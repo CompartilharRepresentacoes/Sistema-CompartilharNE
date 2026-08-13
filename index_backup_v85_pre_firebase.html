@@ -5148,12 +5148,6 @@
               <button onclick="restaurarBackupSistema()" style="background:#fff;color:#dc2626;border:1px solid #dc2626;border-radius:8px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer;width:fit-content">Restaurar deste arquivo</button>
             </div>
             <div id="backup-msg" style="font-size:12px;min-height:14px"></div>
-            <div id="backup-fs-secao" style="border-top:1px solid #f1f5f9;padding-top:16px;display:flex;flex-direction:column;gap:8px">
-              <div style="font-size:12px;font-weight:700;color:#475569">Migrar para o Banco de Dados Compartilhado (Firebase)</div>
-              <div style="font-size:10.5px;color:#64748b">Copia os dados atuais deste navegador (Produtos, Clientes, Fornecedores, Usuários, Pedidos) para o banco compartilhado, usado por todos que acessarem o sistema. Não apaga nada aqui no navegador, e pode rodar mais de uma vez sem duplicar nada.</div>
-              <button id="btn-migrar-firestore" onclick="migrarDadosParaFirestore()" style="background:#DE7926;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer;width:fit-content">Migrar dados para o Firebase</button>
-              <div id="backup-fs-msg" style="font-size:12px;min-height:14px"></div>
-            </div>
           </div>
         </div>
       </div>
@@ -5747,12 +5741,12 @@
 // Substitua pelos dados do seu projeto Firebase
 // ═══════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyBOICU6nUFX5WUddTz_UnRgnoDkl9xDeEE",
-  authDomain:        "sistema-compartilharne.firebaseapp.com",
-  projectId:         "sistema-compartilharne",
-  storageBucket:     "sistema-compartilharne.firebasestorage.app",
-  messagingSenderId: "195548083360",
-  appId:             "1:195548083360:web:2130254064e074f1b785c5"
+  apiKey:            "COLE_SUA_API_KEY_AQUI",
+  authDomain:        "COLE_SEU_AUTH_DOMAIN_AQUI",
+  projectId:         "COLE_SEU_PROJECT_ID_AQUI",
+  storageBucket:     "COLE_SEU_STORAGE_BUCKET_AQUI",
+  messagingSenderId: "COLE_SEU_MESSAGING_SENDER_ID_AQUI",
+  appId:             "COLE_SEU_APP_ID_AQUI"
 };
 
 // Inicializar Firebase (só se a config estiver preenchida)
@@ -5762,96 +5756,6 @@ if (firebaseConfigurado) {
   firebase.initializeApp(FIREBASE_CONFIG);
   auth = firebase.auth();
   db   = firebase.firestore();
-}
-
-// ═══════════════════════════════════════════════════
-// FIRESTORE — camada de cache (mantém getX()/setX() síncronos como sempre foram,
-// só troca o que está por trás: em vez de localStorage, lê/escreve no Firestore).
-// Se o Firebase não estiver configurado (firebaseConfigurado === false), tudo continua
-// funcionando exatamente como antes, direto no localStorage — nenhum código existente
-// precisa saber a diferença.
-// ═══════════════════════════════════════════════════
-var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos'];
-var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [] };
-var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false };
-var _fsOuvindo  = false;
-
-function _fsTodasProntas() {
-  return _fsColecoes.every(function (c) { return _fsPronto[c]; });
-}
-
-// Liga os listeners em tempo real (uma vez só) e chama aoFicarTudoPronto() quando as 5
-// coleções tiverem carregado pelo menos uma vez. Chamadas seguintes (ex.: novo login
-// depois de um logout) chamam o callback imediatamente, sem reinscrever os listeners.
-function _fsIniciarOuvintes(aoFicarTudoPronto) {
-  if (!firebaseConfigurado || !db) { if (aoFicarTudoPronto) aoFicarTudoPronto(); return; }
-  if (_fsOuvindo) { if (_fsTodasProntas() && aoFicarTudoPronto) aoFicarTudoPronto(); return; }
-  _fsOuvindo = true;
-  var chamouCallback = false;
-  _fsColecoes.forEach(function (nome) {
-    db.collection(nome).onSnapshot(function (snap) {
-      _fsCache[nome] = snap.docs.map(function (d) { return d.data(); });
-      var jaEstavaPronto = _fsPronto[nome];
-      _fsPronto[nome] = true;
-      if (jaEstavaPronto) _fsAoAtualizar(nome);
-      if (!chamouCallback && _fsTodasProntas()) {
-        chamouCallback = true;
-        if (aoFicarTudoPronto) aoFicarTudoPronto();
-      }
-    }, function (err) {
-      console.error('Erro ao sincronizar coleção "' + nome + '" com o Firestore:', err);
-    });
-  });
-}
-
-// Re-renderiza a tela atual quando a coleção muda por causa de outro usuário (ou da
-// confirmação de uma escrita própria) enquanto a tela já estava aberta e carregada.
-function _fsAoAtualizar(nome) {
-  var mapaRender = {
-    produtos:     ['renderProdutoList'],
-    clientes:     ['renderClienteList'],
-    fornecedores: ['renderFornecedorList'],
-    usuarios:     ['renderUsuarioList'],
-    pedidos:      ['renderPedidoList', 'renderEntregaControle'],
-  };
-  (mapaRender[nome] || []).forEach(function (fn) {
-    if (typeof window[fn] === 'function') {
-      try { window[fn](); } catch (e) { /* tela não está aberta agora, ignora */ }
-    }
-  });
-}
-
-function _fsGet(nome) { return _fsCache[nome]; }
-
-// Compara o array novo com o que já está em cache e só escreve no Firestore os
-// documentos que de fato mudaram (evita reescrever a coleção inteira a cada salvar).
-// Atualiza o cache local imediatamente (otimista), sem esperar a confirmação do servidor.
-function _fsSet(nome, arrayNovo) {
-  if (!firebaseConfigurado || !db) return;
-  var antigo = _fsCache[nome] || [];
-  var mapAntigo = {};
-  antigo.forEach(function (o) { if (o && o.id) mapAntigo[o.id] = o; });
-  var idsNovo = {};
-  var batch = db.batch();
-  var alguma = false;
-  (arrayNovo || []).forEach(function (item) {
-    if (!item || !item.id) return;
-    idsNovo[item.id] = true;
-    var old = mapAntigo[item.id];
-    if (!old || JSON.stringify(old) !== JSON.stringify(item)) {
-      batch.set(db.collection(nome).doc(String(item.id)), item);
-      alguma = true;
-    }
-  });
-  antigo.forEach(function (o) {
-    if (o && o.id && !idsNovo[o.id]) { batch.delete(db.collection(nome).doc(String(o.id))); alguma = true; }
-  });
-  _fsCache[nome] = (arrayNovo || []).slice();
-  if (alguma) {
-    batch.commit().catch(function (err) {
-      alert('Não foi possível salvar no banco de dados compartilhado: ' + err.message + '\n\nVerifique sua conexão com a internet — a alteração pode não ter sido salva para os outros usuários.');
-    });
-  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -6213,21 +6117,10 @@ function fazerLogout() {
 if (firebaseConfigurado && auth) {
   auth.onAuthStateChanged(user => {
     const btn = document.getElementById('btnEntrar');
+    if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
     if (user) {
-      if (btn) { btn.disabled = true; btn.textContent = 'Carregando dados…'; }
-      _fsIniciarOuvintes(function () {
-        if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
-        var usuarios = getUsuariosSistema();
-        var cadastro = usuarios.find(function (u) { return String(u.email || '').trim().toLowerCase() === String(user.email || '').trim().toLowerCase(); });
-        entrarNoApp({
-          email: user.email,
-          displayName: (cadastro && cadastro.nome) || user.displayName || user.email,
-          grupoNome: cadastro ? cadastro.grupoNome : '',
-          ufs: cadastro ? (cadastro.ufs || []) : []
-        });
-      });
+      entrarNoApp(user);
     } else {
-      if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('mainApp').style.display = 'none';
       var navPainel = document.getElementById('nav-comando-painel');
@@ -6727,10 +6620,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // FORNECEDORES
 // ═══════════════════════════════════════════════════
 function getFornecedores() {
-  return firebaseConfigurado ? _fsGet('fornecedores') : JSON.parse(localStorage.getItem('fornecedores') || '[]');
+  return JSON.parse(localStorage.getItem('fornecedores') || '[]');
 }
 function setFornecedores(data) {
-  if (firebaseConfigurado) { _fsSet('fornecedores', data); } else { localStorage.setItem('fornecedores', JSON.stringify(data)); }
+  localStorage.setItem('fornecedores', JSON.stringify(data));
 }
 
 // Paleta de gradientes para avatares sem foto
@@ -8271,8 +8164,8 @@ async function carregarCidadesTranspPorEstado() {
 // ═══════════════════════════════════════════════════
 // CLIENTES
 // ═══════════════════════════════════════════════════
-function getClientes() { return firebaseConfigurado ? _fsGet('clientes') : JSON.parse(localStorage.getItem('clientes') || '[]'); }
-function setClientes(data) { if (firebaseConfigurado) { _fsSet('clientes', data); } else { localStorage.setItem('clientes', JSON.stringify(data)); } }
+function getClientes() { return JSON.parse(localStorage.getItem('clientes') || '[]'); }
+function setClientes(data) { localStorage.setItem('clientes', JSON.stringify(data)); }
 
 let _cliFiltroAtivo = '';
 function setCliFiltro(val) {
@@ -9000,8 +8893,8 @@ async function carregarCidadesCliente() {
 // ═══════════════════════════════════════════════════
 // PRODUTOS
 // ═══════════════════════════════════════════════════
-function getProdutos() { return firebaseConfigurado ? _fsGet('produtos') : JSON.parse(localStorage.getItem('produtos') || '[]'); }
-function setProdutos(data) { if (firebaseConfigurado) { _fsSet('produtos', data); } else { localStorage.setItem('produtos', JSON.stringify(data)); } }
+function getProdutos() { return JSON.parse(localStorage.getItem('produtos') || '[]'); }
+function setProdutos(data) { localStorage.setItem('produtos', JSON.stringify(data)); }
 
 /* ── Tabela de Preço: localStorage ── */
 function getTabPrecos() { return JSON.parse(localStorage.getItem('tabelas_preco') || '[]'); }
@@ -12530,8 +12423,8 @@ document.addEventListener('click', function(e) {
 // ═══════════════════════════════════════════════════
 var PED_STATUS = ['Pré-Venda','Aguardando Retorno','Enviado','Faturado','Faturado Parcial','Bonificado','Cancelado'];
 
-function getPedidos() { return firebaseConfigurado ? _fsGet('pedidos') : JSON.parse(localStorage.getItem('pedidos') || '[]'); }
-function setPedidos(data) { if (firebaseConfigurado) { _fsSet('pedidos', data); } else { localStorage.setItem('pedidos', JSON.stringify(data)); } }
+function getPedidos() { return JSON.parse(localStorage.getItem('pedidos') || '[]'); }
+function setPedidos(data) { localStorage.setItem('pedidos', JSON.stringify(data)); }
 
 function _pedFmtMoeda(v) { return 'R$ ' + (Number(v)||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function _pedEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
@@ -17600,8 +17493,8 @@ var PAGINAS_SISTEMA = [
 
 function getGruposAcesso() { return JSON.parse(localStorage.getItem('gruposAcesso') || '[]'); }
 function setGruposAcesso(data) { localStorage.setItem('gruposAcesso', JSON.stringify(data)); }
-function getUsuariosSistema() { return firebaseConfigurado ? _fsGet('usuarios') : JSON.parse(localStorage.getItem('usuarios') || '[]'); }
-function setUsuariosSistema(data) { if (firebaseConfigurado) { _fsSet('usuarios', data); } else { localStorage.setItem('usuarios', JSON.stringify(data)); } }
+function getUsuariosSistema() { return JSON.parse(localStorage.getItem('usuarios') || '[]'); }
+function setUsuariosSistema(data) { localStorage.setItem('usuarios', JSON.stringify(data)); }
 function getVendedoresAtivos() { return getUsuariosSistema().filter(function(u){ return (u.ativo||'Sim') !== 'Não' && String(u.grupoNome||'').trim().toLowerCase() === 'vendas'; }); }
 
 function _usuEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
@@ -18228,55 +18121,6 @@ function renderBackupPage() {
   }
   var msg = document.getElementById('backup-msg');
   if (msg) msg.textContent = '';
-  var secaoFs = document.getElementById('backup-fs-secao');
-  if (secaoFs) secaoFs.style.display = firebaseConfigurado ? '' : 'none';
-  var msgFs = document.getElementById('backup-fs-msg');
-  if (msgFs) msgFs.textContent = '';
-}
-
-// ═══════════════════════════════════════════════════
-// MIGRAÇÃO — copia os dados atuais do localStorage deste navegador para o Firestore.
-// Lê direto do localStorage (não usa getProdutos()/getClientes()/etc., que já passam a
-// buscar do Firestore quando firebaseConfigurado é true) para pegar os dados reais que
-// ainda estão só aqui. Usa .set() por id, então rodar de novo não duplica nada.
-// ═══════════════════════════════════════════════════
-var _fsColecoesMigrar = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos'];
-async function migrarDadosParaFirestore() {
-  var msg = document.getElementById('backup-fs-msg');
-  var btn = document.getElementById('btn-migrar-firestore');
-  if (!firebaseConfigurado || !db) {
-    if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Firebase não está configurado.'; }
-    return;
-  }
-  if (!confirm('Isso vai copiar os dados atuais deste navegador (Produtos, Clientes, Fornecedores, Usuários, Pedidos) para o banco de dados compartilhado. Os dados aqui no navegador não serão apagados. Se houver muitos pedidos, pode levar alguns minutos. Continuar?')) return;
-
-  if (btn) { btn.disabled = true; btn.textContent = 'Migrando…'; }
-  if (msg) { msg.style.color = '#64748b'; msg.textContent = 'Migrando, aguarde…'; }
-
-  var resumo = [];
-  try {
-    for (var i = 0; i < _fsColecoesMigrar.length; i++) {
-      var nome = _fsColecoesMigrar[i];
-      var arr = JSON.parse(localStorage.getItem(nome) || '[]');
-      var comId = arr.filter(function (x) { return x && x.id; });
-      var semId = arr.length - comId.length;
-      var enviados = 0;
-      for (var offset = 0; offset < comId.length; offset += 450) {
-        var pedaco = comId.slice(offset, offset + 450);
-        var batch = db.batch();
-        pedaco.forEach(function (item) { batch.set(db.collection(nome).doc(String(item.id)), item); });
-        await batch.commit();
-        enviados += pedaco.length;
-        if (msg) msg.textContent = 'Migrando ' + nome + '… ' + enviados + '/' + comId.length;
-      }
-      resumo.push(nome + ': ' + enviados + ' registro(s)' + (semId ? ' (' + semId + ' ignorado(s) por não ter id)' : ''));
-    }
-    if (msg) { msg.style.color = '#15803d'; msg.innerHTML = '✔ Migração concluída:<br>' + resumo.join('<br>'); }
-  } catch (err) {
-    if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Erro durante a migração: ' + (err && err.message ? err.message : err) + ' — o que já foi enviado antes do erro continua salvo, pode rodar de novo sem duplicar.'; }
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Migrar dados para o Firebase'; }
-  }
 }
 function gerarBackupSistema() {
   var msg = document.getElementById('backup-msg');
