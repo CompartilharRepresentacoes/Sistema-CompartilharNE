@@ -5837,6 +5837,41 @@ function _fsAoAtualizar(nome) {
 // da comparação do setX, e o sistema conclui (errado) que "nada mudou".
 function _fsGet(nome) { return JSON.parse(JSON.stringify(_fsCache[nome] || [])); }
 
+// Cria a conta de acesso (Firebase Authentication) para um usuário cadastrado na tela "Usuários",
+// sem precisar abrir o Firebase Console. Usa um app secundário temporário porque o SDK do cliente
+// desloga o admin e loga como o usuário recém-criado se isso for feito no app principal.
+function _fsAuthCriarContaUsuario(email, senha) {
+  return new Promise(function (resolve, reject) {
+    if (!firebaseConfigurado) { resolve({ pulou: true }); return; }
+    var secApp;
+    try {
+      secApp = firebase.initializeApp(FIREBASE_CONFIG, 'Secundario' + Date.now() + Math.random());
+    } catch (eInit) { reject(eInit); return; }
+    secApp.auth().createUserWithEmailAndPassword(email, senha).then(function () {
+      return secApp.delete();
+    }).then(function () {
+      resolve({ criada: true });
+    }).catch(function (err) {
+      secApp.delete().catch(function () {});
+      if (err && err.code === 'auth/email-already-in-use') {
+        resolve({ jaExistia: true });
+      } else {
+        reject(err);
+      }
+    });
+  });
+}
+
+// Se a conta já existe e a senha mudou no cadastro, não dá para trocar a senha de outra conta pelo
+// SDK do cliente (precisaria de um backend com privilégio de admin) -- em vez disso, manda um e-mail
+// de redefinição para a própria pessoa definir a senha nova.
+function _fsAuthEnviarResetSenha(email) {
+  if (!firebaseConfigurado || !auth) return Promise.resolve();
+  return auth.sendPasswordResetEmail(email).catch(function (err) {
+    console.warn('Não foi possível enviar e-mail de redefinição de senha:', err);
+  });
+}
+
 // Compara o array novo com o que já está em cache e só escreve no Firestore os
 // documentos que de fato mudaram (evita reescrever a coleção inteira a cada salvar).
 // Atualiza o cache local imediatamente (otimista), sem esperar a confirmação do servidor.
@@ -6719,9 +6754,10 @@ function toggleTema() {
 // INICIALIZAÇÃO
 // ═══════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
-  if (!firebaseConfigurado) {
-    setupResponsivo();
-  }
+  // setupResponsivo() monta o carrossel de logos das representadas na tela de login
+  // (puramente visual, não depende do Firebase) -- antes só rodava se !firebaseConfigurado,
+  // o que deixou o carrossel sempre vazio depois que o Firebase foi ativado (13/08/2026).
+  setupResponsivo();
   setTimeout(dashInit, 50);
   // Flyout sidebar com posicionamento inteligente (abre para cima se não couber)
   document.querySelectorAll('.sb-item').forEach(function(item) {
@@ -13944,6 +13980,13 @@ function pedAbrirStatusPopover(ev, id) {
   pop.style.left = left + 'px';
   pop.style.top  = (rect.bottom + 6) + 'px';
   pop.style.display = 'block';
+  // Se não houver espaço suficiente abaixo na janela (ex.: pedido perto do fim da lista),
+  // abre o popover para cima do botão em vez de para baixo -- mesma ideia do flyout do menu lateral.
+  var popRect = pop.getBoundingClientRect();
+  if (popRect.bottom > window.innerHeight - 8) {
+    var topAcima = rect.top - popRect.height - 6;
+    pop.style.top = (topAcima < 8 ? 8 : topAcima) + 'px';
+  }
 }
 function pedFecharStatusPopover() {
   var pop = document.getElementById('ped-status-popover');
@@ -17758,11 +17801,35 @@ function salvarUsuario() {
   try {
     var dados = getUsuariosSistema();
     var idx = editId ? dados.findIndex(function(u){ return u.id === editId; }) : -1;
+    var senhaMudou = usuAntigo ? (usuAntigo.senha !== senha) : true;
     if (idx >= 0) dados[idx] = obj; else dados.push(obj);
     setUsuariosSistema(dados);
     msg.style.color = '#15803d';
     msg.textContent = '✔ Usuário salvo com sucesso!';
-    setTimeout(function(){ msg.textContent=''; _usuAbaAtiva = 'usuarios'; showPage('page-usuario-list'); }, 900);
+
+    function _usuIrParaLista() {
+      setTimeout(function(){ msg.textContent=''; _usuAbaAtiva = 'usuarios'; showPage('page-usuario-list'); }, 900);
+    }
+
+    // Mantém o acesso real (Firebase Authentication) sincronizado com este cadastro, sem precisar
+    // abrir o Firebase Console pra cada pessoa: cria a conta de login (e-mail+senha) daqui mesmo.
+    if (firebaseConfigurado) {
+      _fsAuthCriarContaUsuario(email, senha).then(function (r) {
+        if (r && r.jaExistia && usuAntigo && senhaMudou) {
+          return _fsAuthEnviarResetSenha(email).then(function () {
+            msg.textContent = '✔ Usuário salvo! A senha mudou — enviamos um e-mail para ' + email + ' com um link para definir a senha nova (o acesso já existia).';
+          });
+        } else if (r && r.criada) {
+          msg.textContent = '✔ Usuário salvo e acesso liberado!';
+        }
+      }).catch(function (errAuth) {
+        console.error('Erro ao sincronizar conta de acesso no Firebase:', errAuth);
+        msg.style.color = '#DE7926';
+        msg.textContent = 'Usuário salvo, mas houve um erro ao liberar o acesso: ' + (errAuth && errAuth.message ? errAuth.message : errAuth);
+      }).then(_usuIrParaLista);
+    } else {
+      _usuIrParaLista();
+    }
   } catch (err) {
     msg.style.color = '#dc2626';
     if (err && err.name === 'QuotaExceededError') msg.textContent = 'Armazenamento cheio. Libere espaço e tente novamente.';
