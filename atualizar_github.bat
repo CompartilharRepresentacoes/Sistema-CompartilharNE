@@ -1,7 +1,7 @@
 @echo off
 cd /d "%~dp0"
 echo ===============================================
-echo   Atualizando Sistema Pontti no GitHub
+echo   Atualizando Sistema CompartilharNE no GitHub
 echo ===============================================
 echo.
 
@@ -21,7 +21,7 @@ git push
 echo.
 echo ===============================================
 echo   Concluido! Confira em:
-echo   https://github.com/CompartilharNE/Sistema-CompartilharNE
+echo   https://github.com/CompartilharRepresentacoes/Sistema-CompartilharNE
 echo ===============================================
 echo.
 pause
