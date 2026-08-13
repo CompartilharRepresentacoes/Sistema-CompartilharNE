@@ -389,7 +389,7 @@
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1">
           <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Usuário</label>
-          <input id="loginUsuario" type="text" placeholder="Digite seu e-mail"
+          <input id="loginUsuario" type="text" placeholder="Digite seu login"
             class="border border-slate-300 rounded-lg px-4 py-3 text-sm"
             onkeydown="if(event.key==='Enter') fazerLogin()" autocomplete="username" />
         </div>
@@ -5872,6 +5872,47 @@ function _fsAuthEnviarResetSenha(email) {
   });
 }
 
+// Resolve o e-mail real a partir do "login" digitado na tela de login. Consulta uma coleção
+// pública e mínima (só e-mail, NUNCA senha) porque antes de logar ainda não temos permissão pra
+// ler o cadastro completo de usuários no Firestore (as regras exigem auth para tudo, exceto isto).
+function _fsResolverEmailPorLogin(login) {
+  if (!firebaseConfigurado || !db) return Promise.resolve(null);
+  var chave = String(login || '').trim().toLowerCase();
+  if (!chave) return Promise.resolve(null);
+  return db.collection('logins_publicos').doc(chave).get().then(function (snap) {
+    return (snap.exists && snap.data().email) ? snap.data().email : null;
+  }).catch(function (err) {
+    console.warn('Não foi possível resolver login para e-mail:', err);
+    return null;
+  });
+}
+
+// Mantém a coleção pública login->e-mail em dia sempre que um usuário é salvo ou excluído (cria/
+// atualiza o mapeamento novo e remove o antigo se o login mudou). Nunca grava senha aqui.
+function _fsAtualizarLoginPublico(loginAntigo, loginNovo, email) {
+  if (!firebaseConfigurado || !db) return Promise.resolve();
+  var chaveNova = String(loginNovo || '').trim().toLowerCase();
+  var chaveAntiga = String(loginAntigo || '').trim().toLowerCase();
+  var tarefas = [];
+  if (chaveNova) tarefas.push(db.collection('logins_publicos').doc(chaveNova).set({ email: email }));
+  if (chaveAntiga && chaveAntiga !== chaveNova) tarefas.push(db.collection('logins_publicos').doc(chaveAntiga).delete());
+  return Promise.all(tarefas).catch(function (err) {
+    console.warn('Não foi possível atualizar o mapeamento de login público:', err);
+  });
+}
+
+// Autocorreção: repõe o mapeamento login->e-mail de usuários cadastrados antes desse recurso
+// existir. Roda uma vez por sessão, logo depois de qualquer login bem-sucedido (já autenticado,
+// então tem permissão de escrita).
+var _fsLoginsBackfillFeito = false;
+function _fsBackfillLoginsPublicos() {
+  if (!firebaseConfigurado || !db || _fsLoginsBackfillFeito) return;
+  _fsLoginsBackfillFeito = true;
+  getUsuariosSistema().forEach(function (u) {
+    if (u.login && u.email) _fsAtualizarLoginPublico(null, u.login, u.email);
+  });
+}
+
 // Compara o array novo com o que já está em cache e só escreve no Firestore os
 // documentos que de fato mudaram (evita reescrever a coleção inteira a cada salvar).
 // Atualiza o cache local imediatamente (otimista), sem esperar a confirmação do servidor.
@@ -6105,7 +6146,19 @@ async function fazerLogin() {
       ? firebase.auth.Auth.Persistence.LOCAL
       : firebase.auth.Auth.Persistence.SESSION;
     await auth.setPersistence(persistence);
-    await auth.signInWithEmailAndPassword(usuario, senha);
+    var emailParaEntrar = usuario;
+    if (usuario.indexOf('@') === -1) {
+      // Não parece um e-mail -- trata como "login" (nome de usuário) e resolve o e-mail real antes.
+      var emailResolvido = await _fsResolverEmailPorLogin(usuario);
+      if (!emailResolvido) {
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+        mostrarErroLogin('Usuário ou senha incorretos.');
+        return;
+      }
+      emailParaEntrar = emailResolvido;
+    }
+    await auth.signInWithEmailAndPassword(emailParaEntrar, senha);
     // onAuthStateChanged cuidará do redirecionamento
   } catch (e) {
     btn.disabled = false;
@@ -6284,6 +6337,7 @@ if (firebaseConfigurado && auth) {
       user.getIdToken(true).then(function () {
         _fsIniciarOuvintes(function () {
           if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
+          _fsBackfillLoginsPublicos();
           var usuarios = getUsuariosSistema();
           var cadastro = usuarios.find(function (u) { return String(u.email || '').trim().toLowerCase() === String(user.email || '').trim().toLowerCase(); });
           entrarNoApp({
@@ -17738,7 +17792,10 @@ function renderUsuarioList() {
 }
 function deleteUsuario(id) {
   if (!confirm('Excluir este usuário?')) return;
-  setUsuariosSistema(getUsuariosSistema().filter(function(u){ return u.id !== id; }));
+  var usuarios = getUsuariosSistema();
+  var alvo = usuarios.find(function(u){ return u.id === id; });
+  setUsuariosSistema(usuarios.filter(function(u){ return u.id !== id; }));
+  if (alvo && alvo.login) _fsAtualizarLoginPublico(alvo.login, '', null);
   renderUsuarioList();
 }
 function editUsuario(id) {
@@ -17814,7 +17871,7 @@ function salvarUsuario() {
     // Mantém o acesso real (Firebase Authentication) sincronizado com este cadastro, sem precisar
     // abrir o Firebase Console pra cada pessoa: cria a conta de login (e-mail+senha) daqui mesmo.
     if (firebaseConfigurado) {
-      _fsAuthCriarContaUsuario(email, senha).then(function (r) {
+      var _pAuthConta = _fsAuthCriarContaUsuario(email, senha).then(function (r) {
         if (r && r.jaExistia && usuAntigo && senhaMudou) {
           return _fsAuthEnviarResetSenha(email).then(function () {
             msg.textContent = '✔ Usuário salvo! A senha mudou — enviamos um e-mail para ' + email + ' com um link para definir a senha nova (o acesso já existia).';
@@ -17826,7 +17883,9 @@ function salvarUsuario() {
         console.error('Erro ao sincronizar conta de acesso no Firebase:', errAuth);
         msg.style.color = '#DE7926';
         msg.textContent = 'Usuário salvo, mas houve um erro ao liberar o acesso: ' + (errAuth && errAuth.message ? errAuth.message : errAuth);
-      }).then(_usuIrParaLista);
+      });
+      var _pLoginPublico = _fsAtualizarLoginPublico(usuAntigo ? usuAntigo.login : null, login, email);
+      Promise.all([_pAuthConta, _pLoginPublico]).then(_usuIrParaLista);
     } else {
       _usuIrParaLista();
     }
