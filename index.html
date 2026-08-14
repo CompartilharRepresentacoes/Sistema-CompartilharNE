@@ -9142,6 +9142,11 @@ function salvarCliente() {
   const todos = getClientes();
   const dup = todos.find(r => r.codigo === codigo && r.id !== (_cliEditId||''));
   if (dup) { alert(`Já existe um cliente com o código "${codigo}".`); return; }
+  const docDigits = document.getElementById('cli-cpf-cnpj').value.replace(/\D/g,'');
+  if (docDigits) {
+    const dupDoc = todos.find(r => r.id !== (_cliEditId||'') && String(r.cpf_cnpj||'').replace(/\D/g,'') === docDigits);
+    if (dupDoc) { alert(`Já existe um cliente cadastrado com este CNPJ/CPF: "${dupDoc.nome_fantasia||dupDoc.razao_social||''}" (Código ${dupDoc.codigo}).`); return; }
+  }
   const obj = {
     id: _cliEditId || ('c' + Date.now()),
     codigo, nome_fantasia: nome,
@@ -9237,7 +9242,7 @@ function _cliImportarLinhas(linhas) {
   var cats = getCatClientes();
   var vendedores = getVendedoresAtivos();
   var clientes = getClientes();
-  var resumo = { total: 0, criados: 0, atualizados: 0, redeNaoEncontrada: 0, lojaNaoEncontrada: 0, vendedorNaoEncontrado: 0 };
+  var resumo = { total: 0, criados: 0, atualizados: 0, redeNaoEncontrada: 0, lojaNaoEncontrada: 0, vendedorNaoEncontrado: 0, cnpjDuplicado: [] };
 
   linhas.forEach(function(row, i) {
     var codigo = String(row[0] || '').trim();
@@ -9290,6 +9295,20 @@ function _cliImportarLinhas(linhas) {
     };
 
     var existente = clientes.find(function(c){ return String(c.codigo||'').trim() === codigo; });
+
+    // O Código pode vir digitado de forma diferente entre planilhas (ex: "026418" vs "26418")
+    // para a MESMA loja -- sem essa checagem, isso cria um cliente duplicado com o mesmo CNPJ.
+    var docDigits = String(obj.cpf_cnpj || '').replace(/\D/g, '');
+    if (docDigits) {
+      var conflitoCnpj = clientes.find(function(c){
+        return c.id !== (existente ? existente.id : null) && String(c.cpf_cnpj||'').replace(/\D/g,'') === docDigits;
+      });
+      if (conflitoCnpj) {
+        resumo.cnpjDuplicado.push(codigo + ' - ' + (obj.nome_fantasia||'') + ' (mesmo CNPJ/CPF do cliente código ' + conflitoCnpj.codigo + ')');
+        return;
+      }
+    }
+
     if (existente) {
       obj.id = existente.id;
       obj.prazos_fornecedor = existente.prazos_fornecedor || [];
@@ -9315,6 +9334,7 @@ function _cliMontarMensagemResumo(resumo) {
   if (resumo.redeNaoEncontrada)     avisos.push(resumo.redeNaoEncontrada + ' linha(s) com Rede não encontrada');
   if (resumo.lojaNaoEncontrada)     avisos.push(resumo.lojaNaoEncontrada + ' linha(s) com Loja não encontrada');
   if (resumo.vendedorNaoEncontrado) avisos.push(resumo.vendedorNaoEncontrado + ' linha(s) com Vendedor não encontrado');
+  if ((resumo.cnpjDuplicado||[]).length) avisos.push(resumo.cnpjDuplicado.length + ' linha(s) IGNORADA(S) por já existir outro cliente com o mesmo CNPJ/CPF: ' + resumo.cnpjDuplicado.join('; '));
   if (avisos.length) msg += '\n\nAtenção: ' + avisos.join('; ') + '.';
   return msg;
 }
