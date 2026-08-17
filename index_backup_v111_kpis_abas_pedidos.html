@@ -3540,23 +3540,10 @@
           <input id="vc-cliente" oninput="renderVendasCompletas()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           <button onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div style="flex:1"></div>
-          <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vc-kpi-total">0</div></div>
-        </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.04);display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
-          <div style="text-align:center;padding:0 10px">
-            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Total</div>
-            <div style="font-size:16px;font-weight:800;color:#272A4A" id="vc-kpi-valor">R$ 0,00</div>
-            <div style="font-size:11.5px;color:#64748b;margin-top:2px" id="vc-kpi-peso">0 kg</div>
-          </div>
-          <div style="text-align:center;padding:0 10px;border-left:1px solid #f1f5f9;border-right:1px solid #f1f5f9">
-            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Faturado</div>
-            <div style="font-size:16px;font-weight:800;color:#15803d" id="vc-kpi-valor-fat">R$ 0,00</div>
-            <div style="font-size:11.5px;color:#64748b;margin-top:2px" id="vc-kpi-peso-fat">0 kg</div>
-          </div>
-          <div style="text-align:center;padding:0 10px">
-            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Não Faturado</div>
-            <div style="font-size:16px;font-weight:800;color:#dc2626" id="vc-kpi-valor-naofat">R$ 0,00</div>
-            <div style="font-size:11.5px;color:#64748b;margin-top:2px" id="vc-kpi-peso-naofat">0 kg</div>
+          <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vc-kpi-total">0</div></div>
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="vc-kpi-valor">R$ 0,00</div></div>
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vc-kpi-peso">0 kg</div></div>
           </div>
         </div>
         <div id="vc-lista" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -16180,25 +16167,6 @@ function renderVendasCompletas() {
   var totalPesoGeral  = lista.reduce(function(acc, r){ return acc + r.pesoPedido; }, 0);
   var kV = document.getElementById('vc-kpi-valor'); if (kV) kV.textContent = _pedFmtMoeda(totalValorGeral);
   var kP = document.getElementById('vc-kpi-peso'); if (kP) kP.textContent = totalPesoGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
-
-  var totalValorFaturado = lista.reduce(function(acc, r){ return acc + (Number(r.pedido.valorFaturado) || 0); }, 0);
-  var totalValorNaoFaturado = Math.max(0, totalValorGeral - totalValorFaturado);
-  var totalPesoFaturado = lista.reduce(function(acc, r){
-    return acc + r.itens.reduce(function(acc2, it){
-      var pesoUnit = it.qtdPedida > 0 ? (it.pesoTotal / it.qtdPedida) : 0;
-      return acc2 + pesoUnit * it.qtdFaturada;
-    }, 0);
-  }, 0);
-  var totalPesoNaoFaturado = lista.reduce(function(acc, r){
-    return acc + r.itens.reduce(function(acc2, it){
-      var pesoUnit = it.qtdPedida > 0 ? (it.pesoTotal / it.qtdPedida) : 0;
-      return acc2 + pesoUnit * it.restante;
-    }, 0);
-  }, 0);
-  var kVF = document.getElementById('vc-kpi-valor-fat'); if (kVF) kVF.textContent = _pedFmtMoeda(totalValorFaturado);
-  var kPF = document.getElementById('vc-kpi-peso-fat'); if (kPF) kPF.textContent = totalPesoFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
-  var kVN = document.getElementById('vc-kpi-valor-naofat'); if (kVN) kVN.textContent = _pedFmtMoeda(totalValorNaoFaturado);
-  var kPN = document.getElementById('vc-kpi-peso-naofat'); if (kPN) kPN.textContent = totalPesoNaoFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
   if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; return; }
   vazio.style.display = 'none';
