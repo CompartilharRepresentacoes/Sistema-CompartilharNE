@@ -13489,6 +13489,14 @@ function _pimpFmtData(iso) {
   var partes = String(iso).split('-');
   return partes.length === 3 ? (partes[2] + '/' + partes[1] + '/' + partes[0]) : iso;
 }
+function _pimpLogoCompartilharPadrao() {
+  // Logo padrao da Compartilhar (mesmo PNG ja usado no Excel de Dados Representadas),
+  // usado como fallback quando a Empresa (Gerenciar > Empresa) nao tem foto propria cadastrada.
+  return (typeof DR_COMPARTILHAR_LOGO_B64 !== 'undefined' && DR_COMPARTILHAR_LOGO_B64)
+    ? ('data:image/png;base64,' + DR_COMPARTILHAR_LOGO_B64)
+    : '';
+}
+
 function _pimpLogoOuPlaceholder(foto, texto) {
   if (foto) return '<img src="' + foto + '" style="max-width:100%;max-height:56px;object-fit:contain">';
   return '<div style="font-size:11px;font-weight:700;color:#94a3b8;text-align:center">' + _pedEsc(texto || '') + '</div>';
@@ -13554,7 +13562,7 @@ function _pimpRender() {
 
   cont.innerHTML =
     '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1.5px solid #272A4A;padding-bottom:10px;margin-bottom:10px">'
-      + '<div style="width:140px;height:64px;display:flex;align-items:center">' + _pimpLogoOuPlaceholder(empresa.foto, empresa.nomeFantasia || 'Compartilhar') + '</div>'
+      + '<div style="width:140px;height:64px;display:flex;align-items:center">' + _pimpLogoOuPlaceholder(empresa.foto || _pimpLogoCompartilharPadrao(), empresa.nomeFantasia || 'Compartilhar') + '</div>'
       + '<div style="text-align:center;flex:1">'
         + '<div style="font-size:16px;font-weight:800;color:#272A4A">' + empresaNome + '</div>'
         + (empresaContato ? '<div style="font-size:11px;color:#94a3b8;margin:1px 0 6px">' + empresaContato + '</div>' : '<div style="margin-bottom:6px"></div>')

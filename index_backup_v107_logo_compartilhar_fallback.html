@@ -2809,8 +2809,8 @@
           </span>
           <span id="tabpreco-prod-count" style="font-size:10px;color:#94a3b8">0 produtos</span>
         </div>
-        <div style="display:grid;grid-template-columns:110px 1fr 100px 100px 90px 80px 80px 90px 80px;padding:6px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">
-          <span>Fornecedor</span><span>Código / Produto</span><span>Cód. Pedido</span><span>Cód. Cliente</span><span>Valor</span><span>Comissão</span><span>Período</span><span>Dt. Cadastro</span><span style="text-align:center">Opções</span>
+        <div style="display:grid;grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 80px 90px 80px;padding:6px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">
+          <span>Fornecedor</span><span>Código / Produto</span><span>Cód. Pedido</span><span>Cód. Cliente</span><span>Unidade</span><span>Valor</span><span>Comissão</span><span>Período</span><span>Dt. Cadastro</span><span style="text-align:center">Opções</span>
         </div>
         <div id="tabpreco-prod-list"></div>
       </div>
@@ -2834,6 +2834,22 @@
             </div>
           </div>
           <button onclick="addTabPrecoCliente()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">＋ Add</button>
+        </div>
+
+        <div style="height:1px;background:#f1f5f9;margin:14px 0"></div>
+
+        <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:flex-end">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Rede / Sub Rede <span style="font-weight:400;color:#94a3b8">(adiciona todas as lojas cadastradas de uma vez)</span></label>
+            <div style="position:relative">
+              <input class="form-input" id="tabpreco-rede-busca" placeholder="Ex: Atacadão PE..." autocomplete="off"
+                oninput="_tpRedeFiltrar()" onkeydown="_tabPrecoKeyRede(event)" onblur="setTimeout(()=>{const d=document.getElementById('tabpreco-rede-drop');if(d)d.style.display='none'},200)"
+                style="width:100%">
+              <input type="hidden" id="tabpreco-rede-id">
+              <div id="tabpreco-rede-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:100;max-height:180px;overflow-y:auto;margin-top:3px"></div>
+            </div>
+          </div>
+          <button onclick="addTabPrecoRede()" style="background:#15803d;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">＋ Add Rede</button>
         </div>
       </div>
 
@@ -5273,12 +5289,17 @@
     </div>
     <div style="padding:16px 18px;overflow-y:auto;flex:1">
       <div id="ped-anexo-lista" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
-      <label for="ped-anexo-input-pdf" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed #cbd5e1;border-radius:9px;padding:16px;cursor:pointer;color:#64748b;font-size:12px;font-weight:600">
-        <i class="ti ti-paperclip" style="color:#DE7926"></i> Anexar Nota Fiscal (PDF ou XML)
+      <label for="ped-anexo-input-pdf" id="ped-anexo-dropzone"
+        ondragover="pedAnexoDragOver(event)" ondragenter="pedAnexoDragOver(event)"
+        ondragleave="pedAnexoDragLeave(event)" ondrop="pedAnexoDrop(event)"
+        style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1.5px dashed #cbd5e1;border-radius:9px;padding:20px 16px;cursor:pointer;color:#64748b;font-size:12px;font-weight:600;text-align:center;transition:background .15s,border-color .15s">
+        <i class="ti ti-cloud-upload" style="color:#DE7926;font-size:20px"></i>
+        <span>Arraste os arquivos aqui ou clique para selecionar</span>
+        <span style="font-size:10px;color:#94a3b8;font-weight:400">PDF e XML juntos, quantos precisar</span>
       </label>
-      <input type="file" id="ped-anexo-input-pdf" accept=".pdf,.xml,application/pdf,text/xml,application/xml" style="display:none" onchange="pedAnexarArquivo(this)">
+      <input type="file" id="ped-anexo-input-pdf" accept=".pdf,.xml,application/pdf,text/xml,application/xml" multiple style="display:none" onchange="pedAnexarArquivo(this)">
       <div id="ped-anexo-msg" style="font-size:11px;color:#dc2626;min-height:14px;margin-top:6px"></div>
-      <div style="font-size:10.5px;color:#94a3b8;margin-top:4px">Pode anexar a NF em PDF e/ou o XML da NF-e aqui. O sistema confere se o CNPJ do arquivo corresponde ao Cliente ou ao Fornecedor deste pedido e avisa em caso de divergência. O <b>Val. Fat.</b> aparece automaticamente quando o XML contiver o valor total da nota.</div>
+      <div style="font-size:10.5px;color:#94a3b8;margin-top:4px">Pode anexar a NF em PDF e o XML da NF-e ao mesmo tempo. O sistema confere se o CNPJ do arquivo corresponde ao Cliente ou ao Fornecedor deste pedido e avisa em caso de divergência. O <b>Val. Fat.</b> aparece automaticamente quando o XML contiver o valor total da nota.</div>
     </div>
     <div style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;flex-shrink:0">
       <button onclick="pedFecharAnexos()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
@@ -5299,7 +5320,27 @@
     <div style="padding:16px 18px;overflow-y:auto;flex:1">
       <div id="pfat-info-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f1f5f9"></div>
 
-      <div style="border:1px solid #e2e8f0;border-radius:9px;padding:14px;margin-bottom:16px">
+      <div style="margin-bottom:16px">
+        <div style="font-size:11.5px;font-weight:700;color:#1e293b;margin-bottom:8px">Faturas</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="text-align:left;border-bottom:1px solid #e2e8f0">
+                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Nº Duplicata</th>
+                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Data</th>
+                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Valor</th>
+                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Status</th>
+                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Canc</th>
+                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Del</th>
+                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Transp</th>
+              </tr>
+            </thead>
+            <tbody id="pfat-faturas-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="border:1px solid #e2e8f0;border-radius:9px;padding:14px">
         <div style="font-size:11.5px;font-weight:700;color:#1e293b;margin-bottom:10px">Nova Fatura</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.4fr;gap:10px;margin-bottom:12px">
           <div>
@@ -5339,26 +5380,6 @@
         <div id="pfat-msg" style="font-size:11px;color:#dc2626;min-height:14px;margin-top:8px"></div>
         <div style="display:flex;justify-content:flex-end;margin-top:6px">
           <button onclick="pedSalvarFatura()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer">Salvar Fatura</button>
-        </div>
-      </div>
-
-      <div>
-        <div style="font-size:11.5px;font-weight:700;color:#1e293b;margin-bottom:8px">Faturas</div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse">
-            <thead>
-              <tr style="text-align:left;border-bottom:1px solid #e2e8f0">
-                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Nº Duplicata</th>
-                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Data</th>
-                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Valor</th>
-                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Status</th>
-                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Canc</th>
-                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Del</th>
-                <th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Transp</th>
-              </tr>
-            </thead>
-            <tbody id="pfat-faturas-tbody"></tbody>
-          </table>
         </div>
       </div>
     </div>
@@ -5630,6 +5651,72 @@
     </div>
     <div style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;flex-shrink:0">
       <button onclick="fecharModalTabPrecoCliente()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Exportar Tabela de Preço por Fábrica ── -->
+<div id="modal-tabpreco-export-forn" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:420px;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden">
+    <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#fff">Exportar Tabela de Preço</div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,.6)">Selecione a fábrica para gerar a planilha com os produtos ativos dela</div>
+      </div>
+      <button onclick="fecharModalTabPrecoExportForn()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
+    </div>
+    <div style="padding:18px">
+      <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Fábrica (Fornecedor)</label>
+      <select id="tpexp-forn-sel" class="form-input" style="width:100%"></select>
+      <div id="tpexp-msg" style="font-size:11px;color:#94a3b8;min-height:14px;margin-top:8px"></div>
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px">
+      <button onclick="fecharModalTabPrecoExportForn()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Cancelar</button>
+      <button onclick="confirmarExportTabPrecoForn()" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer">Exportar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Editar Item da Tabela de Preço ── -->
+<div id="modal-tabpreco-prod-edit" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:460px;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden">
+    <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#fff">Editar Produto na Tabela</div>
+        <div id="tpprodedit-nome" style="font-size:10.5px;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      </div>
+      <button onclick="_tpFecharModalEditProd()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
+    </div>
+    <div style="padding:18px">
+      <div style="display:grid;grid-template-columns:1fr 90px;gap:10px;margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Valor</label>
+          <input class="form-input" id="tpprodedit-valor" placeholder="0,00" oninput="_tpFormatValor(this)" style="width:100%">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Comissão (%)</label>
+          <input class="form-input" id="tpprodedit-comissao" placeholder="0,00" oninput="_tpFormatComissao(this)" maxlength="6" style="width:100%">
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Período</label>
+        <input class="form-input" id="tpprodedit-periodo" placeholder="Ex: 07/06/2026" oninput="_tpFormatPeriodo(this)" maxlength="10" style="width:100%">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Código Pedido</label>
+          <input class="form-input" id="tpprodedit-codpedido" placeholder="Código fornecido pelo cliente" style="width:100%">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Código Cliente</label>
+          <input class="form-input" id="tpprodedit-codcliente" placeholder="Código fornecido pelo cliente" style="width:100%">
+        </div>
+      </div>
+      <input type="hidden" id="tpprodedit-index" value="-1">
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px">
+      <button onclick="_tpFecharModalEditProd()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Cancelar</button>
+      <button onclick="_tpSalvarEdicaoProd()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
     </div>
   </div>
 </div>
@@ -9076,6 +9163,11 @@ function salvarCliente() {
   const todos = getClientes();
   const dup = todos.find(r => r.codigo === codigo && r.id !== (_cliEditId||''));
   if (dup) { alert(`Já existe um cliente com o código "${codigo}".`); return; }
+  const docDigits = document.getElementById('cli-cpf-cnpj').value.replace(/\D/g,'');
+  if (docDigits) {
+    const dupDoc = todos.find(r => r.id !== (_cliEditId||'') && String(r.cpf_cnpj||'').replace(/\D/g,'') === docDigits);
+    if (dupDoc) { alert(`Já existe um cliente cadastrado com este CNPJ/CPF: "${dupDoc.nome_fantasia||dupDoc.razao_social||''}" (Código ${dupDoc.codigo}).`); return; }
+  }
   const obj = {
     id: _cliEditId || ('c' + Date.now()),
     codigo, nome_fantasia: nome,
@@ -9171,7 +9263,7 @@ function _cliImportarLinhas(linhas) {
   var cats = getCatClientes();
   var vendedores = getVendedoresAtivos();
   var clientes = getClientes();
-  var resumo = { total: 0, criados: 0, atualizados: 0, redeNaoEncontrada: 0, lojaNaoEncontrada: 0, vendedorNaoEncontrado: 0 };
+  var resumo = { total: 0, criados: 0, atualizados: 0, redeNaoEncontrada: 0, lojaNaoEncontrada: 0, vendedorNaoEncontrado: 0, cnpjDuplicado: [] };
 
   linhas.forEach(function(row, i) {
     var codigo = String(row[0] || '').trim();
@@ -9224,6 +9316,20 @@ function _cliImportarLinhas(linhas) {
     };
 
     var existente = clientes.find(function(c){ return String(c.codigo||'').trim() === codigo; });
+
+    // O Código pode vir digitado de forma diferente entre planilhas (ex: "026418" vs "26418")
+    // para a MESMA loja -- sem essa checagem, isso cria um cliente duplicado com o mesmo CNPJ.
+    var docDigits = String(obj.cpf_cnpj || '').replace(/\D/g, '');
+    if (docDigits) {
+      var conflitoCnpj = clientes.find(function(c){
+        return c.id !== (existente ? existente.id : null) && String(c.cpf_cnpj||'').replace(/\D/g,'') === docDigits;
+      });
+      if (conflitoCnpj) {
+        resumo.cnpjDuplicado.push(codigo + ' - ' + (obj.nome_fantasia||'') + ' (mesmo CNPJ/CPF do cliente código ' + conflitoCnpj.codigo + ')');
+        return;
+      }
+    }
+
     if (existente) {
       obj.id = existente.id;
       obj.prazos_fornecedor = existente.prazos_fornecedor || [];
@@ -9249,6 +9355,7 @@ function _cliMontarMensagemResumo(resumo) {
   if (resumo.redeNaoEncontrada)     avisos.push(resumo.redeNaoEncontrada + ' linha(s) com Rede não encontrada');
   if (resumo.lojaNaoEncontrada)     avisos.push(resumo.lojaNaoEncontrada + ' linha(s) com Loja não encontrada');
   if (resumo.vendedorNaoEncontrado) avisos.push(resumo.vendedorNaoEncontrado + ' linha(s) com Vendedor não encontrado');
+  if ((resumo.cnpjDuplicado||[]).length) avisos.push(resumo.cnpjDuplicado.length + ' linha(s) IGNORADA(S) por já existir outro cliente com o mesmo CNPJ/CPF: ' + resumo.cnpjDuplicado.join('; '));
   if (avisos.length) msg += '\n\nAtenção: ' + avisos.join('; ') + '.';
   return msg;
 }
@@ -9677,12 +9784,16 @@ function _tpRenderProdList() {
     list.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhum produto adicionado</div>';
     return;
   }
+  var produtosCadastro = getProdutos(); // Unidade vem sempre do cadastro do Produto (nao fica gravada no item)
   list.innerHTML = _tpItens.map(function(it,i){
-    return '<div style="display:grid;grid-template-columns:110px 1fr 100px 100px 90px 80px 80px 90px 80px;padding:9px 12px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
+    var prodCad = produtosCadastro.find(function(p){ return p.id === it.prodId; });
+    var unidade = (prodCad && prodCad.unidade) ? prodCad.unidade : '—';
+    return '<div style="display:grid;grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 80px 90px 80px;padding:9px 12px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
       + '<span style="color:#64748b;font-size:11px">'+(it.fornNome||'—')+'</span>'
       + '<span style="font-weight:600;color:#1e293b">'+(it.codigo?it.codigo+' – ':'')+it.nome+'</span>'
       + '<span style="color:#64748b">'+(it.codPedido||'—')+'</span>'
       + '<span style="color:#64748b">'+(it.codCliente||'—')+'</span>'
+      + '<span style="color:#64748b;font-size:11px">'+unidade+'</span>'
       + '<span style="color:#1e293b;font-weight:600">R$ '+it.valor+'</span>'
       + '<span style="color:#64748b;font-size:11px">'+(it.comissao ? it.comissao+'%' : '—')+'</span>'
       + '<span style="color:#DE7926;font-size:11px">'+(it.periodo||'—')+'</span>'
@@ -9695,32 +9806,44 @@ function _tpRenderProdList() {
 }
 
 function _tpRemProd(i) {
+  if (!confirm('Deseja remover este produto da tabela?')) return;
   _tpItens.splice(i,1);
   _tpRenderProdList();
 }
 
+/* ── Editar item já adicionado: popup só com Cód.Pedido/Cód.Cliente/Valor/Comissão/Período
+   (não mexe na busca de produto -- o produto em si não muda, só os dados comerciais) ── */
 function _tpEditProd(i) {
   var it = _tpItens[i];
   if (!it) return;
-  // Preenche os campos do formulário
-  var busca = document.getElementById('tabpreco-prod-busca');
-  var hid   = document.getElementById('tabpreco-prod-id');
-  var valor = document.getElementById('tabpreco-prod-valor');
-  var per   = document.getElementById('tabpreco-prod-periodo');
-  var codP  = document.getElementById('tabpreco-prod-codpedido');
-  var codC  = document.getElementById('tabpreco-prod-codcliente');
-  if (busca) busca.value = (it.codigo ? it.codigo + ' – ' : '') + it.nome;
-  if (hid)   hid.value   = it.prodId;
-  if (valor) valor.value = it.valor;
-  var com = document.getElementById('tabpreco-prod-comissao'); if(com) com.value = it.comissao || '';
-  if (per)   per.value   = it.periodo || '';
-  if (codP)  codP.value  = it.codPedido  || '';
-  if (codC)  codC.value  = it.codCliente || '';
-  // Remove da lista para re-adicionar após edição
-  _tpItens.splice(i, 1);
+  var nomeEl = document.getElementById('tpprodedit-nome');
+  if (nomeEl) nomeEl.textContent = (it.codigo ? it.codigo + ' – ' : '') + it.nome;
+  var idxEl = document.getElementById('tpprodedit-index'); if (idxEl) idxEl.value = i;
+  var setV = function(id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; };
+  setV('tpprodedit-valor', it.valor);
+  setV('tpprodedit-comissao', it.comissao);
+  setV('tpprodedit-periodo', it.periodo);
+  setV('tpprodedit-codpedido', it.codPedido);
+  setV('tpprodedit-codcliente', it.codCliente);
+  var modal = document.getElementById('modal-tabpreco-prod-edit');
+  if (modal) modal.style.display = 'flex';
+}
+function _tpFecharModalEditProd() {
+  var modal = document.getElementById('modal-tabpreco-prod-edit');
+  if (modal) modal.style.display = 'none';
+}
+function _tpSalvarEdicaoProd() {
+  var idx = parseInt((document.getElementById('tpprodedit-index')||{}).value, 10);
+  if (isNaN(idx) || !_tpItens[idx]) { _tpFecharModalEditProd(); return; }
+  var valor = (document.getElementById('tpprodedit-valor')||{}).value || '';
+  if (!valor) { alert('Informe o valor.'); return; }
+  _tpItens[idx].valor      = valor;
+  _tpItens[idx].comissao   = (document.getElementById('tpprodedit-comissao')||{}).value || '';
+  _tpItens[idx].periodo    = (document.getElementById('tpprodedit-periodo')||{}).value || '';
+  _tpItens[idx].codPedido  = (document.getElementById('tpprodedit-codpedido')||{}).value || '';
+  _tpItens[idx].codCliente = (document.getElementById('tpprodedit-codcliente')||{}).value || '';
+  _tpFecharModalEditProd();
   _tpRenderProdList();
-  // Foca no campo valor para o usuário ajustar
-  if (valor) valor.focus();
 }
 
 /* ── Adicionar Cliente ── */
@@ -9770,8 +9893,89 @@ function _tpRenderCliList() {
 }
 
 function _tpRemCli(i) {
+  if (!confirm('Deseja remover este cliente da tabela?')) return;
   _tpClientes.splice(i,1);
   _tpRenderCliList();
+}
+
+/* ── Adicionar Rede / Sub Rede: busca sobre cat_clientes (o mesmo cadastro de
+   Rede > Loja usado no formulario de Cliente) e, ao confirmar, adiciona de uma vez
+   TODOS os clientes vinculados aquele nó -- sem duplicar quem ja estiver na lista.
+   Um nó sem "pai" e uma Rede (casa por cliente.categoria); um nó com "pai" e uma
+   Sub Rede/Loja (casa por cliente.subcategoria) -- ex: "Atacadão PE" costuma ser
+   a Sub Rede dentro da Rede "Atacadão". ── */
+var _tpRedeItems = [];
+function _tpRedeFiltrar() {
+  var input = document.getElementById('tabpreco-rede-busca');
+  var drop  = document.getElementById('tabpreco-rede-drop');
+  if (!input || !drop) return;
+  var q = (input.value || '').trim();
+  document.getElementById('tabpreco-rede-id').value = '';
+  if (!q) { drop.style.display = 'none'; _tpRedeItems = []; return; }
+  var n = _cpNorm(q);
+  var cats = getCatClientes();
+  _tpRedeItems = cats.filter(function(c){ return _cpNorm(c.nome||'').includes(n); }).slice(0,15);
+  if (!_tpRedeItems.length) { drop.style.display = 'none'; return; }
+  drop.onmousedown = function(e){ e.preventDefault(); };
+  drop.innerHTML = _tpRedeItems.map(function(c, i) {
+    var pai = c.pai ? cats.find(function(p){ return p.id === c.pai; }) : null;
+    var label = pai ? _skuEsc(pai.nome||'') + ' <i class="ti ti-chevron-right" style="font-size:9px;color:#cbd5e1"></i> ' + _skuEsc(c.nome||'') : _skuEsc(c.nome||'');
+    return '<div onclick="_tpRedeSelDrop('+i+')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9;color:#334155">'+label+'</div>';
+  }).join('');
+  drop.style.display = 'block';
+}
+function _tpRedeSelDrop(i) {
+  var c = _tpRedeItems[i]; if (!c) return;
+  var cats = getCatClientes();
+  var pai = c.pai ? cats.find(function(p){ return p.id === c.pai; }) : null;
+  document.getElementById('tabpreco-rede-id').value    = c.id;
+  document.getElementById('tabpreco-rede-busca').value = pai ? (pai.nome||'') + ' > ' + (c.nome||'') : (c.nome||'');
+  document.getElementById('tabpreco-rede-drop').style.display = 'none';
+}
+function _tabPrecoKeyRede(event) {
+  if (event.key !== 'Enter' && event.key !== 'Tab') return;
+  if (_tpRedeItems.length === 1 && !document.getElementById('tabpreco-rede-id').value) { _tpRedeSelDrop(0); }
+  var isTabRede = event.key === 'Tab';
+  var temSelecao = !!document.getElementById('tabpreco-rede-id').value;
+  if (event.key === 'Enter') event.preventDefault();
+  if (temSelecao) {
+    if (isTabRede) { event.preventDefault(); setTimeout(function(){ var btn = document.querySelector('[onclick="addTabPrecoRede()"]'); if(btn) btn.focus(); },50); }
+  } else if (event.key === 'Enter') {
+    var el = document.getElementById('tabpreco-rede-busca');
+    if (el) { el.style.border = '1.5px solid #ef4444'; setTimeout(function(){ el.style.border = ''; }, 1200); }
+  }
+}
+function addTabPrecoRede() {
+  var redeId = (document.getElementById('tabpreco-rede-id')||{}).value || '';
+  var msg = document.getElementById('tabpreco-msg');
+  if (!redeId) { alert('Selecione uma rede/sub rede cadastrada (pressione Enter para confirmar a busca).'); return; }
+  var cat = getCatClientes().find(function(c){ return c.id === redeId; }) || {};
+  var ehSubRede = !!cat.pai;
+  var clientesDaRede = getClientesVisiveis().filter(function(c){
+    return ehSubRede ? String(c.subcategoria) === String(redeId) : String(c.categoria) === String(redeId);
+  });
+  if (!clientesDaRede.length) {
+    if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhuma loja cadastrada para esta rede/sub rede.'; }
+    return;
+  }
+  var adicionados = 0, jaTinha = 0;
+  clientesDaRede.forEach(function(cli){
+    if (_tpClientes.find(function(x){ return x.cliId === cli.id; })) { jaTinha++; return; }
+    _tpClientes.push({
+      cliId: cli.id,
+      codigo: cli.codigo || '',
+      nome: cli.nome_fantasia || cli.razao_social || '',
+      dtCadastro: new Date().toLocaleDateString('pt-BR')
+    });
+    adicionados++;
+  });
+  var elBusca = document.getElementById('tabpreco-rede-busca'); if (elBusca) elBusca.value = '';
+  var elId    = document.getElementById('tabpreco-rede-id');    if (elId)    elId.value = '';
+  _tpRenderCliList();
+  if (msg) {
+    msg.style.color = '#16a34a';
+    msg.textContent = adicionados + ' loja(s) adicionada(s)' + (jaTinha ? ', ' + jaTinha + ' já estava(m) na lista' : '') + '.';
+  }
 }
 
 /* ── Salvar Tabela ── */
@@ -9815,44 +10019,106 @@ function salvarTabPreco() {
 }
 
 /* ── Exportar ── */
+/* ── Exportar: abre modal para escolher a fábrica; a planilha gerada traz TODOS os
+   produtos ATIVOS cadastrados daquela fábrica (não só os já adicionados nesta tabela),
+   servindo como modelo para preencher/editar preços e reimportar depois. Se um produto
+   já estiver adicionado na tabela em edição, seus valores atuais vêm pré-preenchidos. ── */
 function exportTabPreco() {
-  var id  = (document.getElementById('tabpreco-edit-id')||{}).value || '';
-  var rec = id ? getTabPrecos().find(function(r){ return r.id===id; }) : null;
-  var itens = rec ? (rec.itens||[]) : _tpItens;
-  if (!itens.length) { alert('Nenhum produto para exportar.'); return; }
-  var rows = [['Fornecedor','Código','Produto','Cód. Pedido','Cód. Cliente','Valor','Comissão','Período','Dt. Cadastro']];
-  itens.forEach(function(it){
-    rows.push([it.fornNome||'',it.codigo||'',it.nome||'',it.codPedido||'',it.codCliente||'',it.valor||'',it.comissao||'',it.periodo||'',it.dtCadastro||'']);
+  var sel = document.getElementById('tpexp-forn-sel');
+  if (sel) {
+    var forns = getFornecedores().slice().sort(function(a,b){
+      return (a.nome_fantasia||a.razao_social||'').localeCompare(b.nome_fantasia||b.razao_social||'', 'pt-BR');
+    });
+    sel.innerHTML = '<option value="">-- Selecione --</option>' + forns.map(function(f){
+      return '<option value="'+f.id+'">'+(f.nome_fantasia||f.razao_social||'—')+'</option>';
+    }).join('');
+  }
+  var msg = document.getElementById('tpexp-msg'); if (msg) msg.textContent = '';
+  var modal = document.getElementById('modal-tabpreco-export-forn');
+  if (modal) modal.style.display = 'flex';
+}
+function fecharModalTabPrecoExportForn() {
+  var modal = document.getElementById('modal-tabpreco-export-forn');
+  if (modal) modal.style.display = 'none';
+}
+function confirmarExportTabPrecoForn() {
+  var fornId = (document.getElementById('tpexp-forn-sel')||{}).value || '';
+  var msg = document.getElementById('tpexp-msg');
+  if (!fornId) { if (msg) msg.textContent = 'Selecione uma fábrica.'; return; }
+  if (typeof XLSX === 'undefined') { alert('Biblioteca de Excel não carregou. Verifique a conexão com a internet e tente novamente.'); return; }
+  var forn = getFornecedores().find(function(f){ return f.id === fornId; }) || {};
+  var fornNome = forn.nome_fantasia || forn.razao_social || 'Fabrica';
+  var produtosAtivos = getProdutos().filter(function(p){
+    return p.fornecedor === fornId && (p.ativo || 'Sim') === 'Sim';
+  }).sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'', 'pt-BR'); });
+  if (!produtosAtivos.length) { if (msg) msg.textContent = 'Nenhum produto ativo cadastrado para esta fábrica.'; return; }
+  var header = ['Código','Produto','Cód. Pedido','Cód. Cliente','Valor','Comissão','Período'];
+  var aoa = [header];
+  produtosAtivos.forEach(function(p){
+    var itemExistente = _tpItens.find(function(it){ return it.prodId === p.id; });
+    aoa.push([
+      p.codigo || '',
+      p.nome || '',
+      itemExistente ? (itemExistente.codPedido || '') : '',
+      itemExistente ? (itemExistente.codCliente || '') : '',
+      itemExistente ? (itemExistente.valor || '') : '',
+      itemExistente ? (itemExistente.comissao || '') : '',
+      itemExistente ? (itemExistente.periodo || '') : ''
+    ]);
   });
-  var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
-  var blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'tabela_preco_'+(new Date().toISOString().slice(0,10))+'.csv';
-  a.click();
+  var ws = XLSX.utils.aoa_to_sheet(aoa);
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Tabela de Preço');
+  try {
+    XLSX.writeFile(wb, 'tabela_preco_' + fornNome.replace(/[^\wÀ-ÿ ]/g,'').trim().replace(/\s+/g,'_') + '.xlsx');
+    fecharModalTabPrecoExportForn();
+  } catch (err) {
+    alert('Erro ao gerar Excel: ' + (err && err.message ? err.message : err));
+  }
 }
 
 /* ── Importar (mesmo padrao de Clientes/Produtos: le a planilha, casa por Codigo do
    produto, faz upsert em _tpItens e mostra um resumo — a revisao final acontece na
    propria lista de produtos da tela, antes de clicar em Salvar) ── */
+// Converte o valor de uma celula de "Periodo" vindo da planilha para dd/mm/yyyy.
+// O Excel, ao reconhecer um texto como "14/08/2029", pode reformatar a celula sozinho para
+// um tipo Data de verdade -- com cellDates:true isso chega aqui como objeto Date; sem isso
+// (ou em planilhas antigas), chega como numero serial (ex: 47344). Cobre os dois casos.
+function _tpParsearPeriodoCelula(v) {
+  if (v instanceof Date && !isNaN(v.getTime())) {
+    var dd = String(v.getUTCDate()).padStart(2,'0');
+    var mm = String(v.getUTCMonth()+1).padStart(2,'0');
+    return dd + '/' + mm + '/' + v.getUTCFullYear();
+  }
+  if (typeof v === 'number' && isFinite(v) && v > 20000 && v < 80000) {
+    var epoch = Date.UTC(1899, 11, 30); // epoch do Excel (compensa o bug do ano 1900)
+    var d = new Date(epoch + v * 86400000);
+    var dd2 = String(d.getUTCDate()).padStart(2,'0');
+    var mm2 = String(d.getUTCMonth()+1).padStart(2,'0');
+    return dd2 + '/' + mm2 + '/' + d.getUTCFullYear();
+  }
+  return String(v || '').trim();
+}
+// Layout das colunas (mesmo da planilha gerada por confirmarExportTabPrecoForn):
+// 0=Codigo, 1=Produto (so leitura), 2=Cod.Pedido, 3=Cod.Cliente, 4=Valor, 5=Comissao, 6=Periodo
 function _tpImportarLinhas(linhas) {
   var produtos = getProdutos();
   var fornecedores = getFornecedores();
   var resumo = { total: 0, adicionados: 0, atualizados: 0, codigosNaoEncontrados: [], semValor: [] };
   linhas.forEach(function(row){
-    var codigo = String(row[1] || '').trim();
+    var codigo = String(row[0] || '').trim();
     if (!codigo) return;
     resumo.total++;
     var prod = produtos.find(function(p){ return _cpNorm(p.codigo||'') === _cpNorm(codigo); });
     if (!prod) { resumo.codigosNaoEncontrados.push(codigo); return; }
-    var valor = String(row[5] || '').trim();
+    var valor = String(row[4] || '').trim();
     if (!valor) { resumo.semValor.push(codigo + ' - ' + (prod.nome||'')); return; }
     var forn = fornecedores.find(function(f){ return f.id === prod.fornecedor; }) || {};
     var itemObj = {
       prodId: prod.id, codigo: prod.codigo, nome: prod.nome,
       fornId: prod.fornecedor || '', fornNome: forn.nome_fantasia || forn.razao_social || '—',
-      codPedido: String(row[3]||'').trim(), codCliente: String(row[4]||'').trim(),
-      valor: valor, comissao: String(row[6]||'').trim(), periodo: String(row[7]||'').trim(),
+      codPedido: String(row[2]||'').trim(), codCliente: String(row[3]||'').trim(),
+      valor: valor, comissao: String(row[5]||'').trim(), periodo: _tpParsearPeriodoCelula(row[6]),
       dtCadastro: new Date().toLocaleDateString('pt-BR')
     };
     var idxExistente = _tpItens.findIndex(function(it){ return it.prodId === prod.id; });
@@ -9877,7 +10143,10 @@ function importTabPrecoFile(input) {
   reader.onload = function(e) {
     try {
       var data = new Uint8Array(e.target.result);
-      var wb = XLSX.read(data, { type: 'array' });
+      // cellDates:true -- sem isso, celulas que o Excel formatou como Data (comum quando o
+      // proprio Excel reconhece "14/08/2029" digitado e reformata a celula sozinho) vêm como
+      // numero serial (ex: 47344) em vez da data, e o Periodo saia errado ao reimportar.
+      var wb = XLSX.read(data, { type: 'array', cellDates: true });
       var ws = wb.Sheets[wb.SheetNames[0]];
       var aoa = XLSX.utils.sheet_to_json(ws, { header: 1 });
       aoa.shift();
@@ -13220,6 +13489,14 @@ function _pimpFmtData(iso) {
   var partes = String(iso).split('-');
   return partes.length === 3 ? (partes[2] + '/' + partes[1] + '/' + partes[0]) : iso;
 }
+function _pimpLogoCompartilharPadrao() {
+  // Logo padrao da Compartilhar (mesmo PNG ja usado no Excel de Dados Representadas),
+  // usado como fallback quando a Empresa (Gerenciar > Empresa) nao tem foto propria cadastrada.
+  return (typeof DR_COMPARTILHAR_LOGO_B64 !== 'undefined' && DR_COMPARTILHAR_LOGO_B64)
+    ? ('data:image/png;base64,' + DR_COMPARTILHAR_LOGO_B64)
+    : '';
+}
+
 function _pimpLogoOuPlaceholder(foto, texto) {
   if (foto) return '<img src="' + foto + '" style="max-width:100%;max-height:56px;object-fit:contain">';
   return '<div style="font-size:11px;font-weight:700;color:#94a3b8;text-align:center">' + _pedEsc(texto || '') + '</div>';
@@ -13285,7 +13562,7 @@ function _pimpRender() {
 
   cont.innerHTML =
     '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1.5px solid #272A4A;padding-bottom:10px;margin-bottom:10px">'
-      + '<div style="width:140px;height:64px;display:flex;align-items:center">' + _pimpLogoOuPlaceholder(empresa.foto, empresa.nomeFantasia || 'Compartilhar') + '</div>'
+      + '<div style="width:140px;height:64px;display:flex;align-items:center">' + _pimpLogoOuPlaceholder(empresa.foto || _pimpLogoCompartilharPadrao(), empresa.nomeFantasia || 'Compartilhar') + '</div>'
       + '<div style="text-align:center;flex:1">'
         + '<div style="font-size:16px;font-weight:800;color:#272A4A">' + empresaNome + '</div>'
         + (empresaContato ? '<div style="font-size:11px;color:#94a3b8;margin:1px 0 6px">' + empresaContato + '</div>' : '<div style="margin-bottom:6px"></div>')
@@ -14239,21 +14516,66 @@ function _pedSalvarAnexoAoPedido(pedidoId, file, tipo, callbacks) {
   };
   reader.readAsDataURL(file);
 }
-// Anexa NF (PDF) ou XML da NF-e — detecta o tipo pela extensão do arquivo
-function pedAnexarArquivo(input) {
+// Anexa NF (PDF) e/ou XML da NF-e — aceita varios arquivos de uma vez (input multiple ou
+// arrastar-e-soltar), detectando o tipo de cada um pela extensao. Processa em SEQUENCIA
+// (um so termina de salvar -- getPedidos()/setPedidos() -- antes do proximo comecar a ler),
+// senao dois arquivos terminando de ler quase juntos podem se basear no mesmo estado antigo
+// do pedido e um anexo "sumir" (mesma familia de bug ja vista no _fsGet -- ver memoria do projeto).
+function pedAnexarArquivos(fileList) {
   var msg = document.getElementById('ped-anexo-msg');
   if (msg) { msg.style.color = '#dc2626'; msg.textContent = ''; }
-  var file = input.files[0]; if (!file) return;
+  var files = Array.prototype.slice.call(fileList || []);
+  if (!files.length) return;
+  _pedProcessarArquivosAnexo(files, 0, { ok: 0, avisos: [] });
+}
+function _pedProcessarArquivosAnexo(files, idx, resumo) {
+  var msg = document.getElementById('ped-anexo-msg');
+  if (idx >= files.length) {
+    var inputEl = document.getElementById('ped-anexo-input-pdf'); if (inputEl) inputEl.value = '';
+    _pedRenderAnexos();
+    if (msg) {
+      if (resumo.avisos.length) {
+        msg.style.color = '#DE7926';
+        msg.textContent = resumo.avisos.join(' ') + (resumo.ok ? ' (' + resumo.ok + ' outro(s) anexado(s) normalmente.)' : '');
+      } else if (resumo.ok) {
+        msg.style.color = '#16a34a';
+        msg.textContent = resumo.ok + (resumo.ok === 1 ? ' arquivo anexado.' : ' arquivos anexados.');
+        setTimeout(function(){ if (msg.textContent.indexOf('anexad') !== -1) msg.textContent = ''; }, 2500);
+      }
+    }
+    return;
+  }
+  var file = files[idx];
+  var proximo = function(){ _pedProcessarArquivosAnexo(files, idx + 1, resumo); };
   var nomeMin = file.name.toLowerCase();
   var tipo = /\.xml$/i.test(nomeMin) ? 'xml' : ((/\.pdf$/i.test(nomeMin) || file.type === 'application/pdf') ? 'pdf' : null);
-  if (!tipo) { if (msg) msg.textContent = 'Selecione um arquivo PDF ou XML.'; input.value=''; return; }
-  if (file.size > 8 * 1024 * 1024) { if (msg) msg.textContent = 'Arquivo muito grande. Limite: 8 MB.'; input.value=''; return; }
+  if (!tipo) { resumo.avisos.push('"' + file.name + '": selecione um arquivo PDF ou XML.'); proximo(); return; }
+  if (file.size > 8 * 1024 * 1024) { resumo.avisos.push('"' + file.name + '": arquivo muito grande (limite 8 MB).'); proximo(); return; }
   _pedSalvarAnexoAoPedido(_pedAnexoPedidoId, file, tipo, {
-    onWarn:     function(txt) { if (msg) { msg.style.color = '#DE7926'; msg.textContent = txt; } },
-    onCnpjErro: function(txt) { if (msg) { msg.style.color = '#dc2626'; msg.textContent = txt; } input.value=''; },
+    onWarn:     function(txt) { resumo.avisos.push('"' + file.name + '": ' + txt); },
+    onCnpjErro: function(txt) { resumo.avisos.push('"' + file.name + '": ' + txt); proximo(); },
     onXmlTexto: function(xmlTexto) { _pfatCriarFaturaAutoXml(_pedAnexoPedidoId, xmlTexto, file.name); },
-    onSaved:    function() { input.value = ''; _pedRenderAnexos(); }
+    onSaved:    function() { resumo.ok++; proximo(); }
   });
+}
+// Compatibilidade com o <input onchange="pedAnexarArquivo(this)">
+function pedAnexarArquivo(input) {
+  pedAnexarArquivos(input.files);
+}
+function pedAnexoDragOver(ev) {
+  ev.preventDefault();
+  var zone = document.getElementById('ped-anexo-dropzone');
+  if (zone) { zone.style.borderColor = '#DE7926'; zone.style.background = '#fff7ed'; }
+}
+function pedAnexoDragLeave(ev) {
+  ev.preventDefault();
+  var zone = document.getElementById('ped-anexo-dropzone');
+  if (zone) { zone.style.borderColor = '#cbd5e1'; zone.style.background = 'transparent'; }
+}
+function pedAnexoDrop(ev) {
+  ev.preventDefault();
+  pedAnexoDragLeave(ev);
+  pedAnexarArquivos(ev.dataTransfer.files);
 }
 // Tooltip (hover): mostra os produtos do pedido
 function pedMostrarItensTooltip(ev, id) {
@@ -14318,20 +14640,46 @@ function pedAlterarStatus(id, novoStatus) {
   pedFecharStatusPopover();
   renderPedidoList();
 }
+// data:...;base64,... vira Blob (com o mime certo por tipo do anexo, nao o que o SO
+// achou que era) -- o Chrome bloqueia "window.open" direto num data: URL grande
+// ("Not allowed to navigate top frame to data URL"), o que fazia o olho abrir uma
+// aba em branco. Blob URL (via URL.createObjectURL) nao tem essa restricao.
+function _pedMimePorTipoAnexo(tipo) {
+  return tipo === 'xml' ? 'application/xml' : (tipo === 'pdf' ? 'application/pdf' : 'application/octet-stream');
+}
+function _pedDataUrlParaBlob(dataUrl, mimeForcado) {
+  var partes = String(dataUrl || '').split(',');
+  if (partes.length < 2) return null;
+  try {
+    var binario = atob(partes[1]);
+    var bytes = new Uint8Array(binario.length);
+    for (var i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
+    return new Blob([bytes], { type: mimeForcado || 'application/octet-stream' });
+  } catch (e) {
+    return null;
+  }
+}
 function pedAbrirAnexo(i) {
   var p = getPedidos().find(function(x){ return x.id === _pedAnexoPedidoId; });
   var a = p && p.anexos && p.anexos[i];
   if (!a) return;
-  window.open(a.dados, '_blank');
+  var blob = _pedDataUrlParaBlob(a.dados, _pedMimePorTipoAnexo(a.tipo));
+  if (!blob) { alert('Não foi possível abrir este anexo.'); return; }
+  var url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
 }
 function pedBaixarAnexo(i) {
   var p = getPedidos().find(function(x){ return x.id === _pedAnexoPedidoId; });
   var a = p && p.anexos && p.anexos[i];
   if (!a) return;
+  var blob = _pedDataUrlParaBlob(a.dados, _pedMimePorTipoAnexo(a.tipo));
+  var url = blob ? URL.createObjectURL(blob) : a.dados;
   var link = document.createElement('a');
-  link.href = a.dados;
+  link.href = url;
   link.download = a.nome || 'anexo.pdf';
   link.click();
+  if (blob) setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
 }
 function pedRemoverAnexo(i) {
   if (!confirm('Remover este anexo?')) return;
@@ -14571,6 +14919,8 @@ function _pfatExtrairDadosXmlPedido(xmlText) {
         codigo: _devXmlTag(prod, 'cProd'),
         nome: _devXmlTag(prod, 'xProd'),
         qtd: parseFloat(_devXmlTag(prod, 'qCom')) || 0,
+        unidadeXml: _devXmlTag(prod, 'uCom') || '',
+        valorItem: parseFloat(_devXmlTag(prod, 'vProd')) || 0,
         precoUnit: parseFloat(_devXmlTag(prod, 'vUnCom')) || 0
       });
     }
@@ -14579,6 +14929,32 @@ function _pfatExtrairDadosXmlPedido(xmlText) {
     return null;
   }
 }
+// A NF-e informa a quantidade JUNTO com a unidade comercial declarada pelo fornecedor
+// (uCom) -- as vezes "CX"/"CXA"/"CAIXA" (o produto foi faturado por caixa fechada), as
+// vezes "UN"/"PC" (por unidade). O Pedido, internamente, guarda tudo em UNIDADES reais
+// (mesma convencao usada na importacao de PDF -- ver _pedMontarItemImportadoPdf). Sem essa
+// conversao, "3 CX" do XML virava "3 unidades faturadas" no sistema, deixando Qtd
+// Faturado/A Faturar completamente errados quando o pedido foi fechado em caixas.
+function _pfatEhUnidadeCaixa(uCom) {
+  return /^CX|CAIXA/.test(String(uCom || '').trim().toUpperCase());
+}
+function _pfatConverterItemXmlParaUnidades(match, produto) {
+  if (!_pfatEhUnidadeCaixa(match.unidadeXml)) {
+    return { qtd: match.qtd, precoFat: match.precoUnit };
+  }
+  var cxNum = parseFloat(String((produto && produto.quant) || '').replace(',', '.'));
+  if (isNaN(cxNum) || cxNum <= 0) {
+    // Produto sem "Quant. Caixa" cadastrada -- sem conversao segura, mantem como veio do XML
+    // (mesma logica defensiva usada em _pedMontarItemImportadoPdf).
+    return { qtd: match.qtd, precoFat: match.precoUnit };
+  }
+  var qtdEmUnidades = match.qtd * cxNum;
+  var valorItemXml = match.valorItem || (match.qtd * match.precoUnit);
+  return {
+    qtd: qtdEmUnidades,
+    precoFat: qtdEmUnidades > 0 ? (valorItemXml / qtdEmUnidades) : match.precoUnit
+  };
+}
 function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
   var dados = _pfatExtrairDadosXmlPedido(xmlText);
   if (!dados) return;
@@ -14586,11 +14962,14 @@ function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
   var idx = data.findIndex(function(x){ return x.id === pedidoId; });
   if (idx < 0) return;
   var pedido = data[idx];
+  var produtos = getProdutos();
   var itensFatura = [];
   (pedido.itens || []).forEach(function(it){
     var match = dados.itens.find(function(x){ return x.codigo && _cpNorm(x.codigo || '') === _cpNorm(it.prodCodigo || ''); });
     if (match && match.qtd > 0) {
-      itensFatura.push({ prodId: it.prodId, prodCodigo: it.prodCodigo, prodNome: it.prodNome, qtd: match.qtd, precoFat: match.precoUnit || it.precoUnit });
+      var produto = produtos.find(function(p){ return p.id === it.prodId; });
+      var convertido = _pfatConverterItemXmlParaUnidades(match, produto);
+      itensFatura.push({ prodId: it.prodId, prodCodigo: it.prodCodigo, prodNome: it.prodNome, qtd: convertido.qtd, precoFat: convertido.precoFat || it.precoUnit });
     }
   });
   var valorFatura = dados.valor || itensFatura.reduce(function(s,it){ return s + it.qtd * it.precoFat; }, 0);
