@@ -3353,7 +3353,7 @@
                 </div>
                 <input type="hidden" id="sku-cli-id">
               </div>
-              <div>
+              <div id="sku-produto-unico-wrap">
                 <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Produto <span style="color:#D82621">*</span></label>
                 <div style="position:relative">
                   <input id="sku-prod-input" class="form-input" placeholder="Código ou nome (4+ letras)..." oninput="_skuProdFiltrar()" onkeydown="_skuProdKey(event)" onblur="setTimeout(function(){var d=document.getElementById('sku-prod-drop');if(d)d.style.display='none'},200)" autocomplete="off">
@@ -3363,8 +3363,8 @@
               </div>
             </div>
 
-            <!-- SKU e Forma -->
-            <div>
+            <!-- SKU e Forma (modo Cliente específico / edição) -->
+            <div id="sku-codigo-unico-wrap">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
                 <i class="ti ti-barcode" style="font-size:13px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Código e embalagem</span>
@@ -3387,10 +3387,56 @@
               </div>
             </div>
 
+            <!-- Adicionar Produto (modo Rede - lote) -->
+            <div id="sku-lote-add-wrap" style="display:none">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+                <i class="ti ti-box" style="font-size:13px;color:#272A4A"></i>
+                <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Adicionar Produto</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 160px 110px auto;gap:10px;align-items:flex-end">
+                <div>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Código / Produto <span style="color:#D82621">*</span></label>
+                  <div style="position:relative">
+                    <input id="sku-lote-prod-input" class="form-input" placeholder="Código ou nome (4+ letras)..." oninput="_skuLoteProdFiltrar()" onkeydown="_skuLoteProdKey(event)" onblur="setTimeout(function(){var d=document.getElementById('sku-lote-prod-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
+                    <div id="sku-lote-prod-drop" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e2e8f0;border-radius:8px;z-index:999;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.15)"></div>
+                  </div>
+                  <input type="hidden" id="sku-lote-prod-id">
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">SKU do Cliente <span style="color:#D82621">*</span></label>
+                  <input id="sku-lote-codigo" class="form-input" placeholder="Ex: 60028166" style="width:100%;font-family:monospace;font-size:13px;font-weight:600;letter-spacing:.04em">
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Forma</label>
+                  <select id="sku-lote-forma" class="form-input" style="width:100%">
+                    <option value="CX">CX</option>
+                    <option value="UND">UND</option>
+                    <option value="PC">PC</option>
+                    <option value="KG">KG</option>
+                  </select>
+                </div>
+                <button onclick="addSkuLoteItem()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;height:34px">&#65291; Add</button>
+              </div>
+            </div>
+
+            <!-- Produtos desta Rede (modo lote) -->
+            <div id="sku-lote-list-wrap" style="display:none;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0">
+              <div style="padding:10px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:flex;align-items:center;gap:6px">
+                  <i class="ti ti-list" style="font-size:11px;color:#272A4A"></i> Produtos desta Rede
+                </span>
+                <span id="sku-lote-count" style="font-size:10px;color:#94a3b8">0 produtos</span>
+              </div>
+              <div style="display:grid;grid-template-columns:110px 1fr 140px 70px 60px;padding:6px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">
+                <span>Código</span><span>Produto</span><span>SKU do Cliente</span><span>Forma</span><span style="text-align:center">Opções</span>
+              </div>
+              <div id="sku-lote-list"></div>
+            </div>
+
             <!-- Ações -->
             <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:6px;border-top:1px solid #f1f5f9">
               <button onclick="showPage('page-sku-clientes-list')" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:8px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">&#8629; Voltar</button>
-              <button onclick="salvarSkuCliente()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 26px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
+              <button id="sku-btn-salvar" onclick="salvarSkuCliente()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 26px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
             </div>
             <div id="sku-autoria-info"></div>
           </div>
@@ -13037,6 +13083,10 @@ function openSkuClientesForm(params) {
   if (skuAutoriaEl) skuAutoriaEl.innerHTML = r ? _appRenderAutoriaHtml(r) : '';
 }
 
+function _skuModoLote() {
+  return _skuTipo === 'rede' && !(document.getElementById('sku-edit-id')||{}).value;
+}
+
 function skuSetTipo(t) {
   _skuTipo = t;
   var btnR = document.getElementById('sku-tipo-rede');
@@ -13048,6 +13098,19 @@ function skuSetTipo(t) {
   // limpar seleção ao trocar tipo
   document.getElementById('sku-cli-input').value = '';
   document.getElementById('sku-cli-id').value    = '';
+
+  // alternar entre modo único (Cliente específico / edição) e modo lote (nova Rede)
+  var modoLote = _skuModoLote();
+  var wUnicoProd = document.getElementById('sku-produto-unico-wrap');
+  var wUnicoCod  = document.getElementById('sku-codigo-unico-wrap');
+  var wLoteAdd   = document.getElementById('sku-lote-add-wrap');
+  var wLoteList  = document.getElementById('sku-lote-list-wrap');
+  if (wUnicoProd) wUnicoProd.style.display = modoLote ? 'none' : '';
+  if (wUnicoCod)  wUnicoCod.style.display  = modoLote ? 'none' : '';
+  if (wLoteAdd)   wLoteAdd.style.display   = modoLote ? '' : 'none';
+  if (wLoteList)  wLoteList.style.display  = modoLote ? '' : 'none';
+  _skuLoteItens = [];
+  _skuLoteRenderList();
 }
 
 function skuFormaSel(v) {
@@ -13182,7 +13245,137 @@ function _skuProdSel(i) {
   document.getElementById('sku-prod-drop').style.display = 'none';
 }
 
+// ── Autocomplete Produto (modo lote - Rede) ──
+var _skuLoteItens = [];
+var _skuLoteProdItems = [];
+function _skuLoteProdFiltrar() {
+  var q    = (document.getElementById('sku-lote-prod-input').value || '').trim();
+  var drop = document.getElementById('sku-lote-prod-drop');
+  if (!drop) return;
+  if (q.length < 4) { drop.style.display='none'; return; }
+  var n = _cpNorm(q);
+  _skuLoteProdItems = getProdutos().filter(function(p) {
+    return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
+  }).slice(0,15);
+  if (!_skuLoteProdItems.length) { drop.style.display='none'; return; }
+  drop.onmousedown = function(e){ e.preventDefault(); };
+  drop.innerHTML = _skuLoteProdItems.map(function(p, i) {
+    return '<div onclick="_skuLoteProdSel('+i+')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">'
+      +(p.codigo?'<span style="font-weight:700;color:#272A4A;margin-right:8px">'+_skuEsc(p.codigo)+'</span>':'')
+      +'<span style="color:#334155;flex:1">'+_skuEsc(p.nome||'')+'</span></div>';
+  }).join('');
+  drop.style.display='block';
+}
+function _skuLoteProdKey(e) {
+  if (e.key!=='Enter' && e.key!=='Tab') return;
+  var q = _cpNorm(document.getElementById('sku-lote-prod-input').value||'');
+  if (!q) return;
+  var prods = getProdutos();
+  var hit = prods.find(function(p){ return _cpNorm(p.codigo||'')=== q; })
+         || (_skuLoteProdItems.length===1 ? _skuLoteProdItems[0] : null)
+         || prods.find(function(p){ return _cpNorm(p.nome||'').includes(q); });
+  if (hit) { _skuLoteProdItems=[hit]; _skuLoteProdSel(0); }
+  if (e.key==='Tab') { e.preventDefault(); setTimeout(function(){ var el=document.getElementById('sku-lote-codigo'); if(el)el.focus(); },50); }
+}
+function _skuLoteProdSel(i) {
+  var p = _skuLoteProdItems[i]; if (!p) return;
+  document.getElementById('sku-lote-prod-id').value    = p.id;
+  document.getElementById('sku-lote-prod-input').value = (p.codigo?p.codigo+' ':'')+(p.nome||'');
+  document.getElementById('sku-lote-prod-drop').style.display = 'none';
+}
+
+function addSkuLoteItem() {
+  var prodInput = document.getElementById('sku-lote-prod-input').value.trim();
+  var prodId    = document.getElementById('sku-lote-prod-id').value.trim();
+  if (prodInput && !prodId) {
+    var np = _cpNorm(prodInput);
+    var hp = getProdutos().find(function(p){ return _cpNorm(p.codigo||'')===np || _cpNorm(p.nome||'').includes(np); });
+    if (hp) { prodId = hp.id; prodInput = hp.nome||''; document.getElementById('sku-lote-prod-id').value=hp.id; }
+  }
+  var sku   = document.getElementById('sku-lote-codigo').value.trim();
+  var forma = document.getElementById('sku-lote-forma').value;
+  if (!prodId) { alert('Selecione o produto'); return; }
+  if (!sku)    { alert('Informe o SKU do cliente'); return; }
+  if (_skuLoteItens.some(function(it){ return it.prodId === prodId; })) { alert('Este produto já foi adicionado à lista'); return; }
+  var prod = getProdutos().find(function(p){ return p.id === prodId; }) || {};
+  _skuLoteItens.push({ prodId: prodId, prodCodigo: prod.codigo||'', prodNome: prod.nome||prodInput, sku: sku, forma: forma });
+
+  document.getElementById('sku-lote-prod-input').value = '';
+  document.getElementById('sku-lote-prod-id').value    = '';
+  document.getElementById('sku-lote-codigo').value     = '';
+  document.getElementById('sku-lote-forma').value      = 'CX';
+  _skuLoteRenderList();
+  document.getElementById('sku-lote-prod-input').focus();
+}
+
+function _skuLoteRemItem(i) {
+  _skuLoteItens.splice(i, 1);
+  _skuLoteRenderList();
+}
+
+function _skuLoteRenderList() {
+  var list  = document.getElementById('sku-lote-list');
+  var count = document.getElementById('sku-lote-count');
+  if (count) count.textContent = _skuLoteItens.length + ' produto' + (_skuLoteItens.length!==1?'s':'');
+  if (list) {
+    if (!_skuLoteItens.length) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhum produto adicionado</div>';
+    } else {
+      list.innerHTML = _skuLoteItens.map(function(it, i) {
+        return '<div style="display:grid;grid-template-columns:110px 1fr 140px 70px 60px;padding:9px 12px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px">'
+          + '<span style="color:#64748b;font-size:11px">'+_skuEsc(it.prodCodigo||'—')+'</span>'
+          + '<span style="font-weight:600;color:#1e293b">'+_skuEsc(it.prodNome||'')+'</span>'
+          + '<span style="font-family:monospace;font-weight:600;color:#1e293b">'+_skuEsc(it.sku||'')+'</span>'
+          + '<span style="color:#64748b;font-size:11px">'+_skuEsc(it.forma||'')+'</span>'
+          + '<div style="display:flex;justify-content:center"><button onclick="_skuLoteRemItem('+i+')" style="width:24px;height:24px;border-radius:5px;border:1px solid #fee2e2;background:#fff5f5;cursor:pointer;color:#dc2626;font-size:11px;display:flex;align-items:center;justify-content:center" title="Remover"><i class="ti ti-trash"></i></button></div></div>';
+      }).join('');
+    }
+  }
+  var btn = document.getElementById('sku-btn-salvar');
+  if (btn) btn.textContent = _skuModoLote() ? ('Salvar todos ('+_skuLoteItens.length+')') : 'Salvar';
+}
+
+function _salvarSkuLote() {
+  var fornInput = document.getElementById('sku-forn-input').value.trim();
+  var fornId    = document.getElementById('sku-forn-id').value.trim();
+  if (fornInput && !fornId) {
+    var n = _cpNorm(fornInput);
+    var hf = getFornecedores().find(function(f){ return _cpNorm(f.codigo||'')===n || _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n); });
+    if (hf) { fornId = hf.id; fornInput = hf.nome_fantasia||hf.razao_social||''; document.getElementById('sku-forn-id').value=hf.id; }
+  }
+  var fornNome = fornInput;
+
+  var cliInput = document.getElementById('sku-cli-input').value.trim();
+  var cliId    = document.getElementById('sku-cli-id').value.trim();
+  if (cliInput && !cliId) {
+    var nc = _cpNorm(cliInput);
+    var hc = getCatClientes().find(function(c){ return _cpNorm(c.nome||'').includes(nc); });
+    if (hc) { cliId = hc.id; cliInput = hc.nome; document.getElementById('sku-cli-id').value=hc.id; }
+  }
+  var cliNome = cliInput;
+
+  if (!fornId) { alert('Selecione o fornecedor'); return; }
+  if (!cliId)  { alert('Selecione a rede'); return; }
+  if (!_skuLoteItens.length) { alert('Adicione ao menos um produto à lista'); return; }
+
+  var dados = getSkuClientes();
+  _skuLoteItens.forEach(function(it) {
+    var novo = {
+      id: 'sku_'+(Date.now())+'_'+Math.random().toString(36).slice(2,7),
+      tipo: 'rede', fornId: fornId, fornNome: fornNome, cliId: cliId, cliNome: cliNome,
+      prodId: it.prodId, prodNome: it.prodNome, sku: it.sku, forma: it.forma,
+      dtCadastro: new Date().toISOString()
+    };
+    Object.assign(novo, _appMontarAutoria(null, []));
+    dados.push(novo);
+  });
+  setSkuClientes(dados);
+  _skuLoteItens = [];
+  showPage('page-sku-clientes-list');
+}
+
 function salvarSkuCliente() {
+  if (_skuModoLote()) { _salvarSkuLote(); return; }
   // Tentar resolver se o usuário digitou sem selecionar no dropdown
   var fornInput = document.getElementById('sku-forn-input').value.trim();
   var fornId    = document.getElementById('sku-forn-id').value.trim();

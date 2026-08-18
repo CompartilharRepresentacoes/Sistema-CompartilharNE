@@ -308,7 +308,7 @@
        via parser da estrutura real do HTML) - por isso escondemos com display:none (remove do fluxo
        por completo, sem deixar espaco em branco) em vez de visibility:hidden (que preserva o
        espaco/altura de todo o app escondido e empurrava o pedido pra pagina 2, no meio da folha). */
-    body > *:not(#modal-ped-impressao) { display: none !important; }
+    body > *:not(#modal-ped-impressao):not(#modal-imprimir-relacao) { display: none !important; }
     #modal-ped-impressao {
       position: static !important;
       display: block !important;
@@ -339,6 +339,36 @@
     }
     #pimp-header-modal, #pimp-footer-modal { display: none !important; }
     #pimp-conteudo { overflow: visible !important; border: none !important; padding: 0 !important; }
+    #modal-imprimir-relacao {
+      position: static !important;
+      display: block !important;
+      inset: auto !important;
+      background: #fff !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    #pimprel-inner-box {
+      position: static !important;
+      display: block !important;
+      max-width: none !important;
+      max-height: none !important;
+      width: 100% !important;
+      height: auto !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      overflow: visible !important;
+    }
+    #pimprel-body-wrapper {
+      position: static !important;
+      display: block !important;
+      overflow: visible !important;
+      height: auto !important;
+      max-height: none !important;
+      padding: 0 !important;
+      background: #fff !important;
+    }
+    #pimprel-header-modal, #pimprel-footer-modal { display: none !important; }
+    #pimprel-conteudo { overflow: visible !important; border: none !important; padding: 0 !important; }
   }
 </style>
 </head>
@@ -3323,7 +3353,7 @@
                 </div>
                 <input type="hidden" id="sku-cli-id">
               </div>
-              <div>
+              <div id="sku-produto-unico-wrap">
                 <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Produto <span style="color:#D82621">*</span></label>
                 <div style="position:relative">
                   <input id="sku-prod-input" class="form-input" placeholder="Código ou nome (4+ letras)..." oninput="_skuProdFiltrar()" onkeydown="_skuProdKey(event)" onblur="setTimeout(function(){var d=document.getElementById('sku-prod-drop');if(d)d.style.display='none'},200)" autocomplete="off">
@@ -3333,8 +3363,8 @@
               </div>
             </div>
 
-            <!-- SKU e Forma -->
-            <div>
+            <!-- SKU e Forma (modo Cliente específico / edição) -->
+            <div id="sku-codigo-unico-wrap">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
                 <i class="ti ti-barcode" style="font-size:13px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Código e embalagem</span>
@@ -3357,10 +3387,56 @@
               </div>
             </div>
 
+            <!-- Adicionar Produto (modo Rede - lote) -->
+            <div id="sku-lote-add-wrap" style="display:none">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+                <i class="ti ti-box" style="font-size:13px;color:#272A4A"></i>
+                <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Adicionar Produto</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 160px 110px auto;gap:10px;align-items:flex-end">
+                <div>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Código / Produto <span style="color:#D82621">*</span></label>
+                  <div style="position:relative">
+                    <input id="sku-lote-prod-input" class="form-input" placeholder="Código ou nome (4+ letras)..." oninput="_skuLoteProdFiltrar()" onkeydown="_skuLoteProdKey(event)" onblur="setTimeout(function(){var d=document.getElementById('sku-lote-prod-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
+                    <div id="sku-lote-prod-drop" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e2e8f0;border-radius:8px;z-index:999;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.15)"></div>
+                  </div>
+                  <input type="hidden" id="sku-lote-prod-id">
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">SKU do Cliente <span style="color:#D82621">*</span></label>
+                  <input id="sku-lote-codigo" class="form-input" placeholder="Ex: 60028166" style="width:100%;font-family:monospace;font-size:13px;font-weight:600;letter-spacing:.04em">
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Forma</label>
+                  <select id="sku-lote-forma" class="form-input" style="width:100%">
+                    <option value="CX">CX</option>
+                    <option value="UND">UND</option>
+                    <option value="PC">PC</option>
+                    <option value="KG">KG</option>
+                  </select>
+                </div>
+                <button onclick="addSkuLoteItem()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;height:34px">&#65291; Add</button>
+              </div>
+            </div>
+
+            <!-- Produtos desta Rede (modo lote) -->
+            <div id="sku-lote-list-wrap" style="display:none;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0">
+              <div style="padding:10px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;display:flex;align-items:center;gap:6px">
+                  <i class="ti ti-list" style="font-size:11px;color:#272A4A"></i> Produtos desta Rede
+                </span>
+                <span id="sku-lote-count" style="font-size:10px;color:#94a3b8">0 produtos</span>
+              </div>
+              <div style="display:grid;grid-template-columns:110px 1fr 140px 70px 60px;padding:6px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">
+                <span>Código</span><span>Produto</span><span>SKU do Cliente</span><span>Forma</span><span style="text-align:center">Opções</span>
+              </div>
+              <div id="sku-lote-list"></div>
+            </div>
+
             <!-- Ações -->
             <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:6px;border-top:1px solid #f1f5f9">
               <button onclick="showPage('page-sku-clientes-list')" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:8px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">&#8629; Voltar</button>
-              <button onclick="salvarSkuCliente()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 26px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
+              <button id="sku-btn-salvar" onclick="salvarSkuCliente()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 26px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
             </div>
             <div id="sku-autoria-info"></div>
           </div>
@@ -3421,7 +3497,7 @@
           <option value="Bonificado">Bonificado</option>
           <option value="Cancelado">Cancelado</option>
         </select>
-        <button onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+        <button onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
         <div style="flex:1"></div>
         <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
           <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="ped-kpi-total">0</div></div>
@@ -3467,7 +3543,12 @@
           <select id="pss-rede" onchange="pssAtualizarLojas();renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Loja</span>
           <select id="pss-loja" onchange="renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <button onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+          <button onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('simples')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
+          <div style="flex:1"></div>
+          <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="pss-kpi-valor">R$ 0,00</div></div>
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pss-kpi-peso">0 kg</div></div>
+          </div>
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:85px 90px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
@@ -3503,12 +3584,25 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="vc-cliente" oninput="renderVendasCompletas()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
-          <button onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+          <button onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div style="flex:1"></div>
-          <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vc-kpi-total">0</div></div>
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="vc-kpi-valor">R$ 0,00</div></div>
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vc-kpi-peso">0 kg</div></div>
+          <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vc-kpi-total">0</div></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.04);display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
+          <div style="text-align:center;padding:0 10px">
+            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Total</div>
+            <div style="font-size:16px;font-weight:800;color:#272A4A" id="vc-kpi-valor">R$ 0,00</div>
+            <div style="font-size:11.5px;color:#64748b;margin-top:2px" id="vc-kpi-peso">0 kg</div>
+          </div>
+          <div style="text-align:center;padding:0 10px;border-left:1px solid #f1f5f9;border-right:1px solid #f1f5f9">
+            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Faturado</div>
+            <div style="font-size:16px;font-weight:800;color:#15803d" id="vc-kpi-valor-fat">R$ 0,00</div>
+            <div style="font-size:11.5px;color:#64748b;margin-top:2px" id="vc-kpi-peso-fat">0 kg</div>
+          </div>
+          <div style="text-align:center;padding:0 10px">
+            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Não Faturado</div>
+            <div style="font-size:16px;font-weight:800;color:#dc2626" id="vc-kpi-valor-naofat">R$ 0,00</div>
+            <div style="font-size:11.5px;color:#64748b;margin-top:2px" id="vc-kpi-peso-naofat">0 kg</div>
           </div>
         </div>
         <div id="vc-lista" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -3540,11 +3634,11 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="vcf-cliente" oninput="renderVendasCompletasFaturadas()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
-          <button onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+          <button onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div style="flex:1"></div>
           <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
             <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vcf-kpi-total">0</div></div>
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="vcf-kpi-valor">R$ 0,00</div></div>
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Faturado</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="vcf-kpi-valor">R$ 0,00</div></div>
             <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vcf-kpi-peso">0 kg</div></div>
           </div>
         </div>
@@ -3577,9 +3671,14 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="psn-cliente" oninput="renderVendasSimplesNfs()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
-          <button onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+          <button onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div style="flex:1"></div>
-          <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">NFs</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="psn-kpi-total">0</div></div>
+          <div style="flex:1"></div>
+          <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">NFs</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="psn-kpi-total">0</div></div>
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="psn-kpi-valor">R$ 0,00</div></div>
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="psn-kpi-peso">0 kg</div></div>
+          </div>
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:100px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
@@ -3615,9 +3714,14 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="pnf-cliente" oninput="renderNaoFaturados()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
-          <button onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+          <button onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div style="flex:1"></div>
-          <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos pendentes</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pnf-kpi-total">0</div></div>
+          <div style="flex:1"></div>
+          <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos pendentes</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pnf-kpi-total">0</div></div>
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Não Faturado</div><div style="font-size:13px;font-weight:700;color:#dc2626" id="pnf-kpi-valor">R$ 0,00</div></div>
+            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Pendente</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pnf-kpi-peso">0 kg</div></div>
+          </div>
         </div>
         <div id="pnf-lista" style="display:flex;flex-direction:column;gap:10px"></div>
         <div id="pnf-vazio" style="display:none;background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:60px 20px;text-align:center">
@@ -5406,6 +5510,26 @@
       <button onclick="pedFecharImpressao()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
       <button onclick="pedImprimirPopup()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
       <button onclick="pedGerarPdfImpressao()" style="background:#D82621;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-type-pdf" style="font-size:11px"></i> Gerar PDF</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-imprimir-relacao" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
+  <div id="pimprel-inner-box" style="background:#fff;border-radius:12px;width:100%;max-width:860px;max-height:92vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
+    <div id="pimprel-header-modal" style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#fff">Imprimir Relação de Pedidos</div>
+        <div id="pimprel-ref" style="font-size:10.5px;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      </div>
+      <button onclick="pedFecharImpressaoRelacao()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
+    </div>
+    <div id="pimprel-body-wrapper" style="padding:16px 18px;overflow-y:auto;flex:1;background:#f1f5f9">
+      <div id="pimprel-conteudo" style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px"></div>
+    </div>
+    <div id="pimprel-footer-modal" style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
+      <button onclick="pedFecharImpressaoRelacao()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
+      <button onclick="pedImprimirRelacaoPopup()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
+      <button onclick="pedGerarPdfRelacao()" style="background:#D82621;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-type-pdf" style="font-size:11px"></i> Gerar PDF</button>
     </div>
   </div>
 </div>
@@ -12959,6 +13083,10 @@ function openSkuClientesForm(params) {
   if (skuAutoriaEl) skuAutoriaEl.innerHTML = r ? _appRenderAutoriaHtml(r) : '';
 }
 
+function _skuModoLote() {
+  return _skuTipo === 'rede' && !(document.getElementById('sku-edit-id')||{}).value;
+}
+
 function skuSetTipo(t) {
   _skuTipo = t;
   var btnR = document.getElementById('sku-tipo-rede');
@@ -12970,6 +13098,19 @@ function skuSetTipo(t) {
   // limpar seleção ao trocar tipo
   document.getElementById('sku-cli-input').value = '';
   document.getElementById('sku-cli-id').value    = '';
+
+  // alternar entre modo único (Cliente específico / edição) e modo lote (nova Rede)
+  var modoLote = _skuModoLote();
+  var wUnicoProd = document.getElementById('sku-produto-unico-wrap');
+  var wUnicoCod  = document.getElementById('sku-codigo-unico-wrap');
+  var wLoteAdd   = document.getElementById('sku-lote-add-wrap');
+  var wLoteList  = document.getElementById('sku-lote-list-wrap');
+  if (wUnicoProd) wUnicoProd.style.display = modoLote ? 'none' : '';
+  if (wUnicoCod)  wUnicoCod.style.display  = modoLote ? 'none' : '';
+  if (wLoteAdd)   wLoteAdd.style.display   = modoLote ? '' : 'none';
+  if (wLoteList)  wLoteList.style.display  = modoLote ? '' : 'none';
+  _skuLoteItens = [];
+  _skuLoteRenderList();
 }
 
 function skuFormaSel(v) {
@@ -13104,7 +13245,137 @@ function _skuProdSel(i) {
   document.getElementById('sku-prod-drop').style.display = 'none';
 }
 
+// ── Autocomplete Produto (modo lote - Rede) ──
+var _skuLoteItens = [];
+var _skuLoteProdItems = [];
+function _skuLoteProdFiltrar() {
+  var q    = (document.getElementById('sku-lote-prod-input').value || '').trim();
+  var drop = document.getElementById('sku-lote-prod-drop');
+  if (!drop) return;
+  if (q.length < 4) { drop.style.display='none'; return; }
+  var n = _cpNorm(q);
+  _skuLoteProdItems = getProdutos().filter(function(p) {
+    return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
+  }).slice(0,15);
+  if (!_skuLoteProdItems.length) { drop.style.display='none'; return; }
+  drop.onmousedown = function(e){ e.preventDefault(); };
+  drop.innerHTML = _skuLoteProdItems.map(function(p, i) {
+    return '<div onclick="_skuLoteProdSel('+i+')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">'
+      +(p.codigo?'<span style="font-weight:700;color:#272A4A;margin-right:8px">'+_skuEsc(p.codigo)+'</span>':'')
+      +'<span style="color:#334155;flex:1">'+_skuEsc(p.nome||'')+'</span></div>';
+  }).join('');
+  drop.style.display='block';
+}
+function _skuLoteProdKey(e) {
+  if (e.key!=='Enter' && e.key!=='Tab') return;
+  var q = _cpNorm(document.getElementById('sku-lote-prod-input').value||'');
+  if (!q) return;
+  var prods = getProdutos();
+  var hit = prods.find(function(p){ return _cpNorm(p.codigo||'')=== q; })
+         || (_skuLoteProdItems.length===1 ? _skuLoteProdItems[0] : null)
+         || prods.find(function(p){ return _cpNorm(p.nome||'').includes(q); });
+  if (hit) { _skuLoteProdItems=[hit]; _skuLoteProdSel(0); }
+  if (e.key==='Tab') { e.preventDefault(); setTimeout(function(){ var el=document.getElementById('sku-lote-codigo'); if(el)el.focus(); },50); }
+}
+function _skuLoteProdSel(i) {
+  var p = _skuLoteProdItems[i]; if (!p) return;
+  document.getElementById('sku-lote-prod-id').value    = p.id;
+  document.getElementById('sku-lote-prod-input').value = (p.codigo?p.codigo+' ':'')+(p.nome||'');
+  document.getElementById('sku-lote-prod-drop').style.display = 'none';
+}
+
+function addSkuLoteItem() {
+  var prodInput = document.getElementById('sku-lote-prod-input').value.trim();
+  var prodId    = document.getElementById('sku-lote-prod-id').value.trim();
+  if (prodInput && !prodId) {
+    var np = _cpNorm(prodInput);
+    var hp = getProdutos().find(function(p){ return _cpNorm(p.codigo||'')===np || _cpNorm(p.nome||'').includes(np); });
+    if (hp) { prodId = hp.id; prodInput = hp.nome||''; document.getElementById('sku-lote-prod-id').value=hp.id; }
+  }
+  var sku   = document.getElementById('sku-lote-codigo').value.trim();
+  var forma = document.getElementById('sku-lote-forma').value;
+  if (!prodId) { alert('Selecione o produto'); return; }
+  if (!sku)    { alert('Informe o SKU do cliente'); return; }
+  if (_skuLoteItens.some(function(it){ return it.prodId === prodId; })) { alert('Este produto já foi adicionado à lista'); return; }
+  var prod = getProdutos().find(function(p){ return p.id === prodId; }) || {};
+  _skuLoteItens.push({ prodId: prodId, prodCodigo: prod.codigo||'', prodNome: prod.nome||prodInput, sku: sku, forma: forma });
+
+  document.getElementById('sku-lote-prod-input').value = '';
+  document.getElementById('sku-lote-prod-id').value    = '';
+  document.getElementById('sku-lote-codigo').value     = '';
+  document.getElementById('sku-lote-forma').value      = 'CX';
+  _skuLoteRenderList();
+  document.getElementById('sku-lote-prod-input').focus();
+}
+
+function _skuLoteRemItem(i) {
+  _skuLoteItens.splice(i, 1);
+  _skuLoteRenderList();
+}
+
+function _skuLoteRenderList() {
+  var list  = document.getElementById('sku-lote-list');
+  var count = document.getElementById('sku-lote-count');
+  if (count) count.textContent = _skuLoteItens.length + ' produto' + (_skuLoteItens.length!==1?'s':'');
+  if (list) {
+    if (!_skuLoteItens.length) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhum produto adicionado</div>';
+    } else {
+      list.innerHTML = _skuLoteItens.map(function(it, i) {
+        return '<div style="display:grid;grid-template-columns:110px 1fr 140px 70px 60px;padding:9px 12px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px">'
+          + '<span style="color:#64748b;font-size:11px">'+_skuEsc(it.prodCodigo||'—')+'</span>'
+          + '<span style="font-weight:600;color:#1e293b">'+_skuEsc(it.prodNome||'')+'</span>'
+          + '<span style="font-family:monospace;font-weight:600;color:#1e293b">'+_skuEsc(it.sku||'')+'</span>'
+          + '<span style="color:#64748b;font-size:11px">'+_skuEsc(it.forma||'')+'</span>'
+          + '<div style="display:flex;justify-content:center"><button onclick="_skuLoteRemItem('+i+')" style="width:24px;height:24px;border-radius:5px;border:1px solid #fee2e2;background:#fff5f5;cursor:pointer;color:#dc2626;font-size:11px;display:flex;align-items:center;justify-content:center" title="Remover"><i class="ti ti-trash"></i></button></div></div>';
+      }).join('');
+    }
+  }
+  var btn = document.getElementById('sku-btn-salvar');
+  if (btn) btn.textContent = _skuModoLote() ? ('Salvar todos ('+_skuLoteItens.length+')') : 'Salvar';
+}
+
+function _salvarSkuLote() {
+  var fornInput = document.getElementById('sku-forn-input').value.trim();
+  var fornId    = document.getElementById('sku-forn-id').value.trim();
+  if (fornInput && !fornId) {
+    var n = _cpNorm(fornInput);
+    var hf = getFornecedores().find(function(f){ return _cpNorm(f.codigo||'')===n || _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n); });
+    if (hf) { fornId = hf.id; fornInput = hf.nome_fantasia||hf.razao_social||''; document.getElementById('sku-forn-id').value=hf.id; }
+  }
+  var fornNome = fornInput;
+
+  var cliInput = document.getElementById('sku-cli-input').value.trim();
+  var cliId    = document.getElementById('sku-cli-id').value.trim();
+  if (cliInput && !cliId) {
+    var nc = _cpNorm(cliInput);
+    var hc = getCatClientes().find(function(c){ return _cpNorm(c.nome||'').includes(nc); });
+    if (hc) { cliId = hc.id; cliInput = hc.nome; document.getElementById('sku-cli-id').value=hc.id; }
+  }
+  var cliNome = cliInput;
+
+  if (!fornId) { alert('Selecione o fornecedor'); return; }
+  if (!cliId)  { alert('Selecione a rede'); return; }
+  if (!_skuLoteItens.length) { alert('Adicione ao menos um produto à lista'); return; }
+
+  var dados = getSkuClientes();
+  _skuLoteItens.forEach(function(it) {
+    var novo = {
+      id: 'sku_'+(Date.now())+'_'+Math.random().toString(36).slice(2,7),
+      tipo: 'rede', fornId: fornId, fornNome: fornNome, cliId: cliId, cliNome: cliNome,
+      prodId: it.prodId, prodNome: it.prodNome, sku: it.sku, forma: it.forma,
+      dtCadastro: new Date().toISOString()
+    };
+    Object.assign(novo, _appMontarAutoria(null, []));
+    dados.push(novo);
+  });
+  setSkuClientes(dados);
+  _skuLoteItens = [];
+  showPage('page-sku-clientes-list');
+}
+
 function salvarSkuCliente() {
+  if (_skuModoLote()) { _salvarSkuLote(); return; }
   // Tentar resolver se o usuário digitou sem selecionar no dropdown
   var fornInput = document.getElementById('sku-forn-input').value.trim();
   var fornId    = document.getElementById('sku-forn-id').value.trim();
@@ -13193,6 +13464,7 @@ function getPedidos() { return firebaseConfigurado ? _fsGet('pedidos') : JSON.pa
 function setPedidos(data) { if (firebaseConfigurado) { _fsSet('pedidos', data); } else { localStorage.setItem('pedidos', JSON.stringify(data)); } }
 
 function _pedFmtMoeda(v) { return 'R$ ' + (Number(v)||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function _pedFmtQtd(v) { return (Number(v)||0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
 function _pedEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
 var _pedStatusFiltro = '';
@@ -13331,6 +13603,18 @@ function renderVendaSimples() {
     return true;
   });
   rows = rows.slice().sort(function(a,b){ return (b.dtCadastro||'').localeCompare(a.dtCadastro||''); });
+
+  var produtosMapPss = {}; getProdutos().forEach(function(pr){ produtosMapPss[pr.id] = pr; });
+  var pssValorTotal = rows.reduce(function(acc,p){ return acc + (Number(p.valorTotal)||0); }, 0);
+  var pssPesoTotal = rows.reduce(function(acc,p){
+    return acc + (p.itens||[]).reduce(function(acc2,it){
+      var prod = produtosMapPss[it.prodId];
+      var pesoUnit = prod ? (parseFloat(String(prod.peso).replace(',', '.')) || 0) : 0;
+      return acc2 + pesoUnit * (Number(it.quantidade) || 0);
+    }, 0);
+  }, 0);
+  var pssKV = document.getElementById('pss-kpi-valor'); if (pssKV) pssKV.textContent = _pedFmtMoeda(pssValorTotal);
+  var pssKP = document.getElementById('pss-kpi-peso'); if (pssKP) pssKP.textContent = pssPesoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
   if (pag) pag.textContent = rows.length + ' de ' + pedidos.length + ' registro' + (pedidos.length!==1?'s':'');
 
@@ -13489,6 +13773,14 @@ function _pimpFmtData(iso) {
   var partes = String(iso).split('-');
   return partes.length === 3 ? (partes[2] + '/' + partes[1] + '/' + partes[0]) : iso;
 }
+function _pimpLogoCompartilharPadrao() {
+  // Logo padrao da Compartilhar (mesmo PNG ja usado no Excel de Dados Representadas),
+  // usado como fallback quando a Empresa (Gerenciar > Empresa) nao tem foto propria cadastrada.
+  return (typeof DR_COMPARTILHAR_LOGO_B64 !== 'undefined' && DR_COMPARTILHAR_LOGO_B64)
+    ? ('data:image/png;base64,' + DR_COMPARTILHAR_LOGO_B64)
+    : '';
+}
+
 function _pimpLogoOuPlaceholder(foto, texto) {
   if (foto) return '<img src="' + foto + '" style="max-width:100%;max-height:56px;object-fit:contain">';
   return '<div style="font-size:11px;font-weight:700;color:#94a3b8;text-align:center">' + _pedEsc(texto || '') + '</div>';
@@ -13554,7 +13846,7 @@ function _pimpRender() {
 
   cont.innerHTML =
     '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1.5px solid #272A4A;padding-bottom:10px;margin-bottom:10px">'
-      + '<div style="width:140px;height:64px;display:flex;align-items:center">' + _pimpLogoOuPlaceholder(empresa.foto, empresa.nomeFantasia || 'Compartilhar') + '</div>'
+      + '<div style="width:140px;height:64px;display:flex;align-items:center">' + _pimpLogoOuPlaceholder(empresa.foto || _pimpLogoCompartilharPadrao(), empresa.nomeFantasia || 'Compartilhar') + '</div>'
       + '<div style="text-align:center;flex:1">'
         + '<div style="font-size:16px;font-weight:800;color:#272A4A">' + empresaNome + '</div>'
         + (empresaContato ? '<div style="font-size:11px;color:#94a3b8;margin:1px 0 6px">' + empresaContato + '</div>' : '<div style="margin-bottom:6px"></div>')
@@ -13632,6 +13924,449 @@ function pedGerarPdfImpressao() {
     }
     var pedido = _pimpPedidoAtual();
     pdf.save('Pedido_' + (pedido ? pedido.lancamento : Date.now()) + '.pdf');
+  }).catch(function(err){
+    alert('Erro ao gerar PDF: ' + (err && err.message || err));
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// IMPRESSAO DA RELACAO DE PEDIDOS (por aba: Geral, Vendas Completas, Venda Simples,
+// Vendas Completas Faturadas, Vendas Simples NFs, Vendas Nao Faturadas)
+// ═══════════════════════════════════════════════════
+var _pimprelAbaAtual = 'geral';
+var _PIMPREL_STATUS_CORES = {
+  'Pré-Venda':          { bg:'#eff6ff', cor:'#2563eb' },
+  'Aguardando Retorno': { bg:'#fff7ed', cor:'#DE7926' },
+  'Enviado':            { bg:'#f5f3ff', cor:'#7c3aed' },
+  'Faturado':           { bg:'#f0fdf4', cor:'#15803d' },
+  'Faturado Parcial':   { bg:'#fefce8', cor:'#a16207' },
+  'Bonificado':         { bg:'#ecfeff', cor:'#0e7490' },
+  'Cancelado':          { bg:'#fff5f5', cor:'#dc2626' },
+};
+function _pimprelPeriodoTxt(dataDe, dataAte) {
+  var fmt = function(iso){ return iso ? iso.split('-').reverse().join('/') : ''; };
+  if (dataDe && dataAte) return ' · ' + fmt(dataDe) + ' a ' + fmt(dataAte);
+  if (dataDe) return ' · a partir de ' + fmt(dataDe);
+  if (dataAte) return ' · até ' + fmt(dataAte);
+  return '';
+}
+function _pimprelBadgeStatus(status) {
+  var cor = _PIMPREL_STATUS_CORES[status] || { bg:'#f1f5f9', cor:'#64748b' };
+  return '<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(status || '—') + '</span>';
+}
+function _pimprelMontarDocumento(titulo, subtitulo, colunas, linhas, totalReais, totalKg) {
+  var logo = (typeof _pimpLogoCompartilharPadrao === 'function') ? _pimpLogoCompartilharPadrao() : '';
+  var theadHtml = '<tr style="text-align:left;background:#f8fafc">' + colunas.map(function(c){
+    return '<th style="padding:6px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase' + (c.align ? ';text-align:' + c.align : '') + '">' + _pedEsc(c.header) + '</th>';
+  }).join('') + '</tr>';
+  var linhasHtml = linhas.map(function(linha){
+    return '<tr style="border-bottom:1px solid #f1f5f9">' + colunas.map(function(c){
+      var valor = c.raw ? c.get(linha) : _pedEsc(c.get(linha));
+      return '<td style="padding:6px 8px;font-size:11px;color:#334155' + (c.align ? ';text-align:' + c.align : '') + (c.destaque ? ';font-weight:700' : '') + '">' + valor + '</td>';
+    }).join('') + '</tr>';
+  }).join('');
+  return ''
+    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1.5px solid #272A4A;padding-bottom:10px;margin-bottom:14px">'
+      + '<div><div style="font-size:15px;font-weight:800;color:#272A4A">' + _pedEsc(titulo) + '</div><div style="font-size:10.5px;color:#64748b;margin-top:2px">' + _pedEsc(subtitulo) + '</div></div>'
+      + '<div style="width:130px;height:50px;display:flex;align-items:center;justify-content:flex-end">' + (logo ? ('<img src="' + logo + '" style="max-width:100%;max-height:50px;object-fit:contain">') : '') + '</div>'
+    + '</div>'
+    + (linhas.length
+        ? ('<table style="width:100%;border-collapse:collapse;margin-bottom:16px"><thead>' + theadHtml + '</thead><tbody>' + linhasHtml + '</tbody></table>')
+        : '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum registro encontrado com esses filtros.</div>')
+    + '<div style="display:flex;justify-content:flex-end;gap:28px;border-top:1.5px solid #272A4A;padding-top:10px">'
+      + '<div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Total em R$</div><div style="font-size:15px;font-weight:800;color:#272A4A">' + _pedFmtMoeda(totalReais) + '</div></div>'
+      + '<div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Total em Kg</div><div style="font-size:15px;font-weight:800;color:#272A4A">' + totalKg.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
+    + '</div>';
+}
+
+// Documento "itemizado": um bloco por pedido (cabecalho + tabela de itens), igual ao que a
+// propria aba mostra na tela (Vendas Completas / Vendas Completas Faturadas / Vendas Nao Faturadas).
+function _pimprelBlocoPedidoHtml(bloco) {
+  var theadHtml = '<tr style="text-align:left;background:#fbfbfc">' + bloco.colunas.map(function(c){
+    return '<th style="padding:4px 8px;font-size:8.5px;font-weight:700;color:#94a3b8;text-transform:uppercase' + (c.align ? ';text-align:' + c.align : '') + '">' + _pedEsc(c.header) + '</th>';
+  }).join('') + '</tr>';
+  var linhasHtml = bloco.itens.map(function(it){
+    return '<tr style="border-top:1px solid #f8fafc">' + bloco.colunas.map(function(c){
+      var valor = c.raw ? c.get(it) : _pedEsc(c.get(it));
+      return '<td style="padding:4px 8px;font-size:10.5px;color:#334155' + (c.align ? ';text-align:' + c.align : '') + (c.destaque ? ';font-weight:700' : '') + '">' + valor + '</td>';
+    }).join('') + '</tr>';
+  }).join('');
+  return ''
+    + '<div style="border:1px solid #eef2f7;border-radius:10px;overflow:hidden;margin-bottom:14px;page-break-inside:avoid">'
+    + '<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #eef2f7;flex-wrap:wrap">'
+      + '<div style="font-size:10.5px;color:#94a3b8">' + _pedEsc(bloco.data) + '</div>'
+      + '<div style="font-size:11.5px;font-weight:700;color:#1e293b">' + _pedEsc(bloco.cliente) + '</div>'
+      + '<div style="font-size:11px;color:#475569">' + _pedEsc(bloco.fornecedor) + '</div>'
+      + _pimprelBadgeStatus(bloco.status)
+      + '<div style="flex:1"></div>'
+      + '<div style="text-align:right"><div style="font-size:8px;color:#94a3b8;text-transform:uppercase">' + _pedEsc(bloco.pesoLabel) + '</div><div style="font-size:11px;font-weight:700;color:#1e293b">' + bloco.pesoValor + '</div></div>'
+      + '<div style="text-align:right"><div style="font-size:8px;color:#94a3b8;text-transform:uppercase">' + _pedEsc(bloco.valorLabel) + '</div><div style="font-size:11px;font-weight:700;color:' + (bloco.valorCor || '#15803d') + '">' + bloco.valorValue + '</div></div>'
+    + '</div>'
+    + '<table style="width:100%;border-collapse:collapse"><thead>' + theadHtml + '</thead><tbody>' + linhasHtml + '</tbody></table>'
+    + '</div>';
+}
+function _pimprelMontarDocumentoItemizado(titulo, subtitulo, blocos, totalReais, totalKg) {
+  var logo = (typeof _pimpLogoCompartilharPadrao === 'function') ? _pimpLogoCompartilharPadrao() : '';
+  var corpo = blocos.length
+    ? blocos.map(_pimprelBlocoPedidoHtml).join('')
+    : '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum registro encontrado com esses filtros.</div>';
+  return ''
+    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1.5px solid #272A4A;padding-bottom:10px;margin-bottom:14px">'
+      + '<div><div style="font-size:15px;font-weight:800;color:#272A4A">' + _pedEsc(titulo) + '</div><div style="font-size:10.5px;color:#64748b;margin-top:2px">' + _pedEsc(subtitulo) + '</div></div>'
+      + '<div style="width:130px;height:50px;display:flex;align-items:center;justify-content:flex-end">' + (logo ? ('<img src="' + logo + '" style="max-width:100%;max-height:50px;object-fit:contain">') : '') + '</div>'
+    + '</div>'
+    + corpo
+    + '<div style="display:flex;justify-content:flex-end;gap:28px;border-top:1.5px solid #272A4A;padding-top:10px">'
+      + '<div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Total em R$</div><div style="font-size:15px;font-weight:800;color:#272A4A">' + _pedFmtMoeda(totalReais) + '</div></div>'
+      + '<div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Total em Kg</div><div style="font-size:15px;font-weight:800;color:#272A4A">' + totalKg.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
+    + '</div>';
+}
+
+function _pimprelDadosGeral() {
+  var pedidos = getPedidos();
+  var busca   = (document.getElementById('ped-busca') ? document.getElementById('ped-busca').value : '').toLowerCase();
+  var dataDe  = document.getElementById('ped-data-de') ? document.getElementById('ped-data-de').value : '';
+  var dataAte = document.getElementById('ped-data-ate') ? document.getElementById('ped-data-ate').value : '';
+  var rows = pedidos.filter(function(p){
+    if (!_appRegistroVisivelUF(p)) return false;
+    if (_pedStatusFiltro && p.status !== _pedStatusFiltro) return false;
+    if (dataDe && (!p.data || p.data < dataDe)) return false;
+    if (dataAte && (!p.data || p.data > dataAte)) return false;
+    if (!busca) return true;
+    return (p.clienteNome||'').toLowerCase().indexOf(busca) !== -1 || (p.fornecedorNome||'').toLowerCase().indexOf(busca) !== -1 || (p.numPedidoCliente||'').toLowerCase().indexOf(busca) !== -1;
+  });
+  rows = rows.slice().sort(function(a,b){ return (b.data||'').localeCompare(a.data||''); });
+  var produtosMap = {}; getProdutos().forEach(function(pr){ produtosMap[pr.id] = pr; });
+  var totalReais = rows.reduce(function(acc,p){ return acc + (Number(p.valorTotal)||0); }, 0);
+  var totalKg = rows.reduce(function(acc,p){
+    return acc + (p.itens||[]).reduce(function(acc2,it){
+      var prod = produtosMap[it.prodId];
+      var pesoUnit = prod ? (parseFloat(String(prod.peso).replace(',', '.')) || 0) : 0;
+      return acc2 + pesoUnit * (Number(it.quantidade) || 0);
+    }, 0);
+  }, 0);
+  var colunas = [
+    { header:'Data', get:function(p){ return p.data ? p.data.split('-').reverse().join('/') : '—'; } },
+    { header:'Pedido', get:function(p){ return p.numPedidoCliente || '—'; } },
+    { header:'Cliente', get:function(p){ return _cpSemColchetes(p.clienteNome); } },
+    { header:'Fornecedor', get:function(p){ return String(p.fornecedorNome||'').replace(/^\d+\s+/, ''); } },
+    { header:'Vendedor', get:function(p){ return p.vendedorNome || '—'; } },
+    { header:'Valor', align:'right', destaque:true, get:function(p){ return _pedFmtMoeda(p.valorTotal); } },
+    { header:'Status', align:'center', raw:true, get:function(p){ return _pimprelBadgeStatus(p.status); } },
+  ];
+  return { titulo:'Relação de Pedidos', subtitulo:'Visão Geral' + _pimprelPeriodoTxt(dataDe, dataAte), colunas:colunas, linhas:rows, totalReais:totalReais, totalKg:totalKg };
+}
+
+function _pimprelDadosSimples() {
+  var pedidos = getPedidos();
+  var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
+  var vendedorF = document.getElementById('pss-vendedor') ? document.getElementById('pss-vendedor').value : '';
+  var ufF       = document.getElementById('pss-uf') ? document.getElementById('pss-uf').value : '';
+  var fornF     = document.getElementById('pss-fornecedor') ? document.getElementById('pss-fornecedor').value : '';
+  var prodF     = (document.getElementById('pss-produto') ? document.getElementById('pss-produto').value : '').toLowerCase();
+  var redeF     = document.getElementById('pss-rede') ? document.getElementById('pss-rede').value : '';
+  var lojaF     = document.getElementById('pss-loja') ? document.getElementById('pss-loja').value : '';
+  var rows = pedidos.filter(function(p){
+    if (vendedorF && p.vendedorId !== vendedorF) return false;
+    if (fornF && p.fornecedorId !== fornF) return false;
+    var cli = clientesMap[p.clienteId];
+    if (ufF && (!cli || cli.estado !== ufF)) return false;
+    if (redeF && (!cli || String(cli.categoria||'') !== String(redeF))) return false;
+    if (lojaF && (!cli || String(cli.subcategoria||'') !== String(lojaF))) return false;
+    if (prodF) {
+      var achou = (p.itens||[]).some(function(it){
+        return (it.prodNome||'').toLowerCase().indexOf(prodF) !== -1 || (it.prodCodigo||'').toLowerCase().indexOf(prodF) !== -1;
+      });
+      if (!achou) return false;
+    }
+    return true;
+  });
+  rows = rows.slice().sort(function(a,b){ return (b.dtCadastro||'').localeCompare(a.dtCadastro||''); });
+  var produtosMap = {}; getProdutos().forEach(function(pr){ produtosMap[pr.id] = pr; });
+  var totalReais = rows.reduce(function(acc,p){ return acc + (Number(p.valorTotal)||0); }, 0);
+  var totalKg = rows.reduce(function(acc,p){
+    return acc + (p.itens||[]).reduce(function(acc2,it){
+      var prod = produtosMap[it.prodId];
+      var pesoUnit = prod ? (parseFloat(String(prod.peso).replace(',', '.')) || 0) : 0;
+      return acc2 + pesoUnit * (Number(it.quantidade) || 0);
+    }, 0);
+  }, 0);
+  var colunas = [
+    { header:'Data', get:function(p){ return p.data ? p.data.split('-').reverse().join('/') : '—'; } },
+    { header:'Pedido', get:function(p){ return p.numPedidoCliente || '—'; } },
+    { header:'Cliente', get:function(p){ return _cpSemColchetes(p.clienteNome); } },
+    { header:'UF', align:'center', get:function(p){ var cli = clientesMap[p.clienteId]; return cli ? (cli.estado || '—') : '—'; } },
+    { header:'Fornecedor', get:function(p){ return String(p.fornecedorNome||'').replace(/^\d+\s+/, ''); } },
+    { header:'Vendedor', get:function(p){ return p.vendedorNome || '—'; } },
+    { header:'Valor', align:'right', destaque:true, get:function(p){ return _pedFmtMoeda(p.valorTotal); } },
+    { header:'Status', align:'center', raw:true, get:function(p){ return _pimprelBadgeStatus(p.status); } },
+  ];
+  return { titulo:'Relação de Pedidos', subtitulo:'Venda Simples', colunas:colunas, linhas:rows, totalReais:totalReais, totalKg:totalKg };
+}
+
+function _pimprelColItensVc() {
+  return [
+    { header:'Cód', get:function(it){ return it.prodCodigo || '—'; } },
+    { header:'Produto', get:function(it){ return it.prodNome || ''; } },
+    { header:'Valor Unit.', align:'right', get:function(it){ return _pedFmtMoeda(it.precoUnit); } },
+    { header:'Qtd', align:'center', get:function(it){ return _pedFmtQtd(it.qtdPedida); } },
+    { header:'Peso (kg)', align:'right', get:function(it){ return it.pesoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }); } },
+    { header:'Valor Total', align:'right', destaque:true, get:function(it){ return _pedFmtMoeda(it.valorTotal); } },
+    { header:'Qtd Faturada', align:'center', get:function(it){ return _pedFmtQtd(it.qtdFaturada); } },
+    { header:'Qtd Não Faturada', align:'center', get:function(it){ return _pedFmtQtd(it.restante); } },
+  ];
+}
+function _pimprelColItensNaoFat() {
+  return [
+    { header:'Cód', get:function(it){ return it.prodCodigo || '—'; } },
+    { header:'Produto', get:function(it){ return it.prodNome || ''; } },
+    { header:'Valor', align:'right', get:function(it){ return _pedFmtMoeda(it.precoUnit); } },
+    { header:'Qtd Pedida', align:'center', get:function(it){ return _pedFmtQtd(it.qtdPedida); } },
+    { header:'Qtd Faturada', align:'center', get:function(it){ return _pedFmtQtd(it.qtdFaturada); } },
+    { header:'Falta Faturar', align:'center', get:function(it){ return _pedFmtQtd(it.restante); } },
+    { header:'Valor Não Faturado', align:'right', destaque:true, get:function(it){ return _pedFmtMoeda(it.valorNaoFaturado); } },
+  ];
+}
+function _pimprelDadosCompletas() {
+  var dataDe  = document.getElementById('vc-data-de') ? document.getElementById('vc-data-de').value : '';
+  var dataAte = document.getElementById('vc-data-ate') ? document.getElementById('vc-data-ate').value : '';
+  var fornF   = (document.getElementById('vc-fornecedor') ? document.getElementById('vc-fornecedor').value : '').trim().toLowerCase();
+  var vendF   = document.getElementById('vc-vendedor') ? document.getElementById('vc-vendedor').value : '';
+  var catF    = document.getElementById('vc-categoria') ? document.getElementById('vc-categoria').value : '';
+  var subF    = document.getElementById('vc-subcategoria') ? document.getElementById('vc-subcategoria').value : '';
+  var ufF     = document.getElementById('vc-uf') ? document.getElementById('vc-uf').value : '';
+  var cliF    = (document.getElementById('vc-cliente') ? document.getElementById('vc-cliente').value : '').trim().toLowerCase();
+  var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
+  var lista = _vcPedidos().filter(function(r){
+    var p = r.pedido;
+    if (dataDe && (!p.data || p.data < dataDe)) return false;
+    if (dataAte && (!p.data || p.data > dataAte)) return false;
+    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (vendF && p.vendedorId !== vendF) return false;
+    var cli = clientesMap[p.clienteId];
+    if (ufF && (!cli || cli.estado !== ufF)) return false;
+    if (catF && (!cli || String(cli.categoria||'') !== String(catF))) return false;
+    if (subF && (!cli || String(cli.subcategoria||'') !== String(subF))) return false;
+    if (cliF) {
+      var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
+      var cnpjMatch = cli && cli.cpf_cnpj && cliF.replace(/\D/g,'').length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1;
+      var codMatch  = cli && cli.codigo && String(cli.codigo).toLowerCase().indexOf(cliF) !== -1;
+      if (!nomeMatch && !cnpjMatch && !codMatch) return false;
+    }
+    return true;
+  });
+  lista = lista.slice().sort(function(a,b){ return (b.pedido.data||'').localeCompare(a.pedido.data||''); });
+  var totalReais = lista.reduce(function(acc, r){ return acc + r.valorPedido; }, 0);
+  var totalKg = lista.reduce(function(acc, r){ return acc + r.pesoPedido; }, 0);
+  var colunasItens = _pimprelColItensVc();
+  var blocos = lista.map(function(r){
+    return {
+      data: r.pedido.data ? r.pedido.data.split('-').reverse().join('/') : '—',
+      cliente: _cpSemColchetes(r.pedido.clienteNome),
+      fornecedor: String(r.pedido.fornecedorNome||'').replace(/^\d+\s+/, ''),
+      status: r.pedido.status,
+      pesoLabel: 'Peso Total', pesoValor: r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg',
+      valorLabel: 'Valor Total', valorValue: _pedFmtMoeda(r.valorPedido), valorCor: '#15803d',
+      colunas: colunasItens, itens: r.itens
+    };
+  });
+  return { titulo:'Relação de Pedidos', subtitulo:'Vendas Completas' + _pimprelPeriodoTxt(dataDe, dataAte), itemizado:true, blocos:blocos, totalReais:totalReais, totalKg:totalKg };
+}
+function _pimprelDadosCompletasFat() {
+  var dataDe  = document.getElementById('vcf-data-de') ? document.getElementById('vcf-data-de').value : '';
+  var dataAte = document.getElementById('vcf-data-ate') ? document.getElementById('vcf-data-ate').value : '';
+  var fornF   = (document.getElementById('vcf-fornecedor') ? document.getElementById('vcf-fornecedor').value : '').trim().toLowerCase();
+  var vendF   = document.getElementById('vcf-vendedor') ? document.getElementById('vcf-vendedor').value : '';
+  var catF    = document.getElementById('vcf-categoria') ? document.getElementById('vcf-categoria').value : '';
+  var subF    = document.getElementById('vcf-subcategoria') ? document.getElementById('vcf-subcategoria').value : '';
+  var ufF     = document.getElementById('vcf-uf') ? document.getElementById('vcf-uf').value : '';
+  var cliF    = (document.getElementById('vcf-cliente') ? document.getElementById('vcf-cliente').value : '').trim().toLowerCase();
+  var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
+  var lista = _vcPedidos().filter(function(r){
+    var p = r.pedido;
+    if (p.status !== 'Faturado' && p.status !== 'Faturado Parcial') return false;
+    if (dataDe && (!p.data || p.data < dataDe)) return false;
+    if (dataAte && (!p.data || p.data > dataAte)) return false;
+    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (vendF && p.vendedorId !== vendF) return false;
+    var cli = clientesMap[p.clienteId];
+    if (ufF && (!cli || cli.estado !== ufF)) return false;
+    if (catF && (!cli || String(cli.categoria||'') !== String(catF))) return false;
+    if (subF && (!cli || String(cli.subcategoria||'') !== String(subF))) return false;
+    if (cliF) {
+      var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
+      var cnpjMatch = cli && cli.cpf_cnpj && cliF.replace(/\D/g,'').length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1;
+      var codMatch  = cli && cli.codigo && String(cli.codigo).toLowerCase().indexOf(cliF) !== -1;
+      if (!nomeMatch && !cnpjMatch && !codMatch) return false;
+    }
+    return true;
+  });
+  lista = lista.slice().sort(function(a,b){ return (b.pedido.data||'').localeCompare(a.pedido.data||''); });
+  var totalReais = lista.reduce(function(acc, r){ return acc + r.valorPedido; }, 0);
+  var totalKg = lista.reduce(function(acc, r){ return acc + r.pesoPedido; }, 0);
+  var colunasItens = _pimprelColItensVc();
+  var blocos = lista.map(function(r){
+    return {
+      data: r.pedido.data ? r.pedido.data.split('-').reverse().join('/') : '—',
+      cliente: _cpSemColchetes(r.pedido.clienteNome),
+      fornecedor: String(r.pedido.fornecedorNome||'').replace(/^\d+\s+/, ''),
+      status: r.pedido.status,
+      pesoLabel: 'Peso Total', pesoValor: r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg',
+      valorLabel: 'Valor Total', valorValue: _pedFmtMoeda(r.valorPedido), valorCor: '#15803d',
+      colunas: colunasItens, itens: r.itens
+    };
+  });
+  return { titulo:'Relação de Pedidos', subtitulo:'Vendas Completas Faturadas' + _pimprelPeriodoTxt(dataDe, dataAte), itemizado:true, blocos:blocos, totalReais:totalReais, totalKg:totalKg };
+}
+function _pimprelDadosSimplesNf() {
+  var dataDe  = document.getElementById('psn-data-de') ? document.getElementById('psn-data-de').value : '';
+  var dataAte = document.getElementById('psn-data-ate') ? document.getElementById('psn-data-ate').value : '';
+  var fornF   = (document.getElementById('psn-fornecedor') ? document.getElementById('psn-fornecedor').value : '').trim().toLowerCase();
+  var vendF   = document.getElementById('psn-vendedor') ? document.getElementById('psn-vendedor').value : '';
+  var catF    = document.getElementById('psn-categoria') ? document.getElementById('psn-categoria').value : '';
+  var subF    = document.getElementById('psn-subcategoria') ? document.getElementById('psn-subcategoria').value : '';
+  var ufF     = document.getElementById('psn-uf') ? document.getElementById('psn-uf').value : '';
+  var cliF    = (document.getElementById('psn-cliente') ? document.getElementById('psn-cliente').value : '').trim().toLowerCase();
+  var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
+  var linhas = _psnLinhas().filter(function(r){
+    var p = r.pedido, f = r.fatura;
+    if (dataDe && (!f.data || f.data < dataDe)) return false;
+    if (dataAte && (!f.data || f.data > dataAte)) return false;
+    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (vendF && p.vendedorId !== vendF) return false;
+    var cli = clientesMap[p.clienteId];
+    if (ufF && (!cli || cli.estado !== ufF)) return false;
+    if (catF && (!cli || String(cli.categoria||'') !== String(catF))) return false;
+    if (subF && (!cli || String(cli.subcategoria||'') !== String(subF))) return false;
+    if (cliF) {
+      var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
+      var cnpjMatch = cli && cli.cpf_cnpj && cliF.replace(/\D/g,'').length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1;
+      if (!nomeMatch && !cnpjMatch) return false;
+    }
+    return true;
+  });
+  linhas = linhas.slice().sort(function(a,b){ return (b.fatura.data||'').localeCompare(a.fatura.data||''); });
+  var totalReais = linhas.reduce(function(acc, r){ return acc + (Number(r.fatura.valor) || 0); }, 0);
+  var totalKg = linhas.reduce(function(acc, r){ return acc + r.pesoFat; }, 0);
+  var colunas = [
+    { header:'Data Fat.', get:function(r){ return r.fatura.data ? r.fatura.data.split('-').reverse().join('/') : '—'; } },
+    { header:'Pedido', get:function(r){ return r.pedido.numPedidoCliente || '—'; } },
+    { header:'Cliente', get:function(r){ return _cpSemColchetes(r.pedido.clienteNome); } },
+    { header:'Fornecedor', get:function(r){ return String(r.pedido.fornecedorNome||'').replace(/^\d+\s+/, ''); } },
+    { header:'Transportadora', get:function(r){ return r.fatura.transportadoraNome || '—'; } },
+    { header:'Duplicata', get:function(r){ return r.fatura.numDuplicata || '—'; } },
+    { header:'Peso (kg)', align:'right', get:function(r){ return r.pesoFat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }); } },
+    { header:'Valor', align:'right', destaque:true, get:function(r){ return _pedFmtMoeda(r.fatura.valor); } },
+  ];
+  return { titulo:'Relação de Pedidos', subtitulo:'Vendas Simples NFs' + _pimprelPeriodoTxt(dataDe, dataAte), colunas:colunas, linhas:linhas, totalReais:totalReais, totalKg:totalKg };
+}
+function _pimprelDadosNaoFat() {
+  var dataDe  = document.getElementById('pnf-data-de') ? document.getElementById('pnf-data-de').value : '';
+  var dataAte = document.getElementById('pnf-data-ate') ? document.getElementById('pnf-data-ate').value : '';
+  var fornF   = (document.getElementById('pnf-fornecedor') ? document.getElementById('pnf-fornecedor').value : '').trim().toLowerCase();
+  var vendF   = document.getElementById('pnf-vendedor') ? document.getElementById('pnf-vendedor').value : '';
+  var catF    = document.getElementById('pnf-categoria') ? document.getElementById('pnf-categoria').value : '';
+  var subF    = document.getElementById('pnf-subcategoria') ? document.getElementById('pnf-subcategoria').value : '';
+  var ufF     = document.getElementById('pnf-uf') ? document.getElementById('pnf-uf').value : '';
+  var cliF    = (document.getElementById('pnf-cliente') ? document.getElementById('pnf-cliente').value : '').trim().toLowerCase();
+  var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
+  var produtosMap = {}; getProdutos().forEach(function(pr){ produtosMap[pr.id] = pr; });
+  var lista = _pnfPendentes().filter(function(r){
+    var p = r.pedido;
+    if (dataDe && (!p.data || p.data < dataDe)) return false;
+    if (dataAte && (!p.data || p.data > dataAte)) return false;
+    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (vendF && p.vendedorId !== vendF) return false;
+    var cli = clientesMap[p.clienteId];
+    if (ufF && (!cli || cli.estado !== ufF)) return false;
+    if (catF && (!cli || String(cli.categoria||'') !== String(catF))) return false;
+    if (subF && (!cli || String(cli.subcategoria||'') !== String(subF))) return false;
+    if (cliF) {
+      var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
+      var cnpjMatch = cli && cli.cpf_cnpj && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1 && cliF.replace(/\D/g,'').length > 0;
+      if (!nomeMatch && !cnpjMatch) return false;
+    }
+    return true;
+  });
+  lista.forEach(function(r){
+    r.pesoPendente = r.pendentes.reduce(function(acc, it){
+      var prod = produtosMap[it.prodId];
+      var pesoUnit = prod ? (parseFloat(String(prod.peso).replace(',', '.')) || 0) : 0;
+      return acc + pesoUnit * it.restante;
+    }, 0);
+    r.valorPendente = r.pendentes.reduce(function(acc, it){ return acc + it.valorNaoFaturado; }, 0);
+  });
+  var totalReais = lista.reduce(function(acc, r){ return acc + r.valorPendente; }, 0);
+  var totalKg = lista.reduce(function(acc, r){ return acc + r.pesoPendente; }, 0);
+  var colunasItens = _pimprelColItensNaoFat();
+  var blocos = lista.map(function(r){
+    return {
+      data: r.pedido.data ? r.pedido.data.split('-').reverse().join('/') : '—',
+      cliente: _cpSemColchetes(r.pedido.clienteNome),
+      fornecedor: String(r.pedido.fornecedorNome||'').replace(/^\d+\s+/, ''),
+      status: r.pedido.status,
+      pesoLabel: 'Peso Pendente', pesoValor: r.pesoPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg',
+      valorLabel: 'Valor Não Faturado', valorValue: _pedFmtMoeda(r.valorPendente), valorCor: '#dc2626',
+      colunas: colunasItens, itens: r.pendentes
+    };
+  });
+  return { titulo:'Relação de Pedidos', subtitulo:'Vendas Não Faturadas' + _pimprelPeriodoTxt(dataDe, dataAte), itemizado:true, blocos:blocos, totalReais:totalReais, totalKg:totalKg };
+}
+
+function _pimprelDadosPorAba(aba) {
+  if (aba === 'completas') return _pimprelDadosCompletas();
+  if (aba === 'simples') return _pimprelDadosSimples();
+  if (aba === 'completas-fat') return _pimprelDadosCompletasFat();
+  if (aba === 'simples-nf') return _pimprelDadosSimplesNf();
+  if (aba === 'nao-fat') return _pimprelDadosNaoFat();
+  return _pimprelDadosGeral();
+}
+
+function pedAbrirImpressaoRelacao(aba) {
+  _pimprelAbaAtual = aba || 'geral';
+  _pimprelRender();
+  var modal = document.getElementById('modal-imprimir-relacao');
+  if (modal) modal.style.display = 'flex';
+}
+function pedFecharImpressaoRelacao() {
+  var modal = document.getElementById('modal-imprimir-relacao');
+  if (modal) modal.style.display = 'none';
+}
+function _pimprelRender() {
+  var cont = document.getElementById('pimprel-conteudo');
+  var ref  = document.getElementById('pimprel-ref');
+  if (!cont) return;
+  var dados = _pimprelDadosPorAba(_pimprelAbaAtual);
+  if (ref) ref.textContent = dados.subtitulo;
+  cont.innerHTML = dados.itemizado
+    ? _pimprelMontarDocumentoItemizado(dados.titulo, dados.subtitulo, dados.blocos, dados.totalReais, dados.totalKg)
+    : _pimprelMontarDocumento(dados.titulo, dados.subtitulo, dados.colunas, dados.linhas, dados.totalReais, dados.totalKg);
+}
+function pedImprimirRelacaoPopup() {
+  window.print();
+}
+function pedGerarPdfRelacao() {
+  var el = document.getElementById('pimprel-conteudo');
+  if (!el || !window.html2canvas || !window.jspdf) { alert('Não foi possível gerar o PDF: biblioteca ainda carregando. Aguarde alguns segundos e tente novamente.'); return; }
+  return html2canvas(el, { scale: 2, useCORS: true }).then(function(canvas){
+    var imgData = canvas.toDataURL('image/png');
+    var jsPDFCtor = window.jspdf.jsPDF;
+    var pdf = new jsPDFCtor('p', 'mm', 'a4');
+    var pageWidth  = pdf.internal.pageSize.getWidth();
+    var pageHeight = pdf.internal.pageSize.getHeight();
+    var imgWidth   = pageWidth;
+    var imgHeight  = canvas.height * imgWidth / canvas.width;
+    var heightLeft = imgHeight;
+    var position = 0;
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    pdf.save('Relacao_Pedidos_' + _pimprelAbaAtual + '_' + Date.now() + '.pdf');
   }).catch(function(err){
     alert('Erro ao gerar PDF: ' + (err && err.message || err));
   });
@@ -15091,6 +15826,8 @@ function renderVendasSimplesNfs() {
   var totalValor = linhas.reduce(function(acc, r){ return acc + (Number(r.fatura.valor) || 0); }, 0);
   var elQtd = document.getElementById('psn-total-qtd'); if (elQtd) elQtd.textContent = totalQtd.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 });
   var elValor = document.getElementById('psn-total-valor'); if (elValor) elValor.textContent = _pedFmtMoeda(totalValor);
+  var psnKV = document.getElementById('psn-kpi-valor'); if (psnKV) psnKV.textContent = _pedFmtMoeda(totalValor);
+  var psnKP = document.getElementById('psn-kpi-peso'); if (psnKP) psnKP.textContent = totalQtd.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 }
 
 // ── Controle de Entrega: previsao e acompanhamento de entrega das NFs faturadas ──
@@ -15503,8 +16240,16 @@ function pnfLimparFiltros() {
   pnfAtualizarSubcategorias();
   renderNaoFaturados();
 }
+function _pnfLimiarPendenciaItem(prod) {
+  // So conta como "nao faturado" se faltar pelo menos 1 caixa cheia (Quant. Caixa do produto).
+  // Residuos menores que 1 CX sao ruido de arredondamento da conversao caixa->unidade
+  // (ver _pfatConverterItemXmlParaUnidades) e nao representam saldo praticamente cobravel.
+  var quantCx = prod ? (parseFloat(String(prod.quant).replace(',', '.')) || 0) : 0;
+  return quantCx > 0 ? quantCx : 0.0001;
+}
 function _pnfPendentes() {
   var pedidos = getPedidos();
+  var produtosMap = {}; getProdutos().forEach(function(pr){ produtosMap[pr.id] = pr; });
   var lista = [];
   pedidos.forEach(function(p){
     if (p.status === 'Cancelado') return;
@@ -15519,7 +16264,8 @@ function _pnfPendentes() {
       var qtdPedida = Number(it.quantidade) || 0;
       totalFaturado += qtdFat;
       var restante = qtdPedida - qtdFat;
-      if (restante > 0.0001) pendentes.push({ prodId: it.prodId, prodCodigo: it.prodCodigo, prodNome: it.prodNome, qtdPedida: qtdPedida, qtdFaturada: qtdFat, restante: restante, precoUnit: Number(it.precoUnit) || 0, valorNaoFaturado: restante * (Number(it.precoUnit) || 0) });
+      var limiar = _pnfLimiarPendenciaItem(produtosMap[it.prodId]);
+      if (restante >= limiar - 0.0001) pendentes.push({ prodId: it.prodId, prodCodigo: it.prodCodigo, prodNome: it.prodNome, qtdPedida: qtdPedida, qtdFaturada: qtdFat, restante: restante, precoUnit: Number(it.precoUnit) || 0, valorNaoFaturado: restante * (Number(it.precoUnit) || 0) });
     });
     if (pendentes.length && totalFaturado > 0) lista.push({ pedido: p, pendentes: pendentes });
   });
@@ -15561,6 +16307,19 @@ function renderNaoFaturados() {
     return true;
   });
 
+  lista.forEach(function(r){
+    r.pesoPendente = r.pendentes.reduce(function(acc, it){
+      var prod = produtosMap[it.prodId];
+      var pesoUnit = prod ? (parseFloat(String(prod.peso).replace(',', '.')) || 0) : 0;
+      return acc + pesoUnit * it.restante;
+    }, 0);
+    r.valorPendente = r.pendentes.reduce(function(acc, it){ return acc + it.valorNaoFaturado; }, 0);
+  });
+  var pnfValorTotal = lista.reduce(function(acc, r){ return acc + r.valorPendente; }, 0);
+  var pnfPesoTotal = lista.reduce(function(acc, r){ return acc + r.pesoPendente; }, 0);
+  var pnfKV = document.getElementById('pnf-kpi-valor'); if (pnfKV) pnfKV.textContent = _pedFmtMoeda(pnfValorTotal);
+  var pnfKP = document.getElementById('pnf-kpi-peso'); if (pnfKP) pnfKP.textContent = pnfPesoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
+
   if (kpi) kpi.textContent = lista.length;
   if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; return; }
   vazio.style.display = 'none';
@@ -15568,20 +16327,16 @@ function renderNaoFaturados() {
     var p = r.pedido;
     var dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
-    var pesoPendente = r.pendentes.reduce(function(acc, it){
-      var prod = produtosMap[it.prodId];
-      var pesoUnit = prod ? (parseFloat(String(prod.peso).replace(',', '.')) || 0) : 0;
-      return acc + pesoUnit * it.restante;
-    }, 0);
-    var valorPendente = r.pendentes.reduce(function(acc, it){ return acc + it.valorNaoFaturado; }, 0);
+    var pesoPendente = r.pesoPendente;
+    var valorPendente = r.valorPendente;
     var itensHtml = r.pendentes.map(function(it){
       return '<tr style="border-bottom:1px solid #f8fafc">'
         + '<td style="padding:5px 8px;font-size:11px;color:#64748b">' + _pedEsc(it.prodCodigo || '—') + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;color:#1e293b;font-weight:600">' + _pedEsc(it.prodNome || '') + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#64748b">' + _pedFmtMoeda(it.precoUnit) + '</td>'
-        + '<td style="padding:5px 8px;font-size:11px;text-align:center">' + it.qtdPedida + '</td>'
-        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#15803d;font-weight:700">' + it.qtdFaturada + '</td>'
-        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#dc2626;font-weight:700">' + it.restante + '</td>'
+        + '<td style="padding:5px 8px;font-size:11px;text-align:center">' + _pedFmtQtd(it.qtdPedida) + '</td>'
+        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#15803d;font-weight:700">' + _pedFmtQtd(it.qtdFaturada) + '</td>'
+        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#dc2626;font-weight:700">' + _pedFmtQtd(it.restante) + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#dc2626;font-weight:700">' + _pedFmtMoeda(it.valorNaoFaturado) + '</td>'
         + '</tr>';
     }).join('');
@@ -15705,6 +16460,25 @@ function renderVendasCompletas() {
   var kV = document.getElementById('vc-kpi-valor'); if (kV) kV.textContent = _pedFmtMoeda(totalValorGeral);
   var kP = document.getElementById('vc-kpi-peso'); if (kP) kP.textContent = totalPesoGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
+  var totalValorFaturado = lista.reduce(function(acc, r){ return acc + (Number(r.pedido.valorFaturado) || 0); }, 0);
+  var totalValorNaoFaturado = Math.max(0, totalValorGeral - totalValorFaturado);
+  var totalPesoFaturado = lista.reduce(function(acc, r){
+    return acc + r.itens.reduce(function(acc2, it){
+      var pesoUnit = it.qtdPedida > 0 ? (it.pesoTotal / it.qtdPedida) : 0;
+      return acc2 + pesoUnit * it.qtdFaturada;
+    }, 0);
+  }, 0);
+  var totalPesoNaoFaturado = lista.reduce(function(acc, r){
+    return acc + r.itens.reduce(function(acc2, it){
+      var pesoUnit = it.qtdPedida > 0 ? (it.pesoTotal / it.qtdPedida) : 0;
+      return acc2 + pesoUnit * it.restante;
+    }, 0);
+  }, 0);
+  var kVF = document.getElementById('vc-kpi-valor-fat'); if (kVF) kVF.textContent = _pedFmtMoeda(totalValorFaturado);
+  var kPF = document.getElementById('vc-kpi-peso-fat'); if (kPF) kPF.textContent = totalPesoFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
+  var kVN = document.getElementById('vc-kpi-valor-naofat'); if (kVN) kVN.textContent = _pedFmtMoeda(totalValorNaoFaturado);
+  var kPN = document.getElementById('vc-kpi-peso-naofat'); if (kPN) kPN.textContent = totalPesoNaoFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
+
   if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; return; }
   vazio.style.display = 'none';
 
@@ -15720,11 +16494,11 @@ function renderVendasCompletas() {
         + '<td style="padding:5px 8px;font-size:11px;color:#64748b">' + _pedEsc(it.prodCodigo || '—') + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;color:#1e293b;font-weight:600">' + _pedEsc(it.prodNome || '') + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#64748b">' + _pedFmtMoeda(it.precoUnit) + '</td>'
-        + '<td style="padding:5px 8px;font-size:11px;text-align:center">' + it.qtdPedida + '</td>'
+        + '<td style="padding:5px 8px;font-size:11px;text-align:center">' + _pedFmtQtd(it.qtdPedida) + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#64748b">' + it.pesoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#1e293b;font-weight:600">' + _pedFmtMoeda(it.valorTotal) + '</td>'
-        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#15803d;font-weight:700">' + it.qtdFaturada + '</td>'
-        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:' + (it.restante > 0 ? '#dc2626' : '#cbd5e1') + ';font-weight:700">' + it.restante + '</td>'
+        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#15803d;font-weight:700">' + _pedFmtQtd(it.qtdFaturada) + '</td>'
+        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:' + (it.restante > 0 ? '#dc2626' : '#cbd5e1') + ';font-weight:700">' + _pedFmtQtd(it.restante) + '</td>'
         + '</tr>';
     }).join('');
     return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
@@ -15817,7 +16591,7 @@ function renderVendasCompletasFaturadas() {
   lista = lista.slice().sort(function(a,b){ return (b.pedido.data||'').localeCompare(a.pedido.data||''); });
 
   var kT = document.getElementById('vcf-kpi-total'); if (kT) kT.textContent = lista.length;
-  var totalValorGeral = lista.reduce(function(acc, r){ return acc + r.valorPedido; }, 0);
+  var totalValorGeral = lista.reduce(function(acc, r){ return acc + (Number(r.pedido.valorFaturado) || 0); }, 0);
   var totalPesoGeral  = lista.reduce(function(acc, r){ return acc + r.pesoPedido; }, 0);
   var kV = document.getElementById('vcf-kpi-valor'); if (kV) kV.textContent = _pedFmtMoeda(totalValorGeral);
   var kP = document.getElementById('vcf-kpi-peso'); if (kP) kP.textContent = totalPesoGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
@@ -15837,11 +16611,11 @@ function renderVendasCompletasFaturadas() {
         + '<td style="padding:5px 8px;font-size:11px;color:#64748b">' + _pedEsc(it.prodCodigo || '—') + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;color:#1e293b;font-weight:600">' + _pedEsc(it.prodNome || '') + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#64748b">' + _pedFmtMoeda(it.precoUnit) + '</td>'
-        + '<td style="padding:5px 8px;font-size:11px;text-align:center">' + it.qtdPedida + '</td>'
+        + '<td style="padding:5px 8px;font-size:11px;text-align:center">' + _pedFmtQtd(it.qtdPedida) + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#64748b">' + it.pesoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#1e293b;font-weight:600">' + _pedFmtMoeda(it.valorTotal) + '</td>'
-        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#15803d;font-weight:700">' + it.qtdFaturada + '</td>'
-        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:' + (it.restante > 0 ? '#dc2626' : '#cbd5e1') + ';font-weight:700">' + it.restante + '</td>'
+        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#15803d;font-weight:700">' + _pedFmtQtd(it.qtdFaturada) + '</td>'
+        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:' + (it.restante > 0 ? '#dc2626' : '#cbd5e1') + ';font-weight:700">' + _pedFmtQtd(it.restante) + '</td>'
         + '</tr>';
     }).join('');
     return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
