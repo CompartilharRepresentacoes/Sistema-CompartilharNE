@@ -10029,13 +10029,15 @@ function _tvpMontarDocumentoPdf(d) {
   }).join('');
 
   return ''
-    + '<div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;border-bottom:1.5px solid #272A4A;padding-bottom:12px;margin-bottom:16px">'
-      + '<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center">' + (d.forn && d.forn.foto ? ('<img src="' + d.forn.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '') + '</div>'
-      + '<div style="text-align:center">'
-        + '<div style="font-size:16px;font-weight:800;color:#272A4A">' + _pedEsc(_cpSemColchetes(d.t.nome || 'Tabela de Preço')) + '</div>'
-        + '<div style="font-size:11px;color:#64748b;margin-top:2px">' + (d.t.codigo ? ('Código: ' + _pedEsc(d.t.codigo) + '   ') : '') + (d.forn ? ('Fornecedor: ' + _pedEsc(_cpSemColchetes(d.forn.nome_fantasia || d.forn.razao_social || '')) + '   ') : '') + (d.rede ? ('Rede: ' + _pedEsc(d.rede.nome)) : '') + '</div>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1.5px solid #272A4A;padding-bottom:12px;margin-bottom:16px">'
+      + '<div>'
+        + '<div style="font-size:17px;font-weight:800;color:#272A4A;text-transform:uppercase;letter-spacing:.02em">' + _pedEsc(_cpSemColchetes(d.t.nome || 'Tabela de Preço')) + (d.forn ? (' - ' + _pedEsc(_cpSemColchetes(d.forn.nome_fantasia || d.forn.razao_social || ''))) : '') + '</div>'
+        + '<div style="font-size:11px;color:#64748b;margin-top:3px">Emitido em ' + _pedEsc(new Date().toLocaleDateString('pt-BR')) + '</div>'
       + '</div>'
-      + '<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center">' + (d.rede && d.rede.foto ? ('<img src="' + d.rede.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '') + '</div>'
+      + '<div style="display:flex;align-items:center;gap:12px;flex-shrink:0">'
+        + '<div style="width:84px;height:84px;display:flex;align-items:center;justify-content:center">' + (d.forn && d.forn.foto ? ('<img src="' + d.forn.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '') + '</div>'
+        + '<div style="width:84px;height:84px;display:flex;align-items:center;justify-content:center">' + (d.rede && d.rede.foto ? ('<img src="' + d.rede.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '') + '</div>'
+      + '</div>'
     + '</div>'
     + (d.itens.length && d.colunas.length
         ? ('<table style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1"><thead><tr style="text-align:left;background:#f8fafc">' + headerCells + '</tr></thead><tbody>' + linhas + '</tbody></table>')
@@ -10057,12 +10059,13 @@ function _tvpExportarExcel() {
   ws.columns = colunasWs;
   var totalCols = colunasWs.length;
 
-  var linhaTitulo = ws.addRow([_cpSemColchetes(d.t.nome || 'Tabela de Preço')]);
+  var tituloTxt = (_cpSemColchetes(d.t.nome || 'Tabela de Preço') + (d.forn ? (' - ' + _cpSemColchetes(d.forn.nome_fantasia || d.forn.razao_social || '')) : '')).toUpperCase();
+  var linhaTitulo = ws.addRow([tituloTxt]);
   linhaTitulo.height = 30;
   ws.mergeCells(linhaTitulo.number, 1, linhaTitulo.number, totalCols);
   linhaTitulo.getCell(1).font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF272A4A' } };
 
-  var linhaSub = ws.addRow([(d.t.codigo ? ('Código: ' + d.t.codigo + '   ') : '') + (d.forn ? ('Fornecedor: ' + _cpSemColchetes(d.forn.nome_fantasia || d.forn.razao_social || '') + '   ') : '') + (d.rede ? ('Rede: ' + d.rede.nome) : '')]);
+  var linhaSub = ws.addRow(['Emitido em ' + new Date().toLocaleDateString('pt-BR')]);
   linhaSub.height = 18;
   ws.mergeCells(linhaSub.number, 1, linhaSub.number, totalCols);
   linhaSub.getCell(1).font = { name: 'Calibri', italic: true, size: 10, color: { argb: 'FF64748B' } };
@@ -10101,10 +10104,10 @@ function _tvpExportarExcel() {
   var imgFornId = (d.forn && d.forn.foto) ? _drCarregarImagemWorkbook(wb, d.forn.foto) : null;
   var imgRedeId = (d.rede && d.rede.foto) ? _drCarregarImagemWorkbook(wb, d.rede.foto) : null;
   if (imgRedeId && totalCols >= 2) {
-    ws.addImage(imgRedeId, { tl: { nativeCol: totalCols - 2, nativeColOff: 47625, nativeRow: 0, nativeRowOff: 47625 }, ext: { width: 1238250 / 9525, height: 762000 / 9525 }, editAs: 'oneCell' });
+    ws.addImage(imgRedeId, { tl: { nativeCol: totalCols - 2, nativeColOff: 47625, nativeRow: 0, nativeRowOff: 47625 }, ext: { width: 1547813 / 9525, height: 952500 / 9525 }, editAs: 'oneCell' });
   }
   if (imgFornId) {
-    ws.addImage(imgFornId, { tl: { nativeCol: totalCols - 1, nativeColOff: 47625, nativeRow: 0, nativeRowOff: 47625 }, ext: { width: 1238250 / 9525, height: 762000 / 9525 }, editAs: 'oneCell' });
+    ws.addImage(imgFornId, { tl: { nativeCol: totalCols - 1, nativeColOff: 47625, nativeRow: 0, nativeRowOff: 47625 }, ext: { width: 1547813 / 9525, height: 952500 / 9525 }, editAs: 'oneCell' });
   }
 
   var nomeArquivo = 'Tabela_Preco_' + _cpNorm(d.t.nome || d.t.codigo || 'export').replace(/\s+/g, '_') + '.xlsx';

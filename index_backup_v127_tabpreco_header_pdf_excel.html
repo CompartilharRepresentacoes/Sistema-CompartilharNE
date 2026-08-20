@@ -2715,7 +2715,7 @@
       </div>
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-          <div style="display:grid;grid-template-columns:1fr 130px 90px 90px 70px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+          <div style="display:grid;grid-template-columns:1fr 130px 90px 90px 104px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>Tabela</span><span>Vig&#234;ncia</span><span>Produtos</span><span>Status</span><span style="text-align:center">Op&#231;&#245;es</span>
           </div>
           <div id="tabpreco-tbody"></div>
@@ -5812,6 +5812,50 @@
     </div>
     <div style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;flex-shrink:0">
       <button onclick="fecharModalTabPrecoCliente()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Visualizar Tabela de Preço (Excel/PDF) ── -->
+<div id="modal-tabpreco-view" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:900px;max-height:88vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
+    <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <i id="tvp-voltar-forn" onclick="_tvpVoltarFornecedores()" class="ti ti-arrow-left" style="display:none;color:rgba(255,255,255,.6);font-size:15px;cursor:pointer;flex-shrink:0"></i>
+      <div style="flex:1;min-width:0">
+        <div id="tvp-titulo" style="font-size:13px;font-weight:700;color:#fff">Tabela de Preço</div>
+        <div id="tvp-subtitulo" style="font-size:10.5px;color:rgba(255,255,255,.6)"></div>
+      </div>
+      <button onclick="_tvpFechar()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
+    </div>
+    <div style="padding:16px 18px;overflow-y:auto;flex:1">
+      <div id="tvp-step-forn" style="display:none">
+        <div id="tvp-forn-lista" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+      <div id="tvp-step-itens" style="display:none">
+        <div style="border:1px solid #eef0f3;border-radius:9px;padding:12px 14px;margin-bottom:14px">
+          <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px">Campos no arquivo (Excel / PDF)</div>
+          <div id="tvp-campos-wrap" style="display:flex;flex-wrap:wrap;gap:8px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:5px 11px;cursor:pointer"><input type="checkbox" id="tvp-campo-codForn" checked onchange="_tvpRenderTabela()">Código Fornecedor</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:5px 11px;cursor:pointer"><input type="checkbox" id="tvp-campo-codCli" checked onchange="_tvpRenderTabela()">Código Cliente (SKU/PLU)</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:5px 11px;cursor:pointer"><input type="checkbox" id="tvp-campo-produto" checked onchange="_tvpRenderTabela()">Produto</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:5px 11px;cursor:pointer"><input type="checkbox" id="tvp-campo-ean" checked onchange="_tvpRenderTabela()">EAN</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:5px 11px;cursor:pointer"><input type="checkbox" id="tvp-campo-und" checked onchange="_tvpRenderTabela()">UND</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:5px 11px;cursor:pointer"><input type="checkbox" id="tvp-campo-qtdCx" checked onchange="_tvpRenderTabela()">Quant. CX</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:5px 11px;cursor:pointer"><input type="checkbox" id="tvp-campo-pesoUnd" checked onchange="_tvpRenderTabela()">Peso Und</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:5px 11px;cursor:pointer"><input type="checkbox" id="tvp-campo-pesoCx" checked onchange="_tvpRenderTabela()">Peso CX</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:5px 11px;cursor:pointer"><input type="checkbox" id="tvp-campo-valor" checked onchange="_tvpRenderTabela()">Valor</label>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px">
+          <button onclick="_tvpExportarExcel()" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:8px 13px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-spreadsheet" style="font-size:12px"></i>Excel</button>
+          <button onclick="_tvpExportarPdf()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:8px 13px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-type-pdf" style="font-size:12px"></i>PDF</button>
+        </div>
+        <div id="tvp-itens-header" style="display:grid;padding:7px 10px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em"></div>
+        <div id="tvp-itens-tbody"></div>
+      </div>
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;flex-shrink:0">
+      <button onclick="_tvpFechar()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
     </div>
   </div>
 </div>
@@ -9692,12 +9736,13 @@ function renderTabPrecoList() {
       statusBadge = '<span style="background:#f0fdf4;color:#166534;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600">Ativa</span>';
     }
     const nItens = (r.itens||[]).length;
-    return `<div style="display:grid;grid-template-columns:1fr 130px 90px 90px 70px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px;transition:background .1s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+    return `<div style="display:grid;grid-template-columns:1fr 130px 90px 90px 104px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px;transition:background .1s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
       <div><div style="font-weight:600;color:#1e293b">${r.nome||'—'}</div><div style="font-size:10px;color:#94a3b8;margin-top:1px">${r.descricao||'Tabela geral'}</div></div>
       <span style="font-size:11px;color:#64748b">até ${validade}</span>
       <span style="font-size:11px;color:#64748b">${nItens}</span>
       ${statusBadge}
       <div style="display:flex;gap:4px;justify-content:center">
+        <button onclick="_tvpAbrir('${r.id}')" style="width:26px;height:26px;border-radius:6px;border:1px solid #fde7cf;background:#fff8f0;cursor:pointer;color:#DE7926;font-size:12px;display:flex;align-items:center;justify-content:center" title="Visualizar / Exportar"><i class="ti ti-eye"></i></button>
         <button onclick="showPage('page-tabpreco-form',{id:'${r.id}'})" style="width:26px;height:26px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#64748b;font-size:12px;display:flex;align-items:center;justify-content:center" title="Editar"><i class="ti ti-edit"></i></button>
         <button onclick="excluirTabPreco('${r.id}')" style="width:26px;height:26px;border-radius:6px;border:1px solid #fee2e2;background:#fff5f5;cursor:pointer;color:#dc2626;font-size:12px;display:flex;align-items:center;justify-content:center" title="Excluir"><i class="ti ti-trash"></i></button>
       </div>
@@ -9709,6 +9754,408 @@ function excluirTabPreco(id) {
   if (!confirm('Deseja excluir esta tabela de preço?')) return;
   setTabPrecos(getTabPrecos().filter(r => r.id !== id));
   renderTabPrecoList();
+}
+
+/* ── Tabela de Preço: popup Visualizar / Exportar (Excel/PDF) ── */
+// Antes o Fornecedor era resolvido automaticamente (so quando a tabela tinha 1 unico); agora,
+// como toda tabela normalmente tem varios fornecedores dentro dela, a escolha e explicita:
+// ao abrir o olho, se houver mais de um fornecedor entre os itens, mostra uma lista pra
+// escolher; se houver so 1, pula direto pro passo de itens (_tvpSelecionarForn).
+var _tvpTabAtualId  = '';
+var _tvpFornAtualId = '';
+
+// Mesma logica de categoria/subcategoria usada em Dados Representadas: cliente.categoria eh
+// sempre a Rede raiz, cliente.subcategoria (quando existe) eh a Sub-Rede/Loja mais especifica.
+// A logo da Rede vem sempre do cadastro da propria Rede (cat_clientes.foto) -- nunca do item.
+function _tvpResolverRede(t) {
+  var clis = (t.clientes || []).map(function (c) {
+    return getClientes().find(function (x) { return String(x.id) === String(c.cliId); });
+  }).filter(Boolean);
+  // So considera quem realmente tem uma Rede (categoria) definida -- 1 cliente sem vinculo
+  // nao deve por si so impedir a resolucao dos demais.
+  var comCategoria = clis.filter(function (c) { return c.categoria !== undefined && c.categoria !== null && c.categoria !== ''; });
+  if (comCategoria.length) {
+    var catSet = comCategoria.map(function (c) { return c.categoria; }).filter(function (v, i, a) { return a.indexOf(v) === i; });
+    if (catSet.length === 1) {
+      var cat = getCatClientes().find(function (c) { return String(c.id) === String(catSet[0]); });
+      if (cat) {
+        var comSub = comCategoria.filter(function (c) { return c.subcategoria !== undefined && c.subcategoria !== null && c.subcategoria !== ''; });
+        var subSet = comSub.map(function (c) { return c.subcategoria; }).filter(function (v, i, a) { return a.indexOf(v) === i; });
+        if (subSet.length === 1 && comSub.length === comCategoria.length) {
+          var sub = getCatClientes().find(function (c) { return String(c.id) === String(subSet[0]); });
+          if (sub) return { id: sub.id, nome: sub.nome, foto: sub.foto || cat.foto || '' };
+        }
+        return { id: cat.id, nome: cat.nome, foto: cat.foto || '' };
+      }
+    }
+  }
+  // Sem clientes vinculados (ou sem Rede consistente entre eles) -- tenta reconhecer a Rede
+  // pelo proprio nome da tabela (ex.: "TABELA ATACADAO PE" -> Rede "Atacadão PE"), preferindo
+  // o nome mais especifico (Sub-Rede) quando mais de um nome aparece dentro do nome da tabela.
+  var nomeTab = _cpNorm(t.nome || '');
+  if (!nomeTab) return null;
+  var candidatos = getCatClientes().filter(function (c) { return c.nome && nomeTab.indexOf(_cpNorm(c.nome)) !== -1; });
+  if (!candidatos.length) return null;
+  candidatos.sort(function (a, b) { return (b.nome || '').length - (a.nome || '').length; });
+  var achado = candidatos[0];
+  var paiAchado = achado.pai ? getCatClientes().find(function (c) { return String(c.id) === String(achado.pai); }) : null;
+  return { id: achado.id, nome: achado.nome, foto: achado.foto || (paiAchado ? paiAchado.foto : '') || '' };
+}
+
+// SKU cadastrado direto na Rede-mae tambem vale pras Sub-Redes dela (e vice-versa) -- mesmo
+// principio de heranca ja usado em Dados Representadas pra Rede/Sub-Rede.
+function _tvpCandidatosRedeIds(rede) {
+  if (!rede) return [];
+  var ids = [String(rede.id)];
+  var node = getCatClientes().find(function (c) { return String(c.id) === String(rede.id); });
+  if (node && node.pai) {
+    ids.push(String(node.pai));
+  } else {
+    getCatClientes().filter(function (c) { return String(c.pai) === String(rede.id); }).forEach(function (sub) { ids.push(String(sub.id)); });
+  }
+  return ids;
+}
+function _tvpBuscarSkus(fornId, rede) {
+  var candidatos = _tvpCandidatosRedeIds(rede);
+  if (!candidatos.length) return [];
+  return getSkuClientes().filter(function (s) { return s.tipo === 'rede' && s.fornId === fornId && candidatos.indexOf(String(s.cliId)) !== -1; });
+}
+
+function _tvpFornecedoresDaTabela(t) {
+  var ids = (t.itens || []).map(function (i) { return i.fornId; }).filter(Boolean);
+  return ids.filter(function (v, i, a) { return a.indexOf(v) === i; });
+}
+
+function _tvpAbrir(id) {
+  var t = getTabPrecos().find(function (x) { return String(x.id) === String(id); });
+  if (!t) return;
+  _tvpTabAtualId = id;
+  _tvpFornAtualId = '';
+
+  var titEl = document.getElementById('tvp-titulo');
+  if (titEl) titEl.textContent = t.nome || 'Tabela de Preço';
+
+  var modal = document.getElementById('modal-tabpreco-view');
+  if (modal) modal.style.display = 'flex';
+
+  var fornIds = _tvpFornecedoresDaTabela(t);
+  if (fornIds.length <= 1) {
+    _tvpSelecionarForn(fornIds[0] || '');
+  } else {
+    _tvpMostrarStepForn(t, fornIds);
+  }
+}
+
+function _tvpMostrarStepForn(t, fornIds) {
+  var subEl = document.getElementById('tvp-subtitulo');
+  if (subEl) subEl.textContent = 'Selecione o fornecedor';
+  var voltar = document.getElementById('tvp-voltar-forn');
+  if (voltar) voltar.style.display = 'none';
+
+  var lista = document.getElementById('tvp-forn-lista');
+  if (lista) {
+    lista.innerHTML = fornIds.map(function (fornId) {
+      var forn = getFornecedores().find(function (f) { return f.id === fornId; });
+      var nome = forn ? (forn.nome_fantasia || forn.razao_social || '—') : '—';
+      var qtd = (t.itens || []).filter(function (i) { return i.fornId === fornId; }).length;
+      return '<div onclick="_tvpSelecionarForn(\'' + fornId + '\')" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'" style="border:1px solid #eef0f3;border-radius:9px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer">'
+        + '<span style="font-size:13px;font-weight:600;color:#1e293b">' + _pedEsc(_cpSemColchetes(nome)) + '</span>'
+        + '<span style="font-size:11px;color:#94a3b8">' + qtd + ' produto' + (qtd !== 1 ? 's' : '') + ' <i class="ti ti-chevron-right" style="margin-left:4px"></i></span>'
+        + '</div>';
+    }).join('');
+  }
+
+  var stepForn = document.getElementById('tvp-step-forn');
+  if (stepForn) stepForn.style.display = 'block';
+  var stepItens = document.getElementById('tvp-step-itens');
+  if (stepItens) stepItens.style.display = 'none';
+}
+
+function _tvpVoltarFornecedores() {
+  var t = getTabPrecos().find(function (x) { return String(x.id) === String(_tvpTabAtualId); });
+  if (!t) return;
+  _tvpMostrarStepForn(t, _tvpFornecedoresDaTabela(t));
+}
+
+// Definicao das colunas selecionaveis (checklist "Campos no arquivo") -- cada uma sabe seu
+// proprio id de checkbox, rotulo, alinhamento e como extrair o valor a partir do item da
+// tabela + registro de SKU (se achou) + cadastro do produto (se achou).
+// Um produto e considerado vendido "por peso" (KG) quando a unidade cadastrada e KG -- nesse
+// caso a propria quantidade da caixa (produto.quant) ja e o peso, entao nao existe "peso da
+// unidade" separado (Peso Und fica "—") e o Peso CX repete o valor de Quant. CX.
+function _tvpEhKg(produto) {
+  return !!(produto && produto.unidade && String(produto.unidade).trim().toUpperCase() === 'KG');
+}
+function _tvpNum(v) {
+  return parseFloat(String(v === undefined || v === null ? '' : v).replace(',', '.')) || 0;
+}
+var TVP_COLUNAS = [
+  { key: 'codForn', label: 'Cód. Fornecedor', align: 'left', valor: function (i, skuRec, produto) { return i.codigo || ''; } },
+  { key: 'codCli',  label: 'Cód. Cliente (SKU/PLU)', align: 'left', valor: function (i, skuRec, produto) { return skuRec ? (skuRec.sku || '—') : '—'; } },
+  { key: 'produto', label: 'Produto', align: 'left', valor: function (i, skuRec, produto) { return i.nome || ''; } },
+  { key: 'ean',     label: 'EAN', align: 'left', valor: function (i, skuRec, produto) { return (produto && produto.ean) ? produto.ean : '—'; } },
+  { key: 'und',     label: 'UND', align: 'left', valor: function (i, skuRec, produto) { return (produto && produto.unidade) ? String(produto.unidade) : '—'; } },
+  { key: 'qtdCx',   label: 'Quant. CX', align: 'left', valor: function (i, skuRec, produto) { return (produto && produto.quant !== undefined && produto.quant !== null && produto.quant !== '') ? String(produto.quant) : '—'; } },
+  { key: 'pesoUnd', label: 'Peso Und', align: 'left', valor: function (i, skuRec, produto) {
+      if (!produto || _tvpEhKg(produto)) return '—';
+      if (produto.peso === undefined || produto.peso === null || produto.peso === '') return '—';
+      return String(produto.peso);
+    } },
+  { key: 'pesoCx',  label: 'Peso CX', align: 'left', valor: function (i, skuRec, produto) {
+      if (!produto) return '—';
+      if (_tvpEhKg(produto)) return (produto.quant !== undefined && produto.quant !== null && produto.quant !== '') ? String(produto.quant) : '—';
+      if (produto.peso === undefined || produto.peso === null || produto.peso === '') return '—';
+      var total = Math.round(_tvpNum(produto.quant) * _tvpNum(produto.peso) * 100) / 100;
+      return String(total).replace('.', ',');
+    } },
+  { key: 'valor',   label: 'Valor', align: 'right', valor: function (i, skuRec, produto) { var val = parseFloat(String(i.valor || '0').replace(',', '.')) || 0; return 'R$ ' + val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } }
+];
+function _tvpColunasVisiveis() {
+  return TVP_COLUNAS.filter(function (c) {
+    var el = document.getElementById('tvp-campo-' + c.key);
+    return el ? el.checked : true;
+  });
+}
+function _tvpGridCols(colunas) {
+  return colunas.map(function (c) {
+    if (c.key === 'produto') return '1fr';
+    if (c.key === 'codCli' || c.key === 'ean') return '130px';
+    if (c.key === 'und') return '64px';
+    return '90px';
+  }).join(' ');
+}
+
+function _tvpSelecionarForn(fornId) {
+  var t = getTabPrecos().find(function (x) { return String(x.id) === String(_tvpTabAtualId); });
+  if (!t) return;
+  _tvpFornAtualId = fornId;
+
+  var itens = (t.itens || []).filter(function (i) { return !fornId || i.fornId === fornId; });
+  var forn = fornId ? getFornecedores().find(function (f) { return f.id === fornId; }) : null;
+
+  var fornIds = _tvpFornecedoresDaTabela(t);
+  var voltar = document.getElementById('tvp-voltar-forn');
+  if (voltar) voltar.style.display = fornIds.length > 1 ? 'inline-block' : 'none';
+
+  var subEl = document.getElementById('tvp-subtitulo');
+  if (subEl) subEl.textContent = (forn ? ('Fornecedor: ' + _cpSemColchetes(forn.nome_fantasia || forn.razao_social || '') + ' · ') : '') + itens.length + ' produto' + (itens.length !== 1 ? 's' : '');
+
+  var stepForn = document.getElementById('tvp-step-forn');
+  if (stepForn) stepForn.style.display = 'none';
+  var stepItens = document.getElementById('tvp-step-itens');
+  if (stepItens) stepItens.style.display = 'block';
+
+  _tvpRenderTabela();
+}
+
+// Redesenha cabecalho + linhas da tabela na tela de acordo com o fornecedor/tabela atuais E
+// os campos marcados no checklist -- chamada tanto ao trocar de fornecedor quanto ao
+// marcar/desmarcar qualquer checkbox de campo (mesma fonte de verdade usada no Excel/PDF).
+function _tvpRenderTabela() {
+  var t = getTabPrecos().find(function (x) { return String(x.id) === String(_tvpTabAtualId); });
+  if (!t) return;
+  var fornId = _tvpFornAtualId;
+  var itens = (t.itens || []).filter(function (i) { return !fornId || i.fornId === fornId; });
+  var rede = _tvpResolverRede(t);
+  var skus = _tvpBuscarSkus(fornId, rede);
+  var produtos = getProdutos();
+  var colunas = _tvpColunasVisiveis();
+  var gridCols = _tvpGridCols(colunas);
+
+  var header = document.getElementById('tvp-itens-header');
+  if (header) {
+    header.style.gridTemplateColumns = gridCols;
+    header.innerHTML = colunas.map(function (c) {
+      return '<span' + (c.align === 'right' ? ' style="text-align:right"' : '') + '>' + _pedEsc(c.label) + '</span>';
+    }).join('');
+  }
+
+  var tbody = document.getElementById('tvp-itens-tbody');
+  if (tbody) {
+    if (!itens.length) {
+      tbody.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhum produto para este fornecedor.</div>';
+    } else if (!colunas.length) {
+      tbody.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Marque ao menos um campo acima.</div>';
+    } else {
+      tbody.innerHTML = itens.map(function (i) {
+        var skuRec = skus.find(function (s) { return s.prodId === i.prodId; });
+        var produto = produtos.find(function (p) { return p.id === i.prodId; });
+        var cells = colunas.map(function (c) {
+          var cor = c.key === 'valor' ? 'color:#15803d;font-weight:700' : (c.key === 'produto' ? 'color:#1e293b' : 'color:#64748b');
+          return '<span style="' + cor + (c.align === 'right' ? ';text-align:right' : '') + '">' + _pedEsc(c.valor(i, skuRec, produto)) + '</span>';
+        }).join('');
+        return '<div style="display:grid;grid-template-columns:' + gridCols + ';padding:7px 10px;border-bottom:1px solid #f1f5f9;font-size:11.5px;align-items:center">' + cells + '</div>';
+      }).join('');
+    }
+  }
+}
+
+function _tvpFechar() {
+  var modal = document.getElementById('modal-tabpreco-view');
+  if (modal) modal.style.display = 'none';
+  _tvpTabAtualId = '';
+  _tvpFornAtualId = '';
+}
+
+// Monta os dados da tabela atual (fornecedor ja escolhido, rede resolvida do cadastro, campos
+// marcados no checklist) pra reaproveitar tanto no Excel quanto no PDF exportado -- as logos
+// so aparecem aqui dentro.
+function _tvpDadosExport() {
+  var t = getTabPrecos().find(function (x) { return String(x.id) === String(_tvpTabAtualId); });
+  if (!t) return null;
+  var fornId = _tvpFornAtualId;
+  var forn = fornId ? getFornecedores().find(function (f) { return f.id === fornId; }) : null;
+  var rede = _tvpResolverRede(t);
+  var itens = (t.itens || []).filter(function (i) { return !fornId || i.fornId === fornId; });
+  var skus = _tvpBuscarSkus(fornId, rede);
+  var produtos = getProdutos();
+  var colunas = _tvpColunasVisiveis();
+  return { t: t, forn: forn, rede: rede, itens: itens, skus: skus, produtos: produtos, colunas: colunas };
+}
+
+function _tvpMontarDocumentoPdf(d) {
+  var linhas = d.itens.map(function (i) {
+    var skuRec = d.skus.find(function (s) { return s.prodId === i.prodId; });
+    var produto = d.produtos.find(function (p) { return p.id === i.prodId; });
+    var cells = d.colunas.map(function (c) {
+      var cor = c.key === 'valor' ? 'font-weight:700;color:#15803d' : (c.key === 'produto' ? 'color:#1e293b' : 'color:#64748b');
+      return '<td style="padding:7px 8px;border:1px solid #cbd5e1;font-size:11px;' + cor + (c.align === 'right' ? ';text-align:right' : '') + '">' + _pedEsc(c.valor(i, skuRec, produto)) + '</td>';
+    }).join('');
+    return '<tr>' + cells + '</tr>';
+  }).join('');
+
+  var headerCells = d.colunas.map(function (c) {
+    return '<th style="padding:6px 8px;border:1px solid #cbd5e1;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase' + (c.align === 'right' ? ';text-align:right' : '') + '">' + _pedEsc(c.label) + '</th>';
+  }).join('');
+
+  return ''
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1.5px solid #272A4A;padding-bottom:12px;margin-bottom:16px">'
+      + '<div>'
+        + '<div style="font-size:17px;font-weight:800;color:#272A4A;text-transform:uppercase;letter-spacing:.02em">' + _pedEsc(_cpSemColchetes(d.t.nome || 'Tabela de Preço')) + (d.forn ? (' - ' + _pedEsc(_cpSemColchetes(d.forn.nome_fantasia || d.forn.razao_social || ''))) : '') + '</div>'
+        + '<div style="font-size:11px;color:#64748b;margin-top:3px">Emitido em ' + _pedEsc(new Date().toLocaleDateString('pt-BR')) + '</div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:12px;flex-shrink:0">'
+        + '<div style="width:84px;height:84px;display:flex;align-items:center;justify-content:center">' + (d.forn && d.forn.foto ? ('<img src="' + d.forn.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '') + '</div>'
+        + '<div style="width:84px;height:84px;display:flex;align-items:center;justify-content:center">' + (d.rede && d.rede.foto ? ('<img src="' + d.rede.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '') + '</div>'
+      + '</div>'
+    + '</div>'
+    + (d.itens.length && d.colunas.length
+        ? ('<table style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1"><thead><tr style="text-align:left;background:#f8fafc">' + headerCells + '</tr></thead><tbody>' + linhas + '</tbody></table>')
+        : '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">' + (d.colunas.length ? 'Nenhum produto nesta tabela.' : 'Marque ao menos um campo antes de exportar.') + '</div>');
+}
+
+function _tvpExportarExcel() {
+  var d = _tvpDadosExport();
+  if (!d) return;
+  if (!d.colunas.length) { alert('Marque ao menos um campo antes de exportar.'); return; }
+  if (typeof ExcelJS === 'undefined') { alert('Não foi possível gerar o Excel: biblioteca ainda carregando (sem internet). Tente novamente.'); return; }
+
+  var LARGURAS = { codForn: 14, codCli: 16, produto: 34, ean: 16, und: 9, qtdCx: 12, pesoUnd: 12, pesoCx: 12, valor: 12 };
+  var ALINHA_CENTRO = { und: true, qtdCx: true, pesoUnd: true, pesoCx: true };
+
+  var wb = new ExcelJS.Workbook();
+  var ws = wb.addWorksheet('Tabela de Preço', { views: [{ showGridLines: false }] });
+  var colunasWs = d.colunas.map(function (c) { return { width: LARGURAS[c.key] || 14 }; });
+  ws.columns = colunasWs;
+  var totalCols = colunasWs.length;
+
+  var tituloTxt = (_cpSemColchetes(d.t.nome || 'Tabela de Preço') + (d.forn ? (' - ' + _cpSemColchetes(d.forn.nome_fantasia || d.forn.razao_social || '')) : '')).toUpperCase();
+  var linhaTitulo = ws.addRow([tituloTxt]);
+  linhaTitulo.height = 30;
+  ws.mergeCells(linhaTitulo.number, 1, linhaTitulo.number, totalCols);
+  linhaTitulo.getCell(1).font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF272A4A' } };
+
+  var linhaSub = ws.addRow(['Emitido em ' + new Date().toLocaleDateString('pt-BR')]);
+  linhaSub.height = 18;
+  ws.mergeCells(linhaSub.number, 1, linhaSub.number, totalCols);
+  linhaSub.getCell(1).font = { name: 'Calibri', italic: true, size: 10, color: { argb: 'FF64748B' } };
+
+  ws.addRow([]);
+
+  var linhaHeader = ws.addRow(d.colunas.map(function (c) { return c.label; }));
+  linhaHeader.height = 20;
+  linhaHeader.eachCell(function (cell) {
+    cell.font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF272A4A' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    cell.border = DR_BORDA_FINA;
+  });
+
+  d.itens.forEach(function (i, idx) {
+    var skuRec = d.skus.find(function (s) { return s.prodId === i.prodId; });
+    var produto = d.produtos.find(function (p) { return p.id === i.prodId; });
+    var valores = d.colunas.map(function (c) {
+      if (c.key === 'valor') return parseFloat(String(i.valor || '0').replace(',', '.')) || 0;
+      return c.valor(i, skuRec, produto);
+    });
+    var row = ws.addRow(valores);
+    var corFundo = (idx % 2 === 0) ? 'FFFFFFFF' : 'FFF8FAFC';
+    row.eachCell({ includeEmpty: true }, function (cell, colNum) {
+      cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1E293B' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: corFundo } };
+      cell.border = DR_BORDA_FINA;
+      var col = d.colunas[colNum - 1];
+      if (col && col.key === 'valor') { cell.numFmt = '"R$" #,##0.00'; cell.alignment = { horizontal: 'right' }; }
+      else if (col && ALINHA_CENTRO[col.key]) cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      else cell.alignment = { horizontal: 'left', vertical: 'middle' };
+    });
+  });
+
+  var imgFornId = (d.forn && d.forn.foto) ? _drCarregarImagemWorkbook(wb, d.forn.foto) : null;
+  var imgRedeId = (d.rede && d.rede.foto) ? _drCarregarImagemWorkbook(wb, d.rede.foto) : null;
+  if (imgRedeId && totalCols >= 2) {
+    ws.addImage(imgRedeId, { tl: { nativeCol: totalCols - 2, nativeColOff: 47625, nativeRow: 0, nativeRowOff: 47625 }, ext: { width: 1547813 / 9525, height: 952500 / 9525 }, editAs: 'oneCell' });
+  }
+  if (imgFornId) {
+    ws.addImage(imgFornId, { tl: { nativeCol: totalCols - 1, nativeColOff: 47625, nativeRow: 0, nativeRowOff: 47625 }, ext: { width: 1547813 / 9525, height: 952500 / 9525 }, editAs: 'oneCell' });
+  }
+
+  var nomeArquivo = 'Tabela_Preco_' + _cpNorm(d.t.nome || d.t.codigo || 'export').replace(/\s+/g, '_') + '.xlsx';
+  wb.xlsx.writeBuffer().then(function (buffer) {
+    var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = nomeArquivo;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+}
+
+function _tvpExportarPdf() {
+  var d = _tvpDadosExport();
+  if (!d) return;
+  if (!window.html2canvas || !window.jspdf) { alert('Não foi possível gerar o PDF: biblioteca ainda carregando. Aguarde alguns segundos e tente novamente.'); return; }
+
+  var docHtml = _tvpMontarDocumentoPdf(d);
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;background:#fff;padding:24px;font-family:inherit;z-index:-1';
+  wrap.innerHTML = docHtml;
+  document.body.appendChild(wrap);
+
+  return html2canvas(wrap, { scale: 2, useCORS: true }).then(function (canvas) {
+    var imgData = canvas.toDataURL('image/png');
+    var jsPDFCtor = window.jspdf.jsPDF;
+    var pdf = new jsPDFCtor('p', 'mm', 'a4');
+    var pageWidth = pdf.internal.pageSize.getWidth();
+    var pageHeight = pdf.internal.pageSize.getHeight();
+    var imgWidth = pageWidth;
+    var imgHeight = canvas.height * imgWidth / canvas.width;
+    var heightLeft = imgHeight;
+    var position = 0;
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    pdf.save('Tabela_Preco_' + _cpNorm(d.t.nome || d.t.codigo || 'export').replace(/\s+/g, '_') + '.pdf');
+  }).catch(function (err) {
+    alert('Erro ao gerar o PDF: ' + (err && err.message ? err.message : err));
+  }).finally(function () {
+    document.body.removeChild(wrap);
+  });
 }
 
 /* ── Tabela de Preço: Produto — dropdown enquanto digita ── */
@@ -11564,8 +12011,6 @@ var _cpExpandedCat      = null;
 var _cpSelectedTercId   = null;
 var _cpSelectedTercNome = '';
 var _cpProdutosCache    = []; // produtos filtrados pela fábrica
-var _cpBrowseTabelaId    = null; // id da tabela aberta na navegacao/lista
-var _cpBrowseBusca       = '';   // texto de busca da lista de tabelas cadastradas
 
 /* ── Dropdown global (anexado ao body, imune a overflow:hidden) ── */
 var _cpDropItems = [];
@@ -11828,334 +12273,13 @@ function cpFabricaChange() {}
 function _cpShowEmpty() {
   const res = document.getElementById('cp-resultado');
   if (!res) return;
-  if (_cpBrowseTabelaId) { _cpRenderBrowseDetalhe(); }
-  else { _cpRenderBrowseLista(); }
-}
-
-/* ── Consulta de Preço: navegar pelas tabelas cadastradas ── */
-function _cpTabelaFornResumo(t) {
-  var nomes = (t.itens || []).map(function (i) { return _cpSemColchetes(i.fornNome || ''); }).filter(Boolean);
-  var uniq = nomes.filter(function (v, i, a) { return a.indexOf(v) === i; });
-  return uniq.join(', ') || '—';
-}
-
-function _cpTabelaResolverRede(t) {
-  var clis = (t.clientes || []).map(function (c) {
-    return getClientes().find(function (x) { return String(x.id) === String(c.cliId); });
-  }).filter(Boolean);
-  if (!clis.length) return null;
-  var catIds = clis.map(function (c) { return c.categoria; }).filter(function (v) { return v !== undefined && v !== null && v !== ''; });
-  var catSet = catIds.filter(function (v, i, a) { return a.indexOf(v) === i; });
-  if (catSet.length !== 1) return null;
-  var cat = getCatClientes().find(function (c) { return String(c.id) === String(catSet[0]); });
-  if (!cat) return null;
-  var subIds = clis.map(function (c) { return c.subcategoria; }).filter(function (v) { return v !== undefined && v !== null && v !== ''; });
-  var subSet = subIds.filter(function (v, i, a) { return a.indexOf(v) === i; });
-  if (subSet.length === 1 && subIds.length === clis.length) {
-    var sub = getCatClientes().find(function (c) { return String(c.id) === String(subSet[0]); });
-    if (sub) return { id: sub.id, nome: sub.nome, foto: sub.foto || cat.foto || '' };
-  }
-  return { id: cat.id, nome: cat.nome, foto: cat.foto || '' };
-}
-
-function _cpBrowseBuscar(v) {
-  _cpBrowseBusca = v || '';
-  _cpRenderBrowseLista();
-}
-
-function _cpAbrirTabela(id) {
-  _cpBrowseTabelaId = id;
-  _cpRenderBrowseDetalhe();
-}
-
-function _cpFecharTabela() {
-  _cpBrowseTabelaId = null;
-  _cpRenderBrowseLista();
-}
-
-function _cpRenderBrowseLista() {
-  var res = document.getElementById('cp-resultado');
-  if (!res) return;
-
-  var fornId = document.getElementById('cp-fabrica') ? document.getElementById('cp-fabrica').value : '';
-  var tercId = document.getElementById('cp-terceiro') ? document.getElementById('cp-terceiro').value : '';
-  var tercType = document.getElementById('cp-terceiro-type') ? document.getElementById('cp-terceiro-type').value : 'cat';
-  var clienteIds = [];
-  if (tercId) {
-    clienteIds = (tercType === 'cat')
-      ? getClientes().filter(function (c) { return String(c.subcategoria) === String(tercId) || String(c.categoria) === String(tercId); }).map(function (c) { return c.id; })
-      : [tercId];
-  }
-  var busca = _cpNorm(_cpBrowseBusca);
-
-  var tabs = getTabPrecos().filter(function (t) {
-    if (fornId && !(t.itens || []).some(function (i) { return i.fornId === fornId; })) return false;
-    if (tercId && !(t.clientes || []).some(function (c) { return clienteIds.indexOf(c.cliId) !== -1; })) return false;
-    if (busca) {
-      var alvo = _cpNorm((t.codigo || '') + ' ' + (t.nome || ''));
-      if (alvo.indexOf(busca) === -1) return false;
-    }
-    return true;
-  });
-  tabs.sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-
-  var linhas = tabs.map(function (t) {
-    return '<tr onclick="_cpAbrirTabela(\'' + t.id + '\')" style="cursor:pointer" onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">'
-      + '<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9;font-size:12px;font-weight:700;color:#272A4A">' + _pedEsc(t.codigo || '—') + '</td>'
-      + '<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9;font-size:12px;color:#1e293b">' + _pedEsc(t.nome || '—') + '</td>'
-      + '<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9;font-size:12px;color:#475569">' + _pedEsc(_cpTabelaFornResumo(t)) + '</td>'
-      + '<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9;font-size:12px;color:#475569;text-align:center">' + (t.itens || []).length + '</td>'
-      + '<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9">' + (t.ativo === 'Sim'
-          ? '<span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px">Ativo</span>'
-          : '<span style="background:#fee2e2;color:#b91c1c;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px">Inativo</span>')
-        + '</td>'
-      + '<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9;text-align:right"><i class="ti ti-eye" style="font-size:15px;color:#DE7926"></i></td>'
-      + '</tr>';
-  }).join('');
-
-  res.innerHTML = ''
-    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">'
-      + '<div style="font-size:13px;font-weight:700;color:#272A4A">Tabelas cadastradas' + (tabs.length ? ' (' + tabs.length + ')' : '') + '</div>'
-      + '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:7px;min-width:220px">'
-        + '<i class="ti ti-search" style="font-size:13px;color:#94a3b8"></i>'
-        + '<input type="text" value="' + _pedEsc(_cpBrowseBusca) + '" oninput="_cpBrowseBuscar(this.value)" placeholder="Buscar por código ou nome" style="border:none;outline:none;font-size:12px;background:transparent;width:100%">'
-      + '</div>'
-    + '</div>'
-    + (tabs.length
-        ? ('<div style="overflow-y:auto;flex:1"><table style="width:100%;border-collapse:collapse">'
-            + '<thead><tr style="text-align:left;color:#94a3b8">'
-              + '<th style="padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0">Código</th>'
-              + '<th style="padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0">Nome da tabela</th>'
-              + '<th style="padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0">Fornecedor(es)</th>'
-              + '<th style="padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0;text-align:center">Produtos</th>'
-              + '<th style="padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0">Status</th>'
-              + '<th style="padding:6px 10px;border-bottom:2px solid #e2e8f0"></th>'
-            + '</tr></thead><tbody>' + linhas + '</tbody></table></div>')
-        : ('<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">'
-            + '<div style="width:56px;height:56px;border-radius:14px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin-bottom:6px">'
-              + '<i class="ti ti-table-off" style="font-size:22px;color:#cbd5e1"></i>'
-            + '</div>'
-            + '<div style="font-size:14px;font-weight:700;color:#94a3b8">Nenhuma tabela encontrada</div>'
-            + '<div style="font-size:12px;color:#cbd5e1">Ajuste os filtros ou cadastre uma nova tabela de preço.</div>'
-          + '</div>'));
-}
-
-function _cpRenderBrowseDetalhe() {
-  var res = document.getElementById('cp-resultado');
-  if (!res) return;
-  var t = getTabPrecos().find(function (x) { return String(x.id) === String(_cpBrowseTabelaId); });
-  if (!t) { _cpBrowseTabelaId = null; _cpRenderBrowseLista(); return; }
-
-  var fornId = document.getElementById('cp-fabrica') ? document.getElementById('cp-fabrica').value : '';
-  var forn = fornId ? getFornecedores().find(function (f) { return f.id === fornId; }) : null;
-  var rede = _cpTabelaResolverRede(t);
-  var itens = fornId ? (t.itens || []).filter(function (i) { return i.fornId === fornId; }) : (t.itens || []);
-  var mostrarColFornecedor = !fornId;
-
-  var linhasItens = itens.map(function (i) {
-    var val = parseFloat(String(i.valor || '0').replace(',', '.')) || 0;
-    var valFmt = 'R$ ' + val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return '<tr>'
-      + '<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11.5px;color:#64748b">' + _pedEsc(i.codigo || '') + '</td>'
-      + '<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11.5px;color:#1e293b">' + _pedEsc(i.nome || '') + '</td>'
-      + (mostrarColFornecedor ? ('<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11.5px;color:#64748b">' + _pedEsc(_cpSemColchetes(i.fornNome || '')) + '</td>') : '')
-      + '<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11.5px;color:#64748b">' + _pedEsc(i.codPedido || '') + '</td>'
-      + '<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11.5px;text-align:right;font-weight:700;color:#15803d">' + valFmt + '</td>'
-      + '<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11.5px;text-align:right;color:#64748b">' + _pedEsc(i.comissao ? (i.comissao + '%') : '—') + '</td>'
-      + '</tr>';
-  }).join('');
-
-  res.innerHTML = ''
-    + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px">'
-      + '<i class="ti ti-arrow-left" onclick="_cpFecharTabela()" style="font-size:17px;color:#94a3b8;cursor:pointer"></i>'
-      + '<div style="font-size:11px;color:#94a3b8">Tabelas cadastradas / <span style="color:#272A4A;font-weight:700">' + _pedEsc(t.codigo || t.nome || '') + '</span></div>'
-    + '</div>'
-    + '<div style="border:1px solid #eef0f3;border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:14px;margin-bottom:14px">'
-      + '<div style="width:46px;height:46px;border-radius:8px;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">'
-        + (forn && forn.foto ? ('<img src="' + forn.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '<span style="font-size:8px;color:#cbd5e1;text-align:center;line-height:1.3">Logo<br>Fornecedor</span>')
-      + '</div>'
-      + '<div style="min-width:0">'
-        + '<div style="font-size:13px;font-weight:700;color:#272A4A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _pedEsc(t.nome || '—') + '</div>'
-        + '<div style="font-size:11px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _pedEsc(t.codigo || '') + (forn ? (' · Fornecedor: ' + _pedEsc(_cpSemColchetes(forn.nome_fantasia || forn.razao_social || ''))) : '') + (rede ? (' · Rede: ' + _pedEsc(rede.nome)) : '') + '</div>'
-      + '</div>'
-      + '<div style="width:46px;height:46px;border-radius:8px;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">'
-        + (rede && rede.foto ? ('<img src="' + rede.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '<span style="font-size:8px;color:#cbd5e1;text-align:center;line-height:1.3">Logo<br>Rede</span>')
-      + '</div>'
-      + '<div style="display:flex;gap:8px">'
-        + '<button onclick="_cpExportarTabelaExcel(\'' + t.id + '\')" style="background:#1D9E75;color:#fff;border:none;font-size:11px;font-weight:700;padding:9px 13px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-spreadsheet"></i>Excel</button>'
-        + '<button onclick="_cpExportarTabelaPdf(\'' + t.id + '\')" style="background:#DE7926;color:#fff;border:none;font-size:11px;font-weight:700;padding:9px 13px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-type-pdf"></i>PDF</button>'
-      + '</div>'
-    + '</div>'
-    + (itens.length
-        ? ('<div style="overflow-y:auto;flex:1"><table style="width:100%;border-collapse:collapse">'
-            + '<thead><tr style="text-align:left;color:#94a3b8">'
-              + '<th style="padding:6px 8px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0">Código</th>'
-              + '<th style="padding:6px 8px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0">Produto</th>'
-              + (mostrarColFornecedor ? '<th style="padding:6px 8px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0">Fornecedor</th>' : '')
-              + '<th style="padding:6px 8px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0">Cód. pedido</th>'
-              + '<th style="padding:6px 8px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0;text-align:right">Valor</th>'
-              + '<th style="padding:6px 8px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #e2e8f0;text-align:right">Comissão</th>'
-            + '</tr></thead><tbody>' + linhasItens + '</tbody></table></div>')
-        : ('<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:12px">Nenhum produto' + (fornId ? ' deste fornecedor' : '') + ' nesta tabela.</div>'));
-}
-
-function _cpMontarDocumentoTabelaPdf(t, forn, rede, itens, mostrarColFornecedor) {
-  var linhas = itens.map(function (i) {
-    var val = parseFloat(String(i.valor || '0').replace(',', '.')) || 0;
-    var valFmt = 'R$ ' + val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return '<tr>'
-      + '<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11px;color:#64748b">' + _pedEsc(i.codigo || '') + '</td>'
-      + '<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11px;color:#1e293b">' + _pedEsc(i.nome || '') + '</td>'
-      + (mostrarColFornecedor ? ('<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11px;color:#64748b">' + _pedEsc(_cpSemColchetes(i.fornNome || '')) + '</td>') : '')
-      + '<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11px;color:#64748b">' + _pedEsc(i.codPedido || '') + '</td>'
-      + '<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11px;text-align:right;font-weight:700;color:#15803d">' + valFmt + '</td>'
-      + '<td style="padding:7px 8px;border-bottom:1px solid #f1f5f9;font-size:11px;text-align:right;color:#64748b">' + _pedEsc(i.comissao ? (i.comissao + '%') : '—') + '</td>'
-      + '</tr>';
-  }).join('');
-
-  return ''
-    + '<div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;border-bottom:1.5px solid #272A4A;padding-bottom:12px;margin-bottom:16px">'
-      + '<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center">' + (forn && forn.foto ? ('<img src="' + forn.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '') + '</div>'
-      + '<div style="text-align:center">'
-        + '<div style="font-size:16px;font-weight:800;color:#272A4A">' + _pedEsc(_cpSemColchetes(t.nome || 'Tabela de Preço')) + '</div>'
-        + '<div style="font-size:11px;color:#64748b;margin-top:2px">' + (t.codigo ? ('Código: ' + _pedEsc(t.codigo) + '   ') : '') + (forn ? ('Fornecedor: ' + _pedEsc(_cpSemColchetes(forn.nome_fantasia || forn.razao_social || '')) + '   ') : '') + (rede ? ('Rede: ' + _pedEsc(rede.nome)) : '') + '</div>'
-      + '</div>'
-      + '<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center">' + (rede && rede.foto ? ('<img src="' + rede.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '') + '</div>'
-    + '</div>'
-    + (itens.length
-        ? ('<table style="width:100%;border-collapse:collapse"><thead><tr style="text-align:left;background:#f8fafc">'
-            + '<th style="padding:6px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Código</th>'
-            + '<th style="padding:6px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th>'
-            + (mostrarColFornecedor ? '<th style="padding:6px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Fornecedor</th>' : '')
-            + '<th style="padding:6px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód. Pedido</th>'
-            + '<th style="padding:6px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor</th>'
-            + '<th style="padding:6px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Comissão</th>'
-          + '</tr></thead><tbody>' + linhas + '</tbody></table>')
-        : '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum produto nesta tabela.</div>');
-}
-
-function _cpExportarTabelaExcel(id) {
-  var t = getTabPrecos().find(function (x) { return String(x.id) === String(id); });
-  if (!t) return;
-  if (typeof ExcelJS === 'undefined') { alert('Não foi possível gerar o Excel: biblioteca ainda carregando (sem internet). Tente novamente.'); return; }
-
-  var fornId = document.getElementById('cp-fabrica') ? document.getElementById('cp-fabrica').value : '';
-  var forn = fornId ? getFornecedores().find(function (f) { return f.id === fornId; }) : null;
-  var rede = _cpTabelaResolverRede(t);
-  var itens = fornId ? (t.itens || []).filter(function (i) { return i.fornId === fornId; }) : (t.itens || []);
-  var mostrarColFornecedor = !fornId;
-
-  var wb = new ExcelJS.Workbook();
-  var ws = wb.addWorksheet('Tabela de Preço', { views: [{ showGridLines: false }] });
-  var colunas = mostrarColFornecedor
-    ? [{ width: 12 }, { width: 34 }, { width: 22 }, { width: 14 }, { width: 12 }, { width: 12 }]
-    : [{ width: 12 }, { width: 34 }, { width: 14 }, { width: 12 }, { width: 12 }];
-  ws.columns = colunas;
-  var totalCols = colunas.length;
-
-  var linhaTitulo = ws.addRow([_cpSemColchetes(t.nome || 'Tabela de Preço')]);
-  linhaTitulo.height = 30;
-  ws.mergeCells(linhaTitulo.number, 1, linhaTitulo.number, totalCols);
-  linhaTitulo.getCell(1).font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF272A4A' } };
-  linhaTitulo.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
-
-  var linhaSub = ws.addRow([(t.codigo ? ('Código: ' + t.codigo + '   ') : '') + (forn ? ('Fornecedor: ' + _cpSemColchetes(forn.nome_fantasia || forn.razao_social || '') + '   ') : '') + (rede ? ('Rede: ' + rede.nome) : '')]);
-  linhaSub.height = 18;
-  ws.mergeCells(linhaSub.number, 1, linhaSub.number, totalCols);
-  linhaSub.getCell(1).font = { name: 'Calibri', italic: true, size: 10, color: { argb: 'FF64748B' } };
-
-  ws.addRow([]);
-
-  var linhaHeader = ws.addRow(mostrarColFornecedor
-    ? ['Código', 'Produto', 'Fornecedor', 'Cód. Pedido', 'Valor', 'Comissão']
-    : ['Código', 'Produto', 'Cód. Pedido', 'Valor', 'Comissão']);
-  linhaHeader.height = 20;
-  linhaHeader.eachCell(function (cell) {
-    cell.font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
-    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF272A4A' } };
-    cell.alignment = { horizontal: 'center', vertical: 'middle' };
-  });
-
-  var valorCol = mostrarColFornecedor ? 5 : 4;
-  var comissaoCol = mostrarColFornecedor ? 6 : 5;
-  itens.forEach(function (i, idx) {
-    var val = parseFloat(String(i.valor || '0').replace(',', '.')) || 0;
-    var comissaoNum = i.comissao ? (parseFloat(String(i.comissao).replace(',', '.')) / 100) : null;
-    var linha = mostrarColFornecedor
-      ? [i.codigo || '', i.nome || '', _cpSemColchetes(i.fornNome || ''), i.codPedido || '', val, comissaoNum]
-      : [i.codigo || '', i.nome || '', i.codPedido || '', val, comissaoNum];
-    var row = ws.addRow(linha);
-    var corFundo = (idx % 2 === 0) ? 'FFFFFFFF' : 'FFF8FAFC';
-    row.eachCell({ includeEmpty: true }, function (cell, colNum) {
-      cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1E293B' } };
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: corFundo } };
-      if (colNum === valorCol) { cell.numFmt = '"R$" #,##0.00'; cell.alignment = { horizontal: 'right' }; }
-      else if (colNum === comissaoCol) { cell.numFmt = '0.0%'; cell.alignment = { horizontal: 'right' }; }
-      else cell.alignment = { horizontal: 'left', vertical: 'middle' };
-    });
-  });
-
-  var imgFornId = (forn && forn.foto) ? _drCarregarImagemWorkbook(wb, forn.foto) : null;
-  var imgRedeId = (rede && rede.foto) ? _drCarregarImagemWorkbook(wb, rede.foto) : null;
-  if (imgRedeId) {
-    ws.addImage(imgRedeId, { tl: { nativeCol: totalCols - 2, nativeColOff: 47625, nativeRow: 0, nativeRowOff: 47625 }, ext: { width: 1238250 / 9525, height: 762000 / 9525 }, editAs: 'oneCell' });
-  }
-  if (imgFornId) {
-    ws.addImage(imgFornId, { tl: { nativeCol: totalCols - 1, nativeColOff: 47625, nativeRow: 0, nativeRowOff: 47625 }, ext: { width: 1238250 / 9525, height: 762000 / 9525 }, editAs: 'oneCell' });
-  }
-
-  var nomeArquivo = 'Tabela_Preco_' + _cpNorm(t.nome || t.codigo || 'export').replace(/\s+/g, '_') + '.xlsx';
-  wb.xlsx.writeBuffer().then(function (buffer) {
-    var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = nomeArquivo;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-  });
-}
-
-function _cpExportarTabelaPdf(id) {
-  var t = getTabPrecos().find(function (x) { return String(x.id) === String(id); });
-  if (!t) return;
-  if (!window.html2canvas || !window.jspdf) { alert('Não foi possível gerar o PDF: biblioteca ainda carregando. Aguarde alguns segundos e tente novamente.'); return; }
-
-  var fornId = document.getElementById('cp-fabrica') ? document.getElementById('cp-fabrica').value : '';
-  var forn = fornId ? getFornecedores().find(function (f) { return f.id === fornId; }) : null;
-  var rede = _cpTabelaResolverRede(t);
-  var itens = fornId ? (t.itens || []).filter(function (i) { return i.fornId === fornId; }) : (t.itens || []);
-  var mostrarColFornecedor = !fornId;
-
-  var docHtml = _cpMontarDocumentoTabelaPdf(t, forn, rede, itens, mostrarColFornecedor);
-  var wrap = document.createElement('div');
-  wrap.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;background:#fff;padding:24px;font-family:inherit;z-index:-1';
-  wrap.innerHTML = docHtml;
-  document.body.appendChild(wrap);
-
-  return html2canvas(wrap, { scale: 2, useCORS: true }).then(function (canvas) {
-    var imgData = canvas.toDataURL('image/png');
-    var jsPDFCtor = window.jspdf.jsPDF;
-    var pdf = new jsPDFCtor('p', 'mm', 'a4');
-    var pageWidth = pdf.internal.pageSize.getWidth();
-    var pageHeight = pdf.internal.pageSize.getHeight();
-    var imgWidth = pageWidth;
-    var imgHeight = canvas.height * imgWidth / canvas.width;
-    var heightLeft = imgHeight;
-    var position = 0;
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-    pdf.save('Tabela_Preco_' + _cpNorm(t.nome || t.codigo || 'export').replace(/\s+/g, '_') + '.pdf');
-  }).catch(function (err) {
-    alert('Erro ao gerar o PDF: ' + (err && err.message ? err.message : err));
-  }).finally(function () {
-    document.body.removeChild(wrap);
-  });
+  res.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+    <div style="width:56px;height:56px;border-radius:14px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin-bottom:6px">
+      <i class="ti ti-search" style="font-size:22px;color:#cbd5e1"></i>
+    </div>
+    <div style="font-size:14px;font-weight:700;color:#94a3b8">Configure os filtros ao lado</div>
+    <div style="font-size:12px;color:#cbd5e1">e clique em Consultar para ver os preços</div>
+  </div>`;
 }
 
 function _cpRenderTree() {
@@ -15983,7 +16107,8 @@ function _pfatRender() {
       campo('Pedido Cliente', _pedEsc(pedido.numPedidoCliente || '—')) +
       campo('Valor', _pedFmtMoeda(pedido.valorTotal)) +
       campo('Valor Faturado', '<span style="color:#15803d">' + _pedFmtMoeda(_pfatValorFaturasAtivo(pedido)) + '</span>') +
-      campo('Status', '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(pedido.status) + '</span>');
+      campo('Status', '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(pedido.status) + '</span>') +
+      campo('Transportadora', _pedEsc(_pfatTransportadoraResumo(pedido)));
   }
 
   var transpSel = document.getElementById('pfat-transportadora');
@@ -16022,6 +16147,20 @@ function _pfatRender() {
   }
 
   _pfatRenderFaturas(pedido);
+}
+// Resolve a Transportadora "do pedido" a partir das faturas ja lancadas (ignora canceladas).
+// Cada fatura pode ter a sua propria transportadora (import via XML pode trazer uma diferente
+// da ultima manual, por exemplo) -- se todas as faturas ativas concordam, mostra o nome; se
+// nenhuma tem transportadora definida, mostra "-"; se ha mais de uma diferente, avisa "Multiplas"
+// em vez de mostrar so a primeira e escender a divergencia.
+function _pfatTransportadoraResumo(pedido) {
+  var faturas = (pedido.faturas || []).filter(function (f) { return f.status !== 'Cancelado'; });
+  var ids = faturas.map(function (f) { return f.transportadoraId; }).filter(Boolean);
+  var uniqIds = ids.filter(function (v, i, a) { return a.indexOf(v) === i; });
+  if (!uniqIds.length) return '—';
+  if (uniqIds.length > 1) return 'Múltiplas';
+  var f = faturas.find(function (x) { return x.transportadoraId === uniqIds[0]; });
+  return (f && f.transportadoraNome) ? f.transportadoraNome : '—';
 }
 function _pfatRenderFaturas(pedido) {
   var tbody = document.getElementById('pfat-faturas-tbody');
@@ -16125,6 +16264,29 @@ function pedExcluirFatura(faturaId) {
   setPedidos(data);
   _pfatRender();
 }
+// Le o grupo <transp><transporta> do XML da NF-e (CNPJ/CPF + xNome do transportador) e casa
+// com o cadastro de Transportadoras (getTransportadoras()) -- primeiro por CNPJ/CPF (normalizado,
+// so digitos), e se nao achar, por nome fantasia/razao social (normalizado, sem acento/case).
+// Retorna null se o XML nao tem grupo de transporte ou se nao bate com nenhum cadastro.
+function _pfatResolverTransportadoraXml(doc) {
+  var transpNode = doc.getElementsByTagName('transporta')[0];
+  if (!transpNode) return null;
+  var docXml = _devNormCnpj(_devXmlTag(transpNode, 'CNPJ') || _devXmlTag(transpNode, 'CPF'));
+  var nomeXml = _devXmlTag(transpNode, 'xNome');
+  if (!docXml && !nomeXml) return null;
+  var transportadoras = getTransportadoras();
+  var achado = docXml
+    ? transportadoras.find(function (t) { return _devNormCnpj(t.cnpj) && _devNormCnpj(t.cnpj) === docXml; })
+    : null;
+  if (!achado && nomeXml) {
+    var nomeXmlNorm = _cpNorm(nomeXml);
+    achado = transportadoras.find(function (t) {
+      return (t.nome_fantasia && _cpNorm(t.nome_fantasia) === nomeXmlNorm) || (t.razao_social && _cpNorm(t.razao_social) === nomeXmlNorm);
+    });
+  }
+  if (!achado) return null;
+  return { id: achado.id, nome: achado.nome_fantasia || achado.razao_social || '' };
+}
 // Cria automaticamente uma fatura ao anexar o XML da NF-e (ícone verde da lista de pedidos)
 function _pfatExtrairDadosXmlPedido(xmlText) {
   try {
@@ -16150,7 +16312,12 @@ function _pfatExtrairDadosXmlPedido(xmlText) {
         precoUnit: parseFloat(_devXmlTag(prod, 'vUnCom')) || 0
       });
     }
-    return { nNF: nNF, data: dataEmi, valor: vNF, itens: itens };
+    var transportadora = _pfatResolverTransportadoraXml(doc);
+    return {
+      nNF: nNF, data: dataEmi, valor: vNF, itens: itens,
+      transportadoraId: transportadora ? transportadora.id : '',
+      transportadoraNome: transportadora ? transportadora.nome : ''
+    };
   } catch (e) {
     return null;
   }
@@ -16203,7 +16370,7 @@ function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
   pedido.faturas.push({
     id: 'f' + Date.now() + Math.random().toString(36).slice(2,7),
     numDuplicata: dados.nNF || nomeArquivo, data: dados.data, valor: valorFatura,
-    transportadoraId: '', transportadoraNome: '',
+    transportadoraId: dados.transportadoraId || '', transportadoraNome: dados.transportadoraNome || '',
     status: 'Enviado', origem: 'xml', itens: itensFatura
   });
   _pfatAtualizarStatusPedido(pedido);
