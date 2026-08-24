@@ -3140,14 +3140,19 @@
             <input type="hidden" id="cp-tipo" value="rede">
           </div>
 
-          <!-- Categoria / Rede (Preço Rede) -->
+          <!-- Categoria / Rede (Preço Rede) -- 2 selects em cascata, mesmo padrao de Dados Representadas -->
           <div id="cp-cat-wrap" class="pg-side-sec">
-            <div class="pg-side-lbl">Categoria / Rede</div>
-            <div style="position:relative">
-              <input id="cp-cat-txt" type="text" placeholder="Buscar categoria ou rede..." autocomplete="off"
-                onkeydown="cpKeyCategoria(event)" onblur="setTimeout(_cpHideDrop,220)"
-                style="font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;width:100%;outline:none;box-sizing:border-box">
-              <div id="cp-cat-drop" style="display:none;background:#fff;border-radius:9px;z-index:9999;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.22)"></div>
+            <div class="pg-side-lbl">Rede</div>
+            <select id="cp-cat-rede-sel" onchange="_cpAtualizarSubRede()"
+              style="font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#1e293b;width:100%;outline:none;box-sizing:border-box">
+              <option value="">Selecione...</option>
+            </select>
+            <div id="cp-cat-subrede-wrap" style="display:none;margin-top:10px">
+              <div class="pg-side-lbl">Sub-Rede</div>
+              <select id="cp-cat-subrede-sel" onchange="_cpAtualizarTerceiroCategoria()"
+                style="font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#1e293b;width:100%;outline:none;box-sizing:border-box">
+                <option value="">Selecione...</option>
+              </select>
             </div>
           </div>
 
@@ -8264,16 +8269,66 @@ function _fpHeaderFotos() {
 }
 
 function _fpRender() {
-  const bc = document.getElementById('fotos-breadcrumb'); if (bc) bc.innerHTML = _fpBreadcrumb();
   const grid = document.getElementById('fotos-grid'); if (!grid) return;
+  const bc = document.getElementById('fotos-breadcrumb');
   const buscaInput = document.getElementById('fotos-busca');
-  const busca = (buscaInput?.value || '').toLowerCase();
+  const busca = (buscaInput?.value || '').trim().toLowerCase();
   const backBtn = document.getElementById('fotos-btn-voltar-nivel');
   if (backBtn) backBtn.style.display = window._fpNivel === 'forn' ? 'none' : 'inline-block';
 
   const kT = document.getElementById('fotos-kpi-total');
   const kC = document.getElementById('fotos-kpi-com');
   const kS = document.getElementById('fotos-kpi-sem');
+
+  // Busca global: com 2+ caracteres, acha o produto em QUALQUER fornecedor/categoria/
+  // subcategoria, independente da pasta em que o usuario esta navegando -- exatamente o que
+  // foi pedido. O estado real de navegacao (_fpNivel/_fpFornId/_fpCatId/_fpSubId) NAO muda,
+  // entao limpar a busca volta pra pasta onde a pessoa estava (mesmo mecanismo de reset ja
+  // usado em fpAbrirForn/fpAbrirCat/fpAbrirSub/fpVoltarNivel/fpIrPara, que sempre zeram o
+  // campo de busca ao trocar de pasta).
+  if (busca.length >= 2) {
+    if (bc) bc.innerHTML = '<span style="color:#1e293b;font-weight:700">Busca em todas as pastas</span>';
+    const fornecedoresBusca = getFornecedores();
+    const catsProdBusca = getCatProdutos();
+    const encontrados = getProdutos().filter(function (p) {
+      return (p.nome || '').toLowerCase().includes(busca) || (p.codigo || '').toLowerCase().includes(busca);
+    });
+    const comFotoBusca = encontrados.filter(function (p) { return p.foto; }).length;
+    if (kT) kT.textContent = encontrados.length;
+    if (kC) kC.textContent = comFotoBusca;
+    if (kS) kS.textContent = encontrados.length - comFotoBusca;
+    if (!encontrados.length) { grid.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum produto encontrado em nenhuma pasta.</div>'; return; }
+    grid.innerHTML = _fpHeaderFotos() + encontrados.map(function (p) {
+      const forn = fornecedoresBusca.find(function (f) { return f.id === p.fornecedor; });
+      const cat = catsProdBusca.find(function (c) { return c.id == p.categoria; });
+      const sub = catsProdBusca.find(function (c) { return c.id == p.subcategoria; });
+      const local = [forn ? forn.nome_fantasia : null, cat ? cat.nome : null, sub ? sub.nome : null].filter(Boolean).join(' › ') || '—';
+      const temFoto = !!p.foto;
+      const imgHtml = temFoto
+        ? '<img src="' + p.foto + '" style="width:100%;height:100%;object-fit:contain">'
+        : '<i class="ti ti-photo" style="font-size:16px;color:#cbd5e1"></i>';
+      const btnAbrir = temFoto
+        ? '<button onclick="fpAbrirFoto(\'' + p.id + '\')" title="Abrir" style="padding:6px 8px;background:#eff6ff;color:#2563eb;border:none;border-radius:6px;font-size:12px;cursor:pointer" onmouseover="this.style.background=\'#dbeafe\'" onmouseout="this.style.background=\'#eff6ff\'"><i class="ti ti-arrows-maximize"></i></button>'
+        : '<button disabled title="Abrir" style="padding:6px 8px;background:#f1f5f9;color:#c0ccd8;border:none;border-radius:6px;font-size:12px;cursor:not-allowed"><i class="ti ti-arrows-maximize"></i></button>';
+      const btnDown = temFoto
+        ? '<button onclick="fpBaixarFoto(\'' + p.id + '\')" title="Baixar" style="padding:6px 8px;background:#f0fdf4;color:#15803d;border:none;border-radius:6px;font-size:12px;cursor:pointer" onmouseover="this.style.background=\'#dcfce7\'" onmouseout="this.style.background=\'#f0fdf4\'"><i class="ti ti-download"></i></button>'
+        : '<button disabled title="Baixar" style="padding:6px 8px;background:#f1f5f9;color:#c0ccd8;border:none;border-radius:6px;font-size:12px;cursor:not-allowed"><i class="ti ti-download"></i></button>';
+      const btnUp = '<label title="Importar foto" style="padding:6px 8px;background:#fff7ed;color:#DE7926;border-radius:6px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center" onmouseover="this.style.background=\'#fed7aa\'" onmouseout="this.style.background=\'#fff7ed\'"><i class="ti ti-upload"></i><input type="file" accept="image/*" style="display:none" onchange="fpImportarFoto(\'' + p.id + '\',this)"></label>';
+      const btnDel = temFoto
+        ? '<button onclick="fpRemoverFoto(\'' + p.id + '\')" title="Remover foto" style="padding:6px 8px;background:#fff5f5;color:#dc2626;border:none;border-radius:6px;font-size:12px;cursor:pointer" onmouseover="this.style.background=\'#fecaca\'" onmouseout="this.style.background=\'#fff5f5\'"><i class="ti ti-trash"></i></button>'
+        : '<button disabled title="Remover foto" style="padding:6px 8px;background:#f1f5f9;color:#c0ccd8;border:none;border-radius:6px;font-size:12px;cursor:not-allowed"><i class="ti ti-trash"></i></button>';
+      return '<div style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:9px 16px;align-items:center;border-bottom:1px solid #f1f5f9"' +
+        ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">' +
+        '<div style="width:42px;height:42px;border-radius:8px;background:#f8fafc;border:1px solid #eef2f7;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px">' + imgHtml + '</div>' +
+        '<div style="min-width:0;padding-right:10px"><div style="font-size:13px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _fpEsc(p.nome) + '">' + _fpEsc(p.nome) + '</div>' +
+        '<div style="font-size:10.5px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px" title="' + _fpEsc(local) + '">' + _fpEsc(local) + '</div></div>' +
+        '<div style="font-size:12.5px;color:#64748b">' + _fpEsc(p.codigo) + '</div>' +
+        '<div style="display:flex;gap:6px;justify-content:flex-end">' + btnAbrir + btnDown + btnUp + btnDel + '</div></div>';
+    }).join('');
+    return;
+  }
+
+  if (bc) bc.innerHTML = _fpBreadcrumb();
 
   if (window._fpNivel === 'forn') {
     if (buscaInput) buscaInput.placeholder = 'Pesquisar fornecedor...';
@@ -10017,21 +10072,21 @@ function _tvpMontarDocumentoPdf(d) {
     var skuRec = d.skus.find(function (s) { return s.prodId === i.prodId; });
     var produto = d.produtos.find(function (p) { return p.id === i.prodId; });
     var cells = d.colunas.map(function (c) {
-      var cor = c.key === 'valor' ? 'font-weight:700;color:#15803d' : (c.key === 'produto' ? 'color:#1e293b' : 'color:#64748b');
-      return '<td style="padding:7px 8px;border:1px solid #cbd5e1;font-size:11px;' + cor + (c.align === 'right' ? ';text-align:right' : '') + '">' + _pedEsc(c.valor(i, skuRec, produto)) + '</td>';
+      var cor = c.key === 'valor' ? 'font-weight:700;color:#000' : 'color:#000';
+      return '<td style="padding:7px 8px;border:1px solid #000;font-size:11px;' + cor + (c.align === 'right' ? ';text-align:right' : '') + '">' + _pedEsc(c.valor(i, skuRec, produto)) + '</td>';
     }).join('');
     return '<tr>' + cells + '</tr>';
   }).join('');
 
   var headerCells = d.colunas.map(function (c) {
-    return '<th style="padding:6px 8px;border:1px solid #cbd5e1;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase' + (c.align === 'right' ? ';text-align:right' : '') + '">' + _pedEsc(c.label) + '</th>';
+    return '<th style="padding:6px 8px;border:1px solid #000;font-size:9.5px;font-weight:700;color:#000;text-transform:uppercase' + (c.align === 'right' ? ';text-align:right' : '') + '">' + _pedEsc(c.label) + '</th>';
   }).join('');
 
   return ''
-    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1.5px solid #272A4A;padding-bottom:12px;margin-bottom:16px">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1.5px solid #000;padding-bottom:12px;margin-bottom:16px">'
       + '<div>'
-        + '<div style="font-size:17px;font-weight:800;color:#272A4A;text-transform:uppercase;letter-spacing:.02em">' + _pedEsc(_cpSemColchetes(d.t.nome || 'Tabela de Preço')) + (d.forn ? (' - ' + _pedEsc(_cpSemColchetes(d.forn.nome_fantasia || d.forn.razao_social || ''))) : '') + '</div>'
-        + '<div style="font-size:11px;color:#64748b;margin-top:3px">Emitido em ' + _pedEsc(new Date().toLocaleDateString('pt-BR')) + '</div>'
+        + '<div style="font-size:17px;font-weight:800;color:#000;text-transform:uppercase;letter-spacing:.02em">' + _pedEsc(_cpSemColchetes(d.t.nome || 'Tabela de Preço')) + (d.forn ? (' - ' + _pedEsc(_cpSemColchetes(d.forn.nome_fantasia || d.forn.razao_social || ''))) : '') + '</div>'
+        + '<div style="font-size:11px;color:#000;margin-top:3px">Emitido em ' + _pedEsc(new Date().toLocaleDateString('pt-BR')) + '</div>'
       + '</div>'
       + '<div style="display:flex;align-items:center;gap:12px;flex-shrink:0">'
         + '<div style="width:84px;height:84px;display:flex;align-items:center;justify-content:center">' + (d.forn && d.forn.foto ? ('<img src="' + d.forn.foto + '" style="max-width:100%;max-height:100%;object-fit:contain">') : '') + '</div>'
@@ -10039,8 +10094,8 @@ function _tvpMontarDocumentoPdf(d) {
       + '</div>'
     + '</div>'
     + (d.itens.length && d.colunas.length
-        ? ('<table style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1"><thead><tr style="text-align:left;background:#f8fafc">' + headerCells + '</tr></thead><tbody>' + linhas + '</tbody></table>')
-        : '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">' + (d.colunas.length ? 'Nenhum produto nesta tabela.' : 'Marque ao menos um campo antes de exportar.') + '</div>');
+        ? ('<table style="width:100%;border-collapse:collapse;border:1px solid #000"><thead><tr style="text-align:left;background:#f8fafc">' + headerCells + '</tr></thead><tbody>' + linhas + '</tbody></table>')
+        : '<div style="text-align:center;padding:40px;color:#000;font-size:13px">' + (d.colunas.length ? 'Nenhum produto nesta tabela.' : 'Marque ao menos um campo antes de exportar.') + '</div>');
 }
 
 function _tvpExportarExcel() {
@@ -10051,6 +10106,7 @@ function _tvpExportarExcel() {
 
   var LARGURAS = { codForn: 14, codCli: 16, produto: 34, ean: 16, und: 9, qtdCx: 12, pesoUnd: 12, pesoCx: 12, valor: 12 };
   var ALINHA_CENTRO = { und: true, qtdCx: true, pesoUnd: true, pesoCx: true };
+  var TVP_BORDA_PRETA = { top: { style: 'thin', color: { argb: 'FF000000' } }, left: { style: 'thin', color: { argb: 'FF000000' } }, bottom: { style: 'thin', color: { argb: 'FF000000' } }, right: { style: 'thin', color: { argb: 'FF000000' } } };
 
   var wb = new ExcelJS.Workbook();
   var ws = wb.addWorksheet('Tabela de Preço', { views: [{ showGridLines: false }] });
@@ -10062,12 +10118,12 @@ function _tvpExportarExcel() {
   var linhaTitulo = ws.addRow([tituloTxt]);
   linhaTitulo.height = 30;
   ws.mergeCells(linhaTitulo.number, 1, linhaTitulo.number, totalCols);
-  linhaTitulo.getCell(1).font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF272A4A' } };
+  linhaTitulo.getCell(1).font = { name: 'Calibri', bold: true, size: 14, color: { argb: 'FF000000' } };
 
   var linhaSub = ws.addRow(['Emitido em ' + new Date().toLocaleDateString('pt-BR')]);
   linhaSub.height = 18;
   ws.mergeCells(linhaSub.number, 1, linhaSub.number, totalCols);
-  linhaSub.getCell(1).font = { name: 'Calibri', italic: true, size: 10, color: { argb: 'FF64748B' } };
+  linhaSub.getCell(1).font = { name: 'Calibri', italic: true, size: 10, color: { argb: 'FF000000' } };
 
   ws.addRow([]);
 
@@ -10077,7 +10133,7 @@ function _tvpExportarExcel() {
     cell.font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF272A4A' } };
     cell.alignment = { horizontal: 'center', vertical: 'middle' };
-    cell.border = DR_BORDA_FINA;
+    cell.border = TVP_BORDA_PRETA;
   });
 
   d.itens.forEach(function (i, idx) {
@@ -10090,9 +10146,9 @@ function _tvpExportarExcel() {
     var row = ws.addRow(valores);
     var corFundo = (idx % 2 === 0) ? 'FFFFFFFF' : 'FFF8FAFC';
     row.eachCell({ includeEmpty: true }, function (cell, colNum) {
-      cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF1E293B' } };
+      cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF000000' } };
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: corFundo } };
-      cell.border = DR_BORDA_FINA;
+      cell.border = TVP_BORDA_PRETA;
       var col = d.colunas[colNum - 1];
       if (col && col.key === 'valor') { cell.numFmt = '"R$" #,##0.00'; cell.alignment = { horizontal: 'right' }; }
       else if (col && ALINHA_CENTRO[col.key]) cell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -12065,7 +12121,55 @@ document.addEventListener('click', function(e) {
   if (!drop.contains(e.target) && !isInput) _cpHideDrop();
 });
 
-/* ── Categoria / Rede ── */
+/* ── Categoria / Rede (selects em cascata, mesmo padrao de _drAtualizarSubRede) ── */
+function _cpPopularRedeCategoria() {
+  var sel = document.getElementById('cp-cat-rede-sel');
+  if (!sel) return;
+  var redes = getCatClientes().filter(function (c) { return !c.pai; });
+  sel.innerHTML = '<option value="">Selecione...</option>' + redes.map(function (c) {
+    return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>';
+  }).join('');
+}
+function _cpAtualizarSubRede() {
+  var redeSel  = document.getElementById('cp-cat-rede-sel');
+  var redeId   = redeSel ? redeSel.value : '';
+  var subSel   = document.getElementById('cp-cat-subrede-sel');
+  var subWrap  = document.getElementById('cp-cat-subrede-wrap');
+  if (subSel) subSel.innerHTML = '<option value="">Selecione...</option>';
+  if (subWrap) subWrap.style.display = 'none';
+  if (redeId) {
+    var subs = getCatClientes().filter(function (c) { return String(c.pai) === String(redeId); });
+    if (subs.length) {
+      if (subWrap) subWrap.style.display = '';
+      if (subSel) subSel.innerHTML += subs.map(function (s) {
+        return '<option value="' + s.id + '">' + _pedEsc(s.nome || '') + '</option>';
+      }).join('');
+    }
+  }
+  _cpAtualizarTerceiroCategoria();
+}
+function _cpAtualizarTerceiroCategoria() {
+  var redeSel  = document.getElementById('cp-cat-rede-sel');
+  var subSel   = document.getElementById('cp-cat-subrede-sel');
+  var subWrap  = document.getElementById('cp-cat-subrede-wrap');
+  var redeId   = redeSel ? redeSel.value : '';
+  var temSub   = !!(subWrap && subWrap.style.display !== 'none');
+  var subId    = temSub && subSel ? subSel.value : '';
+  var tercId   = subId || redeId;
+  var nome = '';
+  if (tercId) {
+    var opt = (subId && subSel) ? subSel.options[subSel.selectedIndex] : (redeSel ? redeSel.options[redeSel.selectedIndex] : null);
+    nome = opt ? opt.textContent : '';
+  }
+  _cpSelectedTercId   = tercId || null;
+  _cpSelectedTercNome = nome;
+  var hId   = document.getElementById('cp-terceiro');
+  var hType = document.getElementById('cp-terceiro-type');
+  if (hId)   hId.value   = tercId || '';
+  if (hType) hType.value = 'cat';
+  _cpShowEmpty();
+}
+
 function cpFiltrarCategoria(busca) {
   busca = (busca || '').toLowerCase().trim();
   const todas = getCatClientes();
@@ -12219,10 +12323,12 @@ function cpSetTipo(val) {
 
   // 5. Limpar campo do painel ativo
   if (val === 'rede') {
-    const catTxt = document.getElementById('cp-cat-txt');
-    if (catTxt) catTxt.value = '';
-    const catDrop = document.getElementById('cp-cat-drop');
-    if (catDrop) catDrop.style.display = 'none';
+    const redeSelReset = document.getElementById('cp-cat-rede-sel');
+    if (redeSelReset) redeSelReset.value = '';
+    const subSelReset = document.getElementById('cp-cat-subrede-sel');
+    if (subSelReset) subSelReset.innerHTML = '<option value="">Selecione...</option>';
+    const subWrapReset = document.getElementById('cp-cat-subrede-wrap');
+    if (subWrapReset) subWrapReset.style.display = 'none';
   } else {
     const cliTxt = document.getElementById('cp-cli-txt');
     if (cliTxt) cliTxt.value = '';
@@ -12247,11 +12353,14 @@ function initConsultaPreco() {
   document.getElementById('cp-produto') && (document.getElementById('cp-produto').value = '');
   _cpProdutosCache = [];
 
-  // Reset categoria
-  const catTxt = document.getElementById('cp-cat-txt');
-  if (catTxt) catTxt.value = '';
-  const catDrop = document.getElementById('cp-cat-drop');
-  if (catDrop) catDrop.style.display = 'none';
+  // Reset categoria (Rede/Sub-Rede) -- repopula o select de Rede a cada entrada na tela
+  _cpPopularRedeCategoria();
+  const redeSelReset = document.getElementById('cp-cat-rede-sel');
+  if (redeSelReset) redeSelReset.value = '';
+  const subSelReset = document.getElementById('cp-cat-subrede-sel');
+  if (subSelReset) subSelReset.innerHTML = '<option value="">Selecione...</option>';
+  const subWrapReset = document.getElementById('cp-cat-subrede-wrap');
+  if (subWrapReset) subWrapReset.style.display = 'none';
 
   // Reset tipo para rede
   const tipoInp = document.getElementById('cp-tipo');
@@ -12358,11 +12467,13 @@ function cpTipoChange() {
   if (tipo === 'rede') {
     if (catWrap) catWrap.style.display = '';
     if (cliWrap) cliWrap.style.display = 'none';
-    // Reset campo categoria
-    const catTxt = document.getElementById('cp-cat-txt');
-    if (catTxt) catTxt.value = '';
-    const catDrop = document.getElementById('cp-cat-drop');
-    if (catDrop) catDrop.style.display = 'none';
+    // Reset campo categoria (selects de Rede/Sub-Rede)
+    const redeSelReset = document.getElementById('cp-cat-rede-sel');
+    if (redeSelReset) redeSelReset.value = '';
+    const subSelReset = document.getElementById('cp-cat-subrede-sel');
+    if (subSelReset) subSelReset.innerHTML = '<option value="">Selecione...</option>';
+    const subWrapReset = document.getElementById('cp-cat-subrede-wrap');
+    if (subWrapReset) subWrapReset.style.display = 'none';
   } else {
     if (catWrap) catWrap.style.display = 'none';
     if (cliWrap) cliWrap.style.display = '';
@@ -12616,10 +12727,16 @@ function cpKeyProduto(event) {
 }
 
 function cpLimpar() {
-  ['cp-fabrica-txt','cp-cat-txt','cp-cli-txt','cp-produto-txt'].forEach(function(id) {
+  ['cp-fabrica-txt','cp-cli-txt','cp-produto-txt'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
+  var redeSelReset = document.getElementById('cp-cat-rede-sel');
+  if (redeSelReset) redeSelReset.value = '';
+  var subSelReset = document.getElementById('cp-cat-subrede-sel');
+  if (subSelReset) subSelReset.innerHTML = '<option value="">Selecione...</option>';
+  var subWrapReset = document.getElementById('cp-cat-subrede-wrap');
+  if (subWrapReset) subWrapReset.style.display = 'none';
   ['cp-fabrica','cp-produto','cp-terceiro'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
