@@ -23183,10 +23183,20 @@ function _drBuscarPrecoProduto(fornId, prodId, clienteIds) {
   if (!melhor) return '';
   return _drNum(melhor.item.valor);
 }
+function _drPrecoExibir(item) {
+  if (!item) return '';
+  if (item.precoTabela === '' || item.precoTabela === undefined || item.precoTabela === null) return '';
+  if (String(item.forma || '').trim().toUpperCase() === 'CX') {
+    var qtd = _drNum(item.prod && item.prod.quant);
+    return Math.round(_drNum(item.precoTabela) * qtd * 100) / 100;
+  }
+  return item.precoTabela;
+}
 function _drEnriquecerItens(itens, fornId, clienteIds) {
   (itens || []).forEach(function (item) {
     item.pesoCxCalc = _drPesoCx(item.prod);
     item.precoTabela = _drBuscarPrecoProduto(fornId, item.prodId, clienteIds);
+    item.precoExibir = _drPrecoExibir(item);
   });
   return itens;
 }
@@ -23695,8 +23705,8 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
   function linhaProdutoTabela(item, corImpar) {
     var row = ws.addRow([
       item.prod.codigo || '', item.sku || '', item.prod.nome || '',
-      item.prod.quant || '', (item.pesoCxCalc !== undefined && item.pesoCxCalc !== '') ? item.pesoCxCalc : '', item.prod.unidade || '',
-      _drFormatarPreco(item.precoTabela)
+      item.prod.quant || '', (item.pesoCxCalc !== undefined && item.pesoCxCalc !== '') ? item.pesoCxCalc : '', item.forma || '',
+      _drFormatarPreco(item.precoExibir)
     ]);
     row.height = 17;
     var cor = (row.number % 2 === 0) ? DR_CORES.white : corImpar;
@@ -23796,8 +23806,8 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
       + '<td style="padding:5px 8px;text-align:left;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.prod.nome || '') + '</td>'
       + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(qtd) + '</td>'
       + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(peso) + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.prod.unidade || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:right;border:1px solid #e5e7eb;font-size:11px">' + _drFormatarPreco(item.precoTabela) + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.forma || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:right;border:1px solid #e5e7eb;font-size:11px">' + _drFormatarPreco(item.precoExibir) + '</td>'
       + '</tr>';
   }
   var comVenda = g.cadastroComVenda || [];

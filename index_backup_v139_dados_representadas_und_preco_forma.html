@@ -690,10 +690,13 @@
 <!-- Header gradiente igual às outras páginas -->
 <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);border-radius:12px;padding:13px 20px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
   <div>
-    <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.01em">Visão Geral</div>
+    <div id="dashTituloVisaoGeral" style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.01em">Visão Geral</div>
     <div id="periodoInfo" style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px"></div>
   </div>
-  <button id="btnReset" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">Limpar filtros</button>
+  <div style="display:flex;gap:8px">
+    <button id="btnHistorico2025" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background=this.dataset.ativo?'#c96a1f':'rgba(255,255,255,.2)'" onmouseout="this.style.background=this.dataset.ativo?'#DE7926':'rgba(255,255,255,.12)'">Ver histórico 2025</button>
+    <button id="btnReset" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">Limpar filtros</button>
+  </div>
 </div>
 <!-- Linha de filtros -->
 <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:9px 14px;margin-bottom:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
@@ -4976,6 +4979,7 @@
             </div>
           </div>
           <div style="flex:1"></div>
+          <button onclick="_drVisualizar()" style="background:#fff;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-eye"></i>Visualizar</button>
           <button onclick="_drGerar()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Gerar relatório</button>
           <button onclick="_drGerarPdf()" style="background:#fff;color:#272A4A;border:1px solid #272A4A;border-radius:7px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-file-type-pdf"></i>Gerar PDF</button>
         </div>
@@ -5863,6 +5867,26 @@
   </div>
 </div>
 
+<!-- ── Modal Visualizar Dados Representadas (mesmo documento do Excel/PDF) ── -->
+<div id="modal-dr-visualizar" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:820px;max-height:88vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
+    <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#fff">Visualizar documento</div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,.6)">Mesmo layout gerado no Excel (uma aba por Rede/Cliente selecionado)</div>
+      </div>
+      <button onclick="_drFecharVisualizar()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
+    </div>
+    <div id="dr-visualizar-abas" style="display:flex;gap:6px;flex-wrap:wrap;padding:12px 18px 0"></div>
+    <div id="dr-visualizar-corpo" style="padding:14px 18px 18px;overflow-y:auto;flex:1"></div>
+    <div style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
+      <button onclick="_drFecharVisualizar()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
+      <button onclick="_drFecharVisualizar();_drGerarPdf();" style="background:#fff;color:#272A4A;border:1px solid #272A4A;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-file-type-pdf"></i>Gerar PDF</button>
+      <button onclick="_drFecharVisualizar();_drGerar();" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">Gerar relatório (Excel)</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Modal Exportar Tabela de Preço por Fábrica ── -->
 <div id="modal-tabpreco-export-forn" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:12px;width:100%;max-width:420px;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden">
@@ -6532,6 +6556,14 @@ function entrarNoApp(user) {
   if (avatarEl) avatarEl.textContent = inicial;
   if (slideTimer)  clearInterval(slideTimer);
   if (mTimer)      clearInterval(mTimer);
+  // O dashboard Inicio ja rodou uma vez em DOMContentLoaded (setTimeout(dashInit,50)), ANTES
+  // do login -- nesse momento, se o Firebase estiver configurado, a sincronizacao com o
+  // Firestore ainda nao comecou (so comeca dentro do fluxo de login), entao _dashConstruirDadosAoVivo()
+  // rodou com tudo vazio (0 pedidos, R$ 0). Como page-home ja fica "ativa" desde o HTML estatico,
+  // ninguem chama showPage('page-home')/dashInit() de novo depois do login -- o usuario ficava
+  // preso naquele retrato vazio ate clicar manualmente em "Inicio". Rodar de novo aqui garante
+  // que assim que o login termina (dados do Firestore ja carregados) o dashboard ja nasce certo.
+  dashInit();
 }
 
 // ═══ Autoria e histórico de alterações (usado por Pedidos, Devoluções, etc.) ═══
@@ -8269,16 +8301,66 @@ function _fpHeaderFotos() {
 }
 
 function _fpRender() {
-  const bc = document.getElementById('fotos-breadcrumb'); if (bc) bc.innerHTML = _fpBreadcrumb();
   const grid = document.getElementById('fotos-grid'); if (!grid) return;
+  const bc = document.getElementById('fotos-breadcrumb');
   const buscaInput = document.getElementById('fotos-busca');
-  const busca = (buscaInput?.value || '').toLowerCase();
+  const busca = (buscaInput?.value || '').trim().toLowerCase();
   const backBtn = document.getElementById('fotos-btn-voltar-nivel');
   if (backBtn) backBtn.style.display = window._fpNivel === 'forn' ? 'none' : 'inline-block';
 
   const kT = document.getElementById('fotos-kpi-total');
   const kC = document.getElementById('fotos-kpi-com');
   const kS = document.getElementById('fotos-kpi-sem');
+
+  // Busca global: com 2+ caracteres, acha o produto em QUALQUER fornecedor/categoria/
+  // subcategoria, independente da pasta em que o usuario esta navegando -- exatamente o que
+  // foi pedido. O estado real de navegacao (_fpNivel/_fpFornId/_fpCatId/_fpSubId) NAO muda,
+  // entao limpar a busca volta pra pasta onde a pessoa estava (mesmo mecanismo de reset ja
+  // usado em fpAbrirForn/fpAbrirCat/fpAbrirSub/fpVoltarNivel/fpIrPara, que sempre zeram o
+  // campo de busca ao trocar de pasta).
+  if (busca.length >= 2) {
+    if (bc) bc.innerHTML = '<span style="color:#1e293b;font-weight:700">Busca em todas as pastas</span>';
+    const fornecedoresBusca = getFornecedores();
+    const catsProdBusca = getCatProdutos();
+    const encontrados = getProdutos().filter(function (p) {
+      return (p.nome || '').toLowerCase().includes(busca) || (p.codigo || '').toLowerCase().includes(busca);
+    });
+    const comFotoBusca = encontrados.filter(function (p) { return p.foto; }).length;
+    if (kT) kT.textContent = encontrados.length;
+    if (kC) kC.textContent = comFotoBusca;
+    if (kS) kS.textContent = encontrados.length - comFotoBusca;
+    if (!encontrados.length) { grid.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum produto encontrado em nenhuma pasta.</div>'; return; }
+    grid.innerHTML = _fpHeaderFotos() + encontrados.map(function (p) {
+      const forn = fornecedoresBusca.find(function (f) { return f.id === p.fornecedor; });
+      const cat = catsProdBusca.find(function (c) { return c.id == p.categoria; });
+      const sub = catsProdBusca.find(function (c) { return c.id == p.subcategoria; });
+      const local = [forn ? forn.nome_fantasia : null, cat ? cat.nome : null, sub ? sub.nome : null].filter(Boolean).join(' › ') || '—';
+      const temFoto = !!p.foto;
+      const imgHtml = temFoto
+        ? '<img src="' + p.foto + '" style="width:100%;height:100%;object-fit:contain">'
+        : '<i class="ti ti-photo" style="font-size:16px;color:#cbd5e1"></i>';
+      const btnAbrir = temFoto
+        ? '<button onclick="fpAbrirFoto(\'' + p.id + '\')" title="Abrir" style="padding:6px 8px;background:#eff6ff;color:#2563eb;border:none;border-radius:6px;font-size:12px;cursor:pointer" onmouseover="this.style.background=\'#dbeafe\'" onmouseout="this.style.background=\'#eff6ff\'"><i class="ti ti-arrows-maximize"></i></button>'
+        : '<button disabled title="Abrir" style="padding:6px 8px;background:#f1f5f9;color:#c0ccd8;border:none;border-radius:6px;font-size:12px;cursor:not-allowed"><i class="ti ti-arrows-maximize"></i></button>';
+      const btnDown = temFoto
+        ? '<button onclick="fpBaixarFoto(\'' + p.id + '\')" title="Baixar" style="padding:6px 8px;background:#f0fdf4;color:#15803d;border:none;border-radius:6px;font-size:12px;cursor:pointer" onmouseover="this.style.background=\'#dcfce7\'" onmouseout="this.style.background=\'#f0fdf4\'"><i class="ti ti-download"></i></button>'
+        : '<button disabled title="Baixar" style="padding:6px 8px;background:#f1f5f9;color:#c0ccd8;border:none;border-radius:6px;font-size:12px;cursor:not-allowed"><i class="ti ti-download"></i></button>';
+      const btnUp = '<label title="Importar foto" style="padding:6px 8px;background:#fff7ed;color:#DE7926;border-radius:6px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center" onmouseover="this.style.background=\'#fed7aa\'" onmouseout="this.style.background=\'#fff7ed\'"><i class="ti ti-upload"></i><input type="file" accept="image/*" style="display:none" onchange="fpImportarFoto(\'' + p.id + '\',this)"></label>';
+      const btnDel = temFoto
+        ? '<button onclick="fpRemoverFoto(\'' + p.id + '\')" title="Remover foto" style="padding:6px 8px;background:#fff5f5;color:#dc2626;border:none;border-radius:6px;font-size:12px;cursor:pointer" onmouseover="this.style.background=\'#fecaca\'" onmouseout="this.style.background=\'#fff5f5\'"><i class="ti ti-trash"></i></button>'
+        : '<button disabled title="Remover foto" style="padding:6px 8px;background:#f1f5f9;color:#c0ccd8;border:none;border-radius:6px;font-size:12px;cursor:not-allowed"><i class="ti ti-trash"></i></button>';
+      return '<div style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:9px 16px;align-items:center;border-bottom:1px solid #f1f5f9"' +
+        ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">' +
+        '<div style="width:42px;height:42px;border-radius:8px;background:#f8fafc;border:1px solid #eef2f7;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px">' + imgHtml + '</div>' +
+        '<div style="min-width:0;padding-right:10px"><div style="font-size:13px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _fpEsc(p.nome) + '">' + _fpEsc(p.nome) + '</div>' +
+        '<div style="font-size:10.5px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px" title="' + _fpEsc(local) + '">' + _fpEsc(local) + '</div></div>' +
+        '<div style="font-size:12.5px;color:#64748b">' + _fpEsc(p.codigo) + '</div>' +
+        '<div style="display:flex;gap:6px;justify-content:flex-end">' + btnAbrir + btnDown + btnUp + btnDel + '</div></div>';
+    }).join('');
+    return;
+  }
+
+  if (bc) bc.innerHTML = _fpBreadcrumb();
 
   if (window._fpNivel === 'forn') {
     if (buscaInput) buscaInput.placeholder = 'Pesquisar fornecedor...';
@@ -12709,6 +12791,93 @@ function _destroyDashChart(id) {
 }
 var _dashOrigChart = null;
 
+// Monta o mesmo formato do antigo retrato estatico (dash-dados), mas a partir dos dados
+// REAIS e atuais do sistema (Pedidos/Fornecedores/Usuarios/Clientes), sem precisar tocar em
+// filtraPedidos()/kpis()/graficos/botoes T1-T4 -- eles so enxergam o objeto DATA resultante.
+// Granularidade por FATURA quando o pedido tem faturas ativas (reflete o mes real do
+// faturamento, inclusive pedidos faturados parcialmente ao longo de varios meses); pedidos
+// sem fatura (ou com status que nao seja Faturado/Faturado Parcial) usam 1 linha no nivel do
+// pedido. periodo_inicio = 1/jan do ano atual e periodo_fim = hoje -> o botao "Ano" vira
+// Ano-a-data de verdade e T1-T4 resolvem sozinhos pro ano corrente, sem mudar aquele codigo.
+function _dashConstruirDadosAoVivo() {
+  var fornecedores = (typeof getFornecedores === 'function') ? getFornecedores() : [];
+  var vendedoresBase = (typeof getVendedoresAtivos === 'function') ? getVendedoresAtivos() : [];
+  var clientesBase = (typeof getClientesVisiveis === 'function') ? getClientesVisiveis() : [];
+  var pedidosBase = ((typeof getPedidos === 'function') ? getPedidos() : []) || [];
+  var statusValidos = (typeof PED_STATUS !== 'undefined') ? PED_STATUS : ['Pré-Venda','Aguardando Retorno','Enviado','Faturado','Faturado Parcial','Bonificado','Cancelado'];
+
+  var FAB = [], fabIdx = {};
+  fornecedores.forEach(function (f) { fabIdx[f.id] = FAB.length; FAB.push(f.nome_fantasia || f.codigo || ('Fornecedor ' + f.id)); });
+  function idxFabrica(id, nome) {
+    if (id != null && Object.prototype.hasOwnProperty.call(fabIdx, id)) return fabIdx[id];
+    var i = FAB.length; if (id != null) fabIdx[id] = i; FAB.push(nome || 'Fornecedor não cadastrado'); return i;
+  }
+
+  var VEND = [], vendIdx = {};
+  vendedoresBase.forEach(function (v) { vendIdx[v.id] = VEND.length; VEND.push(v.nome || v.login || ('Vendedor ' + v.id)); });
+  function idxVendedor(id, nome) {
+    if (id != null && Object.prototype.hasOwnProperty.call(vendIdx, id)) return vendIdx[id];
+    var i = VEND.length; if (id != null) vendIdx[id] = i; VEND.push(nome || 'Vendedor não cadastrado'); return i;
+  }
+
+  var CLI = [], cliIdx = {}, CLI_INATIVO = [];
+  clientesBase.forEach(function (c) { cliIdx[c.id] = CLI.length; CLI.push(c.nome_fantasia || c.razao_social || ('Cliente ' + c.id)); CLI_INATIVO.push(c.ativo === false); });
+  function idxCliente(id, nome) {
+    if (id != null && Object.prototype.hasOwnProperty.call(cliIdx, id)) return cliIdx[id];
+    var i = CLI.length; if (id != null) cliIdx[id] = i; CLI.push(nome || 'Cliente não cadastrado'); CLI_INATIVO.push(true); return i;
+  }
+
+  var STATUS = statusValidos.slice();
+  function idxStatus(status) { var i = STATUS.indexOf(status); return i >= 0 ? i : 0; }
+
+  var PED = [];
+  pedidosBase.forEach(function (pedido) {
+    var cIdx = idxCliente(pedido.clienteId, pedido.clienteNome);
+    var fIdx = idxFabrica(pedido.fornecedorId, pedido.fornecedorNome);
+    var vIdx = idxVendedor(pedido.vendedorId, pedido.vendedorNome);
+    var sIdx = idxStatus(pedido.status);
+    var faturasAtivas = (pedido.faturas || []).filter(function (f) { return f.status !== 'Cancelado'; });
+    if ((pedido.status === 'Faturado' || pedido.status === 'Faturado Parcial') && faturasAtivas.length) {
+      faturasAtivas.forEach(function (fat) {
+        var vol = (fat.itens || []).reduce(function (s, it) { return s + (Number(it.qtd) || 0); }, 0);
+        var data = (fat.data || pedido.data || '').slice(0, 10);
+        if (!data) return;
+        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx]);
+      });
+    } else {
+      var volPed = (pedido.itens || []).reduce(function (s, it) { return s + (Number(it.quantidade) || 0); }, 0);
+      var dataPed = (pedido.data || '').slice(0, 10);
+      if (!dataPed) return;
+      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx]);
+    }
+  });
+
+  var hoje = new Date();
+  var ano = hoje.getFullYear();
+  var pad = function (n) { return String(n).padStart(2, '0'); };
+  var hojeStr = hoje.getFullYear() + '-' + pad(hoje.getMonth() + 1) + '-' + pad(hoje.getDate());
+  var stFat = STATUS.indexOf('Faturado'), stFatParc = STATUS.indexOf('Faturado Parcial');
+  var somaFaturado = PED.filter(function (p) { return p[6] === stFat || p[6] === stFatParc; }).reduce(function (s, p) { return s + p[5]; }, 0);
+
+  return {
+    meta: {
+      periodo_inicio: ano + '-01-01',
+      periodo_fim: hojeStr,
+      linhas_origem: PED.length,
+      pedidos: pedidosBase.length,
+      soma_oficial_faturado: somaFaturado,
+      regras: 'Dados ao vivo do módulo Pedidos (Faturado + Faturado Parcial; granularidade por fatura quando disponível)',
+      gerado_em: hojeStr,
+    },
+    vendedores: VEND,
+    fabricas: FAB,
+    status: STATUS,
+    clientes: CLI,
+    clientes_inativo: CLI_INATIVO,
+    pedidos: PED,
+  };
+}
+
 function dashInit() {
   if (typeof Chart === 'undefined') { setTimeout(dashInit, 100); return; }
   if (!_dashOrigChart) {
@@ -12724,11 +12893,23 @@ function dashInit() {
   (function() {
 
     // =============== DADOS ===============
-    const DATA = JSON.parse(document.getElementById('dash-dados').textContent);
+    const _dashHistorico = window._dashModoHistorico2025 === true;
+    const DATA = _dashHistorico ? JSON.parse(document.getElementById('dash-dados').textContent) : _dashConstruirDadosAoVivo();
     const { vendedores: VEND, fabricas: FAB, clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, meta: METAINFO } = DATA;
     const ST_FATURADO = STATUS.indexOf('Faturado');
     const ST_FAT_PARC = STATUS.indexOf('Faturado Parcial');
     const ST_OK = new Set([ST_FATURADO, ST_FAT_PARC].filter(x => x >= 0));
+
+    // Reflete o modo atual no titulo e no botao de alternar
+    const _dashTitulo = document.getElementById('dashTituloVisaoGeral');
+    if (_dashTitulo) _dashTitulo.textContent = 'Visão Geral' + (_dashHistorico ? ' — Histórico 2025' : '');
+    const _dashBtnHist = document.getElementById('btnHistorico2025');
+    if (_dashBtnHist) {
+      _dashBtnHist.dataset.ativo = _dashHistorico ? '1' : '';
+      _dashBtnHist.textContent = _dashHistorico ? 'Voltar para dados atuais' : 'Ver histórico 2025';
+      _dashBtnHist.style.background = _dashHistorico ? '#DE7926' : 'rgba(255,255,255,.12)';
+      _dashBtnHist.style.borderColor = _dashHistorico ? '#DE7926' : 'rgba(255,255,255,.2)';
+    }
 
 
     // =============== UTIL ===============
@@ -13351,7 +13532,8 @@ function dashInit() {
 
     // =============== PERÍODO ===============
     function updatePeriodoInfo() {
-      document.getElementById('periodoInfo').textContent = `Período: ${fmtDate(state.dtIni)} → ${fmtDate(state.dtFim)}`;
+      const prefixo = _dashHistorico ? 'Histórico 2025 · ' : '';
+      document.getElementById('periodoInfo').textContent = `${prefixo}Período: ${fmtDate(state.dtIni)} → ${fmtDate(state.dtFim)}`;
     }
     document.getElementById('dtIni').addEventListener('change', e => { state.dtIni = e.target.value; rerender(); });
     document.getElementById('dtFim').addEventListener('change', e => { state.dtFim = e.target.value; rerender(); });
@@ -13378,6 +13560,14 @@ function dashInit() {
       document.getElementById('dtFim').value = state.dtFim;
       buildFiltros(); rerender();
     });
+    // onclick (nao addEventListener) de proposito: dashInit() roda de novo toda vez que a
+    // pagina Inicio e reaberta, e addEventListener empilharia um listener novo a cada vez --
+    // o 2o clique dispararia os 2 listeners e o toggle voltaria pro mesmo estado sozinho.
+    const _dashBtnHistEl = document.getElementById('btnHistorico2025');
+    if (_dashBtnHistEl) _dashBtnHistEl.onclick = () => {
+      window._dashModoHistorico2025 = !window._dashModoHistorico2025;
+      dashInit();
+    };
     document.getElementById('btnLimparFabrica')?.addEventListener('click', () => { state.fabricas.clear(); buildFiltros(); rerender(); });
     // theme toggle removed
 
@@ -22806,6 +22996,7 @@ var _drSelecoes = [];
 var _drItensBusca = [];
 var _drUltimosGrupos = [];
 var _drExpandido = {};
+var _drVisualizarGrupoIdx = 0;
 
 function _drPopularFiltros() {
   var fornSel = document.getElementById('dr-fornecedor');
@@ -22952,6 +23143,78 @@ function _drCadastroPara(skus, produtosMap, cliIdsValidos) {
   return lista;
 }
 
+// Peso da CAIXA do produto no documento de Dados Representadas -- mesma regra ja usada na
+// Tabela de Preco (ver _tvpEhKg/coluna Peso CX): quando a unidade cadastrada e KG, a propria
+// Quant. CX ja E o peso (nao faz sentido multiplicar de novo); nos demais casos (PC/UN etc.)
+// o peso da caixa e quantidade x peso da unidade.
+function _drEhKg(produto) {
+  return !!(produto && produto.unidade && String(produto.unidade).trim().toUpperCase() === 'KG');
+}
+function _drNum(v) {
+  return parseFloat(String(v === undefined || v === null ? '' : v).replace(',', '.')) || 0;
+}
+function _drPesoCx(produto) {
+  if (!produto) return '';
+  if (_drEhKg(produto)) return (produto.quant !== undefined && produto.quant !== null && produto.quant !== '') ? produto.quant : '';
+  if (produto.peso === undefined || produto.peso === null || produto.peso === '') return '';
+  return Math.round(_drNum(produto.quant) * _drNum(produto.peso) * 100) / 100;
+}
+// O cadastro de Produto nunca tem preco preenchido (o campo "preco" so existe no objeto mas
+// nenhuma tela grava nele) -- o preco de verdade fica na Tabela de Preco daquele Fornecedor
+// vinculada a Rede/Sub-Rede/Cliente, igual a Consulta de Preco ja resolve. Se mais de uma
+// tabela ativa bater pro mesmo produto, usa a mais recentemente atualizada.
+function _drParseDataBrParaOrdenar(s) {
+  var partes = String(s || '').split('/');
+  if (partes.length !== 3) return '';
+  return partes[2] + '-' + ('0' + partes[1]).slice(-2) + '-' + ('0' + partes[0]).slice(-2);
+}
+function _drBuscarPrecoProduto(fornId, prodId, clienteIds) {
+  var tabelas = (getTabPrecos() || []).filter(function (t) {
+    if (t.ativo !== 'Sim') return false;
+    if (t.fornecedor && String(t.fornecedor) !== String(fornId)) return false;
+    return (t.clientes || []).some(function (c) { return clienteIds.indexOf(c.cliId) !== -1; });
+  });
+  var melhor = null;
+  tabelas.forEach(function (t) {
+    var item = (t.itens || []).find(function (i) { return i.prodId === prodId; });
+    if (!item) return;
+    if (!melhor || _drParseDataBrParaOrdenar(t.dtAtualizacao) > _drParseDataBrParaOrdenar(melhor.tab.dtAtualizacao)) melhor = { tab: t, item: item };
+  });
+  if (!melhor) return '';
+  return _drNum(melhor.item.valor);
+}
+function _drPrecoExibir(item) {
+  if (!item) return '';
+  if (item.precoTabela === '' || item.precoTabela === undefined || item.precoTabela === null) return '';
+  if (String(item.forma || '').trim().toUpperCase() === 'CX') {
+    var qtd = _drNum(item.prod && item.prod.quant);
+    return Math.round(_drNum(item.precoTabela) * qtd * 100) / 100;
+  }
+  return item.precoTabela;
+}
+function _drEnriquecerItens(itens, fornId, clienteIds) {
+  (itens || []).forEach(function (item) {
+    item.pesoCxCalc = _drPesoCx(item.prod);
+    item.precoTabela = _drBuscarPrecoProduto(fornId, item.prodId, clienteIds);
+    item.precoExibir = _drPrecoExibir(item);
+  });
+  return itens;
+}
+// Rede-mae de um grupo para fins de logo/cabecalho: para tipo 'rede' e a propria rede; para
+// 'subrede' sobe 1 nivel ate a Rede que a contem; 'cliente' nao tem rede-mae (sem logo/rotulo).
+function _drRedeMaeDoGrupo(g) {
+  if (!g) return null;
+  if (g.tipo === 'rede') {
+    return getCatClientes().find(function (c) { return String(c.id) === String(g.id); }) || null;
+  }
+  if (g.tipo === 'subrede') {
+    var sub = getCatClientes().find(function (c) { return String(c.id) === String(g.id); });
+    if (!sub || !sub.pai) return null;
+    return getCatClientes().find(function (c) { return String(c.id) === String(sub.pai); }) || null;
+  }
+  return null;
+}
+
 function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
   var produtosMap = {}; getProdutos().forEach(function(p){ produtosMap[p.id] = p; });
   var skus = getSkuClientes().filter(function(s){ return String(s.fornId) === String(fornId); });
@@ -22969,6 +23232,7 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       var idsCadastro = [String(sel.id)].concat(lojas.map(function(l){ return String(l.id); }));
       var cadastro = _drCadastroPara(skus, produtosMap, idsCadastro);
       var clienteIdsTodos = clientesDaRede.map(function(c){ return c.id; });
+      _drEnriquecerItens(cadastro, fornId, clienteIdsTodos);
 
       var produtosCalc = cadastro.map(function(item){
         var r = _drValorQtdProduto(fornId, item.prodId, clienteIdsTodos, dataDe, dataAte);
@@ -23022,6 +23286,7 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       if (redeMae) idsCadastroSub.push(String(redeMae.id));
       var cadastroSub = _drCadastroPara(skus, produtosMap, idsCadastroSub);
       var clienteIdsSub = clientesDaSub.map(function(c){ return c.id; });
+      _drEnriquecerItens(cadastroSub, fornId, clienteIdsSub);
       var produtosCalcSub = cadastroSub.map(function(item){
         var r = _drValorQtdProduto(fornId, item.prodId, clienteIdsSub, dataDe, dataAte);
         return { item: item, valor: r.valor, qtd: r.qtd, comprado: r.valor > 0 };
@@ -23045,6 +23310,7 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       var cli = clientesMap[sel.id];
       if (!cli) return;
       var cadastroCli = _drCadastroPara(skus, produtosMap, [String(sel.id)]);
+      _drEnriquecerItens(cadastroCli, fornId, [String(sel.id)]);
       var produtosCalcCli = cadastroCli.map(function(item){
         var r = _drValorQtdProduto(fornId, item.prodId, [sel.id], dataDe, dataAte);
         return { item: item, valor: r.valor, qtd: r.qtd, comprado: r.valor > 0 };
@@ -23390,8 +23656,11 @@ function _drConstruirAbaResumo(wb, grupos, fornNome, periodoTxt, abasPorGrupo) {
 }
 
 function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartilharId, imgRedeId, imgFornId) {
+  var redeMae = _drRedeMaeDoGrupo(g);
+  var temLinhaRede = (g.tipo === 'subrede' && !!redeMae);
+  var linhaHeaderNum = temLinhaRede ? 8 : 7;
   var ws = wb.addWorksheet(nomeAba, {
-    views: [{ showGridLines: false, state: 'frozen', ySplit: 7, topLeftCell: 'A8' }],
+    views: [{ showGridLines: false, state: 'frozen', ySplit: linhaHeaderNum, topLeftCell: 'A' + (linhaHeaderNum + 1) }],
     pageSetup: { orientation: 'portrait', fitToWidth: 1, fitToHeight: 0 }
   });
   ws.columns = [{ width: 11 }, { width: 16 }, { width: 44 }, { width: 14 }, { width: 12 }, { width: 10 }, { width: 18 }];
@@ -23415,7 +23684,8 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
     row.getCell(2).alignment = { horizontal: 'left', vertical: 'middle' };
     return row;
   }
-  linhaLabel(g.tipo === 'rede' ? 'REDE:' : 'CLIENTE:', g.nome);
+  if (temLinhaRede) linhaLabel('REDE:', redeMae.nome || '');
+  linhaLabel(g.tipo === 'cliente' ? 'CLIENTE:' : (g.tipo === 'subrede' ? 'SUB-REDE:' : 'REDE:'), g.nome);
   linhaLabel('FORNECEDOR:', fornNome);
   linhaLabel('PER\u00cdODO:', periodoTxt);
   linhaLabel('ESTADOS:', g.estados);
@@ -23435,8 +23705,8 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
   function linhaProdutoTabela(item, corImpar) {
     var row = ws.addRow([
       item.prod.codigo || '', item.sku || '', item.prod.nome || '',
-      item.prod.quant || '', item.prod.peso || '', item.prod.unidade || '',
-      _drFormatarPreco(item.prod.preco)
+      item.prod.quant || '', (item.pesoCxCalc !== undefined && item.pesoCxCalc !== '') ? item.pesoCxCalc : '', item.forma || '',
+      _drFormatarPreco(item.precoExibir)
     ]);
     row.height = 17;
     var cor = (row.number % 2 === 0) ? DR_CORES.white : corImpar;
@@ -23502,7 +23772,7 @@ function _drGerarExcelReal(grupos, fornNome, fornId, dataDe, dataAte) {
 
   grupos.forEach(function (g) {
     var nomeAba = abasPorGrupo[g.__idx];
-    var redeObj = (g.tipo === 'rede') ? getCatClientes().find(function (c) { return String(c.id) === String(g.id); }) : null;
+    var redeObj = _drRedeMaeDoGrupo(g);
     var fotoRede = redeObj ? redeObj.foto : '';
     var imgRedeId = fotoRede ? _drCarregarImagemWorkbook(wb, fotoRede) : null;
     _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartilharId, imgRedeId, imgFornId);
@@ -23517,6 +23787,212 @@ function _drGerarExcelReal(grupos, fornNome, fornId, dataDe, dataAte) {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   });
+}
+
+// Monta o mesmo documento que sai numa aba do Excel (_drConstruirAbaGrupo) para exibir no
+// popup "Visualizar" -- titulo + logos Rede/Fornecedor + tabela de produtos com/sem venda.
+// Mantido separado do gerador de Excel/PDF de proposito: aqui e so leitura (nenhum arquivo
+// e baixado), entao o usuario pode conferir antes de decidir gerar ou nao.
+function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn) {
+  var rotuloProprio = (g.tipo === 'cliente') ? 'CLIENTE' : (g.tipo === 'subrede' ? 'SUB-REDE' : 'REDE');
+  var redeMae = _drRedeMaeDoGrupo(g);
+  var mostrarLinhaRede = (g.tipo === 'subrede' && !!redeMae);
+  function linhaProduto(item, corBg) {
+    var qtd = (item.prod.quant !== undefined && item.prod.quant !== null && item.prod.quant !== '') ? String(item.prod.quant) : '\u2014';
+    var peso = (item.pesoCxCalc !== undefined && item.pesoCxCalc !== '') ? String(item.pesoCxCalc).replace('.', ',') : '\u2014';
+    return '<tr style="background:' + corBg + '">'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.prod.codigo || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.sku || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:left;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.prod.nome || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(qtd) + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(peso) + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.forma || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:right;border:1px solid #e5e7eb;font-size:11px">' + _drFormatarPreco(item.precoExibir) + '</td>'
+      + '</tr>';
+  }
+  var comVenda = g.cadastroComVenda || [];
+  var semVenda = g.cadastroSemVenda || [];
+  var linhasComVenda = comVenda.map(function (item) { return linhaProduto(item, '#e2efda'); }).join('');
+  var bannerSemVenda = semVenda.length
+    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#fcd5b4;color:#7f3f00;font-weight:700;border:1px solid #e5e7eb;font-size:11px">PRODUTOS SEM VENDA (' + semVenda.length + ' itens \u2014 OPORTUNIDADE COMERCIAL)</td></tr>')
+    : '';
+  var linhasSemVenda = semVenda.map(function (item) { return linhaProduto(item, '#fff0f0'); }).join('');
+  var semNenhumProduto = !comVenda.length && !semVenda.length;
+
+  return ''
+    + '<div style="background:#d9d9d9;border-radius:6px;padding:10px 14px;margin-bottom:10px;font-size:14px;font-weight:800;color:#1e293b;letter-spacing:.02em">DADOS REPRESENTADAS</div>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;flex-wrap:wrap">'
+      + '<table style="font-size:12px">'
+        + (mostrarLinhaRede ? ('<tr><td style="padding:2px 8px 2px 0;font-weight:700;color:#1e293b;width:110px">REDE:</td><td style="padding:2px 0;font-weight:700;color:#1F4E79">' + _pedEsc(redeMae.nome || '') + '</td></tr>') : '')
+        + '<tr><td style="padding:2px 8px 2px 0;font-weight:700;color:#1e293b;width:110px">' + rotuloProprio + ':</td><td style="padding:2px 0;font-weight:700;color:#1F4E79">' + _pedEsc(g.nome) + '</td></tr>'
+        + '<tr><td style="padding:2px 8px 2px 0;font-weight:700;color:#1e293b">FORNECEDOR:</td><td style="padding:2px 0;font-weight:700;color:#1F4E79">' + _pedEsc(fornNome) + '</td></tr>'
+        + '<tr><td style="padding:2px 8px 2px 0;font-weight:700;color:#1e293b">PER\u00cdODO:</td><td style="padding:2px 0;font-weight:700;color:#1F4E79">' + _pedEsc(periodoTxt) + '</td></tr>'
+        + '<tr><td style="padding:2px 8px 2px 0;font-weight:700;color:#1e293b">ESTADOS:</td><td style="padding:2px 0;font-weight:700;color:#1F4E79">' + _pedEsc(g.estados || '\u2014') + '</td></tr>'
+      + '</table>'
+      + '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0">'
+        + (logoRede ? ('<img id="dr-visualizar-logo-rede" src="' + logoRede + '" style="height:48px;max-width:110px;object-fit:contain">') : '')
+        + (logoForn ? ('<img id="dr-visualizar-logo-forn" src="' + logoForn + '" style="height:48px;max-width:110px;object-fit:contain">') : '')
+      + '</div>'
+    + '</div>'
+    + (semNenhumProduto
+        ? '<div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">Nenhum produto cadastrado para este grupo.</div>'
+        : ('<table style="width:100%;border-collapse:collapse;font-size:11.5px">'
+            + '<thead><tr style="background:#c5d9f1">'
+              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">C\u00d3D. FAB</th>'
+              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">C\u00d3D. REDE</th>'
+              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px;text-align:left">PRODUTOS</th>'
+              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">QTDE P/CX</th>'
+              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">PESO CX</th>'
+              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">UND.</th>'
+              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px;text-align:right">PRE\u00c7O</th>'
+            + '</tr></thead>'
+            + '<tbody>' + linhasComVenda + bannerSemVenda + linhasSemVenda + '</tbody>'
+          + '</table>'));
+}
+
+// Calcula o menor retangulo que contem o "desenho" da logo, descontando a moldura de fundo
+// (branco solido ou transparente) que faz a logo parecer menor que outras coladas do lado --
+// exatamente o problema relatado (logo da Rede com bastante espaco vazio ao redor, a da
+// Fabrica praticamente sem margem). Funcao pura (recebe so os bytes RGBA) pra dar pra testar
+// sem precisar de canvas/Image de verdade.
+function _drCalcularBoundingBoxLogo(dados, largura, altura) {
+  if (!dados || !largura || !altura) return null;
+  function pixelEm(x, y) { var i = (y * largura + x) * 4; return [dados[i], dados[i + 1], dados[i + 2], dados[i + 3]]; }
+  var bg = pixelEm(0, 0);
+  function ehFundo(p) {
+    if (p[3] < 10) return true;
+    return (Math.abs(p[0] - bg[0]) + Math.abs(p[1] - bg[1]) + Math.abs(p[2] - bg[2])) < 24;
+  }
+  var minX = largura, minY = altura, maxX = -1, maxY = -1;
+  for (var y = 0; y < altura; y++) {
+    for (var x = 0; x < largura; x++) {
+      if (!ehFundo(pixelEm(x, y))) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (maxX < 0) return null;
+  var margem = 2;
+  minX = Math.max(0, minX - margem);
+  minY = Math.max(0, minY - margem);
+  maxX = Math.min(largura - 1, maxX + margem);
+  maxY = Math.min(altura - 1, maxY + margem);
+  return { x: minX, y: minY, w: (maxX - minX + 1), h: (maxY - minY + 1) };
+}
+
+// Recorta o fundo em branco/transparente de uma logo (data URL) via canvas. Sempre resolve
+// (nunca rejeita) -- se qualquer etapa falhar (CORS, canvas indisponivel, imagem toda "fundo",
+// etc.) devolve a imagem original sem cortar, pra nunca deixar a logo sumir por causa disso.
+var _drLogoCortadoCache = {};
+function _drRecortarLogo(dataUrl) {
+  if (!dataUrl) return Promise.resolve(dataUrl);
+  if (Object.prototype.hasOwnProperty.call(_drLogoCortadoCache, dataUrl)) return Promise.resolve(_drLogoCortadoCache[dataUrl]);
+  return new Promise(function (resolve) {
+    var resolvido = false;
+    function finalizar(v) { if (resolvido) return; resolvido = true; _drLogoCortadoCache[dataUrl] = v; resolve(v); }
+    try {
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+          if (!w || !h) { finalizar(dataUrl); return; }
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext && canvas.getContext('2d');
+          if (!ctx) { finalizar(dataUrl); return; }
+          ctx.drawImage(img, 0, 0);
+          var dados;
+          try { dados = ctx.getImageData(0, 0, w, h).data; } catch (eLeitura) { finalizar(dataUrl); return; }
+          var caixa = _drCalcularBoundingBoxLogo(dados, w, h);
+          if (!caixa || (caixa.w >= w * 0.98 && caixa.h >= h * 0.98)) { finalizar(dataUrl); return; }
+          var canvas2 = document.createElement('canvas');
+          canvas2.width = caixa.w; canvas2.height = caixa.h;
+          var ctx2 = canvas2.getContext('2d');
+          ctx2.drawImage(canvas, caixa.x, caixa.y, caixa.w, caixa.h, 0, 0, caixa.w, caixa.h);
+          finalizar(canvas2.toDataURL('image/png'));
+        } catch (eProc) { finalizar(dataUrl); }
+      };
+      img.onerror = function () { finalizar(dataUrl); };
+      setTimeout(function () { finalizar(dataUrl); }, 1500);
+      img.src = dataUrl;
+    } catch (eOuter) { finalizar(dataUrl); }
+  });
+}
+
+function _drRenderVisualizar() {
+  var grupos = _drUltimosGrupos || [];
+  var fornSel = document.getElementById('dr-fornecedor');
+  var fornId = fornSel ? fornSel.value : '';
+  var fornNome = (fornSel && fornSel.selectedIndex > 0) ? fornSel.options[fornSel.selectedIndex].textContent : '';
+  var dataDe = document.getElementById('dr-data-de').value;
+  var dataAte = document.getElementById('dr-data-ate').value;
+  var periodoTxt = (dataDe ? dataDe.split('-').reverse().join('/') : '\u2014') + ' a ' + (dataAte ? dataAte.split('-').reverse().join('/') : '\u2014');
+
+  var abas = document.getElementById('dr-visualizar-abas');
+  if (abas) {
+    abas.innerHTML = grupos.map(function (g, idx) {
+      var ativo = idx === _drVisualizarGrupoIdx;
+      return '<button onclick="_drSelecionarGrupoVisualizar(' + idx + ')" style="background:' + (ativo ? '#272A4A' : '#f1f5f9') + ';color:' + (ativo ? '#fff' : '#475569') + ';border:none;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">' + _pedEsc(g.nome) + '</button>';
+    }).join('');
+  }
+
+  var corpo = document.getElementById('dr-visualizar-corpo');
+  if (!corpo) return;
+  var g = grupos[_drVisualizarGrupoIdx];
+  if (!g) { corpo.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum grupo selecionado.</div>'; return; }
+
+  var forn = getFornecedores().find(function (f) { return f.id === fornId; });
+  var logoForn = forn ? forn.foto : '';
+  var redeObj = _drRedeMaeDoGrupo(g);
+  var logoRede = redeObj ? redeObj.foto : '';
+
+  corpo.innerHTML = _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn);
+
+  var grupoNoMomento = g;
+  if (logoRede) {
+    _drRecortarLogo(logoRede).then(function (recortada) {
+      if (grupos[_drVisualizarGrupoIdx] !== grupoNoMomento || !recortada) return;
+      var imgEl = document.getElementById('dr-visualizar-logo-rede');
+      if (imgEl) imgEl.src = recortada;
+    });
+  }
+  if (logoForn) {
+    _drRecortarLogo(logoForn).then(function (recortada) {
+      if (grupos[_drVisualizarGrupoIdx] !== grupoNoMomento || !recortada) return;
+      var imgEl = document.getElementById('dr-visualizar-logo-forn');
+      if (imgEl) imgEl.src = recortada;
+    });
+  }
+}
+
+function _drSelecionarGrupoVisualizar(idx) {
+  _drVisualizarGrupoIdx = idx;
+  _drRenderVisualizar();
+}
+
+function _drFecharVisualizar() {
+  var modal = document.getElementById('modal-dr-visualizar');
+  if (modal) modal.style.display = 'none';
+}
+
+function _drVisualizar() {
+  var msg = document.getElementById('dr-msg');
+  var fornId = document.getElementById('dr-fornecedor').value;
+  if (!fornId) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione a F\u00e1brica (Fornecedor).'; return; }
+  if (!_drSelecoes.length) { msg.style.color = '#dc2626'; msg.textContent = 'Adicione ao menos uma Rede ou Cliente.'; return; }
+  var dataDe = document.getElementById('dr-data-de').value;
+  var dataAte = document.getElementById('dr-data-ate').value;
+  var grupos = getDrGrupos(fornId, _drSelecoes, dataDe, dataAte);
+  if (!grupos.length) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhum dado encontrado com esses filtros.'; return; }
+  _drUltimosGrupos = grupos;
+  _drVisualizarGrupoIdx = 0;
+  msg.style.color = '#64748b'; msg.textContent = '';
+  var modal = document.getElementById('modal-dr-visualizar');
+  if (modal) modal.style.display = 'flex';
+  _drRenderVisualizar();
 }
 
 function _drGerar() {
