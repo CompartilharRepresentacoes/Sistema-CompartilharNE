@@ -9041,79 +9041,43 @@ async function buscarCNPJCliente() {
   const btn = document.getElementById('btn-buscar-cnpj-cli');
   const btnTextoOriginal = btn ? btn.innerHTML : null;
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Buscando...'; }
-  const _capCli = (s) => (s||'').toString().toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
   try {
-    // Fonte 1: BrasilAPI (dados oficiais da Receita Federal). Se ela falhar por qualquer motivo
-    // (erro 500, limite de consultas 429, fora do ar), tenta a fonte reserva antes de desistir --
-    // só um CNPJ realmente inexistente (404) encerra a busca sem tentar a reserva.
-    let r = null, fonte = '';
-    try {
-      const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
-      if (resp.ok) { r = await resp.json(); fonte = 'brasilapi'; }
-      else if (resp.status === 404) { alert('CNPJ não encontrado na Receita Federal. Confira os números digitados.'); return; }
-    } catch(e) { console.warn('[buscarCNPJCliente] BrasilAPI falhou, tentando fonte reserva:', e); }
-
-    if (!r) {
-      try {
-        const resp2 = await fetch(`https://www.receitaws.com.br/v1/cnpj/${cnpj}`);
-        if (resp2.ok) {
-          const d = await resp2.json();
-          if (d.status !== 'ERROR') { r = d; fonte = 'receitaws'; }
-        }
-      } catch(e) { console.warn('[buscarCNPJCliente] fonte reserva (ReceitaWS) também falhou:', e); }
-    }
-
-    if (!r) {
-      alert('Não foi possível buscar o CNPJ em nenhuma das fontes disponíveis (BrasilAPI e ReceitaWS). Tente novamente em instantes, ou preencha os dados manualmente.');
+    const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+    if (!resp.ok) {
+      if (resp.status === 404) { alert('CNPJ não encontrado na Receita Federal. Confira os números digitados.'); return; }
+      if (resp.status === 429) { alert('Muitas consultas de CNPJ em pouco tempo (limite do serviço gratuito da BrasilAPI). Aguarde alguns segundos e tente novamente.'); return; }
+      alert('Não foi possível buscar o CNPJ (serviço retornou erro ' + resp.status + '). Tente novamente em instantes.');
       return;
     }
-
-    if (fonte === 'brasilapi') {
-      if (r.nome_fantasia) document.getElementById('cli-nome-fantasia').value = r.nome_fantasia;
-      if (r.razao_social)  document.getElementById('cli-razao-social').value  = r.razao_social;
-      if (r.email)         document.getElementById('cli-email').value         = r.email;
-      if (r.ddd_telefone_1) document.getElementById('cli-tel1').value = r.ddd_telefone_1;
-      // "Número" do endereço não vem do CEP (ViaCEP nunca retorna isso) -- só da própria consulta de
-      // CNPJ. Quando o CNPJ não tiver um número (comum em endereços rurais/zona industrial), usa "SN"
-      // (Sem Número) em vez de deixar o campo em branco.
-      document.getElementById('cli-numero').value = r.numero || 'SN';
-      // A Receita Federal (via BrasilAPI) já traz o tipo de logradouro (Rua/Av./Alameda/Praça/...)
-      // separado do nome, e também o Complemento -- monta o endereço completo com isso em vez de
-      // depender só do CEP (ViaCEP costuma vir sem o tipo de logradouro e quase sempre sem complemento).
-      if (r.logradouro) {
-        const tipo = r.descricao_tipo_de_logradouro ? _capCli(r.descricao_tipo_de_logradouro) + ' ' : '';
-        document.getElementById('cli-endereco').value = tipo + _capCli(r.logradouro);
-      }
-      if (r.bairro)      document.getElementById('cli-bairro').value      = _capCli(r.bairro);
-      if (r.complemento) document.getElementById('cli-complemento').value = _capCli(r.complemento);
-      if (r.cep) {
-        const cepEl = document.getElementById('cli-cep');
-        cepEl.value = r.cep.replace(/(\d{5})(\d{3})/,'$1-$2');
-        // Só usa o CEP pra completar o que a Receita não trouxe (UF, Cidade e a lista do dropdown) --
-        // sem sobrescrever Endereço/Bairro/Complemento que já vieram da própria consulta de CNPJ acima.
-        buscarCEPCliente(cepEl, true);
-      }
-    } else {
-      // Fonte reserva (ReceitaWS): campos com nomes diferentes da BrasilAPI, e o logradouro já
-      // vem com o tipo embutido no próprio texto (não precisa juntar duas partes).
-      if (r.fantasia) document.getElementById('cli-nome-fantasia').value = r.fantasia;
-      if (r.nome)      document.getElementById('cli-razao-social').value  = r.nome;
-      if (r.email)     document.getElementById('cli-email').value         = r.email;
-      if (r.telefone)  document.getElementById('cli-tel1').value = r.telefone.split('/')[0].trim();
-      document.getElementById('cli-numero').value = r.numero || 'SN';
-      if (r.logradouro)  document.getElementById('cli-endereco').value    = _capCli(r.logradouro);
-      if (r.bairro)       document.getElementById('cli-bairro').value      = _capCli(r.bairro);
-      if (r.complemento)  document.getElementById('cli-complemento').value = _capCli(r.complemento);
-      const cepDigitos = (r.cep || '').replace(/\D/g,'');
-      if (cepDigitos.length === 8) {
-        const cepEl = document.getElementById('cli-cep');
-        cepEl.value = cepDigitos.replace(/(\d{5})(\d{3})/,'$1-$2');
-        buscarCEPCliente(cepEl, true);
-      }
+    const r = await resp.json();
+    if (r.nome_fantasia) document.getElementById('cli-nome-fantasia').value = r.nome_fantasia;
+    if (r.razao_social)  document.getElementById('cli-razao-social').value  = r.razao_social;
+    if (r.email)         document.getElementById('cli-email').value         = r.email;
+    if (r.ddd_telefone_1) document.getElementById('cli-tel1').value = r.ddd_telefone_1;
+    // "Número" do endereço não vem do CEP (ViaCEP nunca retorna isso) -- só da própria consulta de
+    // CNPJ. Quando o CNPJ não tiver um número (comum em endereços rurais/zona industrial), usa "SN"
+    // (Sem Número) em vez de deixar o campo em branco.
+    document.getElementById('cli-numero').value = r.numero || 'SN';
+    // A Receita Federal (via BrasilAPI) já traz o tipo de logradouro (Rua/Av./Alameda/Praça/...)
+    // separado do nome, e também o Complemento -- monta o endereço completo com isso em vez de
+    // depender só do CEP (ViaCEP costuma vir sem o tipo de logradouro e quase sempre sem complemento).
+    const _capCli = (s) => (s||'').toString().toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
+    if (r.logradouro) {
+      const tipo = r.descricao_tipo_de_logradouro ? _capCli(r.descricao_tipo_de_logradouro) + ' ' : '';
+      document.getElementById('cli-endereco').value = tipo + _capCli(r.logradouro);
+    }
+    if (r.bairro)      document.getElementById('cli-bairro').value      = _capCli(r.bairro);
+    if (r.complemento) document.getElementById('cli-complemento').value = _capCli(r.complemento);
+    if (r.cep) {
+      const cepEl = document.getElementById('cli-cep');
+      cepEl.value = r.cep.replace(/(\d{5})(\d{3})/,'$1-$2');
+      // Só usa o CEP pra completar o que a Receita não trouxe (UF, Cidade e a lista do dropdown) --
+      // sem sobrescrever Endereço/Bairro/Complemento que já vieram da própria consulta de CNPJ acima.
+      buscarCEPCliente(cepEl, true);
     }
   } catch(e) {
     console.warn('[buscarCNPJCliente] falha na consulta:', e);
-    alert('Não foi possível buscar o CNPJ. Possíveis causas: sem conexão com a internet, ou os serviços de consulta estão fora do ar no momento. Tente novamente em instantes.\n\nDetalhe técnico: ' + (e && e.message ? e.message : e));
+    alert('Não foi possível buscar o CNPJ. Possíveis causas: sem conexão com a internet, ou o serviço de consulta (BrasilAPI) está fora do ar no momento. Tente novamente em instantes.\n\nDetalhe técnico: ' + (e && e.message ? e.message : e));
   } finally {
     if (btn) { btn.disabled = false; btn.innerHTML = btnTextoOriginal; }
   }
