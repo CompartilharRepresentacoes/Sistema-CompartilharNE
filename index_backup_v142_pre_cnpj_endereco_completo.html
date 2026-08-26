@@ -9058,23 +9058,7 @@ async function buscarCNPJCliente() {
     // CNPJ. Quando o CNPJ não tiver um número (comum em endereços rurais/zona industrial), usa "SN"
     // (Sem Número) em vez de deixar o campo em branco.
     document.getElementById('cli-numero').value = r.numero || 'SN';
-    // A Receita Federal (via BrasilAPI) já traz o tipo de logradouro (Rua/Av./Alameda/Praça/...)
-    // separado do nome, e também o Complemento -- monta o endereço completo com isso em vez de
-    // depender só do CEP (ViaCEP costuma vir sem o tipo de logradouro e quase sempre sem complemento).
-    const _capCli = (s) => (s||'').toString().toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
-    if (r.logradouro) {
-      const tipo = r.descricao_tipo_de_logradouro ? _capCli(r.descricao_tipo_de_logradouro) + ' ' : '';
-      document.getElementById('cli-endereco').value = tipo + _capCli(r.logradouro);
-    }
-    if (r.bairro)      document.getElementById('cli-bairro').value      = _capCli(r.bairro);
-    if (r.complemento) document.getElementById('cli-complemento').value = _capCli(r.complemento);
-    if (r.cep) {
-      const cepEl = document.getElementById('cli-cep');
-      cepEl.value = r.cep.replace(/(\d{5})(\d{3})/,'$1-$2');
-      // Só usa o CEP pra completar o que a Receita não trouxe (UF, Cidade e a lista do dropdown) --
-      // sem sobrescrever Endereço/Bairro/Complemento que já vieram da própria consulta de CNPJ acima.
-      buscarCEPCliente(cepEl, true);
-    }
+    if (r.cep) { const cepEl = document.getElementById('cli-cep'); cepEl.value = r.cep.replace(/(\d{5})(\d{3})/,'$1-$2'); buscarCEPCliente(cepEl); }
   } catch(e) {
     console.warn('[buscarCNPJCliente] falha na consulta:', e);
     alert('Não foi possível buscar o CNPJ. Possíveis causas: sem conexão com a internet, ou o serviço de consulta (BrasilAPI) está fora do ar no momento. Tente novamente em instantes.\n\nDetalhe técnico: ' + (e && e.message ? e.message : e));
@@ -9707,7 +9691,7 @@ function removerCliFoto() {
   document.getElementById('cli-foto-input').value='';
 }
 
-async function buscarCEPCliente(el, manterEndereco) {
+async function buscarCEPCliente(el) {
   let v = el.value.replace(/\D/g,'').slice(0,8);
   if (v.length>5) v = v.slice(0,5)+'-'+v.slice(5);
   el.value = v;
@@ -9716,14 +9700,9 @@ async function buscarCEPCliente(el, manterEndereco) {
     const res = await fetch(`https://viacep.com.br/ws/${v.replace(/\D/g,'')}/json/`);
     const d = await res.json();
     if (d.erro) return;
-    // Quando chamado logo depois de uma busca por CNPJ (manterEndereco=true), não sobrescreve
-    // Endereço/Bairro/Complemento que já vieram da Receita Federal -- só completa o que faltar.
-    const _endEl = document.getElementById('cli-endereco');
-    const _baiEl = document.getElementById('cli-bairro');
-    const _cplEl = document.getElementById('cli-complemento');
-    if (!(manterEndereco && _endEl.value)) _endEl.value = d.logradouro||'';
-    if (!(manterEndereco && _baiEl.value)) _baiEl.value = d.bairro||'';
-    if (!(manterEndereco && _cplEl.value)) _cplEl.value = d.complemento||'';
+    document.getElementById('cli-endereco').value = d.logradouro||'';
+    document.getElementById('cli-bairro').value   = d.bairro||'';
+    document.getElementById('cli-complemento').value = d.complemento||'';
     if (d.uf) {
       document.getElementById('cli-estado').value = d.uf;
       document.getElementById('cli-uf').value = d.uf;
