@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Enriquecimento de Clientes INATIVOS via CNPJ</title>
+<title>Enriquecimento de Clientes INATIVOS via CNPJ — v3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   * { box-sizing: border-box; }
@@ -10,7 +10,7 @@
   header { background: linear-gradient(135deg,#272A4A,#3d4180); color:#fff; padding: 18px 26px; }
   header h1 { margin:0; font-size: 18px; }
   header p { margin:4px 0 0; font-size:12.5px; color:#cbd5e1; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 26px 60px; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 20px 26px 60px; }
   .card { background:#fff; border-radius: 10px; padding: 16px 20px; margin-bottom:16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
   .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
   button { background:#272A4A; color:#fff; border:none; border-radius:7px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer; }
@@ -31,7 +31,7 @@
   .barra-fill { height:100%; background:#15803d; width:0%; transition: width .2s; }
   .log { font-size:11px; color:#94a3b8; margin-top:8px; height:18px; }
   table { width:100%; border-collapse:collapse; font-size:11.5px; }
-  th, td { padding:6px 8px; border-bottom:1px solid #f1f5f9; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px; }
+  th, td { padding:6px 8px; border-bottom:1px solid #f1f5f9; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:170px; }
   th { background:#f8fafc; color:#64748b; font-size:10px; text-transform:uppercase; position:sticky; top:0; }
   .tbl-wrap { max-height: 520px; overflow:auto; border:1px solid #f1f5f9; border-radius:8px; }
   .chip { display:inline-block; padding:2px 8px; border-radius:5px; font-size:10.5px; font-weight:700; }
@@ -46,13 +46,13 @@
 </head>
 <body>
 <header>
-  <h1>Enriquecimento de Clientes INATIVOS via CNPJ</h1>
-  <p>Ferramenta local (roda só no seu navegador). Mesma lógica da versão dos clientes ativos: espera maior entre consultas, tenta de novo sozinha quando leva bloqueio, e usa uma segunda fonte (ReceitaWS) quando a primeira falha de vez.</p>
+  <h1>Enriquecimento de Clientes INATIVOS via CNPJ — v3</h1>
+  <p>Ferramenta local (roda só no seu navegador). Versão 3: agora também traz o tipo de logradouro (Rua/Av./Alameda/Praça) e o Complemento, e já entrega Razão Social/Nome/Endereço com Primeira Letra Maiúscula em vez de CAIXA ALTA.</p>
 </header>
 <div class="wrap">
 
   <div class="aviso">
-    <strong>Base desta ferramenta:</strong> os 2.426 clientes do arquivo "Clientes inativos.xlsx" (2.406 com CNPJ, 11 com CPF — CPF não é consultável nesta API pública, só CNPJ). Espera-base de 8s entre consultas, com retentativa automática em caso de bloqueio e uma segunda fonte (ReceitaWS) antes de marcar erro de vez. Dá pra reprocessar só quem ficou com erro.
+    <strong>O que mudou desde a versão anterior:</strong> os resultados que você baixou não tinham Complemento e às vezes vinham sem o tipo de logradouro (Rua/Av./Praça/Alameda) -- essa v3 corrige isso (mesma lógica já aplicada no cadastro de Cliente do sistema) e já entrega os nomes com Primeira Letra Maiúscula em vez de CAIXA ALTA. Como a API não permite pedir só os campos que faltam, é necessário rodar a consulta completa de novo.
   </div>
 
   <div class="card">
@@ -80,8 +80,8 @@
       <table>
         <thead>
           <tr>
-            <th>Código</th><th>Fantasia</th><th>Razão Social (planilha)</th><th>Razão Social (nova)</th>
-            <th>Endereço</th><th>Número</th><th>Bairro</th><th>Município</th><th>UF</th><th>CEP</th><th>Fonte</th><th>Status</th>
+            <th>Código</th><th>Fantasia</th><th>Razão Social (nova)</th>
+            <th>Endereço</th><th>Número</th><th>Complemento</th><th>Bairro</th><th>Município</th><th>UF</th><th>CEP</th><th>Fonte</th><th>Status</th>
           </tr>
         </thead>
         <tbody id="corpoTabela"></tbody>
@@ -95,7 +95,7 @@
 const TODOS = JSON.parse(document.getElementById('dados-clientes').textContent);
 const CLIENTES_CNPJ = TODOS.filter(c => c.tipoDoc === 'CNPJ');
 
-let resultados = CLIENTES_CNPJ.map(c => ({ ...c, status: 'pend', razaoNova:'', endereco:'', numero:'', bairro:'', municipio:'', uf:'', cep:'', fonte:'', msg:'' }));
+let resultados = CLIENTES_CNPJ.map(c => ({ ...c, status: 'pend', razaoNova:'', endereco:'', numero:'', complemento:'', bairro:'', municipio:'', uf:'', cep:'', fonte:'', msg:'' }));
 let pausado = false;
 let rodando = false;
 let filaAtual = [];
@@ -115,6 +115,10 @@ const btnPausar = document.getElementById('btnPausar');
 const btnExportar = document.getElementById('btnExportar');
 const delayInput = document.getElementById('delaySeg');
 
+// Mesma capitalização usada no cadastro de Cliente do sistema (trata "." como separador
+// também, pra siglas tipo "A.M.D." ou "S.A." não virarem "A.m.d."/"S.a.").
+const _cap = (s) => (s||'').toString().toLowerCase().replace(/(^|[\s.])\S/g, c => c.toUpperCase());
+
 function renderLinha(item) {
   const idx = resultados.indexOf(item);
   let tr = document.getElementById('linha-' + idx);
@@ -125,9 +129,8 @@ function renderLinha(item) {
   }
   const chipClasse = item.status === 'ok' ? 'ok' : item.status === 'nf' ? 'nf' : item.status === 'err' ? 'err' : 'pend';
   const chipTexto = item.status === 'ok' ? 'OK' : item.status === 'nf' ? 'Não encontrado' : item.status === 'err' ? 'Erro' : 'Pendente';
-  const razaoDiff = item.razaoNova && item.razaoNova !== item.razaoAtual ? ' class="diff"' : '';
-  tr.innerHTML = `<td>${item.codigo}</td><td>${item.fantasia}</td><td>${item.razaoAtual}</td>`
-    + `<td${razaoDiff}>${item.razaoNova}</td><td>${item.endereco}</td><td>${item.numero}</td>`
+  tr.innerHTML = `<td>${item.codigo}</td><td>${item.fantasia}</td><td>${item.razaoNova}</td>`
+    + `<td>${item.endereco}</td><td>${item.numero}</td><td>${item.complemento}</td>`
     + `<td>${item.bairro}</td><td>${item.municipio}</td><td>${item.uf}</td><td>${item.cep}</td>`
     + `<td class="fonte">${item.fonte}</td>`
     + `<td><span class="chip ${chipClasse}" title="${item.msg||''}">${chipTexto}</span></td>`;
@@ -145,25 +148,40 @@ function atualizarStats() {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// Fonte 1: BrasilAPI (dados da Receita via minha-receita). Fonte 2 (fallback): ReceitaWS.
+// Fonte 1: BrasilAPI -- traz tipo de logradouro separado do nome, e Complemento.
 async function tentarBrasilApi(doc) {
   const resp = await fetch('https://brasilapi.com.br/api/cnpj/v1/' + doc);
   if (resp.status === 429) { const e = new Error('limite'); e.limite = true; throw e; }
   if (resp.status === 404) { const e = new Error('naoencontrado'); e.naoEncontrado = true; throw e; }
   if (!resp.ok) { throw new Error('http' + resp.status); }
   const d = await resp.json();
-  return { razaoNova: d.razao_social || '', endereco: d.logradouro || '', numero: d.numero || '',
-           bairro: d.bairro || '', municipio: d.municipio || '', uf: d.uf || '',
-           cep: d.cep ? String(d.cep).replace(/(\d{5})(\d{3})/, '$1-$2') : '', fonte: 'BrasilAPI' };
+  const tipo = d.descricao_tipo_de_logradouro ? _cap(d.descricao_tipo_de_logradouro) + ' ' : '';
+  return { razaoNova: _cap(d.razao_social || ''),
+           endereco: d.logradouro ? (tipo + _cap(d.logradouro)) : '',
+           numero: d.numero || '',
+           complemento: _cap(d.complemento || ''),
+           bairro: _cap(d.bairro || ''),
+           municipio: _cap(d.municipio || ''),
+           uf: d.uf || '',
+           cep: d.cep ? String(d.cep).replace(/(\d{5})(\d{3})/, '$1-$2') : '',
+           fonte: 'BrasilAPI' };
 }
+// Fonte 2 (reserva): ReceitaWS -- logradouro já vem com o tipo embutido no texto.
 async function tentarReceitaWs(doc) {
   const resp = await fetch('https://www.receitaws.com.br/v1/cnpj/' + doc);
   if (resp.status === 429) { const e = new Error('limite'); e.limite = true; throw e; }
   if (!resp.ok) { throw new Error('http' + resp.status); }
   const d = await resp.json();
   if (d.status === 'ERROR') { const e = new Error('naoencontrado'); e.naoEncontrado = true; throw e; }
-  return { razaoNova: d.nome || '', endereco: d.logradouro || '', numero: d.numero || '',
-           bairro: d.bairro || '', municipio: d.municipio || '', uf: d.uf || '', cep: d.cep || '', fonte: 'ReceitaWS' };
+  return { razaoNova: _cap(d.nome || ''),
+           endereco: _cap(d.logradouro || ''),
+           numero: d.numero || '',
+           complemento: _cap(d.complemento || ''),
+           bairro: _cap(d.bairro || ''),
+           municipio: _cap(d.municipio || ''),
+           uf: d.uf || '',
+           cep: (d.cep || '').replace(/\D/g,'').replace(/(\d{5})(\d{3})/, '$1-$2'),
+           fonte: 'ReceitaWS' };
 }
 
 async function consultarUm(item) {
@@ -180,7 +198,6 @@ async function consultarUm(item) {
         await sleep(15000 * t);
         continue;
       }
-      // Esgotou as tentativas na BrasilAPI (ou foi outro erro) -- tenta a fonte reserva antes de desistir.
       break;
     }
   }
@@ -234,7 +251,7 @@ btnPausar.onclick = () => { pausado = !pausado; btnPausar.textContent = pausado 
 btnExportar.onclick = () => {
   const linhas = resultados.filter(i => i.status !== 'pend').map(i => ({
     'Código': i.codigo, 'Fantasia': i.fantasia, 'Razão Social (planilha PonttiERP)': i.razaoAtual,
-    'Razão Social (nova)': i.razaoNova, 'Endereço': i.endereco, 'Número': i.numero,
+    'Razão Social (nova)': i.razaoNova, 'Endereço': i.endereco, 'Número': i.numero, 'Complemento': i.complemento,
     'Bairro': i.bairro, 'Município': i.municipio, 'UF': i.uf, 'CEP': i.cep, 'Fonte': i.fonte,
     'CNPJ': i.doc, 'Status da consulta': i.status === 'ok' ? 'OK' : i.status === 'nf' ? 'Não encontrado' : i.status === 'err' ? 'Erro' : 'Pendente',
     'Detalhe': i.msg || ''
@@ -242,7 +259,7 @@ btnExportar.onclick = () => {
   const ws = XLSX.utils.json_to_sheet(linhas);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Clientes enriquecidos');
-  XLSX.writeFile(wb, 'Clientes_Inativos_Enriquecidos.xlsx');
+  XLSX.writeFile(wb, 'Clientes_Inativos_Enriquecidos_v3.xlsx');
 };
 
 resultados.slice(0, 20).forEach((item) => renderLinha(item));

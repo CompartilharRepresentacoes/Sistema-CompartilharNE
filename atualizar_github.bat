@@ -1,5 +1,5 @@
 @echo off
-cd /d "%~dp0"
+pushd "%~dp0"
 echo ===============================================
 echo   Atualizando Sistema CompartilharNE no GitHub
 echo ===============================================
@@ -24,4 +24,5 @@ echo   Concluido! Confira em:
 echo   https://github.com/CompartilharRepresentacoes/Sistema-CompartilharNE
 echo ===============================================
 echo.
+popd
 pause

@@ -1919,6 +1919,8 @@
 <button onclick="_cliExportarExcel()" title="Exportar clientes em Excel" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-file-spreadsheet" style="font-size:10px"></i> Exportar</button>
 <button onclick="document.getElementById('cli-import-file').click()" title="Importar clientes de Excel" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-file-import" style="font-size:10px"></i> Importar</button>
 <input type="file" id="cli-import-file" accept=".xlsx,.xls" style="display:none" onchange="_cliImportarExcel(this)">
+<button onclick="document.getElementById('cli-cadcompleto-file').click()" title="Importar planilha Cadastro Completo (Clientes + Codigos por Fabrica + Vendedor por Fabrica)" style="background:#fff;color:#D82621;border:2px solid #D82621;border-radius:7px;padding:5px 13px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-database-import" style="font-size:10px"></i> Cadastro Completo</button>
+<input type="file" id="cli-cadcompleto-file" accept=".xlsx,.xls" style="display:none" onchange="_cadCompletoArquivoSelecionado(this)">
 <button onclick="showPage('page-cliente-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
           </div>
         </div>
@@ -5635,6 +5637,22 @@
 </div>
 
 <!-- ── Modal: Código do Cliente por Fornecedor ── -->
+<div id="modal-cadcompleto" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:560px;max-height:88vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
+    <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#fff">Importar Cadastro Completo</div>
+        <div id="cadcompleto-subtitulo" style="font-size:10.5px;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      </div>
+      <button onclick="fecharModalCadCompleto()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
+    </div>
+    <div id="cadcompleto-body" style="padding:16px 18px;overflow-y:auto;flex:1"></div>
+    <div style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
+      <button onclick="fecharModalCadCompleto()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>
+      <button id="cadcompleto-btn-confirmar" onclick="_cadCompletoConfirmar()" style="background:#D82621;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">Confirmar importação</button>
+    </div>
+  </div>
+</div>
 <div id="modal-cod-cli-forn" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:12px;width:100%;max-width:460px;max-height:85vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
     <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
@@ -9041,27 +9059,79 @@ async function buscarCNPJCliente() {
   const btn = document.getElementById('btn-buscar-cnpj-cli');
   const btnTextoOriginal = btn ? btn.innerHTML : null;
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Buscando...'; }
+  const _capCli = (s) => (s||'').toString().toLowerCase().replace(/(^|[\s.])\S/g, c => c.toUpperCase());
   try {
-    const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
-    if (!resp.ok) {
-      if (resp.status === 404) { alert('CNPJ não encontrado na Receita Federal. Confira os números digitados.'); return; }
-      if (resp.status === 429) { alert('Muitas consultas de CNPJ em pouco tempo (limite do serviço gratuito da BrasilAPI). Aguarde alguns segundos e tente novamente.'); return; }
-      alert('Não foi possível buscar o CNPJ (serviço retornou erro ' + resp.status + '). Tente novamente em instantes.');
+    // Fonte 1: BrasilAPI (dados oficiais da Receita Federal). Se ela falhar por qualquer motivo
+    // (erro 500, limite de consultas 429, fora do ar), tenta a fonte reserva antes de desistir --
+    // só um CNPJ realmente inexistente (404) encerra a busca sem tentar a reserva.
+    let r = null, fonte = '';
+    try {
+      const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+      if (resp.ok) { r = await resp.json(); fonte = 'brasilapi'; }
+      else if (resp.status === 404) { alert('CNPJ não encontrado na Receita Federal. Confira os números digitados.'); return; }
+    } catch(e) { console.warn('[buscarCNPJCliente] BrasilAPI falhou, tentando fonte reserva:', e); }
+
+    if (!r) {
+      try {
+        const resp2 = await fetch(`https://www.receitaws.com.br/v1/cnpj/${cnpj}`);
+        if (resp2.ok) {
+          const d = await resp2.json();
+          if (d.status !== 'ERROR') { r = d; fonte = 'receitaws'; }
+        }
+      } catch(e) { console.warn('[buscarCNPJCliente] fonte reserva (ReceitaWS) também falhou:', e); }
+    }
+
+    if (!r) {
+      alert('Não foi possível buscar o CNPJ em nenhuma das fontes disponíveis (BrasilAPI e ReceitaWS). Tente novamente em instantes, ou preencha os dados manualmente.');
       return;
     }
-    const r = await resp.json();
-    if (r.nome_fantasia) document.getElementById('cli-nome-fantasia').value = r.nome_fantasia;
-    if (r.razao_social)  document.getElementById('cli-razao-social').value  = r.razao_social;
-    if (r.email)         document.getElementById('cli-email').value         = r.email;
-    if (r.ddd_telefone_1) document.getElementById('cli-tel1').value = r.ddd_telefone_1;
-    // "Número" do endereço não vem do CEP (ViaCEP nunca retorna isso) -- só da própria consulta de
-    // CNPJ. Quando o CNPJ não tiver um número (comum em endereços rurais/zona industrial), usa "SN"
-    // (Sem Número) em vez de deixar o campo em branco.
-    document.getElementById('cli-numero').value = r.numero || 'SN';
-    if (r.cep) { const cepEl = document.getElementById('cli-cep'); cepEl.value = r.cep.replace(/(\d{5})(\d{3})/,'$1-$2'); buscarCEPCliente(cepEl); }
+
+    if (fonte === 'brasilapi') {
+      if (r.nome_fantasia) document.getElementById('cli-nome-fantasia').value = _capCli(r.nome_fantasia);
+      if (r.razao_social)  document.getElementById('cli-razao-social').value  = _capCli(r.razao_social);
+      if (r.email)         document.getElementById('cli-email').value         = r.email;
+      if (r.ddd_telefone_1) document.getElementById('cli-tel1').value = r.ddd_telefone_1;
+      // "Número" do endereço não vem do CEP (ViaCEP nunca retorna isso) -- só da própria consulta de
+      // CNPJ. Quando o CNPJ não tiver um número (comum em endereços rurais/zona industrial), usa "SN"
+      // (Sem Número) em vez de deixar o campo em branco.
+      document.getElementById('cli-numero').value = r.numero || 'SN';
+      // A Receita Federal (via BrasilAPI) já traz o tipo de logradouro (Rua/Av./Alameda/Praça/...)
+      // separado do nome, e também o Complemento -- monta o endereço completo com isso em vez de
+      // depender só do CEP (ViaCEP costuma vir sem o tipo de logradouro e quase sempre sem complemento).
+      if (r.logradouro) {
+        const tipo = r.descricao_tipo_de_logradouro ? _capCli(r.descricao_tipo_de_logradouro) + ' ' : '';
+        document.getElementById('cli-endereco').value = tipo + _capCli(r.logradouro);
+      }
+      if (r.bairro)      document.getElementById('cli-bairro').value      = _capCli(r.bairro);
+      if (r.complemento) document.getElementById('cli-complemento').value = _capCli(r.complemento);
+      if (r.cep) {
+        const cepEl = document.getElementById('cli-cep');
+        cepEl.value = r.cep.replace(/(\d{5})(\d{3})/,'$1-$2');
+        // Só usa o CEP pra completar o que a Receita não trouxe (UF, Cidade e a lista do dropdown) --
+        // sem sobrescrever Endereço/Bairro/Complemento que já vieram da própria consulta de CNPJ acima.
+        buscarCEPCliente(cepEl, true);
+      }
+    } else {
+      // Fonte reserva (ReceitaWS): campos com nomes diferentes da BrasilAPI, e o logradouro já
+      // vem com o tipo embutido no próprio texto (não precisa juntar duas partes).
+      if (r.fantasia) document.getElementById('cli-nome-fantasia').value = _capCli(r.fantasia);
+      if (r.nome)      document.getElementById('cli-razao-social').value  = _capCli(r.nome);
+      if (r.email)     document.getElementById('cli-email').value         = r.email;
+      if (r.telefone)  document.getElementById('cli-tel1').value = r.telefone.split('/')[0].trim();
+      document.getElementById('cli-numero').value = r.numero || 'SN';
+      if (r.logradouro)  document.getElementById('cli-endereco').value    = _capCli(r.logradouro);
+      if (r.bairro)       document.getElementById('cli-bairro').value      = _capCli(r.bairro);
+      if (r.complemento)  document.getElementById('cli-complemento').value = _capCli(r.complemento);
+      const cepDigitos = (r.cep || '').replace(/\D/g,'');
+      if (cepDigitos.length === 8) {
+        const cepEl = document.getElementById('cli-cep');
+        cepEl.value = cepDigitos.replace(/(\d{5})(\d{3})/,'$1-$2');
+        buscarCEPCliente(cepEl, true);
+      }
+    }
   } catch(e) {
     console.warn('[buscarCNPJCliente] falha na consulta:', e);
-    alert('Não foi possível buscar o CNPJ. Possíveis causas: sem conexão com a internet, ou o serviço de consulta (BrasilAPI) está fora do ar no momento. Tente novamente em instantes.\n\nDetalhe técnico: ' + (e && e.message ? e.message : e));
+    alert('Não foi possível buscar o CNPJ. Possíveis causas: sem conexão com a internet, ou os serviços de consulta estão fora do ar no momento. Tente novamente em instantes.\n\nDetalhe técnico: ' + (e && e.message ? e.message : e));
   } finally {
     if (btn) { btn.disabled = false; btn.innerHTML = btnTextoOriginal; }
   }
@@ -9673,6 +9743,327 @@ function _cliImportarExcel(input) {
   reader.readAsArrayBuffer(file);
 }
 
+// ═══════ Importar Cadastro Completo (Clientes + Codigos por Fabrica + Vendedor por Fabrica) ═══════
+function _cadCol(header, candidatos) {
+  for (var k = 0; k < candidatos.length; k++) {
+    var alvo = candidatos[k].toLowerCase();
+    for (var i = 0; i < header.length; i++) {
+      if (String(header[i] || '').toLowerCase().indexOf(alvo) !== -1) return i;
+    }
+  }
+  return -1;
+}
+
+function _cadVal(row, idx) {
+  if (idx == null || idx < 0 || !row) return '';
+  var v = row[idx];
+  return v === undefined || v === null ? '' : String(v);
+}
+
+function _cadNomeMatch(forn, nomeAlvo) {
+  if (!forn || !nomeAlvo) return false;
+  var alvo = String(nomeAlvo).trim().toLowerCase();
+  if (!alvo) return false;
+  var nf = String(forn.nome_fantasia || '').trim().toLowerCase();
+  var rs = String(forn.razao_social || '').trim().toLowerCase();
+  return nf === alvo || rs === alvo
+    || (nf && (nf.indexOf(alvo) !== -1 || alvo.indexOf(nf) !== -1))
+    || (rs && (rs.indexOf(alvo) !== -1 || alvo.indexOf(rs) !== -1));
+}
+
+function _cadUpsertCodigoForn(cliObj, fornId, codigoCliente) {
+  if (!cliObj.codigos_fornecedor) cliObj.codigos_fornecedor = [];
+  var idx = cliObj.codigos_fornecedor.findIndex(function(x){ return x.fornecedor_id === fornId; });
+  if (idx >= 0) cliObj.codigos_fornecedor[idx].codigo_cliente = codigoCliente;
+  else cliObj.codigos_fornecedor.push({ fornecedor_id: fornId, codigo_cliente: codigoCliente });
+}
+
+function _cadCompletoArquivoSelecionado(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (typeof XLSX === 'undefined') { alert('Biblioteca de Excel não carregou. Verifique a conexão com a internet e tente novamente.'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var wb = XLSX.read(data, { type: 'array' });
+      var resultado = _cadCompletoProcessar(wb, false);
+      window._cadCompletoWb = wb;
+      _cadCompletoAbrirPreview(file.name, resultado.resumo);
+    } catch (err) {
+      alert('Erro ao ler a planilha: ' + (err && err.message ? err.message : err));
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function _cadCompletoAbrirPreview(nomeArquivo, resumo) {
+  document.getElementById('cadcompleto-subtitulo').textContent = nomeArquivo + ' • ' + resumo.abasEncontradas.join(', ');
+  var html = '';
+
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Aba Clientes</span><span>' + resumo.clientes.total + ' linha(s)</span></div>'
+    + '<div style="font-size:12px;color:#555;line-height:1.8">'
+    + '<div>' + resumo.clientes.novos + ' cliente(s) novo(s) &bull; ' + resumo.clientes.atualizados + ' atualizado(s)</div>'
+    + (resumo.clientes.redeNaoEncontrada ? '<div style="color:#B45309">' + resumo.clientes.redeNaoEncontrada + ' linha(s) com Rede não encontrada</div>' : '')
+    + (resumo.clientes.lojaNaoEncontrada ? '<div style="color:#B45309">' + resumo.clientes.lojaNaoEncontrada + ' linha(s) com Loja não encontrada</div>' : '')
+    + (resumo.clientes.cnpjDuplicado.length ? '<div style="color:#B91C1C">' + resumo.clientes.cnpjDuplicado.length + ' linha(s) ignorada(s) por CNPJ/CPF duplicado</div>' : '')
+    + '</div></div>';
+
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Códigos por Fábrica (Allfood / Nova Mix)</span><span>' + (resumo.codigosFabrica.allfood + resumo.codigosFabrica.novamix) + ' código(s)</span></div>'
+    + '<div style="font-size:12px;color:#555">' + resumo.codigosFabrica.allfood + ' Allfood &bull; ' + resumo.codigosFabrica.novamix + ' Nova Mix / Quatá</div>'
+    + (resumo.codigosFabrica.allfoodNaoCadastrado ? '<div style="color:#B45309;font-size:12px;margin-top:4px">Fornecedor "Allfood" não encontrado no Cadastro de Fornecedores — nenhum código Allfood foi aplicado.</div>' : '')
+    + (resumo.codigosFabrica.novaMixNaoCadastrado ? '<div style="color:#B45309;font-size:12px;margin-top:4px">Fornecedor "Quatá"/"Nova Mix" não encontrado no Cadastro de Fornecedores — nenhum código Nova Mix/Quatá foi aplicado.</div>' : '')
+    + '</div>';
+
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Vendedor por Fábrica</span><span>' + resumo.vendedorForn.total + ' linha(s)</span></div>'
+    + '<div style="font-size:12px;color:#555;line-height:1.8">'
+    + '<div>' + resumo.vendedorForn.vinculados + ' vinculada(s) a um cliente existente</div>'
+    + (resumo.vendedorForn.semCodigoCliente ? '<div style="color:#B91C1C">' + resumo.vendedorForn.semCodigoCliente + ' linha(s) com Código Cliente não encontrado</div>' : '')
+    + (resumo.vendedorForn.fabricaNaoEncontrada ? '<div style="color:#B45309">' + resumo.vendedorForn.fabricaNaoEncontrada + ' linha(s) com Fábrica não cadastrada em Fornecedores</div>' : '')
+    + (resumo.vendedorForn.vendedorNaoEncontrado ? '<div style="color:#B45309">' + resumo.vendedorForn.vendedorNaoEncontrado + ' linha(s) com Vendedor não cadastrado/ativo</div>' : '')
+    + '</div></div>';
+
+  var totalPrazoTabela = resumo.prazoForn.total + resumo.tabelaForn.total;
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A"><span>Prazo / Tabela por Fábrica</span><span>' + totalPrazoTabela + ' linha(s)</span></div>'
+    + '<div style="font-size:12px;color:#888;margin-top:4px">' + (totalPrazoTabela === 0 ? 'Abas vazias na planilha — nada a importar.' : (resumo.prazoForn.total + ' de Prazo, ' + resumo.tabelaForn.total + ' de Tabela — mesma lógica de Vendedor por Fábrica.')) + '</div>'
+    + '</div>';
+
+  document.getElementById('cadcompleto-body').innerHTML = html;
+  document.getElementById('cadcompleto-btn-confirmar').disabled = (resumo.clientes.total === 0);
+  document.getElementById('modal-cadcompleto').style.display = 'flex';
+}
+
+function fecharModalCadCompleto() {
+  document.getElementById('modal-cadcompleto').style.display = 'none';
+  window._cadCompletoWb = null;
+}
+
+function _cadCompletoConfirmar() {
+  if (!window._cadCompletoWb) { fecharModalCadCompleto(); return; }
+  try {
+    var resultado = _cadCompletoProcessar(window._cadCompletoWb, true);
+    fecharModalCadCompleto();
+    renderClienteList();
+    alert('Importação concluída.\n\n'
+      + resultado.resumo.clientes.novos + ' cliente(s) novo(s), ' + resultado.resumo.clientes.atualizados + ' atualizado(s).\n'
+      + (resultado.resumo.codigosFabrica.allfood + resultado.resumo.codigosFabrica.novamix) + ' código(s) de fábrica aplicado(s).\n'
+      + resultado.resumo.vendedorForn.vinculados + ' vínculo(s) de Vendedor por Fábrica aplicado(s).');
+  } catch (err) {
+    alert('Erro ao confirmar importação: ' + (err && err.message ? err.message : err));
+  }
+}
+
+// Faz o parse das 4 abas do arquivo "Cadastro Completo". Se commit=true, grava de verdade (setClientes).
+// Sempre retorna o resumo, seja em modo preview (commit=false) ou gravação real (commit=true).
+function _cadCompletoProcessar(wb, commit) {
+  var abasEncontradas = [];
+  var wsClientes = wb.Sheets['Clientes']; if (wsClientes) abasEncontradas.push('Clientes');
+  var wsVend = wb.Sheets['Vendedor por Fábrica']; if (wsVend) abasEncontradas.push('Vendedor por Fábrica');
+  var wsPrazo = wb.Sheets['Prazo por Fábrica']; if (wsPrazo) abasEncontradas.push('Prazo por Fábrica');
+  var wsTabela = wb.Sheets['Tabela de Preço por Fábrica']; if (wsTabela) abasEncontradas.push('Tabela de Preço por Fábrica');
+
+  var cats = getCatClientes();
+  var vendedoresAtivos = getVendedoresAtivos();
+  var fornecedores = getFornecedores();
+  var clientes = JSON.parse(JSON.stringify(getClientes()));
+
+  var fornAllfood = fornecedores.find(function(f){ return _cadNomeMatch(f, 'allfood'); });
+  var fornNovaMix = fornecedores.find(function(f){ return _cadNomeMatch(f, 'quatá') || _cadNomeMatch(f, 'nova mix'); });
+
+  var resumo = {
+    abasEncontradas: abasEncontradas,
+    clientes: { total: 0, novos: 0, atualizados: 0, redeNaoEncontrada: 0, lojaNaoEncontrada: 0, cnpjDuplicado: [] },
+    codigosFabrica: { allfood: 0, novamix: 0, allfoodNaoCadastrado: !fornAllfood, novaMixNaoCadastrado: !fornNovaMix },
+    vendedorForn: { total: 0, vinculados: 0, semCodigoCliente: 0, fabricaNaoEncontrada: 0, vendedorNaoEncontrado: 0 },
+    prazoForn: { total: 0 },
+    tabelaForn: { total: 0 }
+  };
+
+  // ── aba Clientes ──
+  if (wsClientes) {
+    var aoaCli = XLSX.utils.sheet_to_json(wsClientes, { header: 1 });
+    var header = aoaCli[0] || [];
+    var C = {
+      codigo:      _cadCol(header, ['código']),
+      nome:        _cadCol(header, ['nome fantasia']),
+      razao:       _cadCol(header, ['razão social']),
+      tipoDoc:     _cadCol(header, ['tipo documento']),
+      doc:         _cadCol(header, ['cnpj']),
+      ie:          _cadCol(header, ['insc']),
+      tel1:        _cadCol(header, ['telefone 1']),
+      tel2:        _cadCol(header, ['telefone 2']),
+      whats:       _cadCol(header, ['whatsapp']),
+      contato:     _cadCol(header, ['contato']),
+      emailXml:    _cadCol(header, ['e-mail xml']),
+      email:       -1,
+      cep:         _cadCol(header, ['cep']),
+      endereco:    _cadCol(header, ['endereço']),
+      numero:      _cadCol(header, ['número']),
+      complemento: _cadCol(header, ['complemento']),
+      bairro:      _cadCol(header, ['bairro']),
+      cidade:      _cadCol(header, ['cidade']),
+      uf:          -1,
+      pais:        -1,
+      rede:        _cadCol(header, ['nome real']),
+      loja:        _cadCol(header, ['sub-rede', 'loja']),
+      ativo:       -1,
+      obs:         _cadCol(header, ['observaç']),
+      codAllfood:  _cadCol(header, ['allfood']),
+      codNovaMix:  _cadCol(header, ['nova mix'])
+    };
+    for (var ih = 0; ih < header.length; ih++) {
+      var h = String(header[ih] || '').trim().toLowerCase();
+      if (h === 'e-mail') C.email = ih;
+      if (h === 'uf') C.uf = ih;
+      if (h === 'país' || h === 'pais') C.pais = ih;
+      if (h === 'ativo') C.ativo = ih;
+    }
+
+    for (var r = 1; r < aoaCli.length; r++) {
+      var row = aoaCli[r];
+      if (!row || !row.length) continue;
+      var codigo = _cadVal(row, C.codigo).trim();
+      if (!codigo) continue;
+      resumo.clientes.total++;
+
+      var redeNome = _cadVal(row, C.rede).trim();
+      var lojaNome = _cadVal(row, C.loja).trim();
+      var rede = redeNome ? cats.find(function(c){ return String(c.nome||'').trim().toLowerCase() === redeNome.toLowerCase() && !c.pai; }) : null;
+      if (redeNome && !rede) resumo.clientes.redeNaoEncontrada++;
+      var loja = lojaNome ? cats.find(function(c){ return String(c.nome||'').trim().toLowerCase() === lojaNome.toLowerCase() && c.pai; }) : null;
+      if (lojaNome && !loja) resumo.clientes.lojaNaoEncontrada++;
+
+      var docTipoRaw = _cadVal(row, C.tipoDoc).trim().toLowerCase();
+      var docTipo = docTipoRaw.indexOf('cpf') !== -1 ? 'cpf' : 'cnpj';
+      var ativoRaw = _cadVal(row, C.ativo).trim().toLowerCase();
+      var docValor = _cadVal(row, C.doc).trim();
+
+      var existente = clientes.find(function(c){ return String(c.codigo||'').trim() === codigo; });
+
+      var docDigits = docValor.replace(/\D/g, '');
+      if (docDigits) {
+        var idExistente = existente ? existente.id : null;
+        var conflito = clientes.find(function(c){
+          return c.id !== idExistente && String(c.cpf_cnpj||'').replace(/\D/g,'') === docDigits;
+        });
+        if (conflito) {
+          resumo.clientes.cnpjDuplicado.push(codigo + ' - ' + _cadVal(row, C.nome) + ' (mesmo CNPJ/CPF do cliente código ' + conflito.codigo + ')');
+          continue;
+        }
+      }
+
+      var obj = existente ? JSON.parse(JSON.stringify(existente)) : {
+        id: 'c' + Date.now() + '_' + r,
+        prazos_fornecedor: [], tabelas_fornecedor: [], vendedores_fornecedor: [], codigos_fornecedor: []
+      };
+      obj.codigo = codigo;
+      obj.nome_fantasia = _cadVal(row, C.nome).trim();
+      obj.razao_social  = _cadVal(row, C.razao).trim();
+      obj.doc_tipo = docTipo;
+      obj.cpf_cnpj = docValor;
+      if (!obj.insc_estadual) obj.insc_estadual = docTipo === 'cpf' ? 'Isento' : '';
+      var ieVal = _cadVal(row, C.ie).trim(); if (ieVal) obj.insc_estadual = ieVal;
+      obj.email = _cadVal(row, C.email).trim();
+      obj.email_xml = _cadVal(row, C.emailXml).trim();
+      obj.tel1 = _cadVal(row, C.tel1).trim();
+      obj.tel2 = _cadVal(row, C.tel2).trim();
+      obj.whatsapp = _cadVal(row, C.whats).trim();
+      obj.contato = _cadVal(row, C.contato).trim();
+      obj.cep = _cadVal(row, C.cep).trim();
+      obj.endereco = _cadVal(row, C.endereco).trim();
+      obj.numero = _cadVal(row, C.numero).trim();
+      obj.bairro = _cadVal(row, C.bairro).trim();
+      obj.cidade = _cadVal(row, C.cidade).trim();
+      obj.estado = _cadVal(row, C.uf).trim();
+      obj.complemento = _cadVal(row, C.complemento).trim();
+      obj.pais = _cadVal(row, C.pais).trim() || 'Brasil';
+      if (rede) obj.categoria = rede.id;
+      if (loja) obj.subcategoria = loja.id;
+      obj.ativo = (ativoRaw === 'não' || ativoRaw === 'nao') ? 'Não' : 'Sim';
+      var obsVal = _cadVal(row, C.obs).trim(); if (obsVal) obj.obs = obsVal;
+      if (!obj.codigos_fornecedor) obj.codigos_fornecedor = [];
+
+      var codAllfoodVal = _cadVal(row, C.codAllfood).trim();
+      if (codAllfoodVal && fornAllfood) {
+        resumo.codigosFabrica.allfood++;
+        _cadUpsertCodigoForn(obj, fornAllfood.id, codAllfoodVal);
+      }
+      var codNovaMixVal = _cadVal(row, C.codNovaMix).trim();
+      if (codNovaMixVal && fornNovaMix) {
+        resumo.codigosFabrica.novamix++;
+        _cadUpsertCodigoForn(obj, fornNovaMix.id, codNovaMixVal);
+      }
+
+      if (existente) {
+        var idxE = clientes.indexOf(existente);
+        clientes[idxE] = obj;
+        resumo.clientes.atualizados++;
+      } else {
+        clientes.push(obj);
+        resumo.clientes.novos++;
+      }
+    }
+  }
+
+  // ── aba Vendedor por Fábrica ──
+  if (wsVend) {
+    var aoaVend = XLSX.utils.sheet_to_json(wsVend, { header: 1 });
+    var headerV = aoaVend[0] || [];
+    var V = {
+      codigo:  _cadCol(headerV, ['código cliente']),
+      fabrica: _cadCol(headerV, ['fábrica', 'fabrica']),
+      vendedor:_cadCol(headerV, ['vendedor'])
+    };
+    var mapaClientesPorCodigo = {};
+    clientes.forEach(function(c){ mapaClientesPorCodigo[String(c.codigo||'').trim()] = c; });
+
+    for (var rv = 1; rv < aoaVend.length; rv++) {
+      var rowV = aoaVend[rv];
+      if (!rowV || !rowV.length) continue;
+      var codV = _cadVal(rowV, V.codigo).trim();
+      if (!codV) continue;
+      resumo.vendedorForn.total++;
+
+      var cli = mapaClientesPorCodigo[codV];
+      if (!cli) { resumo.vendedorForn.semCodigoCliente++; continue; }
+
+      var fabricaNome = _cadVal(rowV, V.fabrica).trim();
+      var forn = fornecedores.find(function(f){ return _cadNomeMatch(f, fabricaNome); });
+      if (!forn) { resumo.vendedorForn.fabricaNaoEncontrada++; continue; }
+
+      var vendNomeV = _cadVal(rowV, V.vendedor).trim();
+      var vend = vendedoresAtivos.find(function(v){ return String(v.nome||v.nome_fantasia||'').trim().toLowerCase() === vendNomeV.toLowerCase(); });
+      if (!vend) { resumo.vendedorForn.vendedorNaoEncontrado++; continue; }
+
+      var fornNomeFmt = (forn.codigo ? forn.codigo + ' ' : '') + (forn.nome_fantasia || forn.razao_social || '');
+      if (!cli.vendedores_fornecedor) cli.vendedores_fornecedor = [];
+      var idxV = cli.vendedores_fornecedor.findIndex(function(p){ return p.fornId === forn.id; });
+      var item = { fornId: forn.id, fornNome: fornNomeFmt, vendId: vend.id, vendNome: (vend.nome || vend.nome_fantasia || '') };
+      if (idxV >= 0) cli.vendedores_fornecedor[idxV] = item; else cli.vendedores_fornecedor.push(item);
+      resumo.vendedorForn.vinculados++;
+    }
+  }
+
+  // ── abas Prazo / Tabela por Fábrica (mesmo layout de Vendedor; hoje ainda vazias) ──
+  if (wsPrazo) {
+    var aoaPrazo = XLSX.utils.sheet_to_json(wsPrazo, { header: 1 });
+    for (var rp = 1; rp < aoaPrazo.length; rp++) { if (aoaPrazo[rp] && String(aoaPrazo[rp][0]||'').trim()) resumo.prazoForn.total++; }
+  }
+  if (wsTabela) {
+    var aoaTabela = XLSX.utils.sheet_to_json(wsTabela, { header: 1 });
+    for (var rt = 1; rt < aoaTabela.length; rt++) { if (aoaTabela[rt] && String(aoaTabela[rt][0]||'').trim()) resumo.tabelaForn.total++; }
+  }
+
+  if (commit) setClientes(clientes);
+
+  return { resumo: resumo, clientes: clientes };
+}
+
 function previewCliFoto(input) {
   const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
@@ -9691,7 +10082,7 @@ function removerCliFoto() {
   document.getElementById('cli-foto-input').value='';
 }
 
-async function buscarCEPCliente(el) {
+async function buscarCEPCliente(el, manterEndereco) {
   let v = el.value.replace(/\D/g,'').slice(0,8);
   if (v.length>5) v = v.slice(0,5)+'-'+v.slice(5);
   el.value = v;
@@ -9700,9 +10091,14 @@ async function buscarCEPCliente(el) {
     const res = await fetch(`https://viacep.com.br/ws/${v.replace(/\D/g,'')}/json/`);
     const d = await res.json();
     if (d.erro) return;
-    document.getElementById('cli-endereco').value = d.logradouro||'';
-    document.getElementById('cli-bairro').value   = d.bairro||'';
-    document.getElementById('cli-complemento').value = d.complemento||'';
+    // Quando chamado logo depois de uma busca por CNPJ (manterEndereco=true), não sobrescreve
+    // Endereço/Bairro/Complemento que já vieram da Receita Federal -- só completa o que faltar.
+    const _endEl = document.getElementById('cli-endereco');
+    const _baiEl = document.getElementById('cli-bairro');
+    const _cplEl = document.getElementById('cli-complemento');
+    if (!(manterEndereco && _endEl.value)) _endEl.value = d.logradouro||'';
+    if (!(manterEndereco && _baiEl.value)) _baiEl.value = d.bairro||'';
+    if (!(manterEndereco && _cplEl.value)) _cplEl.value = d.complemento||'';
     if (d.uf) {
       document.getElementById('cli-estado').value = d.uf;
       document.getElementById('cli-uf').value = d.uf;
@@ -23183,10 +23579,20 @@ function _drBuscarPrecoProduto(fornId, prodId, clienteIds) {
   if (!melhor) return '';
   return _drNum(melhor.item.valor);
 }
+function _drPrecoExibir(item) {
+  if (!item) return '';
+  if (item.precoTabela === '' || item.precoTabela === undefined || item.precoTabela === null) return '';
+  if (String(item.forma || '').trim().toUpperCase() === 'CX') {
+    var qtd = _drNum(item.prod && item.prod.quant);
+    return Math.round(_drNum(item.precoTabela) * qtd * 100) / 100;
+  }
+  return item.precoTabela;
+}
 function _drEnriquecerItens(itens, fornId, clienteIds) {
   (itens || []).forEach(function (item) {
     item.pesoCxCalc = _drPesoCx(item.prod);
     item.precoTabela = _drBuscarPrecoProduto(fornId, item.prodId, clienteIds);
+    item.precoExibir = _drPrecoExibir(item);
   });
   return itens;
 }
@@ -23431,6 +23837,23 @@ function _drMontarDocumentoPdf(grupos, subtitulo) {
     + '</div>';
 }
 
+// PDF completo de Dados Representadas: resumo Rede/Loja (como sempre foi) + 1 secao por
+// Rede/Sub-Rede/Cliente selecionado com a tabela produto-a-produto (mesma que aparece no popup
+// Visualizar e na aba do Excel) -- pedido do usuario pra parar de ter menos detalhe no PDF.
+function _drMontarDocumentoPdfSecoes(grupos, fornNome, periodoTxt, logoForn, logosRede) {
+  return (grupos || []).map(function (g, i) {
+    var logoRede = (logosRede && logosRede[i]) || '';
+    return '<div style="margin-top:30px;padding-top:24px;border-top:2px dashed #cbd5e1">' + _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn || '') + '</div>';
+  }).join('');
+}
+function _drMontarDocumentoPdfCompleto(grupos, fornId, fornNome, subtitulo, periodoTxt) {
+  var doc = _drMontarDocumentoPdf(grupos, subtitulo);
+  var forn = getFornecedores().find(function (f) { return f.id === fornId; });
+  var logoForn = forn ? forn.foto : '';
+  var logosRede = (grupos || []).map(function (g) { var redeObj = _drRedeMaeDoGrupo(g); return redeObj ? redeObj.foto : ''; });
+  return doc + _drMontarDocumentoPdfSecoes(grupos, fornNome, periodoTxt, logoForn, logosRede);
+}
+
 function _drGerarPdf() {
   var msg = document.getElementById('dr-msg');
   if (!_drUltimosGrupos || !_drUltimosGrupos.length) {
@@ -23447,38 +23870,47 @@ function _drGerarPdf() {
   var dataAte = document.getElementById('dr-data-ate').value;
   var periodoTxt = (typeof _pimprelPeriodoTxt === 'function') ? _pimprelPeriodoTxt(dataDe, dataAte) : '';
   var subtitulo = 'Fábrica: ' + fornNome + periodoTxt;
+  var periodoTxtPlano = (dataDe ? dataDe.split('-').reverse().join('/') : '\u2014') + ' a ' + (dataAte ? dataAte.split('-').reverse().join('/') : '\u2014');
 
-  var docHtml = _drMontarDocumentoPdf(_drUltimosGrupos, subtitulo);
-  var wrap = document.createElement('div');
-  wrap.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;background:#fff;padding:24px;font-family:inherit;z-index:-1';
-  wrap.innerHTML = docHtml;
-  document.body.appendChild(wrap);
+  var forn = getFornecedores().find(function (f) { return f.id === fornSel.value; });
+  var logoFornOriginal = forn ? forn.foto : '';
+  var logosRedeOriginais = _drUltimosGrupos.map(function (g) { var redeObj = _drRedeMaeDoGrupo(g); return redeObj ? redeObj.foto : ''; });
 
   if (msg) { msg.style.color = '#64748b'; msg.textContent = 'Gerando PDF...'; }
-  return html2canvas(wrap, { scale: 2, useCORS: true }).then(function(canvas){
-    var imgData = canvas.toDataURL('image/png');
-    var jsPDFCtor = window.jspdf.jsPDF;
-    var pdf = new jsPDFCtor('p', 'mm', 'a4');
-    var pageWidth  = pdf.internal.pageSize.getWidth();
-    var pageHeight = pdf.internal.pageSize.getHeight();
-    var imgWidth   = pageWidth;
-    var imgHeight  = canvas.height * imgWidth / canvas.width;
-    var heightLeft = imgHeight;
-    var position = 0;
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
+  return Promise.all([_drRecortarLogo(logoFornOriginal)].concat(logosRedeOriginais.map(function (l) { return _drRecortarLogo(l); }))).then(function (logosCortadas) {
+    var logoFornCortada = logosCortadas[0];
+    var logosRedeCortadas = logosCortadas.slice(1);
+    var docHtml = _drMontarDocumentoPdf(_drUltimosGrupos, subtitulo) + _drMontarDocumentoPdfSecoes(_drUltimosGrupos, fornNome, periodoTxtPlano, logoFornCortada, logosRedeCortadas);
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;background:#fff;padding:24px;font-family:inherit;z-index:-1';
+    wrap.innerHTML = docHtml;
+    document.body.appendChild(wrap);
+
+    return html2canvas(wrap, { scale: 2, useCORS: true }).then(function(canvas){
+      var imgData = canvas.toDataURL('image/png');
+      var jsPDFCtor = window.jspdf.jsPDF;
+      var pdf = new jsPDFCtor('p', 'mm', 'a4');
+      var pageWidth  = pdf.internal.pageSize.getWidth();
+      var pageHeight = pdf.internal.pageSize.getHeight();
+      var imgWidth   = pageWidth;
+      var imgHeight  = canvas.height * imgWidth / canvas.width;
+      var heightLeft = imgHeight;
+      var position = 0;
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-    }
-    pdf.save('Dados_Representadas_' + Date.now() + '.pdf');
-    if (msg) { msg.style.color = '#15803d'; msg.textContent = 'PDF gerado com sucesso!'; }
-  }).catch(function(err){
-    if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Erro ao gerar o PDF: ' + (err && err.message ? err.message : err); }
-  }).finally(function(){
-    document.body.removeChild(wrap);
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      pdf.save('Dados_Representadas_' + Date.now() + '.pdf');
+      if (msg) { msg.style.color = '#15803d'; msg.textContent = 'PDF gerado com sucesso!'; }
+    }).catch(function(err){
+      if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Erro ao gerar o PDF: ' + (err && err.message ? err.message : err); }
+    }).finally(function(){
+      document.body.removeChild(wrap);
+    });
   });
 }
 
@@ -23695,8 +24127,8 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
   function linhaProdutoTabela(item, corImpar) {
     var row = ws.addRow([
       item.prod.codigo || '', item.sku || '', item.prod.nome || '',
-      item.prod.quant || '', (item.pesoCxCalc !== undefined && item.pesoCxCalc !== '') ? item.pesoCxCalc : '', item.prod.unidade || '',
-      _drFormatarPreco(item.precoTabela)
+      item.prod.quant || '', (item.pesoCxCalc !== undefined && item.pesoCxCalc !== '') ? item.pesoCxCalc : '', item.forma || '',
+      _drFormatarPreco(item.precoExibir)
     ]);
     row.height = 17;
     var cor = (row.number % 2 === 0) ? DR_CORES.white : corImpar;
@@ -23796,8 +24228,8 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
       + '<td style="padding:5px 8px;text-align:left;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.prod.nome || '') + '</td>'
       + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(qtd) + '</td>'
       + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(peso) + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.prod.unidade || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:right;border:1px solid #e5e7eb;font-size:11px">' + _drFormatarPreco(item.precoTabela) + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.forma || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:right;border:1px solid #e5e7eb;font-size:11px">' + _drFormatarPreco(item.precoExibir) + '</td>'
       + '</tr>';
   }
   var comVenda = g.cadastroComVenda || [];
@@ -23820,8 +24252,8 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
         + '<tr><td style="padding:2px 8px 2px 0;font-weight:700;color:#1e293b">ESTADOS:</td><td style="padding:2px 0;font-weight:700;color:#1F4E79">' + _pedEsc(g.estados || '\u2014') + '</td></tr>'
       + '</table>'
       + '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0">'
-        + (logoRede ? ('<img src="' + logoRede + '" style="height:34px;max-width:90px;object-fit:contain">') : '')
-        + (logoForn ? ('<img src="' + logoForn + '" style="height:34px;max-width:90px;object-fit:contain">') : '')
+        + (logoRede ? ('<img id="dr-visualizar-logo-rede" src="' + logoRede + '" style="height:48px;max-width:110px;object-fit:contain">') : '')
+        + (logoForn ? ('<img id="dr-visualizar-logo-forn" src="' + logoForn + '" style="height:48px;max-width:110px;object-fit:contain">') : '')
       + '</div>'
     + '</div>'
     + (semNenhumProduto
@@ -23838,6 +24270,78 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
             + '</tr></thead>'
             + '<tbody>' + linhasComVenda + bannerSemVenda + linhasSemVenda + '</tbody>'
           + '</table>'));
+}
+
+// Calcula o menor retangulo que contem o "desenho" da logo, descontando a moldura de fundo
+// (branco solido ou transparente) que faz a logo parecer menor que outras coladas do lado --
+// exatamente o problema relatado (logo da Rede com bastante espaco vazio ao redor, a da
+// Fabrica praticamente sem margem). Funcao pura (recebe so os bytes RGBA) pra dar pra testar
+// sem precisar de canvas/Image de verdade.
+function _drCalcularBoundingBoxLogo(dados, largura, altura) {
+  if (!dados || !largura || !altura) return null;
+  function pixelEm(x, y) { var i = (y * largura + x) * 4; return [dados[i], dados[i + 1], dados[i + 2], dados[i + 3]]; }
+  var bg = pixelEm(0, 0);
+  function ehFundo(p) {
+    if (p[3] < 10) return true;
+    return (Math.abs(p[0] - bg[0]) + Math.abs(p[1] - bg[1]) + Math.abs(p[2] - bg[2])) < 24;
+  }
+  var minX = largura, minY = altura, maxX = -1, maxY = -1;
+  for (var y = 0; y < altura; y++) {
+    for (var x = 0; x < largura; x++) {
+      if (!ehFundo(pixelEm(x, y))) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (maxX < 0) return null;
+  var margem = 2;
+  minX = Math.max(0, minX - margem);
+  minY = Math.max(0, minY - margem);
+  maxX = Math.min(largura - 1, maxX + margem);
+  maxY = Math.min(altura - 1, maxY + margem);
+  return { x: minX, y: minY, w: (maxX - minX + 1), h: (maxY - minY + 1) };
+}
+
+// Recorta o fundo em branco/transparente de uma logo (data URL) via canvas. Sempre resolve
+// (nunca rejeita) -- se qualquer etapa falhar (CORS, canvas indisponivel, imagem toda "fundo",
+// etc.) devolve a imagem original sem cortar, pra nunca deixar a logo sumir por causa disso.
+var _drLogoCortadoCache = {};
+function _drRecortarLogo(dataUrl) {
+  if (!dataUrl) return Promise.resolve(dataUrl);
+  if (Object.prototype.hasOwnProperty.call(_drLogoCortadoCache, dataUrl)) return Promise.resolve(_drLogoCortadoCache[dataUrl]);
+  return new Promise(function (resolve) {
+    var resolvido = false;
+    function finalizar(v) { if (resolvido) return; resolvido = true; _drLogoCortadoCache[dataUrl] = v; resolve(v); }
+    try {
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+          if (!w || !h) { finalizar(dataUrl); return; }
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext && canvas.getContext('2d');
+          if (!ctx) { finalizar(dataUrl); return; }
+          ctx.drawImage(img, 0, 0);
+          var dados;
+          try { dados = ctx.getImageData(0, 0, w, h).data; } catch (eLeitura) { finalizar(dataUrl); return; }
+          var caixa = _drCalcularBoundingBoxLogo(dados, w, h);
+          if (!caixa || (caixa.w >= w * 0.98 && caixa.h >= h * 0.98)) { finalizar(dataUrl); return; }
+          var canvas2 = document.createElement('canvas');
+          canvas2.width = caixa.w; canvas2.height = caixa.h;
+          var ctx2 = canvas2.getContext('2d');
+          ctx2.drawImage(canvas, caixa.x, caixa.y, caixa.w, caixa.h, 0, 0, caixa.w, caixa.h);
+          finalizar(canvas2.toDataURL('image/png'));
+        } catch (eProc) { finalizar(dataUrl); }
+      };
+      img.onerror = function () { finalizar(dataUrl); };
+      setTimeout(function () { finalizar(dataUrl); }, 1500);
+      img.src = dataUrl;
+    } catch (eOuter) { finalizar(dataUrl); }
+  });
 }
 
 function _drRenderVisualizar() {
@@ -23868,6 +24372,22 @@ function _drRenderVisualizar() {
   var logoRede = redeObj ? redeObj.foto : '';
 
   corpo.innerHTML = _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn);
+
+  var grupoNoMomento = g;
+  if (logoRede) {
+    _drRecortarLogo(logoRede).then(function (recortada) {
+      if (grupos[_drVisualizarGrupoIdx] !== grupoNoMomento || !recortada) return;
+      var imgEl = document.getElementById('dr-visualizar-logo-rede');
+      if (imgEl) imgEl.src = recortada;
+    });
+  }
+  if (logoForn) {
+    _drRecortarLogo(logoForn).then(function (recortada) {
+      if (grupos[_drVisualizarGrupoIdx] !== grupoNoMomento || !recortada) return;
+      var imgEl = document.getElementById('dr-visualizar-logo-forn');
+      if (imgEl) imgEl.src = recortada;
+    });
+  }
 }
 
 function _drSelecionarGrupoVisualizar(idx) {

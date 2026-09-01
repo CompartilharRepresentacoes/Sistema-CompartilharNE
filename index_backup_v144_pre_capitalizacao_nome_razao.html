@@ -9041,27 +9041,79 @@ async function buscarCNPJCliente() {
   const btn = document.getElementById('btn-buscar-cnpj-cli');
   const btnTextoOriginal = btn ? btn.innerHTML : null;
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Buscando...'; }
+  const _capCli = (s) => (s||'').toString().toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
   try {
-    const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
-    if (!resp.ok) {
-      if (resp.status === 404) { alert('CNPJ não encontrado na Receita Federal. Confira os números digitados.'); return; }
-      if (resp.status === 429) { alert('Muitas consultas de CNPJ em pouco tempo (limite do serviço gratuito da BrasilAPI). Aguarde alguns segundos e tente novamente.'); return; }
-      alert('Não foi possível buscar o CNPJ (serviço retornou erro ' + resp.status + '). Tente novamente em instantes.');
+    // Fonte 1: BrasilAPI (dados oficiais da Receita Federal). Se ela falhar por qualquer motivo
+    // (erro 500, limite de consultas 429, fora do ar), tenta a fonte reserva antes de desistir --
+    // só um CNPJ realmente inexistente (404) encerra a busca sem tentar a reserva.
+    let r = null, fonte = '';
+    try {
+      const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+      if (resp.ok) { r = await resp.json(); fonte = 'brasilapi'; }
+      else if (resp.status === 404) { alert('CNPJ não encontrado na Receita Federal. Confira os números digitados.'); return; }
+    } catch(e) { console.warn('[buscarCNPJCliente] BrasilAPI falhou, tentando fonte reserva:', e); }
+
+    if (!r) {
+      try {
+        const resp2 = await fetch(`https://www.receitaws.com.br/v1/cnpj/${cnpj}`);
+        if (resp2.ok) {
+          const d = await resp2.json();
+          if (d.status !== 'ERROR') { r = d; fonte = 'receitaws'; }
+        }
+      } catch(e) { console.warn('[buscarCNPJCliente] fonte reserva (ReceitaWS) também falhou:', e); }
+    }
+
+    if (!r) {
+      alert('Não foi possível buscar o CNPJ em nenhuma das fontes disponíveis (BrasilAPI e ReceitaWS). Tente novamente em instantes, ou preencha os dados manualmente.');
       return;
     }
-    const r = await resp.json();
-    if (r.nome_fantasia) document.getElementById('cli-nome-fantasia').value = r.nome_fantasia;
-    if (r.razao_social)  document.getElementById('cli-razao-social').value  = r.razao_social;
-    if (r.email)         document.getElementById('cli-email').value         = r.email;
-    if (r.ddd_telefone_1) document.getElementById('cli-tel1').value = r.ddd_telefone_1;
-    // "Número" do endereço não vem do CEP (ViaCEP nunca retorna isso) -- só da própria consulta de
-    // CNPJ. Quando o CNPJ não tiver um número (comum em endereços rurais/zona industrial), usa "SN"
-    // (Sem Número) em vez de deixar o campo em branco.
-    document.getElementById('cli-numero').value = r.numero || 'SN';
-    if (r.cep) { const cepEl = document.getElementById('cli-cep'); cepEl.value = r.cep.replace(/(\d{5})(\d{3})/,'$1-$2'); buscarCEPCliente(cepEl); }
+
+    if (fonte === 'brasilapi') {
+      if (r.nome_fantasia) document.getElementById('cli-nome-fantasia').value = r.nome_fantasia;
+      if (r.razao_social)  document.getElementById('cli-razao-social').value  = r.razao_social;
+      if (r.email)         document.getElementById('cli-email').value         = r.email;
+      if (r.ddd_telefone_1) document.getElementById('cli-tel1').value = r.ddd_telefone_1;
+      // "Número" do endereço não vem do CEP (ViaCEP nunca retorna isso) -- só da própria consulta de
+      // CNPJ. Quando o CNPJ não tiver um número (comum em endereços rurais/zona industrial), usa "SN"
+      // (Sem Número) em vez de deixar o campo em branco.
+      document.getElementById('cli-numero').value = r.numero || 'SN';
+      // A Receita Federal (via BrasilAPI) já traz o tipo de logradouro (Rua/Av./Alameda/Praça/...)
+      // separado do nome, e também o Complemento -- monta o endereço completo com isso em vez de
+      // depender só do CEP (ViaCEP costuma vir sem o tipo de logradouro e quase sempre sem complemento).
+      if (r.logradouro) {
+        const tipo = r.descricao_tipo_de_logradouro ? _capCli(r.descricao_tipo_de_logradouro) + ' ' : '';
+        document.getElementById('cli-endereco').value = tipo + _capCli(r.logradouro);
+      }
+      if (r.bairro)      document.getElementById('cli-bairro').value      = _capCli(r.bairro);
+      if (r.complemento) document.getElementById('cli-complemento').value = _capCli(r.complemento);
+      if (r.cep) {
+        const cepEl = document.getElementById('cli-cep');
+        cepEl.value = r.cep.replace(/(\d{5})(\d{3})/,'$1-$2');
+        // Só usa o CEP pra completar o que a Receita não trouxe (UF, Cidade e a lista do dropdown) --
+        // sem sobrescrever Endereço/Bairro/Complemento que já vieram da própria consulta de CNPJ acima.
+        buscarCEPCliente(cepEl, true);
+      }
+    } else {
+      // Fonte reserva (ReceitaWS): campos com nomes diferentes da BrasilAPI, e o logradouro já
+      // vem com o tipo embutido no próprio texto (não precisa juntar duas partes).
+      if (r.fantasia) document.getElementById('cli-nome-fantasia').value = r.fantasia;
+      if (r.nome)      document.getElementById('cli-razao-social').value  = r.nome;
+      if (r.email)     document.getElementById('cli-email').value         = r.email;
+      if (r.telefone)  document.getElementById('cli-tel1').value = r.telefone.split('/')[0].trim();
+      document.getElementById('cli-numero').value = r.numero || 'SN';
+      if (r.logradouro)  document.getElementById('cli-endereco').value    = _capCli(r.logradouro);
+      if (r.bairro)       document.getElementById('cli-bairro').value      = _capCli(r.bairro);
+      if (r.complemento)  document.getElementById('cli-complemento').value = _capCli(r.complemento);
+      const cepDigitos = (r.cep || '').replace(/\D/g,'');
+      if (cepDigitos.length === 8) {
+        const cepEl = document.getElementById('cli-cep');
+        cepEl.value = cepDigitos.replace(/(\d{5})(\d{3})/,'$1-$2');
+        buscarCEPCliente(cepEl, true);
+      }
+    }
   } catch(e) {
     console.warn('[buscarCNPJCliente] falha na consulta:', e);
-    alert('Não foi possível buscar o CNPJ. Possíveis causas: sem conexão com a internet, ou o serviço de consulta (BrasilAPI) está fora do ar no momento. Tente novamente em instantes.\n\nDetalhe técnico: ' + (e && e.message ? e.message : e));
+    alert('Não foi possível buscar o CNPJ. Possíveis causas: sem conexão com a internet, ou os serviços de consulta estão fora do ar no momento. Tente novamente em instantes.\n\nDetalhe técnico: ' + (e && e.message ? e.message : e));
   } finally {
     if (btn) { btn.disabled = false; btn.innerHTML = btnTextoOriginal; }
   }
@@ -9691,7 +9743,7 @@ function removerCliFoto() {
   document.getElementById('cli-foto-input').value='';
 }
 
-async function buscarCEPCliente(el) {
+async function buscarCEPCliente(el, manterEndereco) {
   let v = el.value.replace(/\D/g,'').slice(0,8);
   if (v.length>5) v = v.slice(0,5)+'-'+v.slice(5);
   el.value = v;
@@ -9700,9 +9752,14 @@ async function buscarCEPCliente(el) {
     const res = await fetch(`https://viacep.com.br/ws/${v.replace(/\D/g,'')}/json/`);
     const d = await res.json();
     if (d.erro) return;
-    document.getElementById('cli-endereco').value = d.logradouro||'';
-    document.getElementById('cli-bairro').value   = d.bairro||'';
-    document.getElementById('cli-complemento').value = d.complemento||'';
+    // Quando chamado logo depois de uma busca por CNPJ (manterEndereco=true), não sobrescreve
+    // Endereço/Bairro/Complemento que já vieram da Receita Federal -- só completa o que faltar.
+    const _endEl = document.getElementById('cli-endereco');
+    const _baiEl = document.getElementById('cli-bairro');
+    const _cplEl = document.getElementById('cli-complemento');
+    if (!(manterEndereco && _endEl.value)) _endEl.value = d.logradouro||'';
+    if (!(manterEndereco && _baiEl.value)) _baiEl.value = d.bairro||'';
+    if (!(manterEndereco && _cplEl.value)) _cplEl.value = d.complemento||'';
     if (d.uf) {
       document.getElementById('cli-estado').value = d.uf;
       document.getElementById('cli-uf').value = d.uf;
@@ -23444,16 +23501,18 @@ function _drMontarDocumentoPdf(grupos, subtitulo) {
 // PDF completo de Dados Representadas: resumo Rede/Loja (como sempre foi) + 1 secao por
 // Rede/Sub-Rede/Cliente selecionado com a tabela produto-a-produto (mesma que aparece no popup
 // Visualizar e na aba do Excel) -- pedido do usuario pra parar de ter menos detalhe no PDF.
+function _drMontarDocumentoPdfSecoes(grupos, fornNome, periodoTxt, logoForn, logosRede) {
+  return (grupos || []).map(function (g, i) {
+    var logoRede = (logosRede && logosRede[i]) || '';
+    return '<div style="margin-top:30px;padding-top:24px;border-top:2px dashed #cbd5e1">' + _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn || '') + '</div>';
+  }).join('');
+}
 function _drMontarDocumentoPdfCompleto(grupos, fornId, fornNome, subtitulo, periodoTxt) {
   var doc = _drMontarDocumentoPdf(grupos, subtitulo);
   var forn = getFornecedores().find(function (f) { return f.id === fornId; });
   var logoForn = forn ? forn.foto : '';
-  var detalhes = (grupos || []).map(function (g) {
-    var redeObj = _drRedeMaeDoGrupo(g);
-    var logoRede = redeObj ? redeObj.foto : '';
-    return '<div style="margin-top:30px;padding-top:24px;border-top:2px dashed #cbd5e1">' + _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn) + '</div>';
-  }).join('');
-  return doc + detalhes;
+  var logosRede = (grupos || []).map(function (g) { var redeObj = _drRedeMaeDoGrupo(g); return redeObj ? redeObj.foto : ''; });
+  return doc + _drMontarDocumentoPdfSecoes(grupos, fornNome, periodoTxt, logoForn, logosRede);
 }
 
 function _drGerarPdf() {
@@ -23474,37 +23533,45 @@ function _drGerarPdf() {
   var subtitulo = 'Fábrica: ' + fornNome + periodoTxt;
   var periodoTxtPlano = (dataDe ? dataDe.split('-').reverse().join('/') : '\u2014') + ' a ' + (dataAte ? dataAte.split('-').reverse().join('/') : '\u2014');
 
-  var docHtml = _drMontarDocumentoPdfCompleto(_drUltimosGrupos, fornSel.value, fornNome, subtitulo, periodoTxtPlano);
-  var wrap = document.createElement('div');
-  wrap.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;background:#fff;padding:24px;font-family:inherit;z-index:-1';
-  wrap.innerHTML = docHtml;
-  document.body.appendChild(wrap);
+  var forn = getFornecedores().find(function (f) { return f.id === fornSel.value; });
+  var logoFornOriginal = forn ? forn.foto : '';
+  var logosRedeOriginais = _drUltimosGrupos.map(function (g) { var redeObj = _drRedeMaeDoGrupo(g); return redeObj ? redeObj.foto : ''; });
 
   if (msg) { msg.style.color = '#64748b'; msg.textContent = 'Gerando PDF...'; }
-  return html2canvas(wrap, { scale: 2, useCORS: true }).then(function(canvas){
-    var imgData = canvas.toDataURL('image/png');
-    var jsPDFCtor = window.jspdf.jsPDF;
-    var pdf = new jsPDFCtor('p', 'mm', 'a4');
-    var pageWidth  = pdf.internal.pageSize.getWidth();
-    var pageHeight = pdf.internal.pageSize.getHeight();
-    var imgWidth   = pageWidth;
-    var imgHeight  = canvas.height * imgWidth / canvas.width;
-    var heightLeft = imgHeight;
-    var position = 0;
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
+  return Promise.all([_drRecortarLogo(logoFornOriginal)].concat(logosRedeOriginais.map(function (l) { return _drRecortarLogo(l); }))).then(function (logosCortadas) {
+    var logoFornCortada = logosCortadas[0];
+    var logosRedeCortadas = logosCortadas.slice(1);
+    var docHtml = _drMontarDocumentoPdf(_drUltimosGrupos, subtitulo) + _drMontarDocumentoPdfSecoes(_drUltimosGrupos, fornNome, periodoTxtPlano, logoFornCortada, logosRedeCortadas);
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;background:#fff;padding:24px;font-family:inherit;z-index:-1';
+    wrap.innerHTML = docHtml;
+    document.body.appendChild(wrap);
+
+    return html2canvas(wrap, { scale: 2, useCORS: true }).then(function(canvas){
+      var imgData = canvas.toDataURL('image/png');
+      var jsPDFCtor = window.jspdf.jsPDF;
+      var pdf = new jsPDFCtor('p', 'mm', 'a4');
+      var pageWidth  = pdf.internal.pageSize.getWidth();
+      var pageHeight = pdf.internal.pageSize.getHeight();
+      var imgWidth   = pageWidth;
+      var imgHeight  = canvas.height * imgWidth / canvas.width;
+      var heightLeft = imgHeight;
+      var position = 0;
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-    }
-    pdf.save('Dados_Representadas_' + Date.now() + '.pdf');
-    if (msg) { msg.style.color = '#15803d'; msg.textContent = 'PDF gerado com sucesso!'; }
-  }).catch(function(err){
-    if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Erro ao gerar o PDF: ' + (err && err.message ? err.message : err); }
-  }).finally(function(){
-    document.body.removeChild(wrap);
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      pdf.save('Dados_Representadas_' + Date.now() + '.pdf');
+      if (msg) { msg.style.color = '#15803d'; msg.textContent = 'PDF gerado com sucesso!'; }
+    }).catch(function(err){
+      if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Erro ao gerar o PDF: ' + (err && err.message ? err.message : err); }
+    }).finally(function(){
+      document.body.removeChild(wrap);
+    });
   });
 }
 
