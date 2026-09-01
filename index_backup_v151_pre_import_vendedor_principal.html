@@ -1919,6 +1919,8 @@
 <button onclick="_cliExportarExcel()" title="Exportar clientes em Excel" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-file-spreadsheet" style="font-size:10px"></i> Exportar</button>
 <button onclick="document.getElementById('cli-import-file').click()" title="Importar clientes de Excel" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-file-import" style="font-size:10px"></i> Importar</button>
 <input type="file" id="cli-import-file" accept=".xlsx,.xls" style="display:none" onchange="_cliImportarExcel(this)">
+<button onclick="document.getElementById('cli-cadcompleto-file').click()" title="Importar planilha Cadastro Completo (Clientes + Codigos por Fabrica + Vendedor por Fabrica)" style="background:#fff;color:#D82621;border:2px solid #D82621;border-radius:7px;padding:5px 13px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-database-import" style="font-size:10px"></i> Cadastro Completo</button>
+<input type="file" id="cli-cadcompleto-file" accept=".xlsx,.xls" style="display:none" onchange="_cadCompletoArquivoSelecionado(this)">
 <button onclick="showPage('page-cliente-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
           </div>
         </div>
@@ -2302,13 +2304,27 @@
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
 
-              <!-- Vendedor por Fábrica -->
+              <!-- Vendedor Principal -->
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px">
+                <div style="padding:9px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:6px">
+                  <i class="ti ti-star" style="font-size:11px;color:#0ea5e9"></i>
+                  <span style="font-size:12px;font-weight:700;color:#1e293b">Vendedor principal</span>
+                  <span style="font-size:10px;color:#94a3b8">atende este cliente em todas as fábricas</span>
+                </div>
+                <div style="padding:12px 14px">
+                  <select id="cli-vendedor-principal" class="form-input" style="width:100%" onchange="renderVendedoresForn()">
+                    <option value="">-- Selecione --</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Segundo vendedor (excecao por fabrica) -->
               <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px">
                 <div style="padding:9px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between">
                   <div style="display:flex;align-items:center;gap:6px">
                     <i class="ti ti-user-star" style="font-size:11px;color:#0ea5e9"></i>
-                    <span style="font-size:12px;font-weight:700;color:#1e293b">Vendedor por Fábrica</span>
-                    <span style="font-size:10px;color:#94a3b8">quem atende este cliente em cada representada</span>
+                    <span style="font-size:12px;font-weight:700;color:#1e293b">Segundo vendedor (exceção por fábrica)</span>
+                    <span style="font-size:10px;color:#94a3b8">só preencha se alguma fábrica tiver vendedor diferente do principal</span>
                   </div>
                   <button onclick="toggleFormVendForn()" id="btn-vendforn-open"
                     style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">
@@ -5635,6 +5651,29 @@
 </div>
 
 <!-- ── Modal: Código do Cliente por Fornecedor ── -->
+<div id="modal-cadcompleto" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:560px;max-height:88vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
+    <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#fff">Importar Cadastro Completo</div>
+        <div id="cadcompleto-subtitulo" style="font-size:10.5px;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+      </div>
+      <button onclick="fecharModalCadCompleto()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
+    </div>
+    <div id="cadcompleto-body" style="padding:16px 18px;overflow-y:auto;flex:1"></div>
+    <div style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
+      <button onclick="fecharModalCadCompleto()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>
+      <button id="cadcompleto-btn-confirmar" onclick="_cadCompletoConfirmar()" style="background:#D82621;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">Confirmar importação</button>
+    </div>
+  </div>
+</div>
+<div id="modal-ver-logo-cat" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;width:260px;padding:18px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+    <div id="vlc-titulo" style="font-size:13px;font-weight:700;color:#272A4A;margin-bottom:12px"></div>
+    <div id="vlc-corpo" style="width:180px;height:180px;margin:0 auto;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden"></div>
+    <button onclick="fecharModalVerLogoCat()" style="margin-top:14px;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:6px;padding:7px 16px;font-size:12px;cursor:pointer">Fechar</button>
+  </div>
+</div>
 <div id="modal-cod-cli-forn" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:12px;width:100%;max-width:460px;max-height:85vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
     <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
@@ -6936,7 +6975,7 @@ function renderCatClienteList() {
   tbody.innerHTML = rows.map(r => {
     const isSub = !!r.pai;
     const nomePai = isSub ? (data.find(x => x.id == r.pai)?.nome || '') : '';
-    return `<div style="display:grid;grid-template-columns:1fr 90px;padding:${isSub?'10px 16px 10px 36px':'13px 16px'};align-items:center;border-bottom:1px solid #f8fafc;background:${isSub?'#fafbff':'#fff'};cursor:pointer;transition:background .12s"
+    return `<div style="display:grid;grid-template-columns:1fr 118px;padding:${isSub?'10px 16px 10px 36px':'13px 16px'};align-items:center;border-bottom:1px solid #f8fafc;background:${isSub?'#fafbff':'#fff'};cursor:pointer;transition:background .12s"
         onmouseover="this.style.background='${isSub?'#f0f4ff':'#f8fbff'}'" onmouseout="this.style.background='${isSub?'#fafbff':'#fff'}'">
       <div>
         ${isSub
@@ -6945,6 +6984,11 @@ function renderCatClienteList() {
         }
       </div>
       <div style="display:flex;gap:1px;justify-content:flex-end">
+        <button onclick="event.stopPropagation();visualizarLogoCatCliente(${r.id})" title="Visualizar logo"
+          style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb;display:flex;align-items:center"
+          onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='none'">
+          <i class="ti ti-eye" style="font-size:13px"></i>
+        </button>
         <button onclick="editCatCliente(${r.id})" title="Editar"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
@@ -6958,6 +7002,23 @@ function renderCatClienteList() {
       </div>
     </div>`;
   }).join('');
+}
+function visualizarLogoCatCliente(id) {
+  var cat = getCatClientes().find(function(c){ return c.id == id; });
+  if (!cat) return;
+  document.getElementById('vlc-titulo').textContent = 'Logo — ' + (cat.nome || '');
+  var corpo = document.getElementById('vlc-corpo');
+  if (cat.foto) {
+    corpo.style.border = '1px solid #e2e8f0';
+    corpo.innerHTML = '<img src="' + cat.foto + '" style="width:100%;height:100%;object-fit:contain;display:block">';
+  } else {
+    corpo.style.border = '2px dashed #cbd5e1';
+    corpo.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><i class="ti ti-photo-off" style="font-size:28px;color:#94a3b8"></i><span style="font-size:11px;color:#94a3b8">Nenhuma logo cadastrada</span></div>';
+  }
+  document.getElementById('modal-ver-logo-cat').style.display = 'flex';
+}
+function fecharModalVerLogoCat() {
+  document.getElementById('modal-ver-logo-cat').style.display = 'none';
 }
 function openCatClienteForm(params) {
   document.getElementById('form-cat-id').value   = params.id || '';
@@ -9199,7 +9260,15 @@ function openClienteForm(params) {
   setV('cli-obs', r.obs||'');
   // Toggle doc tipo
   toggleCliDocTipo(r.doc_tipo || 'cnpj');
-  // Vendedor por Fábrica
+  // Vendedor principal
+  var vpSel = document.getElementById('cli-vendedor-principal');
+  if (vpSel) {
+    var vpOrd = getVendedoresAtivos().sort(function(a,b){ return (a.nome||a.nome_fantasia||'').localeCompare(b.nome||b.nome_fantasia||'', 'pt-BR'); });
+    vpSel.innerHTML = '<option value="">-- Selecione --</option>' +
+      vpOrd.map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome||v.nome_fantasia||'') + '</option>'; }).join('');
+    vpSel.value = r.vendedor_principal || '';
+  }
+  // Vendedor por Fábrica (exceções)
   window._cliVendedoresForn = JSON.parse(JSON.stringify(r.vendedores_fornecedor || []));
   document.getElementById('cli-vendforn-form').style.display = 'none';
   document.getElementById('btn-vendforn-open').innerHTML = '<i class="ti ti-plus" style="font-size:9px"></i> Cadastrar';
@@ -9320,21 +9389,31 @@ function renderVendedoresForn() {
   var cont = document.getElementById('cli-vendforn-list');
   if (!cont) return;
   var lista = window._cliVendedoresForn || [];
-  if (!lista.length) { cont.innerHTML = '<div style="padding:12px 14px;text-align:center;font-size:11px;color:#94a3b8">Nenhum vendedor vinculado.</div>'; return; }
+  var vpSel = document.getElementById('cli-vendedor-principal');
+  var vpNome = vpSel && vpSel.value ? (vpSel.options[vpSel.selectedIndex] || {}).text : '';
+  var rodape = vpNome
+    ? '<div style="padding:8px 14px;font-size:11px;color:#94a3b8">Nas demais fábricas, este cliente continua com o vendedor principal (' + _pedEsc(vpNome) + ').</div>'
+    : '';
+  if (!lista.length) {
+    cont.innerHTML = '<div style="padding:12px 14px;text-align:center;font-size:11px;color:#94a3b8">Nenhuma exceção cadastrada.</div>' + rodape;
+    return;
+  }
   cont.innerHTML = lista.map(function(p, i){
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #f1f5f9">'
       + '<div style="font-size:12px;color:#334155"><span style="font-weight:700;color:#1e293b">'+_pedEsc(p.fornNome)+'</span>'
-      + ' <span style="color:#94a3b8">&rarr;</span> <span style="font-weight:600">'+_pedEsc(p.vendNome)+'</span></div>'
+      + ' <span style="color:#94a3b8">&rarr;</span> <span style="font-weight:600">'+_pedEsc(p.vendNome)+'</span>'
+      + ' <span style="font-size:10px;color:#94a3b8">(exceção)</span></div>'
       + '<button onclick="removerVendedorForn('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:11px"></i></button>'
       + '</div>';
-  }).join('');
+  }).join('') + rodape;
 }
 // Resolve o vendedor certo para um Cliente numa Fábrica (Fornecedor) específica.
 function _cliResolverVendedorPorForn(cliente, fornId) {
   if (!cliente || !fornId) return null;
   var lista = cliente.vendedores_fornecedor || [];
   var achou = lista.find(function(v){ return String(v.fornId) === String(fornId); });
-  return achou ? achou.vendId : null;
+  if (achou) return achou.vendId;
+  return cliente.vendedor_principal || null;
 }
 
 // ── Prazo Cliente / Tabela Cliente (Dados Financeiros por Fornecedor) ──
@@ -9544,6 +9623,7 @@ function salvarCliente() {
     ent_estado:   document.getElementById('cli-ent-estado').value,
     ent_pais:     document.getElementById('cli-ent-pais').value.trim(),
     obs:          document.getElementById('cli-obs').value.trim(),
+    vendedor_principal: document.getElementById('cli-vendedor-principal').value,
     prazos_fornecedor:     window._cliPrazos          || [],
     tabelas_fornecedor:    window._cliTabelas         || [],
     vendedores_fornecedor: window._cliVendedoresForn || [],
@@ -9723,6 +9803,327 @@ function _cliImportarExcel(input) {
     input.value = '';
   };
   reader.readAsArrayBuffer(file);
+}
+
+// ═══════ Importar Cadastro Completo (Clientes + Codigos por Fabrica + Vendedor por Fabrica) ═══════
+function _cadCol(header, candidatos) {
+  for (var k = 0; k < candidatos.length; k++) {
+    var alvo = candidatos[k].toLowerCase();
+    for (var i = 0; i < header.length; i++) {
+      if (String(header[i] || '').toLowerCase().indexOf(alvo) !== -1) return i;
+    }
+  }
+  return -1;
+}
+
+function _cadVal(row, idx) {
+  if (idx == null || idx < 0 || !row) return '';
+  var v = row[idx];
+  return v === undefined || v === null ? '' : String(v);
+}
+
+function _cadNomeMatch(forn, nomeAlvo) {
+  if (!forn || !nomeAlvo) return false;
+  var alvo = String(nomeAlvo).trim().toLowerCase();
+  if (!alvo) return false;
+  var nf = String(forn.nome_fantasia || '').trim().toLowerCase();
+  var rs = String(forn.razao_social || '').trim().toLowerCase();
+  return nf === alvo || rs === alvo
+    || (nf && (nf.indexOf(alvo) !== -1 || alvo.indexOf(nf) !== -1))
+    || (rs && (rs.indexOf(alvo) !== -1 || alvo.indexOf(rs) !== -1));
+}
+
+function _cadUpsertCodigoForn(cliObj, fornId, codigoCliente) {
+  if (!cliObj.codigos_fornecedor) cliObj.codigos_fornecedor = [];
+  var idx = cliObj.codigos_fornecedor.findIndex(function(x){ return x.fornecedor_id === fornId; });
+  if (idx >= 0) cliObj.codigos_fornecedor[idx].codigo_cliente = codigoCliente;
+  else cliObj.codigos_fornecedor.push({ fornecedor_id: fornId, codigo_cliente: codigoCliente });
+}
+
+function _cadCompletoArquivoSelecionado(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (typeof XLSX === 'undefined') { alert('Biblioteca de Excel não carregou. Verifique a conexão com a internet e tente novamente.'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var wb = XLSX.read(data, { type: 'array' });
+      var resultado = _cadCompletoProcessar(wb, false);
+      window._cadCompletoWb = wb;
+      _cadCompletoAbrirPreview(file.name, resultado.resumo);
+    } catch (err) {
+      alert('Erro ao ler a planilha: ' + (err && err.message ? err.message : err));
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function _cadCompletoAbrirPreview(nomeArquivo, resumo) {
+  document.getElementById('cadcompleto-subtitulo').textContent = nomeArquivo + ' • ' + resumo.abasEncontradas.join(', ');
+  var html = '';
+
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Aba Clientes</span><span>' + resumo.clientes.total + ' linha(s)</span></div>'
+    + '<div style="font-size:12px;color:#555;line-height:1.8">'
+    + '<div>' + resumo.clientes.novos + ' cliente(s) novo(s) &bull; ' + resumo.clientes.atualizados + ' atualizado(s)</div>'
+    + (resumo.clientes.redeNaoEncontrada ? '<div style="color:#B45309">' + resumo.clientes.redeNaoEncontrada + ' linha(s) com Rede não encontrada</div>' : '')
+    + (resumo.clientes.lojaNaoEncontrada ? '<div style="color:#B45309">' + resumo.clientes.lojaNaoEncontrada + ' linha(s) com Loja não encontrada</div>' : '')
+    + (resumo.clientes.cnpjDuplicado.length ? '<div style="color:#B91C1C">' + resumo.clientes.cnpjDuplicado.length + ' linha(s) ignorada(s) por CNPJ/CPF duplicado</div>' : '')
+    + '</div></div>';
+
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Códigos por Fábrica (Allfood / Nova Mix)</span><span>' + (resumo.codigosFabrica.allfood + resumo.codigosFabrica.novamix) + ' código(s)</span></div>'
+    + '<div style="font-size:12px;color:#555">' + resumo.codigosFabrica.allfood + ' Allfood &bull; ' + resumo.codigosFabrica.novamix + ' Nova Mix / Quatá</div>'
+    + (resumo.codigosFabrica.allfoodNaoCadastrado ? '<div style="color:#B45309;font-size:12px;margin-top:4px">Fornecedor "Allfood" não encontrado no Cadastro de Fornecedores — nenhum código Allfood foi aplicado.</div>' : '')
+    + (resumo.codigosFabrica.novaMixNaoCadastrado ? '<div style="color:#B45309;font-size:12px;margin-top:4px">Fornecedor "Quatá"/"Nova Mix" não encontrado no Cadastro de Fornecedores — nenhum código Nova Mix/Quatá foi aplicado.</div>' : '')
+    + '</div>';
+
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Vendedor por Fábrica</span><span>' + resumo.vendedorForn.total + ' linha(s)</span></div>'
+    + '<div style="font-size:12px;color:#555;line-height:1.8">'
+    + '<div>' + resumo.vendedorForn.vinculados + ' vinculada(s) a um cliente existente</div>'
+    + (resumo.vendedorForn.semCodigoCliente ? '<div style="color:#B91C1C">' + resumo.vendedorForn.semCodigoCliente + ' linha(s) com Código Cliente não encontrado</div>' : '')
+    + (resumo.vendedorForn.fabricaNaoEncontrada ? '<div style="color:#B45309">' + resumo.vendedorForn.fabricaNaoEncontrada + ' linha(s) com Fábrica não cadastrada em Fornecedores</div>' : '')
+    + (resumo.vendedorForn.vendedorNaoEncontrado ? '<div style="color:#B45309">' + resumo.vendedorForn.vendedorNaoEncontrado + ' linha(s) com Vendedor não cadastrado/ativo</div>' : '')
+    + '</div></div>';
+
+  var totalPrazoTabela = resumo.prazoForn.total + resumo.tabelaForn.total;
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A"><span>Prazo / Tabela por Fábrica</span><span>' + totalPrazoTabela + ' linha(s)</span></div>'
+    + '<div style="font-size:12px;color:#888;margin-top:4px">' + (totalPrazoTabela === 0 ? 'Abas vazias na planilha — nada a importar.' : (resumo.prazoForn.total + ' de Prazo, ' + resumo.tabelaForn.total + ' de Tabela — mesma lógica de Vendedor por Fábrica.')) + '</div>'
+    + '</div>';
+
+  document.getElementById('cadcompleto-body').innerHTML = html;
+  document.getElementById('cadcompleto-btn-confirmar').disabled = (resumo.clientes.total === 0);
+  document.getElementById('modal-cadcompleto').style.display = 'flex';
+}
+
+function fecharModalCadCompleto() {
+  document.getElementById('modal-cadcompleto').style.display = 'none';
+  window._cadCompletoWb = null;
+}
+
+function _cadCompletoConfirmar() {
+  if (!window._cadCompletoWb) { fecharModalCadCompleto(); return; }
+  try {
+    var resultado = _cadCompletoProcessar(window._cadCompletoWb, true);
+    fecharModalCadCompleto();
+    renderClienteList();
+    alert('Importação concluída.\n\n'
+      + resultado.resumo.clientes.novos + ' cliente(s) novo(s), ' + resultado.resumo.clientes.atualizados + ' atualizado(s).\n'
+      + (resultado.resumo.codigosFabrica.allfood + resultado.resumo.codigosFabrica.novamix) + ' código(s) de fábrica aplicado(s).\n'
+      + resultado.resumo.vendedorForn.vinculados + ' vínculo(s) de Vendedor por Fábrica aplicado(s).');
+  } catch (err) {
+    alert('Erro ao confirmar importação: ' + (err && err.message ? err.message : err));
+  }
+}
+
+// Faz o parse das 4 abas do arquivo "Cadastro Completo". Se commit=true, grava de verdade (setClientes).
+// Sempre retorna o resumo, seja em modo preview (commit=false) ou gravação real (commit=true).
+function _cadCompletoProcessar(wb, commit) {
+  var abasEncontradas = [];
+  var wsClientes = wb.Sheets['Clientes']; if (wsClientes) abasEncontradas.push('Clientes');
+  var wsVend = wb.Sheets['Vendedor por Fábrica']; if (wsVend) abasEncontradas.push('Vendedor por Fábrica');
+  var wsPrazo = wb.Sheets['Prazo por Fábrica']; if (wsPrazo) abasEncontradas.push('Prazo por Fábrica');
+  var wsTabela = wb.Sheets['Tabela de Preço por Fábrica']; if (wsTabela) abasEncontradas.push('Tabela de Preço por Fábrica');
+
+  var cats = getCatClientes();
+  var vendedoresAtivos = getVendedoresAtivos();
+  var fornecedores = getFornecedores();
+  var clientes = JSON.parse(JSON.stringify(getClientes()));
+
+  var fornAllfood = fornecedores.find(function(f){ return _cadNomeMatch(f, 'allfood'); });
+  var fornNovaMix = fornecedores.find(function(f){ return _cadNomeMatch(f, 'quatá') || _cadNomeMatch(f, 'nova mix'); });
+
+  var resumo = {
+    abasEncontradas: abasEncontradas,
+    clientes: { total: 0, novos: 0, atualizados: 0, redeNaoEncontrada: 0, lojaNaoEncontrada: 0, cnpjDuplicado: [] },
+    codigosFabrica: { allfood: 0, novamix: 0, allfoodNaoCadastrado: !fornAllfood, novaMixNaoCadastrado: !fornNovaMix },
+    vendedorForn: { total: 0, vinculados: 0, semCodigoCliente: 0, fabricaNaoEncontrada: 0, vendedorNaoEncontrado: 0 },
+    prazoForn: { total: 0 },
+    tabelaForn: { total: 0 }
+  };
+
+  // ── aba Clientes ──
+  if (wsClientes) {
+    var aoaCli = XLSX.utils.sheet_to_json(wsClientes, { header: 1 });
+    var header = aoaCli[0] || [];
+    var C = {
+      codigo:      _cadCol(header, ['código']),
+      nome:        _cadCol(header, ['nome fantasia']),
+      razao:       _cadCol(header, ['razão social']),
+      tipoDoc:     _cadCol(header, ['tipo documento']),
+      doc:         _cadCol(header, ['cnpj']),
+      ie:          _cadCol(header, ['insc']),
+      tel1:        _cadCol(header, ['telefone 1']),
+      tel2:        _cadCol(header, ['telefone 2']),
+      whats:       _cadCol(header, ['whatsapp']),
+      contato:     _cadCol(header, ['contato']),
+      emailXml:    _cadCol(header, ['e-mail xml']),
+      email:       -1,
+      cep:         _cadCol(header, ['cep']),
+      endereco:    _cadCol(header, ['endereço']),
+      numero:      _cadCol(header, ['número']),
+      complemento: _cadCol(header, ['complemento']),
+      bairro:      _cadCol(header, ['bairro']),
+      cidade:      _cadCol(header, ['cidade']),
+      uf:          -1,
+      pais:        -1,
+      rede:        _cadCol(header, ['nome real']),
+      loja:        _cadCol(header, ['sub-rede', 'loja']),
+      ativo:       -1,
+      obs:         _cadCol(header, ['observaç']),
+      codAllfood:  _cadCol(header, ['allfood']),
+      codNovaMix:  _cadCol(header, ['nova mix'])
+    };
+    for (var ih = 0; ih < header.length; ih++) {
+      var h = String(header[ih] || '').trim().toLowerCase();
+      if (h === 'e-mail') C.email = ih;
+      if (h === 'uf') C.uf = ih;
+      if (h === 'país' || h === 'pais') C.pais = ih;
+      if (h === 'ativo') C.ativo = ih;
+    }
+
+    for (var r = 1; r < aoaCli.length; r++) {
+      var row = aoaCli[r];
+      if (!row || !row.length) continue;
+      var codigo = _cadVal(row, C.codigo).trim();
+      if (!codigo) continue;
+      resumo.clientes.total++;
+
+      var redeNome = _cadVal(row, C.rede).trim();
+      var lojaNome = _cadVal(row, C.loja).trim();
+      var rede = redeNome ? cats.find(function(c){ return String(c.nome||'').trim().toLowerCase() === redeNome.toLowerCase() && !c.pai; }) : null;
+      if (redeNome && !rede) resumo.clientes.redeNaoEncontrada++;
+      var loja = lojaNome ? cats.find(function(c){ return String(c.nome||'').trim().toLowerCase() === lojaNome.toLowerCase() && c.pai; }) : null;
+      if (lojaNome && !loja) resumo.clientes.lojaNaoEncontrada++;
+
+      var docTipoRaw = _cadVal(row, C.tipoDoc).trim().toLowerCase();
+      var docTipo = docTipoRaw.indexOf('cpf') !== -1 ? 'cpf' : 'cnpj';
+      var ativoRaw = _cadVal(row, C.ativo).trim().toLowerCase();
+      var docValor = _cadVal(row, C.doc).trim();
+
+      var existente = clientes.find(function(c){ return String(c.codigo||'').trim() === codigo; });
+
+      var docDigits = docValor.replace(/\D/g, '');
+      if (docDigits) {
+        var idExistente = existente ? existente.id : null;
+        var conflito = clientes.find(function(c){
+          return c.id !== idExistente && String(c.cpf_cnpj||'').replace(/\D/g,'') === docDigits;
+        });
+        if (conflito) {
+          resumo.clientes.cnpjDuplicado.push(codigo + ' - ' + _cadVal(row, C.nome) + ' (mesmo CNPJ/CPF do cliente código ' + conflito.codigo + ')');
+          continue;
+        }
+      }
+
+      var obj = existente ? JSON.parse(JSON.stringify(existente)) : {
+        id: 'c' + Date.now() + '_' + r,
+        prazos_fornecedor: [], tabelas_fornecedor: [], vendedores_fornecedor: [], codigos_fornecedor: []
+      };
+      obj.codigo = codigo;
+      obj.nome_fantasia = _cadVal(row, C.nome).trim();
+      obj.razao_social  = _cadVal(row, C.razao).trim();
+      obj.doc_tipo = docTipo;
+      obj.cpf_cnpj = docValor;
+      if (!obj.insc_estadual) obj.insc_estadual = docTipo === 'cpf' ? 'Isento' : '';
+      var ieVal = _cadVal(row, C.ie).trim(); if (ieVal) obj.insc_estadual = ieVal;
+      obj.email = _cadVal(row, C.email).trim();
+      obj.email_xml = _cadVal(row, C.emailXml).trim();
+      obj.tel1 = _cadVal(row, C.tel1).trim();
+      obj.tel2 = _cadVal(row, C.tel2).trim();
+      obj.whatsapp = _cadVal(row, C.whats).trim();
+      obj.contato = _cadVal(row, C.contato).trim();
+      obj.cep = _cadVal(row, C.cep).trim();
+      obj.endereco = _cadVal(row, C.endereco).trim();
+      obj.numero = _cadVal(row, C.numero).trim();
+      obj.bairro = _cadVal(row, C.bairro).trim();
+      obj.cidade = _cadVal(row, C.cidade).trim();
+      obj.estado = _cadVal(row, C.uf).trim();
+      obj.complemento = _cadVal(row, C.complemento).trim();
+      obj.pais = _cadVal(row, C.pais).trim() || 'Brasil';
+      if (rede) obj.categoria = rede.id;
+      if (loja) obj.subcategoria = loja.id;
+      obj.ativo = (ativoRaw === 'não' || ativoRaw === 'nao') ? 'Não' : 'Sim';
+      var obsVal = _cadVal(row, C.obs).trim(); if (obsVal) obj.obs = obsVal;
+      if (!obj.codigos_fornecedor) obj.codigos_fornecedor = [];
+
+      var codAllfoodVal = _cadVal(row, C.codAllfood).trim();
+      if (codAllfoodVal && fornAllfood) {
+        resumo.codigosFabrica.allfood++;
+        _cadUpsertCodigoForn(obj, fornAllfood.id, codAllfoodVal);
+      }
+      var codNovaMixVal = _cadVal(row, C.codNovaMix).trim();
+      if (codNovaMixVal && fornNovaMix) {
+        resumo.codigosFabrica.novamix++;
+        _cadUpsertCodigoForn(obj, fornNovaMix.id, codNovaMixVal);
+      }
+
+      if (existente) {
+        var idxE = clientes.indexOf(existente);
+        clientes[idxE] = obj;
+        resumo.clientes.atualizados++;
+      } else {
+        clientes.push(obj);
+        resumo.clientes.novos++;
+      }
+    }
+  }
+
+  // ── aba Vendedor por Fábrica ──
+  if (wsVend) {
+    var aoaVend = XLSX.utils.sheet_to_json(wsVend, { header: 1 });
+    var headerV = aoaVend[0] || [];
+    var V = {
+      codigo:  _cadCol(headerV, ['código cliente']),
+      fabrica: _cadCol(headerV, ['fábrica', 'fabrica']),
+      vendedor:_cadCol(headerV, ['vendedor'])
+    };
+    var mapaClientesPorCodigo = {};
+    clientes.forEach(function(c){ mapaClientesPorCodigo[String(c.codigo||'').trim()] = c; });
+
+    for (var rv = 1; rv < aoaVend.length; rv++) {
+      var rowV = aoaVend[rv];
+      if (!rowV || !rowV.length) continue;
+      var codV = _cadVal(rowV, V.codigo).trim();
+      if (!codV) continue;
+      resumo.vendedorForn.total++;
+
+      var cli = mapaClientesPorCodigo[codV];
+      if (!cli) { resumo.vendedorForn.semCodigoCliente++; continue; }
+
+      var fabricaNome = _cadVal(rowV, V.fabrica).trim();
+      var forn = fornecedores.find(function(f){ return _cadNomeMatch(f, fabricaNome); });
+      if (!forn) { resumo.vendedorForn.fabricaNaoEncontrada++; continue; }
+
+      var vendNomeV = _cadVal(rowV, V.vendedor).trim();
+      var vend = vendedoresAtivos.find(function(v){ return String(v.nome||v.nome_fantasia||'').trim().toLowerCase() === vendNomeV.toLowerCase(); });
+      if (!vend) { resumo.vendedorForn.vendedorNaoEncontrado++; continue; }
+
+      var fornNomeFmt = (forn.codigo ? forn.codigo + ' ' : '') + (forn.nome_fantasia || forn.razao_social || '');
+      if (!cli.vendedores_fornecedor) cli.vendedores_fornecedor = [];
+      var idxV = cli.vendedores_fornecedor.findIndex(function(p){ return p.fornId === forn.id; });
+      var item = { fornId: forn.id, fornNome: fornNomeFmt, vendId: vend.id, vendNome: (vend.nome || vend.nome_fantasia || '') };
+      if (idxV >= 0) cli.vendedores_fornecedor[idxV] = item; else cli.vendedores_fornecedor.push(item);
+      resumo.vendedorForn.vinculados++;
+    }
+  }
+
+  // ── abas Prazo / Tabela por Fábrica (mesmo layout de Vendedor; hoje ainda vazias) ──
+  if (wsPrazo) {
+    var aoaPrazo = XLSX.utils.sheet_to_json(wsPrazo, { header: 1 });
+    for (var rp = 1; rp < aoaPrazo.length; rp++) { if (aoaPrazo[rp] && String(aoaPrazo[rp][0]||'').trim()) resumo.prazoForn.total++; }
+  }
+  if (wsTabela) {
+    var aoaTabela = XLSX.utils.sheet_to_json(wsTabela, { header: 1 });
+    for (var rt = 1; rt < aoaTabela.length; rt++) { if (aoaTabela[rt] && String(aoaTabela[rt][0]||'').trim()) resumo.tabelaForn.total++; }
+  }
+
+  if (commit) setClientes(clientes);
+
+  return { resumo: resumo, clientes: clientes };
 }
 
 function previewCliFoto(input) {
