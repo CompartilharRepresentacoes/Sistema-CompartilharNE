@@ -196,6 +196,63 @@
     .sb-flyout .fly-col:last-child { border-right: none; }
     .sb-flyout .fly-col-title { font-size: 9px; font-weight: 700; color: #94a3b8;
       text-transform: uppercase; letter-spacing: .05em; padding: 4px 14px 2px; }
+
+    /* ── Mobile: menu-gaveta ── */
+    #btnMobileMenu { display:none; }
+    #sidebarBackdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:290; }
+    @media (max-width: 767px) {
+      #btnMobileMenu {
+        display:flex; align-items:center; justify-content:center;
+        width:36px; height:36px; border:none; background:none; cursor:pointer;
+        color:#272A4A; margin-right:10px; flex-shrink:0; padding:0;
+      }
+      #btnMobileMenu i { font-size:22px; }
+      #appSidebar {
+        left: -240px; width: 240px; padding: 14px 0; align-items: stretch;
+        transition: left .25s ease; box-shadow: 4px 0 24px rgba(0,0,0,.25); overflow-y:auto;
+      }
+      body.mob-menu-open #appSidebar { left: 0; }
+      body.mob-menu-open #sidebarBackdrop { display:block; }
+      #appMainArea { margin-left: 0; }
+      .sb-item {
+        width: auto; flex-direction: row; justify-content: flex-start;
+        padding: 11px 18px; gap: 12px; border-radius: 0;
+      }
+      .sb-item i:not(.sb-chevron) { font-size: 18px; width:22px; text-align:center; flex-shrink:0; }
+      .sb-label { font-size: 13px; text-align:left; }
+      .sb-chevron { display:none; }
+      .sb-item-has-sub .sb-chevron {
+        display:inline-block; margin-left:auto; font-size:16px;
+        color:rgba(255,255,255,.4); transition:transform .15s; flex-shrink:0;
+      }
+      .sb-item-has-sub.sb-flyout-open .sb-chevron { transform:rotate(180deg); }
+      .sb-flyout {
+        display:none !important; position:static !important; left:auto !important;
+        top:auto !important; bottom:auto !important; box-shadow:none !important;
+        border:none !important; border-left:none !important; border-radius:0 !important;
+        background:transparent !important; min-width:0 !important; padding: 0 0 6px 34px !important;
+      }
+      .sb-item.sb-flyout-open .sb-flyout { display:block !important; }
+      .sb-flyout-title { display:none !important; }
+      .sb-flyout a { color: rgba(255,255,255,.7) !important; padding: 8px 6px !important; font-size:13px !important; font-weight:500; }
+      .sb-flyout a:hover, .sb-flyout a:active { background:transparent !important; color:#fff !important; }
+      .sb-flyout .fly-grid { display:block !important; min-width:0 !important; }
+      .sb-flyout .fly-col { border-right:none !important; padding:2px 0 !important; }
+      .sb-flyout .fly-col-title { color: rgba(255,255,255,.4) !important; padding: 6px 6px 2px !important; }
+
+      /* Clientes: linhas viram cartoes empilhados */
+      .cli-row-card { display:block !important; padding:12px 14px !important; }
+      .cli-row-card .cli-c-codigo { display:inline-block; font-size:10px; font-weight:700; color:#94a3b8; margin-bottom:3px; }
+      .cli-row-card .cli-c-nome { padding-right:0 !important; margin-bottom:2px; }
+      .cli-row-card .cli-c-razao { padding-right:0 !important; margin-bottom:6px; }
+      .cli-row-card .cli-c-doc { display:inline-block; margin-right:10px; margin-bottom:4px; }
+      .cli-row-card .cli-c-cidade { display:inline-block; margin-bottom:4px; }
+      .cli-row-card .cli-c-cat {
+        display:inline-block; background:#eef2ff; color:#3b5bdb; font-weight:700 !important;
+        border-radius:20px; padding:2px 9px; font-size:10px !important; margin-bottom:6px;
+      }
+      .cli-row-card .cli-c-acoes { justify-content:flex-start !important; gap:2px !important; margin-top:4px; }
+    }
     /* Topbar breadcrumb */
     .tb-page-title { font-size: 14px; font-weight: 700; color: #272A4A; }
     /* KPI cards */
@@ -616,11 +673,14 @@
 
   </aside>
 
+  <div id="sidebarBackdrop" onclick="_mobMenuFechar()"></div>
+
   <!-- ── ÁREA PRINCIPAL ── -->
   <div id="appMainArea">
 
     <!-- Topbar -->
     <header id="appTopbar">
+      <button id="btnMobileMenu" title="Menu" onclick="_mobMenuAbrir()"><i class="ti ti-menu-2"></i></button>
       <div id="tb-brand">
         <img src="compartilhar logo vetor.svg" style="height:44px;width:auto;display:block;object-fit:contain"
           alt="Compartilhar" onerror="this.style.display='none';document.getElementById('tb-brand-fallback').style.display='flex'">
@@ -7494,16 +7554,42 @@ function toggleTema() {
 // ═══════════════════════════════════════════════════
 // INICIALIZAÇÃO
 // ═══════════════════════════════════════════════════
+function _mobMenuAbrir(){ document.body.classList.add('mob-menu-open'); }
+function _mobMenuFechar(){
+  document.body.classList.remove('mob-menu-open');
+  document.querySelectorAll('#appSidebar .sb-item.sb-flyout-open').forEach(function(el){ el.classList.remove('sb-flyout-open'); });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // setupResponsivo() monta o carrossel de logos das representadas na tela de login
   // (puramente visual, não depende do Firebase) -- antes só rodava se !firebaseConfigurado,
   // o que deixou o carrossel sempre vazio depois que o Firebase foi ativado (13/08/2026).
   setupResponsivo();
   setTimeout(dashInit, 50);
+
+  // Menu-gaveta mobile: fecha ao clicar no backdrop, alterna submenu por toque (accordion)
+  document.getElementById('sidebarBackdrop')?.addEventListener('click', _mobMenuFechar);
+  document.getElementById('appSidebar')?.addEventListener('click', function(e) {
+    if (!window.matchMedia('(max-width: 767px)').matches) return;
+    if (e.target.closest('.sb-flyout a')) { _mobMenuFechar(); return; }
+    var item = e.target.closest('.sb-item');
+    if (!item) return;
+    if (item.querySelector('.sb-flyout')) {
+      e.preventDefault();
+      item.classList.toggle('sb-flyout-open');
+      return;
+    }
+    _mobMenuFechar();
+  });
+
   // Flyout sidebar com posicionamento inteligente (abre para cima se não couber)
   document.querySelectorAll('.sb-item').forEach(function(item) {
     var flyout = item.querySelector('.sb-flyout');
     if (!flyout) return;
+    item.classList.add('sb-item-has-sub');
+    var chev = document.createElement('i');
+    chev.className = 'ti ti-chevron-down sb-chevron';
+    item.insertBefore(chev, flyout);
     var timer;
     item.addEventListener('mouseenter', function() {
       clearTimeout(timer);
@@ -9262,18 +9348,18 @@ function renderClienteList() {
           return x.codigo_cliente + '  :  ' + fnome;
         }).join('&#10;')
       : 'Nenhum codigo cadastrado';
-    return `<div style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:11px 16px;align-items:center;border-bottom:1px solid #f8fafc;transition:background .12s"
+    return `<div class="cli-row-card" style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:11px 16px;align-items:center;border-bottom:1px solid #f8fafc;transition:background .12s"
         onmouseover="this.style.background='#f8fbff'" onmouseout="this.style.background=''">
-      <div style="font-size:13px;font-weight:700;color:#272A4A">${r.codigo||'—'}</div>
-      <div style="display:flex;align-items:center;gap:7px;padding-right:8px">
+      <div class="cli-c-codigo" style="font-size:13px;font-weight:700;color:#272A4A">${r.codigo||'—'}</div>
+      <div class="cli-c-nome" style="display:flex;align-items:center;gap:7px;padding-right:8px">
         <span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${(r.ativo||'Sim')==='Sim'?'#16a34a':'#dc2626'}"></span>
         <span style="font-size:13px;font-weight:600;color:#1e293b">${r.nome_fantasia||'—'}</span>
       </div>
-      <div style="font-size:11px;color:#64748b;padding-right:8px">${r.razao_social||'—'}</div>
-      <div style="font-size:11px;color:#64748b">${r.cpf_cnpj||'—'}</div>
-      <div style="font-size:11px;color:#64748b">${cidade||'—'}</div>
-      <div style="font-size:11px;color:#64748b">${catNome}</div>
-      <div style="display:flex;gap:1px;justify-content:center">
+      <div class="cli-c-razao" style="font-size:11px;color:#64748b;padding-right:8px">${r.razao_social||'—'}</div>
+      <div class="cli-c-doc" style="font-size:11px;color:#64748b">${r.cpf_cnpj||'—'}</div>
+      <div class="cli-c-cidade" style="font-size:11px;color:#64748b">${cidade||'—'}</div>
+      <div class="cli-c-cat" style="font-size:11px;color:#64748b">${catNome}</div>
+      <div class="cli-c-acoes" style="display:flex;gap:1px;justify-content:center">
         <button onclick="abrirModalCodCliForn('${r.id}')" title="${tooltipQr}"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:${codigos.length?'#272A4A':'#94a3b8'};display:flex;align-items:center"
           onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='none'">

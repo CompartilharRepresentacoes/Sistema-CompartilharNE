@@ -196,6 +196,63 @@
     .sb-flyout .fly-col:last-child { border-right: none; }
     .sb-flyout .fly-col-title { font-size: 9px; font-weight: 700; color: #94a3b8;
       text-transform: uppercase; letter-spacing: .05em; padding: 4px 14px 2px; }
+
+    /* ── Mobile: menu-gaveta ── */
+    #btnMobileMenu { display:none; }
+    #sidebarBackdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:290; }
+    @media (max-width: 767px) {
+      #btnMobileMenu {
+        display:flex; align-items:center; justify-content:center;
+        width:36px; height:36px; border:none; background:none; cursor:pointer;
+        color:#272A4A; margin-right:10px; flex-shrink:0; padding:0;
+      }
+      #btnMobileMenu i { font-size:22px; }
+      #appSidebar {
+        left: -240px; width: 240px; padding: 14px 0; align-items: stretch;
+        transition: left .25s ease; box-shadow: 4px 0 24px rgba(0,0,0,.25); overflow-y:auto;
+      }
+      body.mob-menu-open #appSidebar { left: 0; }
+      body.mob-menu-open #sidebarBackdrop { display:block; }
+      #appMainArea { margin-left: 0; }
+      .sb-item {
+        width: auto; flex-direction: row; justify-content: flex-start;
+        padding: 11px 18px; gap: 12px; border-radius: 0;
+      }
+      .sb-item i:not(.sb-chevron) { font-size: 18px; width:22px; text-align:center; flex-shrink:0; }
+      .sb-label { font-size: 13px; text-align:left; }
+      .sb-chevron { display:none; }
+      .sb-item-has-sub .sb-chevron {
+        display:inline-block; margin-left:auto; font-size:16px;
+        color:rgba(255,255,255,.4); transition:transform .15s; flex-shrink:0;
+      }
+      .sb-item-has-sub.sb-flyout-open .sb-chevron { transform:rotate(180deg); }
+      .sb-flyout {
+        display:none !important; position:static !important; left:auto !important;
+        top:auto !important; bottom:auto !important; box-shadow:none !important;
+        border:none !important; border-left:none !important; border-radius:0 !important;
+        background:transparent !important; min-width:0 !important; padding: 0 0 6px 34px !important;
+      }
+      .sb-item.sb-flyout-open .sb-flyout { display:block !important; }
+      .sb-flyout-title { display:none !important; }
+      .sb-flyout a { color: rgba(255,255,255,.7) !important; padding: 8px 6px !important; font-size:13px !important; font-weight:500; }
+      .sb-flyout a:hover, .sb-flyout a:active { background:transparent !important; color:#fff !important; }
+      .sb-flyout .fly-grid { display:block !important; min-width:0 !important; }
+      .sb-flyout .fly-col { border-right:none !important; padding:2px 0 !important; }
+      .sb-flyout .fly-col-title { color: rgba(255,255,255,.4) !important; padding: 6px 6px 2px !important; }
+
+      /* Clientes: linhas viram cartoes empilhados */
+      .cli-row-card { display:block !important; padding:12px 14px !important; }
+      .cli-row-card .cli-c-codigo { display:inline-block; font-size:10px; font-weight:700; color:#94a3b8; margin-bottom:3px; }
+      .cli-row-card .cli-c-nome { padding-right:0 !important; margin-bottom:2px; }
+      .cli-row-card .cli-c-razao { padding-right:0 !important; margin-bottom:6px; }
+      .cli-row-card .cli-c-doc { display:inline-block; margin-right:10px; margin-bottom:4px; }
+      .cli-row-card .cli-c-cidade { display:inline-block; margin-bottom:4px; }
+      .cli-row-card .cli-c-cat {
+        display:inline-block; background:#eef2ff; color:#3b5bdb; font-weight:700 !important;
+        border-radius:20px; padding:2px 9px; font-size:10px !important; margin-bottom:6px;
+      }
+      .cli-row-card .cli-c-acoes { justify-content:flex-start !important; gap:2px !important; margin-top:4px; }
+    }
     /* Topbar breadcrumb */
     .tb-page-title { font-size: 14px; font-weight: 700; color: #272A4A; }
     /* KPI cards */
@@ -616,11 +673,14 @@
 
   </aside>
 
+  <div id="sidebarBackdrop" onclick="_mobMenuFechar()"></div>
+
   <!-- ── ÁREA PRINCIPAL ── -->
   <div id="appMainArea">
 
     <!-- Topbar -->
     <header id="appTopbar">
+      <button id="btnMobileMenu" title="Menu" onclick="_mobMenuAbrir()"><i class="ti ti-menu-2"></i></button>
       <div id="tb-brand">
         <img src="compartilhar logo vetor.svg" style="height:44px;width:auto;display:block;object-fit:contain"
           alt="Compartilhar" onerror="this.style.display='none';document.getElementById('tb-brand-fallback').style.display='flex'">
@@ -900,8 +960,14 @@
             <span>Categoria</span><span style="text-align:right">A&#231;&#245;es</span>
           </div>
           <div id="cat-cliente-tbody"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="cat-cliente-paginacao">0 registros</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="cat-cliente-qtd" onchange="renderCatClienteList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -1017,8 +1083,14 @@
             <span>Categoria</span><span style="text-align:right">A&#231;&#245;es</span>
           </div>
           <div id="cat-produto-tbody"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="cat-produto-paginacao">0 registros</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="cat-produto-qtd" onchange="renderCatProdutoList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -1122,9 +1194,14 @@
             <span>C&#243;digo</span><span></span><span>Fornecedor</span><span>CNPJ</span><span>Cidade</span><span style="text-align:center">Op&#231;&#245;es</span>
           </div>
           <div id="fornecedor-tbody"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="fornecedor-paginacao">0 registros</span>
-            <div style="display:flex;gap:3px" id="fornecedor-pag-btns"></div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="fornecedor-qtd" onchange="renderFornecedorList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -1412,9 +1489,14 @@
             <span>C&#243;digo</span><span>Transportadora</span><span>CNPJ</span><span>Cidade / UF</span><span style="text-align:center">Op&#231;&#245;es</span>
           </div>
           <div id="transp-tbody"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="transp-paginacao">0 registros</span>
-            <div style="display:flex;gap:3px" id="transp-pag-btns"></div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="transp-qtd" onchange="renderTranspList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -1955,9 +2037,14 @@
             <span>C&#243;digo</span><span>Cliente</span><span>Raz&#227;o Social</span><span>CNPJ</span><span>Cidade / UF</span><span>Categoria</span><span style="text-align:center">Op&#231;&#245;es</span>
           </div>
           <div id="cliente-tbody"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="cliente-paginacao">0 registros</span>
-            <div style="display:flex;gap:3px" id="cliente-pag-btns"></div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="cliente-qtd" onchange="renderClienteList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -2304,13 +2391,27 @@
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
 
-              <!-- Vendedor por Fábrica -->
+              <!-- Vendedor Principal -->
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px">
+                <div style="padding:9px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:6px">
+                  <i class="ti ti-star" style="font-size:11px;color:#0ea5e9"></i>
+                  <span style="font-size:12px;font-weight:700;color:#1e293b">Vendedor principal</span>
+                  <span style="font-size:10px;color:#94a3b8">atende este cliente em todas as fábricas</span>
+                </div>
+                <div style="padding:12px 14px">
+                  <select id="cli-vendedor-principal" class="form-input" style="width:100%" onchange="renderVendedoresForn()">
+                    <option value="">-- Selecione --</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Segundo vendedor (excecao por fabrica) -->
               <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px">
                 <div style="padding:9px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between">
                   <div style="display:flex;align-items:center;gap:6px">
                     <i class="ti ti-user-star" style="font-size:11px;color:#0ea5e9"></i>
-                    <span style="font-size:12px;font-weight:700;color:#1e293b">Vendedor por Fábrica</span>
-                    <span style="font-size:10px;color:#94a3b8">quem atende este cliente em cada representada</span>
+                    <span style="font-size:12px;font-weight:700;color:#1e293b">Segundo vendedor (exceção por fábrica)</span>
+                    <span style="font-size:10px;color:#94a3b8">só preencha se alguma fábrica tiver vendedor diferente do principal</span>
                   </div>
                   <button onclick="toggleFormVendForn()" id="btn-vendforn-open"
                     style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">
@@ -2440,9 +2541,14 @@
             <span>C&#243;digo</span><span></span><span>Produto</span><span>Un.</span><span>Qtde</span><span>Fornecedor</span><span style="text-align:center">Op&#231;&#245;es</span>
           </div>
           <div id="produto-tbody"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="produto-paginacao">0 registros</span>
-            <div style="display:flex;gap:3px" id="produto-pag-btns"></div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="produto-qtd" onchange="renderProdutoList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -2641,8 +2747,14 @@
             <span>Representada</span><span>Arquivo</span><span>Data</span><span>Status</span><span style="text-align:right">Ações</span>
           </div>
           <div id="catalogo-tbody" style="min-height:60px"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="catalogo-paginacao">0 registros</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="catalogo-qtd" onchange="renderCatalogoList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -2722,9 +2834,14 @@
             <span>Tabela</span><span>Última Atualização</span><span>Produtos</span><span>Status</span><span style="text-align:center">Op&#231;&#245;es</span>
           </div>
           <div id="tabpreco-tbody"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="tabpreco-paginacao">0 registros</span>
-            <div style="display:flex;gap:3px" id="tabpreco-pag-btns"></div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="tabpreco-qtd" onchange="renderTabPrecoList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -2950,8 +3067,14 @@
             <span>Produto</span><span>Alvo</span><span>Valor</span><span>Válido até</span><span>Status</span><span style="text-align:center">Opções</span>
           </div>
           <div id="negpreco-tbody"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="negpreco-paginacao">0 registros</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="negpreco-qtd" onchange="renderNegPrecoList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -3549,8 +3672,14 @@
           <span style="text-align:right">Ações</span>
         </div>
         <div id="ped-tbody" style="min-height:60px"></div>
-        <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9">
+        <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
           <span style="font-size:10px;color:#94a3b8" id="ped-paginacao">0 registros</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+            <select id="ped-qtd" onchange="renderPedidoList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+              <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+            </select>
+          </div>
         </div>
       </div>
       </div>
@@ -3586,8 +3715,14 @@
             <span>Data</span><span>Pedido</span><span>Cliente</span><span style="text-align:center">UF</span><span>Fornecedor</span><span>Vendedor</span><span>Valor</span><span>Status</span>
           </div>
           <div id="pss-tbody" style="min-height:60px"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="pss-paginacao">0 registros</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="pss-qtd" onchange="renderVendaSimples()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -4021,8 +4156,14 @@
           <span>Pedido Cliente</span><span>Cliente</span><span style="text-align:center">UF</span><span>Vendedor</span><span>Fornecedor</span><span>Transportadora</span><span>NF</span><span>Data Fat.</span><span>Prevista</span><span style="text-align:center">Dias</span><span>Entrega</span><span>Status</span>
         </div>
         <div id="entctrl-tbody" style="min-height:60px"></div>
-        <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9">
+        <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
           <span style="font-size:10px;color:#94a3b8" id="entctrl-paginacao">0 registros</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+            <select id="entctrl-qtd" onchange="renderEntregaControle()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+              <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -4071,8 +4212,14 @@
             <span>Data</span><span>Cliente</span><span>Fornecedor</span><span>Motivo</span><span>Valor</span><span style="text-align:right">Ações</span>
           </div>
           <div id="dev-tbody" style="min-height:60px"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="dev-paginacao">0 registros</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="dev-qtd" onchange="renderDevolucaoList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -4699,8 +4846,14 @@
           <span>NF</span><span>Cliente</span><span>Transportadora</span><span>Tipo</span><span>Valor</span><span>Data</span><span style="text-align:right">Ações</span>
         </div>
         <div id="oc-tbody" style="min-height:60px"></div>
-        <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9">
+        <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
           <span style="font-size:10px;color:#94a3b8" id="oc-paginacao">0 registros</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+            <select id="oc-qtd" onchange="renderOcorrencias()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+              <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -4782,8 +4935,14 @@
           <span>Produto</span><span>Cliente Origem</span><span>Fornecedor</span><span>Qtd Disp.</span><span>Validade</span><span>Dias</span><span>Status</span><span style="text-align:right">Ações</span>
         </div>
         <div id="rev-tbody" style="min-height:60px"></div>
-        <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9">
+        <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
           <span style="font-size:10px;color:#94a3b8" id="rev-paginacao">0 registros</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+            <select id="rev-qtd" onchange="renderRevendaList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+              <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -5046,8 +5205,14 @@
             <span>Nome</span><span>E-mail</span><span>Grupo</span><span>Ativo</span><span style="text-align:right">Ações</span>
           </div>
           <div id="usu-tbody" style="min-height:60px"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="usu-paginacao">0 registros</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="usu-qtd" onchange="renderUsuarioList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -5058,8 +5223,14 @@
             <span>Nome do Grupo</span><span>Usuários vinculados</span><span style="text-align:right">Ações</span>
           </div>
           <div id="grp-tbody" style="min-height:60px"></div>
-          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9">
+          <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="grp-paginacao">0 registros</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;color:#94a3b8">Mostrar</span>
+              <select id="grp-qtd" onchange="renderGrupoList()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
+                <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -6924,6 +7095,46 @@ function getCatClientes() {
 function setCatClientes(data) {
   localStorage.setItem('cat_clientes', JSON.stringify(data));
 }
+// ═══════ Paginação genérica "Mostrar" (10/25/50/Todos) — usada em todas as listas do sistema ═══════
+function _pgQtd(selectId) {
+  var el = document.getElementById(selectId);
+  var v = el ? el.value : '10';
+  return v === 'todos' ? Infinity : (parseInt(v, 10) || 10);
+}
+function _pgAplicar(lista, selectId) {
+  var qtd = _pgQtd(selectId);
+  return qtd === Infinity ? lista : lista.slice(0, qtd);
+}
+// exibidos: quantos itens estão sendo desenhados agora (após o corte do "Mostrar")
+// totalFiltrado: quantos itens batem com a busca/filtro atual (antes do corte)
+// totalGeral: quantos itens existem no total, sem filtro nenhum
+function _pgTexto(exibidos, totalFiltrado, totalGeral, singular, plural) {
+  singular = singular || 'registro'; plural = plural || 'registros';
+  if (totalGeral == null) totalGeral = totalFiltrado;
+  var palavraFiltro = totalFiltrado === 1 ? singular : plural;
+  if (totalFiltrado === totalGeral) {
+    if (exibidos >= totalFiltrado) return totalGeral + ' ' + palavraFiltro;
+    return 'Mostrando ' + exibidos + ' de ' + totalFiltrado + ' ' + palavraFiltro;
+  }
+  var palavraGeral = totalGeral === 1 ? singular : plural;
+  if (exibidos >= totalFiltrado) return totalFiltrado + ' de ' + totalGeral + ' ' + palavraGeral;
+  return 'Mostrando ' + exibidos + ' de ' + totalFiltrado + ' (de ' + totalGeral + ' no total)';
+}
+// Monta o HTML do seletor "Mostrar" — fica no rodapé do painel, ao lado do texto de contagem.
+function _pgSeletorHtml(selectId, onchangeFnName) {
+  return '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'
+    + '<span style="font-size:10px;color:#94a3b8">Mostrar</span>'
+    + '<select id="' + selectId + '" onchange="' + onchangeFnName + '()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">'
+    + '<option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>'
+    + '</select></div>';
+}
+
+var _catCliAbertas = {};
+function _catCliToggle(id) {
+  _catCliAbertas[id] = !_catCliAbertas[id];
+  renderCatClienteList();
+}
+
 function renderCatClienteList() {
   const data  = getCatClientes();
   const busca = (document.getElementById('cat-cliente-busca')?.value || '').toLowerCase();
@@ -6949,9 +7160,41 @@ function renderCatClienteList() {
     rows.push(pai);
     filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR')).forEach(f => rows.push(f));
   });
-  if (busca) rows = rows.filter(r => r.nome.toLowerCase().includes(busca));
+  if (busca) {
+    // busca ativa: ignora expandir/recolher e mostra direto quem bate (rede ou sub-rede)
+    rows = [];
+    pais.forEach(pai => {
+      const filhosDoPai = filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'));
+      const paiBate = pai.nome.toLowerCase().includes(busca);
+      const filhosQueBatem = filhosDoPai.filter(f => f.nome.toLowerCase().includes(busca));
+      if (paiBate || filhosQueBatem.length) {
+        rows.push(pai);
+        (paiBate ? filhosDoPai : filhosQueBatem).forEach(f => rows.push(f));
+      }
+    });
+  } else {
+    rows = [];
+    pais.forEach(pai => {
+      rows.push(pai);
+      if (_catCliAbertas[pai.id]) {
+        filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR')).forEach(f => rows.push(f));
+      }
+    });
+  }
 
-  if (pag) pag.textContent = `${rows.length} de ${data.length} registro${data.length!==1?'s':''}`;
+  // "Mostrar" corta por quantidade de REDES (itens sem pai) -- cada rede exibida traz as sub-redes dela junto
+  const redesFiltradas = rows.filter(r => !r.pai).length;
+  const qtdMostrar = _pgQtd('cat-cliente-qtd');
+  if (qtdMostrar !== Infinity) {
+    let contPais = 0, rowsCortadas = [];
+    for (let i = 0; i < rows.length; i++) {
+      if (!rows[i].pai) { contPais++; if (contPais > qtdMostrar) break; }
+      rowsCortadas.push(rows[i]);
+    }
+    rows = rowsCortadas;
+  }
+
+  if (pag) pag.textContent = _pgTexto(rows.filter(r => !r.pai).length, redesFiltradas, totalPai, 'rede', 'redes');
 
   if (!rows.length) {
     tbody.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum registro encontrado.</div>`;
@@ -6960,17 +7203,39 @@ function renderCatClienteList() {
 
   tbody.innerHTML = rows.map(r => {
     const isSub = !!r.pai;
-    const nomePai = isSub ? (data.find(x => x.id == r.pai)?.nome || '') : '';
-    return `<div style="display:grid;grid-template-columns:1fr 118px;padding:${isSub?'10px 16px 10px 36px':'13px 16px'};align-items:center;border-bottom:1px solid #f8fafc;background:${isSub?'#fafbff':'#fff'};cursor:pointer;transition:background .12s"
-        onmouseover="this.style.background='${isSub?'#f0f4ff':'#f8fbff'}'" onmouseout="this.style.background='${isSub?'#fafbff':'#fff'}'">
-      <div>
-        ${isSub
-          ? `<div style="display:flex;align-items:center;gap:6px"><span style="color:#94a3b8;font-size:13px">↳</span><div style="font-size:13px;font-weight:600;color:#3b5bdb">${r.nome}</div></div>`
-          : `<div style="font-size:14px;font-weight:700;color:#1e293b">${r.nome}</div>`
-        }
-      </div>
-      <div style="display:flex;gap:1px;justify-content:flex-end">
-        <button onclick="event.stopPropagation();visualizarLogoCatCliente(${r.id})" title="Visualizar logo"
+    if (isSub) {
+      return `<div style="display:grid;grid-template-columns:1fr 118px;padding:10px 16px 10px 36px;align-items:center;border-bottom:1px solid #f8fafc;background:#fafbff;transition:background .12s"
+          onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='#fafbff'">
+        <div style="display:flex;align-items:center;gap:6px"><span style="color:#94a3b8;font-size:13px">↳</span><div style="font-size:13px;font-weight:600;color:#3b5bdb">${r.nome}</div></div>
+        <div style="display:flex;gap:1px;justify-content:flex-end">
+          <button onclick="visualizarLogoCatCliente(${r.id})" title="Visualizar logo"
+            style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb;display:flex;align-items:center"
+            onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='none'">
+            <i class="ti ti-eye" style="font-size:13px"></i>
+          </button>
+          <button onclick="editCatCliente(${r.id})" title="Editar"
+            style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
+            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
+            <i class="ti ti-edit" style="font-size:13px"></i>
+          </button>
+          <button onclick="deleteCatCliente(${r.id})" title="Excluir"
+            style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
+            onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
+            <i class="ti ti-trash" style="font-size:13px"></i>
+          </button>
+        </div>
+      </div>`;
+    }
+    const qtdFilhos = filhos.filter(f => f.pai == r.id).length;
+    const aberto = !busca && !!_catCliAbertas[r.id];
+    const seta = qtdFilhos
+      ? `<i class="ti ti-chevron-${aberto?'down':'right'}" style="font-size:14px;color:#94a3b8;width:16px;display:inline-block;flex-shrink:0"></i>`
+      : `<span style="width:16px;display:inline-block;flex-shrink:0"></span>`;
+    return `<div onclick="_catCliToggle(${r.id})" style="display:grid;grid-template-columns:1fr 118px;padding:13px 16px;align-items:center;border-bottom:1px solid #f8fafc;background:#fff;cursor:pointer;transition:background .12s"
+        onmouseover="this.style.background='#f8fbff'" onmouseout="this.style.background='#fff'">
+      <div style="display:flex;align-items:center;gap:6px">${seta}<span style="font-size:14px;font-weight:700;color:#1e293b">${r.nome}</span>${qtdFilhos ? `<span style="font-size:11px;font-weight:600;color:#94a3b8">(${qtdFilhos})</span>` : ''}</div>
+      <div style="display:flex;gap:1px;justify-content:flex-end" onclick="event.stopPropagation()">
+        <button onclick="visualizarLogoCatCliente(${r.id})" title="Visualizar logo"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb;display:flex;align-items:center"
           onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='none'">
           <i class="ti ti-eye" style="font-size:13px"></i>
@@ -7090,6 +7355,12 @@ function getCatProdutos() {
 function setCatProdutos(data) {
   localStorage.setItem('cat_produtos', JSON.stringify(data));
 }
+var _catProdAbertas = {};
+function _catProdToggle(id) {
+  _catProdAbertas[id] = !_catProdAbertas[id];
+  renderCatProdutoList();
+}
+
 function renderCatProdutoList() {
   const data  = getCatProdutos();
   const busca = (document.getElementById('cat-produto-busca')?.value || '').toLowerCase();
@@ -7102,8 +7373,9 @@ function renderCatProdutoList() {
   const kpiT = document.getElementById('cat-prod-kpi-total');
   const kpiP = document.getElementById('cat-prod-kpi-principal');
   const kpiS = document.getElementById('cat-prod-kpi-sub');
+  const totalPaiCatProd = data.filter(r => !r.pai).length;
   if (kpiT) kpiT.textContent = data.length;
-  if (kpiP) kpiP.textContent = data.filter(r => !r.pai).length;
+  if (kpiP) kpiP.textContent = totalPaiCatProd;
   if (kpiS) kpiS.textContent = data.filter(r => !!r.pai).length;
 
   const pais   = data.filter(r => !r.pai).sort((a,b) => dir==='asc' ? a.nome.localeCompare(b.nome,'pt-BR') : b.nome.localeCompare(a.nome,'pt-BR'));
@@ -7113,9 +7385,41 @@ function renderCatProdutoList() {
     rows.push(pai);
     filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR')).forEach(f => rows.push(f));
   });
-  if (busca) rows = rows.filter(r => r.nome.toLowerCase().includes(busca));
+  if (busca) {
+    // busca ativa: ignora expandir/recolher e mostra direto quem bate (categoria ou subcategoria)
+    rows = [];
+    pais.forEach(pai => {
+      const filhosDoPai = filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'));
+      const paiBate = pai.nome.toLowerCase().includes(busca);
+      const filhosQueBatem = filhosDoPai.filter(f => f.nome.toLowerCase().includes(busca));
+      if (paiBate || filhosQueBatem.length) {
+        rows.push(pai);
+        (paiBate ? filhosDoPai : filhosQueBatem).forEach(f => rows.push(f));
+      }
+    });
+  } else {
+    rows = [];
+    pais.forEach(pai => {
+      rows.push(pai);
+      if (_catProdAbertas[pai.id]) {
+        filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR')).forEach(f => rows.push(f));
+      }
+    });
+  }
 
-  if (pag) pag.textContent = `${rows.length} de ${data.length} registro${data.length!==1?'s':''}`;
+  // "Mostrar" corta por quantidade de categorias principais (itens sem pai)
+  const catsFiltradas = rows.filter(r => !r.pai).length;
+  const qtdMostrarCatProd = _pgQtd('cat-produto-qtd');
+  if (qtdMostrarCatProd !== Infinity) {
+    let contPais = 0, rowsCortadas = [];
+    for (let i = 0; i < rows.length; i++) {
+      if (!rows[i].pai) { contPais++; if (contPais > qtdMostrarCatProd) break; }
+      rowsCortadas.push(rows[i]);
+    }
+    rows = rowsCortadas;
+  }
+
+  if (pag) pag.textContent = _pgTexto(rows.filter(r => !r.pai).length, catsFiltradas, totalPaiCatProd, 'categoria', 'categorias');
 
   if (!rows.length) {
     tbody.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum registro encontrado.</div>`;
@@ -7124,16 +7428,33 @@ function renderCatProdutoList() {
 
   tbody.innerHTML = rows.map(r => {
     const isSub  = !!r.pai;
-    const nomePai = isSub ? (data.find(x => x.id == r.pai)?.nome || '') : '';
-    return `<div style="display:grid;grid-template-columns:1fr 90px;padding:${isSub?'10px 16px 10px 36px':'13px 16px'};align-items:center;border-bottom:1px solid #f8fafc;background:${isSub?'#fafbff':'#fff'};cursor:pointer;transition:background .12s"
-        onmouseover="this.style.background='${isSub?'#f0f4ff':'#f8fbff'}'" onmouseout="this.style.background='${isSub?'#fafbff':'#fff'}'">
-      <div>
-        ${isSub
-          ? `<div style="display:flex;align-items:center;gap:6px"><span style="color:#94a3b8;font-size:13px">↳</span><div style="font-size:13px;font-weight:600;color:#3b5bdb">${r.nome}</div></div>`
-          : `<div style="font-size:14px;font-weight:700;color:#1e293b">${r.nome}</div>`
-        }
-      </div>
-      <div style="display:flex;gap:1px;justify-content:flex-end">
+    if (isSub) {
+      return `<div style="display:grid;grid-template-columns:1fr 90px;padding:10px 16px 10px 36px;align-items:center;border-bottom:1px solid #f8fafc;background:#fafbff;transition:background .12s"
+          onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='#fafbff'">
+        <div style="display:flex;align-items:center;gap:6px"><span style="color:#94a3b8;font-size:13px">↳</span><div style="font-size:13px;font-weight:600;color:#3b5bdb">${r.nome}</div></div>
+        <div style="display:flex;gap:1px;justify-content:flex-end">
+          <button onclick="editCatProduto(${r.id})" title="Editar"
+            style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
+            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
+            <i class="ti ti-edit" style="font-size:13px"></i>
+          </button>
+          <button onclick="deleteCatProduto(${r.id})" title="Excluir"
+            style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
+            onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
+            <i class="ti ti-trash" style="font-size:13px"></i>
+          </button>
+        </div>
+      </div>`;
+    }
+    const qtdFilhos = filhos.filter(f => f.pai == r.id).length;
+    const aberto = !busca && !!_catProdAbertas[r.id];
+    const seta = qtdFilhos
+      ? `<i class="ti ti-chevron-${aberto?'down':'right'}" style="font-size:14px;color:#94a3b8;width:16px;display:inline-block;flex-shrink:0"></i>`
+      : `<span style="width:16px;display:inline-block;flex-shrink:0"></span>`;
+    return `<div onclick="_catProdToggle(${r.id})" style="display:grid;grid-template-columns:1fr 90px;padding:13px 16px;align-items:center;border-bottom:1px solid #f8fafc;background:#fff;cursor:pointer;transition:background .12s"
+        onmouseover="this.style.background='#f8fbff'" onmouseout="this.style.background='#fff'">
+      <div style="display:flex;align-items:center;gap:6px">${seta}<span style="font-size:14px;font-weight:700;color:#1e293b">${r.nome}</span>${qtdFilhos ? `<span style="font-size:11px;font-weight:600;color:#94a3b8">(${qtdFilhos})</span>` : ''}</div>
+      <div style="display:flex;gap:1px;justify-content:flex-end" onclick="event.stopPropagation()">
         <button onclick="editCatProduto(${r.id})" title="Editar"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
@@ -7233,16 +7554,42 @@ function toggleTema() {
 // ═══════════════════════════════════════════════════
 // INICIALIZAÇÃO
 // ═══════════════════════════════════════════════════
+function _mobMenuAbrir(){ document.body.classList.add('mob-menu-open'); }
+function _mobMenuFechar(){
+  document.body.classList.remove('mob-menu-open');
+  document.querySelectorAll('#appSidebar .sb-item.sb-flyout-open').forEach(function(el){ el.classList.remove('sb-flyout-open'); });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // setupResponsivo() monta o carrossel de logos das representadas na tela de login
   // (puramente visual, não depende do Firebase) -- antes só rodava se !firebaseConfigurado,
   // o que deixou o carrossel sempre vazio depois que o Firebase foi ativado (13/08/2026).
   setupResponsivo();
   setTimeout(dashInit, 50);
+
+  // Menu-gaveta mobile: fecha ao clicar no backdrop, alterna submenu por toque (accordion)
+  document.getElementById('sidebarBackdrop')?.addEventListener('click', _mobMenuFechar);
+  document.getElementById('appSidebar')?.addEventListener('click', function(e) {
+    if (!window.matchMedia('(max-width: 767px)').matches) return;
+    if (e.target.closest('.sb-flyout a')) { _mobMenuFechar(); return; }
+    var item = e.target.closest('.sb-item');
+    if (!item) return;
+    if (item.querySelector('.sb-flyout')) {
+      e.preventDefault();
+      item.classList.toggle('sb-flyout-open');
+      return;
+    }
+    _mobMenuFechar();
+  });
+
   // Flyout sidebar com posicionamento inteligente (abre para cima se não couber)
   document.querySelectorAll('.sb-item').forEach(function(item) {
     var flyout = item.querySelector('.sb-flyout');
     if (!flyout) return;
+    item.classList.add('sb-item-has-sub');
+    var chev = document.createElement('i');
+    chev.className = 'ti ti-chevron-down sb-chevron';
+    item.insertBefore(chev, flyout);
     var timer;
     item.addEventListener('mouseenter', function() {
       clearTimeout(timer);
@@ -7346,7 +7693,9 @@ function renderFornecedorList() {
 
   const tbody = document.getElementById('fornecedor-tbody');
   const pag   = document.getElementById('fornecedor-paginacao');
-  if (pag) pag.textContent = `${rows.length} de ${data.length} registro${data.length!==1?'s':''}`;
+  const fornFiltrados = rows.length;
+  rows = _pgAplicar(rows, 'fornecedor-qtd');
+  if (pag) pag.textContent = _pgTexto(rows.length, fornFiltrados, data.length, 'fornecedor', 'fornecedores');
 
   if (!rows.length) {
     tbody.innerHTML = `<div style="text-align:center;padding:40px 20px;color:#94a3b8;font-size:13px">
@@ -8005,10 +8354,12 @@ async function renderCatalogoList() {
   if (kT) kT.textContent = fornecedores.length;
   if (kC) kC.textContent = comCat;
   if (kS) kS.textContent = fornecedores.length - comCat;
-  const rows = fornecedores.filter(f =>
+  let rows = fornecedores.filter(f =>
     !busca || (f.nome_fantasia||'').toLowerCase().includes(busca) || (f.codigo||'').toLowerCase().includes(busca)
   );
-  if (pag) pag.textContent = `${rows.length} de ${fornecedores.length} registro${fornecedores.length !== 1 ? 's' : ''}`;
+  const catalogoFiltrados = rows.length;
+  rows = _pgAplicar(rows, 'catalogo-qtd');
+  if (pag) pag.textContent = _pgTexto(rows.length, catalogoFiltrados, fornecedores.length, 'fornecedor', 'fornecedores');
   if (!rows.length) {
     tbody.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum fornecedor cadastrado.</div>`;
     return;
@@ -8651,7 +9002,9 @@ function renderTranspList() {
     return (a.nome_fantasia||'').localeCompare(b.nome_fantasia||'','pt-BR');
   });
 
-  if (pag) pag.textContent = `${rows.length} de ${data.length} registro${rows.length !== 1 ? 's' : ''}`;
+  const transpFiltradas = rows.length;
+  rows = _pgAplicar(rows, 'transp-qtd');
+  if (pag) pag.textContent = _pgTexto(rows.length, transpFiltradas, data.length, 'transportadora', 'transportadoras');
 
   if (!rows.length) {
     tbody.innerHTML = `<div style="text-align:center;padding:36px 16px;color:#94a3b8;font-size:13px">
@@ -8969,7 +9322,9 @@ function renderClienteList() {
   if (kpiI) kpiI.textContent = data.filter(r => r.ativo==='Não').length;
   if (kpiT) kpiT.textContent = rows.length;
 
-  if (pag) pag.textContent = `${rows.length} de ${data.length} registro${data.length!==1?'s':''}`;
+  const cliFiltrados = rows.length;
+  rows = _pgAplicar(rows, 'cliente-qtd');
+  if (pag) pag.textContent = _pgTexto(rows.length, cliFiltrados, data.length, 'cliente', 'clientes');
 
   if (!rows.length) {
     tbody.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum cliente encontrado.</div>`;
@@ -8993,18 +9348,18 @@ function renderClienteList() {
           return x.codigo_cliente + '  :  ' + fnome;
         }).join('&#10;')
       : 'Nenhum codigo cadastrado';
-    return `<div style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:11px 16px;align-items:center;border-bottom:1px solid #f8fafc;transition:background .12s"
+    return `<div class="cli-row-card" style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:11px 16px;align-items:center;border-bottom:1px solid #f8fafc;transition:background .12s"
         onmouseover="this.style.background='#f8fbff'" onmouseout="this.style.background=''">
-      <div style="font-size:13px;font-weight:700;color:#272A4A">${r.codigo||'—'}</div>
-      <div style="display:flex;align-items:center;gap:7px;padding-right:8px">
+      <div class="cli-c-codigo" style="font-size:13px;font-weight:700;color:#272A4A">${r.codigo||'—'}</div>
+      <div class="cli-c-nome" style="display:flex;align-items:center;gap:7px;padding-right:8px">
         <span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${(r.ativo||'Sim')==='Sim'?'#16a34a':'#dc2626'}"></span>
         <span style="font-size:13px;font-weight:600;color:#1e293b">${r.nome_fantasia||'—'}</span>
       </div>
-      <div style="font-size:11px;color:#64748b;padding-right:8px">${r.razao_social||'—'}</div>
-      <div style="font-size:11px;color:#64748b">${r.cpf_cnpj||'—'}</div>
-      <div style="font-size:11px;color:#64748b">${cidade||'—'}</div>
-      <div style="font-size:11px;color:#64748b">${catNome}</div>
-      <div style="display:flex;gap:1px;justify-content:center">
+      <div class="cli-c-razao" style="font-size:11px;color:#64748b;padding-right:8px">${r.razao_social||'—'}</div>
+      <div class="cli-c-doc" style="font-size:11px;color:#64748b">${r.cpf_cnpj||'—'}</div>
+      <div class="cli-c-cidade" style="font-size:11px;color:#64748b">${cidade||'—'}</div>
+      <div class="cli-c-cat" style="font-size:11px;color:#64748b">${catNome}</div>
+      <div class="cli-c-acoes" style="display:flex;gap:1px;justify-content:center">
         <button onclick="abrirModalCodCliForn('${r.id}')" title="${tooltipQr}"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:${codigos.length?'#272A4A':'#94a3b8'};display:flex;align-items:center"
           onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='none'">
@@ -9246,7 +9601,15 @@ function openClienteForm(params) {
   setV('cli-obs', r.obs||'');
   // Toggle doc tipo
   toggleCliDocTipo(r.doc_tipo || 'cnpj');
-  // Vendedor por Fábrica
+  // Vendedor principal
+  var vpSel = document.getElementById('cli-vendedor-principal');
+  if (vpSel) {
+    var vpOrd = getVendedoresAtivos().sort(function(a,b){ return (a.nome||a.nome_fantasia||'').localeCompare(b.nome||b.nome_fantasia||'', 'pt-BR'); });
+    vpSel.innerHTML = '<option value="">-- Selecione --</option>' +
+      vpOrd.map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome||v.nome_fantasia||'') + '</option>'; }).join('');
+    vpSel.value = r.vendedor_principal || '';
+  }
+  // Vendedor por Fábrica (exceções)
   window._cliVendedoresForn = JSON.parse(JSON.stringify(r.vendedores_fornecedor || []));
   document.getElementById('cli-vendforn-form').style.display = 'none';
   document.getElementById('btn-vendforn-open').innerHTML = '<i class="ti ti-plus" style="font-size:9px"></i> Cadastrar';
@@ -9367,21 +9730,31 @@ function renderVendedoresForn() {
   var cont = document.getElementById('cli-vendforn-list');
   if (!cont) return;
   var lista = window._cliVendedoresForn || [];
-  if (!lista.length) { cont.innerHTML = '<div style="padding:12px 14px;text-align:center;font-size:11px;color:#94a3b8">Nenhum vendedor vinculado.</div>'; return; }
+  var vpSel = document.getElementById('cli-vendedor-principal');
+  var vpNome = vpSel && vpSel.value ? (vpSel.options[vpSel.selectedIndex] || {}).text : '';
+  var rodape = vpNome
+    ? '<div style="padding:8px 14px;font-size:11px;color:#94a3b8">Nas demais fábricas, este cliente continua com o vendedor principal (' + _pedEsc(vpNome) + ').</div>'
+    : '';
+  if (!lista.length) {
+    cont.innerHTML = '<div style="padding:12px 14px;text-align:center;font-size:11px;color:#94a3b8">Nenhuma exceção cadastrada.</div>' + rodape;
+    return;
+  }
   cont.innerHTML = lista.map(function(p, i){
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #f1f5f9">'
       + '<div style="font-size:12px;color:#334155"><span style="font-weight:700;color:#1e293b">'+_pedEsc(p.fornNome)+'</span>'
-      + ' <span style="color:#94a3b8">&rarr;</span> <span style="font-weight:600">'+_pedEsc(p.vendNome)+'</span></div>'
+      + ' <span style="color:#94a3b8">&rarr;</span> <span style="font-weight:600">'+_pedEsc(p.vendNome)+'</span>'
+      + ' <span style="font-size:10px;color:#94a3b8">(exceção)</span></div>'
       + '<button onclick="removerVendedorForn('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:11px"></i></button>'
       + '</div>';
-  }).join('');
+  }).join('') + rodape;
 }
 // Resolve o vendedor certo para um Cliente numa Fábrica (Fornecedor) específica.
 function _cliResolverVendedorPorForn(cliente, fornId) {
   if (!cliente || !fornId) return null;
   var lista = cliente.vendedores_fornecedor || [];
   var achou = lista.find(function(v){ return String(v.fornId) === String(fornId); });
-  return achou ? achou.vendId : null;
+  if (achou) return achou.vendId;
+  return cliente.vendedor_principal || null;
 }
 
 // ── Prazo Cliente / Tabela Cliente (Dados Financeiros por Fornecedor) ──
@@ -9591,6 +9964,7 @@ function salvarCliente() {
     ent_estado:   document.getElementById('cli-ent-estado').value,
     ent_pais:     document.getElementById('cli-ent-pais').value.trim(),
     obs:          document.getElementById('cli-obs').value.trim(),
+    vendedor_principal: document.getElementById('cli-vendedor-principal').value,
     prazos_fornecedor:     window._cliPrazos          || [],
     tabelas_fornecedor:    window._cliTabelas         || [],
     vendedores_fornecedor: window._cliVendedoresForn || [],
@@ -9850,7 +10224,8 @@ function _cadCompletoAbrirPreview(nomeArquivo, resumo) {
   html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
     + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Vendedor por Fábrica</span><span>' + resumo.vendedorForn.total + ' linha(s)</span></div>'
     + '<div style="font-size:12px;color:#555;line-height:1.8">'
-    + '<div>' + resumo.vendedorForn.vinculados + ' vinculada(s) a um cliente existente</div>'
+    + '<div>' + resumo.vendedorForn.principalDefinido + ' cliente(s) com Vendedor Principal definido</div>'
+    + (resumo.vendedorForn.excecoesCriadas ? '<div>' + resumo.vendedorForn.excecoesCriadas + ' exceção(ões) por fábrica (vendedor diferente do principal)</div>' : '<div style="color:#888">Nenhuma exceção — mesmo vendedor em todas as fábricas de cada cliente</div>')
     + (resumo.vendedorForn.semCodigoCliente ? '<div style="color:#B91C1C">' + resumo.vendedorForn.semCodigoCliente + ' linha(s) com Código Cliente não encontrado</div>' : '')
     + (resumo.vendedorForn.fabricaNaoEncontrada ? '<div style="color:#B45309">' + resumo.vendedorForn.fabricaNaoEncontrada + ' linha(s) com Fábrica não cadastrada em Fornecedores</div>' : '')
     + (resumo.vendedorForn.vendedorNaoEncontrado ? '<div style="color:#B45309">' + resumo.vendedorForn.vendedorNaoEncontrado + ' linha(s) com Vendedor não cadastrado/ativo</div>' : '')
@@ -9881,7 +10256,7 @@ function _cadCompletoConfirmar() {
     alert('Importação concluída.\n\n'
       + resultado.resumo.clientes.novos + ' cliente(s) novo(s), ' + resultado.resumo.clientes.atualizados + ' atualizado(s).\n'
       + (resultado.resumo.codigosFabrica.allfood + resultado.resumo.codigosFabrica.novamix) + ' código(s) de fábrica aplicado(s).\n'
-      + resultado.resumo.vendedorForn.vinculados + ' vínculo(s) de Vendedor por Fábrica aplicado(s).');
+      + resultado.resumo.vendedorForn.principalDefinido + ' cliente(s) com Vendedor Principal definido, ' + resultado.resumo.vendedorForn.excecoesCriadas + ' exceção(ões) por fábrica.');
   } catch (err) {
     alert('Erro ao confirmar importação: ' + (err && err.message ? err.message : err));
   }
@@ -9908,7 +10283,7 @@ function _cadCompletoProcessar(wb, commit) {
     abasEncontradas: abasEncontradas,
     clientes: { total: 0, novos: 0, atualizados: 0, redeNaoEncontrada: 0, lojaNaoEncontrada: 0, cnpjDuplicado: [] },
     codigosFabrica: { allfood: 0, novamix: 0, allfoodNaoCadastrado: !fornAllfood, novaMixNaoCadastrado: !fornNovaMix },
-    vendedorForn: { total: 0, vinculados: 0, semCodigoCliente: 0, fabricaNaoEncontrada: 0, vendedorNaoEncontrado: 0 },
+    vendedorForn: { total: 0, principalDefinido: 0, excecoesCriadas: 0, semCodigoCliente: 0, fabricaNaoEncontrada: 0, vendedorNaoEncontrado: 0 },
     prazoForn: { total: 0 },
     tabelaForn: { total: 0 }
   };
@@ -10040,6 +10415,11 @@ function _cadCompletoProcessar(wb, commit) {
   }
 
   // ── aba Vendedor por Fábrica ──
+  // O sistema agora tem Vendedor Principal (vale pra todas as fábricas) + excecao pontual por fábrica.
+  // Por isso primeiro agrupamos as linhas por cliente: o vendedor que mais aparece pros fornecedores
+  // desse cliente vira o Principal; qualquer fábrica com um vendedor diferente da maioria vira excecao.
+  // Quando só existe 1 linha pro cliente (caso mais comum), ela sozinha já define o Principal e nenhuma
+  // excecao e criada.
   if (wsVend) {
     var aoaVend = XLSX.utils.sheet_to_json(wsVend, { header: 1 });
     var headerV = aoaVend[0] || [];
@@ -10051,6 +10431,7 @@ function _cadCompletoProcessar(wb, commit) {
     var mapaClientesPorCodigo = {};
     clientes.forEach(function(c){ mapaClientesPorCodigo[String(c.codigo||'').trim()] = c; });
 
+    var linhasPorCliente = {}; // codigo -> [{ cli, forn, vend }]
     for (var rv = 1; rv < aoaVend.length; rv++) {
       var rowV = aoaVend[rv];
       if (!rowV || !rowV.length) continue;
@@ -10069,13 +10450,35 @@ function _cadCompletoProcessar(wb, commit) {
       var vend = vendedoresAtivos.find(function(v){ return String(v.nome||v.nome_fantasia||'').trim().toLowerCase() === vendNomeV.toLowerCase(); });
       if (!vend) { resumo.vendedorForn.vendedorNaoEncontrado++; continue; }
 
-      var fornNomeFmt = (forn.codigo ? forn.codigo + ' ' : '') + (forn.nome_fantasia || forn.razao_social || '');
-      if (!cli.vendedores_fornecedor) cli.vendedores_fornecedor = [];
-      var idxV = cli.vendedores_fornecedor.findIndex(function(p){ return p.fornId === forn.id; });
-      var item = { fornId: forn.id, fornNome: fornNomeFmt, vendId: vend.id, vendNome: (vend.nome || vend.nome_fantasia || '') };
-      if (idxV >= 0) cli.vendedores_fornecedor[idxV] = item; else cli.vendedores_fornecedor.push(item);
-      resumo.vendedorForn.vinculados++;
+      if (!linhasPorCliente[codV]) linhasPorCliente[codV] = [];
+      linhasPorCliente[codV].push({ cli: cli, forn: forn, vend: vend });
     }
+
+    Object.keys(linhasPorCliente).forEach(function(codV){
+      var linhas = linhasPorCliente[codV];
+      var cli = linhas[0].cli;
+
+      // conta quantas vezes cada vendedor aparece pra esse cliente -> o mais frequente vira o Principal
+      var contagem = {};
+      linhas.forEach(function(l){ contagem[l.vend.id] = (contagem[l.vend.id]||0) + 1; });
+      var principalId = linhas[0].vend.id, maiorContagem = 0;
+      Object.keys(contagem).forEach(function(vid){
+        if (contagem[vid] > maiorContagem) { maiorContagem = contagem[vid]; principalId = vid; }
+      });
+      cli.vendedor_principal = principalId;
+      resumo.vendedorForn.principalDefinido++;
+
+      // fábricas cujo vendedor diverge do Principal viram excecao em vendedores_fornecedor
+      linhas.forEach(function(l){
+        if (l.vend.id === principalId) return;
+        var fornNomeFmt = (l.forn.codigo ? l.forn.codigo + ' ' : '') + (l.forn.nome_fantasia || l.forn.razao_social || '');
+        if (!cli.vendedores_fornecedor) cli.vendedores_fornecedor = [];
+        var idxV = cli.vendedores_fornecedor.findIndex(function(p){ return p.fornId === l.forn.id; });
+        var item = { fornId: l.forn.id, fornNome: fornNomeFmt, vendId: l.vend.id, vendNome: (l.vend.nome || l.vend.nome_fantasia || '') };
+        if (idxV >= 0) cli.vendedores_fornecedor[idxV] = item; else cli.vendedores_fornecedor.push(item);
+        resumo.vendedorForn.excecoesCriadas++;
+      });
+    });
   }
 
   // ── abas Prazo / Tabela por Fábrica (mesmo layout de Vendedor; hoje ainda vazias) ──
@@ -10219,7 +10622,9 @@ function renderTabPrecoList() {
   const tbody = document.getElementById('tabpreco-tbody');
   const pag   = document.getElementById('tabpreco-paginacao');
   if (!tbody) return;
-  if (pag) pag.textContent = `${rows.length} de ${data.length} registro${data.length!==1?'s':''}`;
+  const tabPrecoFiltradas = rows.length;
+  rows = _pgAplicar(rows, 'tabpreco-qtd');
+  if (pag) pag.textContent = _pgTexto(rows.length, tabPrecoFiltradas, data.length, 'tabela', 'tabelas');
 
   const fornecedores = getFornecedores();
   if (!rows.length) {
@@ -11499,7 +11904,9 @@ function renderNegPrecoList() {
   var tbody = document.getElementById('negpreco-tbody');
   var pag   = document.getElementById('negpreco-paginacao');
   if (!tbody) return;
-  if (pag) pag.textContent = rows.length + ' de ' + data.length + ' registro' + (data.length !== 1 ? 's' : '');
+  var negPrecoFiltradas = rows.length;
+  rows = _pgAplicar(rows, 'negpreco-qtd');
+  if (pag) pag.textContent = _pgTexto(rows.length, negPrecoFiltradas, data.length, 'negociação', 'negociações');
   if (!rows.length) {
     tbody.innerHTML = '<div style="padding:28px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma negociação encontrada</div>';
     return;
@@ -11881,7 +12288,9 @@ function renderProdutoList() {
   if (kpiA) kpiA.textContent = data.filter(r=>(r.ativo||'Sim')==='Sim').length;
   if (kpiI) kpiI.textContent = data.filter(r=>r.ativo==='Não').length;
   if (kpiT) kpiT.textContent = rows.length;
-  if (pag) pag.textContent = `${rows.length} de ${data.length} registro${data.length!==1?'s':''}`;
+  const prodFiltrados = rows.length;
+  rows = _pgAplicar(rows, 'produto-qtd');
+  if (pag) pag.textContent = _pgTexto(rows.length, prodFiltrados, data.length, 'produto', 'produtos');
 
   if (!rows.length) {
     tbody.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum produto encontrado.</div>`;
@@ -14903,7 +15312,9 @@ function renderVendaSimples() {
   var pssKV = document.getElementById('pss-kpi-valor'); if (pssKV) pssKV.textContent = _pedFmtMoeda(pssValorTotal);
   var pssKP = document.getElementById('pss-kpi-peso'); if (pssKP) pssKP.textContent = pssPesoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
-  if (pag) pag.textContent = rows.length + ' de ' + pedidos.length + ' registro' + (pedidos.length!==1?'s':'');
+  var pssFiltrados = rows.length;
+  rows = _pgAplicar(rows, 'pss-qtd');
+  if (pag) pag.textContent = _pgTexto(rows.length, pssFiltrados, pedidos.length, 'pedido', 'pedidos');
 
   if (!rows.length) {
     tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum pedido encontrado com esses filtros.</div>';
@@ -14980,7 +15391,9 @@ function renderPedidoList() {
   if (kV) kV.textContent = _pedFmtMoeda(valorTotal);
   if (kP) kP.textContent = pesoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
-  if (pag) pag.textContent = rows.length + ' de ' + pedidos.length + ' registro' + (pedidos.length!==1?'s':'');
+  const pedFiltrados = rows.length;
+  rows = _pgAplicar(rows, 'ped-qtd');
+  if (pag) pag.textContent = _pgTexto(rows.length, pedFiltrados, pedidos.length, 'pedido', 'pedidos');
   _pedAtualizarSetasOrdenacao();
 
   if (!rows.length) {
@@ -17524,7 +17937,9 @@ function renderEntregaControle() {
   var kR = document.getElementById('entctrl-kpi-rota'); if (kR) kR.textContent = rota;
   var kE = document.getElementById('entctrl-kpi-entregues'); if (kE) kE.textContent = entregues;
 
-  var pag = document.getElementById('entctrl-paginacao'); if (pag) pag.textContent = total + ' registro' + (total !== 1 ? 's' : '');
+  var pag = document.getElementById('entctrl-paginacao');
+  linhas = _pgAplicar(linhas, 'entctrl-qtd');
+  if (pag) pag.textContent = _pgTexto(linhas.length, total, total, 'registro', 'registros');
 
   if (!linhas.length) {
     tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhuma NF encontrada com esses filtros.</div>';
@@ -19044,7 +19459,9 @@ function renderDevolucaoList() {
   if (kT) kT.textContent = rows.length;
   if (kV) kV.textContent = _pedFmtMoeda(valorTotal);
 
-  if (pag) pag.textContent = rows.length + ' de ' + devs.length + ' registro' + (devs.length!==1?'s':'');
+  const devFiltradas = rows.length;
+  rows = _pgAplicar(rows, 'dev-qtd');
+  if (pag) pag.textContent = _pgTexto(rows.length, devFiltradas, devs.length, 'devolução', 'devoluções');
 
   if (!rows.length) {
     tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhuma devolução encontrada.</div>';
@@ -19791,7 +20208,10 @@ function renderRevendaList() {
   var kVenc = document.getElementById('rev-kpi-vencendo'); if (kVenc) kVenc.textContent = vencendo;
   var kR = document.getElementById('rev-kpi-revendidos'); if (kR) kR.textContent = revendidosMes;
 
-  var pag = document.getElementById('rev-paginacao'); if (pag) pag.textContent = linhas.length + ' registro' + (linhas.length!==1?'s':'');
+  var pag = document.getElementById('rev-paginacao');
+  var revFiltradas = linhas.length;
+  linhas = _pgAplicar(linhas, 'rev-qtd');
+  if (pag) pag.textContent = _pgTexto(linhas.length, revFiltradas, revFiltradas, 'registro', 'registros');
 
   if (!linhas.length) {
     tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum item de revenda encontrado.</div>';
@@ -20543,7 +20963,9 @@ function renderUsuarioList() {
   var tbody = document.getElementById('usu-tbody');
   var pag = document.getElementById('usu-paginacao');
   if (!tbody) return;
-  if (pag) pag.textContent = usuarios.length + ' registro' + (usuarios.length!==1?'s':'');
+  var usuTotalGeral = usuarios.length;
+  usuarios = _pgAplicar(usuarios, 'usu-qtd');
+  if (pag) pag.textContent = _pgTexto(usuarios.length, usuTotalGeral, usuTotalGeral, 'usuário', 'usuários');
   if (!usuarios.length) {
     tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum usuário cadastrado.</div>';
     return;
@@ -20673,7 +21095,9 @@ function renderGrupoList() {
   var tbody = document.getElementById('grp-tbody');
   var pag = document.getElementById('grp-paginacao');
   if (!tbody) return;
-  if (pag) pag.textContent = grupos.length + ' registro' + (grupos.length!==1?'s':'');
+  var grpTotalGeral = grupos.length;
+  grupos = _pgAplicar(grupos, 'grp-qtd');
+  if (pag) pag.textContent = _pgTexto(grupos.length, grpTotalGeral, grpTotalGeral, 'grupo', 'grupos');
   if (!grupos.length) {
     tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum grupo cadastrado.</div>';
     return;
@@ -23176,7 +23600,9 @@ function renderOcorrencias() {
 
   var tbody = document.getElementById('oc-tbody');
   var pag = document.getElementById('oc-paginacao');
-  if (pag) pag.textContent = data.length + ' registro' + (data.length !== 1 ? 's' : '');
+  var ocTotalGeral = data.length;
+  data = _pgAplicar(data, 'oc-qtd');
+  if (pag) pag.textContent = _pgTexto(data.length, ocTotalGeral, ocTotalGeral, 'ocorrência', 'ocorrências');
   if (!data.length) {
     tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhuma ocorrência registrada.</div>';
     return;
