@@ -7069,12 +7069,6 @@ function _pgSeletorHtml(selectId, onchangeFnName) {
     + '</select></div>';
 }
 
-var _catCliAbertas = {};
-function _catCliToggle(id) {
-  _catCliAbertas[id] = !_catCliAbertas[id];
-  renderCatClienteList();
-}
-
 function renderCatClienteList() {
   const data  = getCatClientes();
   const busca = (document.getElementById('cat-cliente-busca')?.value || '').toLowerCase();
@@ -7100,27 +7094,7 @@ function renderCatClienteList() {
     rows.push(pai);
     filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR')).forEach(f => rows.push(f));
   });
-  if (busca) {
-    // busca ativa: ignora expandir/recolher e mostra direto quem bate (rede ou sub-rede)
-    rows = [];
-    pais.forEach(pai => {
-      const filhosDoPai = filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'));
-      const paiBate = pai.nome.toLowerCase().includes(busca);
-      const filhosQueBatem = filhosDoPai.filter(f => f.nome.toLowerCase().includes(busca));
-      if (paiBate || filhosQueBatem.length) {
-        rows.push(pai);
-        (paiBate ? filhosDoPai : filhosQueBatem).forEach(f => rows.push(f));
-      }
-    });
-  } else {
-    rows = [];
-    pais.forEach(pai => {
-      rows.push(pai);
-      if (_catCliAbertas[pai.id]) {
-        filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR')).forEach(f => rows.push(f));
-      }
-    });
-  }
+  if (busca) rows = rows.filter(r => r.nome.toLowerCase().includes(busca));
 
   // "Mostrar" corta por quantidade de REDES (itens sem pai) -- cada rede exibida traz as sub-redes dela junto
   const redesFiltradas = rows.filter(r => !r.pai).length;
@@ -7143,39 +7117,17 @@ function renderCatClienteList() {
 
   tbody.innerHTML = rows.map(r => {
     const isSub = !!r.pai;
-    if (isSub) {
-      return `<div style="display:grid;grid-template-columns:1fr 118px;padding:10px 16px 10px 36px;align-items:center;border-bottom:1px solid #f8fafc;background:#fafbff;transition:background .12s"
-          onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='#fafbff'">
-        <div style="display:flex;align-items:center;gap:6px"><span style="color:#94a3b8;font-size:13px">↳</span><div style="font-size:13px;font-weight:600;color:#3b5bdb">${r.nome}</div></div>
-        <div style="display:flex;gap:1px;justify-content:flex-end">
-          <button onclick="visualizarLogoCatCliente(${r.id})" title="Visualizar logo"
-            style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb;display:flex;align-items:center"
-            onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='none'">
-            <i class="ti ti-eye" style="font-size:13px"></i>
-          </button>
-          <button onclick="editCatCliente(${r.id})" title="Editar"
-            style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
-            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-            <i class="ti ti-edit" style="font-size:13px"></i>
-          </button>
-          <button onclick="deleteCatCliente(${r.id})" title="Excluir"
-            style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
-            onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-            <i class="ti ti-trash" style="font-size:13px"></i>
-          </button>
-        </div>
-      </div>`;
-    }
-    const qtdFilhos = filhos.filter(f => f.pai == r.id).length;
-    const aberto = !busca && !!_catCliAbertas[r.id];
-    const seta = qtdFilhos
-      ? `<i class="ti ti-chevron-${aberto?'down':'right'}" style="font-size:14px;color:#94a3b8;width:16px;display:inline-block;flex-shrink:0"></i>`
-      : `<span style="width:16px;display:inline-block;flex-shrink:0"></span>`;
-    return `<div onclick="_catCliToggle(${r.id})" style="display:grid;grid-template-columns:1fr 118px;padding:13px 16px;align-items:center;border-bottom:1px solid #f8fafc;background:#fff;cursor:pointer;transition:background .12s"
-        onmouseover="this.style.background='#f8fbff'" onmouseout="this.style.background='#fff'">
-      <div style="display:flex;align-items:center;gap:6px">${seta}<span style="font-size:14px;font-weight:700;color:#1e293b">${r.nome}</span>${qtdFilhos ? `<span style="font-size:11px;font-weight:600;color:#94a3b8">(${qtdFilhos})</span>` : ''}</div>
-      <div style="display:flex;gap:1px;justify-content:flex-end" onclick="event.stopPropagation()">
-        <button onclick="visualizarLogoCatCliente(${r.id})" title="Visualizar logo"
+    const nomePai = isSub ? (data.find(x => x.id == r.pai)?.nome || '') : '';
+    return `<div style="display:grid;grid-template-columns:1fr 118px;padding:${isSub?'10px 16px 10px 36px':'13px 16px'};align-items:center;border-bottom:1px solid #f8fafc;background:${isSub?'#fafbff':'#fff'};cursor:pointer;transition:background .12s"
+        onmouseover="this.style.background='${isSub?'#f0f4ff':'#f8fbff'}'" onmouseout="this.style.background='${isSub?'#fafbff':'#fff'}'">
+      <div>
+        ${isSub
+          ? `<div style="display:flex;align-items:center;gap:6px"><span style="color:#94a3b8;font-size:13px">↳</span><div style="font-size:13px;font-weight:600;color:#3b5bdb">${r.nome}</div></div>`
+          : `<div style="font-size:14px;font-weight:700;color:#1e293b">${r.nome}</div>`
+        }
+      </div>
+      <div style="display:flex;gap:1px;justify-content:flex-end">
+        <button onclick="event.stopPropagation();visualizarLogoCatCliente(${r.id})" title="Visualizar logo"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb;display:flex;align-items:center"
           onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='none'">
           <i class="ti ti-eye" style="font-size:13px"></i>
@@ -7295,12 +7247,6 @@ function getCatProdutos() {
 function setCatProdutos(data) {
   localStorage.setItem('cat_produtos', JSON.stringify(data));
 }
-var _catProdAbertas = {};
-function _catProdToggle(id) {
-  _catProdAbertas[id] = !_catProdAbertas[id];
-  renderCatProdutoList();
-}
-
 function renderCatProdutoList() {
   const data  = getCatProdutos();
   const busca = (document.getElementById('cat-produto-busca')?.value || '').toLowerCase();
@@ -7325,27 +7271,7 @@ function renderCatProdutoList() {
     rows.push(pai);
     filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR')).forEach(f => rows.push(f));
   });
-  if (busca) {
-    // busca ativa: ignora expandir/recolher e mostra direto quem bate (categoria ou subcategoria)
-    rows = [];
-    pais.forEach(pai => {
-      const filhosDoPai = filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'));
-      const paiBate = pai.nome.toLowerCase().includes(busca);
-      const filhosQueBatem = filhosDoPai.filter(f => f.nome.toLowerCase().includes(busca));
-      if (paiBate || filhosQueBatem.length) {
-        rows.push(pai);
-        (paiBate ? filhosDoPai : filhosQueBatem).forEach(f => rows.push(f));
-      }
-    });
-  } else {
-    rows = [];
-    pais.forEach(pai => {
-      rows.push(pai);
-      if (_catProdAbertas[pai.id]) {
-        filhos.filter(f => f.pai == pai.id).sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR')).forEach(f => rows.push(f));
-      }
-    });
-  }
+  if (busca) rows = rows.filter(r => r.nome.toLowerCase().includes(busca));
 
   // "Mostrar" corta por quantidade de categorias principais (itens sem pai)
   const catsFiltradas = rows.filter(r => !r.pai).length;
@@ -7368,33 +7294,16 @@ function renderCatProdutoList() {
 
   tbody.innerHTML = rows.map(r => {
     const isSub  = !!r.pai;
-    if (isSub) {
-      return `<div style="display:grid;grid-template-columns:1fr 90px;padding:10px 16px 10px 36px;align-items:center;border-bottom:1px solid #f8fafc;background:#fafbff;transition:background .12s"
-          onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='#fafbff'">
-        <div style="display:flex;align-items:center;gap:6px"><span style="color:#94a3b8;font-size:13px">↳</span><div style="font-size:13px;font-weight:600;color:#3b5bdb">${r.nome}</div></div>
-        <div style="display:flex;gap:1px;justify-content:flex-end">
-          <button onclick="editCatProduto(${r.id})" title="Editar"
-            style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
-            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-            <i class="ti ti-edit" style="font-size:13px"></i>
-          </button>
-          <button onclick="deleteCatProduto(${r.id})" title="Excluir"
-            style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
-            onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-            <i class="ti ti-trash" style="font-size:13px"></i>
-          </button>
-        </div>
-      </div>`;
-    }
-    const qtdFilhos = filhos.filter(f => f.pai == r.id).length;
-    const aberto = !busca && !!_catProdAbertas[r.id];
-    const seta = qtdFilhos
-      ? `<i class="ti ti-chevron-${aberto?'down':'right'}" style="font-size:14px;color:#94a3b8;width:16px;display:inline-block;flex-shrink:0"></i>`
-      : `<span style="width:16px;display:inline-block;flex-shrink:0"></span>`;
-    return `<div onclick="_catProdToggle(${r.id})" style="display:grid;grid-template-columns:1fr 90px;padding:13px 16px;align-items:center;border-bottom:1px solid #f8fafc;background:#fff;cursor:pointer;transition:background .12s"
-        onmouseover="this.style.background='#f8fbff'" onmouseout="this.style.background='#fff'">
-      <div style="display:flex;align-items:center;gap:6px">${seta}<span style="font-size:14px;font-weight:700;color:#1e293b">${r.nome}</span>${qtdFilhos ? `<span style="font-size:11px;font-weight:600;color:#94a3b8">(${qtdFilhos})</span>` : ''}</div>
-      <div style="display:flex;gap:1px;justify-content:flex-end" onclick="event.stopPropagation()">
+    const nomePai = isSub ? (data.find(x => x.id == r.pai)?.nome || '') : '';
+    return `<div style="display:grid;grid-template-columns:1fr 90px;padding:${isSub?'10px 16px 10px 36px':'13px 16px'};align-items:center;border-bottom:1px solid #f8fafc;background:${isSub?'#fafbff':'#fff'};cursor:pointer;transition:background .12s"
+        onmouseover="this.style.background='${isSub?'#f0f4ff':'#f8fbff'}'" onmouseout="this.style.background='${isSub?'#fafbff':'#fff'}'">
+      <div>
+        ${isSub
+          ? `<div style="display:flex;align-items:center;gap:6px"><span style="color:#94a3b8;font-size:13px">↳</span><div style="font-size:13px;font-weight:600;color:#3b5bdb">${r.nome}</div></div>`
+          : `<div style="font-size:14px;font-weight:700;color:#1e293b">${r.nome}</div>`
+        }
+      </div>
+      <div style="display:flex;gap:1px;justify-content:flex-end">
         <button onclick="editCatProduto(${r.id})" title="Editar"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
