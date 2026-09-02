@@ -196,6 +196,76 @@
     .sb-flyout .fly-col:last-child { border-right: none; }
     .sb-flyout .fly-col-title { font-size: 9px; font-weight: 700; color: #94a3b8;
       text-transform: uppercase; letter-spacing: .05em; padding: 4px 14px 2px; }
+
+    /* ── Mobile: menu-gaveta ── */
+    #btnMobileMenu { display:none; }
+    #sidebarBackdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:290; }
+    @media (max-width: 767px) {
+      #btnMobileMenu {
+        display:flex; align-items:center; justify-content:center;
+        width:36px; height:36px; border:none; background:none; cursor:pointer;
+        color:#272A4A; margin-right:10px; flex-shrink:0; padding:0;
+      }
+      #btnMobileMenu i { font-size:22px; }
+      #appSidebar {
+        left: -280px; width: 280px; padding: 14px 0; align-items: stretch;
+        transition: left .25s ease; box-shadow: 4px 0 24px rgba(0,0,0,.25); overflow-y:auto;
+      }
+      body.mob-menu-open #appSidebar { left: 0; }
+      body.mob-menu-open #sidebarBackdrop { display:block; }
+      #appMainArea { margin-left: 0; }
+      .sb-item {
+        width: auto; flex-direction: row; justify-content: flex-start;
+        padding: 12px 16px; gap: 12px; border-radius: 0;
+      }
+      .sb-item i:not(.sb-chevron) { font-size: 18px; width:22px; text-align:center; flex-shrink:0; }
+      .sb-label { font-size: 13.5px; text-align:left; white-space:normal; line-height:1.25; flex:1; }
+      .sb-chevron { display:none; }
+      .sb-item-has-sub .sb-chevron {
+        display:inline-block; margin-left:6px; font-size:16px;
+        color:rgba(255,255,255,.4); transition:transform .15s; flex-shrink:0;
+      }
+      .sb-item-has-sub.sb-flyout-open .sb-chevron { transform:rotate(180deg); }
+      .sb-flyout {
+        display:none !important; position:static !important; left:auto !important;
+        top:auto !important; bottom:auto !important; box-shadow:none !important;
+        border:none !important; border-left:none !important; border-radius:0 !important;
+        background:rgba(0,0,0,.18) !important; min-width:0 !important; padding: 4px 8px 8px 46px !important;
+      }
+      .sb-item.sb-flyout-open .sb-flyout { display:block !important; }
+      .sb-flyout-title { display:none !important; }
+      .sb-flyout a {
+        color: rgba(255,255,255,.75) !important; padding: 9px 6px !important; font-size:13px !important;
+        font-weight:500; line-height:1.3; white-space:normal !important; border-radius:6px !important;
+      }
+      .sb-flyout a:hover, .sb-flyout a:active { background:rgba(255,255,255,.08) !important; color:#fff !important; }
+      .sb-flyout .fly-grid { display:block !important; min-width:0 !important; }
+      .sb-flyout .fly-col { border-right:none !important; padding:2px 0 !important; }
+      .sb-flyout .fly-col-title { color: rgba(255,255,255,.4) !important; padding: 6px 6px 2px !important; }
+
+      /* Dashboard (Início): evita espremer/quebrar em telas de celular */
+      .dash-root #kpis { grid-template-columns: repeat(2, 1fr) !important; }
+      .dash-root #podio { grid-template-columns: 1fr !important; gap:10px !important; }
+      .dash-root .dg21, .dash-root .dg11 { grid-template-columns: 1fr !important; }
+      .dash-root .dashHeaderRow { flex-wrap: wrap !important; gap: 10px !important; }
+      .dash-root .dashHeaderRow > div:last-child { width: 100%; display:flex !important; gap:8px !important; }
+      .dash-root .dashHeaderRow > div:last-child button { flex:1; }
+      .dash-root .d-tab-bar { overflow-x: auto !important; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; }
+      .dash-root .d-tab-btn { flex-shrink: 0 !important; }
+
+      /* Clientes: linhas viram cartoes empilhados */
+      .cli-row-card { display:block !important; padding:12px 14px !important; }
+      .cli-row-card .cli-c-codigo { display:inline-block; font-size:10px; font-weight:700; color:#94a3b8; margin-bottom:3px; }
+      .cli-row-card .cli-c-nome { padding-right:0 !important; margin-bottom:2px; }
+      .cli-row-card .cli-c-razao { padding-right:0 !important; margin-bottom:6px; }
+      .cli-row-card .cli-c-doc { display:inline-block; margin-right:10px; margin-bottom:4px; }
+      .cli-row-card .cli-c-cidade { display:inline-block; margin-bottom:4px; }
+      .cli-row-card .cli-c-cat {
+        display:inline-block; background:#eef2ff; color:#3b5bdb; font-weight:700 !important;
+        border-radius:20px; padding:2px 9px; font-size:10px !important; margin-bottom:6px;
+      }
+      .cli-row-card .cli-c-acoes { justify-content:flex-start !important; gap:2px !important; margin-top:4px; }
+    }
     /* Topbar breadcrumb */
     .tb-page-title { font-size: 14px; font-weight: 700; color: #272A4A; }
     /* KPI cards */
@@ -616,11 +686,14 @@
 
   </aside>
 
+  <div id="sidebarBackdrop" onclick="_mobMenuFechar()"></div>
+
   <!-- ── ÁREA PRINCIPAL ── -->
   <div id="appMainArea">
 
     <!-- Topbar -->
     <header id="appTopbar">
+      <button id="btnMobileMenu" title="Menu" onclick="_mobMenuAbrir()"><i class="ti ti-menu-2"></i></button>
       <div id="tb-brand">
         <img src="compartilhar logo vetor.svg" style="height:44px;width:auto;display:block;object-fit:contain"
           alt="Compartilhar" onerror="this.style.display='none';document.getElementById('tb-brand-fallback').style.display='flex'">
@@ -688,7 +761,7 @@
 </script>
 <div class="dash-root">
 <!-- Header gradiente igual às outras páginas -->
-<div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);border-radius:12px;padding:13px 20px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+<div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);border-radius:12px;padding:13px 20px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between" class="dashHeaderRow">
   <div>
     <div id="dashTituloVisaoGeral" style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.01em">Visão Geral</div>
     <div id="periodoInfo" style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px"></div>
@@ -723,11 +796,11 @@
 </div>
 <section id="tab-home" class="tab-content active">
   <div id="kpis" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px"></div>
-  <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px">
+  <div class="dg21" style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px">
     <div class="d-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Faturamento mensal</span><span style="font-size:11px;color:#64748b">Somente <b>Faturado</b> e <b>Faturado Parcial</b></span></div><div style="height:260px"><canvas id="chartMensal"></canvas></div></div>
     <div class="d-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Participação por fábrica</span><button id="btnLimparFabrica" style="font-size:11px;color:#0e7490;background:none;border:none;cursor:pointer">limpar</button></div><div style="height:260px"><canvas id="chartFabricas"></canvas></div></div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+  <div class="dg11" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
     <div class="d-card"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">Top 5 vendedores</div><div id="topVendedores"></div></div>
     <div class="d-card"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">Top 5 clientes</div><div id="topClientes"></div></div>
   </div>
@@ -739,12 +812,12 @@
   <div class="d-card" style="margin-bottom:12px"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px">% atingimento da meta por vendedor</div><div style="height:300px"><canvas id="chartAtingMeta"></canvas></div></div>
   <div id="drillVendedor" class="d-card" style="display:none;margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Drill-down: <span id="drillNome"></span></span><button id="drillFechar" style="font-size:11px;color:#0e7490;background:none;border:none;cursor:pointer">fechar ✕</button></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><div style="height:220px"><canvas id="drillEvol"></canvas></div></div><div><div style="height:220px"><canvas id="drillFab"></canvas></div></div></div>
+    <div class="dg11" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><div style="height:220px"><canvas id="drillEvol"></canvas></div></div><div><div style="height:220px"><canvas id="drillFab"></canvas></div></div></div>
     <div id="drillTabela" style="margin-top:12px"></div>
   </div>
 </section>
 <section id="tab-clientes" class="tab-content">
-  <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px">
+  <div class="dg21" style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px">
     <div class="d-card"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">Curva ABC de clientes (Pareto)</div><div style="height:300px"><canvas id="chartABC"></canvas></div><div style="margin-top:8px;font-size:11px;color:#64748b">A: até 80% do faturamento · B: 80–95% · C: 95–100%</div></div>
     <div class="d-card"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px">Risco de inatividade</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-size:12px;color:#64748b">Dias sem comprar ≥</span><input id="diasRisco" type="number" min="0" max="365" value="60" style="width:60px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px"></div><div id="alertaRisco" style="font-size:12px;color:#334155"></div></div>
   </div>
@@ -7494,16 +7567,42 @@ function toggleTema() {
 // ═══════════════════════════════════════════════════
 // INICIALIZAÇÃO
 // ═══════════════════════════════════════════════════
+function _mobMenuAbrir(){ document.body.classList.add('mob-menu-open'); }
+function _mobMenuFechar(){
+  document.body.classList.remove('mob-menu-open');
+  document.querySelectorAll('#appSidebar .sb-item.sb-flyout-open').forEach(function(el){ el.classList.remove('sb-flyout-open'); });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // setupResponsivo() monta o carrossel de logos das representadas na tela de login
   // (puramente visual, não depende do Firebase) -- antes só rodava se !firebaseConfigurado,
   // o que deixou o carrossel sempre vazio depois que o Firebase foi ativado (13/08/2026).
   setupResponsivo();
   setTimeout(dashInit, 50);
+
+  // Menu-gaveta mobile: fecha ao clicar no backdrop, alterna submenu por toque (accordion)
+  document.getElementById('sidebarBackdrop')?.addEventListener('click', _mobMenuFechar);
+  document.getElementById('appSidebar')?.addEventListener('click', function(e) {
+    if (!window.matchMedia('(max-width: 767px)').matches) return;
+    if (e.target.closest('.sb-flyout a')) { _mobMenuFechar(); return; }
+    var item = e.target.closest('.sb-item');
+    if (!item) return;
+    if (item.querySelector('.sb-flyout')) {
+      e.preventDefault();
+      item.classList.toggle('sb-flyout-open');
+      return;
+    }
+    _mobMenuFechar();
+  });
+
   // Flyout sidebar com posicionamento inteligente (abre para cima se não couber)
   document.querySelectorAll('.sb-item').forEach(function(item) {
     var flyout = item.querySelector('.sb-flyout');
     if (!flyout) return;
+    item.classList.add('sb-item-has-sub');
+    var chev = document.createElement('i');
+    chev.className = 'ti ti-chevron-down sb-chevron';
+    item.insertBefore(chev, flyout);
     var timer;
     item.addEventListener('mouseenter', function() {
       clearTimeout(timer);
@@ -9262,18 +9361,18 @@ function renderClienteList() {
           return x.codigo_cliente + '  :  ' + fnome;
         }).join('&#10;')
       : 'Nenhum codigo cadastrado';
-    return `<div style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:11px 16px;align-items:center;border-bottom:1px solid #f8fafc;transition:background .12s"
+    return `<div class="cli-row-card" style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:11px 16px;align-items:center;border-bottom:1px solid #f8fafc;transition:background .12s"
         onmouseover="this.style.background='#f8fbff'" onmouseout="this.style.background=''">
-      <div style="font-size:13px;font-weight:700;color:#272A4A">${r.codigo||'—'}</div>
-      <div style="display:flex;align-items:center;gap:7px;padding-right:8px">
+      <div class="cli-c-codigo" style="font-size:13px;font-weight:700;color:#272A4A">${r.codigo||'—'}</div>
+      <div class="cli-c-nome" style="display:flex;align-items:center;gap:7px;padding-right:8px">
         <span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${(r.ativo||'Sim')==='Sim'?'#16a34a':'#dc2626'}"></span>
         <span style="font-size:13px;font-weight:600;color:#1e293b">${r.nome_fantasia||'—'}</span>
       </div>
-      <div style="font-size:11px;color:#64748b;padding-right:8px">${r.razao_social||'—'}</div>
-      <div style="font-size:11px;color:#64748b">${r.cpf_cnpj||'—'}</div>
-      <div style="font-size:11px;color:#64748b">${cidade||'—'}</div>
-      <div style="font-size:11px;color:#64748b">${catNome}</div>
-      <div style="display:flex;gap:1px;justify-content:center">
+      <div class="cli-c-razao" style="font-size:11px;color:#64748b;padding-right:8px">${r.razao_social||'—'}</div>
+      <div class="cli-c-doc" style="font-size:11px;color:#64748b">${r.cpf_cnpj||'—'}</div>
+      <div class="cli-c-cidade" style="font-size:11px;color:#64748b">${cidade||'—'}</div>
+      <div class="cli-c-cat" style="font-size:11px;color:#64748b">${catNome}</div>
+      <div class="cli-c-acoes" style="display:flex;gap:1px;justify-content:center">
         <button onclick="abrirModalCodCliForn('${r.id}')" title="${tooltipQr}"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:${codigos.length?'#272A4A':'#94a3b8'};display:flex;align-items:center"
           onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='none'">
