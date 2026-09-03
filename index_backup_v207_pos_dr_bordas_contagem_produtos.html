@@ -175,6 +175,7 @@
     .sb-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,.45); letter-spacing:.03em; text-align:center; line-height:1; transition: color .15s; }
     .sb-item.active .sb-label { color: #fff; }
     .sb-item:hover .sb-label { color: rgba(255,255,255,.9); }
+    .sb-chevron { display: none; }
     .sb-flyout {
       display: none; position: fixed; left: 76px; top: auto; bottom: auto; z-index: 400;
       background: #fff; border: 1px solid #e2e8f0; border-left: 3px solid #DE7926;
@@ -277,10 +278,23 @@
       #page-catalogo-list #catalogo-tbody { display:grid !important; grid-template-columns:1fr 1fr; gap:10px; padding:10px !important; }
       #page-catalogo-list .mc-row { border:1.5px solid #94a3b8 !important; border-radius:12px !important; background:#fff !important; text-align:center; box-shadow:none !important; }
       #page-catalogo-list .mc-row .mc-primary-line { flex-direction:column !important; align-items:center !important; gap:6px !important; width:100% !important; }
-      #page-catalogo-list .mc-row .mc-primary { text-align:center !important; width:100% !important; }
+      #page-catalogo-list .mc-row .mc-primary { display:none !important; }
       #page-catalogo-list .mc-actions { justify-content:center !important; }
-      #page-catalogo-list .mc-row .mc-primary-line > div:first-child { width:92px !important; height:92px !important; border:none !important; padding:0 !important; border-radius:16px !important; font-size:30px !important; }
-      #page-catalogo-list .mc-row .mc-primary-line > div:first-child img { width:100% !important; height:100% !important; }
+      #page-catalogo-list .mc-row .mc-primary-line > div:first-child { width:100% !important; height:auto !important; aspect-ratio:1/1 !important; border:none !important; padding:0 !important; border-radius:16px !important; font-size:36px !important; }
+      #page-catalogo-list .mc-row .mc-primary-line > div:first-child img { width:100% !important; height:100% !important; object-fit:contain !important; }
+      #page-fotos-produtos .pg-two-col { display:block; }
+      #page-fotos-produtos .pg-side { position:static; margin-bottom:10px; }
+      #page-fotos-produtos #fotos-kpis-box { display:none !important; }
+      #page-fotos-produtos .fp-header { display:none !important; }
+      #page-fotos-produtos .fp-row { display:flex !important; flex-wrap:wrap !important; align-items:center !important; gap:2px 10px !important; padding:13px 14px !important; }
+      #page-fotos-produtos .fp-row > div:nth-child(1) { flex:1 1 auto !important; min-width:0 !important; order:1 !important; }
+      #page-fotos-produtos .fp-row > div:nth-child(2) { flex:0 0 100% !important; order:3 !important; padding-left:30px !important; }
+      #page-fotos-produtos .fp-row > div:nth-child(3) { flex:0 0 auto !important; order:2 !important; }
+      #page-fotos-produtos .fp-foto-row { display:flex !important; flex-wrap:wrap !important; align-items:center !important; gap:8px 10px !important; padding:12px 14px !important; }
+      #page-fotos-produtos .fp-foto-row > div:nth-child(1) { flex:0 0 auto !important; order:1 !important; }
+      #page-fotos-produtos .fp-foto-row > div:nth-child(2) { flex:1 1 auto !important; min-width:0 !important; order:2 !important; }
+      #page-fotos-produtos .fp-foto-row > div:nth-child(3) { flex:0 0 100% !important; order:4 !important; padding-left:52px !important; font-size:11px !important; }
+      #page-fotos-produtos .fp-foto-row > div:nth-child(4) { flex:0 0 100% !important; order:3 !important; justify-content:flex-end !important; display:flex !important; gap:6px !important; margin-top:2px !important; }
 
       /* Clientes: linhas viram cartoes empilhados */
       .cli-row-card { display:block !important; padding:12px 14px !important; }
@@ -2823,7 +2837,7 @@
             <div class="pg-side-lbl">Busca rápida</div>
             <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="fotos-busca" oninput="_fpRender()" placeholder="Pesquisar fornecedor..."></div>
           </div>
-          <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
+          <div class="pg-side-sec" id="fotos-kpis-box" style="background:rgba(0,0,0,.15)">
             <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="fotos-kpi-total">0</span></div>
             <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Com foto</span><span style="font-weight:700;color:#16a34a" id="fotos-kpi-com">0</span></div>
             <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Sem foto</span><span style="font-weight:700;color:#f87171" id="fotos-kpi-sem">0</span></div>
@@ -6393,10 +6407,12 @@ if (firebaseConfigurado) {
 // funcionando exatamente como antes, direto no localStorage — nenhum código existente
 // precisa saber a diferença.
 // ═══════════════════════════════════════════════════
-var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos'];
-var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [] };
-var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false };
+var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas'];
+var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [], cat_clientes: [], cat_produtos: [], transportadoras: [], tabelas_preco: [], sku_clientes: [], negociacoes_preco: [], devolucoes: [], ocorrencias_entrega: [], bloqueios_produto: [], gruposAcesso: [], comandos_navegacao: [], metas: [] };
+var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false, cat_clientes: false, cat_produtos: false, transportadoras: false, tabelas_preco: false, sku_clientes: false, negociacoes_preco: false, devolucoes: false, ocorrencias_entrega: false, bloqueios_produto: false, gruposAcesso: false, comandos_navegacao: false, metas: false };
 var _fsOuvindo  = false;
+var _fsEmpresaCache = null;
+var _fsEmpresaCarregada = false;
 
 function _fsTodasProntas() {
   return _fsColecoes.every(function (c) { return _fsPronto[c]; });
@@ -6424,6 +6440,16 @@ function _fsIniciarOuvintes(aoFicarTudoPronto) {
       console.error('Erro ao sincronizar coleção "' + nome + '" com o Firestore:', err);
     });
   });
+  db.collection('config_singular').doc('empresa').onSnapshot(function (doc) {
+    _fsEmpresaCache = doc.exists ? doc.data() : null;
+    var jaCarregada = _fsEmpresaCarregada;
+    _fsEmpresaCarregada = true;
+    if (jaCarregada && typeof window.renderEmpresaView === 'function') {
+      try { window.renderEmpresaView(); } catch (e) { /* tela não está aberta agora, ignora */ }
+    }
+  }, function (err) {
+    console.error('Erro ao sincronizar "empresa" com o Firestore:', err);
+  });
 }
 
 // Re-renderiza a tela atual quando a coleção muda por causa de outro usuário (ou da
@@ -6435,6 +6461,18 @@ function _fsAoAtualizar(nome) {
     fornecedores: ['renderFornecedorList'],
     usuarios:     ['renderUsuarioList'],
     pedidos:      ['renderPedidoList', 'renderEntregaControle'],
+    cat_clientes: ['renderCatClienteList'],
+    cat_produtos: ['renderCatProdutoList'],
+    transportadoras: ['renderTranspList'],
+    tabelas_preco: ['renderTabPrecoList'],
+    sku_clientes: ['renderSkuList'],
+    negociacoes_preco: ['renderNegPrecoList'],
+    devolucoes: ['renderDevolucaoList'],
+    ocorrencias_entrega: ['renderOcorrencias'],
+    bloqueios_produto: ['renderBloqueios'],
+    gruposAcesso: ['renderGrupoList'],
+    comandos_navegacao: ['renderComandoList'],
+    metas: ['renderMetaList'],
   };
   (mapaRender[nome] || []).forEach(function (fn) {
     if (typeof window[fn] === 'function') {
@@ -7140,10 +7178,10 @@ function showPage(pageId, params) {
 // CATEGORIA DE CLIENTE
 // ═══════════════════════════════════════════════════
 function getCatClientes() {
-  return JSON.parse(localStorage.getItem('cat_clientes') || '[]');
+  return firebaseConfigurado ? _fsGet('cat_clientes') : JSON.parse(localStorage.getItem('cat_clientes') || '[]');
 }
 function setCatClientes(data) {
-  localStorage.setItem('cat_clientes', JSON.stringify(data));
+  if (firebaseConfigurado) { _fsSet('cat_clientes', data); } else { localStorage.setItem('cat_clientes', JSON.stringify(data)); }
 }
 // ═══════ Paginação genérica "Mostrar" (10/25/50/Todos) — usada em todas as listas do sistema ═══════
 function _pgQtd(selectId) {
@@ -7400,10 +7438,10 @@ function deleteCatCliente(id) {
 // CATEGORIA DE PRODUTO
 // ═══════════════════════════════════════════════════
 function getCatProdutos() {
-  return JSON.parse(localStorage.getItem('cat_produtos') || '[]');
+  return firebaseConfigurado ? _fsGet('cat_produtos') : JSON.parse(localStorage.getItem('cat_produtos') || '[]');
 }
 function setCatProdutos(data) {
-  localStorage.setItem('cat_produtos', JSON.stringify(data));
+  if (firebaseConfigurado) { _fsSet('cat_produtos', data); } else { localStorage.setItem('cat_produtos', JSON.stringify(data)); }
 }
 var _catProdAbertas = {};
 function _catProdToggle(id) {
@@ -8089,10 +8127,21 @@ async function carregarCidadesPorEstado() {
 // EMPRESA (dados cadastrais da empresa)
 // ═══════════════════════════════════════════════════
 function getEmpresa() {
+  if (firebaseConfigurado) return _fsEmpresaCache ? JSON.parse(JSON.stringify(_fsEmpresaCache)) : null;
   try { return JSON.parse(localStorage.getItem('empresa')) || null; }
   catch(e) { return null; }
 }
 function setEmpresa(obj) {
+  if (firebaseConfigurado && db) {
+    _fsEmpresaCache = obj;
+    db.collection('config_singular').doc('empresa').set(obj).then(function () {
+      console.log('[Firestore] ✔ "empresa" salva.');
+    }).catch(function (err) {
+      console.error('[Firestore] ✘ erro ao salvar "empresa":', err);
+      alert('Não foi possível salvar os dados da Empresa no banco compartilhado: ' + err.message);
+    });
+    return;
+  }
   localStorage.setItem('empresa', JSON.stringify(obj));
 }
 
@@ -8447,7 +8496,7 @@ async function renderCatalogoList() {
         <div class="mc-secondary mc-hide" style="font-size:12px;font-weight:600;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${arquivo}">${arquivo}</div>
         ${temCat ? `<div class="mc-hide" style="font-size:10px;color:#94a3b8;margin-top:3px"><i class="ti ti-calendar" style="font-size:9px"></i> ${dataUpload}</div>` : ''}
       </div>
-      <div class="mc-meta" style="font-size:13px;font-weight:600;color:#475569">${temCat ? 'Atualizado ' + dataUpload : 'Sem catalogo'}</div>
+      <div class="mc-meta" style="font-size:13px;font-weight:600;color:#475569">${temCat ? dataUpload : 'Sem catalogo'}</div>
       <div class="mc-badge mc-hide">${statusHtml}</div>
       <div class="mc-actions" style="display:flex;gap:6px;align-items:center;justify-content:flex-end">${btnAbrir}${btnDown}${btnUp}${btnDel}</div>
     </div>`;
@@ -8820,17 +8869,17 @@ function _fpBreadcrumb() {
 }
 
 function _fpHeaderFolder() {
-  return '<div style="display:grid;grid-template-columns:1fr 190px 130px;padding:8px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center"><span>Nome</span><span>Produtos</span><span style="text-align:right">Ações</span></div>';
+  return '<div class="fp-header" style="display:grid;grid-template-columns:1fr 190px 130px;padding:8px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center"><span>Nome</span><span>Produtos</span><span style="text-align:right">Ações</span></div>';
 }
 function _fpFolderRow(onclick, label, statsText, downloadOnclick) {
-  return '<div onclick="' + onclick + '" style="display:grid;grid-template-columns:1fr 190px 130px;padding:13px 16px;align-items:center;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background .12s"' +
+  return '<div class="fp-row" onclick="' + onclick + '" style="display:grid;grid-template-columns:1fr 190px 130px;padding:13px 16px;align-items:center;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background .12s"' +
     ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">' +
     '<div style="display:flex;align-items:center;gap:10px;min-width:0"><i class="ti ti-folder" style="font-size:17px;color:#DE7926;flex-shrink:0"></i><span style="font-size:13.5px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + label + '</span></div>' +
     '<div style="font-size:12px;color:#64748b">' + statsText + '</div>' +
     '<div style="text-align:right"><button onclick="event.stopPropagation();' + downloadOnclick + '" title="Baixar fotos desta pasta (.zip)" style="padding:6px 12px;background:#eff6ff;color:#2563eb;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px"><i class="ti ti-download" style="font-size:11px"></i> Baixar</button></div></div>';
 }
 function _fpHeaderFotos() {
-  return '<div style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:8px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center"><span></span><span>Produto</span><span>Código</span><span style="text-align:right">Ações</span></div>';
+  return '<div class="fp-header" style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:8px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center"><span></span><span>Produto</span><span>Código</span><span style="text-align:right">Ações</span></div>';
 }
 
 function _fpRender() {
@@ -8882,7 +8931,7 @@ function _fpRender() {
       const btnDel = temFoto
         ? '<button onclick="fpRemoverFoto(\'' + p.id + '\')" title="Remover foto" style="padding:6px 8px;background:#fff5f5;color:#dc2626;border:none;border-radius:6px;font-size:12px;cursor:pointer" onmouseover="this.style.background=\'#fecaca\'" onmouseout="this.style.background=\'#fff5f5\'"><i class="ti ti-trash"></i></button>'
         : '<button disabled title="Remover foto" style="padding:6px 8px;background:#f1f5f9;color:#c0ccd8;border:none;border-radius:6px;font-size:12px;cursor:not-allowed"><i class="ti ti-trash"></i></button>';
-      return '<div style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:9px 16px;align-items:center;border-bottom:1px solid #f1f5f9"' +
+      return '<div class="fp-foto-row" style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:9px 16px;align-items:center;border-bottom:1px solid #f1f5f9"' +
         ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">' +
         '<div style="width:42px;height:42px;border-radius:8px;background:#f8fafc;border:1px solid #eef2f7;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px">' + imgHtml + '</div>' +
         '<div style="min-width:0;padding-right:10px"><div style="font-size:13px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _fpEsc(p.nome) + '">' + _fpEsc(p.nome) + '</div>' +
@@ -8984,7 +9033,7 @@ function _fpRender() {
       const btnDel = temFoto
         ? '<button onclick="fpRemoverFoto(\'' + p.id + '\')" title="Remover foto" style="padding:6px 8px;background:#fff5f5;color:#dc2626;border:none;border-radius:6px;font-size:12px;cursor:pointer" onmouseover="this.style.background=\'#fecaca\'" onmouseout="this.style.background=\'#fff5f5\'"><i class="ti ti-trash"></i></button>'
         : '<button disabled title="Remover foto" style="padding:6px 8px;background:#f1f5f9;color:#c0ccd8;border:none;border-radius:6px;font-size:12px;cursor:not-allowed"><i class="ti ti-trash"></i></button>';
-      return '<div style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:9px 16px;align-items:center;border-bottom:1px solid #f1f5f9"' +
+      return '<div class="fp-foto-row" style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:9px 16px;align-items:center;border-bottom:1px solid #f1f5f9"' +
         ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">' +
         '<div style="width:42px;height:42px;border-radius:8px;background:#f8fafc;border:1px solid #eef2f7;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px">' + imgHtml + '</div>' +
         '<div style="font-size:13px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px" title="' + _fpEsc(p.nome) + '">' + _fpEsc(p.nome) + '</div>' +
@@ -9090,8 +9139,8 @@ function fpRemoverFoto(id) {
 // ═══════════════════════════════════════════════════
 // TRANSPORTADORAS
 // ═══════════════════════════════════════════════════
-function getTransportadoras() { return JSON.parse(localStorage.getItem('transportadoras') || '[]'); }
-function setTransportadoras(data) { localStorage.setItem('transportadoras', JSON.stringify(data)); }
+function getTransportadoras() { return firebaseConfigurado ? _fsGet('transportadoras') : JSON.parse(localStorage.getItem('transportadoras') || '[]'); }
+function setTransportadoras(data) { if (firebaseConfigurado) { _fsSet('transportadoras', data); } else { localStorage.setItem('transportadoras', JSON.stringify(data)); } }
 
 let _transpFiltroAtivo = '';
 function setTranspFiltro(val) {
@@ -10702,8 +10751,8 @@ function getProdutos() { return firebaseConfigurado ? _fsGet('produtos') : JSON.
 function setProdutos(data) { if (firebaseConfigurado) { _fsSet('produtos', data); } else { localStorage.setItem('produtos', JSON.stringify(data)); } }
 
 /* ── Tabela de Preço: localStorage ── */
-function getTabPrecos() { return JSON.parse(localStorage.getItem('tabelas_preco') || '[]'); }
-function setTabPrecos(data) { localStorage.setItem('tabelas_preco', JSON.stringify(data)); }
+function getTabPrecos() { return firebaseConfigurado ? _fsGet('tabelas_preco') : JSON.parse(localStorage.getItem('tabelas_preco') || '[]'); }
+function setTabPrecos(data) { if (firebaseConfigurado) { _fsSet('tabelas_preco', data); } else { localStorage.setItem('tabelas_preco', JSON.stringify(data)); } }
 
 
 // ═══════════════════════════════════════════════════
@@ -11981,8 +12030,8 @@ function tpcliBaixarPdf() {
 // do cliente — a checagem é sempre feita "ao vivo" comparando a data de hoje com dataFim,
 // nunca fica um status desatualizado gravado (mesmo padrão de "Vigência" da Tabela de Preço).
 // ═══════════════════════════════════════════════════
-function getNegPrecos() { return JSON.parse(localStorage.getItem('negociacoes_preco') || '[]'); }
-function setNegPrecos(data) { localStorage.setItem('negociacoes_preco', JSON.stringify(data)); }
+function getNegPrecos() { return firebaseConfigurado ? _fsGet('negociacoes_preco') : JSON.parse(localStorage.getItem('negociacoes_preco') || '[]'); }
+function setNegPrecos(data) { if (firebaseConfigurado) { _fsSet('negociacoes_preco', data); } else { localStorage.setItem('negociacoes_preco', JSON.stringify(data)); } }
 
 var _negPrecoFiltroAtivo = 'Sim';
 function setNegPrecoFiltro(val) {
@@ -14565,8 +14614,8 @@ function dashInit() {
 // SKU CLIENTES
 // ═══════════════════════════════════════════════════
 function _skuEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-function getSkuClientes() { return JSON.parse(localStorage.getItem('sku_clientes') || '[]'); }
-function setSkuClientes(d) { localStorage.setItem('sku_clientes', JSON.stringify(d)); }
+function getSkuClientes() { return firebaseConfigurado ? _fsGet('sku_clientes') : JSON.parse(localStorage.getItem('sku_clientes') || '[]'); }
+function setSkuClientes(d) { if (firebaseConfigurado) { _fsSet('sku_clientes', d); } else { localStorage.setItem('sku_clientes', JSON.stringify(d)); } }
 
 var _skuPage = 0;
 var _skuPerPage = 20;
@@ -18686,8 +18735,8 @@ function _pedProdKey(e) {
 // ═══════════════════════════════════════════════════
 // BLOQUEIO DE PRODUTOS (aba dentro de Pedidos)
 // ═══════════════════════════════════════════════════
-function getBloqueiosProduto() { return JSON.parse(localStorage.getItem('bloqueios_produto') || '[]'); }
-function setBloqueiosProduto(d) { localStorage.setItem('bloqueios_produto', JSON.stringify(d)); }
+function getBloqueiosProduto() { return firebaseConfigurado ? _fsGet('bloqueios_produto') : JSON.parse(localStorage.getItem('bloqueios_produto') || '[]'); }
+function setBloqueiosProduto(d) { if (firebaseConfigurado) { _fsSet('bloqueios_produto', d); } else { localStorage.setItem('bloqueios_produto', JSON.stringify(d)); } }
 
 var _bloqNivelAtual = 'rede';
 var _bloqProdItens = [];
@@ -18983,8 +19032,8 @@ function _metaFornKey(event) {
 }
 
 // ── Meta: CRUD completo (getMetas/setMetas, formulário, lista) ──
-function getMetas() { return JSON.parse(localStorage.getItem('metas') || '[]'); }
-function setMetas(data) { localStorage.setItem('metas', JSON.stringify(data)); }
+function getMetas() { return firebaseConfigurado ? _fsGet('metas') : JSON.parse(localStorage.getItem('metas') || '[]'); }
+function setMetas(data) { if (firebaseConfigurado) { _fsSet('metas', data); } else { localStorage.setItem('metas', JSON.stringify(data)); } }
 function _metaEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function _metaFmtValor(v, tipo) {
   var s = (Number(v)||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -19529,8 +19578,8 @@ var _devXmlAtual = null;
 var _devXmlPendentes = [];
 var _devXmlLinkCandidatos = {};
 
-function getDevolucoes() { return JSON.parse(localStorage.getItem('devolucoes') || '[]'); }
-function setDevolucoes(data) { localStorage.setItem('devolucoes', JSON.stringify(data)); }
+function getDevolucoes() { return firebaseConfigurado ? _fsGet('devolucoes') : JSON.parse(localStorage.getItem('devolucoes') || '[]'); }
+function setDevolucoes(data) { if (firebaseConfigurado) { _fsSet('devolucoes', data); } else { localStorage.setItem('devolucoes', JSON.stringify(data)); } }
 
 // Vinculo manual de produto por fornecedor: quando o codigo do produto na NFD
 // nao bate com o codigo interno nem com o EAN cadastrado, o usuario vincula uma
@@ -21057,8 +21106,8 @@ var PAGINAS_SISTEMA = [
   { key: 'usuarios',            secao: 'Gerenciar',   nome: 'Usuários' },
 ];
 
-function getGruposAcesso() { return JSON.parse(localStorage.getItem('gruposAcesso') || '[]'); }
-function setGruposAcesso(data) { localStorage.setItem('gruposAcesso', JSON.stringify(data)); }
+function getGruposAcesso() { return firebaseConfigurado ? _fsGet('gruposAcesso') : JSON.parse(localStorage.getItem('gruposAcesso') || '[]'); }
+function setGruposAcesso(data) { if (firebaseConfigurado) { _fsSet('gruposAcesso', data); } else { localStorage.setItem('gruposAcesso', JSON.stringify(data)); } }
 function getUsuariosSistema() { return firebaseConfigurado ? _fsGet('usuarios') : JSON.parse(localStorage.getItem('usuarios') || '[]'); }
 function setUsuariosSistema(data) { if (firebaseConfigurado) { _fsSet('usuarios', data); } else { localStorage.setItem('usuarios', JSON.stringify(data)); } }
 function getVendedoresAtivos() { return getUsuariosSistema().filter(function(u){ return (u.ativo||'Sim') !== 'Não' && String(u.grupoNome||'').trim().toLowerCase() === 'vendas'; }); }
@@ -21402,10 +21451,10 @@ function salvarPermissoesUsuario() {
 // ═══════════════════════════════════════════════════
 function _navEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function getComandosNavegacao() {
-  return JSON.parse(localStorage.getItem('comandos_navegacao') || '[]');
+  return firebaseConfigurado ? _fsGet('comandos_navegacao') : JSON.parse(localStorage.getItem('comandos_navegacao') || '[]');
 }
 function setComandosNavegacao(data) {
-  localStorage.setItem('comandos_navegacao', JSON.stringify(data));
+  if (firebaseConfigurado) { _fsSet('comandos_navegacao', data); } else { localStorage.setItem('comandos_navegacao', JSON.stringify(data)); }
 }
 // Páginas que podem ser destino de um comando: exclui formulários de edição de registro específico
 // (que abririam em branco/sem contexto) e as próprias páginas de Comandos. Mantém page-pedido-form
@@ -21732,7 +21781,7 @@ function renderBackupPage() {
 // buscar do Firestore quando firebaseConfigurado é true) para pegar os dados reais que
 // ainda estão só aqui. Usa .set() por id, então rodar de novo não duplica nada.
 // ═══════════════════════════════════════════════════
-var _fsColecoesMigrar = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos'];
+var _fsColecoesMigrar = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas'];
 async function migrarDadosParaFirestore() {
   var msg = document.getElementById('backup-fs-msg');
   var btn = document.getElementById('btn-migrar-firestore');
@@ -21740,7 +21789,7 @@ async function migrarDadosParaFirestore() {
     if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Firebase não está configurado.'; }
     return;
   }
-  if (!confirm('Isso vai copiar os dados atuais deste navegador (Produtos, Clientes, Fornecedores, Usuários, Pedidos) para o banco de dados compartilhado. Os dados aqui no navegador não serão apagados. Se houver muitos pedidos, pode levar alguns minutos. Continuar?')) return;
+  if (!confirm('Isso vai copiar os dados atuais deste navegador (Produtos, Clientes, Fornecedores, Usuários, Pedidos, Categoria de Cliente/Rede e Categoria de Produto) para o banco de dados compartilhado. Os dados aqui no navegador não serão apagados. Se houver muitos pedidos, pode levar alguns minutos. Continuar?')) return;
 
   if (btn) { btn.disabled = true; btn.textContent = 'Migrando…'; }
   if (msg) { msg.style.color = '#64748b'; msg.textContent = 'Migrando, aguarde…'; }
@@ -21762,6 +21811,17 @@ async function migrarDadosParaFirestore() {
         if (msg) msg.textContent = 'Migrando ' + nome + '… ' + enviados + '/' + comId.length;
       }
       resumo.push(nome + ': ' + enviados + ' registro(s)' + (semId ? ' (' + semId + ' ignorado(s) por não ter id)' : ''));
+    }
+    try {
+      var empresaLocal = JSON.parse(localStorage.getItem('empresa'));
+      if (empresaLocal) {
+        await db.collection('config_singular').doc('empresa').set(empresaLocal);
+        resumo.push('empresa: dados enviados');
+      } else {
+        resumo.push('empresa: nada cadastrado neste navegador, nada a enviar');
+      }
+    } catch (errEmpresa) {
+      resumo.push('empresa: erro ao enviar (' + (errEmpresa && errEmpresa.message ? errEmpresa.message : errEmpresa) + ')');
     }
     if (msg) { msg.style.color = '#15803d'; msg.innerHTML = '✔ Migração concluída:<br>' + resumo.join('<br>'); }
   } catch (err) {
@@ -23673,8 +23733,8 @@ function _sugGerarExcel() {
 // ═══════════════════════════════════════════════════
 // OCORRÊNCIAS DE ENTREGA
 // ═══════════════════════════════════════════════════
-function getOcorrencias() { return JSON.parse(localStorage.getItem('ocorrencias_entrega') || '[]'); }
-function setOcorrencias(data) { localStorage.setItem('ocorrencias_entrega', JSON.stringify(data)); }
+function getOcorrencias() { return firebaseConfigurado ? _fsGet('ocorrencias_entrega') : JSON.parse(localStorage.getItem('ocorrencias_entrega') || '[]'); }
+function setOcorrencias(data) { if (firebaseConfigurado) { _fsSet('ocorrencias_entrega', data); } else { localStorage.setItem('ocorrencias_entrega', JSON.stringify(data)); } }
 
 var OC_TIPOS = ['Avaria', 'Recusa total', 'Recusa parcial', 'Extravio', 'Atraso', 'Divergência de quantidade', 'Outro'];
 var OC_COR = {
@@ -24731,11 +24791,22 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
     return row;
   }
 
-  (g.cadastroComVenda || []).forEach(function (item) { linhaProdutoTabela(item, DR_CORES.zebraGreen); });
+  var comVenda = g.cadastroComVenda || [];
+  if (comVenda.length) {
+    var linhaBannerCom = ws.addRow(['PRODUTOS  (' + comVenda.length + ' itens)']);
+    linhaBannerCom.height = 17;
+    ws.mergeCells(linhaBannerCom.number, 1, linhaBannerCom.number, 7);
+    linhaBannerCom.getCell(1).font = { name: 'Calibri', bold: true, size: 10, color: { argb: DR_CORES.greenTxt } };
+    linhaBannerCom.getCell(1).fill = _drFill(DR_CORES.zebraGreen);
+    linhaBannerCom.getCell(1).border = DR_BORDA_FINA;
+    linhaBannerCom.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+    for (var cb = 2; cb <= 7; cb++) { linhaBannerCom.getCell(cb).fill = _drFill(DR_CORES.zebraGreen); linhaBannerCom.getCell(cb).border = DR_BORDA_FINA; }
+  }
+  comVenda.forEach(function (item) { linhaProdutoTabela(item, DR_CORES.zebraGreen); });
 
   var semVenda = g.cadastroSemVenda || [];
   if (semVenda.length) {
-    var linhaBanner = ws.addRow(['PRODUTOS SEM VENDA  (' + semVenda.length + ' itens \u2014 OPORTUNIDADE COMERCIAL)']);
+    var linhaBanner = ws.addRow(['PRODUTOS SEM VENDA  (' + semVenda.length + ' itens)']);
     linhaBanner.height = 17;
     ws.mergeCells(linhaBanner.number, 1, linhaBanner.number, 7);
     linhaBanner.getCell(1).font = { name: 'Calibri', bold: true, size: 10, color: { argb: DR_CORES.brownTxt } };
@@ -24809,26 +24880,29 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
   var rotuloProprio = (g.tipo === 'cliente') ? 'CLIENTE' : (g.tipo === 'subrede' ? 'SUB-REDE' : 'REDE');
   var redeMae = _drRedeMaeDoGrupo(g);
   var mostrarLinhaRede = (g.tipo === 'subrede' && !!redeMae);
-  function linhaProduto(item, corBg) {
+  function linhaProduto(item) {
     var qtd = (item.prod.quant !== undefined && item.prod.quant !== null && item.prod.quant !== '') ? String(item.prod.quant) : '\u2014';
     var peso = (item.pesoCxCalc !== undefined && item.pesoCxCalc !== '') ? String(item.pesoCxCalc).replace('.', ',') : '\u2014';
-    return '<tr style="background:' + corBg + '">'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.prod.codigo || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.sku || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:left;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.prod.nome || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(qtd) + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(peso) + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.forma || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:right;border:1px solid #e5e7eb;font-size:11px">' + _drFormatarPreco(item.precoExibir) + '</td>'
+    return '<tr style="background:#ffffff">'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.prod.codigo || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.sku || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:left;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.prod.nome || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(qtd) + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(peso) + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.forma || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:right;border:1px solid #000;font-size:11px;color:#000">' + _drFormatarPreco(item.precoExibir) + '</td>'
       + '</tr>';
   }
   var comVenda = g.cadastroComVenda || [];
   var semVenda = g.cadastroSemVenda || [];
-  var linhasComVenda = comVenda.map(function (item) { return linhaProduto(item, '#e2efda'); }).join('');
-  var bannerSemVenda = semVenda.length
-    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#fcd5b4;color:#7f3f00;font-weight:700;border:1px solid #e5e7eb;font-size:11px">PRODUTOS SEM VENDA (' + semVenda.length + ' itens \u2014 OPORTUNIDADE COMERCIAL)</td></tr>')
+  var linhasComVenda = comVenda.map(function (item) { return linhaProduto(item); }).join('');
+  var bannerComVenda = comVenda.length
+    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#e2efda;color:#375623;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS (' + comVenda.length + ' itens)</td></tr>')
     : '';
-  var linhasSemVenda = semVenda.map(function (item) { return linhaProduto(item, '#fff0f0'); }).join('');
+  var bannerSemVenda = semVenda.length
+    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#fcd5b4;color:#7f3f00;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS SEM VENDA (' + semVenda.length + ' itens)</td></tr>')
+    : '';
+  var linhasSemVenda = semVenda.map(function (item) { return linhaProduto(item); }).join('');
   var semNenhumProduto = !comVenda.length && !semVenda.length;
 
   return ''
@@ -24848,17 +24922,17 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
     + '</div>'
     + (semNenhumProduto
         ? '<div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">Nenhum produto cadastrado para este grupo.</div>'
-        : ('<table style="width:100%;border-collapse:collapse;font-size:11.5px">'
+        : ('<table style="width:100%;border-collapse:collapse;font-size:11.5px;border:2.5px solid #000">'
             + '<thead><tr style="background:#c5d9f1">'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">C\u00d3D. FAB</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">C\u00d3D. REDE</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px;text-align:left">PRODUTOS</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">QTDE P/CX</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">PESO CX</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">UND.</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px;text-align:right">PRE\u00c7O</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">C\u00d3D. FAB</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">C\u00d3D. REDE</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px;text-align:left">PRODUTOS</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">QTDE P/CX</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">PESO CX</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">UND.</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:2.5px solid #000;color:#1F4E79;font-size:10.5px;text-align:right">PRE\u00c7O</th>'
             + '</tr></thead>'
-            + '<tbody>' + linhasComVenda + bannerSemVenda + linhasSemVenda + '</tbody>'
+            + '<tbody>' + bannerComVenda + linhasComVenda + bannerSemVenda + linhasSemVenda + '</tbody>'
           + '</table>'));
 }
 

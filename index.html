@@ -24791,11 +24791,22 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
     return row;
   }
 
-  (g.cadastroComVenda || []).forEach(function (item) { linhaProdutoTabela(item, DR_CORES.zebraGreen); });
+  var comVenda = g.cadastroComVenda || [];
+  if (comVenda.length) {
+    var linhaBannerCom = ws.addRow(['PRODUTOS  (' + comVenda.length + ' itens)']);
+    linhaBannerCom.height = 17;
+    ws.mergeCells(linhaBannerCom.number, 1, linhaBannerCom.number, 7);
+    linhaBannerCom.getCell(1).font = { name: 'Calibri', bold: true, size: 10, color: { argb: DR_CORES.greenTxt } };
+    linhaBannerCom.getCell(1).fill = _drFill(DR_CORES.zebraGreen);
+    linhaBannerCom.getCell(1).border = DR_BORDA_FINA;
+    linhaBannerCom.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+    for (var cb = 2; cb <= 7; cb++) { linhaBannerCom.getCell(cb).fill = _drFill(DR_CORES.zebraGreen); linhaBannerCom.getCell(cb).border = DR_BORDA_FINA; }
+  }
+  comVenda.forEach(function (item) { linhaProdutoTabela(item, DR_CORES.zebraGreen); });
 
   var semVenda = g.cadastroSemVenda || [];
   if (semVenda.length) {
-    var linhaBanner = ws.addRow(['PRODUTOS SEM VENDA  (' + semVenda.length + ' itens \u2014 OPORTUNIDADE COMERCIAL)']);
+    var linhaBanner = ws.addRow(['PRODUTOS SEM VENDA  (' + semVenda.length + ' itens)']);
     linhaBanner.height = 17;
     ws.mergeCells(linhaBanner.number, 1, linhaBanner.number, 7);
     linhaBanner.getCell(1).font = { name: 'Calibri', bold: true, size: 10, color: { argb: DR_CORES.brownTxt } };
@@ -24869,26 +24880,29 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
   var rotuloProprio = (g.tipo === 'cliente') ? 'CLIENTE' : (g.tipo === 'subrede' ? 'SUB-REDE' : 'REDE');
   var redeMae = _drRedeMaeDoGrupo(g);
   var mostrarLinhaRede = (g.tipo === 'subrede' && !!redeMae);
-  function linhaProduto(item, corBg) {
+  function linhaProduto(item) {
     var qtd = (item.prod.quant !== undefined && item.prod.quant !== null && item.prod.quant !== '') ? String(item.prod.quant) : '\u2014';
     var peso = (item.pesoCxCalc !== undefined && item.pesoCxCalc !== '') ? String(item.pesoCxCalc).replace('.', ',') : '\u2014';
-    return '<tr style="background:' + corBg + '">'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.prod.codigo || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.sku || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:left;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.prod.nome || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(qtd) + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(peso) + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #e5e7eb;font-size:11px">' + _pedEsc(item.forma || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:right;border:1px solid #e5e7eb;font-size:11px">' + _drFormatarPreco(item.precoExibir) + '</td>'
+    return '<tr style="background:#ffffff">'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.prod.codigo || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.sku || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:left;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.prod.nome || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(qtd) + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(peso) + '</td>'
+      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.forma || '') + '</td>'
+      + '<td style="padding:5px 8px;text-align:right;border:1px solid #000;font-size:11px;color:#000">' + _drFormatarPreco(item.precoExibir) + '</td>'
       + '</tr>';
   }
   var comVenda = g.cadastroComVenda || [];
   var semVenda = g.cadastroSemVenda || [];
-  var linhasComVenda = comVenda.map(function (item) { return linhaProduto(item, '#e2efda'); }).join('');
-  var bannerSemVenda = semVenda.length
-    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#fcd5b4;color:#7f3f00;font-weight:700;border:1px solid #e5e7eb;font-size:11px">PRODUTOS SEM VENDA (' + semVenda.length + ' itens \u2014 OPORTUNIDADE COMERCIAL)</td></tr>')
+  var linhasComVenda = comVenda.map(function (item) { return linhaProduto(item); }).join('');
+  var bannerComVenda = comVenda.length
+    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#e2efda;color:#375623;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS (' + comVenda.length + ' itens)</td></tr>')
     : '';
-  var linhasSemVenda = semVenda.map(function (item) { return linhaProduto(item, '#fff0f0'); }).join('');
+  var bannerSemVenda = semVenda.length
+    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#fcd5b4;color:#7f3f00;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS SEM VENDA (' + semVenda.length + ' itens)</td></tr>')
+    : '';
+  var linhasSemVenda = semVenda.map(function (item) { return linhaProduto(item); }).join('');
   var semNenhumProduto = !comVenda.length && !semVenda.length;
 
   return ''
@@ -24908,17 +24922,17 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
     + '</div>'
     + (semNenhumProduto
         ? '<div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">Nenhum produto cadastrado para este grupo.</div>'
-        : ('<table style="width:100%;border-collapse:collapse;font-size:11.5px">'
+        : ('<table style="width:100%;border-collapse:collapse;font-size:11.5px;border:2.5px solid #000">'
             + '<thead><tr style="background:#c5d9f1">'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">C\u00d3D. FAB</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">C\u00d3D. REDE</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px;text-align:left">PRODUTOS</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">QTDE P/CX</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">PESO CX</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px">UND.</th>'
-              + '<th style="padding:6px 8px;border:1px solid #e5e7eb;color:#1F4E79;font-size:10.5px;text-align:right">PRE\u00c7O</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">C\u00d3D. FAB</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">C\u00d3D. REDE</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px;text-align:left">PRODUTOS</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">QTDE P/CX</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">PESO CX</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">UND.</th>'
+              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:2.5px solid #000;color:#1F4E79;font-size:10.5px;text-align:right">PRE\u00c7O</th>'
             + '</tr></thead>'
-            + '<tbody>' + linhasComVenda + bannerSemVenda + linhasSemVenda + '</tbody>'
+            + '<tbody>' + bannerComVenda + linhasComVenda + bannerSemVenda + linhasSemVenda + '</tbody>'
           + '</table>'));
 }
 
