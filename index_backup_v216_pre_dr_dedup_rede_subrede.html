@@ -24530,20 +24530,6 @@ function _drGerarGruposMultiForn(fornIds, selecoes, dataDe, dataAte) {
   return todosGrupos;
 }
 
-function _drSelecoesEfetivas() {
-  var todas = getCatClientes();
-  var redesComSubMarcada = {};
-  _drSelecoes.forEach(function (sel) {
-    if (sel.tipo !== 'subrede') return;
-    var sub = todas.find(function (c) { return String(c.id) === String(sel.id); });
-    if (sub && sub.pai) redesComSubMarcada[String(sub.pai)] = true;
-  });
-  return _drSelecoes.filter(function (sel) {
-    if (sel.tipo === 'rede' && redesComSubMarcada[String(sel.id)]) return false;
-    return true;
-  });
-}
-
 function _drToggleExpandido(chave) {
   _drExpandido[chave] = !_drExpandido[chave];
   _drRenderArvore(_drUltimosGrupos);
@@ -25257,7 +25243,7 @@ function _drVisualizar() {
   if (!_drSelecoes.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma Rede ou Cliente.'; return; }
   var dataDe = document.getElementById('dr-data-de').value;
   var dataAte = document.getElementById('dr-data-ate').value;
-  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoesEfetivas(), dataDe, dataAte);
+  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoes, dataDe, dataAte);
   if (!grupos.length) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhum dado encontrado com esses filtros.'; return; }
   _drUltimosGrupos = grupos;
   _drVisualizarGrupoIdx = 0;
@@ -25274,7 +25260,7 @@ function _drGerar() {
   var dataDe = document.getElementById('dr-data-de').value;
   var dataAte = document.getElementById('dr-data-ate').value;
 
-  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoesEfetivas(), dataDe, dataAte);
+  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoes, dataDe, dataAte);
   _drUltimosGrupos = grupos;
   _drExpandido = {};
 
