@@ -215,7 +215,7 @@
       body.mob-menu-open #sidebarBackdrop { display:block; }
       #appMainArea { margin-left: 0; }
       .sb-item {
-        width: auto; flex-direction: row; justify-content: flex-start;
+        width: auto; flex-direction: row; flex-wrap: wrap; justify-content: flex-start;
         padding: 12px 16px; gap: 12px; border-radius: 0;
       }
       .sb-item i:not(.sb-chevron) { font-size: 18px; width:22px; text-align:center; flex-shrink:0; }
@@ -231,6 +231,7 @@
         top:auto !important; bottom:auto !important; box-shadow:none !important;
         border:none !important; border-left:none !important; border-radius:0 !important;
         background:rgba(0,0,0,.18) !important; min-width:0 !important; padding: 4px 8px 8px 34px !important;
+        flex-basis: 100% !important; width: 100% !important;
       }
       .sb-item.sb-flyout-open .sb-flyout { display:block !important; }
       .sb-flyout-title { display:none !important; }
@@ -248,6 +249,8 @@
       .dash-root #kpis { grid-template-columns: repeat(2, 1fr) !important; }
       .dash-root #podio { grid-template-columns: 1fr !important; gap:10px !important; }
       .dash-root .dg21, .dash-root .dg11 { grid-template-columns: 1fr !important; }
+      .dash-root .dg21 > .d-card, .dash-root .dg11 > .d-card, .dash-root #podio > * { min-width: 0 !important; }
+      .dash-root .d-card { overflow: hidden; }
       .dash-root .dashHeaderRow { flex-wrap: wrap !important; gap: 10px !important; }
       .dash-root .dashHeaderRow > div:last-child { width: 100%; display:flex !important; gap:8px !important; }
       .dash-root .dashHeaderRow > div:last-child button { flex:1; }
