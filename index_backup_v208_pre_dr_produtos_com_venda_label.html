@@ -24793,7 +24793,7 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
 
   var comVenda = g.cadastroComVenda || [];
   if (comVenda.length) {
-    var linhaBannerCom = ws.addRow(['PRODUTOS COM VENDA  (' + comVenda.length + ' itens)']);
+    var linhaBannerCom = ws.addRow(['PRODUTOS  (' + comVenda.length + ' itens)']);
     linhaBannerCom.height = 17;
     ws.mergeCells(linhaBannerCom.number, 1, linhaBannerCom.number, 7);
     linhaBannerCom.getCell(1).font = { name: 'Calibri', bold: true, size: 10, color: { argb: DR_CORES.greenTxt } };
@@ -24897,7 +24897,7 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
   var semVenda = g.cadastroSemVenda || [];
   var linhasComVenda = comVenda.map(function (item) { return linhaProduto(item); }).join('');
   var bannerComVenda = comVenda.length
-    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#e2efda;color:#375623;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS COM VENDA (' + comVenda.length + ' itens)</td></tr>')
+    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#e2efda;color:#375623;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS (' + comVenda.length + ' itens)</td></tr>')
     : '';
   var bannerSemVenda = semVenda.length
     ? ('<tr><td colspan="7" style="padding:6px 8px;background:#fcd5b4;color:#7f3f00;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS SEM VENDA (' + semVenda.length + ' itens)</td></tr>')
