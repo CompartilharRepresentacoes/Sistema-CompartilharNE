@@ -301,6 +301,36 @@
       #page-devolucao-list .dev-hdr-mobile-hide { display:none !important; }
       #page-devolucao-list .dev-mobile-actions { display:flex !important; }
 
+      #page-devolucao-form .dev-grid-1 { grid-template-columns:1fr 1fr !important; gap:10px !important; }
+      #page-devolucao-form .dev-fld-forn, #page-devolucao-form .dev-fld-cli { grid-column:1 / -1 !important; }
+      #page-devolucao-form .dev-grid-2 { grid-template-columns:1fr 1fr !important; gap:10px !important; }
+      #page-devolucao-form .dev-fld-vendedor { order:1 !important; }
+      #page-devolucao-form .dev-fld-motivo { order:2 !important; }
+      #page-devolucao-form .dev-fld-nfemit { order:3 !important; }
+      #page-devolucao-form .dev-fld-datadevol { order:4 !important; }
+      #page-devolucao-form .dev-fld-nforigem { order:5 !important; }
+      #page-devolucao-form .dev-fld-datanforigem { order:6 !important; }
+
+      #page-devolucao-form .dev-item-add-row { grid-template-columns:1fr 1fr !important; gap:10px !important; align-items:stretch !important; }
+      #page-devolucao-form .dev-fld-item-prod { grid-column:1 / -1 !important; }
+      #page-devolucao-form #dev-item-add-btn { grid-column:1 / -1 !important; width:100% !important; height:38px !important; }
+      #page-devolucao-form #dev-item-add-btn .dev-add-txt { display:inline !important; }
+      #page-devolucao-form #dev-itens-header { display:none !important; }
+      #page-devolucao-form .dev-item-row {
+        display:flex !important; flex-wrap:wrap !important; align-items:center !important;
+        padding:12px 14px !important; gap:2px 8px !important;
+      }
+      #page-devolucao-form .dev-item-nome {
+        flex:1 1 100% !important; order:1 !important; white-space:normal !important;
+        font-size:13px !important; font-weight:700 !important; color:#1e293b !important; margin-bottom:2px !important;
+      }
+      #page-devolucao-form .dev-item-valor { order:2 !important; font-size:11.5px !important; color:#64748b !important; }
+      #page-devolucao-form .dev-item-qtd { order:3 !important; font-size:11.5px !important; color:#64748b !important; }
+      #page-devolucao-form .dev-item-qtd::before { content:' \00d7 '; }
+      #page-devolucao-form .dev-item-qtd::after { content:' un'; }
+      #page-devolucao-form .dev-item-total { order:4 !important; margin-left:auto !important; font-size:13px !important; }
+      #page-devolucao-form .dev-item-acoes { order:5 !important; }
+
       /* Clientes: linhas viram cartoes empilhados */
       .cli-row-card { display:block !important; padding:12px 14px !important; }
       .cli-row-card .cli-c-codigo { display:inline-block; font-size:10px; font-weight:700; color:#94a3b8; margin-bottom:3px; }
@@ -4313,16 +4343,16 @@
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Devolução</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
-              <div style="display:grid;grid-template-columns:110px 150px 1fr 1fr;gap:14px;margin-bottom:14px">
-                <div>
+              <div class="dev-grid-1" style="display:grid;grid-template-columns:110px 150px 1fr 1fr;gap:14px;margin-bottom:14px">
+                <div class="dev-fld-lanc">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Lançamento</label>
                   <input class="form-input" id="dev-lancamento" readonly tabindex="-1" style="width:100%;background:#f8fafc;color:#475569;font-weight:700;text-align:center">
                 </div>
-                <div>
+                <div class="dev-fld-datalanc">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Data Lançamento <span style="color:#D82621">*</span></label>
                   <input class="form-input" id="dev-data" type="date" style="width:100%">
                 </div>
-                <div>
+                <div class="dev-fld-forn">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Fornecedor <span style="color:#D82621">*</span></label>
                   <div style="position:relative">
                     <input id="dev-forn-input" class="form-input" placeholder="Código ou nome..." oninput="_devFornFiltrar()" onkeydown="_devFornKey(event)" onblur="setTimeout(function(){var d=document.getElementById('dev-forn-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
@@ -4330,7 +4360,7 @@
                   </div>
                   <input type="hidden" id="dev-forn-id">
                 </div>
-                <div>
+                <div class="dev-fld-cli">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Cliente <span style="color:#D82621">*</span></label>
                   <div style="position:relative">
                     <input id="dev-cli-input" class="form-input" placeholder="Código ou nome..." oninput="_devCliFiltrar()" onkeydown="_devCliKey(event)" onblur="setTimeout(function(){var d=document.getElementById('dev-cli-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
@@ -4339,31 +4369,31 @@
                   <input type="hidden" id="dev-cli-id">
                 </div>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:14px">
-                <div>
+              <div class="dev-grid-2" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:14px">
+                <div class="dev-fld-vendedor">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Vendedor</label>
                   <select class="form-input" id="dev-vendedor" style="width:100%">
                     <option value="">-- Selecione --</option>
                   </select>
                 </div>
-                <div>
+                <div class="dev-fld-nfemit">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">NF Emitida <span style="color:#D82621">*</span></label>
                   <input class="form-input" id="dev-nf-emitida" placeholder="Número" style="width:100%">
                 </div>
-                <div>
+                <div class="dev-fld-datadevol">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Data Devolução <span style="color:#D82621">*</span></label>
                   <input class="form-input" id="dev-data-nf-emitida" type="date" style="width:100%">
                 </div>
-                <div>
+                <div class="dev-fld-nforigem">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">NF Origem <span style="color:#D82621">*</span></label>
                   <input class="form-input" id="dev-nf-origem" placeholder="Número" oninput="_devBuscarDataNfOrigem()" style="width:100%">
                   <div id="dev-nf-origem-msg" style="font-size:9.5px;color:#94a3b8;margin-top:3px"></div>
                 </div>
-                <div>
+                <div class="dev-fld-datanforigem">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Data NF Origem <span style="color:#D82621">*</span></label>
                   <input class="form-input" id="dev-data-nf-origem" type="date" style="width:100%">
                 </div>
-                <div>
+                <div class="dev-fld-motivo">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Motivo</label>
                   <select class="form-input" id="dev-motivo" style="width:100%">
                     <option value="Avaria">Avaria</option>
@@ -4391,8 +4421,8 @@
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Produto</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 110px 90px 40px;gap:10px;align-items:end;margin-bottom:12px">
-                <div>
+              <div class="dev-item-add-row" style="display:grid;grid-template-columns:1fr 110px 90px 40px;gap:10px;align-items:end;margin-bottom:12px">
+                <div class="dev-fld-item-prod">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Produto <span style="color:#D82621">*</span></label>
                   <div style="position:relative">
                     <input id="dev-item-prod-input" class="form-input" placeholder="Código ou nome (4+ letras)..." oninput="_devProdFiltrar()" onkeydown="_devProdKey(event)" onblur="setTimeout(function(){var d=document.getElementById('dev-item-prod-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
@@ -4400,19 +4430,19 @@
                   </div>
                   <input type="hidden" id="dev-item-prod-id">
                 </div>
-                <div>
+                <div class="dev-fld-item-valor">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Valor <span style="color:#D82621">*</span></label>
                   <input class="form-input" id="dev-item-valor" type="text" inputmode="decimal" oninput="_pedMaskPreco(this)" placeholder="0,00" style="width:100%">
                 </div>
-                <div>
+                <div class="dev-fld-item-qtd">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Qtd <span style="color:#D82621">*</span></label>
                   <input class="form-input no-spin" id="dev-item-qtd" type="number" min="0" step="1" placeholder="0" style="width:100%">
                 </div>
-                <button id="dev-item-add-btn" onclick="devAddItem()" title="Adicionar produto" style="background:#272A4A;color:#fff;border:none;border-radius:8px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-plus"></i></button>
+                <button id="dev-item-add-btn" onclick="devAddItem()" title="Adicionar produto" style="background:#272A4A;color:#fff;border:none;border-radius:8px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-plus"></i><span class="dev-add-txt" style="display:none;margin-left:7px;font-size:12px;font-weight:700">Adicionar produto</span></button>
               </div>
               <div id="dev-item-msg" style="font-size:11px;color:#dc2626;margin-top:-6px;margin-bottom:6px"></div>
               <div style="border:1px solid #eef2f7;border-radius:10px;overflow:hidden">
-                <div style="display:grid;grid-template-columns:1fr 90px 60px 95px 40px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
+                <div id="dev-itens-header" style="display:grid;grid-template-columns:1fr 90px 60px 95px 40px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
                   <span>Produto</span><span>Valor</span><span>Qtd</span><span>Total</span><span></span>
                 </div>
                 <div id="dev-itens-tbody"><div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">Nenhum produto adicionado.</div></div>
@@ -19921,12 +19951,12 @@ function renderDevItens() {
   tbody.innerHTML = _devItens.map(function(it,i){
     total += Number(it.valorTotal)||0;
     var nomeComCodigo = (it.prodCodigo ? it.prodCodigo+' ' : '') + (it.prodNome||'');
-    return '<div style="display:grid;grid-template-columns:1fr 90px 60px 95px 40px;padding:8px 12px;border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px">'
-      + '<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _pedEsc(nomeComCodigo) + '</div>'
-      + '<div>' + _pedFmtMoeda(it.valor) + '</div>'
-      + '<div>' + it.quantidade + '</div>'
-      + '<div style="font-weight:700">' + _pedFmtMoeda(it.valorTotal) + '</div>'
-      + '<div><button onclick="devRemoveItem(' + i + ')" style="background:none;border:none;cursor:pointer;color:#dc2626"><i class="ti ti-trash" style="font-size:11px"></i></button></div>'
+    return '<div class="dev-item-row" style="display:grid;grid-template-columns:1fr 90px 60px 95px 40px;padding:8px 12px;border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px">'
+      + '<div class="dev-item-nome" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _pedEsc(nomeComCodigo) + '</div>'
+      + '<div class="dev-item-valor">' + _pedFmtMoeda(it.valor) + '</div>'
+      + '<div class="dev-item-qtd">' + it.quantidade + '</div>'
+      + '<div class="dev-item-total" style="font-weight:700">' + _pedFmtMoeda(it.valorTotal) + '</div>'
+      + '<div class="dev-item-acoes"><button onclick="devRemoveItem(' + i + ')" style="background:none;border:none;cursor:pointer;color:#dc2626"><i class="ti ti-trash" style="font-size:11px"></i></button></div>'
       + '</div>';
   }).join('');
   var totalEl = document.getElementById('dev-total-produtos'); if (totalEl) totalEl.textContent = _pedFmtMoeda(total);
