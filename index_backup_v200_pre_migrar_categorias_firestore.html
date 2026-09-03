@@ -175,7 +175,6 @@
     .sb-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,.45); letter-spacing:.03em; text-align:center; line-height:1; transition: color .15s; }
     .sb-item.active .sb-label { color: #fff; }
     .sb-item:hover .sb-label { color: rgba(255,255,255,.9); }
-    .sb-chevron { display: none; }
     .sb-flyout {
       display: none; position: fixed; left: 76px; top: auto; bottom: auto; z-index: 400;
       background: #fff; border: 1px solid #e2e8f0; border-left: 3px solid #DE7926;
@@ -6407,12 +6406,10 @@ if (firebaseConfigurado) {
 // funcionando exatamente como antes, direto no localStorage — nenhum código existente
 // precisa saber a diferença.
 // ═══════════════════════════════════════════════════
-var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas'];
-var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [], cat_clientes: [], cat_produtos: [], transportadoras: [], tabelas_preco: [], sku_clientes: [], negociacoes_preco: [], devolucoes: [], ocorrencias_entrega: [], bloqueios_produto: [], gruposAcesso: [], comandos_navegacao: [], metas: [] };
-var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false, cat_clientes: false, cat_produtos: false, transportadoras: false, tabelas_preco: false, sku_clientes: false, negociacoes_preco: false, devolucoes: false, ocorrencias_entrega: false, bloqueios_produto: false, gruposAcesso: false, comandos_navegacao: false, metas: false };
+var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos'];
+var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [] };
+var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false };
 var _fsOuvindo  = false;
-var _fsEmpresaCache = null;
-var _fsEmpresaCarregada = false;
 
 function _fsTodasProntas() {
   return _fsColecoes.every(function (c) { return _fsPronto[c]; });
@@ -6440,16 +6437,6 @@ function _fsIniciarOuvintes(aoFicarTudoPronto) {
       console.error('Erro ao sincronizar coleção "' + nome + '" com o Firestore:', err);
     });
   });
-  db.collection('config_singular').doc('empresa').onSnapshot(function (doc) {
-    _fsEmpresaCache = doc.exists ? doc.data() : null;
-    var jaCarregada = _fsEmpresaCarregada;
-    _fsEmpresaCarregada = true;
-    if (jaCarregada && typeof window.renderEmpresaView === 'function') {
-      try { window.renderEmpresaView(); } catch (e) { /* tela não está aberta agora, ignora */ }
-    }
-  }, function (err) {
-    console.error('Erro ao sincronizar "empresa" com o Firestore:', err);
-  });
 }
 
 // Re-renderiza a tela atual quando a coleção muda por causa de outro usuário (ou da
@@ -6461,18 +6448,6 @@ function _fsAoAtualizar(nome) {
     fornecedores: ['renderFornecedorList'],
     usuarios:     ['renderUsuarioList'],
     pedidos:      ['renderPedidoList', 'renderEntregaControle'],
-    cat_clientes: ['renderCatClienteList'],
-    cat_produtos: ['renderCatProdutoList'],
-    transportadoras: ['renderTranspList'],
-    tabelas_preco: ['renderTabPrecoList'],
-    sku_clientes: ['renderSkuList'],
-    negociacoes_preco: ['renderNegPrecoList'],
-    devolucoes: ['renderDevolucaoList'],
-    ocorrencias_entrega: ['renderOcorrencias'],
-    bloqueios_produto: ['renderBloqueios'],
-    gruposAcesso: ['renderGrupoList'],
-    comandos_navegacao: ['renderComandoList'],
-    metas: ['renderMetaList'],
   };
   (mapaRender[nome] || []).forEach(function (fn) {
     if (typeof window[fn] === 'function') {
@@ -7178,10 +7153,10 @@ function showPage(pageId, params) {
 // CATEGORIA DE CLIENTE
 // ═══════════════════════════════════════════════════
 function getCatClientes() {
-  return firebaseConfigurado ? _fsGet('cat_clientes') : JSON.parse(localStorage.getItem('cat_clientes') || '[]');
+  return JSON.parse(localStorage.getItem('cat_clientes') || '[]');
 }
 function setCatClientes(data) {
-  if (firebaseConfigurado) { _fsSet('cat_clientes', data); } else { localStorage.setItem('cat_clientes', JSON.stringify(data)); }
+  localStorage.setItem('cat_clientes', JSON.stringify(data));
 }
 // ═══════ Paginação genérica "Mostrar" (10/25/50/Todos) — usada em todas as listas do sistema ═══════
 function _pgQtd(selectId) {
@@ -7438,10 +7413,10 @@ function deleteCatCliente(id) {
 // CATEGORIA DE PRODUTO
 // ═══════════════════════════════════════════════════
 function getCatProdutos() {
-  return firebaseConfigurado ? _fsGet('cat_produtos') : JSON.parse(localStorage.getItem('cat_produtos') || '[]');
+  return JSON.parse(localStorage.getItem('cat_produtos') || '[]');
 }
 function setCatProdutos(data) {
-  if (firebaseConfigurado) { _fsSet('cat_produtos', data); } else { localStorage.setItem('cat_produtos', JSON.stringify(data)); }
+  localStorage.setItem('cat_produtos', JSON.stringify(data));
 }
 var _catProdAbertas = {};
 function _catProdToggle(id) {
@@ -8127,21 +8102,10 @@ async function carregarCidadesPorEstado() {
 // EMPRESA (dados cadastrais da empresa)
 // ═══════════════════════════════════════════════════
 function getEmpresa() {
-  if (firebaseConfigurado) return _fsEmpresaCache ? JSON.parse(JSON.stringify(_fsEmpresaCache)) : null;
   try { return JSON.parse(localStorage.getItem('empresa')) || null; }
   catch(e) { return null; }
 }
 function setEmpresa(obj) {
-  if (firebaseConfigurado && db) {
-    _fsEmpresaCache = obj;
-    db.collection('config_singular').doc('empresa').set(obj).then(function () {
-      console.log('[Firestore] ✔ "empresa" salva.');
-    }).catch(function (err) {
-      console.error('[Firestore] ✘ erro ao salvar "empresa":', err);
-      alert('Não foi possível salvar os dados da Empresa no banco compartilhado: ' + err.message);
-    });
-    return;
-  }
   localStorage.setItem('empresa', JSON.stringify(obj));
 }
 
@@ -9139,8 +9103,8 @@ function fpRemoverFoto(id) {
 // ═══════════════════════════════════════════════════
 // TRANSPORTADORAS
 // ═══════════════════════════════════════════════════
-function getTransportadoras() { return firebaseConfigurado ? _fsGet('transportadoras') : JSON.parse(localStorage.getItem('transportadoras') || '[]'); }
-function setTransportadoras(data) { if (firebaseConfigurado) { _fsSet('transportadoras', data); } else { localStorage.setItem('transportadoras', JSON.stringify(data)); } }
+function getTransportadoras() { return JSON.parse(localStorage.getItem('transportadoras') || '[]'); }
+function setTransportadoras(data) { localStorage.setItem('transportadoras', JSON.stringify(data)); }
 
 let _transpFiltroAtivo = '';
 function setTranspFiltro(val) {
@@ -10751,8 +10715,8 @@ function getProdutos() { return firebaseConfigurado ? _fsGet('produtos') : JSON.
 function setProdutos(data) { if (firebaseConfigurado) { _fsSet('produtos', data); } else { localStorage.setItem('produtos', JSON.stringify(data)); } }
 
 /* ── Tabela de Preço: localStorage ── */
-function getTabPrecos() { return firebaseConfigurado ? _fsGet('tabelas_preco') : JSON.parse(localStorage.getItem('tabelas_preco') || '[]'); }
-function setTabPrecos(data) { if (firebaseConfigurado) { _fsSet('tabelas_preco', data); } else { localStorage.setItem('tabelas_preco', JSON.stringify(data)); } }
+function getTabPrecos() { return JSON.parse(localStorage.getItem('tabelas_preco') || '[]'); }
+function setTabPrecos(data) { localStorage.setItem('tabelas_preco', JSON.stringify(data)); }
 
 
 // ═══════════════════════════════════════════════════
@@ -12030,8 +11994,8 @@ function tpcliBaixarPdf() {
 // do cliente — a checagem é sempre feita "ao vivo" comparando a data de hoje com dataFim,
 // nunca fica um status desatualizado gravado (mesmo padrão de "Vigência" da Tabela de Preço).
 // ═══════════════════════════════════════════════════
-function getNegPrecos() { return firebaseConfigurado ? _fsGet('negociacoes_preco') : JSON.parse(localStorage.getItem('negociacoes_preco') || '[]'); }
-function setNegPrecos(data) { if (firebaseConfigurado) { _fsSet('negociacoes_preco', data); } else { localStorage.setItem('negociacoes_preco', JSON.stringify(data)); } }
+function getNegPrecos() { return JSON.parse(localStorage.getItem('negociacoes_preco') || '[]'); }
+function setNegPrecos(data) { localStorage.setItem('negociacoes_preco', JSON.stringify(data)); }
 
 var _negPrecoFiltroAtivo = 'Sim';
 function setNegPrecoFiltro(val) {
@@ -14614,8 +14578,8 @@ function dashInit() {
 // SKU CLIENTES
 // ═══════════════════════════════════════════════════
 function _skuEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-function getSkuClientes() { return firebaseConfigurado ? _fsGet('sku_clientes') : JSON.parse(localStorage.getItem('sku_clientes') || '[]'); }
-function setSkuClientes(d) { if (firebaseConfigurado) { _fsSet('sku_clientes', d); } else { localStorage.setItem('sku_clientes', JSON.stringify(d)); } }
+function getSkuClientes() { return JSON.parse(localStorage.getItem('sku_clientes') || '[]'); }
+function setSkuClientes(d) { localStorage.setItem('sku_clientes', JSON.stringify(d)); }
 
 var _skuPage = 0;
 var _skuPerPage = 20;
@@ -18735,8 +18699,8 @@ function _pedProdKey(e) {
 // ═══════════════════════════════════════════════════
 // BLOQUEIO DE PRODUTOS (aba dentro de Pedidos)
 // ═══════════════════════════════════════════════════
-function getBloqueiosProduto() { return firebaseConfigurado ? _fsGet('bloqueios_produto') : JSON.parse(localStorage.getItem('bloqueios_produto') || '[]'); }
-function setBloqueiosProduto(d) { if (firebaseConfigurado) { _fsSet('bloqueios_produto', d); } else { localStorage.setItem('bloqueios_produto', JSON.stringify(d)); } }
+function getBloqueiosProduto() { return JSON.parse(localStorage.getItem('bloqueios_produto') || '[]'); }
+function setBloqueiosProduto(d) { localStorage.setItem('bloqueios_produto', JSON.stringify(d)); }
 
 var _bloqNivelAtual = 'rede';
 var _bloqProdItens = [];
@@ -19032,8 +18996,8 @@ function _metaFornKey(event) {
 }
 
 // ── Meta: CRUD completo (getMetas/setMetas, formulário, lista) ──
-function getMetas() { return firebaseConfigurado ? _fsGet('metas') : JSON.parse(localStorage.getItem('metas') || '[]'); }
-function setMetas(data) { if (firebaseConfigurado) { _fsSet('metas', data); } else { localStorage.setItem('metas', JSON.stringify(data)); } }
+function getMetas() { return JSON.parse(localStorage.getItem('metas') || '[]'); }
+function setMetas(data) { localStorage.setItem('metas', JSON.stringify(data)); }
 function _metaEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function _metaFmtValor(v, tipo) {
   var s = (Number(v)||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -19578,8 +19542,8 @@ var _devXmlAtual = null;
 var _devXmlPendentes = [];
 var _devXmlLinkCandidatos = {};
 
-function getDevolucoes() { return firebaseConfigurado ? _fsGet('devolucoes') : JSON.parse(localStorage.getItem('devolucoes') || '[]'); }
-function setDevolucoes(data) { if (firebaseConfigurado) { _fsSet('devolucoes', data); } else { localStorage.setItem('devolucoes', JSON.stringify(data)); } }
+function getDevolucoes() { return JSON.parse(localStorage.getItem('devolucoes') || '[]'); }
+function setDevolucoes(data) { localStorage.setItem('devolucoes', JSON.stringify(data)); }
 
 // Vinculo manual de produto por fornecedor: quando o codigo do produto na NFD
 // nao bate com o codigo interno nem com o EAN cadastrado, o usuario vincula uma
@@ -21106,8 +21070,8 @@ var PAGINAS_SISTEMA = [
   { key: 'usuarios',            secao: 'Gerenciar',   nome: 'Usuários' },
 ];
 
-function getGruposAcesso() { return firebaseConfigurado ? _fsGet('gruposAcesso') : JSON.parse(localStorage.getItem('gruposAcesso') || '[]'); }
-function setGruposAcesso(data) { if (firebaseConfigurado) { _fsSet('gruposAcesso', data); } else { localStorage.setItem('gruposAcesso', JSON.stringify(data)); } }
+function getGruposAcesso() { return JSON.parse(localStorage.getItem('gruposAcesso') || '[]'); }
+function setGruposAcesso(data) { localStorage.setItem('gruposAcesso', JSON.stringify(data)); }
 function getUsuariosSistema() { return firebaseConfigurado ? _fsGet('usuarios') : JSON.parse(localStorage.getItem('usuarios') || '[]'); }
 function setUsuariosSistema(data) { if (firebaseConfigurado) { _fsSet('usuarios', data); } else { localStorage.setItem('usuarios', JSON.stringify(data)); } }
 function getVendedoresAtivos() { return getUsuariosSistema().filter(function(u){ return (u.ativo||'Sim') !== 'Não' && String(u.grupoNome||'').trim().toLowerCase() === 'vendas'; }); }
@@ -21451,10 +21415,10 @@ function salvarPermissoesUsuario() {
 // ═══════════════════════════════════════════════════
 function _navEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function getComandosNavegacao() {
-  return firebaseConfigurado ? _fsGet('comandos_navegacao') : JSON.parse(localStorage.getItem('comandos_navegacao') || '[]');
+  return JSON.parse(localStorage.getItem('comandos_navegacao') || '[]');
 }
 function setComandosNavegacao(data) {
-  if (firebaseConfigurado) { _fsSet('comandos_navegacao', data); } else { localStorage.setItem('comandos_navegacao', JSON.stringify(data)); }
+  localStorage.setItem('comandos_navegacao', JSON.stringify(data));
 }
 // Páginas que podem ser destino de um comando: exclui formulários de edição de registro específico
 // (que abririam em branco/sem contexto) e as próprias páginas de Comandos. Mantém page-pedido-form
@@ -21781,7 +21745,7 @@ function renderBackupPage() {
 // buscar do Firestore quando firebaseConfigurado é true) para pegar os dados reais que
 // ainda estão só aqui. Usa .set() por id, então rodar de novo não duplica nada.
 // ═══════════════════════════════════════════════════
-var _fsColecoesMigrar = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas'];
+var _fsColecoesMigrar = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos'];
 async function migrarDadosParaFirestore() {
   var msg = document.getElementById('backup-fs-msg');
   var btn = document.getElementById('btn-migrar-firestore');
@@ -21789,7 +21753,7 @@ async function migrarDadosParaFirestore() {
     if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Firebase não está configurado.'; }
     return;
   }
-  if (!confirm('Isso vai copiar os dados atuais deste navegador (Produtos, Clientes, Fornecedores, Usuários, Pedidos, Categoria de Cliente/Rede e Categoria de Produto) para o banco de dados compartilhado. Os dados aqui no navegador não serão apagados. Se houver muitos pedidos, pode levar alguns minutos. Continuar?')) return;
+  if (!confirm('Isso vai copiar os dados atuais deste navegador (Produtos, Clientes, Fornecedores, Usuários, Pedidos) para o banco de dados compartilhado. Os dados aqui no navegador não serão apagados. Se houver muitos pedidos, pode levar alguns minutos. Continuar?')) return;
 
   if (btn) { btn.disabled = true; btn.textContent = 'Migrando…'; }
   if (msg) { msg.style.color = '#64748b'; msg.textContent = 'Migrando, aguarde…'; }
@@ -21811,17 +21775,6 @@ async function migrarDadosParaFirestore() {
         if (msg) msg.textContent = 'Migrando ' + nome + '… ' + enviados + '/' + comId.length;
       }
       resumo.push(nome + ': ' + enviados + ' registro(s)' + (semId ? ' (' + semId + ' ignorado(s) por não ter id)' : ''));
-    }
-    try {
-      var empresaLocal = JSON.parse(localStorage.getItem('empresa'));
-      if (empresaLocal) {
-        await db.collection('config_singular').doc('empresa').set(empresaLocal);
-        resumo.push('empresa: dados enviados');
-      } else {
-        resumo.push('empresa: nada cadastrado neste navegador, nada a enviar');
-      }
-    } catch (errEmpresa) {
-      resumo.push('empresa: erro ao enviar (' + (errEmpresa && errEmpresa.message ? errEmpresa.message : errEmpresa) + ')');
     }
     if (msg) { msg.style.color = '#15803d'; msg.innerHTML = '✔ Migração concluída:<br>' + resumo.join('<br>'); }
   } catch (err) {
@@ -23733,8 +23686,8 @@ function _sugGerarExcel() {
 // ═══════════════════════════════════════════════════
 // OCORRÊNCIAS DE ENTREGA
 // ═══════════════════════════════════════════════════
-function getOcorrencias() { return firebaseConfigurado ? _fsGet('ocorrencias_entrega') : JSON.parse(localStorage.getItem('ocorrencias_entrega') || '[]'); }
-function setOcorrencias(data) { if (firebaseConfigurado) { _fsSet('ocorrencias_entrega', data); } else { localStorage.setItem('ocorrencias_entrega', JSON.stringify(data)); } }
+function getOcorrencias() { return JSON.parse(localStorage.getItem('ocorrencias_entrega') || '[]'); }
+function setOcorrencias(data) { localStorage.setItem('ocorrencias_entrega', JSON.stringify(data)); }
 
 var OC_TIPOS = ['Avaria', 'Recusa total', 'Recusa parcial', 'Extravio', 'Atraso', 'Divergência de quantidade', 'Outro'];
 var OC_COR = {
