@@ -4258,7 +4258,7 @@
               <span id="dev-motivo-ms-resumo" style="font-size:11px;color:#fff">Todos</span>
               <i class="ti ti-chevron-down" style="font-size:12px;color:rgba(255,255,255,.5)"></i>
             </div>
-            <div id="dev-motivo-ms-drop" style="display:none;position:fixed;background:#2e3157;border:0.5px solid rgba(255,255,255,.15);border-radius:8px;padding:6px;z-index:50;box-sizing:border-box;max-height:220px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.25)"></div>
+            <div id="dev-motivo-ms-drop" style="display:none;position:absolute;top:100%;left:0;right:0;margin-top:4px;background:#2e3157;border:0.5px solid rgba(255,255,255,.15);border-radius:8px;padding:6px;z-index:5;box-sizing:border-box"></div>
           </div>
           <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
             <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Devoluções</span><span style="font-weight:700;color:#fff" id="dev-kpi-total">0</span></div>
@@ -19640,32 +19640,15 @@ function _devPopularFiltroMotivo() {
 
 function _devToggleMotivoMs() {
   var drop = document.getElementById('dev-motivo-ms-drop');
-  var btn = document.getElementById('dev-motivo-ms-btn');
-  if (!drop || !btn) return;
-  if (drop.style.display === 'block') {
-    drop.style.display = 'none';
-    return;
-  }
-  var r = btn.getBoundingClientRect();
-  drop.style.top = (r.bottom + 4) + 'px';
-  drop.style.left = r.left + 'px';
-  drop.style.width = r.width + 'px';
-  drop.style.display = 'block';
+  if (!drop) return;
+  drop.style.display = drop.style.display === 'block' ? 'none' : 'block';
   if (!window._devMotivoClickForaRegistrado) {
     window._devMotivoClickForaRegistrado = true;
     document.addEventListener('click', function (ev) {
-      var btnEl = document.getElementById('dev-motivo-ms-btn');
+      var btn = document.getElementById('dev-motivo-ms-btn');
       var dropEl = document.getElementById('dev-motivo-ms-drop');
-      if (!btnEl || !dropEl) return;
-      if (!btnEl.contains(ev.target) && !dropEl.contains(ev.target)) dropEl.style.display = 'none';
-    });
-    window.addEventListener('scroll', function () {
-      var dropEl = document.getElementById('dev-motivo-ms-drop');
-      if (dropEl) dropEl.style.display = 'none';
-    }, true);
-    window.addEventListener('resize', function () {
-      var dropEl = document.getElementById('dev-motivo-ms-drop');
-      if (dropEl) dropEl.style.display = 'none';
+      if (!btn || !dropEl) return;
+      if (!btn.contains(ev.target) && !dropEl.contains(ev.target)) dropEl.style.display = 'none';
     });
   }
 }
