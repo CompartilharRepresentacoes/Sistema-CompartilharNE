@@ -13957,8 +13957,8 @@ function dashInit() {
         const pct = it.max ? (it.val/it.max)*100 : 0;
         return `<div class="mb-2 last:mb-0">
           <div class="flex items-center justify-between text-[13px]">
-            <span class="truncate pr-2 min-w-0"><span class="inline-block w-5 text-ink-400">${idx+1}.</span> ${escapeHtml(it.nome)}</span>
-            <span class="font-semibold tabular-nums shrink-0 whitespace-nowrap">${fmtBRL(it.val)}</span>
+            <span class="truncate pr-2"><span class="inline-block w-5 text-ink-400">${idx+1}.</span> ${escapeHtml(it.nome)}</span>
+            <span class="font-semibold tabular-nums">${fmtBRL(it.val)}</span>
           </div>
           <div class="h-1.5 bg-ink-100 dark:bg-ink-800 rounded-full overflow-hidden mt-1">
             <div class="h-full bg-brand-500" style="width:${pct}%"></div>
