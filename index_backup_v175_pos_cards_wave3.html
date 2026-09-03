@@ -268,8 +268,6 @@
       .mc-row .mc-primary-line { display:flex !important; align-items:center; gap:8px; margin-bottom:2px; }
       .mc-row .mc-actions { display:flex !important; flex-wrap:wrap !important; gap:2px !important; justify-content:flex-start !important; margin-top:6px; }
       .mc-row .mc-hide { display:none !important; }
-      .mc-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-      .mc-table-wrap table { min-width:640px; }
 
       /* Clientes: linhas viram cartoes empilhados */
       .cli-row-card { display:block !important; padding:12px 14px !important; }
@@ -14574,11 +14572,11 @@ function renderSkuList() {
       for (var ig = 0; ig < pagG.length; ig++) {
         var g = pagG[ig];
         var bgG = ig % 2 === 0 ? '#fff' : '#fafbff';
-        rowsG += '<div class="mc-row" style="display:flex;padding:10px 14px;background:'+bgG+';border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px;gap:4px">'
-          + '<span class="mc-secondary" style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(g.fornNome||''))+'</span>'
-          + '<span class="mc-primary" style="flex:1;color:#334155;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(g.cliNome||'')+'</span>'
-          + '<span class="mc-meta" style="width:90px;flex-shrink:0;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:5px;font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1">'+g.count+' SKU'+(g.count!==1?'s':'')+'</span></span>'
-          + '<span class="mc-actions" style="width:70px;flex-shrink:0;display:flex;justify-content:center">'
+        rowsG += '<div style="display:flex;padding:10px 14px;background:'+bgG+';border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px;gap:4px">'
+          + '<span style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(g.fornNome||''))+'</span>'
+          + '<span style="flex:1;color:#334155;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(g.cliNome||'')+'</span>'
+          + '<span style="width:90px;flex-shrink:0;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:5px;font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1">'+g.count+' SKU'+(g.count!==1?'s':'')+'</span></span>'
+          + '<span style="width:70px;flex-shrink:0;display:flex;justify-content:center">'
           + '<button onclick="abrirSkuRedeDetalhe(\''+g.fornId+'\',\''+g.cliId+'\')" style="width:26px;height:26px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#272A4A;font-size:13px" title="Visualizar"><i class="ti ti-eye"></i></button>'
           + '</span></div>';
       }
@@ -14615,13 +14613,13 @@ function renderSkuList() {
       var bg  = i % 2 === 0 ? '#fff' : '#fafbff';
       var cor = FORMA_COLOR[r.forma] || '#475569';
       var bgf = FORMA_BG[r.forma]   || '#f1f5f9';
-      rows += '<div class="mc-row" style="display:flex;padding:9px 14px;background:'+bg+';border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px;gap:4px">'
-        + '<span class="mc-secondary" style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(r.fornNome||''))+'</span>'
-        + '<span class="mc-primary" style="flex:1;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(r.cliNome||'')+'</span>'
-        + '<span class="mc-secondary" style="flex:1;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(r.prodNome||''))+'</span>'
-        + '<span class="mc-meta" style="width:130px;flex-shrink:0;font-family:monospace;font-weight:700;color:#1e293b">'+_skuEsc(r.sku||'')+'</span>'
-        + '<span class="mc-badge" style="width:70px;flex-shrink:0"><span style="display:inline-block;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:700;background:'+bgf+';color:'+cor+'">'+_skuEsc(r.forma||'')+'</span></span>'
-        + '<span class="mc-actions" style="width:80px;flex-shrink:0;display:flex;gap:5px;justify-content:center">'
+      rows += '<div style="display:flex;padding:9px 14px;background:'+bg+';border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px;gap:4px">'
+        + '<span style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(r.fornNome||''))+'</span>'
+        + '<span style="flex:1;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(r.cliNome||'')+'</span>'
+        + '<span style="flex:1;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(r.prodNome||''))+'</span>'
+        + '<span style="width:130px;flex-shrink:0;font-family:monospace;font-weight:700;color:#1e293b">'+_skuEsc(r.sku||'')+'</span>'
+        + '<span style="width:70px;flex-shrink:0"><span style="display:inline-block;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:700;background:'+bgf+';color:'+cor+'">'+_skuEsc(r.forma||'')+'</span></span>'
+        + '<span style="width:80px;flex-shrink:0;display:flex;gap:5px;justify-content:center">'
         + '<button onclick="showPage(\'page-sku-clientes-form\',{id:\''+r.id+'\'})" style="width:26px;height:26px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#64748b;font-size:12px" title="Editar"><i class="ti ti-edit"></i></button>'
         + '<button onclick="excluirSkuCliente(\''+r.id+'\',this)" style="width:26px;height:26px;border-radius:6px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;color:#dc2626;font-size:12px" title="Excluir"><i class="ti ti-trash"></i></button>'
         + '</span>'
@@ -14659,11 +14657,11 @@ function abrirSkuRedeDetalhe(fornId, cliId) {
         var cor = FORMA_COLOR[r.forma] || '#475569';
         var bgf = FORMA_BG[r.forma]   || '#f1f5f9';
         var bg  = i % 2 === 0 ? '#fff' : '#fafbff';
-        return '<div class="mc-row" style="display:flex;padding:9px 16px;background:'+bg+';border-bottom:1px solid #f1f5f9;font-size:12px;align-items:center;gap:4px">'
-          + '<span class="mc-secondary" style="flex:1;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(r.prodNome||''))+'</span>'
-          + '<span class="mc-meta" style="width:110px;flex-shrink:0;font-family:monospace;font-weight:700;color:#1e293b">'+_skuEsc(r.sku||'')+'</span>'
-          + '<span class="mc-badge" style="width:55px;flex-shrink:0"><span style="padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;background:'+bgf+';color:'+cor+'">'+_skuEsc(r.forma||'')+'</span></span>'
-          + '<span class="mc-actions" style="width:60px;flex-shrink:0;display:flex;gap:4px;justify-content:center">'
+        return '<div style="display:flex;padding:9px 16px;background:'+bg+';border-bottom:1px solid #f1f5f9;font-size:12px;align-items:center;gap:4px">'
+          + '<span style="flex:1;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(r.prodNome||''))+'</span>'
+          + '<span style="width:110px;flex-shrink:0;font-family:monospace;font-weight:700;color:#1e293b">'+_skuEsc(r.sku||'')+'</span>'
+          + '<span style="width:55px;flex-shrink:0"><span style="padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;background:'+bgf+';color:'+cor+'">'+_skuEsc(r.forma||'')+'</span></span>'
+          + '<span style="width:60px;flex-shrink:0;display:flex;gap:4px;justify-content:center">'
           + '<button onclick="fecharSkuRedeDetalhe();showPage(\'page-sku-clientes-form\',{id:\''+r.id+'\'})" style="width:22px;height:22px;border-radius:5px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#64748b;font-size:10px" title="Editar"><i class="ti ti-edit"></i></button>'
           + '<button onclick="_skuRedeDetalheExcluir(\''+r.id+'\')" style="width:22px;height:22px;border-radius:5px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;color:#dc2626;font-size:10px" title="Excluir"><i class="ti ti-trash"></i></button>'
           + '</span></div>';
@@ -18148,9 +18146,9 @@ function renderNaoFaturados() {
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Não Faturado</div><div style="font-size:12px;font-weight:700;color:#dc2626">' + _pedFmtMoeda(valorPendente) + '</div></div>'
       + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:#f1f5f9;color:#a16207;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-invoice" style="font-size:11px"></i> Faturar</button>'
       + '</div>'
-      + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
+      + '<table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Pedida</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Falta Faturar</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Não Faturado</th></tr></thead>'
-      + '<tbody>' + itensHtml + '</tbody></table></div>'
+      + '<tbody>' + itensHtml + '</tbody></table>'
       + '</div>';
   }).join('');
 }
@@ -18309,9 +18307,9 @@ function renderVendasCompletas() {
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Total</div><div style="font-size:12px;font-weight:700;color:#15803d">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
       + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:#f1f5f9;color:#a16207;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-invoice" style="font-size:11px"></i> Faturar</button>'
       + '</div>'
-      + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
+      + '<table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Unit.</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Peso (kg)</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Total</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Não Faturada</th></tr></thead>'
-      + '<tbody>' + itensHtml + '</tbody></table></div>'
+      + '<tbody>' + itensHtml + '</tbody></table>'
       + '</div>';
   }).join('');
 }
@@ -18426,9 +18424,9 @@ function renderVendasCompletasFaturadas() {
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Total</div><div style="font-size:12px;font-weight:700;color:#15803d">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
       + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:#f1f5f9;color:#a16207;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-invoice" style="font-size:11px"></i> Faturar</button>'
       + '</div>'
-      + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
+      + '<table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Unit.</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Peso (kg)</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Total</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Não Faturada</th></tr></thead>'
-      + '<tbody>' + itensHtml + '</tbody></table></div>'
+      + '<tbody>' + itensHtml + '</tbody></table>'
       + '</div>';
   }).join('');
 }
