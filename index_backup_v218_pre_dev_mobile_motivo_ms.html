@@ -5172,12 +5172,20 @@
             <div id="dr-forn-ms-drop" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px;width:230px;max-width:80vw;box-shadow:0 4px 16px rgba(15,23,42,.08);z-index:30;max-height:260px;overflow-y:auto"></div>
           </div>
           <div style="position:relative">
-            <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Rede(s) / Sub-Rede(s)</div>
-            <div id="dr-rede-ms-btn" onclick="_drToggleMs('rede')" style="display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:220px;cursor:pointer;box-sizing:border-box">
+            <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Rede(s)</div>
+            <div id="dr-rede-ms-btn" onclick="_drToggleMs('rede')" style="display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:190px;cursor:pointer;box-sizing:border-box">
               <span id="dr-rede-ms-resumo" style="flex:1">Selecione...</span>
               <i class="ti ti-chevron-down" style="font-size:14px;color:#94a3b8"></i>
             </div>
-            <div id="dr-rede-ms-drop" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px;width:260px;max-width:80vw;box-shadow:0 4px 16px rgba(15,23,42,.08);z-index:30;max-height:300px;overflow-y:auto"></div>
+            <div id="dr-rede-ms-drop" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px;width:230px;max-width:80vw;box-shadow:0 4px 16px rgba(15,23,42,.08);z-index:30;max-height:300px;overflow-y:auto"></div>
+          </div>
+          <div id="dr-subrede-wrap-ms" style="position:relative;display:none">
+            <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Sub-Rede(s)</div>
+            <div id="dr-subrede-ms-btn" onclick="_drToggleMs('subrede')" style="display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:190px;cursor:pointer;box-sizing:border-box">
+              <span id="dr-subrede-ms-resumo" style="flex:1">Selecione...</span>
+              <i class="ti ti-chevron-down" style="font-size:14px;color:#94a3b8"></i>
+            </div>
+            <div id="dr-subrede-ms-drop" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px;width:230px;max-width:80vw;box-shadow:0 4px 16px rgba(15,23,42,.08);z-index:30;max-height:300px;overflow-y:auto"></div>
           </div>
         </div>
 
@@ -24045,6 +24053,7 @@ var _drSelecoes = [];
 var _drFornecedoresSelecionados = [];
 var _drOpcoesForn = [];
 var _drOpcoesRede = [];
+var _drOpcoesSubrede = [];
 var _drItensBusca = [];
 var _drUltimosGrupos = [];
 var _drExpandido = {};
@@ -24058,8 +24067,11 @@ function _drPopularFiltros() {
   _drRenderChips();
   _drAtualizarResumoForn();
   _drAtualizarResumoRede();
+  _drAtualizarResumoSubrede();
+  _drAtualizarSubredeVisibilidade();
   var dropForn = document.getElementById('dr-forn-ms-drop'); if (dropForn) dropForn.style.display = 'none';
   var dropRede = document.getElementById('dr-rede-ms-drop'); if (dropRede) dropRede.style.display = 'none';
+  var dropSub = document.getElementById('dr-subrede-ms-drop'); if (dropSub) dropSub.style.display = 'none';
   var inp = document.getElementById('dr-selecao-input'); if (inp) inp.value = '';
   var de = document.getElementById('dr-data-de'); if (de) de.value = '';
   var ate = document.getElementById('dr-data-ate'); if (ate) ate.value = '';
@@ -24072,22 +24084,26 @@ function _drPopularFiltros() {
 // usado nos filtros do Dashboard/Inicio) em vez de select+botao Adicionar -- marca/desmarca
 // direto na lista, sem precisar clicar em "Adicionar" a cada item (pedido do usuario).
 function _drToggleMs(which) {
-  var dropId = which === 'forn' ? 'dr-forn-ms-drop' : 'dr-rede-ms-drop';
-  var outroId = which === 'forn' ? 'dr-rede-ms-drop' : 'dr-forn-ms-drop';
-  var outro = document.getElementById(outroId); if (outro) outro.style.display = 'none';
-  var drop = document.getElementById(dropId);
+  var ids = { forn: 'dr-forn-ms-drop', rede: 'dr-rede-ms-drop', subrede: 'dr-subrede-ms-drop' };
+  Object.keys(ids).forEach(function (k) { if (k !== which) { var d = document.getElementById(ids[k]); if (d) d.style.display = 'none'; } });
+  var drop = document.getElementById(ids[which]);
   if (!drop) return;
   var abrir = drop.style.display !== 'block';
   drop.style.display = abrir ? 'block' : 'none';
-  if (abrir) { if (which === 'forn') _drRenderMsFornDrop(); else _drRenderMsRedeDrop(); }
+  if (abrir) {
+    if (which === 'forn') _drRenderMsFornDrop();
+    else if (which === 'rede') _drRenderMsRedeDrop();
+    else _drRenderMsSubredeDrop();
+  }
 }
 if (!window._drClickForaRegistrado) {
   window._drClickForaRegistrado = true;
   document.addEventListener('click', function (e) {
-    var fornBtn = document.getElementById('dr-forn-ms-btn'), fornDrop = document.getElementById('dr-forn-ms-drop');
-    var redeBtn = document.getElementById('dr-rede-ms-btn'), redeDrop = document.getElementById('dr-rede-ms-drop');
-    if (fornDrop && fornDrop.style.display === 'block' && fornBtn && !fornBtn.contains(e.target) && !fornDrop.contains(e.target)) fornDrop.style.display = 'none';
-    if (redeDrop && redeDrop.style.display === 'block' && redeBtn && !redeBtn.contains(e.target) && !redeDrop.contains(e.target)) redeDrop.style.display = 'none';
+    var pares = [['dr-forn-ms-btn', 'dr-forn-ms-drop'], ['dr-rede-ms-btn', 'dr-rede-ms-drop'], ['dr-subrede-ms-btn', 'dr-subrede-ms-drop']];
+    pares.forEach(function (par) {
+      var btn = document.getElementById(par[0]), drop = document.getElementById(par[1]);
+      if (drop && drop.style.display === 'block' && btn && !btn.contains(e.target) && !drop.contains(e.target)) drop.style.display = 'none';
+    });
   });
 }
 function _drRenderMsFornDrop() {
@@ -24126,43 +24142,95 @@ function _drRenderMsRedeDrop() {
   var drop = document.getElementById('dr-rede-ms-drop');
   if (!drop) return;
   var todas = getCatClientes();
-  var redes = todas.filter(function (c) { return !c.pai; });
-  _drOpcoesRede = [];
-  var html = '';
-  redes.forEach(function (r) {
-    var idxR = _drOpcoesRede.length;
-    _drOpcoesRede.push({ tipo: 'rede', id: r.id, nome: r.nome || '' });
-    var marcadoRede = _drSelecoes.some(function (s) { return s.tipo === 'rede' && String(s.id) === String(r.id); });
-    html += '<label style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:12.5px;color:#1e293b;cursor:pointer">'
-      + '<input type="checkbox" onchange="_drToggleRede(' + idxR + ', this.checked)" ' + (marcadoRede ? 'checked' : '') + '>'
+  _drOpcoesRede = todas.filter(function (c) { return !c.pai; });
+  drop.innerHTML = _drOpcoesRede.map(function (r, i) {
+    var marcado = _drSelecoes.some(function (s) { return s.tipo === 'rede' && String(s.id) === String(r.id); });
+    return '<label style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:12.5px;color:#1e293b;cursor:pointer">'
+      + '<input type="checkbox" onchange="_drToggleRede(' + i + ', this.checked)" ' + (marcado ? 'checked' : '') + '>'
       + _pedEsc(r.nome || '') + '</label>';
-    var subs = todas.filter(function (c) { return String(c.pai) === String(r.id); });
-    subs.forEach(function (s) {
-      var idxS = _drOpcoesRede.length;
-      _drOpcoesRede.push({ tipo: 'subrede', id: s.id, nome: s.nome || '' });
-      var marcadoSub = _drSelecoes.some(function (sel) { return sel.tipo === 'subrede' && String(sel.id) === String(s.id); });
-      html += '<label style="display:flex;align-items:center;gap:8px;padding:4px 2px 4px 22px;font-size:12px;color:#64748b;cursor:pointer">'
-        + '<input type="checkbox" onchange="_drToggleRede(' + idxS + ', this.checked)" ' + (marcadoSub ? 'checked' : '') + '>'
-        + '\u21b3 ' + _pedEsc(s.nome || '') + '</label>';
-    });
-  });
-  drop.innerHTML = html || '<div style="padding:6px;font-size:12px;color:#94a3b8">Nenhuma rede cadastrada.</div>';
+  }).join('') || '<div style="padding:6px;font-size:12px;color:#94a3b8">Nenhuma rede cadastrada.</div>';
 }
-function _drToggleRede(idxOpcao, marcado) {
-  var op = _drOpcoesRede[idxOpcao]; if (!op) return;
-  var idx = _drSelecoes.findIndex(function (s) { return s.tipo === op.tipo && String(s.id) === String(op.id); });
-  if (marcado && idx === -1) _drSelecoes.push({ tipo: op.tipo, id: op.id, nome: op.nome });
-  if (!marcado && idx !== -1) _drSelecoes.splice(idx, 1);
+function _drToggleRede(i, marcado) {
+  var r = _drOpcoesRede[i]; if (!r) return;
+  var idx = _drSelecoes.findIndex(function (s) { return s.tipo === 'rede' && String(s.id) === String(r.id); });
+  if (marcado && idx === -1) _drSelecoes.push({ tipo: 'rede', id: r.id, nome: r.nome || '' });
+  if (!marcado && idx !== -1) {
+    _drSelecoes.splice(idx, 1);
+    // Desmarcar a Rede tambem limpa Sub-Redes dela ja marcadas -- evita selecao "orfa"
+    // que ficaria invisivel com o campo de Sub-Rede escondido de novo.
+    var idsFilhas = getCatClientes().filter(function (c) { return String(c.pai) === String(r.id); }).map(function (c) { return String(c.id); });
+    _drSelecoes = _drSelecoes.filter(function (s) { return !(s.tipo === 'subrede' && idsFilhas.indexOf(String(s.id)) !== -1); });
+  }
   _drRenderChips();
   _drAtualizarResumoRede();
+  _drAtualizarSubredeVisibilidade();
+  var dropSub = document.getElementById('dr-subrede-ms-drop');
+  if (dropSub && dropSub.style.display === 'block') _drRenderMsSubredeDrop();
+  _drAtualizarResumoSubrede();
 }
 function _drAtualizarResumoRede() {
   var el = document.getElementById('dr-rede-ms-resumo');
   if (!el) return;
-  var redesSel = _drSelecoes.filter(function (s) { return s.tipo === 'rede' || s.tipo === 'subrede'; });
+  var redesSel = _drSelecoes.filter(function (s) { return s.tipo === 'rede'; });
   var n = redesSel.length;
   if (!n) { el.textContent = 'Selecione...'; return; }
   if (n === 1) { el.textContent = redesSel[0].nome; return; }
+  el.textContent = n + ' selecionadas';
+}
+// Sub-Rede em cascata: so aparece se alguma Rede marcada tiver filhas, e a lista mostra so as
+// filhas das Redes atualmente marcadas (com um sub-titulo por Rede quando mais de uma esta
+// marcada, pra deixar claro de qual Rede cada Sub-Rede pertence).
+function _drAtualizarSubredeVisibilidade() {
+  var wrap = document.getElementById('dr-subrede-wrap-ms');
+  if (!wrap) return;
+  var redesIds = _drSelecoes.filter(function (s) { return s.tipo === 'rede'; }).map(function (s) { return String(s.id); });
+  var todas = getCatClientes();
+  var temFilhas = todas.some(function (c) { return c.pai && redesIds.indexOf(String(c.pai)) !== -1; });
+  wrap.style.display = temFilhas ? '' : 'none';
+  if (!temFilhas) {
+    var dropSub = document.getElementById('dr-subrede-ms-drop');
+    if (dropSub) dropSub.style.display = 'none';
+  }
+}
+function _drRenderMsSubredeDrop() {
+  var drop = document.getElementById('dr-subrede-ms-drop');
+  if (!drop) return;
+  var redesSel = _drSelecoes.filter(function (s) { return s.tipo === 'rede'; });
+  var todas = getCatClientes();
+  _drOpcoesSubrede = [];
+  var html = '';
+  redesSel.forEach(function (rSel) {
+    var subs = todas.filter(function (c) { return String(c.pai) === String(rSel.id); });
+    if (!subs.length) return;
+    if (redesSel.length > 1) {
+      html += '<div style="font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;padding:6px 2px 2px">' + _pedEsc(rSel.nome) + '</div>';
+    }
+    subs.forEach(function (s) {
+      var idxS = _drOpcoesSubrede.length;
+      _drOpcoesSubrede.push({ id: s.id, nome: s.nome || '' });
+      var marcado = _drSelecoes.some(function (sel) { return sel.tipo === 'subrede' && String(sel.id) === String(s.id); });
+      html += '<label style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:12.5px;color:#1e293b;cursor:pointer">'
+        + '<input type="checkbox" onchange="_drToggleSubrede(' + idxS + ', this.checked)" ' + (marcado ? 'checked' : '') + '>'
+        + _pedEsc(s.nome || '') + '</label>';
+    });
+  });
+  drop.innerHTML = html || '<div style="padding:6px;font-size:12px;color:#94a3b8">Nenhuma sub-rede para as redes selecionadas.</div>';
+}
+function _drToggleSubrede(i, marcado) {
+  var s = _drOpcoesSubrede[i]; if (!s) return;
+  var idx = _drSelecoes.findIndex(function (sel) { return sel.tipo === 'subrede' && String(sel.id) === String(s.id); });
+  if (marcado && idx === -1) _drSelecoes.push({ tipo: 'subrede', id: s.id, nome: s.nome });
+  if (!marcado && idx !== -1) _drSelecoes.splice(idx, 1);
+  _drRenderChips();
+  _drAtualizarResumoSubrede();
+}
+function _drAtualizarResumoSubrede() {
+  var el = document.getElementById('dr-subrede-ms-resumo');
+  if (!el) return;
+  var subsSel = _drSelecoes.filter(function (s) { return s.tipo === 'subrede'; });
+  var n = subsSel.length;
+  if (!n) { el.textContent = 'Selecione...'; return; }
+  if (n === 1) { el.textContent = subsSel[0].nome; return; }
   el.textContent = n + ' selecionadas';
 }
 
@@ -24200,8 +24268,11 @@ function _drRemoverSelecao(idx) {
   _drSelecoes.splice(idx, 1);
   _drRenderChips();
   _drAtualizarResumoRede();
+  _drAtualizarResumoSubrede();
   var dropRede = document.getElementById('dr-rede-ms-drop');
   if (dropRede && dropRede.style.display === 'block') _drRenderMsRedeDrop();
+  var dropSub = document.getElementById('dr-subrede-ms-drop');
+  if (dropSub && dropSub.style.display === 'block') _drRenderMsSubredeDrop();
 }
 function _drRenderChips() {
   var cont = document.getElementById('dr-selecao-chips');
@@ -24457,6 +24528,20 @@ function _drGerarGruposMultiForn(fornIds, selecoes, dataDe, dataAte) {
     });
   });
   return todosGrupos;
+}
+
+function _drSelecoesEfetivas() {
+  var todas = getCatClientes();
+  var redesComSubMarcada = {};
+  _drSelecoes.forEach(function (sel) {
+    if (sel.tipo !== 'subrede') return;
+    var sub = todas.find(function (c) { return String(c.id) === String(sel.id); });
+    if (sub && sub.pai) redesComSubMarcada[String(sub.pai)] = true;
+  });
+  return _drSelecoes.filter(function (sel) {
+    if (sel.tipo === 'rede' && redesComSubMarcada[String(sel.id)]) return false;
+    return true;
+  });
 }
 
 function _drToggleExpandido(chave) {
@@ -25172,7 +25257,7 @@ function _drVisualizar() {
   if (!_drSelecoes.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma Rede ou Cliente.'; return; }
   var dataDe = document.getElementById('dr-data-de').value;
   var dataAte = document.getElementById('dr-data-ate').value;
-  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoes, dataDe, dataAte);
+  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoesEfetivas(), dataDe, dataAte);
   if (!grupos.length) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhum dado encontrado com esses filtros.'; return; }
   _drUltimosGrupos = grupos;
   _drVisualizarGrupoIdx = 0;
@@ -25189,7 +25274,7 @@ function _drGerar() {
   var dataDe = document.getElementById('dr-data-de').value;
   var dataAte = document.getElementById('dr-data-ate').value;
 
-  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoes, dataDe, dataAte);
+  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoesEfetivas(), dataDe, dataAte);
   _drUltimosGrupos = grupos;
   _drExpandido = {};
 
