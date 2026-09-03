@@ -13965,7 +13965,7 @@ function dashInit() {
     function buildMultiselect(elId, label, items, stateSet) {
       const el = document.getElementById(elId);
       const summary = () => {
-        if (stateSet.size === 0) return `(${items.length})`;
+        if (stateSet.size === 0) return `Todas (${items.length})`;
         if (stateSet.size === 1) { const [v] = stateSet; return items[v]; }
         return `${stateSet.size} selecionadas`;
       };
