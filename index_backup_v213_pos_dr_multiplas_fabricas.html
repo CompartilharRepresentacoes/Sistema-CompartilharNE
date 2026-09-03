@@ -5163,19 +5163,22 @@
 
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
         <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:12px">
-          <div>
-            <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Fábrica (Fornecedor)</div>
-            <select id="dr-fornecedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;min-width:180px"><option value="">Selecione...</option></select>
+          <div style="position:relative">
+            <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Fábrica(s) (Fornecedor)</div>
+            <div id="dr-forn-ms-btn" onclick="_drToggleMs('forn')" style="display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:190px;cursor:pointer;box-sizing:border-box">
+              <span id="dr-forn-ms-resumo" style="flex:1">Selecione...</span>
+              <i class="ti ti-chevron-down" style="font-size:14px;color:#94a3b8"></i>
+            </div>
+            <div id="dr-forn-ms-drop" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px;width:230px;max-width:80vw;box-shadow:0 4px 16px rgba(15,23,42,.08);z-index:30;max-height:260px;overflow-y:auto"></div>
           </div>
-          <div>
-            <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Rede</div>
-            <select id="dr-rede-sel" onchange="_drAtualizarSubRede()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;min-width:170px"><option value="">Selecione...</option></select>
+          <div style="position:relative">
+            <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Rede(s) / Sub-Rede(s)</div>
+            <div id="dr-rede-ms-btn" onclick="_drToggleMs('rede')" style="display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:220px;cursor:pointer;box-sizing:border-box">
+              <span id="dr-rede-ms-resumo" style="flex:1">Selecione...</span>
+              <i class="ti ti-chevron-down" style="font-size:14px;color:#94a3b8"></i>
+            </div>
+            <div id="dr-rede-ms-drop" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px;width:260px;max-width:80vw;box-shadow:0 4px 16px rgba(15,23,42,.08);z-index:30;max-height:300px;overflow-y:auto"></div>
           </div>
-          <div id="dr-subrede-wrap" style="display:none">
-            <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Sub-Rede</div>
-            <select id="dr-subrede-sel" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;min-width:170px"><option value="">Selecione...</option></select>
-          </div>
-          <button onclick="_drAdicionarRedeSelecionada()" style="background:#f1f5f9;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap"><i class="ti ti-plus" style="margin-right:4px"></i>Adicionar</button>
         </div>
 
         <div style="border-top:1px solid #f1f5f9;padding-top:10px;margin-bottom:10px;position:relative;max-width:420px">
@@ -13965,7 +13968,7 @@ function dashInit() {
     function buildMultiselect(elId, label, items, stateSet) {
       const el = document.getElementById(elId);
       const summary = () => {
-        if (stateSet.size === 0) return `Todas (${items.length})`;
+        if (stateSet.size === 0) return `(${items.length})`;
         if (stateSet.size === 1) { const [v] = stateSet; return items[v]; }
         return `${stateSet.size} selecionadas`;
       };
@@ -24039,30 +24042,24 @@ function _ocConfirmarEmail() {
 // DADOS REPRESENTADAS (Operações)
 // ═══════════════════════════════════════════════════
 var _drSelecoes = [];
+var _drFornecedoresSelecionados = [];
+var _drOpcoesForn = [];
+var _drOpcoesRede = [];
 var _drItensBusca = [];
 var _drUltimosGrupos = [];
 var _drExpandido = {};
 var _drVisualizarGrupoIdx = 0;
 
 function _drPopularFiltros() {
-  var fornSel = document.getElementById('dr-fornecedor');
-  if (fornSel && !fornSel.dataset.populado) {
-    var fornecedores = getFornecedores();
-    fornSel.innerHTML = '<option value="">Selecione...</option>' + fornecedores.map(function(f){ return '<option value="' + f.id + '">' + _pedEsc(_cpSemColchetes(f.nome_fantasia || f.razao_social || '')) + '</option>'; }).join('');
-    fornSel.dataset.populado = '1';
-  }
-  var redeSel = document.getElementById('dr-rede-sel');
-  if (redeSel && !redeSel.dataset.populado) {
-    var redes = getCatClientes().filter(function(c){ return !c.pai; });
-    redeSel.innerHTML = '<option value="">Selecione...</option>' + redes.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
-    redeSel.dataset.populado = '1';
-  }
   _drSelecoes = [];
+  _drFornecedoresSelecionados = [];
   _drUltimosGrupos = [];
   _drExpandido = {};
   _drRenderChips();
-  if (redeSel) redeSel.value = '';
-  _drAtualizarSubRede();
+  _drAtualizarResumoForn();
+  _drAtualizarResumoRede();
+  var dropForn = document.getElementById('dr-forn-ms-drop'); if (dropForn) dropForn.style.display = 'none';
+  var dropRede = document.getElementById('dr-rede-ms-drop'); if (dropRede) dropRede.style.display = 'none';
   var inp = document.getElementById('dr-selecao-input'); if (inp) inp.value = '';
   var de = document.getElementById('dr-data-de'); if (de) de.value = '';
   var ate = document.getElementById('dr-data-ate'); if (ate) ate.value = '';
@@ -24071,41 +24068,102 @@ function _drPopularFiltros() {
   var arv = document.getElementById('dr-arvore'); if (arv) arv.innerHTML = '';
 }
 
-// Rede/Sub-Rede: dropdowns em cascata (mesmo padrao da Sugestao de Pedido) + botao Adicionar
-// que joga a selecao (Sub-Rede se escolhida, senao a Rede inteira) na lista de chips existente.
-function _drAtualizarSubRede() {
-  var redeSelEl = document.getElementById('dr-rede-sel');
-  var redeId = redeSelEl ? redeSelEl.value : '';
-  var subSel = document.getElementById('dr-subrede-sel');
-  var subWrap = document.getElementById('dr-subrede-wrap');
-  if (subSel) subSel.innerHTML = '<option value="">Selecione...</option>';
-  if (!redeId) { if (subWrap) subWrap.style.display = 'none'; return; }
-  var subs = getCatClientes().filter(function(c){ return String(c.pai) === String(redeId); });
-  if (!subs.length) { if (subWrap) subWrap.style.display = 'none'; return; }
-  if (subWrap) subWrap.style.display = '';
-  if (subSel) subSel.innerHTML += subs.map(function(s){ return '<option value="' + s.id + '">' + _pedEsc(s.nome || '') + '</option>'; }).join('');
+// Fabrica(s) e Rede(s)/Sub-Rede(s): dropdowns de checkbox (mesmo espirito do multiselect ja
+// usado nos filtros do Dashboard/Inicio) em vez de select+botao Adicionar -- marca/desmarca
+// direto na lista, sem precisar clicar em "Adicionar" a cada item (pedido do usuario).
+function _drToggleMs(which) {
+  var dropId = which === 'forn' ? 'dr-forn-ms-drop' : 'dr-rede-ms-drop';
+  var outroId = which === 'forn' ? 'dr-rede-ms-drop' : 'dr-forn-ms-drop';
+  var outro = document.getElementById(outroId); if (outro) outro.style.display = 'none';
+  var drop = document.getElementById(dropId);
+  if (!drop) return;
+  var abrir = drop.style.display !== 'block';
+  drop.style.display = abrir ? 'block' : 'none';
+  if (abrir) { if (which === 'forn') _drRenderMsFornDrop(); else _drRenderMsRedeDrop(); }
 }
-
-function _drAdicionarRedeSelecionada() {
-  var redeSel = document.getElementById('dr-rede-sel');
-  var subWrap = document.getElementById('dr-subrede-wrap');
-  var subSel = document.getElementById('dr-subrede-sel');
-  var redeId = redeSel ? redeSel.value : '';
-  if (!redeId) return;
-  var temSub = !!(subWrap && subWrap.style.display !== 'none');
-  var subId = temSub && subSel ? subSel.value : '';
-  if (temSub && subId) {
-    if (_drSelecoes.some(function(s){ return s.tipo === 'subrede' && String(s.id) === String(subId); })) return;
-    var nomeSub = subSel.options[subSel.selectedIndex].textContent;
-    _drSelecoes.push({ tipo: 'subrede', id: subId, nome: nomeSub });
-  } else {
-    if (_drSelecoes.some(function(s){ return s.tipo === 'rede' && String(s.id) === String(redeId); })) return;
-    var nomeRede = redeSel.options[redeSel.selectedIndex].textContent;
-    _drSelecoes.push({ tipo: 'rede', id: redeId, nome: nomeRede });
+if (!window._drClickForaRegistrado) {
+  window._drClickForaRegistrado = true;
+  document.addEventListener('click', function (e) {
+    var fornBtn = document.getElementById('dr-forn-ms-btn'), fornDrop = document.getElementById('dr-forn-ms-drop');
+    var redeBtn = document.getElementById('dr-rede-ms-btn'), redeDrop = document.getElementById('dr-rede-ms-drop');
+    if (fornDrop && fornDrop.style.display === 'block' && fornBtn && !fornBtn.contains(e.target) && !fornDrop.contains(e.target)) fornDrop.style.display = 'none';
+    if (redeDrop && redeDrop.style.display === 'block' && redeBtn && !redeBtn.contains(e.target) && !redeDrop.contains(e.target)) redeDrop.style.display = 'none';
+  });
+}
+function _drRenderMsFornDrop() {
+  var drop = document.getElementById('dr-forn-ms-drop');
+  if (!drop) return;
+  _drOpcoesForn = getFornecedores();
+  drop.innerHTML = _drOpcoesForn.map(function (f, i) {
+    var nome = _cpSemColchetes(f.nome_fantasia || f.razao_social || '');
+    var marcado = _drFornecedoresSelecionados.indexOf(String(f.id)) !== -1;
+    return '<label style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:12.5px;color:#1e293b;cursor:pointer">'
+      + '<input type="checkbox" onchange="_drToggleForn(' + i + ', this.checked)" ' + (marcado ? 'checked' : '') + '>'
+      + _pedEsc(nome) + '</label>';
+  }).join('') || '<div style="padding:6px;font-size:12px;color:#94a3b8">Nenhuma f\u00e1brica cadastrada.</div>';
+}
+function _drToggleForn(i, marcado) {
+  var f = _drOpcoesForn[i]; if (!f) return;
+  var id = String(f.id);
+  var idx = _drFornecedoresSelecionados.indexOf(id);
+  if (marcado && idx === -1) _drFornecedoresSelecionados.push(id);
+  if (!marcado && idx !== -1) _drFornecedoresSelecionados.splice(idx, 1);
+  _drAtualizarResumoForn();
+}
+function _drAtualizarResumoForn() {
+  var el = document.getElementById('dr-forn-ms-resumo');
+  if (!el) return;
+  var n = _drFornecedoresSelecionados.length;
+  if (!n) { el.textContent = 'Selecione...'; return; }
+  if (n === 1) {
+    var forn = getFornecedores().find(function (f) { return String(f.id) === _drFornecedoresSelecionados[0]; });
+    el.textContent = forn ? _cpSemColchetes(forn.nome_fantasia || forn.razao_social || '') : '1 selecionada';
+    return;
   }
+  el.textContent = n + ' selecionadas';
+}
+function _drRenderMsRedeDrop() {
+  var drop = document.getElementById('dr-rede-ms-drop');
+  if (!drop) return;
+  var todas = getCatClientes();
+  var redes = todas.filter(function (c) { return !c.pai; });
+  _drOpcoesRede = [];
+  var html = '';
+  redes.forEach(function (r) {
+    var idxR = _drOpcoesRede.length;
+    _drOpcoesRede.push({ tipo: 'rede', id: r.id, nome: r.nome || '' });
+    var marcadoRede = _drSelecoes.some(function (s) { return s.tipo === 'rede' && String(s.id) === String(r.id); });
+    html += '<label style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:12.5px;color:#1e293b;cursor:pointer">'
+      + '<input type="checkbox" onchange="_drToggleRede(' + idxR + ', this.checked)" ' + (marcadoRede ? 'checked' : '') + '>'
+      + _pedEsc(r.nome || '') + '</label>';
+    var subs = todas.filter(function (c) { return String(c.pai) === String(r.id); });
+    subs.forEach(function (s) {
+      var idxS = _drOpcoesRede.length;
+      _drOpcoesRede.push({ tipo: 'subrede', id: s.id, nome: s.nome || '' });
+      var marcadoSub = _drSelecoes.some(function (sel) { return sel.tipo === 'subrede' && String(sel.id) === String(s.id); });
+      html += '<label style="display:flex;align-items:center;gap:8px;padding:4px 2px 4px 22px;font-size:12px;color:#64748b;cursor:pointer">'
+        + '<input type="checkbox" onchange="_drToggleRede(' + idxS + ', this.checked)" ' + (marcadoSub ? 'checked' : '') + '>'
+        + '\u21b3 ' + _pedEsc(s.nome || '') + '</label>';
+    });
+  });
+  drop.innerHTML = html || '<div style="padding:6px;font-size:12px;color:#94a3b8">Nenhuma rede cadastrada.</div>';
+}
+function _drToggleRede(idxOpcao, marcado) {
+  var op = _drOpcoesRede[idxOpcao]; if (!op) return;
+  var idx = _drSelecoes.findIndex(function (s) { return s.tipo === op.tipo && String(s.id) === String(op.id); });
+  if (marcado && idx === -1) _drSelecoes.push({ tipo: op.tipo, id: op.id, nome: op.nome });
+  if (!marcado && idx !== -1) _drSelecoes.splice(idx, 1);
   _drRenderChips();
-  redeSel.value = '';
-  _drAtualizarSubRede();
+  _drAtualizarResumoRede();
+}
+function _drAtualizarResumoRede() {
+  var el = document.getElementById('dr-rede-ms-resumo');
+  if (!el) return;
+  var redesSel = _drSelecoes.filter(function (s) { return s.tipo === 'rede' || s.tipo === 'subrede'; });
+  var n = redesSel.length;
+  if (!n) { el.textContent = 'Selecione...'; return; }
+  if (n === 1) { el.textContent = redesSel[0].nome; return; }
+  el.textContent = n + ' selecionadas';
 }
 
 function _drFiltrarSelecao() {
@@ -24141,12 +24199,16 @@ function _drAdicionarSelecao(i) {
 function _drRemoverSelecao(idx) {
   _drSelecoes.splice(idx, 1);
   _drRenderChips();
+  _drAtualizarResumoRede();
+  var dropRede = document.getElementById('dr-rede-ms-drop');
+  if (dropRede && dropRede.style.display === 'block') _drRenderMsRedeDrop();
 }
 function _drRenderChips() {
   var cont = document.getElementById('dr-selecao-chips');
   if (!cont) return;
   cont.innerHTML = _drSelecoes.map(function(s, i){
-    var cor = s.tipo === 'cliente' ? '#272A4A' : '#DE7926';
+    if (s.tipo !== 'cliente') return '';
+    var cor = '#272A4A';
     return '<span style="display:inline-flex;align-items:center;gap:5px;background:' + cor + '1a;color:' + cor + ';font-size:11px;font-weight:600;padding:4px 8px;border-radius:6px">'
       + _pedEsc(s.nome) + '<span onclick="_drRemoverSelecao(' + i + ')" style="cursor:pointer;font-weight:700">&times;</span></span>';
   }).join('');
@@ -24379,6 +24441,24 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
   return grupos;
 }
 
+// Cruza cada Fabrica selecionada com cada Rede/Sub-Rede/Cliente selecionado -- uma aba/secao
+// por combinacao, agrupada por Rede/Cliente primeiro e Fabrica depois. Cada grupo resultante
+// ganha fornId/fornNome proprios, usados depois pelas abas do popup, do Excel e do PDF.
+function _drGerarGruposMultiForn(fornIds, selecoes, dataDe, dataAte) {
+  var fornecedores = getFornecedores();
+  var todosGrupos = [];
+  selecoes.forEach(function (sel) {
+    fornIds.forEach(function (fid) {
+      var forn = fornecedores.find(function (f) { return String(f.id) === String(fid); });
+      var fornNome = forn ? _cpSemColchetes(forn.nome_fantasia || forn.razao_social || '') : '';
+      var gruposSel = getDrGrupos(fid, [sel], dataDe, dataAte);
+      gruposSel.forEach(function (g) { g.fornId = fid; g.fornNome = fornNome; });
+      todosGrupos = todosGrupos.concat(gruposSel);
+    });
+  });
+  return todosGrupos;
+}
+
 function _drToggleExpandido(chave) {
   _drExpandido[chave] = !_drExpandido[chave];
   _drRenderArvore(_drUltimosGrupos);
@@ -24496,6 +24576,16 @@ function _drMontarDocumentoPdfSecoes(grupos, fornNome, periodoTxt, logoForn, log
     return '<div style="margin-top:30px;padding-top:24px;border-top:2px dashed #cbd5e1">' + _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn || '') + '</div>';
   }).join('');
 }
+// Versao para multiplas Fabricas selecionadas: cada grupo ja carrega seu proprio fornId/fornNome
+// (ver _drGerarGruposMultiForn), entao o nome do Fornecedor e a logo variam por secao em vez de
+// ser um unico valor fixo pra todo o documento.
+function _drMontarDocumentoPdfSecoesMulti(grupos, periodoTxt, logosForn, logosRede) {
+  return (grupos || []).map(function (g, i) {
+    var logoRede = (logosRede && logosRede[i]) || '';
+    var logoForn = (logosForn && logosForn[i]) || '';
+    return '<div style="margin-top:30px;padding-top:24px;border-top:2px dashed #cbd5e1">' + _drMontarDocumentoGrupoHtml(g, g.fornNome, periodoTxt, logoRede, logoForn) + '</div>';
+  }).join('');
+}
 function _drMontarDocumentoPdfCompleto(grupos, fornId, fornNome, subtitulo, periodoTxt) {
   var doc = _drMontarDocumentoPdf(grupos, subtitulo);
   var forn = getFornecedores().find(function (f) { return f.id === fornId; });
@@ -24507,30 +24597,31 @@ function _drMontarDocumentoPdfCompleto(grupos, fornId, fornNome, subtitulo, peri
 function _drGerarPdf() {
   var msg = document.getElementById('dr-msg');
   if (!_drUltimosGrupos || !_drUltimosGrupos.length) {
-    if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Gere o relatório primeiro (botão "Gerar relatório").'; }
+    if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Gere o relat\u00f3rio primeiro (bot\u00e3o "Gerar relat\u00f3rio").'; }
     return;
   }
   if (!window.html2canvas || !window.jspdf) {
-    if (msg) { msg.style.color = '#b45309'; msg.textContent = 'Não foi possível gerar o PDF: biblioteca ainda carregando. Aguarde alguns segundos e tente novamente.'; }
+    if (msg) { msg.style.color = '#b45309'; msg.textContent = 'N\u00e3o foi poss\u00edvel gerar o PDF: biblioteca ainda carregando. Aguarde alguns segundos e tente novamente.'; }
     return;
   }
-  var fornSel = document.getElementById('dr-fornecedor');
-  var fornNome = (fornSel && fornSel.selectedIndex > 0) ? fornSel.options[fornSel.selectedIndex].textContent : '';
+  var nomesFornecedores = [];
+  _drUltimosGrupos.forEach(function (g) { if (g.fornNome && nomesFornecedores.indexOf(g.fornNome) === -1) nomesFornecedores.push(g.fornNome); });
   var dataDe = document.getElementById('dr-data-de').value;
   var dataAte = document.getElementById('dr-data-ate').value;
   var periodoTxt = (typeof _pimprelPeriodoTxt === 'function') ? _pimprelPeriodoTxt(dataDe, dataAte) : '';
-  var subtitulo = 'Fábrica: ' + fornNome + periodoTxt;
+  var subtitulo = 'F\u00e1brica' + (nomesFornecedores.length > 1 ? 's' : '') + ': ' + nomesFornecedores.join(', ') + periodoTxt;
   var periodoTxtPlano = (dataDe ? dataDe.split('-').reverse().join('/') : '\u2014') + ' a ' + (dataAte ? dataAte.split('-').reverse().join('/') : '\u2014');
 
-  var forn = getFornecedores().find(function (f) { return f.id === fornSel.value; });
-  var logoFornOriginal = forn ? forn.foto : '';
+  var fornecedores = getFornecedores();
+  var logosFornOriginais = _drUltimosGrupos.map(function (g) { var f = fornecedores.find(function (x) { return String(x.id) === String(g.fornId); }); return f ? f.foto : ''; });
   var logosRedeOriginais = _drUltimosGrupos.map(function (g) { var redeObj = _drRedeMaeDoGrupo(g); return redeObj ? redeObj.foto : ''; });
 
   if (msg) { msg.style.color = '#64748b'; msg.textContent = 'Gerando PDF...'; }
-  return Promise.all([_drRecortarLogo(logoFornOriginal)].concat(logosRedeOriginais.map(function (l) { return _drRecortarLogo(l); }))).then(function (logosCortadas) {
-    var logoFornCortada = logosCortadas[0];
-    var logosRedeCortadas = logosCortadas.slice(1);
-    var docHtml = _drMontarDocumentoPdf(_drUltimosGrupos, subtitulo) + _drMontarDocumentoPdfSecoes(_drUltimosGrupos, fornNome, periodoTxtPlano, logoFornCortada, logosRedeCortadas);
+  return Promise.all(logosFornOriginais.map(function (l) { return _drRecortarLogo(l); }).concat(logosRedeOriginais.map(function (l) { return _drRecortarLogo(l); }))).then(function (logosCortadas) {
+    var n = _drUltimosGrupos.length;
+    var logosFornCortadas = logosCortadas.slice(0, n);
+    var logosRedeCortadas = logosCortadas.slice(n);
+    var docHtml = _drMontarDocumentoPdf(_drUltimosGrupos, subtitulo) + _drMontarDocumentoPdfSecoesMulti(_drUltimosGrupos, periodoTxtPlano, logosFornCortadas, logosRedeCortadas);
     var wrap = document.createElement('div');
     wrap.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;background:#fff;padding:24px;font-family:inherit;z-index:-1';
     wrap.innerHTML = docHtml;
@@ -24634,7 +24725,7 @@ function _drLinhaProduto(ws, p, nivel) {
   }
 }
 
-function _drConstruirAbaResumo(wb, grupos, fornNome, periodoTxt, abasPorGrupo) {
+function _drConstruirAbaResumo(wb, grupos, periodoTxt, abasPorGrupo) {
   var ws = wb.addWorksheet('\ud83d\udcca Resumo', {
     views: [{ showGridLines: false, state: 'frozen', ySplit: 4, topLeftCell: 'A5' }],
     properties: { outlineProperties: { summaryBelow: false, summaryRight: true } }
@@ -24670,7 +24761,7 @@ function _drConstruirAbaResumo(wb, grupos, fornNome, periodoTxt, abasPorGrupo) {
 
   grupos.forEach(function (g) {
     var nomeAba = abasPorGrupo[g.__idx];
-    var rowRede = ws.addRow([fornNome, g.nome, g.estados, g.cadastrados, g.comprados, g.semVenda, g.positivacao.toFixed(1) + '%', Math.round(g.valor * 100) / 100, nomeAba]);
+    var rowRede = ws.addRow([g.fornNome, g.nome, g.estados, g.cadastrados, g.comprados, g.semVenda, g.positivacao.toFixed(1) + '%', Math.round(g.valor * 100) / 100, nomeAba]);
     rowRede.height = 20;
     var estilosRede = {
       1: { font: { name: 'Calibri', bold: true, size: 10, color: { argb: DR_CORES.black } }, align: { horizontal: 'left', vertical: 'middle' } },
@@ -24793,7 +24884,7 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
 
   var comVenda = g.cadastroComVenda || [];
   if (comVenda.length) {
-    var linhaBannerCom = ws.addRow(['PRODUTOS  (' + comVenda.length + ' itens)']);
+    var linhaBannerCom = ws.addRow(['PRODUTOS COM VENDA  (' + comVenda.length + ' itens)']);
     linhaBannerCom.height = 17;
     ws.mergeCells(linhaBannerCom.number, 1, linhaBannerCom.number, 7);
     linhaBannerCom.getCell(1).font = { name: 'Calibri', bold: true, size: 10, color: { argb: DR_CORES.greenTxt } };
@@ -24831,7 +24922,7 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
   return ws;
 }
 
-function _drGerarExcelReal(grupos, fornNome, fornId, dataDe, dataAte) {
+function _drGerarExcelReal(grupos, dataDe, dataAte) {
   var periodoTxt = (dataDe ? dataDe.split('-').reverse().join('/') : '\u2014') + ' a ' + (dataAte ? dataAte.split('-').reverse().join('/') : '\u2014');
   var wb = new ExcelJS.Workbook();
 
@@ -24839,29 +24930,41 @@ function _drGerarExcelReal(grupos, fornNome, fornId, dataDe, dataAte) {
   var abasPorGrupo = {};
   grupos.forEach(function (g, idx) {
     g.__idx = idx;
-    var nomeAbaBase = _drNomeAba((fornNome + ' ' + g.nome).trim());
+    var nomeAbaBase = _drNomeAba((g.fornNome + ' ' + g.nome).trim());
     var nomeAba = nomeAbaBase, i = 2;
     while (abasUsadas[nomeAba]) { nomeAba = _drNomeAba(nomeAbaBase.slice(0, 27) + ' ' + i); i++; }
     abasUsadas[nomeAba] = true;
     abasPorGrupo[idx] = nomeAba;
   });
 
-  _drConstruirAbaResumo(wb, grupos, fornNome, periodoTxt, abasPorGrupo);
+  _drConstruirAbaResumo(wb, grupos, periodoTxt, abasPorGrupo);
 
-  var forn = getFornecedores().find(function (f) { return f.id === fornId; });
-  var fotoForn = forn ? forn.foto : '';
   var imgCompartilharId = wb.addImage({ base64: DR_COMPARTILHAR_LOGO_B64, extension: 'png' });
-  var imgFornId = fotoForn ? _drCarregarImagemWorkbook(wb, fotoForn) : null;
+  var fornecedores = getFornecedores();
+  var imgFornCache = {};
 
   grupos.forEach(function (g) {
     var nomeAba = abasPorGrupo[g.__idx];
     var redeObj = _drRedeMaeDoGrupo(g);
     var fotoRede = redeObj ? redeObj.foto : '';
     var imgRedeId = fotoRede ? _drCarregarImagemWorkbook(wb, fotoRede) : null;
-    _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartilharId, imgRedeId, imgFornId);
+
+    var imgFornId;
+    if (Object.prototype.hasOwnProperty.call(imgFornCache, g.fornId)) {
+      imgFornId = imgFornCache[g.fornId];
+    } else {
+      var forn = fornecedores.find(function (f) { return String(f.id) === String(g.fornId); });
+      var fotoForn = forn ? forn.foto : '';
+      imgFornId = fotoForn ? _drCarregarImagemWorkbook(wb, fotoForn) : null;
+      imgFornCache[g.fornId] = imgFornId;
+    }
+
+    _drConstruirAbaGrupo(wb, g, g.fornNome, periodoTxt, nomeAba, imgCompartilharId, imgRedeId, imgFornId);
   });
 
-  var nomeArquivo = 'Dados_Representadas_' + fornNome.replace(/[^a-zA-Z0-9]+/g, '_') + '.xlsx';
+  var nomesFornecedores = [];
+  grupos.forEach(function (g) { if (g.fornNome && nomesFornecedores.indexOf(g.fornNome) === -1) nomesFornecedores.push(g.fornNome); });
+  var nomeArquivo = 'Dados_Representadas_' + nomesFornecedores.join('_').replace(/[^a-zA-Z0-9]+/g, '_') + '.xlsx';
   return wb.xlsx.writeBuffer().then(function (buffer) {
     var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     var url = URL.createObjectURL(blob);
@@ -24897,7 +25000,7 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
   var semVenda = g.cadastroSemVenda || [];
   var linhasComVenda = comVenda.map(function (item) { return linhaProduto(item); }).join('');
   var bannerComVenda = comVenda.length
-    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#e2efda;color:#375623;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS (' + comVenda.length + ' itens)</td></tr>')
+    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#e2efda;color:#375623;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS COM VENDA (' + comVenda.length + ' itens)</td></tr>')
     : '';
   var bannerSemVenda = semVenda.length
     ? ('<tr><td colspan="7" style="padding:6px 8px;background:#fcd5b4;color:#7f3f00;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS SEM VENDA (' + semVenda.length + ' itens)</td></tr>')
@@ -25010,18 +25113,17 @@ function _drRecortarLogo(dataUrl) {
 
 function _drRenderVisualizar() {
   var grupos = _drUltimosGrupos || [];
-  var fornSel = document.getElementById('dr-fornecedor');
-  var fornId = fornSel ? fornSel.value : '';
-  var fornNome = (fornSel && fornSel.selectedIndex > 0) ? fornSel.options[fornSel.selectedIndex].textContent : '';
   var dataDe = document.getElementById('dr-data-de').value;
   var dataAte = document.getElementById('dr-data-ate').value;
   var periodoTxt = (dataDe ? dataDe.split('-').reverse().join('/') : '\u2014') + ' a ' + (dataAte ? dataAte.split('-').reverse().join('/') : '\u2014');
+  var multiFornecedor = _drFornecedoresSelecionados.length > 1;
 
   var abas = document.getElementById('dr-visualizar-abas');
   if (abas) {
     abas.innerHTML = grupos.map(function (g, idx) {
       var ativo = idx === _drVisualizarGrupoIdx;
-      return '<button onclick="_drSelecionarGrupoVisualizar(' + idx + ')" style="background:' + (ativo ? '#272A4A' : '#f1f5f9') + ';color:' + (ativo ? '#fff' : '#475569') + ';border:none;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">' + _pedEsc(g.nome) + '</button>';
+      var rotulo = multiFornecedor ? (g.nome + ' \u00b7 ' + g.fornNome) : g.nome;
+      return '<button onclick="_drSelecionarGrupoVisualizar(' + idx + ')" style="background:' + (ativo ? '#272A4A' : '#f1f5f9') + ';color:' + (ativo ? '#fff' : '#475569') + ';border:none;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">' + _pedEsc(rotulo) + '</button>';
     }).join('');
   }
 
@@ -25030,12 +25132,12 @@ function _drRenderVisualizar() {
   var g = grupos[_drVisualizarGrupoIdx];
   if (!g) { corpo.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum grupo selecionado.</div>'; return; }
 
-  var forn = getFornecedores().find(function (f) { return f.id === fornId; });
+  var forn = getFornecedores().find(function (f) { return String(f.id) === String(g.fornId); });
   var logoForn = forn ? forn.foto : '';
   var redeObj = _drRedeMaeDoGrupo(g);
   var logoRede = redeObj ? redeObj.foto : '';
 
-  corpo.innerHTML = _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn);
+  corpo.innerHTML = _drMontarDocumentoGrupoHtml(g, g.fornNome, periodoTxt, logoRede, logoForn);
 
   var grupoNoMomento = g;
   if (logoRede) {
@@ -25066,12 +25168,11 @@ function _drFecharVisualizar() {
 
 function _drVisualizar() {
   var msg = document.getElementById('dr-msg');
-  var fornId = document.getElementById('dr-fornecedor').value;
-  if (!fornId) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione a F\u00e1brica (Fornecedor).'; return; }
-  if (!_drSelecoes.length) { msg.style.color = '#dc2626'; msg.textContent = 'Adicione ao menos uma Rede ou Cliente.'; return; }
+  if (!_drFornecedoresSelecionados.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma F\u00e1brica (Fornecedor).'; return; }
+  if (!_drSelecoes.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma Rede ou Cliente.'; return; }
   var dataDe = document.getElementById('dr-data-de').value;
   var dataAte = document.getElementById('dr-data-ate').value;
-  var grupos = getDrGrupos(fornId, _drSelecoes, dataDe, dataAte);
+  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoes, dataDe, dataAte);
   if (!grupos.length) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhum dado encontrado com esses filtros.'; return; }
   _drUltimosGrupos = grupos;
   _drVisualizarGrupoIdx = 0;
@@ -25083,13 +25184,12 @@ function _drVisualizar() {
 
 function _drGerar() {
   var msg = document.getElementById('dr-msg');
-  var fornId = document.getElementById('dr-fornecedor').value;
-  if (!fornId) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione a F\u00e1brica (Fornecedor).'; return; }
-  if (!_drSelecoes.length) { msg.style.color = '#dc2626'; msg.textContent = 'Adicione ao menos uma Rede ou Cliente.'; return; }
+  if (!_drFornecedoresSelecionados.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma F\u00e1brica (Fornecedor).'; return; }
+  if (!_drSelecoes.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma Rede ou Cliente.'; return; }
   var dataDe = document.getElementById('dr-data-de').value;
   var dataAte = document.getElementById('dr-data-ate').value;
 
-  var grupos = getDrGrupos(fornId, _drSelecoes, dataDe, dataAte);
+  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoes, dataDe, dataAte);
   _drUltimosGrupos = grupos;
   _drExpandido = {};
 
@@ -25108,11 +25208,9 @@ function _drGerar() {
     msg.textContent = 'Relat\u00f3rio calculado na tela. Biblioteca de Excel n\u00e3o carregou (sem internet) \u2014 n\u00e3o foi poss\u00edvel gerar o arquivo.';
     return;
   }
-  var forn = getFornecedores().find(function (f) { return f.id === fornId; });
-  var fornNome = _cpSemColchetes(forn ? (forn.nome_fantasia || forn.razao_social || '') : '');
   msg.style.color = '#64748b';
   msg.textContent = 'Gerando Excel...';
-  _drGerarExcelReal(grupos, fornNome, fornId, dataDe, dataAte).then(function () {
+  _drGerarExcelReal(grupos, dataDe, dataAte).then(function () {
     msg.style.color = '#15803d';
     msg.textContent = 'Relat\u00f3rio gerado e Excel baixado com sucesso!';
   }).catch(function (err) {
