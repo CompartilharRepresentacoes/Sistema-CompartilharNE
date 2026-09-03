@@ -8652,7 +8652,7 @@ async function abrirCartilha(fornId) {
   window._cartilhaFornId = fornId;
   window._cartilhaPagAtual = 1;
   window._cartilhaAnimating = false;
-  window._cartilhaModo = window.innerWidth < 700 ? 'vertical' : 'horizontal';
+  window._cartilhaModo = 'vertical';
   document.getElementById('cartilha-titulo').textContent  = forn.nome_fantasia + ' — Catálogo';
   document.getElementById('cartilha-arquivo').textContent = cat.nome || '';
   document.getElementById('modal-cartilha').style.display = 'flex';
