@@ -20045,7 +20045,8 @@ function devAnexarXml(input) {
   input.value = '';
 }
 // Logica compartilhada de leitura/preenchimento a partir de um arquivo XML de NFD,
-// usada pelo botao "Anexar XML" de dentro do formulario.
+// usada tanto pelo botao "Anexar XML" de dentro do formulario quanto pelo botao
+// "Importar XML" da lista.
 function _devProcessarArquivoXml(file) {
   var msg = document.getElementById('dev-xml-msg');
   var reader = new FileReader();
@@ -20215,8 +20216,8 @@ function _devXmlLinkConfirmar(idx) {
   _devRenderXmlPendentes();
 }
 
-// Visualizacao de um XML ja anexado a devolucao (anexado via "Anexar XML"
-// dentro do formulario). Em vez de abrir
+// Visualizacao de um XML ja anexado a devolucao (anexado na criacao via
+// "Importar XML" na lista ou "Anexar XML" dentro do formulario). Em vez de abrir
 // o XML bruto direto, abre um popup com o numero da NF (para copiar rapido e usar
 // na emissao da NFD no site do fornecedor) e um link opcional pro XML completo.
 var _devXmlModalDados = null;
