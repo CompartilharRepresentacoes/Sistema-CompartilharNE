@@ -277,10 +277,10 @@
       #page-catalogo-list #catalogo-tbody { display:grid !important; grid-template-columns:1fr 1fr; gap:10px; padding:10px !important; }
       #page-catalogo-list .mc-row { border:1.5px solid #94a3b8 !important; border-radius:12px !important; background:#fff !important; text-align:center; box-shadow:none !important; }
       #page-catalogo-list .mc-row .mc-primary-line { flex-direction:column !important; align-items:center !important; gap:6px !important; width:100% !important; }
-      #page-catalogo-list .mc-row .mc-primary { display:none !important; }
+      #page-catalogo-list .mc-row .mc-primary { text-align:center !important; width:100% !important; }
       #page-catalogo-list .mc-actions { justify-content:center !important; }
-      #page-catalogo-list .mc-row .mc-primary-line > div:first-child { width:120px !important; height:120px !important; border:none !important; padding:0 !important; border-radius:16px !important; font-size:36px !important; }
-      #page-catalogo-list .mc-row .mc-primary-line > div:first-child img { width:100% !important; height:100% !important; object-fit:cover !important; }
+      #page-catalogo-list .mc-row .mc-primary-line > div:first-child { width:92px !important; height:92px !important; border:none !important; padding:0 !important; border-radius:16px !important; font-size:30px !important; }
+      #page-catalogo-list .mc-row .mc-primary-line > div:first-child img { width:100% !important; height:100% !important; }
 
       /* Clientes: linhas viram cartoes empilhados */
       .cli-row-card { display:block !important; padding:12px 14px !important; }
@@ -8447,7 +8447,7 @@ async function renderCatalogoList() {
         <div class="mc-secondary mc-hide" style="font-size:12px;font-weight:600;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${arquivo}">${arquivo}</div>
         ${temCat ? `<div class="mc-hide" style="font-size:10px;color:#94a3b8;margin-top:3px"><i class="ti ti-calendar" style="font-size:9px"></i> ${dataUpload}</div>` : ''}
       </div>
-      <div class="mc-meta" style="font-size:13px;font-weight:600;color:#475569">${temCat ? dataUpload : 'Sem catalogo'}</div>
+      <div class="mc-meta" style="font-size:13px;font-weight:600;color:#475569">${temCat ? 'Atualizado ' + dataUpload : 'Sem catalogo'}</div>
       <div class="mc-badge mc-hide">${statusHtml}</div>
       <div class="mc-actions" style="display:flex;gap:6px;align-items:center;justify-content:flex-end">${btnAbrir}${btnDown}${btnUp}${btnDel}</div>
     </div>`;
