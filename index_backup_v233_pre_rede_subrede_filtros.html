@@ -3253,7 +3253,7 @@
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Negociar com</label>
             <select class="form-input" id="negpreco-alvo-tipo" onchange="negPrecoAlternarAlvo()" style="width:100%">
               <option value="cliente">Cliente específico</option>
-              <option value="rede">Rede</option>
+              <option value="rede">Categoria de Clientes</option>
             </select>
           </div>
           <div id="negpreco-alvo-cliente-wrap" style="grid-column:span 2">
@@ -3268,11 +3268,11 @@
             </div>
           </div>
           <div id="negpreco-alvo-categoria-wrap" style="display:none">
-            <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Rede</label>
+            <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Categoria</label>
             <select class="form-input" id="negpreco-rede-id" onchange="_negAtualizarSubcategorias()" style="width:100%"><option value="">-- Selecione --</option></select>
           </div>
           <div id="negpreco-alvo-subcategoria-wrap" style="display:none">
-            <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Sub Rede</label>
+            <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Subcategoria</label>
             <select class="form-input" id="negpreco-subcategoria-id" style="width:100%"><option value="">Todas</option></select>
           </div>
         </div>
@@ -3849,9 +3849,9 @@
           <input id="vc-fornecedor" oninput="renderVendasCompletas()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
           <select id="vc-vendedor" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
           <select id="vc-categoria" onchange="vcAtualizarSubcategorias();renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
           <select id="vc-subcategoria" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
           <select id="vc-uf" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
@@ -3899,9 +3899,9 @@
           <input id="vcf-fornecedor" oninput="renderVendasCompletasFaturadas()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
           <select id="vcf-vendedor" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
           <select id="vcf-categoria" onchange="vcfAtualizarSubcategorias();renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
           <select id="vcf-subcategoria" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
           <select id="vcf-uf" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
@@ -3936,9 +3936,9 @@
           <input id="psn-fornecedor" oninput="renderVendasSimplesNfs()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
           <select id="psn-vendedor" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
           <select id="psn-categoria" onchange="psnAtualizarSubcategorias();renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
           <select id="psn-subcategoria" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
           <select id="psn-uf" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
@@ -3979,9 +3979,9 @@
           <input id="pnf-fornecedor" oninput="renderNaoFaturados()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
           <select id="pnf-vendedor" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
           <select id="pnf-categoria" onchange="pnfAtualizarSubcategorias();renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
           <select id="pnf-subcategoria" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
           <select id="pnf-uf" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
@@ -4545,11 +4545,11 @@
             <select id="rel-f-vendedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
           </span>
           <span class="rel-campo" data-campo="categoria" style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+            <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
             <select id="rel-f-categoria" onchange="_relAtualizarSubcategorias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           </span>
           <span class="rel-campo" data-campo="subcategoria" style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+            <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
             <select id="rel-f-subcategoria" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           </span>
           <span class="rel-campo" data-campo="uf" style="display:flex;align-items:center;gap:6px">

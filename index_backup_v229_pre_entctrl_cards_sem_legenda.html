@@ -3253,7 +3253,7 @@
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Negociar com</label>
             <select class="form-input" id="negpreco-alvo-tipo" onchange="negPrecoAlternarAlvo()" style="width:100%">
               <option value="cliente">Cliente específico</option>
-              <option value="rede">Rede</option>
+              <option value="rede">Categoria de Clientes</option>
             </select>
           </div>
           <div id="negpreco-alvo-cliente-wrap" style="grid-column:span 2">
@@ -3268,11 +3268,11 @@
             </div>
           </div>
           <div id="negpreco-alvo-categoria-wrap" style="display:none">
-            <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Rede</label>
+            <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Categoria</label>
             <select class="form-input" id="negpreco-rede-id" onchange="_negAtualizarSubcategorias()" style="width:100%"><option value="">-- Selecione --</option></select>
           </div>
           <div id="negpreco-alvo-subcategoria-wrap" style="display:none">
-            <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Sub Rede</label>
+            <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Subcategoria</label>
             <select class="form-input" id="negpreco-subcategoria-id" style="width:100%"><option value="">Todas</option></select>
           </div>
         </div>
@@ -3849,9 +3849,9 @@
           <input id="vc-fornecedor" oninput="renderVendasCompletas()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
           <select id="vc-vendedor" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
           <select id="vc-categoria" onchange="vcAtualizarSubcategorias();renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
           <select id="vc-subcategoria" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
           <select id="vc-uf" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
@@ -3899,9 +3899,9 @@
           <input id="vcf-fornecedor" oninput="renderVendasCompletasFaturadas()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
           <select id="vcf-vendedor" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
           <select id="vcf-categoria" onchange="vcfAtualizarSubcategorias();renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
           <select id="vcf-subcategoria" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
           <select id="vcf-uf" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
@@ -3936,9 +3936,9 @@
           <input id="psn-fornecedor" oninput="renderVendasSimplesNfs()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
           <select id="psn-vendedor" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
           <select id="psn-categoria" onchange="psnAtualizarSubcategorias();renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
           <select id="psn-subcategoria" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
           <select id="psn-uf" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
@@ -3979,9 +3979,9 @@
           <input id="pnf-fornecedor" oninput="renderNaoFaturados()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
           <select id="pnf-vendedor" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
           <select id="pnf-categoria" onchange="pnfAtualizarSubcategorias();renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
           <select id="pnf-subcategoria" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
           <select id="pnf-uf" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
@@ -4206,61 +4206,59 @@
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
           <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Total de Notas Fiscais</div>
           <div style="font-size:22px;font-weight:800;color:#1e293b;line-height:1.2;letter-spacing:-.02em" id="entctrl-kpi-total">0</div>
+          <div style="font-size:11px;color:#94a3b8">no período filtrado</div>
           <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#272A4A"></div>
         </div>
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
           <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Em Rota</div>
           <div style="font-size:22px;font-weight:800;color:#b45309;line-height:1.2;letter-spacing:-.02em" id="entctrl-kpi-rota">0</div>
+          <div style="font-size:11px;color:#94a3b8">aguardando confirmação de entrega</div>
           <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#DE7926"></div>
         </div>
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
           <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Entregues</div>
           <div style="font-size:22px;font-weight:800;color:#15803d;line-height:1.2;letter-spacing:-.02em" id="entctrl-kpi-entregues">0</div>
+          <div style="font-size:11px;color:#94a3b8">com data de entrega concluída</div>
           <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#16a34a"></div>
         </div>
       </div>
 
       <!-- Barra de filtros -->
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div style="position:relative;flex:1;min-width:200px;max-width:300px">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="entctrl-busca" oninput="renderEntregaControle()" placeholder="Buscar por NF, loja ou código..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-          </div>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Data Fat.</span>
-          <input type="date" id="entctrl-data-de" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-          <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="date" id="entctrl-data-ate" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-          <button id="entctrl-mais-filtros-btn" onclick="entctrlToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
-            <i class="ti ti-adjustments-horizontal" style="font-size:13px"></i> <span id="entctrl-mais-filtros-txt">Mais filtros</span> <i id="entctrl-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
-          </button>
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+        <div style="position:relative;flex:1;min-width:150px;max-width:190px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="entctrl-busca" oninput="renderEntregaControle()" placeholder="Buscar por NF..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
         </div>
-        <div id="entctrl-filtros-extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
-          <input id="entctrl-fornecedor" oninput="renderEntregaControle()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:130px">
-          <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
-          <select id="entctrl-categoria" onchange="entctrlAtualizarSubcategorias();renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
-          <select id="entctrl-subcategoria" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
-          <select id="entctrl-vendedor" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
-          <select id="entctrl-uf" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-            <option value="">Todas</option>
-            <option value="AL">AL</option><option value="BA">BA</option><option value="PB">PB</option>
-            <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
-          </select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Transportadora</span>
-          <input id="entctrl-transportadora" oninput="renderEntregaControle()" placeholder="Nome..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:120px">
-          <span style="font-size:11px;font-weight:600;color:#64748b">Status</span>
-          <select id="entctrl-status" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-            <option value="">Todos</option>
-            <option value="rota">Em Rota</option>
-            <option value="atrasada">Atrasada</option>
-            <option value="entregue">Entregue</option>
-          </select>
-          <button onclick="entctrlLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
-        </div>
+        <span style="font-size:11px;font-weight:600;color:#64748b">Data Fat.</span>
+        <input type="date" id="entctrl-data-de" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+        <span style="color:#94a3b8;font-size:13px">→</span>
+        <input type="date" id="entctrl-data-ate" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+        <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
+        <input id="entctrl-fornecedor" oninput="renderEntregaControle()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:130px">
+        <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
+        <select id="entctrl-vendedor" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
+        <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
+        <select id="entctrl-categoria" onchange="entctrlAtualizarSubcategorias();renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
+        <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
+        <select id="entctrl-subcategoria" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
+        <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
+        <select id="entctrl-uf" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <option value="">Todas</option>
+          <option value="AL">AL</option><option value="BA">BA</option><option value="PB">PB</option>
+          <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
+        </select>
+        <span style="font-size:11px;font-weight:600;color:#64748b">Transportadora</span>
+        <input id="entctrl-transportadora" oninput="renderEntregaControle()" placeholder="Nome..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:120px">
+        <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
+        <input id="entctrl-cliente" oninput="renderEntregaControle()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+        <span style="font-size:11px;font-weight:600;color:#64748b">Status</span>
+        <select id="entctrl-status" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <option value="">Todos</option>
+          <option value="rota">Em Rota</option>
+          <option value="atrasada">Atrasada</option>
+          <option value="entregue">Entregue</option>
+        </select>
+        <button onclick="entctrlLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
       </div>
 
       <!-- Tabela -->
@@ -4545,11 +4543,11 @@
             <select id="rel-f-vendedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
           </span>
           <span class="rel-campo" data-campo="categoria" style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+            <span style="font-size:11px;font-weight:600;color:#64748b">Categoria de Clientes</span>
             <select id="rel-f-categoria" onchange="_relAtualizarSubcategorias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           </span>
           <span class="rel-campo" data-campo="subcategoria" style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+            <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria de Clientes</span>
             <select id="rel-f-subcategoria" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           </span>
           <span class="rel-campo" data-campo="uf" style="display:flex;align-items:center;gap:6px">
@@ -17907,18 +17905,8 @@ function entctrlAtualizarSubcategorias() {
   subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
-function entctrlToggleMaisFiltros() {
-  var box = document.getElementById('entctrl-filtros-extra');
-  var txt = document.getElementById('entctrl-mais-filtros-txt');
-  var chev = document.getElementById('entctrl-mais-filtros-chevron');
-  if (!box) return;
-  var abrir = box.style.display === 'none' || !box.style.display;
-  box.style.display = abrir ? 'flex' : 'none';
-  if (txt) txt.textContent = abrir ? 'Menos filtros' : 'Mais filtros';
-  if (chev) chev.className = abrir ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
-}
 function entctrlLimparFiltros() {
-  ['entctrl-busca','entctrl-data-de','entctrl-data-ate','entctrl-fornecedor','entctrl-vendedor','entctrl-categoria','entctrl-subcategoria','entctrl-uf','entctrl-transportadora','entctrl-status'].forEach(function(id){
+  ['entctrl-busca','entctrl-data-de','entctrl-data-ate','entctrl-fornecedor','entctrl-vendedor','entctrl-categoria','entctrl-uf','entctrl-transportadora','entctrl-cliente','entctrl-status'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
   entctrlAtualizarSubcategorias();
@@ -18164,16 +18152,12 @@ function renderEntregaControle() {
   var subF    = document.getElementById('entctrl-subcategoria') ? document.getElementById('entctrl-subcategoria').value : '';
   var ufF     = document.getElementById('entctrl-uf') ? document.getElementById('entctrl-uf').value : '';
   var transpF = (document.getElementById('entctrl-transportadora') ? document.getElementById('entctrl-transportadora').value : '').trim().toLowerCase();
+  var cliF    = (document.getElementById('entctrl-cliente') ? document.getElementById('entctrl-cliente').value : '').trim().toLowerCase();
   var statusF = document.getElementById('entctrl-status') ? document.getElementById('entctrl-status').value : '';
 
   var linhas = _entctrlLinhas().filter(function(r){
     var p = r.pedido, f = r.fatura, cli = r.cliente;
-    if (busca) {
-      var nfMatch   = (f.numDuplicata||'').toLowerCase().indexOf(busca) !== -1;
-      var lojaMatch = (p.clienteNome||'').toLowerCase().indexOf(busca) !== -1;
-      var codMatch  = cli && cli.codigo && String(cli.codigo).toLowerCase().indexOf(busca) !== -1;
-      if (!nfMatch && !lojaMatch && !codMatch) return false;
-    }
+    if (busca && (f.numDuplicata||'').toLowerCase().indexOf(busca) === -1) return false;
     if (dataDe && (!f.data || f.data < dataDe)) return false;
     if (dataAte && (!f.data || f.data > dataAte)) return false;
     if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
@@ -18182,6 +18166,12 @@ function renderEntregaControle() {
     if (subF && String(cli.subcategoria||'') !== String(subF)) return false;
     if (ufF && r.uf !== ufF) return false;
     if (transpF && (f.transportadoraNome||'').toLowerCase().indexOf(transpF) === -1) return false;
+    if (cliF) {
+      var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
+      var cnpjMatch = cli && cli.cpf_cnpj && cliF.replace(/\D/g,'').length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1;
+      var codMatch  = cli && cli.codigo && String(cli.codigo).toLowerCase().indexOf(cliF) !== -1;
+      if (!nomeMatch && !cnpjMatch && !codMatch) return false;
+    }
     if (statusF === 'rota' && (r.entregue || r.atrasada)) return false;
     if (statusF === 'atrasada' && !r.atrasada) return false;
     if (statusF === 'entregue' && !r.entregue) return false;
