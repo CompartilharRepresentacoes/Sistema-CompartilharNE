@@ -4260,8 +4260,8 @@
 
       <!-- Tabela -->
       <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-        <div style="display:grid;grid-template-columns:90px 1.2fr 45px 0.85fr 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
-          <span>Pedido Cliente</span><span>Cliente</span><span style="text-align:center">UF</span><span>Vendedor</span><span>Fornecedor</span><span>Transportadora</span><span>NF</span><span>Data Fat.</span><span>Prevista</span><span style="text-align:center">Dias</span><span>Entrega</span><span>Status</span>
+        <div style="display:grid;grid-template-columns:90px 1.2fr 0.85fr 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+          <span>Pedido</span><span>Cliente</span><span>Cidade</span><span style="text-align:center">UF</span><span>Fornecedor</span><span>Transp.</span><span>NF</span><span>Data Fat.</span><span>Previsão</span><span style="text-align:center">Dias</span><span>Entrega</span><span>Status</span>
         </div>
         <div id="entctrl-tbody" style="min-height:60px"></div>
         <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
@@ -17861,6 +17861,7 @@ function _entctrlDiasDiferenca(dataFatStr, dataEntregaStr) {
 function _entctrlLinhas() {
   var pedidos = getPedidos();
   var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
+  var transpMap = {}; getTransportadoras().forEach(function(t){ transpMap[t.id] = t; });
   var hoje = new Date().toISOString().slice(0, 10);
   var linhas = [];
   pedidos.forEach(function(p){
@@ -17873,7 +17874,9 @@ function _entctrlLinhas() {
       var diasDif = _entctrlDiasDiferenca(f.data, f.dataEntrega);
       var entregue = !!f.dataEntrega;
       var atrasada = !entregue && !!prevista && hoje > prevista;
-      linhas.push({ pedido: p, fatura: f, cliente: cli, uf: uf, prevista: prevista, diasDif: diasDif, entregue: entregue, atrasada: atrasada });
+      var transp = f.transportadoraId ? transpMap[f.transportadoraId] : null;
+      var transportadoraNome = transp ? (transp.nome_fantasia || transp.razao_social || '') : (f.transportadoraNome || '');
+      linhas.push({ pedido: p, fatura: f, cliente: cli, uf: uf, prevista: prevista, diasDif: diasDif, entregue: entregue, atrasada: atrasada, transportadoraNome: transportadoraNome });
     });
   });
   return linhas;
@@ -18176,7 +18179,7 @@ function renderEntregaControle() {
     if (catF && String(cli.categoria||'') !== String(catF)) return false;
     if (subF && String(cli.subcategoria||'') !== String(subF)) return false;
     if (ufF && r.uf !== ufF) return false;
-    if (transpF && (f.transportadoraNome||'').toLowerCase().indexOf(transpF) === -1) return false;
+    if (transpF && (r.transportadoraNome||'').toLowerCase().indexOf(transpF) === -1) return false;
     if (statusF === 'rota' && (r.entregue || r.atrasada)) return false;
     if (statusF === 'atrasada' && !r.atrasada) return false;
     if (statusF === 'entregue' && !r.entregue) return false;
@@ -18201,7 +18204,7 @@ function renderEntregaControle() {
   }
 
   tbody.innerHTML = linhas.map(function(r){
-    var p = r.pedido, f = r.fatura;
+    var p = r.pedido, f = r.fatura, cli = r.cliente || {};
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
     var dataFatFmt = f.data ? f.data.split('-').reverse().join('/') : '—';
     var prevFmt = r.prevista ? r.prevista.split('-').reverse().join('/') : '—';
@@ -18210,13 +18213,13 @@ function renderEntregaControle() {
     else if (r.atrasada) statusHtml = '<span style="background:#fef2f2;color:#991b1b;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Atrasada</span>';
     else statusHtml = '<span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Em Rota</span>';
     var diasHtml = (r.diasDif == null) ? '<span style="color:#cbd5e1">—</span>' : '<span style="font-weight:700;color:' + (r.diasDif > 0 ? '#991b1b' : '#15803d') + '">' + r.diasDif + '</span>';
-    return '<div class="mc-row" style="display:grid;grid-template-columns:90px 1.2fr 45px 0.85fr 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
+    return '<div class="mc-row" style="display:grid;grid-template-columns:90px 1.2fr 0.85fr 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
       + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary" style="font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(cli.ent_cidade || cli.cidade || '—') + '</div>'
       + '<div style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(r.uf || '—') + '</div>'
-      + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(p.vendedorNome || '—') + '</div>'
       + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(f.transportadoraNome || '—') + '</div>'
+      + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(r.transportadoraNome || '—') + '</div>'
       + '<div class="mc-meta" style="font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
       + '<div style="font-size:12px;color:#64748b">' + dataFatFmt + '</div>'
       + '<div style="font-size:12px;color:#64748b">' + prevFmt + '</div>'
