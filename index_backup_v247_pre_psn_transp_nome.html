@@ -17785,7 +17785,6 @@ function renderVendasSimplesNfs() {
   var cliF    = (document.getElementById('psn-cliente') ? document.getElementById('psn-cliente').value : '').trim().toLowerCase();
 
   var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
-  var transpMap = {}; getTransportadoras().forEach(function(t){ transpMap[t.id] = t; });
 
   var linhas = _psnLinhas().filter(function(r){
     var p = r.pedido, f = r.fatura;
@@ -17816,8 +17815,6 @@ function renderVendasSimplesNfs() {
       var cli = clientesMap[p.clienteId];
       var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
       var dataFmt = f.data ? f.data.split('-').reverse().join('/') : '—';
-      var transp = f.transportadoraId ? transpMap[f.transportadoraId] : null;
-      var transportadoraNome = transp ? (transp.nome_fantasia || transp.razao_social || '') : (f.transportadoraNome || '');
       return '<div class="mc-row" style="display:grid;grid-template-columns:100px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
         + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
         + '<div class="mc-primary" style="font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
@@ -17825,7 +17822,7 @@ function renderVendasSimplesNfs() {
         + '<div class="mc-meta" style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(cli ? (cli.estado || '—') : '—') + '</div>'
         + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(p.vendedorNome || '—') + '</div>'
         + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
-        + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(transportadoraNome || '—') + '</div>'
+        + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(f.transportadoraNome || '—') + '</div>'
         + '<div class="mc-meta" style="font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
         + '<div class="mc-meta" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
         + '<div class="mc-meta" style="font-size:12px;color:#64748b;text-align:center">' + r.pesoFat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + '</div>'
