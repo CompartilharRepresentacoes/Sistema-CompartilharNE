@@ -4916,13 +4916,10 @@
           <textarea id="oc-descricao" placeholder="Detalhes relatados pela transportadora ou pelo motorista..." style="width:100%;height:60px;border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;resize:vertical"></textarea>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-          <div id="oc-anexo-dropzone" onclick="document.getElementById('oc-anexo').click()"
-            ondragover="_ocAnexoDragOver(event)" ondragenter="_ocAnexoDragOver(event)"
-            ondragleave="_ocAnexoDragLeave(event)" ondrop="_ocAnexoDrop(event)"
-            style="font-size:11.5px;color:#64748b;display:flex;align-items:center;gap:6px;border:1.5px dashed #e2e8f0;border-radius:8px;padding:6px 10px;cursor:pointer;transition:background .15s,border-color .15s">
-            <i class="ti ti-paperclip"></i> <span id="oc-anexo-label">Anexar foto ou comprovante (opcional) — arraste ou clique</span>
+          <div style="font-size:11.5px;color:#64748b;display:flex;align-items:center;gap:6px">
+            <i class="ti ti-paperclip"></i> <span id="oc-anexo-label">Anexar foto ou comprovante (opcional)</span>
             <input type="file" id="oc-anexo" accept="image/*,.pdf" style="display:none" onchange="_ocAnexarComprovante(this)">
-            <button type="button" onclick="event.stopPropagation();document.getElementById('oc-anexo').click()" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:#475569">Escolher arquivo</button>
+            <button type="button" onclick="document.getElementById('oc-anexo').click()" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:#475569">Escolher arquivo</button>
           </div>
           <button onclick="_ocSalvarManual()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer">Salvar ocorrência</button>
         </div>
@@ -4933,12 +4930,9 @@
         <div style="font-size:13.5px;font-weight:700;color:#272A4A;margin-bottom:4px">Anexar e-mail da transportadora</div>
         <div style="font-size:11px;color:#94a3b8;margin-bottom:12px">Envie o .eml, .msg, .pdf ou .txt do e-mail. O sistema tenta identificar a NF e o tipo de ocorrência — você revisa antes de confirmar.</div>
         <input type="file" id="oc-email-arquivo" accept=".eml,.msg,.pdf,.txt" style="display:none" onchange="_ocProcessarArquivoEmail(this)">
-        <div id="oc-dropzone" onclick="document.getElementById('oc-email-arquivo').click()"
-          ondragover="_ocEmailDragOver(event)" ondragenter="_ocEmailDragOver(event)"
-          ondragleave="_ocEmailDragLeave(event)" ondrop="_ocEmailDrop(event)"
-          style="border:2px dashed #cbd5e1;border-radius:10px;padding:26px;text-align:center;cursor:pointer;color:#94a3b8;font-size:12.5px;margin-bottom:14px;transition:background .15s,border-color .15s">
+        <div id="oc-dropzone" onclick="document.getElementById('oc-email-arquivo').click()" style="border:2px dashed #cbd5e1;border-radius:10px;padding:26px;text-align:center;cursor:pointer;color:#94a3b8;font-size:12.5px;margin-bottom:14px">
           <i class="ti ti-mail-opened" style="font-size:22px;display:block;margin-bottom:8px;color:#94a3b8"></i>
-          Arraste o e-mail aqui ou clique para selecionar (.eml, .msg, .pdf, .txt)
+          Clique para selecionar o e-mail (.eml, .msg, .pdf, .txt)
         </div>
         <div id="oc-email-msg" style="font-size:12px;margin-bottom:10px;min-height:14px"></div>
         <div id="oc-preview" style="display:none">
@@ -24084,9 +24078,7 @@ function _ocSelecionarNf(i) {
 
 var _ocAnexoData = '';
 function _ocAnexarComprovante(input) {
-  _ocAnexarComprovanteArquivo(input.files && input.files[0]);
-}
-function _ocAnexarComprovanteArquivo(file) {
+  var file = input.files && input.files[0];
   if (!file) return;
   var reader = new FileReader();
   reader.onload = function(e){
@@ -24094,21 +24086,6 @@ function _ocAnexarComprovanteArquivo(file) {
     document.getElementById('oc-anexo-label').textContent = file.name;
   };
   reader.readAsDataURL(file);
-}
-function _ocAnexoDragOver(ev) {
-  ev.preventDefault();
-  var zone = document.getElementById('oc-anexo-dropzone');
-  if (zone) { zone.style.borderColor = '#DE7926'; zone.style.background = '#fff7ed'; }
-}
-function _ocAnexoDragLeave(ev) {
-  ev.preventDefault();
-  var zone = document.getElementById('oc-anexo-dropzone');
-  if (zone) { zone.style.borderColor = '#e2e8f0'; zone.style.background = 'transparent'; }
-}
-function _ocAnexoDrop(ev) {
-  ev.preventDefault();
-  _ocAnexoDragLeave(ev);
-  _ocAnexarComprovanteArquivo(ev.dataTransfer.files && ev.dataTransfer.files[0]);
 }
 
 function _ocSalvarManual() {
@@ -24161,24 +24138,7 @@ var _ocCandidatasEmail = [];
 var _ocNomeArquivoEmail = '';
 
 function _ocProcessarArquivoEmail(input) {
-  _ocProcessarArquivoEmailArquivo(input.files && input.files[0]);
-}
-function _ocEmailDragOver(ev) {
-  ev.preventDefault();
-  var zone = document.getElementById('oc-dropzone');
-  if (zone) { zone.style.borderColor = '#DE7926'; zone.style.background = '#fff7ed'; }
-}
-function _ocEmailDragLeave(ev) {
-  ev.preventDefault();
-  var zone = document.getElementById('oc-dropzone');
-  if (zone) { zone.style.borderColor = '#cbd5e1'; zone.style.background = 'transparent'; }
-}
-function _ocEmailDrop(ev) {
-  ev.preventDefault();
-  _ocEmailDragLeave(ev);
-  _ocProcessarArquivoEmailArquivo(ev.dataTransfer.files && ev.dataTransfer.files[0]);
-}
-function _ocProcessarArquivoEmailArquivo(file) {
+  var file = input.files && input.files[0];
   var msg = document.getElementById('oc-email-msg');
   if (!file) return;
   _ocNomeArquivoEmail = file.name;
