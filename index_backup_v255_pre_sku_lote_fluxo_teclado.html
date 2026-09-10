@@ -3033,27 +3033,27 @@
           </div>
           <div>
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Valor</label>
-            <input class="form-input" id="tabpreco-prod-valor" placeholder="0,00" oninput="_tpFormatValor(this)" style="width:100%">
+            <input class="form-input" id="tabpreco-prod-valor" placeholder="0,00" oninput="_tpFormatValor(this)" onkeydown="_pedEnterAvanca(event,'tabpreco-prod-comissao')" style="width:100%">
           </div>
           <div>
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Comissão (%)</label>
-            <input class="form-input" id="tabpreco-prod-comissao" placeholder="0,00" oninput="_tpFormatComissao(this)" maxlength="6" style="width:100%">
+            <input class="form-input" id="tabpreco-prod-comissao" placeholder="0,00" oninput="_tpFormatComissao(this)" maxlength="6" onkeydown="_pedEnterAvanca(event,'tabpreco-prod-periodo')" style="width:100%">
           </div>
           <div>
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Período</label>
-            <input class="form-input" id="tabpreco-prod-periodo" placeholder="Ex: 07/06/2026" oninput="_tpFormatPeriodo(this)" maxlength="10" style="width:100%">
+            <input class="form-input" id="tabpreco-prod-periodo" placeholder="Ex: 07/06/2026" oninput="_tpFormatPeriodo(this)" maxlength="10" onkeydown="_pedEnterAvanca(event,'tabpreco-prod-codpedido')" style="width:100%">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:flex-end">
           <div>
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Código Pedido</label>
-            <input class="form-input" id="tabpreco-prod-codpedido" placeholder="Código fornecido pelo cliente" style="width:100%">
+            <input class="form-input" id="tabpreco-prod-codpedido" placeholder="Código fornecido pelo cliente" onkeydown="_pedEnterAvanca(event,'tabpreco-prod-codcliente')" style="width:100%">
           </div>
           <div>
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Código Cliente</label>
-            <input class="form-input" id="tabpreco-prod-codcliente" placeholder="Código fornecido pelo cliente" style="width:100%">
+            <input class="form-input" id="tabpreco-prod-codcliente" placeholder="Código fornecido pelo cliente" onkeydown="_tpAddProdKey(event)" style="width:100%">
           </div>
-          <button onclick="addTabPrecoProduto()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">＋ Add</button>
+          <button onclick="addTabPrecoProduto()" onkeydown="_tpAddProdKey(event)" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">＋ Add</button>
         </div>
       </div>
 
@@ -4068,12 +4068,12 @@
                 </div>
                 <div>
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Número Pedido Cliente</label>
-                  <input class="form-input" id="ped-num-cliente" placeholder="Nº informado pelo cliente" oninput="pedFiltrarNumCliente(this); pedVerificarDuplicidade()" style="width:100%">
+                  <input class="form-input" id="ped-num-cliente" placeholder="Nº informado pelo cliente" oninput="pedFiltrarNumCliente(this); pedVerificarDuplicidade()" onkeydown="_pedEnterAvanca(event,'ped-num-fornecedor')" style="width:100%">
                   <div id="ped-num-cliente-msg" style="font-size:10.5px;color:#DE7926;font-weight:600;margin-top:4px;min-height:13px"></div>
                 </div>
                 <div>
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Número Pedido Fornecedor</label>
-                  <input class="form-input" id="ped-num-fornecedor" placeholder="Nº atribuído pela fábrica" style="width:100%">
+                  <input class="form-input" id="ped-num-fornecedor" placeholder="Nº atribuído pela fábrica" onkeydown="_pedEnterAvanca(event,'ped-item-prod-input')" style="width:100%">
                 </div>
                 <div>
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Status</label>
@@ -4101,7 +4101,7 @@
                 <div>
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Produto</label>
                   <div style="position:relative">
-                    <input id="ped-item-prod-input" class="form-input" placeholder="Código ou nome (4+ letras)..." oninput="_pedProdFiltrar()" onkeydown="_pedProdKey(event)" onblur="setTimeout(function(){var d=document.getElementById('ped-item-prod-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
+                    <input id="ped-item-prod-input" class="form-input" placeholder="Código ou nome (3+ letras)..." oninput="_pedProdFiltrar()" onkeydown="_pedProdKey(event)" onblur="setTimeout(function(){var d=document.getElementById('ped-item-prod-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
                     <div id="ped-item-prod-drop" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e2e8f0;border-radius:8px;z-index:999;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.15)"></div>
                   </div>
                   <input type="hidden" id="ped-item-prod-id">
@@ -4123,7 +4123,7 @@
                 </div>
                 <div>
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Preço (R$)</label>
-                  <input class="form-input" id="ped-item-preco" type="text" inputmode="decimal" oninput="_pedMaskPreco(this)" placeholder="0,00" style="width:100%">
+                  <input class="form-input" id="ped-item-preco" type="text" inputmode="decimal" oninput="_pedMaskPreco(this)" onkeydown="_pedEnterAvanca(event,'ped-item-desc')" placeholder="0,00" style="width:100%">
                 </div>
                 <div>
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px" title="Comissão cadastrada na tabela de preço específica do cliente">Comissão</label>
@@ -4131,11 +4131,11 @@
                 </div>
                 <div>
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Desc. (%)</label>
-                  <input class="form-input" id="ped-item-desc" type="number" min="0" max="100" step="0.01" value="0" style="width:100%">
+                  <input class="form-input" id="ped-item-desc" type="number" min="0" max="100" step="0.01" value="0" onkeydown="_pedEnterAvanca(event,'ped-item-qtd')" style="width:100%">
                 </div>
                 <div>
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px" title="Em UN, deve ser múltipla da CX cadastrada; em CX, informe o número de caixas">Qtd.</label>
-                  <input class="form-input no-spin" id="ped-item-qtd" type="number" min="0" step="1" placeholder="Quantidade" style="width:100%">
+                  <input class="form-input no-spin" id="ped-item-qtd" type="number" min="0" step="1" placeholder="Quantidade" onkeydown="_pedAddItemKey(event)" style="width:100%">
                 </div>
                 <button id="ped-item-add-btn" onclick="pedAddItem()" onkeydown="_pedAddItemKey(event)" title="Adicionar item (Enter ou Tab também inclui)" style="background:#272A4A;color:#fff;border:none;border-radius:8px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-plus"></i></button>
               </div>
@@ -4260,7 +4260,7 @@
 
       <!-- Tabela -->
       <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-        <div style="display:grid;grid-template-columns:90px 1.2fr 0.85fr 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+        <div style="display:grid;grid-template-columns:90px 1.7fr 72px 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
           <span>Pedido</span><span>Cliente</span><span>Cidade</span><span style="text-align:center">UF</span><span>Fornecedor</span><span>Transp.</span><span>NF</span><span>Data Fat.</span><span>Previsão</span><span style="text-align:center">Dias</span><span>Entrega</span><span>Status</span>
         </div>
         <div id="entctrl-tbody" style="min-height:60px"></div>
@@ -4367,7 +4367,7 @@
                 </div>
                 <div class="dev-fld-datalanc">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Data Lançamento <span style="color:#D82621">*</span></label>
-                  <input class="form-input" id="dev-data" type="date" style="width:100%">
+                  <input class="form-input" id="dev-data" type="date" onkeydown="_pedEnterAvanca(event,'dev-forn-input')" style="width:100%">
                 </div>
                 <div class="dev-fld-forn">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Fornecedor <span style="color:#D82621">*</span></label>
@@ -4389,30 +4389,30 @@
               <div class="dev-grid-2" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:14px">
                 <div class="dev-fld-vendedor">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Vendedor</label>
-                  <select class="form-input" id="dev-vendedor" style="width:100%">
+                  <select class="form-input" id="dev-vendedor" onkeydown="_pedEnterAvanca(event,'dev-nf-emitida')" style="width:100%">
                     <option value="">-- Selecione --</option>
                   </select>
                 </div>
                 <div class="dev-fld-nfemit">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">NF Emitida <span style="color:#D82621">*</span></label>
-                  <input class="form-input" id="dev-nf-emitida" placeholder="Número" style="width:100%">
+                  <input class="form-input" id="dev-nf-emitida" placeholder="Número" onkeydown="_pedEnterAvanca(event,'dev-data-nf-emitida')" style="width:100%">
                 </div>
                 <div class="dev-fld-datadevol">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Data Devolução <span style="color:#D82621">*</span></label>
-                  <input class="form-input" id="dev-data-nf-emitida" type="date" style="width:100%">
+                  <input class="form-input" id="dev-data-nf-emitida" type="date" onkeydown="_pedEnterAvanca(event,'dev-nf-origem')" style="width:100%">
                 </div>
                 <div class="dev-fld-nforigem">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">NF Origem <span style="color:#D82621">*</span></label>
-                  <input class="form-input" id="dev-nf-origem" placeholder="Número" oninput="_devBuscarDataNfOrigem()" style="width:100%">
+                  <input class="form-input" id="dev-nf-origem" placeholder="Número" oninput="_devBuscarDataNfOrigem()" onkeydown="_pedEnterAvanca(event,'dev-data-nf-origem')" style="width:100%">
                   <div id="dev-nf-origem-msg" style="font-size:9.5px;color:#94a3b8;margin-top:3px"></div>
                 </div>
                 <div class="dev-fld-datanforigem">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Data NF Origem <span style="color:#D82621">*</span></label>
-                  <input class="form-input" id="dev-data-nf-origem" type="date" style="width:100%">
+                  <input class="form-input" id="dev-data-nf-origem" type="date" onkeydown="_pedEnterAvanca(event,'dev-motivo')" style="width:100%">
                 </div>
                 <div class="dev-fld-motivo">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Motivo</label>
-                  <select class="form-input" id="dev-motivo" style="width:100%">
+                  <select class="form-input" id="dev-motivo" onkeydown="_pedEnterAvanca(event,'dev-item-prod-input')" style="width:100%">
                     <option value="Avaria">Avaria</option>
                     <option value="Vencido">Vencido</option>
                     <option value="Logística">Logística</option>
@@ -4442,20 +4442,20 @@
                 <div class="dev-fld-item-prod">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Produto <span style="color:#D82621">*</span></label>
                   <div style="position:relative">
-                    <input id="dev-item-prod-input" class="form-input" placeholder="Código ou nome (4+ letras)..." oninput="_devProdFiltrar()" onkeydown="_devProdKey(event)" onblur="setTimeout(function(){var d=document.getElementById('dev-item-prod-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
+                    <input id="dev-item-prod-input" class="form-input" placeholder="Código ou nome (3+ letras)..." oninput="_devProdFiltrar()" onkeydown="_devProdKey(event)" onblur="setTimeout(function(){var d=document.getElementById('dev-item-prod-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
                     <div id="dev-item-prod-drop" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e2e8f0;border-radius:8px;z-index:999;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.15)"></div>
                   </div>
                   <input type="hidden" id="dev-item-prod-id">
                 </div>
                 <div class="dev-fld-item-valor">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Valor <span style="color:#D82621">*</span></label>
-                  <input class="form-input" id="dev-item-valor" type="text" inputmode="decimal" oninput="_pedMaskPreco(this)" placeholder="0,00" style="width:100%">
+                  <input class="form-input" id="dev-item-valor" type="text" inputmode="decimal" oninput="_pedMaskPreco(this)" onkeydown="_pedEnterAvanca(event,'dev-item-qtd')" placeholder="0,00" style="width:100%">
                 </div>
                 <div class="dev-fld-item-qtd">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Qtd <span style="color:#D82621">*</span></label>
-                  <input class="form-input no-spin" id="dev-item-qtd" type="number" min="0" step="1" placeholder="0" style="width:100%">
+                  <input class="form-input no-spin" id="dev-item-qtd" type="number" min="0" step="1" placeholder="0" onkeydown="_devAddItemKey(event)" style="width:100%">
                 </div>
-                <button id="dev-item-add-btn" onclick="devAddItem()" title="Adicionar produto" style="background:#272A4A;color:#fff;border:none;border-radius:8px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-plus"></i><span class="dev-add-txt" style="display:none;margin-left:7px;font-size:12px;font-weight:700">Adicionar produto</span></button>
+                <button id="dev-item-add-btn" onclick="devAddItem()" onkeydown="_devAddItemKey(event)" title="Adicionar produto" style="background:#272A4A;color:#fff;border:none;border-radius:8px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-plus"></i><span class="dev-add-txt" style="display:none;margin-left:7px;font-size:12px;font-weight:700">Adicionar produto</span></button>
               </div>
               <div id="dev-item-msg" style="font-size:11px;color:#dc2626;margin-top:-6px;margin-bottom:6px"></div>
               <div style="border:1px solid #eef2f7;border-radius:10px;overflow:hidden">
@@ -11327,7 +11327,7 @@ function _tabPrecoFiltrarProd() {
   var busca = (document.getElementById('tabpreco-prod-busca').value || '').trim();
   var drop = document.getElementById('tabpreco-prod-drop');
   if (!drop) return;
-  if (busca.length < 4) { drop.style.display = 'none'; return; }
+  if (busca.length < 3) { drop.style.display = 'none'; return; }
   busca = busca.toLowerCase();
   _tabPrecoProdItems = getProdutos().filter(function(p) {
     return (p.nome||'').toLowerCase().includes(busca) || (p.codigo||'').toLowerCase().includes(busca);
@@ -11369,14 +11369,14 @@ function _tabPrecoKeyProd(event) {
   if (prods.length === 1) {
     event.preventDefault();
     _tabPrecoSelProd(prods[0].id, prods[0].nome||'', prods[0].codigo||'');
-    if (isTab) { var n = document.getElementById('tabpreco-prod-valor'); if(n) n.focus(); }
+    var n = document.getElementById('tabpreco-prod-valor'); if(n) { n.focus(); n.select(); }
     return;
   }
   // Se dropdown tiver só 1 item, seleciona ele
   if (_tabPrecoProdItems && _tabPrecoProdItems.length === 1) {
     event.preventDefault();
     _tabPrecoSelProd(_tabPrecoProdItems[0].id, _tabPrecoProdItems[0].nome||'', _tabPrecoProdItems[0].codigo||'');
-    if (isTab) { var n = document.getElementById('tabpreco-prod-valor'); if(n) n.focus(); }
+    var n = document.getElementById('tabpreco-prod-valor'); if(n) { n.focus(); n.select(); }
     return;
   }
   // Não encontrou — borda vermelha
@@ -11505,6 +11505,14 @@ function _tpFormatValor(el) {
 }
 
 /* ── Adicionar Produto ── */
+function _tpAddProdKey(e) {
+  if (e.key === 'Enter' || e.key === 'Tab') {
+    e.preventDefault();
+    addTabPrecoProduto();
+    var el = document.getElementById('tabpreco-prod-busca');
+    if (el) el.focus();
+  }
+}
 function addTabPrecoProduto() {
   var prodId  = (document.getElementById('tabpreco-prod-id')  ||{}).value || '';
   var busca   = (document.getElementById('tabpreco-prod-busca')||{}).value || '';
@@ -17058,6 +17066,8 @@ function openPedidoForm(params) {
   }
 
   renderPedItens();
+  var fornInputEl = document.getElementById('ped-forn-input');
+  if (fornInputEl) fornInputEl.focus();
 }
 
 function editPedido(id) {
@@ -17785,6 +17795,7 @@ function renderVendasSimplesNfs() {
   var cliF    = (document.getElementById('psn-cliente') ? document.getElementById('psn-cliente').value : '').trim().toLowerCase();
 
   var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
+  var transpMap = {}; getTransportadoras().forEach(function(t){ transpMap[t.id] = t; });
 
   var linhas = _psnLinhas().filter(function(r){
     var p = r.pedido, f = r.fatura;
@@ -17815,6 +17826,8 @@ function renderVendasSimplesNfs() {
       var cli = clientesMap[p.clienteId];
       var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
       var dataFmt = f.data ? f.data.split('-').reverse().join('/') : '—';
+      var transp = f.transportadoraId ? transpMap[f.transportadoraId] : null;
+      var transportadoraNome = transp ? (transp.nome_fantasia || transp.razao_social || '') : (f.transportadoraNome || '');
       return '<div class="mc-row" style="display:grid;grid-template-columns:100px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
         + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
         + '<div class="mc-primary" style="font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
@@ -17822,7 +17835,7 @@ function renderVendasSimplesNfs() {
         + '<div class="mc-meta" style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(cli ? (cli.estado || '—') : '—') + '</div>'
         + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(p.vendedorNome || '—') + '</div>'
         + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
-        + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(f.transportadoraNome || '—') + '</div>'
+        + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(transportadoraNome || '—') + '</div>'
         + '<div class="mc-meta" style="font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
         + '<div class="mc-meta" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
         + '<div class="mc-meta" style="font-size:12px;color:#64748b;text-align:center">' + r.pesoFat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + '</div>'
@@ -18213,7 +18226,7 @@ function renderEntregaControle() {
     else if (r.atrasada) statusHtml = '<span style="background:#fef2f2;color:#991b1b;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Atrasada</span>';
     else statusHtml = '<span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Em Rota</span>';
     var diasHtml = (r.diasDif == null) ? '<span style="color:#cbd5e1">—</span>' : '<span style="font-weight:700;color:' + (r.diasDif > 0 ? '#991b1b' : '#15803d') + '">' + r.diasDif + '</span>';
-    return '<div class="mc-row" style="display:grid;grid-template-columns:90px 1.2fr 0.85fr 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
+    return '<div class="mc-row" style="display:grid;grid-template-columns:90px 1.7fr 72px 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
       + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary" style="font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
       + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(cli.ent_cidade || cli.cidade || '—') + '</div>'
@@ -18666,7 +18679,7 @@ function _pedFornFiltrar() {
   var drop = document.getElementById('ped-forn-drop');
   if (!drop) return;
   document.getElementById('ped-forn-id').value = '';
-  if (!q) { drop.style.display='none'; return; }
+  if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   _pedFornItems = getFornecedores().filter(function(f){
     return _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n) || _cpNorm(f.codigo||'').includes(n);
@@ -18683,7 +18696,10 @@ function _pedFornFiltrar() {
 function _pedFornKey(e) {
   if (e.key!=='Enter' && e.key!=='Tab') return;
   if (_pedFornItems.length===1) { _pedFornSel(0); }
-  if (e.key==='Enter') { e.preventDefault(); }
+  if (e.key==='Enter') {
+    e.preventDefault();
+    if (document.getElementById('ped-forn-id').value) _pedEnterAvanca(e, 'ped-cli-input');
+  }
   // Tab: segue a ordem natural dos campos (não força o próximo)
 }
 function _pedFornSel(i) {
@@ -18702,7 +18718,7 @@ function _pedCliFiltrar() {
   var drop = document.getElementById('ped-cli-drop');
   if (!drop) return;
   document.getElementById('ped-cli-id').value = '';
-  if (!q) { drop.style.display='none'; return; }
+  if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   var qDigits = q.replace(/\D/g, '');
   _pedCliItems = getClientesVisiveis().filter(function(c){
@@ -18723,7 +18739,10 @@ function _pedCliFiltrar() {
 function _pedCliKey(e) {
   if (e.key!=='Enter' && e.key!=='Tab') return;
   if (_pedCliItems.length===1) { _pedCliSel(0); }
-  if (e.key==='Enter') { e.preventDefault(); }
+  if (e.key==='Enter') {
+    e.preventDefault();
+    if (document.getElementById('ped-cli-id').value) _pedEnterAvanca(e, 'ped-num-cliente');
+  }
   // Tab: segue a ordem natural dos campos (não força o próximo)
 }
 function _pedCliSel(i) {
@@ -18773,7 +18792,7 @@ function _pedProdFiltrar() {
   var drop = document.getElementById('ped-item-prod-drop');
   if (!drop) return;
   document.getElementById('ped-item-prod-id').value = '';
-  if (q.length < 4) { drop.style.display='none'; return; }
+  if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   var fornId = document.getElementById('ped-forn-id').value;
   var cliId = document.getElementById('ped-cli-id').value;
@@ -18801,8 +18820,20 @@ function _pedProdFiltrar() {
 function _pedProdKey(e) {
   if (e.key!=='Enter' && e.key!=='Tab') return;
   if (_pedProdItems.length===1) { _pedProdSel(0); }
-  if (e.key==='Enter') { e.preventDefault(); }
+  if (e.key==='Enter') {
+    e.preventDefault();
+    if (document.getElementById('ped-item-prod-id').value) _pedEnterAvanca(e, 'ped-item-preco');
+  }
   // Tab: segue a ordem natural dos campos (não força o próximo)
+}
+// Move o foco pro proximo campo do formulario de Pedido quando o Enter e
+// pressionado (usado pra pular Vendedor/Status, que sao preenchidos sozinhos
+// ou tem valor padrao, e pra emular Tab nos campos sem selecao/lista).
+function _pedEnterAvanca(e, idProximo) {
+  if (e && e.key !== 'Enter') return;
+  if (e) e.preventDefault();
+  var el = document.getElementById(idProximo);
+  if (el) { el.focus(); if (el.select) el.select(); }
 }
 
 // ═══════════════════════════════════════════════════
@@ -19815,7 +19846,7 @@ function _devFornFiltrar() {
   var drop = document.getElementById('dev-forn-drop');
   if (!drop) return;
   document.getElementById('dev-forn-id').value = '';
-  if (!q) { drop.style.display='none'; return; }
+  if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   _devFornItems = getFornecedores().filter(function(f){
     return _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n) || _cpNorm(f.codigo||'').includes(n);
@@ -19832,7 +19863,10 @@ function _devFornFiltrar() {
 function _devFornKey(e) {
   if (e.key!=='Enter' && e.key!=='Tab') return;
   if (_devFornItems.length===1) { _devFornSel(0); }
-  if (e.key==='Enter') { e.preventDefault(); }
+  if (e.key==='Enter') {
+    e.preventDefault();
+    if (document.getElementById('dev-forn-id').value) _pedEnterAvanca(e, 'dev-cli-input');
+  }
 }
 function _devFornSel(i) {
   var f = _devFornItems[i]; if (!f) return;
@@ -19848,7 +19882,7 @@ function _devCliFiltrar() {
   var drop = document.getElementById('dev-cli-drop');
   if (!drop) return;
   document.getElementById('dev-cli-id').value = '';
-  if (!q) { drop.style.display='none'; return; }
+  if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   var qDigits = q.replace(/\D/g, '');
   _devCliItems = getClientesVisiveis().filter(function(c){
@@ -19869,7 +19903,10 @@ function _devCliFiltrar() {
 function _devCliKey(e) {
   if (e.key!=='Enter' && e.key!=='Tab') return;
   if (_devCliItems.length===1) { _devCliSel(0); }
-  if (e.key==='Enter') { e.preventDefault(); }
+  if (e.key==='Enter') {
+    e.preventDefault();
+    if (document.getElementById('dev-cli-id').value) _pedEnterAvanca(e, 'dev-vendedor');
+  }
 }
 function _devCliSel(i) {
   var c = _devCliItems[i]; if (!c) return;
@@ -19915,7 +19952,7 @@ function _devProdFiltrar() {
   var drop = document.getElementById('dev-item-prod-drop');
   if (!drop) return;
   document.getElementById('dev-item-prod-id').value = '';
-  if (q.length < 4) { drop.style.display='none'; return; }
+  if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   _devProdItems = getProdutos().filter(function(p){
     return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
@@ -19932,7 +19969,21 @@ function _devProdFiltrar() {
 function _devProdKey(e) {
   if (e.key!=='Enter' && e.key!=='Tab') return;
   if (_devProdItems.length===1) { _devProdSel(0); }
-  if (e.key==='Enter') { e.preventDefault(); }
+  if (e.key==='Enter') {
+    e.preventDefault();
+    if (document.getElementById('dev-item-prod-id').value) _pedEnterAvanca(e, 'dev-item-valor');
+  }
+}
+// Enter/Tab na Qtd. do item de Devolucao ja cadastra o item (mesmo padrao do
+// Pedido, _pedAddItemKey) e devolve o foco pro campo Produto pra continuar
+// lancando itens em sequencia.
+function _devAddItemKey(e) {
+  if (e.key === 'Enter' || e.key === 'Tab') {
+    e.preventDefault();
+    devAddItem();
+    var el = document.getElementById('dev-item-prod-input');
+    if (el) el.focus();
+  }
 }
 function _devProdSel(i) {
   var p = _devProdItems[i]; if (!p) return;
@@ -20039,6 +20090,8 @@ function openDevolucaoForm(params) {
   if (devAutoriaEl) devAutoriaEl.innerHTML = params.id ? _appRenderAutoriaHtml(params) : '';
 
   renderDevItens();
+  var fornInputEl = document.getElementById('dev-forn-input');
+  if (fornInputEl) fornInputEl.focus();
 }
 
 function _devNormCnpj(s) { return String(s||'').replace(/\D/g,''); }
