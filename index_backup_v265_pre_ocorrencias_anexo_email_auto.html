@@ -26,15 +26,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <!-- MsgReader (leitura de .msg do Outlook p/ extrair anexos embutidos) - esm.sh empacota a lib (CommonJS) num modulo unico -->
-  <script type="module">
-    try {
-      var _msgReaderMod = await import('https://esm.sh/@kenjiuno/msgreader@1.28.0');
-      window.MsgReader = _msgReaderMod.default || _msgReaderMod.MsgReader || _msgReaderMod;
-    } catch (e) {
-      console.warn('MsgReader indisponivel (sem internet ou CDN bloqueado):', e);
-    }
-  </script>
   <style>
     :root {
       --brand-navy:  #272A4A;
@@ -4951,7 +4942,6 @@
           Arraste o e-mail aqui ou clique para selecionar (.eml, .msg, .pdf, .txt)
         </div>
         <div id="oc-email-msg" style="font-size:12px;margin-bottom:10px;min-height:14px"></div>
-        <div id="oc-email-anexos-wrap" style="display:none;margin-bottom:10px"></div>
         <div id="oc-preview" style="display:none">
           <div style="font-size:12px;font-weight:700;color:#272A4A;margin-bottom:8px">Ocorrências identificadas no e-mail — revise antes de salvar</div>
           <div style="display:grid;grid-template-columns:110px 1fr 170px 110px;gap:8px;padding:6px 4px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">
@@ -24178,8 +24168,6 @@ function _ocSalvarManual() {
 // ── Anexo de e-mail (extração best-effort, revisável antes de salvar) ──
 var _ocCandidatasEmail = [];
 var _ocNomeArquivoEmail = '';
-var _ocAnexosEncontrados = [];
-var _ocAnexoEmailSelecionado = null;
 
 function _ocProcessarArquivoEmail(input) {
   _ocProcessarArquivoEmailArquivo(input.files && input.files[0]);
@@ -24199,108 +24187,10 @@ function _ocEmailDrop(ev) {
   _ocEmailDragLeave(ev);
   _ocProcessarArquivoEmailArquivo(ev.dataTransfer.files && ev.dataTransfer.files[0]);
 }
-function _ocInferirMimeAnexo(fileName) {
-  var ext = String(fileName || '').split('.').pop().toLowerCase();
-  var mapa = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', gif:'image/gif', webp:'image/webp', pdf:'application/pdf' };
-  return mapa[ext] || 'application/octet-stream';
-}
-function _ocBytesParaDataUrl(bytes, fileName, callback) {
-  var blob = new Blob([bytes], { type: _ocInferirMimeAnexo(fileName) });
-  var reader = new FileReader();
-  reader.onload = function(e){ callback(e.target.result); };
-  reader.readAsDataURL(blob);
-}
-function _ocExtrairAnexosMsg(bytes) {
-  try {
-    if (!window.MsgReader) return { anexos: [], corpoTexto: '' };
-    var leitor = new window.MsgReader(bytes);
-    var info = leitor.getFileData();
-    if (!info || info.error) return { anexos: [], corpoTexto: '' };
-    var corpoTexto = [info.headers || '', info.subject || '', info.body || ''].join('\n');
-    var anexos = (info.attachments || []).map(function(att){
-      var completo = leitor.getAttachment(att);
-      return { fileName: completo.fileName || att.fileName || 'anexo', bytes: completo.content };
-    }).filter(function(a){ return a.bytes && a.bytes.length; });
-    return { anexos: anexos, corpoTexto: corpoTexto };
-  } catch (e) {
-    console.warn('Erro ao ler .msg:', e);
-    return { anexos: [], corpoTexto: '' };
-  }
-}
-function _ocConverterAnexosMsg(anexosBrutos, callback) {
-  if (!anexosBrutos.length) { callback([]); return; }
-  var resultado = new Array(anexosBrutos.length);
-  var pendentes = anexosBrutos.length;
-  anexosBrutos.forEach(function(a, i){
-    _ocBytesParaDataUrl(a.bytes, a.fileName, function(dataUrl){
-      resultado[i] = { fileName: a.fileName, dataUrl: dataUrl };
-      pendentes--;
-      if (pendentes === 0) callback(resultado);
-    });
-  });
-}
-function _ocExtrairAnexosEml(texto) {
-  var anexos = [];
-  try {
-    var mBoundary = String(texto || '').match(/boundary="?([^"\r\n;]+)"?/i);
-    if (!mBoundary) return anexos;
-    var boundary = mBoundary[1];
-    var partes = texto.split('--' + boundary);
-    partes.forEach(function(parte){
-      var mNome = parte.match(/Content-Disposition:\s*attachment[^\r\n]*filename="?([^"\r\n;]+)"?/i)
-        || parte.match(/Content-Type:[^\r\n]*name="?([^"\r\n;]+)"?/i);
-      var temBase64 = /Content-Transfer-Encoding:\s*base64/i.test(parte);
-      if (!mNome || !temBase64) return;
-      var fileName = mNome[1].trim();
-      var corpo = parte.split(/\r?\n\r?\n/).slice(1).join('\n\n').replace(/[\r\n]+/g, '');
-      if (!corpo) return;
-      var mMime = parte.match(/Content-Type:\s*([^;\r\n]+)/i);
-      var mime = mMime ? mMime[1].trim() : _ocInferirMimeAnexo(fileName);
-      anexos.push({ fileName: fileName, dataUrl: 'data:' + mime + ';base64,' + corpo });
-    });
-  } catch (e) { console.warn('Erro ao extrair anexos do .eml:', e); }
-  return anexos;
-}
-function _ocFinalizarAnexosEncontrados(lista) {
-  _ocAnexosEncontrados = lista || [];
-  _ocAnexoEmailSelecionado = _ocAnexosEncontrados.length === 1 ? _ocAnexosEncontrados[0] : null;
-  _ocRenderAnexosEmailLista();
-}
-function _ocEscolherAnexoEmail(i) {
-  var a = _ocAnexosEncontrados[i];
-  if (!a) return;
-  _ocAnexoEmailSelecionado = a;
-  _ocRenderAnexosEmailLista();
-}
-function _ocRemoverAnexoEmail() {
-  _ocAnexoEmailSelecionado = null;
-  _ocRenderAnexosEmailLista();
-}
-function _ocRenderAnexosEmailLista() {
-  var wrap = document.getElementById('oc-email-anexos-wrap');
-  if (!wrap) return;
-  if (!_ocAnexosEncontrados.length) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
-  wrap.style.display = 'block';
-  var titulo = _ocAnexosEncontrados.length === 1
-    ? 'O e-mail tem 1 anexo:'
-    : 'Este e-mail tem ' + _ocAnexosEncontrados.length + ' anexos. Escolha um para anexar as ocorrencias:';
-  wrap.innerHTML = '<div style="font-size:11.5px;color:#64748b;margin-bottom:6px">' + titulo + '</div>'
-    + _ocAnexosEncontrados.map(function(a, i){
-        var sel = _ocAnexoEmailSelecionado && _ocAnexoEmailSelecionado.fileName === a.fileName && _ocAnexoEmailSelecionado.dataUrl === a.dataUrl;
-        return '<div style="display:flex;align-items:center;gap:8px;border:1px solid ' + (sel ? '#bbf7d0' : '#e2e8f0') + ';background:' + (sel ? '#f0fdf4' : '#fff') + ';border-radius:7px;padding:6px 10px;margin-bottom:6px">'
-          + '<i class="ti ti-paperclip" style="color:' + (sel ? '#15803d' : '#94a3b8') + '"></i>'
-          + '<span style="flex:1;font-size:12px;color:' + (sel ? '#15803d' : '#334155') + '">' + _pedEsc(a.fileName) + (sel ? ' \u2014 anexado as ocorrencias' : '') + '</span>'
-          + (sel
-            ? '<button onclick="_ocRemoverAnexoEmail()" title="Remover" style="background:none;border:1px solid #fecaca;border-radius:6px;width:22px;height:22px;padding:0;font-size:13px;cursor:pointer;color:#dc2626">&times;</button>'
-            : '<button onclick="_ocEscolherAnexoEmail(' + i + ')" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:#475569">Anexar</button>')
-          + '</div>';
-      }).join('');
-}
 function _ocProcessarArquivoEmailArquivo(file) {
   var msg = document.getElementById('oc-email-msg');
   if (!file) return;
   _ocNomeArquivoEmail = file.name;
-  _ocFinalizarAnexosEncontrados([]);
   msg.style.color = '#64748b';
   msg.textContent = 'Lendo arquivo...';
   var nomeMin = file.name.toLowerCase();
@@ -24341,30 +24231,9 @@ function _ocProcessarArquivoEmailArquivo(file) {
       });
     };
     readerPdf.readAsArrayBuffer(file);
-  } else if (nomeMin.indexOf('.msg') !== -1) {
-    if (!window.MsgReader) {
-      msg.style.color = '#b45309';
-      msg.textContent = 'A leitura de .msg ainda está carregando (ou está sem internet) — tente novamente em instantes ou lance manualmente.';
-      return;
-    }
-    var readerMsg = new FileReader();
-    readerMsg.onload = function(e){
-      var bytes = new Uint8Array(e.target.result);
-      var extraido = _ocExtrairAnexosMsg(bytes);
-      tratarTexto(extraido.corpoTexto);
-      _ocConverterAnexosMsg(extraido.anexos, _ocFinalizarAnexosEncontrados);
-    };
-    readerMsg.onerror = function(){ msg.style.color = '#dc2626'; msg.textContent = 'Erro ao ler o arquivo .msg.'; };
-    readerMsg.readAsArrayBuffer(file);
   } else {
     var readerTxt = new FileReader();
-    readerTxt.onload = function(e){
-      var texto = e.target.result;
-      tratarTexto(texto);
-      if (nomeMin.indexOf('.eml') !== -1) {
-        _ocFinalizarAnexosEncontrados(_ocExtrairAnexosEml(texto));
-      }
-    };
+    readerTxt.onload = function(e){ tratarTexto(e.target.result); };
     readerTxt.readAsText(file);
   }
 }
@@ -24400,15 +24269,14 @@ function _ocConfirmarEmail() {
       data: new Date().toISOString().slice(0, 10),
       valor: _pedParseMoeda(c.valor),
       descricao: c.descricao,
-      anexoData: _ocAnexoEmailSelecionado ? _ocAnexoEmailSelecionado.dataUrl : '',
-      anexoNome: _ocAnexoEmailSelecionado ? _ocAnexoEmailSelecionado.fileName : _ocNomeArquivoEmail,
+      anexoData: '',
+      anexoNome: _ocNomeArquivoEmail,
       origem: 'email',
       dtCadastro: new Date().toISOString()
     });
   });
   setOcorrencias(data);
   _ocCandidatasEmail = [];
-  _ocFinalizarAnexosEncontrados([]);
   document.getElementById('oc-preview').style.display = 'none';
   document.getElementById('oc-email-msg').style.color = '#15803d';
   document.getElementById('oc-email-msg').textContent = 'Ocorrências salvas com sucesso!';
