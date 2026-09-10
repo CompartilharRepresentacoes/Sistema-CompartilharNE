@@ -280,6 +280,50 @@
       .mc-row .mc-hide { display:none !important; }
       .mc-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
       .mc-table-wrap table { min-width:640px; }
+
+      /* Controle de Entrega: linha de 12 colunas vira cartao no mobile (cabecalho de coluna nao faz sentido empilhado) */
+      #page-entrega-controle .ent-header-row { display:none !important; }
+      #page-entrega-controle .mc-row {
+        display:flex !important; flex-wrap:wrap !important; align-items:flex-start !important;
+        padding:12px 14px !important; row-gap:2px !important; column-gap:8px !important;
+      }
+      #page-entrega-controle .mc-row .ent-cliente { order:1; flex:1 1 auto !important; min-width:0 !important; }
+      #page-entrega-controle .mc-row .ent-status { order:2; flex:0 0 auto !important; margin-left:auto !important; }
+      #page-entrega-controle .mc-row .ent-pedido,
+      #page-entrega-controle .mc-row .ent-nf { flex:0 0 100% !important; font-size:11px !important; color:#94a3b8 !important; margin:0 !important; }
+      #page-entrega-controle .mc-row .ent-pedido { order:3; }
+      #page-entrega-controle .mc-row .ent-pedido::before { content:'Pedido '; }
+      #page-entrega-controle .mc-row .ent-nf { order:4; margin-bottom:4px !important; }
+      #page-entrega-controle .mc-row .ent-nf::before { content:'NF '; }
+      #page-entrega-controle .mc-row .ent-cidade { order:5; }
+      #page-entrega-controle .mc-row .ent-uf { order:6; }
+      #page-entrega-controle .mc-row .ent-uf::before { content:'\00b7 '; }
+      #page-entrega-controle .mc-row .ent-forn { order:7; }
+      #page-entrega-controle .mc-row .ent-forn::before { content:'F\00e1b: '; }
+      #page-entrega-controle .mc-row .ent-transp { order:8; }
+      #page-entrega-controle .mc-row .ent-transp::before { content:'Transp: '; }
+      #page-entrega-controle .mc-row .ent-datafat,
+      #page-entrega-controle .mc-row .ent-prev,
+      #page-entrega-controle .mc-row .ent-dias {
+        flex:1 1 0 !important; min-width:0 !important; text-align:left !important;
+        border-top:1px solid #f1f5f9 !important; padding-top:6px !important; margin-top:6px !important;
+      }
+      #page-entrega-controle .mc-row .ent-datafat { order:9; }
+      #page-entrega-controle .mc-row .ent-prev { order:10; }
+      #page-entrega-controle .mc-row .ent-dias { order:11; }
+      #page-entrega-controle .mc-row .ent-datafat::before,
+      #page-entrega-controle .mc-row .ent-prev::before,
+      #page-entrega-controle .mc-row .ent-dias::before {
+        display:block !important; font-size:9.5px !important; color:#94a3b8 !important; text-transform:uppercase !important; letter-spacing:.03em !important; margin-bottom:2px !important;
+      }
+      #page-entrega-controle .mc-row .ent-datafat::before { content:'Faturado'; }
+      #page-entrega-controle .mc-row .ent-prev::before { content:'Previs\00e3o'; }
+      #page-entrega-controle .mc-row .ent-dias::before { content:'Atraso'; }
+      #page-entrega-controle .mc-row .ent-entrega-wrap { order:12; flex:0 0 100% !important; margin-top:8px !important; }
+      #page-entrega-controle .mc-row .ent-entrega-wrap::before {
+        content:'Data de entrega'; display:block; font-size:9.5px; color:#94a3b8; text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px;
+      }
+      #page-entrega-controle .mc-row .ent-entrega-wrap input { width:100% !important; box-sizing:border-box !important; }
       #page-catalogo-list .pg-two-col { display:block; }
       #page-catalogo-list .pg-side { position:static; margin-bottom:10px; }
       #page-catalogo-list #catalogo-kpis-box { display:none !important; }
@@ -4269,7 +4313,7 @@
 
       <!-- Tabela -->
       <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-        <div style="display:grid;grid-template-columns:90px 1.7fr 72px 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+        <div class="ent-header-row" style="display:grid;grid-template-columns:90px 1.7fr 72px 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
           <span>Pedido</span><span>Cliente</span><span>Cidade</span><span style="text-align:center">UF</span><span>Fornecedor</span><span>Transp.</span><span>NF</span><span>Data Fat.</span><span>Previsão</span><span style="text-align:center">Dias</span><span>Entrega</span><span>Status</span>
         </div>
         <div id="entctrl-tbody" style="min-height:60px"></div>
@@ -18253,18 +18297,18 @@ function renderEntregaControle() {
     else statusHtml = '<span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Em Rota</span>';
     var diasHtml = (r.diasDif == null) ? '<span style="color:#cbd5e1">—</span>' : '<span style="font-weight:700;color:' + (r.diasDif > 0 ? '#991b1b' : '#15803d') + '">' + r.diasDif + '</span>';
     return '<div class="mc-row" style="display:grid;grid-template-columns:90px 1.7fr 72px 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
-      + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<div class="mc-primary" style="font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-      + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(cli.ent_cidade || cli.cidade || '—') + '</div>'
-      + '<div style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(r.uf || '—') + '</div>'
-      + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(r.transportadoraNome || '—') + '</div>'
-      + '<div class="mc-meta" style="font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
-      + '<div style="font-size:12px;color:#64748b">' + dataFatFmt + '</div>'
-      + '<div style="font-size:12px;color:#64748b">' + prevFmt + '</div>'
-      + '<div style="text-align:center">' + diasHtml + '</div>'
-      + '<div><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="' + _entctrlDataParaBR(f.dataEntrega) + '" oninput="_entctrlMaskData(this)" onchange="entctrlSalvarDataEntregaTexto(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:6px;padding:4px 6px;font-size:11px"></div>'
-      + '<div class="mc-badge">' + statusHtml + '</div>'
+      + '<div class="mc-meta ent-pedido" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+      + '<div class="mc-primary ent-cliente" style="font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="mc-meta ent-cidade" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(cli.ent_cidade || cli.cidade || '—') + '</div>'
+      + '<div class="ent-uf" style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(r.uf || '—') + '</div>'
+      + '<div class="mc-meta ent-forn" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="mc-meta ent-transp" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(r.transportadoraNome || '—') + '</div>'
+      + '<div class="mc-meta ent-nf" style="font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
+      + '<div class="ent-datafat" style="font-size:12px;color:#64748b">' + dataFatFmt + '</div>'
+      + '<div class="ent-prev" style="font-size:12px;color:#64748b">' + prevFmt + '</div>'
+      + '<div class="ent-dias" style="text-align:center">' + diasHtml + '</div>'
+      + '<div class="ent-entrega-wrap"><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="' + _entctrlDataParaBR(f.dataEntrega) + '" oninput="_entctrlMaskData(this)" onchange="entctrlSalvarDataEntregaTexto(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:6px;padding:4px 6px;font-size:11px"></div>'
+      + '<div class="mc-badge ent-status">' + statusHtml + '</div>'
       + '</div>';
   }).join('');
 }
