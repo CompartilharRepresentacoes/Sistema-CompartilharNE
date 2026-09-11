@@ -258,43 +258,6 @@
       /* Ocorrencias: KPIs 2 por linha no mobile (desktop continua 4 colunas) */
       #oc-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
 
-      /* Ocorrencias: barra de filtros empilha no mobile (mesmo padrao/classes ja usados
-         no Controle de Entrega -- ver comentario la em cima). */
-      #page-ocorrencias .entf-linha-topo {
-        flex-direction:column !important; align-items:stretch !important; gap:8px !important;
-      }
-      #page-ocorrencias .entf-linha-topo > div {
-        width:100% !important; max-width:100% !important; flex:0 0 auto !important;
-      }
-      #page-ocorrencias .entf-linha-topo > span {
-        display:block !important; width:100% !important; margin:2px 0 0 !important;
-      }
-      #page-ocorrencias .entf-linha-topo > button {
-        width:100% !important; margin:2px 0 0 !important; margin-left:0 !important; justify-content:center !important;
-      }
-      #page-ocorrencias .entf-daterow {
-        display:flex !important; align-items:center !important; gap:6px !important; width:100% !important;
-      }
-      #page-ocorrencias .entf-daterow input {
-        flex:1 1 0 !important; min-width:0 !important; width:auto !important;
-      }
-      #page-ocorrencias #oc-filtros-extra {
-        flex-direction:column !important; align-items:stretch !important; gap:0 !important;
-      }
-      #page-ocorrencias #oc-filtros-extra > span {
-        display:block !important; width:100% !important; margin:10px 0 4px !important;
-      }
-      #page-ocorrencias #oc-filtros-extra > span:first-child {
-        margin-top:0 !important;
-      }
-      #page-ocorrencias #oc-filtros-extra > input,
-      #page-ocorrencias #oc-filtros-extra > select {
-        width:100% !important; box-sizing:border-box !important;
-      }
-      #page-ocorrencias #oc-filtros-extra > button {
-        width:100% !important; margin-top:14px !important; justify-content:center !important;
-      }
-
       /* Dashboard (Início): evita espremer/quebrar em telas de celular */
       .dash-root #kpis { grid-template-columns: repeat(2, 1fr) !important; }
       .dash-root #podio { grid-template-columns: 1fr !important; gap:10px !important; }
@@ -5038,32 +5001,6 @@
             <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">Avarias, recusas, devoluções e atrasos na entrega</div>
           </div>
           <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
-        </div>
-      </div>
-
-      <!-- Barra de filtros -->
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)">
-        <div class="entf-linha-topo" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div style="position:relative;flex:1;min-width:200px;max-width:300px">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="oc-filtro-busca" oninput="renderOcorrencias()" placeholder="Buscar por NF, cliente ou transportadora..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-          </div>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-          <div class="entf-daterow" style="display:contents">
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="oc-filtro-data-de" oninput="_entctrlMaskData(this);renderOcorrencias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
-          <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="oc-filtro-data-ate" oninput="_entctrlMaskData(this);renderOcorrencias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
-          </div>
-          <button id="oc-mais-filtros-btn" onclick="_ocToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
-            <i class="ti ti-adjustments-horizontal" style="font-size:13px"></i> <span id="oc-mais-filtros-txt">Mais filtros</span> <i id="oc-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
-          </button>
-        </div>
-        <div id="oc-filtros-extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-size:11px;font-weight:600;color:#64748b">Tipo</span>
-          <select id="oc-filtro-tipo" onchange="renderOcorrencias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Transportadora</span>
-          <input id="oc-filtro-transportadora" oninput="renderOcorrencias()" placeholder="Nome..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
-          <button onclick="_ocLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
         </div>
       </div>
 
@@ -24954,66 +24891,11 @@ function _ocPopularSelectTipo() {
   }
 }
 
-// Select do FILTRO (Mais filtros) -- separado do select do formulario manual (oc-tipo) porque
-// cada um tem seu proprio dataset.populado e a opcao "Todos" e diferente de "Selecione...".
-function _ocPopularFiltroTipo() {
-  var sel = document.getElementById('oc-filtro-tipo');
-  if (sel && !sel.dataset.populado) {
-    sel.innerHTML = '<option value="">Todos</option>' + OC_TIPOS.map(function(t){ return '<option value="' + t + '">' + t + '</option>'; }).join('');
-    sel.dataset.populado = '1';
-  }
-}
-
-function _ocToggleMaisFiltros() {
-  var box = document.getElementById('oc-filtros-extra');
-  var txt = document.getElementById('oc-mais-filtros-txt');
-  var chev = document.getElementById('oc-mais-filtros-chevron');
-  if (!box) return;
-  var abrir = box.style.display === 'none' || !box.style.display;
-  box.style.display = abrir ? 'flex' : 'none';
-  if (txt) txt.textContent = abrir ? 'Menos filtros' : 'Mais filtros';
-  if (chev) chev.className = abrir ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
-}
-function _ocLimparFiltros() {
-  ['oc-filtro-busca','oc-filtro-data-de','oc-filtro-data-ate','oc-filtro-tipo','oc-filtro-transportadora'].forEach(function(id){
-    var el = document.getElementById(id); if (el) el.value = '';
-  });
-  renderOcorrencias();
-}
-
 function renderOcorrencias() {
   _ocPopularSelectTipo();
-  _ocPopularFiltroTipo();
-
-  var busca = _cpNorm(document.getElementById('oc-filtro-busca') ? document.getElementById('oc-filtro-busca').value : '');
-  var dataDe = _entctrlParseDataBR(document.getElementById('oc-filtro-data-de') ? document.getElementById('oc-filtro-data-de').value : '');
-  var dataAte = _entctrlParseDataBR(document.getElementById('oc-filtro-data-ate') ? document.getElementById('oc-filtro-data-ate').value : '');
-  var tipoF = document.getElementById('oc-filtro-tipo') ? document.getElementById('oc-filtro-tipo').value : '';
-  var transpF = _cpNorm(document.getElementById('oc-filtro-transportadora') ? document.getElementById('oc-filtro-transportadora').value : '');
-
   var data = getOcorrencias().slice().sort(function(a, b){ return (b.data || '').localeCompare(a.data || '') || (b.dtCadastro || '').localeCompare(a.dtCadastro || ''); });
-
-  data = data.filter(function(o){
-    if (busca) {
-      var nfM = _cpNorm(o.nfNumero || '').indexOf(busca) !== -1;
-      var cliM = _cpNorm(o.clienteNome || '').indexOf(busca) !== -1;
-      var trM = _cpNorm(o.transportadoraNome || '').indexOf(busca) !== -1;
-      if (!nfM && !cliM && !trM) return false;
-    }
-    if (dataDe && (!o.data || o.data < dataDe)) return false;
-    if (dataAte && (!o.data || o.data > dataAte)) return false;
-    if (tipoF && o.tipo !== tipoF) return false;
-    if (transpF && _cpNorm(o.transportadoraNome || '').indexOf(transpF) === -1) return false;
-    return true;
-  });
-
-  var doMes;
-  if (dataDe || dataAte) {
-    doMes = data;
-  } else {
-    var mesAtual = new Date().toISOString().slice(0, 7);
-    doMes = data.filter(function(o){ return (o.data || '').slice(0, 7) === mesAtual; });
-  }
+  var mesAtual = new Date().toISOString().slice(0, 7);
+  var doMes = data.filter(function(o){ return (o.data || '').slice(0, 7) === mesAtual; });
   var avarias = doMes.filter(function(o){ return o.tipo === 'Avaria'; }).length;
   var recusas = doMes.filter(function(o){ return o.tipo === 'Recusa total' || o.tipo === 'Recusa parcial'; }).length;
   var valorTotal = doMes.reduce(function(acc, o){ return acc + (parseFloat(o.valor) || 0); }, 0);
@@ -25029,7 +24911,7 @@ function renderOcorrencias() {
   data = _pgAplicar(data, 'oc-qtd');
   if (pag) pag.textContent = _pgTexto(data.length, ocTotalGeral, ocTotalGeral, 'ocorrência', 'ocorrências');
   if (!data.length) {
-    tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhuma ocorrência encontrada com esses filtros.</div>';
+    tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhuma ocorrência registrada.</div>';
     return;
   }
   tbody.innerHTML = data.map(function(o){
