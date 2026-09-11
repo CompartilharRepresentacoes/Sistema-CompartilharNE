@@ -295,38 +295,22 @@
       #page-entrega-controle .mc-row .ent-pedido::before { content:'Pedido '; }
       #page-entrega-controle .mc-row .ent-nf { order:4; margin-bottom:4px !important; }
       #page-entrega-controle .mc-row .ent-nf::before { content:'NF '; }
-      /* Cidade/UF/Fabrica/Transportadora: grupo ISOLADO (a .ent-linha-local vira um flex-wrap
-         proprio so com esses 4 campos no mobile -- antes eles tentavam conviver soltos na
-         MESMA linha do flex-container geral junto de outros campos, e sem nada forcando
-         quebra de linha antes deles, o navegador os espremia a largura ~0 e sobrepunha o
-         texto uns nos outros quando o nome da fabrica ou cidade era comprido). No desktop
-         a wrapper fica "display:contents" (definido inline no HTML) e some da arvore de
-         layout, entao o grid de 12 colunas nao muda em nada. */
-      #page-entrega-controle .mc-row .ent-linha-local {
-        order:5; display:flex !important; flex-wrap:wrap !important; flex:0 0 100% !important;
-        column-gap:10px !important; row-gap:2px !important; margin-top:2px !important;
-      }
-      #page-entrega-controle .mc-row .ent-linha-local .ent-cidade,
-      #page-entrega-controle .mc-row .ent-linha-local .ent-uf,
-      #page-entrega-controle .mc-row .ent-linha-local .ent-forn,
-      #page-entrega-controle .mc-row .ent-linha-local .ent-transp {
-        flex:0 0 auto !important; white-space:nowrap !important; max-width:100% !important;
-      }
+      #page-entrega-controle .mc-row .ent-cidade { order:5; }
+      #page-entrega-controle .mc-row .ent-uf { order:6; }
       #page-entrega-controle .mc-row .ent-uf::before { content:'\00b7 '; }
+      #page-entrega-controle .mc-row .ent-forn { order:7; }
       #page-entrega-controle .mc-row .ent-forn::before { content:'F\00e1b: '; }
+      #page-entrega-controle .mc-row .ent-transp { order:8; }
       #page-entrega-controle .mc-row .ent-transp::before { content:'Transp: '; }
-      /* Faturado/Previsao/Atraso: mesmo raciocinio -- grupo isolado, mas em grid de 3
-         colunas fixas (em vez de flex:1 1 0 solto, que tambem se espremia a ~0 e sobrepunha
-         os 3 textos quando dividia linha com Cidade/UF/Fabrica/Transportadora). */
-      #page-entrega-controle .mc-row .ent-linha-metrics {
-        order:6; display:grid !important; grid-template-columns:repeat(3,1fr) !important; flex:0 0 100% !important;
-        column-gap:8px !important; border-top:1px solid #f1f5f9 !important; padding-top:6px !important; margin-top:6px !important;
+      #page-entrega-controle .mc-row .ent-datafat,
+      #page-entrega-controle .mc-row .ent-prev,
+      #page-entrega-controle .mc-row .ent-dias {
+        flex:1 1 0 !important; min-width:0 !important; text-align:left !important;
+        border-top:1px solid #f1f5f9 !important; padding-top:6px !important; margin-top:6px !important;
       }
-      #page-entrega-controle .mc-row .ent-linha-metrics .ent-datafat,
-      #page-entrega-controle .mc-row .ent-linha-metrics .ent-prev,
-      #page-entrega-controle .mc-row .ent-linha-metrics .ent-dias {
-        min-width:0 !important; text-align:left !important; border:none !important; padding:0 !important; margin:0 !important;
-      }
+      #page-entrega-controle .mc-row .ent-datafat { order:9; }
+      #page-entrega-controle .mc-row .ent-prev { order:10; }
+      #page-entrega-controle .mc-row .ent-dias { order:11; }
       #page-entrega-controle .mc-row .ent-datafat::before,
       #page-entrega-controle .mc-row .ent-prev::before,
       #page-entrega-controle .mc-row .ent-dias::before {
@@ -18924,18 +18908,14 @@ function renderEntregaControle() {
     return '<div class="mc-row" style="display:grid;grid-template-columns:90px 1.7fr 72px 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
       + '<div class="mc-meta ent-pedido" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary ent-cliente" style="font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-      + '<div class="ent-linha-local" style="display:contents">'
       + '<div class="mc-meta ent-cidade" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(cli.ent_cidade || cli.cidade || '—') + '</div>'
       + '<div class="ent-uf" style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(r.uf || '—') + '</div>'
       + '<div class="mc-meta ent-forn" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
       + '<div class="mc-meta ent-transp" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(r.transportadoraNome || '—') + '</div>'
-      + '</div>'
       + '<div class="mc-meta ent-nf" style="font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
-      + '<div class="ent-linha-metrics" style="display:contents">'
       + '<div class="ent-datafat" style="font-size:12px;color:#64748b">' + dataFatFmt + '</div>'
       + '<div class="ent-prev" style="font-size:12px;color:#64748b">' + prevFmt + '</div>'
       + '<div class="ent-dias" style="text-align:center">' + diasHtml + '</div>'
-      + '</div>'
       + '<div class="ent-entrega-wrap"><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="' + _entctrlDataParaBR(f.dataEntrega) + '" oninput="_entctrlMaskData(this)" onchange="entctrlSalvarDataEntregaTexto(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:6px;padding:4px 6px;font-size:11px"></div>'
       + '<div class="mc-badge ent-status">' + statusHtml + '</div>'
       + '</div>';
