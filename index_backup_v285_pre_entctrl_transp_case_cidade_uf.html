@@ -351,7 +351,7 @@
         color:#1e293b !important; text-transform:uppercase !important;
       }
       #page-entrega-controle .mc-row .ent-nf::before { content:'NF: '; }
-      #page-entrega-controle .mc-row .ent-transp::before { content:'Transp: '; text-transform:none !important; }
+      #page-entrega-controle .mc-row .ent-transp::before { content:'Transp: '; }
 
       /* Cidade/UF/Status: grupo isolado (a pedido do Marcos) -- Status saiu do topo (ao lado
          do cliente) e do grupo com Pedido/NF, e passou a ficar ao lado da Cidade/UF, alinhado
@@ -365,7 +365,6 @@
         flex:0 0 auto !important; white-space:nowrap !important; max-width:100% !important; color:#1e293b !important;
       }
       #page-entrega-controle .mc-row .ent-uf::before { content:'- '; }
-      #page-entrega-controle .mc-row .ent-linha-local .ent-uf { margin-left:-8px !important; }
       #page-entrega-controle .mc-row .ent-linha-local .ent-status {
         flex:0 0 auto !important; white-space:nowrap !important; font-size:12px !important; color:#1e293b !important; margin:0 0 0 auto !important;
       }
@@ -374,14 +373,10 @@
         background:none !important; padding:0 !important; border-radius:0 !important; font-weight:800 !important; font-size:12px !important; text-transform:uppercase !important;
       }
 
-      /* Faturado/Previsao/Dias/Entrega: grupo isolado em grid de 4 colunas fixas --
-         a pedido do Marcos (2026-09-11, 3a rodada), a Entrega deixou de ser uma linha
-         separada embaixo e virou a 4a coluna desta mesma linha (mockup aprovado antes
-         de aplicar). O rotulo "Data de entrega" nao cabia mais numa coluna de 1/4 da
-         largura do cartao, entao virou so "Entrega" (termo que o proprio Marcos usou). */
+      /* Faturado/Previsao/Dias: grupo isolado em grid de 3 colunas fixas. */
       #page-entrega-controle .mc-row .ent-linha-metrics {
-        order:4 !important; display:grid !important; grid-template-columns:repeat(4,1fr) !important; flex:0 0 100% !important;
-        column-gap:6px !important; border-top:1px solid #f1f5f9 !important; padding-top:6px !important; margin-top:6px !important; align-items:start !important;
+        order:4 !important; display:grid !important; grid-template-columns:repeat(3,1fr) !important; flex:0 0 100% !important;
+        column-gap:8px !important; border-top:1px solid #f1f5f9 !important; padding-top:6px !important; margin-top:6px !important;
       }
       #page-entrega-controle .mc-row .ent-linha-metrics .ent-datafat,
       #page-entrega-controle .mc-row .ent-linha-metrics .ent-prev,
@@ -398,14 +393,12 @@
       #page-entrega-controle .mc-row .ent-dias::before { content:'Dias'; }
 
       #page-entrega-controle .mc-row .ent-entrega-wrap {
-        min-width:0 !important; box-sizing:border-box !important;
+        order:5 !important; flex:0 0 100% !important; margin-top:8px !important; padding-right:16px !important; box-sizing:border-box !important;
       }
       #page-entrega-controle .mc-row .ent-entrega-wrap::before {
-        content:'Entrega'; display:block; font-size:9.5px; color:#94a3b8; text-transform:uppercase; letter-spacing:.03em; margin-bottom:2px;
+        content:'Data de entrega'; display:block; font-size:9.5px; color:#94a3b8; text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px;
       }
-      #page-entrega-controle .mc-row .ent-entrega-wrap input {
-        width:100% !important; box-sizing:border-box !important; font-size:10.5px !important; padding:3px 4px !important;
-      }
+      #page-entrega-controle .mc-row .ent-entrega-wrap input { width:100% !important; box-sizing:border-box !important; }
       #page-catalogo-list .pg-two-col { display:block; }
       #page-catalogo-list .pg-side { position:static; margin-bottom:10px; }
       #page-catalogo-list #catalogo-kpis-box { display:none !important; }
@@ -19062,6 +19055,7 @@ function renderEntregaControle() {
       + '<div class="ent-datafat" style="order:8;font-size:12px;color:#64748b">' + dataFatFmt + '</div>'
       + '<div class="ent-prev" style="order:9;font-size:12px;color:#64748b">' + prevFmt + '</div>'
       + '<div class="ent-dias" style="order:10;text-align:center">' + diasHtml + '</div>'
+      + '</div>'
       + '<div class="ent-entrega-wrap" style="order:11"><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="' + _entctrlDataParaBR(f.dataEntrega) + '" oninput="_entctrlMaskData(this)" onchange="entctrlSalvarDataEntregaTexto(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:6px;padding:4px 6px;font-size:11px"></div>'
       + '</div>';
   }).join('');
