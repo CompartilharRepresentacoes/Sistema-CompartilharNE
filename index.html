@@ -328,42 +328,52 @@
         padding:12px 14px !important; row-gap:2px !important; column-gap:8px !important;
       }
       #page-entrega-controle .mc-row .ent-cliente { order:1 !important; flex:0 0 100% !important; }
+      #page-entrega-controle .mc-row .ent-pedido { display:none !important; }
 
-      /* Cidade/UF/Fabrica/Transportadora: grupo ISOLADO (flex-wrap proprio -- itens soltos junto de
-         outros campos no mesmo flex plano ja causou sobreposicao real de texto, corrigido em 2026-09-11). */
-      #page-entrega-controle .mc-row .ent-linha-local {
+      /* Fornecedor/Transp/NF: grupo isolado (a pedido do Marcos, 2026-09-11 2a rodada) --
+         Fornecedor sem rotulo "Fabrica:", em MAIUSCULO/negrito; Transp tambem em MAIUSCULO;
+         ordem visual (Fornecedor, NF, Transp) e diferente da ordem das colunas do desktop
+         (Fornecedor, Transp, NF), por isso usa order:N !important proprio dentro do grupo --
+         nao usa o mesmo order:N "de posicao desktop" herdado via inline style. */
+      #page-entrega-controle .mc-row .ent-linha-forn {
         order:2 !important; display:flex !important; flex-wrap:wrap !important; flex:0 0 100% !important;
-        column-gap:10px !important; row-gap:2px !important;
+        column-gap:10px !important; row-gap:2px !important; align-items:center !important;
       }
-      #page-entrega-controle .mc-row .ent-linha-local .ent-cidade,
-      #page-entrega-controle .mc-row .ent-linha-local .ent-uf,
-      #page-entrega-controle .mc-row .ent-linha-local .ent-forn,
-      #page-entrega-controle .mc-row .ent-linha-local .ent-transp {
-        flex:0 0 auto !important; white-space:nowrap !important; max-width:100% !important; color:#1e293b !important;
+      #page-entrega-controle .mc-row .ent-linha-forn .ent-forn {
+        order:1 !important; flex:0 0 auto !important; white-space:nowrap !important; max-width:100% !important;
+        color:#1e293b !important; font-weight:800 !important; text-transform:uppercase !important;
       }
-      #page-entrega-controle .mc-row .ent-uf::before { content:'- '; }
-      #page-entrega-controle .mc-row .ent-forn::before { content:'F\0000e1brica: '; }
+      #page-entrega-controle .mc-row .ent-linha-forn .ent-nf {
+        order:2 !important; flex:0 0 auto !important; white-space:nowrap !important; font-size:12px !important; color:#1e293b !important; margin:0 !important;
+      }
+      #page-entrega-controle .mc-row .ent-linha-forn .ent-transp {
+        order:3 !important; flex:0 0 auto !important; white-space:nowrap !important; max-width:100% !important;
+        color:#1e293b !important; text-transform:uppercase !important;
+      }
+      #page-entrega-controle .mc-row .ent-nf::before { content:'NF: '; }
       #page-entrega-controle .mc-row .ent-transp::before { content:'Transp: '; }
 
-      /* Pedido/NF/Status: grupo isolado novo (a pedido do Marcos) -- antes Pedido/NF eram 2 linhas
-         cinzas separadas e Status ficava sozinho no topo ao lado do nome do cliente. */
-      #page-entrega-controle .mc-row .ent-linha-refs {
+      /* Cidade/UF/Status: grupo isolado (a pedido do Marcos) -- Status saiu do topo (ao lado
+         do cliente) e do grupo com Pedido/NF, e passou a ficar ao lado da Cidade/UF, alinhado
+         a direita, em MAIUSCULO/negrito e sem a pilula colorida (so o texto). */
+      #page-entrega-controle .mc-row .ent-linha-local {
         order:3 !important; display:flex !important; flex-wrap:wrap !important; flex:0 0 100% !important;
         column-gap:10px !important; row-gap:2px !important; align-items:center !important;
       }
-      #page-entrega-controle .mc-row .ent-linha-refs .ent-pedido,
-      #page-entrega-controle .mc-row .ent-linha-refs .ent-nf,
-      #page-entrega-controle .mc-row .ent-linha-refs .ent-status {
-        flex:0 0 auto !important; white-space:nowrap !important; font-size:12px !important; color:#1e293b !important; margin:0 !important;
+      #page-entrega-controle .mc-row .ent-linha-local .ent-cidade,
+      #page-entrega-controle .mc-row .ent-linha-local .ent-uf {
+        flex:0 0 auto !important; white-space:nowrap !important; max-width:100% !important; color:#1e293b !important;
       }
-      #page-entrega-controle .mc-row .ent-pedido::before { content:'Pedido: '; }
-      #page-entrega-controle .mc-row .ent-nf::before { content:'NF: '; }
-      #page-entrega-controle .mc-row .ent-linha-refs .ent-status::before { content:'Status: '; }
-      #page-entrega-controle .mc-row .ent-linha-refs .ent-status span {
-        background:none !important; padding:0 !important; border-radius:0 !important; font-weight:800 !important; font-size:12px !important;
+      #page-entrega-controle .mc-row .ent-uf::before { content:'- '; }
+      #page-entrega-controle .mc-row .ent-linha-local .ent-status {
+        flex:0 0 auto !important; white-space:nowrap !important; font-size:12px !important; color:#1e293b !important; margin:0 0 0 auto !important;
+      }
+      #page-entrega-controle .mc-row .ent-linha-local .ent-status::before { content:'Status: '; }
+      #page-entrega-controle .mc-row .ent-linha-local .ent-status span {
+        background:none !important; padding:0 !important; border-radius:0 !important; font-weight:800 !important; font-size:12px !important; text-transform:uppercase !important;
       }
 
-      /* Faturado/Previsao/Atraso: grupo isolado em grid de 3 colunas fixas. */
+      /* Faturado/Previsao/Dias: grupo isolado em grid de 3 colunas fixas. */
       #page-entrega-controle .mc-row .ent-linha-metrics {
         order:4 !important; display:grid !important; grid-template-columns:repeat(3,1fr) !important; flex:0 0 100% !important;
         column-gap:8px !important; border-top:1px solid #f1f5f9 !important; padding-top:6px !important; margin-top:6px !important;
@@ -380,7 +390,7 @@
       }
       #page-entrega-controle .mc-row .ent-datafat::before { content:'Faturado'; }
       #page-entrega-controle .mc-row .ent-prev::before { content:'Previs\00e3o'; }
-      #page-entrega-controle .mc-row .ent-dias::before { content:'Atraso'; }
+      #page-entrega-controle .mc-row .ent-dias::before { content:'Dias'; }
 
       #page-entrega-controle .mc-row .ent-entrega-wrap {
         order:5 !important; flex:0 0 100% !important; margin-top:8px !important; padding-right:16px !important; box-sizing:border-box !important;
@@ -19029,16 +19039,16 @@ function renderEntregaControle() {
     else statusHtml = '<span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Em Rota</span>';
     var diasHtml = (r.diasDif == null) ? '<span style="color:#cbd5e1">—</span>' : '<span style="font-weight:700;color:' + (r.diasDif > 0 ? '#991b1b' : '#15803d') + '">' + r.diasDif + '</span>';
     return '<div class="mc-row" style="display:grid;grid-template-columns:90px 1.7fr 72px 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
+      + '<div class="mc-meta ent-pedido" style="order:1;font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary ent-cliente" style="order:2;font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="ent-linha-forn" style="display:contents">'
+      + '<div class="mc-meta ent-forn" style="order:5;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="mc-meta ent-transp" style="order:6;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(r.transportadoraNome || '—') + '</div>'
+      + '<div class="mc-meta ent-nf" style="order:7;font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
+      + '</div>'
       + '<div class="ent-linha-local" style="display:contents">'
       + '<div class="mc-meta ent-cidade" style="order:3;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(cli.ent_cidade || cli.cidade || '—') + '</div>'
       + '<div class="ent-uf" style="order:4;font-size:12px;color:#64748b;text-align:center">' + _pedEsc(r.uf || '—') + '</div>'
-      + '<div class="mc-meta ent-forn" style="order:5;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div class="mc-meta ent-transp" style="order:6;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(r.transportadoraNome || '—') + '</div>'
-      + '</div>'
-      + '<div class="ent-linha-refs" style="display:contents">'
-      + '<div class="mc-meta ent-pedido" style="order:1;font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<div class="mc-meta ent-nf" style="order:7;font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
       + '<div class="mc-badge ent-status" style="order:12">' + statusHtml + '</div>'
       + '</div>'
       + '<div class="ent-linha-metrics" style="display:contents">'
