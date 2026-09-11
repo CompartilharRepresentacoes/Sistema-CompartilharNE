@@ -316,8 +316,7 @@
         margin-top:0 !important;
       }
       #page-entrega-controle #entctrl-filtros-extra > input,
-      #page-entrega-controle #entctrl-filtros-extra > select,
-      #page-entrega-controle #entctrl-filtros-extra > div {
+      #page-entrega-controle #entctrl-filtros-extra > select {
         width:100% !important; box-sizing:border-box !important;
       }
       #page-entrega-controle #entctrl-filtros-extra > button {
@@ -4342,9 +4341,9 @@
           </div>
           <span style="font-size:11px;font-weight:600;color:#64748b">Data Fat.</span>
           <div class="entf-daterow" style="display:contents">
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="entctrl-data-de" oninput="_entctrlMaskData(this);renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <input type="date" id="entctrl-data-de" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="entctrl-data-ate" oninput="_entctrlMaskData(this);renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <input type="date" id="entctrl-data-ate" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           </div>
           <button id="entctrl-mais-filtros-btn" onclick="entctrlToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
             <i class="ti ti-adjustments-horizontal" style="font-size:13px"></i> <span id="entctrl-mais-filtros-txt">Mais filtros</span> <i id="entctrl-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
@@ -4352,11 +4351,7 @@
         </div>
         <div id="entctrl-filtros-extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:10px;flex-wrap:wrap">
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
-          <div style="position:relative;width:130px">
-            <input id="entctrl-fornecedor" oninput="_entctrlFornFiltrar()" onkeydown="_entctrlFornKey(event)" onblur="setTimeout(function(){var d=document.getElementById('entctrl-forn-drop');if(d)d.style.display='none'},200)" autocomplete="off" placeholder="Nome ou código..." style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-            <div id="entctrl-forn-drop" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e2e8f0;border-radius:8px;z-index:999;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.15)"></div>
-          </div>
-          <input type="hidden" id="entctrl-fornecedor-id">
+          <input id="entctrl-fornecedor" oninput="renderEntregaControle()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:130px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
           <select id="entctrl-categoria" onchange="entctrlAtualizarSubcategorias();renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
@@ -18679,60 +18674,10 @@ function entctrlToggleMaisFiltros() {
   if (chev) chev.className = abrir ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
 }
 function entctrlLimparFiltros() {
-  ['entctrl-busca','entctrl-data-de','entctrl-data-ate','entctrl-fornecedor','entctrl-fornecedor-id','entctrl-vendedor','entctrl-categoria','entctrl-subcategoria','entctrl-uf','entctrl-transportadora','entctrl-status'].forEach(function(id){
+  ['entctrl-busca','entctrl-data-de','entctrl-data-ate','entctrl-fornecedor','entctrl-vendedor','entctrl-categoria','entctrl-subcategoria','entctrl-uf','entctrl-transportadora','entctrl-status'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
   entctrlAtualizarSubcategorias();
-  renderEntregaControle();
-}
-var _entctrlFornItems = [];
-function _entctrlFornFiltrar() {
-  var inputEl = document.getElementById('entctrl-fornecedor');
-  var q = (inputEl ? inputEl.value : '').trim();
-  var drop = document.getElementById('entctrl-forn-drop');
-  var idEl = document.getElementById('entctrl-fornecedor-id');
-  if (idEl) idEl.value = '';
-  if (drop) {
-    if (q.length < 3) {
-      drop.style.display = 'none';
-    } else {
-      var n = _cpNorm(q);
-      _entctrlFornItems = getFornecedores().filter(function (f) {
-        return _cpNorm(f.nome_fantasia || f.razao_social || '').indexOf(n) !== -1 || _cpNorm(f.codigo || '').indexOf(n) !== -1;
-      }).slice(0, 15);
-      if (!_entctrlFornItems.length) {
-        drop.style.display = 'none';
-      } else {
-        drop.onmousedown = function (e) { e.preventDefault(); };
-        drop.innerHTML = _entctrlFornItems.map(function (f, i) {
-          return '<div onclick="_entctrlFornSel(' + i + ')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9">'
-            + (f.codigo ? '<span style="font-weight:700;color:#272A4A;margin-right:8px">' + _pedEsc(f.codigo) + '</span>' : '')
-            + '<span style="color:#334155">' + _pedEsc(f.nome_fantasia || f.razao_social || '') + '</span></div>';
-        }).join('');
-        drop.style.display = 'block';
-      }
-    }
-  }
-  renderEntregaControle();
-}
-function _entctrlFornKey(e) {
-  if (e.key === 'Escape') {
-    var d = document.getElementById('entctrl-forn-drop');
-    if (d) d.style.display = 'none';
-    return;
-  }
-  if (e.key !== 'Enter') return;
-  e.preventDefault();
-  if (_entctrlFornItems.length === 1) _entctrlFornSel(0);
-}
-function _entctrlFornSel(i) {
-  var f = _entctrlFornItems[i]; if (!f) return;
-  var idEl = document.getElementById('entctrl-fornecedor-id');
-  var inputEl = document.getElementById('entctrl-fornecedor');
-  if (idEl) idEl.value = f.id;
-  if (inputEl) inputEl.value = (f.codigo ? f.codigo + ' ' : '') + (f.nome_fantasia || f.razao_social || '');
-  var drop = document.getElementById('entctrl-forn-drop');
-  if (drop) drop.style.display = 'none';
   renderEntregaControle();
 }
 function entctrlSalvarDataEntrega(pedidoId, faturaId, valor) {
@@ -18967,9 +18912,8 @@ function renderEntregaControle() {
   if (!tbody) return;
 
   var busca   = (document.getElementById('entctrl-busca') ? document.getElementById('entctrl-busca').value : '').trim().toLowerCase();
-  var dataDe  = _entctrlParseDataBR(document.getElementById('entctrl-data-de') ? document.getElementById('entctrl-data-de').value : '');
-  var dataAte = _entctrlParseDataBR(document.getElementById('entctrl-data-ate') ? document.getElementById('entctrl-data-ate').value : '');
-  var fornIdF = document.getElementById('entctrl-fornecedor-id') ? document.getElementById('entctrl-fornecedor-id').value : '';
+  var dataDe  = document.getElementById('entctrl-data-de') ? document.getElementById('entctrl-data-de').value : '';
+  var dataAte = document.getElementById('entctrl-data-ate') ? document.getElementById('entctrl-data-ate').value : '';
   var fornF   = (document.getElementById('entctrl-fornecedor') ? document.getElementById('entctrl-fornecedor').value : '').trim().toLowerCase();
   var vendF   = document.getElementById('entctrl-vendedor') ? document.getElementById('entctrl-vendedor').value : '';
   var catF    = document.getElementById('entctrl-categoria') ? document.getElementById('entctrl-categoria').value : '';
@@ -18988,8 +18932,7 @@ function renderEntregaControle() {
     }
     if (dataDe && (!f.data || f.data < dataDe)) return false;
     if (dataAte && (!f.data || f.data > dataAte)) return false;
-    if (fornIdF) { if (p.fornecedorId !== fornIdF) return false; }
-    else if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
     if (vendF && p.vendedorId !== vendF) return false;
     if (catF && String(cli.categoria||'') !== String(catF)) return false;
     if (subF && String(cli.subcategoria||'') !== String(subF)) return false;
