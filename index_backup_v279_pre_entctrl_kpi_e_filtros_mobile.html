@@ -288,40 +288,6 @@
          visual das 12 colunas do desktop -- Grid/Flexbox posicionam pelo valor de "order", nao pela posicao
          no HTML, entao os campos podem ser fisicamente reagrupados aqui em wrappers sem o desktop mudar. */
       #page-entrega-controle .ent-header-row { display:none !important; }
-      #page-entrega-controle .entf-linha-topo {
-        flex-direction:column !important; align-items:stretch !important; gap:8px !important;
-      }
-      #page-entrega-controle .entf-linha-topo > div {
-        width:100% !important; max-width:100% !important; flex:0 0 auto !important;
-      }
-      #page-entrega-controle .entf-linha-topo > span {
-        display:block !important; width:100% !important; margin:2px 0 0 !important;
-      }
-      #page-entrega-controle .entf-linha-topo > button {
-        width:100% !important; margin:2px 0 0 !important; margin-left:0 !important; justify-content:center !important;
-      }
-      #page-entrega-controle .entf-daterow {
-        display:flex !important; align-items:center !important; gap:6px !important; width:100% !important;
-      }
-      #page-entrega-controle .entf-daterow input {
-        flex:1 1 0 !important; min-width:0 !important; width:auto !important;
-      }
-      #page-entrega-controle #entctrl-filtros-extra {
-        flex-direction:column !important; align-items:stretch !important; gap:0 !important;
-      }
-      #page-entrega-controle #entctrl-filtros-extra > span {
-        display:block !important; width:100% !important; margin:10px 0 4px !important;
-      }
-      #page-entrega-controle #entctrl-filtros-extra > span:first-child {
-        margin-top:0 !important;
-      }
-      #page-entrega-controle #entctrl-filtros-extra > input,
-      #page-entrega-controle #entctrl-filtros-extra > select {
-        width:100% !important; box-sizing:border-box !important;
-      }
-      #page-entrega-controle #entctrl-filtros-extra > button {
-        width:100% !important; margin-top:14px !important; justify-content:center !important;
-      }
       #page-entrega-controle .mc-row {
         display:flex !important; flex-wrap:wrap !important; align-items:flex-start !important;
         padding:12px 14px !important; row-gap:2px !important; column-gap:8px !important;
@@ -4316,35 +4282,33 @@
       <!-- Cards -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Notas Fiscais</div>
           <div style="font-size:22px;font-weight:800;color:#1e293b;line-height:1.2;letter-spacing:-.02em" id="entctrl-kpi-total">0</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Notas Fiscais</div>
           <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#272A4A"></div>
         </div>
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Em Rota</div>
           <div style="font-size:22px;font-weight:800;color:#b45309;line-height:1.2;letter-spacing:-.02em" id="entctrl-kpi-rota">0</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Em Rota</div>
           <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#DE7926"></div>
         </div>
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Entregues</div>
           <div style="font-size:22px;font-weight:800;color:#15803d;line-height:1.2;letter-spacing:-.02em" id="entctrl-kpi-entregues">0</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Entregues</div>
           <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#16a34a"></div>
         </div>
       </div>
 
       <!-- Barra de filtros -->
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)">
-        <div class="entf-linha-topo" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <div style="position:relative;flex:1;min-width:200px;max-width:300px">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input id="entctrl-busca" oninput="renderEntregaControle()" placeholder="Buscar por NF, loja ou código..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           </div>
           <span style="font-size:11px;font-weight:600;color:#64748b">Data Fat.</span>
-          <div class="entf-daterow" style="display:contents">
           <input type="date" id="entctrl-data-de" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           <span style="color:#94a3b8;font-size:13px">→</span>
           <input type="date" id="entctrl-data-ate" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-          </div>
           <button id="entctrl-mais-filtros-btn" onclick="entctrlToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
             <i class="ti ti-adjustments-horizontal" style="font-size:13px"></i> <span id="entctrl-mais-filtros-txt">Mais filtros</span> <i id="entctrl-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
           </button>
