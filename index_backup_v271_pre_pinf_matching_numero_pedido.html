@@ -17424,17 +17424,8 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
       return !!c && (c === destDigits || c === emitDigits);
     });
   }
-  function _pinfNormNumPedido(v) {
-    return String(v || '').trim().toLowerCase().replace(/^0+(?=\d)/, '');
-  }
-
   if (porCnpj.length === 1) return { pedido: porCnpj[0], ambiguo: false, motivo: 'cnpj' };
   if (porCnpj.length > 1) {
-    var numPedNf = _pinfNormNumPedido(nfDados.numPedido);
-    if (numPedNf) {
-      var porNumero = porCnpj.filter(function (p) { return _pinfNormNumPedido(p.numPedidoCliente) === numPedNf; });
-      if (porNumero.length === 1) return { pedido: porNumero[0], ambiguo: false, motivo: 'cnpj+numeroPedido' };
-    }
     var ordenadosCnpj = ordenarPorScoreEValor(porCnpj);
     var melhorCnpj = ordenadosCnpj[0], segundoCnpj = ordenadosCnpj[1];
     if (segundoCnpj && segundoCnpj.score === melhorCnpj.score && Math.abs(segundoCnpj.diff - melhorCnpj.diff) < 0.01) {
@@ -20829,28 +20820,7 @@ function _devExtrairDadosXml(xmlText) {
     // faturado ao decidir entre pedidos candidatos ambiguos (_pimEscolherPedidoCandidato).
     var vNF = parseFloat(_devXmlTag(doc.getElementsByTagName('ICMSTot')[0], 'vNF')) || 0;
 
-    // numPedido: numero do pedido de compra do cliente, quando o fornecedor preenche essa
-    // informacao no XML (tag <xPed> dentro de <det><prod>, ou em texto livre no <infCpl>).
-    // Usado pelo Import XML/NF em lote para desempatar quando o cliente tem mais de 1 pedido
-    // no mesmo periodo/fabrica -- sem isso, o sistema podia bater so por CNPJ e escolher o
-    // pedido errado (ex: cliente com 2 pedidos na mesma semana). Ver _pimEscolherPedidoCandidato.
-    var numPedidoXml = '';
-    for (var j = 0; j < detEls.length && !numPedidoXml; j++) {
-      var prodJ = detEls[j].getElementsByTagName('prod')[0];
-      if (!prodJ) continue;
-      var xPedTag = prodJ.getElementsByTagName('xPed')[0];
-      if (xPedTag && (xPedTag.textContent || '').trim()) numPedidoXml = xPedTag.textContent.trim();
-    }
-    if (!numPedidoXml) {
-      var infCplEls = doc.getElementsByTagName('infCpl');
-      if (infCplEls.length) {
-        var infCplTxt = infCplEls[0].textContent || '';
-        var mPed = infCplTxt.match(/PEDIDO[S]?\s*(?:DE\s*COMPRA)?\s*(?:N[ºO°.]?)?\s*[:\-]?\s*(\d{2,})/i) || infCplTxt.match(/\bPED\.?\s*(?:N[ºO°.]?)?\s*[:\-]?\s*(\d{2,})/i);
-        if (mPed) numPedidoXml = mPed[1];
-      }
-    }
-
-    return { nNF: nNF, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml };
+    return { nNF: nNF, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF };
   } catch (e) {
     return null;
   }
