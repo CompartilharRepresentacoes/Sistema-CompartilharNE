@@ -22846,58 +22846,15 @@ function deleteComandoNavegacao(id) {
 }
 
 // ── Botão flutuante de comando (voz ou texto) ──
-var _navTentativasFalha = 0;
-var _navVozSessao = 0;
 function _navTogglePainel() {
   var painel = document.getElementById('nav-comando-painel');
   if (!painel) return;
   var aberto = painel.style.display === 'flex';
   painel.style.display = aberto ? 'none' : 'flex';
-  _navVozSessao++;
   if (!aberto) {
     var input = document.getElementById('nav-comando-input');
     document.getElementById('nav-comando-status').textContent = '';
-    if (input) input.value = '';
-    _navTentativasFalha = 0;
-    var mobile = window.matchMedia('(max-width: 767px)').matches;
-    if (mobile) {
-      _navMostrarOuvindo();
-      _navIniciarVoz();
-    } else {
-      _navMostrarDigitar();
-    }
-  }
-}
-function _navMostrarDigitar() {
-  _navVozSessao++;
-  var campos = document.getElementById('nav-comando-campos');
-  var vozMobile = document.getElementById('nav-comando-voz-mobile');
-  if (campos) campos.style.display = 'flex';
-  if (vozMobile) vozMobile.style.display = 'none';
-  var input = document.getElementById('nav-comando-input');
-  if (input) input.focus();
-}
-function _navMostrarOuvindo() {
-  var campos = document.getElementById('nav-comando-campos');
-  var vozMobile = document.getElementById('nav-comando-voz-mobile');
-  if (campos) campos.style.display = 'none';
-  if (vozMobile) vozMobile.style.display = 'flex';
-}
-function _navFalhaReconhecimento(msg) {
-  var status = document.getElementById('nav-comando-status');
-  _navTentativasFalha++;
-  if (_navTentativasFalha >= 3) {
-    status.style.color = '#dc2626';
-    status.textContent = 'Não consegui entender por voz. Pode digitar aqui.';
-    _navMostrarDigitar();
-  } else {
-    status.style.color = '#b45309';
-    status.textContent = msg + ' (tentativa ' + _navTentativasFalha + ' de 3) — tentando de novo...';
-    setTimeout(function(){
-      var vozMobile = document.getElementById('nav-comando-voz-mobile');
-      var aindaEmVoz = vozMobile && vozMobile.style.display !== 'none';
-      if (aindaEmVoz) _navIniciarVoz();
-    }, 900);
+    if (input) { input.value = ''; input.focus(); }
   }
 }
 function _navExecutarDoPainel() {
@@ -22907,9 +22864,8 @@ function _navExecutarDoPainel() {
   var texto = input.value;
   var comando = _navEncontrarComando(texto);
   if (comando) {
-    _navTentativasFalha = 0;
     status.style.color = '#15803d';
-    status.textContent = '✔ Abrindo: ' + (PAGE_META[comando.pagina] ? PAGE_META[comando.pagina].title : comando.pagina);
+    status.textContent = '\u2714 Abrindo: ' + (PAGE_META[comando.pagina] ? PAGE_META[comando.pagina].title : comando.pagina);
     showPage(comando.pagina, { clienteNome: comando.filtroCliente || '', categoriaId: comando.filtroCategoriaId || '', aba: comando.aba || '' });
     setTimeout(function(){
       var painel = document.getElementById('nav-comando-painel');
@@ -22918,14 +22874,8 @@ function _navExecutarDoPainel() {
       status.textContent = '';
     }, 900);
   } else {
-    var vozMobile = document.getElementById('nav-comando-voz-mobile');
-    var emModoVoz = vozMobile && vozMobile.style.display !== 'none';
-    if (emModoVoz) {
-      _navFalhaReconhecimento('Não reconheci esse comando.');
-    } else {
-      status.style.color = '#dc2626';
-      status.textContent = 'Não reconheci esse comando. Tente outra frase.';
-    }
+    status.style.color = '#dc2626';
+    status.textContent = 'Não reconheci esse comando. Tente outra frase.';
   }
 }
 function _navIniciarVoz() {
@@ -22934,10 +22884,8 @@ function _navIniciarVoz() {
   if (!SpeechRecognitionApi) {
     status.style.color = '#dc2626';
     status.textContent = 'Reconhecimento de voz não disponível neste navegador/acesso (pode exigir https).';
-    _navMostrarDigitar();
     return;
   }
-  var minhaSessao = ++_navVozSessao;
   try {
     var rec = new SpeechRecognitionApi();
     rec.lang = 'pt-BR';
@@ -22946,21 +22894,19 @@ function _navIniciarVoz() {
     status.style.color = '#475569';
     status.textContent = 'Ouvindo...';
     rec.onresult = function(ev) {
-      if (minhaSessao !== _navVozSessao) return;
       var texto = ev.results[0][0].transcript;
       var input = document.getElementById('nav-comando-input');
       if (input) input.value = texto;
       _navExecutarDoPainel();
     };
     rec.onerror = function() {
-      if (minhaSessao !== _navVozSessao) return;
-      _navFalhaReconhecimento('Não entendi.');
+      status.style.color = '#dc2626';
+      status.textContent = 'Não entendi. Tente novamente ou digite o comando.';
     };
     rec.start();
   } catch (e) {
     status.style.color = '#dc2626';
     status.textContent = 'Reconhecimento de voz indisponível.';
-    _navMostrarDigitar();
   }
 }
 
@@ -26816,27 +26762,16 @@ function _drGerar() {
 }
 
 </script>
-<style>
-@keyframes navMicPulse {
-  0% { box-shadow: 0 0 0 0 rgba(39,42,74,.35); }
-  70% { box-shadow: 0 0 0 14px rgba(39,42,74,0); }
-  100% { box-shadow: 0 0 0 0 rgba(39,42,74,0); }
-}
-</style>
 <div id="nav-comando-painel" style="display:none;position:fixed;left:84px;bottom:22px;width:300px;background:#fff;border-radius:12px;box-shadow:0 8px 28px rgba(15,23,42,.25);z-index:9998;flex-direction:column;overflow:hidden">
   <div style="background:linear-gradient(135deg,#272A4A,#3d4180);padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
     <div style="font-size:12px;font-weight:700;color:#fff">Para onde vamos?</div>
     <span onclick="_navTogglePainel()" style="color:rgba(255,255,255,.7);cursor:pointer;font-size:14px">&times;</span>
   </div>
   <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
-    <div id="nav-comando-campos" style="display:flex;gap:6px">
+    <div style="display:flex;gap:6px">
       <input id="nav-comando-input" placeholder="ex.: abrir pedido" class="form-input" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter'){_navExecutarDoPainel();}">
       <button onclick="_navIniciarVoz()" title="Falar" style="background:#f1f5f9;border:none;border-radius:7px;width:34px;color:#272A4A;cursor:pointer"><i class="ti ti-microphone"></i></button>
       <button onclick="_navExecutarDoPainel()" title="Ir" style="background:#272A4A;border:none;border-radius:7px;width:34px;color:#fff;cursor:pointer"><i class="ti ti-arrow-right"></i></button>
-    </div>
-    <div id="nav-comando-voz-mobile" style="display:none;flex-direction:column;align-items:center;gap:10px;padding:8px 0">
-      <div id="nav-comando-mic-grande" style="width:56px;height:56px;border-radius:50%;background:#272A4A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;animation:navMicPulse 1.6s ease-in-out infinite"><i class="ti ti-microphone"></i></div>
-      <span onclick="_navMostrarDigitar()" style="font-size:11px;color:#64748b;cursor:pointer;text-decoration:underline">Prefiro digitar</span>
     </div>
     <div id="nav-comando-status" style="font-size:11px;min-height:14px"></div>
   </div>
