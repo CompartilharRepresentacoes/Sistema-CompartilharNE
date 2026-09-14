@@ -255,6 +255,79 @@
       .sb-flyout .fly-col { border-right:none !important; padding:2px 0 !important; }
       .sb-flyout .fly-col-title { color: rgba(255,255,255,.4) !important; padding: 6px 6px 2px !important; }
 
+      /* Ocorrencias: KPIs 2 por linha no mobile (desktop continua 4 colunas) */
+      #oc-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+      /* Ocorrencias: barra de filtros empilha no mobile (mesmo padrao/classes ja usados
+         no Controle de Entrega -- ver comentario la em cima). */
+      #page-ocorrencias .entf-linha-topo {
+        flex-direction:column !important; align-items:stretch !important; gap:8px !important;
+      }
+      #page-ocorrencias .entf-linha-topo > div {
+        width:100% !important; max-width:100% !important; flex:0 0 auto !important;
+      }
+      #page-ocorrencias .entf-linha-topo > span {
+        display:block !important; width:100% !important; margin:2px 0 0 !important;
+      }
+      #page-ocorrencias .entf-linha-topo > button {
+        width:100% !important; margin:2px 0 0 !important; margin-left:0 !important; justify-content:center !important;
+      }
+      #page-ocorrencias .entf-daterow {
+        display:flex !important; align-items:center !important; gap:6px !important; width:100% !important;
+      }
+      #page-ocorrencias .entf-daterow input {
+        flex:1 1 0 !important; min-width:0 !important; width:auto !important;
+      }
+      #page-ocorrencias #oc-filtros-extra {
+        flex-direction:column !important; align-items:stretch !important; gap:0 !important;
+      }
+      #page-ocorrencias #oc-filtros-extra > span {
+        display:block !important; width:100% !important; margin:10px 0 4px !important;
+      }
+      #page-ocorrencias #oc-filtros-extra > span:first-child {
+        margin-top:0 !important;
+      }
+      #page-ocorrencias #oc-filtros-extra > input,
+      #page-ocorrencias #oc-filtros-extra > select {
+        width:100% !important; box-sizing:border-box !important;
+      }
+      #page-ocorrencias #oc-filtros-extra > button {
+        width:100% !important; margin-top:14px !important; justify-content:center !important;
+      }
+
+      /* Revenda: KPIs 2 por linha no mobile (desktop continua 4 colunas) */
+      #rev-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+      /* Revenda: barra de filtros empilha no mobile (mesmo padrao usado em Ocorrencias/
+         Controle de Entrega) e esconde o cabecalho de colunas da lista, que nao faz
+         sentido espremido no celular -- cada item vira cartao via .mc-row generico. */
+      #page-revenda-list .entf-linha-topo {
+        flex-direction:column !important; align-items:stretch !important; gap:8px !important;
+      }
+      #page-revenda-list .entf-linha-topo > div {
+        width:100% !important; max-width:100% !important; flex:0 0 auto !important;
+      }
+      #page-revenda-list .entf-linha-topo > button {
+        width:100% !important; margin:2px 0 0 !important; margin-left:0 !important; justify-content:center !important;
+      }
+      #page-revenda-list #rev-filtros-extra {
+        flex-direction:column !important; align-items:stretch !important; gap:0 !important;
+      }
+      #page-revenda-list #rev-filtros-extra > span {
+        display:block !important; width:100% !important; margin:10px 0 4px !important;
+      }
+      #page-revenda-list #rev-filtros-extra > span:first-child {
+        margin-top:0 !important;
+      }
+      #page-revenda-list #rev-filtros-extra > input,
+      #page-revenda-list #rev-filtros-extra > select {
+        width:100% !important; box-sizing:border-box !important;
+      }
+      #page-revenda-list #rev-filtros-extra > button {
+        width:100% !important; margin-top:14px !important; justify-content:center !important;
+      }
+      #page-revenda-list .rev-header-row { display:none !important; }
+
       /* Dashboard (Início): evita espremer/quebrar em telas de celular */
       .dash-root #kpis { grid-template-columns: repeat(2, 1fr) !important; }
       .dash-root #podio { grid-template-columns: 1fr !important; gap:10px !important; }
@@ -328,45 +401,60 @@
         padding:12px 14px !important; row-gap:2px !important; column-gap:8px !important;
       }
       #page-entrega-controle .mc-row .ent-cliente { order:1 !important; flex:0 0 100% !important; }
+      #page-entrega-controle .mc-row .ent-pedido { display:none !important; }
 
-      /* Cidade/UF/Fabrica/Transportadora: grupo ISOLADO (flex-wrap proprio -- itens soltos junto de
-         outros campos no mesmo flex plano ja causou sobreposicao real de texto, corrigido em 2026-09-11). */
-      #page-entrega-controle .mc-row .ent-linha-local {
+      /* Fornecedor/Transp/NF: grupo isolado (a pedido do Marcos, 2026-09-11 2a rodada) --
+         Fornecedor sem rotulo "Fabrica:", em MAIUSCULO/negrito; Transp tambem em MAIUSCULO;
+         ordem visual (Fornecedor, NF, Transp) e diferente da ordem das colunas do desktop
+         (Fornecedor, Transp, NF), por isso usa order:N !important proprio dentro do grupo --
+         nao usa o mesmo order:N "de posicao desktop" herdado via inline style. */
+      #page-entrega-controle .mc-row .ent-linha-forn {
         order:2 !important; display:flex !important; flex-wrap:wrap !important; flex:0 0 100% !important;
-        column-gap:10px !important; row-gap:2px !important;
+        column-gap:10px !important; row-gap:2px !important; align-items:center !important;
       }
-      #page-entrega-controle .mc-row .ent-linha-local .ent-cidade,
-      #page-entrega-controle .mc-row .ent-linha-local .ent-uf,
-      #page-entrega-controle .mc-row .ent-linha-local .ent-forn,
-      #page-entrega-controle .mc-row .ent-linha-local .ent-transp {
-        flex:0 0 auto !important; white-space:nowrap !important; max-width:100% !important; color:#1e293b !important;
+      #page-entrega-controle .mc-row .ent-linha-forn .ent-forn {
+        order:1 !important; flex:0 0 auto !important; white-space:nowrap !important; max-width:100% !important;
+        color:#1e293b !important; font-weight:800 !important; text-transform:uppercase !important;
       }
-      #page-entrega-controle .mc-row .ent-uf::before { content:'- '; }
-      #page-entrega-controle .mc-row .ent-forn::before { content:'F\0000e1brica: '; }
-      #page-entrega-controle .mc-row .ent-transp::before { content:'Transp: '; }
+      #page-entrega-controle .mc-row .ent-linha-forn .ent-nf {
+        order:2 !important; flex:0 0 auto !important; white-space:nowrap !important; font-size:12px !important; color:#1e293b !important; margin:0 !important;
+      }
+      #page-entrega-controle .mc-row .ent-linha-forn .ent-transp {
+        order:3 !important; flex:0 0 auto !important; white-space:nowrap !important; max-width:100% !important;
+        color:#1e293b !important; text-transform:uppercase !important;
+      }
+      #page-entrega-controle .mc-row .ent-nf::before { content:'NF: '; }
+      #page-entrega-controle .mc-row .ent-transp::before { content:'Transp: '; text-transform:none !important; }
 
-      /* Pedido/NF/Status: grupo isolado novo (a pedido do Marcos) -- antes Pedido/NF eram 2 linhas
-         cinzas separadas e Status ficava sozinho no topo ao lado do nome do cliente. */
-      #page-entrega-controle .mc-row .ent-linha-refs {
+      /* Cidade/UF/Status: grupo isolado (a pedido do Marcos) -- Status saiu do topo (ao lado
+         do cliente) e do grupo com Pedido/NF, e passou a ficar ao lado da Cidade/UF, alinhado
+         a direita, em MAIUSCULO/negrito e sem a pilula colorida (so o texto). */
+      #page-entrega-controle .mc-row .ent-linha-local {
         order:3 !important; display:flex !important; flex-wrap:wrap !important; flex:0 0 100% !important;
         column-gap:10px !important; row-gap:2px !important; align-items:center !important;
       }
-      #page-entrega-controle .mc-row .ent-linha-refs .ent-pedido,
-      #page-entrega-controle .mc-row .ent-linha-refs .ent-nf,
-      #page-entrega-controle .mc-row .ent-linha-refs .ent-status {
-        flex:0 0 auto !important; white-space:nowrap !important; font-size:12px !important; color:#1e293b !important; margin:0 !important;
+      #page-entrega-controle .mc-row .ent-linha-local .ent-cidade,
+      #page-entrega-controle .mc-row .ent-linha-local .ent-uf {
+        flex:0 0 auto !important; white-space:nowrap !important; max-width:100% !important; color:#1e293b !important;
       }
-      #page-entrega-controle .mc-row .ent-pedido::before { content:'Pedido: '; }
-      #page-entrega-controle .mc-row .ent-nf::before { content:'NF: '; }
-      #page-entrega-controle .mc-row .ent-linha-refs .ent-status::before { content:'Status: '; }
-      #page-entrega-controle .mc-row .ent-linha-refs .ent-status span {
-        background:none !important; padding:0 !important; border-radius:0 !important; font-weight:800 !important; font-size:12px !important;
+      #page-entrega-controle .mc-row .ent-uf::before { content:'- '; }
+      #page-entrega-controle .mc-row .ent-linha-local .ent-uf { margin-left:-8px !important; }
+      #page-entrega-controle .mc-row .ent-linha-local .ent-status {
+        flex:0 0 auto !important; white-space:nowrap !important; font-size:12px !important; color:#1e293b !important; margin:0 0 0 auto !important;
+      }
+      #page-entrega-controle .mc-row .ent-linha-local .ent-status::before { content:'Status: '; }
+      #page-entrega-controle .mc-row .ent-linha-local .ent-status span {
+        background:none !important; padding:0 !important; border-radius:0 !important; font-weight:800 !important; font-size:12px !important; text-transform:uppercase !important;
       }
 
-      /* Faturado/Previsao/Atraso: grupo isolado em grid de 3 colunas fixas. */
+      /* Faturado/Previsao/Dias/Entrega: grupo isolado em grid de 4 colunas fixas --
+         a pedido do Marcos (2026-09-11, 3a rodada), a Entrega deixou de ser uma linha
+         separada embaixo e virou a 4a coluna desta mesma linha (mockup aprovado antes
+         de aplicar). O rotulo "Data de entrega" nao cabia mais numa coluna de 1/4 da
+         largura do cartao, entao virou so "Entrega" (termo que o proprio Marcos usou). */
       #page-entrega-controle .mc-row .ent-linha-metrics {
-        order:4 !important; display:grid !important; grid-template-columns:repeat(3,1fr) !important; flex:0 0 100% !important;
-        column-gap:8px !important; border-top:1px solid #f1f5f9 !important; padding-top:6px !important; margin-top:6px !important;
+        order:4 !important; display:grid !important; grid-template-columns:repeat(4,1fr) !important; flex:0 0 100% !important;
+        column-gap:6px !important; border-top:1px solid #f1f5f9 !important; padding-top:6px !important; margin-top:6px !important; align-items:start !important;
       }
       #page-entrega-controle .mc-row .ent-linha-metrics .ent-datafat,
       #page-entrega-controle .mc-row .ent-linha-metrics .ent-prev,
@@ -380,15 +468,17 @@
       }
       #page-entrega-controle .mc-row .ent-datafat::before { content:'Faturado'; }
       #page-entrega-controle .mc-row .ent-prev::before { content:'Previs\00e3o'; }
-      #page-entrega-controle .mc-row .ent-dias::before { content:'Atraso'; }
+      #page-entrega-controle .mc-row .ent-dias::before { content:'Dias'; }
 
       #page-entrega-controle .mc-row .ent-entrega-wrap {
-        order:5 !important; flex:0 0 100% !important; margin-top:8px !important; padding-right:16px !important; box-sizing:border-box !important;
+        min-width:0 !important; box-sizing:border-box !important;
       }
       #page-entrega-controle .mc-row .ent-entrega-wrap::before {
-        content:'Data de entrega'; display:block; font-size:9.5px; color:#94a3b8; text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px;
+        content:'Entrega'; display:block; font-size:9.5px; color:#94a3b8; text-transform:uppercase; letter-spacing:.03em; margin-bottom:2px;
       }
-      #page-entrega-controle .mc-row .ent-entrega-wrap input { width:100% !important; box-sizing:border-box !important; }
+      #page-entrega-controle .mc-row .ent-entrega-wrap input {
+        width:100% !important; box-sizing:border-box !important; font-size:10.5px !important; padding:3px 4px !important;
+      }
       #page-catalogo-list .pg-two-col { display:block; }
       #page-catalogo-list .pg-side { position:static; margin-bottom:10px; }
       #page-catalogo-list #catalogo-kpis-box { display:none !important; }
@@ -4984,22 +5074,52 @@
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px">
-          <div style="font-size:11px;color:#64748b">Ocorrências no mês</div>
-          <div id="oc-kpi-total" style="font-size:20px;font-weight:700;color:#272A4A;margin-top:2px">0</div>
+      <!-- Barra de filtros -->
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+        <div class="entf-linha-topo" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="position:relative;flex:1;min-width:200px;max-width:300px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="oc-filtro-busca" oninput="renderOcorrencias()" placeholder="Buscar por NF, cliente ou transportadora..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          </div>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
+          <div class="entf-daterow" style="display:contents">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="oc-filtro-data-de" oninput="_entctrlMaskData(this);renderOcorrencias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <span style="color:#94a3b8;font-size:13px">→</span>
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="oc-filtro-data-ate" oninput="_entctrlMaskData(this);renderOcorrencias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          </div>
+          <button id="oc-mais-filtros-btn" onclick="_ocToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
+            <i class="ti ti-adjustments-horizontal" style="font-size:13px"></i> <span id="oc-mais-filtros-txt">Mais filtros</span> <i id="oc-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
+          </button>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px">
-          <div style="font-size:11px;color:#64748b">Avarias</div>
-          <div id="oc-kpi-avarias" style="font-size:20px;font-weight:700;color:#DC2626;margin-top:2px">0</div>
+        <div id="oc-filtros-extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:600;color:#64748b">Tipo</span>
+          <select id="oc-filtro-tipo" onchange="renderOcorrencias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Transportadora</span>
+          <input id="oc-filtro-transportadora" oninput="renderOcorrencias()" placeholder="Nome..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
+          <button onclick="_ocLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px">
-          <div style="font-size:11px;color:#64748b">Recusas / devoluções</div>
-          <div id="oc-kpi-recusas" style="font-size:20px;font-weight:700;color:#C2410C;margin-top:2px">0</div>
+      </div>
+
+      <div id="oc-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div id="oc-kpi-total" style="font-size:22px;font-weight:800;color:#272A4A;line-height:1.2;letter-spacing:-.02em">0</div>
+          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Ocorrências no mês</div>
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#272A4A"></div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px">
-          <div style="font-size:11px;color:#64748b">Valor afetado</div>
-          <div id="oc-kpi-valor" style="font-size:20px;font-weight:700;color:#272A4A;margin-top:2px">R$ 0,00</div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div id="oc-kpi-avarias" style="font-size:22px;font-weight:800;color:#DC2626;line-height:1.2;letter-spacing:-.02em">0</div>
+          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Avarias</div>
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#DC2626"></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div id="oc-kpi-recusas" style="font-size:22px;font-weight:800;color:#C2410C;line-height:1.2;letter-spacing:-.02em">0</div>
+          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Recusas / devoluções</div>
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#C2410C"></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div id="oc-kpi-valor" style="font-size:22px;font-weight:800;color:#272A4A;line-height:1.2;letter-spacing:-.02em">R$ 0,00</div>
+          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Valor afetado</div>
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#272A4A"></div>
         </div>
       </div>
 
@@ -5028,7 +5148,7 @@
           </div>
           <div>
             <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Data da ocorrência</div>
-            <input type="date" id="oc-data" style="width:100%;border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc">
+            <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="oc-data" oninput="_entctrlMaskData(this)" style="width:100%;border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc">
           </div>
           <div>
             <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Valor afetado</div>
@@ -5113,7 +5233,7 @@
         <button onclick="showPage('page-revenda-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Registrar Item</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">
+      <div id="rev-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
           <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Itens Disponíveis</div>
           <div style="font-size:22px;font-weight:800;color:#1e293b;line-height:1.2;letter-spacing:-.02em" id="rev-kpi-disponiveis">0</div>
@@ -5140,36 +5260,40 @@
         </div>
       </div>
 
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
-        <div style="position:relative;flex:1;min-width:170px;max-width:230px">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input id="rev-busca" oninput="renderRevendaList()" placeholder="Produto, cliente ou fornecedor..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+        <div class="entf-linha-topo" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="position:relative;flex:1;min-width:200px;max-width:300px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="rev-busca" oninput="renderRevendaList()" placeholder="Produto, cliente ou fornecedor..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          </div>
+          <button id="rev-mais-filtros-btn" onclick="_revToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
+            <i class="ti ti-adjustments-horizontal" style="font-size:13px"></i> <span id="rev-mais-filtros-txt">Mais filtros</span> <i id="rev-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
+          </button>
         </div>
-        <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
-        <input id="rev-fornecedor" oninput="renderRevendaList()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
-        <span style="font-size:11px;font-weight:600;color:#64748b">Validade</span>
-        <select id="rev-validade-filtro" onchange="renderRevendaList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-          <option value="">Todas</option>
-          <option value="15">Vencendo em 15 dias</option>
-          <option value="vencidas">Vencidas</option>
-        </select>
-        <button onclick="revLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <span style="font-size:11px;font-weight:600;color:#64748b">Status</span>
-        <select id="rev-status-filtro" onchange="renderRevendaList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-          <option value="">Todos</option>
-          <option value="Disponível">Disponível</option>
-          <option value="Vencendo em breve">Vencendo em breve</option>
-          <option value="Vencido">Vencido</option>
-          <option value="Revendido">Revendido</option>
-          <option value="Descartado">Descartado</option>
-        </select>
+        <div id="rev-filtros-extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
+          <input id="rev-fornecedor" oninput="renderRevendaList()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <span style="font-size:11px;font-weight:600;color:#64748b">Validade</span>
+          <select id="rev-validade-filtro" onchange="renderRevendaList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+            <option value="">Todas</option>
+            <option value="15">Vencendo em 15 dias</option>
+            <option value="vencidas">Vencidas</option>
+          </select>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Status</span>
+          <select id="rev-status-filtro" onchange="renderRevendaList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+            <option value="">Todos</option>
+            <option value="Disponível">Disponível</option>
+            <option value="Vencendo em breve">Vencendo em breve</option>
+            <option value="Vencido">Vencido</option>
+            <option value="Revendido">Revendido</option>
+            <option value="Descartado">Descartado</option>
+          </select>
+          <button onclick="revLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+        </div>
       </div>
 
       <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-        <div style="display:grid;grid-template-columns:1.3fr 1.1fr 1fr 75px 90px 55px 1fr 150px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
+        <div class="rev-header-row" style="display:grid;grid-template-columns:1.3fr 1.1fr 1fr 75px 90px 55px 1fr 150px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
           <span>Produto</span><span>Cliente Origem</span><span>Fornecedor</span><span>Qtd Disp.</span><span>Validade</span><span>Dias</span><span>Status</span><span style="text-align:right">Ações</span>
         </div>
         <div id="rev-tbody" style="min-height:60px"></div>
@@ -19029,23 +19153,22 @@ function renderEntregaControle() {
     else statusHtml = '<span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Em Rota</span>';
     var diasHtml = (r.diasDif == null) ? '<span style="color:#cbd5e1">—</span>' : '<span style="font-weight:700;color:' + (r.diasDif > 0 ? '#991b1b' : '#15803d') + '">' + r.diasDif + '</span>';
     return '<div class="mc-row" style="display:grid;grid-template-columns:90px 1.7fr 72px 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
+      + '<div class="mc-meta ent-pedido" style="order:1;font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary ent-cliente" style="order:2;font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="ent-linha-forn" style="display:contents">'
+      + '<div class="mc-meta ent-forn" style="order:5;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="mc-meta ent-transp" style="order:6;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(r.transportadoraNome || '—') + '</div>'
+      + '<div class="mc-meta ent-nf" style="order:7;font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
+      + '</div>'
       + '<div class="ent-linha-local" style="display:contents">'
       + '<div class="mc-meta ent-cidade" style="order:3;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(cli.ent_cidade || cli.cidade || '—') + '</div>'
       + '<div class="ent-uf" style="order:4;font-size:12px;color:#64748b;text-align:center">' + _pedEsc(r.uf || '—') + '</div>'
-      + '<div class="mc-meta ent-forn" style="order:5;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div class="mc-meta ent-transp" style="order:6;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(r.transportadoraNome || '—') + '</div>'
-      + '</div>'
-      + '<div class="ent-linha-refs" style="display:contents">'
-      + '<div class="mc-meta ent-pedido" style="order:1;font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<div class="mc-meta ent-nf" style="order:7;font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
       + '<div class="mc-badge ent-status" style="order:12">' + statusHtml + '</div>'
       + '</div>'
       + '<div class="ent-linha-metrics" style="display:contents">'
       + '<div class="ent-datafat" style="order:8;font-size:12px;color:#64748b">' + dataFatFmt + '</div>'
       + '<div class="ent-prev" style="order:9;font-size:12px;color:#64748b">' + prevFmt + '</div>'
       + '<div class="ent-dias" style="order:10;text-align:center">' + diasHtml + '</div>'
-      + '</div>'
       + '<div class="ent-entrega-wrap" style="order:11"><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="' + _entctrlDataParaBR(f.dataEntrega) + '" oninput="_entctrlMaskData(this)" onchange="entctrlSalvarDataEntregaTexto(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:6px;padding:4px 6px;font-size:11px"></div>'
       + '</div>';
   }).join('');
@@ -21347,6 +21470,16 @@ var REV_STATUS_CORES = {
   'Descartado':         { bg:'#f1f5f9', cor:'#64748b' },
 };
 
+function _revToggleMaisFiltros() {
+  var box = document.getElementById('rev-filtros-extra');
+  var txt = document.getElementById('rev-mais-filtros-txt');
+  var chev = document.getElementById('rev-mais-filtros-chevron');
+  if (!box) return;
+  var abrir = box.style.display === 'none' || !box.style.display;
+  box.style.display = abrir ? 'flex' : 'none';
+  if (txt) txt.textContent = abrir ? 'Menos filtros' : 'Mais filtros';
+  if (chev) chev.className = abrir ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
+}
 function revLimparFiltros() {
   ['rev-busca','rev-fornecedor'].forEach(function(id){ var el = document.getElementById(id); if (el) el.value = ''; });
   var vf = document.getElementById('rev-validade-filtro'); if (vf) vf.value = '';
@@ -24783,7 +24916,70 @@ function _ocDetectarTipo(linha) {
   return 'Outro';
 }
 
+// (Marcos, 2026-09-11) A maioria das transportadoras manda a ocorrencia num template de
+// tabela com campos fixos (Nº NOTA FISCAL / MOTIVO DA OCORRÊNCIA / OBS com linhas como
+// "01 CX CÓD 001058 - SOBRA"). Quando reconhece esse padrao, tenta calcular o Valor
+// afetado sozinho a partir do preco unitario da NF de origem -- fica so como sugestao,
+// o campo continua editavel na tela de revisao antes de confirmar. So retorna resultado
+// quando encontra sinal real de tabela (MOTIVO ou linha de produto); caso contrario
+// devolve null e quem chamou cai no parser antigo de texto livre (fallback abaixo).
+function _ocExtrairEstruturado(texto) {
+  var txt = String(texto || '');
+  var mNf = txt.match(/N[ºo°]?\.?\s*NOTA\s*FISCAL\s*[:\-]?\s*\n?\s*([0-9]{3,9})/i);
+  if (!mNf) return null;
+  var nf = mNf[1];
+
+  var mMotivo = txt.match(/MOTIVO\s*DA\s*OCORR[ÊE]NCIA\s*[:\-]?\s*\n?\s*([^\n]+)/i);
+  var motivoTxt = mMotivo ? mMotivo[1].trim() : '';
+
+  var reProduto = /(\d+(?:[.,]\d+)?)\s*(CX|CAIXAS?|UNID(?:ADES?)?|UND?|KG)S?\.?\s*C[ÓO]D\.?\s*([A-Z0-9\-]+)\s*[-–]\s*(SOBRA|FALTA|AVARIAD[OA]|AVARIA|QUEBRAD[OA]|DANIFICAD[OA]|EXTRAVIAD[OA])/gi;
+  var produtos = [];
+  var m;
+  while ((m = reProduto.exec(txt)) !== null) {
+    produtos.push({ qtd: parseFloat(String(m[1]).replace(',', '.')), unidade: m[2].toUpperCase(), codigo: m[3], situacao: m[4].toUpperCase() });
+  }
+
+  if (!motivoTxt && !produtos.length) return null;
+
+  var mObs = txt.match(/\bOBS[:.]?\s*\n?([\s\S]{0,400})/i);
+  var descricaoBruta = mObs ? mObs[1] : motivoTxt;
+  var descricao = String(descricaoBruta || motivoTxt || '').replace(/\s+/g, ' ').trim().slice(0, 300);
+
+  var tipo = _ocDetectarTipo(motivoTxt + ' ' + descricao);
+  if (produtos.length && tipo === 'Outro') tipo = 'Divergência de quantidade';
+
+  return { nf: nf, descricao: descricao || motivoTxt || ('NF ' + nf), tipo: tipo, produtos: produtos };
+}
+
+// Casa cada produto extraido do e-mail (por codigo) com os itens da NF de origem (mesmo
+// pedido/fatura, via _entctrlLinhas) e soma preco unitario x quantidade -- convertendo
+// CX para unidade pelo "cx" (Quant. Caixa) gravado no item do pedido. Soma SOBRA + FALTA
+// quando houver os dois (inversao de produtos conta o impacto das duas pontas).
+function _ocCalcularValorProdutos(nf, produtos) {
+  if (!produtos || !produtos.length) return 0;
+  var linhas = _entctrlLinhas();
+  var achado = linhas.find(function(l){ return String(l.fatura.numDuplicata || '').trim() === String(nf).trim(); });
+  if (!achado || !achado.pedido || !achado.pedido.itens) return 0;
+  var itens = achado.pedido.itens;
+  var total = 0;
+  produtos.forEach(function(prod){
+    var codigoNorm = String(prod.codigo || '').replace(/^0+/, '');
+    var item = itens.find(function(it){ return String(it.prodCodigo || '').replace(/^0+/, '') === codigoNorm; });
+    if (!item) return;
+    var precoUnit = Number(item.precoUnit) || 0;
+    var unidadesAfetadas = Number(prod.qtd) || 0;
+    if (/^(CX|CAIXA)/.test(prod.unidade) && item.cx) unidadesAfetadas = unidadesAfetadas * Number(item.cx);
+    total += unidadesAfetadas * precoUnit;
+  });
+  return total;
+}
+
 function _ocExtrairOcorrenciasDeTexto(texto) {
+  var estruturado = _ocExtrairEstruturado(texto);
+  if (estruturado) {
+    var valorCalc = _ocCalcularValorProdutos(estruturado.nf, estruturado.produtos);
+    return [{ nf: estruturado.nf, descricao: estruturado.descricao, tipo: estruturado.tipo, valor: valorCalc > 0 ? _pedNumParaMascara(valorCalc) : '' }];
+  }
   var linhas = String(texto || '').split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
   var reNf = /\bNF[^\d]{0,15}?(\d{3,9})\b/i;
   var candidatas = [];
@@ -24805,11 +25001,66 @@ function _ocPopularSelectTipo() {
   }
 }
 
+// Select do FILTRO (Mais filtros) -- separado do select do formulario manual (oc-tipo) porque
+// cada um tem seu proprio dataset.populado e a opcao "Todos" e diferente de "Selecione...".
+function _ocPopularFiltroTipo() {
+  var sel = document.getElementById('oc-filtro-tipo');
+  if (sel && !sel.dataset.populado) {
+    sel.innerHTML = '<option value="">Todos</option>' + OC_TIPOS.map(function(t){ return '<option value="' + t + '">' + t + '</option>'; }).join('');
+    sel.dataset.populado = '1';
+  }
+}
+
+function _ocToggleMaisFiltros() {
+  var box = document.getElementById('oc-filtros-extra');
+  var txt = document.getElementById('oc-mais-filtros-txt');
+  var chev = document.getElementById('oc-mais-filtros-chevron');
+  if (!box) return;
+  var abrir = box.style.display === 'none' || !box.style.display;
+  box.style.display = abrir ? 'flex' : 'none';
+  if (txt) txt.textContent = abrir ? 'Menos filtros' : 'Mais filtros';
+  if (chev) chev.className = abrir ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
+}
+function _ocLimparFiltros() {
+  ['oc-filtro-busca','oc-filtro-data-de','oc-filtro-data-ate','oc-filtro-tipo','oc-filtro-transportadora'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  renderOcorrencias();
+}
+
 function renderOcorrencias() {
   _ocPopularSelectTipo();
+  _ocPopularFiltroTipo();
+
+  var busca = _cpNorm(document.getElementById('oc-filtro-busca') ? document.getElementById('oc-filtro-busca').value : '');
+  var dataDe = _entctrlParseDataBR(document.getElementById('oc-filtro-data-de') ? document.getElementById('oc-filtro-data-de').value : '');
+  var dataAte = _entctrlParseDataBR(document.getElementById('oc-filtro-data-ate') ? document.getElementById('oc-filtro-data-ate').value : '');
+  var tipoF = document.getElementById('oc-filtro-tipo') ? document.getElementById('oc-filtro-tipo').value : '';
+  var transpF = _cpNorm(document.getElementById('oc-filtro-transportadora') ? document.getElementById('oc-filtro-transportadora').value : '');
+
   var data = getOcorrencias().slice().sort(function(a, b){ return (b.data || '').localeCompare(a.data || '') || (b.dtCadastro || '').localeCompare(a.dtCadastro || ''); });
-  var mesAtual = new Date().toISOString().slice(0, 7);
-  var doMes = data.filter(function(o){ return (o.data || '').slice(0, 7) === mesAtual; });
+
+  data = data.filter(function(o){
+    if (busca) {
+      var nfM = _cpNorm(o.nfNumero || '').indexOf(busca) !== -1;
+      var cliM = _cpNorm(o.clienteNome || '').indexOf(busca) !== -1;
+      var trM = _cpNorm(o.transportadoraNome || '').indexOf(busca) !== -1;
+      if (!nfM && !cliM && !trM) return false;
+    }
+    if (dataDe && (!o.data || o.data < dataDe)) return false;
+    if (dataAte && (!o.data || o.data > dataAte)) return false;
+    if (tipoF && o.tipo !== tipoF) return false;
+    if (transpF && _cpNorm(o.transportadoraNome || '').indexOf(transpF) === -1) return false;
+    return true;
+  });
+
+  var doMes;
+  if (dataDe || dataAte) {
+    doMes = data;
+  } else {
+    var mesAtual = new Date().toISOString().slice(0, 7);
+    doMes = data.filter(function(o){ return (o.data || '').slice(0, 7) === mesAtual; });
+  }
   var avarias = doMes.filter(function(o){ return o.tipo === 'Avaria'; }).length;
   var recusas = doMes.filter(function(o){ return o.tipo === 'Recusa total' || o.tipo === 'Recusa parcial'; }).length;
   var valorTotal = doMes.reduce(function(acc, o){ return acc + (parseFloat(o.valor) || 0); }, 0);
@@ -24825,7 +25076,7 @@ function renderOcorrencias() {
   data = _pgAplicar(data, 'oc-qtd');
   if (pag) pag.textContent = _pgTexto(data.length, ocTotalGeral, ocTotalGeral, 'ocorrência', 'ocorrências');
   if (!data.length) {
-    tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhuma ocorrência registrada.</div>';
+    tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhuma ocorrência encontrada com esses filtros.</div>';
     return;
   }
   tbody.innerHTML = data.map(function(o){
@@ -24956,7 +25207,7 @@ function _ocSalvarManual() {
     clienteNome: document.getElementById('oc-nf-cliente-nome').value,
     transportadoraNome: document.getElementById('oc-nf-transportadora-nome').value,
     tipo: tipo,
-    data: document.getElementById('oc-data').value || new Date().toISOString().slice(0, 10),
+    data: _entctrlParseDataBR(document.getElementById('oc-data').value) || new Date().toISOString().slice(0, 10),
     valor: _pedParseMoeda(document.getElementById('oc-valor').value),
     descricao: document.getElementById('oc-descricao').value.trim(),
     anexoData: _ocAnexoData,
