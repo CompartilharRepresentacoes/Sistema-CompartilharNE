@@ -355,6 +355,154 @@
         display:inline-block !important; margin-top:8px; margin-right:20px; vertical-align:top;
       }
 
+      /* Pedidos (Digitacao de Pedidos): no mobile as abas viram "atual + 3 pontos",
+         os filtros da Visao Geral empilham, os KPIs viram cartoes, o Imprimir desce
+         para depois dos KPIs, e o cabecalho de coluna da lista fica escondido -- o
+         cartao de cada pedido ja mostra rotulos (Forn/Vend/Valor/Fat) via ::before. */
+      #page-pedido-list #ped-abas-desktop { display:none !important; }
+      #page-pedido-list #ped-abas-mobile { display:block !important; }
+      #page-pedido-list #ped-filtros-geral { flex-direction:column !important; align-items:stretch !important; }
+      #page-pedido-list #ped-filtros-geral .ped-divider { display:none !important; }
+      #page-pedido-list #ped-filtros-geral .ped-busca-wrap { max-width:100% !important; width:100% !important; }
+      #page-pedido-list #ped-filtros-geral .ped-data-row,
+      #page-pedido-list #ped-filtros-geral .ped-status-row {
+        display:flex !important; align-items:center !important; gap:8px !important; width:100% !important;
+      }
+      #page-pedido-list #ped-filtros-geral .ped-data-row input,
+      #page-pedido-list #ped-filtros-geral .ped-status-row select { flex:1 !important; min-width:0 !important; }
+      #page-pedido-list #ped-filtros-geral .ped-limpar-btn,
+      #page-pedido-list #ped-filtros-geral .ped-imprimir-btn { width:100% !important; justify-content:center !important; margin:0 !important; }
+      #page-pedido-list #ped-filtros-geral .ped-spacer { display:none !important; }
+      #page-pedido-list #ped-filtros-geral .ped-kpis-wrap {
+        display:grid !important; grid-template-columns:repeat(2,1fr) !important; gap:8px !important;
+        width:100% !important; padding-left:0 !important; order:20 !important;
+      }
+      #page-pedido-list #ped-filtros-geral .ped-imprimir-btn { order:21 !important; }
+      #page-pedido-list #ped-filtros-geral .ped-kpi-item {
+        display:flex !important; flex-direction:column-reverse !important; align-items:center !important;
+        text-align:center !important; background:#f8fafc !important; border-radius:10px !important; padding:10px !important;
+      }
+      #page-pedido-list #ped-filtros-geral .ped-kpi-item > div:last-child { font-size:15px !important; }
+      #page-pedido-list #ped-filtros-geral .ped-kpi-item:nth-child(3) { grid-column:1 / span 2 !important; }
+      #page-pedido-list .ped-header-row { display:none !important; }
+      #page-pedido-list .ped-r-pedido::before { content:'Pedido nº '; color:#94a3b8; }
+      #page-pedido-list .ped-r-forn::before { content:'Forn: '; color:#94a3b8; }
+      #page-pedido-list .ped-r-vend::before { content:'Vend: '; color:#94a3b8; }
+      #page-pedido-list .ped-r-valor::before { content:'Valor: '; color:#94a3b8; font-weight:400; }
+      #page-pedido-list .ped-r-valfat::before { content:'Fat: '; color:#94a3b8; font-weight:400; }
+
+      /* Pedidos: mesmo padrao aplicado as outras 5 visoes (Venda Simples, Vendas
+         Completas, Vendas Completas Faturadas, Vendas Simples NFs, Vendas Nao
+         Faturadas) -- filtros empilham, campos secundarios entram em "Mais
+         filtros", KPIs viram cartoes, e cabecalhos de grid ficam escondidos. */
+      #page-pedido-list .ped-filtros-bar { flex-direction:column !important; align-items:stretch !important; }
+      #page-pedido-list .ped-data-row {
+        display:flex !important; align-items:center !important; gap:8px !important; width:100% !important;
+      }
+      #page-pedido-list .ped-data-row input { flex:1 !important; min-width:0 !important; }
+      #page-pedido-list .ped-mf-toggle {
+        display:flex !important; align-items:center !important; justify-content:space-between !important;
+        width:100% !important; padding:8px 2px !important; font-size:11px !important; font-weight:700 !important;
+        color:#272A4A !important; cursor:pointer;
+      }
+      #page-pedido-list .ped-filtros-extra { display:none !important; }
+      #page-pedido-list .ped-filtros-extra.ped-mf-aberta {
+        display:flex !important; flex-direction:column !important; gap:8px !important; width:100% !important;
+      }
+      #page-pedido-list .ped-filtros-extra.ped-mf-aberta > span { margin-top:4px !important; }
+      #page-pedido-list .ped-filtros-extra.ped-mf-aberta input,
+      #page-pedido-list .ped-filtros-extra.ped-mf-aberta select { width:100% !important; box-sizing:border-box !important; }
+      #page-pedido-list .ped-kpis-wrap {
+        display:grid !important; grid-template-columns:repeat(2,1fr) !important; gap:8px !important;
+        width:100% !important; padding-left:0 !important;
+      }
+      #page-pedido-list .ped-kpi-item {
+        display:flex !important; flex-direction:column-reverse !important; align-items:center !important;
+        text-align:center !important; background:#f8fafc !important; border-radius:10px !important; padding:10px !important;
+      }
+      #page-pedido-list .ped-kpi-item > div:last-child { font-size:15px !important; }
+      #page-pedido-list .ped-kpi-item:nth-child(3):last-child { grid-column:1 / span 2 !important; }
+      #page-pedido-list .ped-kpis-box { grid-template-columns:1fr !important; gap:10px !important; }
+      #page-pedido-list .ped-kpis-box > div { border-left:none !important; border-right:none !important; border-top:1px solid #f1f5f9 !important; padding-top:10px !important; }
+      #page-pedido-list .ped-kpis-box > div:first-child { border-top:none !important; padding-top:0 !important; }
+      #page-pedido-list .ped-r-uf::before { content:'UF: '; color:#94a3b8; }
+      #page-pedido-list .ped-r-cidade::before { content:'Cidade: '; color:#94a3b8; }
+      #page-pedido-list .ped-r-transp::before { content:'Transp: '; color:#94a3b8; }
+      #page-pedido-list .ped-r-duplicata::before { content:'Duplicata: '; color:#94a3b8; }
+      #page-pedido-list .ped-r-datafat::before { content:'Fat: '; color:#94a3b8; }
+      #page-pedido-list .ped-r-peso::before { content:'Peso: '; color:#94a3b8; }
+
+      /* Pedidos: ajustes visuais pedidos por Marcos (2026-09-16) -- cartao com
+         sombra em vez de linha flat, campos reagrupados (data+pedido+status
+         numa linha, cliente em destaque, fornecedor em maiusculo sem rotulo
+         + vendedor por extenso, valores por ultimo), rotulos atualizados. */
+      #page-pedido-list .ped-r-forn::before { content:''; }
+      #page-pedido-list .ped-r-vend::before { content:'Vendedor: '; color:#94a3b8; }
+      #page-pedido-list .ped-r-valfat::before { content:'Fat.: '; color:#94a3b8; font-weight:400; }
+
+      #ped-tbody .mc-row {
+        display:flex !important; flex-wrap:wrap !important; align-items:center !important;
+        gap:6px 10px !important; background:#fff !important; border-radius:12px !important;
+        box-shadow:0 2px 10px rgba(15,23,42,.08) !important; margin-bottom:10px !important;
+        border:none !important; padding:14px !important;
+      }
+      #ped-tbody .ped-r-data { order:1 !important; }
+      #ped-tbody .ped-r-pedido { order:2 !important; }
+      #ped-tbody .mc-badge { order:3 !important; margin-left:auto !important; }
+      #ped-tbody .mc-primary { order:4 !important; flex-basis:100% !important; }
+      #ped-tbody .ped-r-forn { order:5 !important; text-transform:uppercase !important; font-weight:700 !important; color:#272A4A !important; }
+      #ped-tbody .ped-r-vend { order:6 !important; margin-left:auto !important; }
+      #ped-tbody .ped-r-valor { order:7 !important; }
+      #ped-tbody .ped-r-valfat { order:8 !important; margin-left:auto !important; }
+      #ped-tbody .mc-actions {
+        order:99 !important; flex-basis:100% !important; margin-top:6px !important;
+        padding-top:8px !important; border-top:1px solid #f1f5f9 !important;
+      }
+
+      #pss-tbody .mc-row {
+        display:flex !important; flex-wrap:wrap !important; align-items:center !important;
+        gap:6px 10px !important; background:#fff !important; border-radius:12px !important;
+        box-shadow:0 2px 10px rgba(15,23,42,.08) !important; margin-bottom:10px !important;
+        border:none !important; padding:14px !important;
+      }
+      #pss-tbody .ped-r-data { order:1 !important; }
+      #pss-tbody .ped-r-pedido { order:2 !important; }
+      #pss-tbody .mc-badge { order:3 !important; margin-left:auto !important; }
+      #pss-tbody .mc-primary { order:4 !important; flex-basis:100% !important; }
+      #pss-tbody .ped-r-forn { order:5 !important; text-transform:uppercase !important; font-weight:700 !important; color:#272A4A !important; }
+      #pss-tbody .ped-r-uf { order:6 !important; margin-left:auto !important; }
+      #pss-tbody .ped-r-vend { order:7 !important; }
+      #pss-tbody .ped-r-valor { order:8 !important; margin-left:auto !important; }
+
+      #psn-tbody .mc-row {
+        display:flex !important; flex-wrap:wrap !important; align-items:center !important;
+        gap:6px 10px !important; background:#fff !important; border-radius:12px !important;
+        box-shadow:0 2px 10px rgba(15,23,42,.08) !important; margin-bottom:10px !important;
+        border:none !important; padding:14px !important;
+      }
+      #psn-tbody .ped-r-pedido { order:1 !important; }
+      #psn-tbody .ped-r-datafat { order:2 !important; margin-left:auto !important; }
+      #psn-tbody .mc-primary { order:3 !important; flex-basis:100% !important; }
+      #psn-tbody .ped-r-forn { order:4 !important; text-transform:uppercase !important; font-weight:700 !important; color:#272A4A !important; }
+      #psn-tbody .ped-r-vend { order:5 !important; margin-left:auto !important; }
+      #psn-tbody .ped-r-cidade { order:6 !important; }
+      #psn-tbody .ped-r-uf { order:7 !important; }
+      #psn-tbody .ped-r-transp { order:8 !important; margin-left:auto !important; }
+      #psn-tbody .ped-r-duplicata { order:9 !important; }
+      #psn-tbody .ped-r-peso { order:10 !important; margin-left:auto !important; }
+      #psn-tbody .ped-r-valor {
+        order:11 !important; flex-basis:100% !important; text-align:right !important;
+        margin-top:6px !important; padding-top:6px !important; border-top:1px solid #f1f5f9 !important;
+      }
+
+      /* Vendas Completas / Completas Faturadas / Vendas Nao Faturadas: mesmo
+         padrao visual (fornecedor maiusculo, Vendedor por extenso) -- ja
+         usam cartao com sombra por pedido, so empilha o cabecalho no mobile
+         em vez do flex-wrap corrido, que ficava dificil de ler. */
+      #page-pedido-list .vcx-header-row { flex-direction:column !important; align-items:stretch !important; gap:5px !important; }
+      #page-pedido-list .vcx-r-forn { text-transform:uppercase !important; }
+
+
       /* Dashboard (Início): evita espremer/quebrar em telas de celular */
       .dash-root #kpis { grid-template-columns: repeat(2, 1fr) !important; }
       .dash-root #podio { grid-template-columns: 1fr !important; gap:10px !important; }
@@ -3958,7 +4106,7 @@
         <button onclick="showPage('page-pedido-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
       <!-- Abas de visao (mesmo estilo das abas da pagina Inicio: maiusculas + sublinhado laranja) -->
-      <div style="display:flex;gap:2px;border-bottom:2px solid #e2e8f0;margin-bottom:14px;background:#f8fafc;border-radius:10px 10px 0 0;padding:4px 4px 0;flex-wrap:wrap">
+      <div id="ped-abas-desktop" style="display:flex;gap:2px;border-bottom:2px solid #e2e8f0;margin-bottom:14px;background:#f8fafc;border-radius:10px 10px 0 0;padding:4px 4px 0;flex-wrap:wrap">
         <button id="ped-aba-geral" onclick="pedSetAba('geral')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#fff;color:#272A4A;border:none;border-bottom:2px solid #DE7926;margin-bottom:-2px;border-radius:8px 8px 0 0;box-shadow:0 -1px 4px rgba(15,23,42,.06);cursor:pointer;white-space:nowrap;transition:all .15s">Visão Geral</button>
         <button id="ped-aba-completas" onclick="pedSetAba('completas')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Completas</button>
         <button id="ped-aba-simples" onclick="pedSetAba('simples')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Venda Simples</button>
@@ -3966,21 +4114,32 @@
         <button id="ped-aba-simples-nf" onclick="pedSetAba('simples-nf')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Simples NFs</button>
         <button id="ped-aba-nao-fat" onclick="pedSetAba('nao-fat')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Não Faturadas</button>
       </div>
+      <!-- Abas (mobile): so a aba atual + botao de 3 pontos que abre as outras -->
+      <div id="ped-abas-mobile" style="display:none;position:relative;margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:10px;padding:4px">
+          <div id="ped-abas-mobile-atual" style="background:#fff;color:#272A4A;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:7px 12px;border-radius:8px;border-bottom:2px solid #DE7926">Visão Geral</div>
+          <button onclick="_pedToggleAbasMenu()" title="Outras visões" style="width:30px;height:30px;border:none;background:transparent;color:#64748b;font-size:18px;font-weight:700;cursor:pointer">&#8942;</button>
+        </div>
+        <div id="ped-abas-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,.14);overflow:hidden;z-index:20;min-width:230px"></div>
+      </div>
 
       <!-- ═══ Painel: Visão Geral ═══ -->
       <div id="ped-painel-geral">
       <!-- Barra de filtros -->
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
-        <div style="position:relative;flex:1;min-width:200px;max-width:280px">
+      <div id="ped-filtros-geral" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+        <div class="ped-busca-wrap" style="position:relative;flex:1;min-width:200px;max-width:280px">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input id="ped-busca" oninput="renderPedidoList()" placeholder="Cliente, fornecedor ou numero do pedido..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
         </div>
-        <div style="width:1px;height:22px;background:#e2e8f0"></div>
+        <div class="ped-divider" style="width:1px;height:22px;background:#e2e8f0"></div>
+        <div class="ped-data-row">
         <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
         <input type="date" id="ped-data-de" onchange="renderPedidoList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
         <span style="color:#94a3b8;font-size:13px">→</span>
         <input type="date" id="ped-data-ate" onchange="renderPedidoList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-        <div style="width:1px;height:22px;background:#e2e8f0"></div>
+        </div>
+        <div class="ped-divider" style="width:1px;height:22px;background:#e2e8f0"></div>
+        <div class="ped-status-row">
         <span style="font-size:11px;font-weight:600;color:#64748b">Status</span>
         <select id="ped-status-sel" onchange="pedSetStatusFiltro(this.value)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           <option value="">Todos</option>
@@ -3992,16 +4151,17 @@
           <option value="Bonificado">Bonificado</option>
           <option value="Cancelado">Cancelado</option>
         </select>
-        <button onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
-        <div style="flex:1"></div>
-        <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
-          <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="ped-kpi-total">0</div></div>
-          <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="ped-kpi-valor">R$ 0,00</div></div>
-          <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="ped-kpi-peso">0 kg</div></div>
+        </div>
+        <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
+        <div class="ped-spacer" style="flex:1"></div>
+        <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
+          <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="ped-kpi-total">0</div></div>
+          <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="ped-kpi-valor">R$ 0,00</div></div>
+          <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="ped-kpi-peso">0 kg</div></div>
         </div>
       </div>
       <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-        <div style="display:grid;grid-template-columns:85px 90px 2fr 1fr 0.8fr 100px 100px 110px 292px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+        <div class="ped-header-row" style="display:grid;grid-template-columns:85px 90px 2fr 1fr 0.8fr 100px 100px 110px 292px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
           <span id="ped-th-data" onclick="pedOrdenarPor('data')" style="cursor:pointer;user-select:none">Data<span class="ped-seta"></span></span>
           <span id="ped-th-numPedidoCliente" onclick="pedOrdenarPor('numPedidoCliente')" style="cursor:pointer;user-select:none">Pedido<span class="ped-seta"></span></span>
           <span id="ped-th-clienteNome" onclick="pedOrdenarPor('clienteNome')" style="cursor:pointer;user-select:none">Cliente<span class="ped-seta"></span></span>
@@ -4027,7 +4187,9 @@
 
       <!-- ═══ Painel: Venda Simples ═══ -->
       <div id="ped-painel-simples" style="display:none">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+        <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+          <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('pss')">Mais filtros <span>&#9662;</span></div>
+        <div id="pss-filtros-extra" class="ped-filtros-extra" style="display:contents">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
           <select id="pss-vendedor" onchange="renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
@@ -4044,15 +4206,16 @@
           <select id="pss-rede" onchange="pssAtualizarLojas();renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Loja</span>
           <select id="pss-loja" onchange="renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <button onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('simples')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
-          <div style="flex:1"></div>
-          <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="pss-kpi-valor">R$ 0,00</div></div>
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pss-kpi-peso">0 kg</div></div>
+        </div>
+          <button class="ped-limpar-btn" onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
+          <div class="ped-spacer" style="flex:1"></div>
+          <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="pss-kpi-valor">R$ 0,00</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pss-kpi-peso">0 kg</div></div>
           </div>
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-          <div style="display:grid;grid-template-columns:85px 90px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+          <div class="ped-header-row" style="display:grid;grid-template-columns:85px 90px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>Data</span><span>Pedido</span><span>Cliente</span><span style="text-align:center">UF</span><span>Fornecedor</span><span>Vendedor</span><span>Valor</span><span>Status</span>
           </div>
           <div id="pss-tbody" style="min-height:60px"></div>
@@ -4070,11 +4233,15 @@
 
       <!-- ═══ Painel: Vendas Completas ═══ -->
       <div id="ped-painel-completas" style="display:none">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+        <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+          <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
           <input type="date" id="vc-data-de" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           <span style="color:#94a3b8;font-size:13px">→</span>
           <input type="date" id="vc-data-ate" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          </div>
+          <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('vc')">Mais filtros <span>&#9662;</span></div>
+          <div id="vc-filtros-extra" class="ped-filtros-extra" style="display:contents">
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
           <input id="vc-fornecedor" oninput="renderVendasCompletas()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
@@ -4091,11 +4258,12 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="vc-cliente" oninput="renderVendasCompletas()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
-          <button onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
-          <div style="flex:1"></div>
-          <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vc-kpi-total">0</div></div>
+          </div>
+          <button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
+          <div class="ped-spacer" style="flex:1"></div>
+          <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px"><div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vc-kpi-total">0</div></div></div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.04);display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
+        <div class="ped-kpis-box" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.04);display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
           <div style="text-align:center;padding:0 10px">
             <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Total</div>
             <div style="font-size:16px;font-weight:800;color:#272A4A" id="vc-kpi-valor">R$ 0,00</div>
@@ -4120,11 +4288,15 @@
         </div>
       </div>
       <div id="ped-painel-completas-fat" style="display:none">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+        <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+          <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
           <input type="date" id="vcf-data-de" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           <span style="color:#94a3b8;font-size:13px">→</span>
           <input type="date" id="vcf-data-ate" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          </div>
+          <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('vcf')">Mais filtros <span>&#9662;</span></div>
+          <div id="vcf-filtros-extra" class="ped-filtros-extra" style="display:contents">
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
           <input id="vcf-fornecedor" oninput="renderVendasCompletasFaturadas()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
@@ -4141,12 +4313,13 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="vcf-cliente" oninput="renderVendasCompletasFaturadas()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
-          <button onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
-          <div style="flex:1"></div>
-          <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vcf-kpi-total">0</div></div>
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Faturado</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="vcf-kpi-valor">R$ 0,00</div></div>
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vcf-kpi-peso">0 kg</div></div>
+          </div>
+          <button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
+          <div class="ped-spacer" style="flex:1"></div>
+          <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vcf-kpi-total">0</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Faturado</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="vcf-kpi-valor">R$ 0,00</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vcf-kpi-peso">0 kg</div></div>
           </div>
         </div>
         <div id="vcf-lista" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -4157,11 +4330,15 @@
         </div>
       </div>
       <div id="ped-painel-simples-nf" style="display:none">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+        <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+          <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
           <input type="date" id="psn-data-de" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           <span style="color:#94a3b8;font-size:13px">→</span>
           <input type="date" id="psn-data-ate" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          </div>
+          <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('psn')">Mais filtros <span>&#9662;</span></div>
+          <div id="psn-filtros-extra" class="ped-filtros-extra" style="display:contents">
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
           <input id="psn-fornecedor" oninput="renderVendasSimplesNfs()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
@@ -4178,17 +4355,17 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="psn-cliente" oninput="renderVendasSimplesNfs()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
-          <button onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
-          <div style="flex:1"></div>
-          <div style="flex:1"></div>
-          <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">NFs</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="psn-kpi-total">0</div></div>
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="psn-kpi-valor">R$ 0,00</div></div>
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="psn-kpi-peso">0 kg</div></div>
+          </div>
+          <button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
+          <div class="ped-spacer" style="flex:1"></div>
+          <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">NFs</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="psn-kpi-total">0</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="psn-kpi-valor">R$ 0,00</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="psn-kpi-peso">0 kg</div></div>
           </div>
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-          <div style="display:grid;grid-template-columns:100px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+          <div class="ped-header-row" style="display:grid;grid-template-columns:100px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>Pedido Cliente</span><span>Cliente</span><span>Cidade</span><span style="text-align:center">Estado</span><span>Vendedor</span><span>Fornecedor</span><span>Transportadora</span><span>Duplicata</span><span>Data Faturamento</span><span style="text-align:center">Qtd Fat / Kg</span><span style="text-align:right">Valor Fat</span>
           </div>
           <div id="psn-tbody" style="min-height:60px"></div>
@@ -4200,11 +4377,15 @@
         </div>
       </div>
       <div id="ped-painel-nao-fat" style="display:none">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+        <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+          <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
           <input type="date" id="pnf-data-de" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           <span style="color:#94a3b8;font-size:13px">→</span>
           <input type="date" id="pnf-data-ate" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          </div>
+          <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('pnf')">Mais filtros <span>&#9662;</span></div>
+          <div id="pnf-filtros-extra" class="ped-filtros-extra" style="display:contents">
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
           <input id="pnf-fornecedor" oninput="renderNaoFaturados()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
@@ -4221,13 +4402,13 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="pnf-cliente" oninput="renderNaoFaturados()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
-          <button onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
-          <div style="flex:1"></div>
-          <div style="flex:1"></div>
-          <div style="display:flex;gap:18px;align-items:center;padding-left:6px">
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos pendentes</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pnf-kpi-total">0</div></div>
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Não Faturado</div><div style="font-size:13px;font-weight:700;color:#dc2626" id="pnf-kpi-valor">R$ 0,00</div></div>
-            <div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Pendente</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pnf-kpi-peso">0 kg</div></div>
+          </div>
+          <button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
+          <div class="ped-spacer" style="flex:1"></div>
+          <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos pendentes</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pnf-kpi-total">0</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Não Faturado</div><div style="font-size:13px;font-weight:700;color:#dc2626" id="pnf-kpi-valor">R$ 0,00</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Pendente</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pnf-kpi-peso">0 kg</div></div>
           </div>
         </div>
         <div id="pnf-lista" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -15857,6 +16038,14 @@ function _pedAtualizarSetasOrdenacao() {
 // ── Abas da lista de Pedidos ──
 var _pedAbaAtiva = 'geral';
 var PED_ABAS = ['geral','completas','simples','completas-fat','simples-nf','nao-fat'];
+var PED_ABA_LABELS = {
+  'geral': 'Visão Geral',
+  'completas': 'Vendas Completas',
+  'simples': 'Venda Simples',
+  'completas-fat': 'Vendas Completas Faturadas',
+  'simples-nf': 'Vendas Simples NFs',
+  'nao-fat': 'Vendas Não Faturadas'
+};
 function pedSetAba(aba) {
   _pedAbaAtiva = aba;
   PED_ABAS.forEach(function(a){
@@ -15871,12 +16060,38 @@ function pedSetAba(aba) {
     }
     if (painel) painel.style.display = ativo ? 'block' : 'none';
   });
+  var abaMobileAtual = document.getElementById('ped-abas-mobile-atual');
+  if (abaMobileAtual) abaMobileAtual.textContent = PED_ABA_LABELS[aba] || aba;
+  _pedFecharAbasMenu();
   if (aba === 'geral') renderPedidoList();
   if (aba === 'simples') { _pssPopularFiltros(); renderVendaSimples(); }
   if (aba === 'nao-fat') { _pnfPopularFiltros(); renderNaoFaturados(); }
   if (aba === 'simples-nf') { _psnPopularFiltros(); renderVendasSimplesNfs(); }
   if (aba === 'completas') { _vcPopularFiltros(); renderVendasCompletas(); }
   if (aba === 'completas-fat') { _vcfPopularFiltros(); renderVendasCompletasFaturadas(); }
+}
+// Menu mobile de "outras visoes": no celular so a aba ativa aparece, junto de um
+// botao de 3 pontos que abre a lista das demais para trocar de visao.
+function _pedToggleAbasMenu() {
+  var menu = document.getElementById('ped-abas-menu');
+  if (!menu) return;
+  var aberto = menu.style.display === 'block';
+  if (aberto) { _pedFecharAbasMenu(); return; }
+  menu.innerHTML = PED_ABAS.filter(function(a){ return a !== _pedAbaAtiva; }).map(function(a){
+    return '<div onclick="pedSetAba(\'' + a + '\')" style="padding:13px 16px;font-size:14px;font-weight:600;color:#1e293b;cursor:pointer;border-bottom:1px solid #f1f5f9">' + PED_ABA_LABELS[a] + '</div>';
+  }).join('');
+  menu.style.display = 'block';
+}
+function _pedFecharAbasMenu() {
+  var menu = document.getElementById('ped-abas-menu');
+  if (menu) menu.style.display = 'none';
+}
+// Alterna o painel "Mais filtros" (Fornecedor/Vendedor/Rede/Sub Rede/UF/Cliente)
+// nas abas que tem filtros secundarios, escondidos por padrao no celular.
+function _pedToggleMaisFiltros(prefixo) {
+  var wrap = document.getElementById(prefixo + '-filtros-extra');
+  if (!wrap) return;
+  wrap.classList.toggle('ped-mf-aberta');
 }
 
 // ── Venda Simples: filtros por vendedor/UF/fornecedor/produto/rede/loja ──
@@ -15987,13 +16202,13 @@ function renderVendaSimples() {
     var cor = statusCores[p.status] || { bg:'#f1f5f9', cor:'#64748b' };
     var statusHtml = '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>';
     return '<div class="mc-row" style="display:grid;grid-template-columns:85px 90px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
-      + '<div class="mc-meta" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
-      + '<div class="mc-meta" style="font-size:12.5px;color:#475569;white-space:normal;word-break:break-all;line-height:1.25">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+      + '<div class="mc-meta ped-r-data" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
+      + '<div class="mc-meta ped-r-pedido" style="font-size:12.5px;color:#475569;white-space:normal;word-break:break-all;line-height:1.25">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary" style="font-size:13px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word;line-height:1.3">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-      + '<div class="mc-meta" style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(uf) + '</div>'
-      + '<div class="mc-meta" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div class="mc-meta" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(p.vendedorNome || '—') + '</div>'
-      + '<div class="mc-meta" style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedFmtMoeda(p.valorTotal) + '</div>'
+      + '<div class="mc-meta ped-r-uf" style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(uf) + '</div>'
+      + '<div class="mc-meta ped-r-forn" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="mc-meta ped-r-vend" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(p.vendedorNome || '—') + '</div>'
+      + '<div class="mc-meta ped-r-valor" style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedFmtMoeda(p.valorTotal) + '</div>'
       + '<div class="mc-badge">' + statusHtml + '</div>'
       + '</div>';
   }).join('');
@@ -16067,13 +16282,13 @@ function renderPedidoList() {
     const podeExcluir = p.status === 'Cancelado';
     return '<div class="mc-row" style="display:grid;grid-template-columns:85px 90px 2fr 1fr 0.8fr 100px 100px 110px 292px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9;transition:background .12s"'
       + ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">'
-      + '<div class="mc-meta" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
-      + '<div class="mc-meta" style="font-size:12.5px;color:#475569;white-space:normal;word-break:break-all;line-height:1.25;padding-right:6px">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+      + '<div class="mc-meta ped-r-data" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
+      + '<div class="mc-meta ped-r-pedido" style="font-size:12.5px;color:#475569;white-space:normal;word-break:break-all;line-height:1.25;padding-right:6px">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary" style="font-size:13px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word;line-height:1.3;padding-right:8px">' + (p.revenda ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:#eff6ff;color:#1d4ed8;margin-right:6px;vertical-align:middle"><i class="ti ti-recycle" style="font-size:9px"></i>Revenda</span>' : '') + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-      + '<div class="mc-meta" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div class="mc-meta" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px">' + _pedEsc(p.vendedorNome || '—') + '</div>'
-      + '<div class="mc-meta" style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedFmtMoeda(p.valorTotal) + '</div>'
-      + '<div class="mc-meta" style="font-size:12.5px;' + (p.valorFaturado ? 'font-weight:700;color:#15803d' : 'color:#cbd5e1') + '">' + (p.valorFaturado ? _pedFmtMoeda(p.valorFaturado) : '—') + '</div>'
+      + '<div class="mc-meta ped-r-forn" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="mc-meta ped-r-vend" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px">' + _pedEsc(p.vendedorNome || '—') + '</div>'
+      + '<div class="mc-meta ped-r-valor" style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedFmtMoeda(p.valorTotal) + '</div>'
+      + '<div class="mc-meta ped-r-valfat" style="font-size:12.5px;' + (p.valorFaturado ? 'font-weight:700;color:#15803d' : 'color:#cbd5e1') + '">' + (p.valorFaturado ? _pedFmtMoeda(p.valorFaturado) : '—') + '</div>'
       + '<div class="mc-badge">' + statusHtml + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
       + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:12px"></i></button>'
@@ -18730,17 +18945,17 @@ function renderVendasSimplesNfs() {
       var transp = f.transportadoraId ? transpMap[f.transportadoraId] : null;
       var transportadoraNome = transp ? (transp.nome_fantasia || transp.razao_social || '') : (f.transportadoraNome || '');
       return '<div class="mc-row" style="display:grid;grid-template-columns:100px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
-        + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+        + '<div class="mc-meta ped-r-pedido" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
         + '<div class="mc-primary" style="font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-        + '<div class="mc-meta" style="font-size:12px;color:#64748b">' + _pedEsc(cli ? (cli.cidade || '—') : '—') + '</div>'
-        + '<div class="mc-meta" style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(cli ? (cli.estado || '—') : '—') + '</div>'
-        + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(p.vendedorNome || '—') + '</div>'
-        + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
-        + '<div class="mc-meta" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(transportadoraNome || '—') + '</div>'
-        + '<div class="mc-meta" style="font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
-        + '<div class="mc-meta" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
-        + '<div class="mc-meta" style="font-size:12px;color:#64748b;text-align:center">' + r.pesoFat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + '</div>'
-        + '<div class="mc-meta" style="font-size:12.5px;font-weight:700;color:#15803d;text-align:right">' + _pedFmtMoeda(f.valor) + '</div>'
+        + '<div class="mc-meta ped-r-cidade" style="font-size:12px;color:#64748b">' + _pedEsc(cli ? (cli.cidade || '—') : '—') + '</div>'
+        + '<div class="mc-meta ped-r-uf" style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(cli ? (cli.estado || '—') : '—') + '</div>'
+        + '<div class="mc-meta ped-r-vend" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(p.vendedorNome || '—') + '</div>'
+        + '<div class="mc-meta ped-r-forn" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
+        + '<div class="mc-meta ped-r-transp" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(transportadoraNome || '—') + '</div>'
+        + '<div class="mc-meta ped-r-duplicata" style="font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
+        + '<div class="mc-meta ped-r-datafat" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
+        + '<div class="mc-meta ped-r-peso" style="font-size:12px;color:#64748b;text-align:center">' + r.pesoFat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + '</div>'
+        + '<div class="mc-meta ped-r-valor" style="font-size:12.5px;font-weight:700;color:#15803d;text-align:right">' + _pedFmtMoeda(f.valor) + '</div>'
         + '</div>';
     }).join('');
   }
@@ -19334,12 +19549,13 @@ function renderNaoFaturados() {
         + '</tr>';
     }).join('');
     return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
-      + '<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
-      + '<div style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
-      + '<div style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-      + '<div style="font-size:11.5px;color:#475569">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fefce8;color:#a16207">' + _pedEsc(p.status) + '</span>'
+      + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
+      + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
+      + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="vcx-r-forn" style="font-size:11.5px;color:#272A4A;font-weight:700">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
+      + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+      + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fefce8;color:#a16207">' + _pedEsc(p.status) + '</span>'
       + '<div style="flex:1"></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Pendente</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + pesoPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Não Faturado</div><div style="font-size:12px;font-weight:700;color:#dc2626">' + _pedFmtMoeda(valorPendente) + '</div></div>'
@@ -19495,12 +19711,13 @@ function renderVendasCompletas() {
         + '</tr>';
     }).join('');
     return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
-      + '<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
-      + '<div style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
-      + '<div style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-      + '<div style="font-size:11.5px;color:#475569">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
+      + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
+      + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
+      + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="vcx-r-forn" style="font-size:11.5px;color:#272A4A;font-weight:700">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
+      + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+      + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
       + '<div style="flex:1"></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Total</div><div style="font-size:12px;font-weight:700;color:#15803d">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
@@ -19612,12 +19829,13 @@ function renderVendasCompletasFaturadas() {
         + '</tr>';
     }).join('');
     return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
-      + '<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
-      + '<div style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
-      + '<div style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-      + '<div style="font-size:11.5px;color:#475569">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
+      + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
+      + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
+      + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="vcx-r-forn" style="font-size:11.5px;color:#272A4A;font-weight:700">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
+      + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+      + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
       + '<div style="flex:1"></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Total</div><div style="font-size:12px;font-weight:700;color:#15803d">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
@@ -22846,15 +23064,58 @@ function deleteComandoNavegacao(id) {
 }
 
 // ── Botão flutuante de comando (voz ou texto) ──
+var _navTentativasFalha = 0;
+var _navVozSessao = 0;
 function _navTogglePainel() {
   var painel = document.getElementById('nav-comando-painel');
   if (!painel) return;
   var aberto = painel.style.display === 'flex';
   painel.style.display = aberto ? 'none' : 'flex';
+  _navVozSessao++;
   if (!aberto) {
     var input = document.getElementById('nav-comando-input');
     document.getElementById('nav-comando-status').textContent = '';
-    if (input) { input.value = ''; input.focus(); }
+    if (input) input.value = '';
+    _navTentativasFalha = 0;
+    var mobile = window.matchMedia('(max-width: 767px)').matches;
+    if (mobile) {
+      _navMostrarOuvindo();
+      _navIniciarVoz();
+    } else {
+      _navMostrarDigitar();
+    }
+  }
+}
+function _navMostrarDigitar() {
+  _navVozSessao++;
+  var campos = document.getElementById('nav-comando-campos');
+  var vozMobile = document.getElementById('nav-comando-voz-mobile');
+  if (campos) campos.style.display = 'flex';
+  if (vozMobile) vozMobile.style.display = 'none';
+  var input = document.getElementById('nav-comando-input');
+  if (input) input.focus();
+}
+function _navMostrarOuvindo() {
+  var campos = document.getElementById('nav-comando-campos');
+  var vozMobile = document.getElementById('nav-comando-voz-mobile');
+  if (campos) campos.style.display = 'none';
+  if (vozMobile) vozMobile.style.display = 'flex';
+}
+function _navFalhaReconhecimento(msg) {
+  var status = document.getElementById('nav-comando-status');
+  _navTentativasFalha++;
+  if (_navTentativasFalha >= 3) {
+    status.style.color = '#dc2626';
+    status.textContent = 'Não consegui entender por voz. Pode digitar aqui.';
+    _navMostrarDigitar();
+  } else {
+    status.style.color = '#b45309';
+    status.textContent = msg + ' (tentativa ' + _navTentativasFalha + ' de 3) — tentando de novo...';
+    setTimeout(function(){
+      var vozMobile = document.getElementById('nav-comando-voz-mobile');
+      var aindaEmVoz = vozMobile && vozMobile.style.display !== 'none';
+      if (aindaEmVoz) _navIniciarVoz();
+    }, 900);
   }
 }
 function _navExecutarDoPainel() {
@@ -22864,8 +23125,9 @@ function _navExecutarDoPainel() {
   var texto = input.value;
   var comando = _navEncontrarComando(texto);
   if (comando) {
+    _navTentativasFalha = 0;
     status.style.color = '#15803d';
-    status.textContent = '\u2714 Abrindo: ' + (PAGE_META[comando.pagina] ? PAGE_META[comando.pagina].title : comando.pagina);
+    status.textContent = '✔ Abrindo: ' + (PAGE_META[comando.pagina] ? PAGE_META[comando.pagina].title : comando.pagina);
     showPage(comando.pagina, { clienteNome: comando.filtroCliente || '', categoriaId: comando.filtroCategoriaId || '', aba: comando.aba || '' });
     setTimeout(function(){
       var painel = document.getElementById('nav-comando-painel');
@@ -22874,8 +23136,14 @@ function _navExecutarDoPainel() {
       status.textContent = '';
     }, 900);
   } else {
-    status.style.color = '#dc2626';
-    status.textContent = 'Não reconheci esse comando. Tente outra frase.';
+    var vozMobile = document.getElementById('nav-comando-voz-mobile');
+    var emModoVoz = vozMobile && vozMobile.style.display !== 'none';
+    if (emModoVoz) {
+      _navFalhaReconhecimento('Não reconheci esse comando.');
+    } else {
+      status.style.color = '#dc2626';
+      status.textContent = 'Não reconheci esse comando. Tente outra frase.';
+    }
   }
 }
 function _navIniciarVoz() {
@@ -22884,8 +23152,10 @@ function _navIniciarVoz() {
   if (!SpeechRecognitionApi) {
     status.style.color = '#dc2626';
     status.textContent = 'Reconhecimento de voz não disponível neste navegador/acesso (pode exigir https).';
+    _navMostrarDigitar();
     return;
   }
+  var minhaSessao = ++_navVozSessao;
   try {
     var rec = new SpeechRecognitionApi();
     rec.lang = 'pt-BR';
@@ -22894,19 +23164,21 @@ function _navIniciarVoz() {
     status.style.color = '#475569';
     status.textContent = 'Ouvindo...';
     rec.onresult = function(ev) {
+      if (minhaSessao !== _navVozSessao) return;
       var texto = ev.results[0][0].transcript;
       var input = document.getElementById('nav-comando-input');
       if (input) input.value = texto;
       _navExecutarDoPainel();
     };
     rec.onerror = function() {
-      status.style.color = '#dc2626';
-      status.textContent = 'Não entendi. Tente novamente ou digite o comando.';
+      if (minhaSessao !== _navVozSessao) return;
+      _navFalhaReconhecimento('Não entendi.');
     };
     rec.start();
   } catch (e) {
     status.style.color = '#dc2626';
     status.textContent = 'Reconhecimento de voz indisponível.';
+    _navMostrarDigitar();
   }
 }
 
@@ -26762,16 +27034,27 @@ function _drGerar() {
 }
 
 </script>
+<style>
+@keyframes navMicPulse {
+  0% { box-shadow: 0 0 0 0 rgba(39,42,74,.35); }
+  70% { box-shadow: 0 0 0 14px rgba(39,42,74,0); }
+  100% { box-shadow: 0 0 0 0 rgba(39,42,74,0); }
+}
+</style>
 <div id="nav-comando-painel" style="display:none;position:fixed;left:84px;bottom:22px;width:300px;background:#fff;border-radius:12px;box-shadow:0 8px 28px rgba(15,23,42,.25);z-index:9998;flex-direction:column;overflow:hidden">
   <div style="background:linear-gradient(135deg,#272A4A,#3d4180);padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
     <div style="font-size:12px;font-weight:700;color:#fff">Para onde vamos?</div>
     <span onclick="_navTogglePainel()" style="color:rgba(255,255,255,.7);cursor:pointer;font-size:14px">&times;</span>
   </div>
   <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
-    <div style="display:flex;gap:6px">
+    <div id="nav-comando-campos" style="display:flex;gap:6px">
       <input id="nav-comando-input" placeholder="ex.: abrir pedido" class="form-input" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter'){_navExecutarDoPainel();}">
       <button onclick="_navIniciarVoz()" title="Falar" style="background:#f1f5f9;border:none;border-radius:7px;width:34px;color:#272A4A;cursor:pointer"><i class="ti ti-microphone"></i></button>
       <button onclick="_navExecutarDoPainel()" title="Ir" style="background:#272A4A;border:none;border-radius:7px;width:34px;color:#fff;cursor:pointer"><i class="ti ti-arrow-right"></i></button>
+    </div>
+    <div id="nav-comando-voz-mobile" style="display:none;flex-direction:column;align-items:center;gap:10px;padding:8px 0">
+      <div id="nav-comando-mic-grande" style="width:56px;height:56px;border-radius:50%;background:#272A4A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;animation:navMicPulse 1.6s ease-in-out infinite"><i class="ti ti-microphone"></i></div>
+      <span onclick="_navMostrarDigitar()" style="font-size:11px;color:#64748b;cursor:pointer;text-decoration:underline">Prefiro digitar</span>
     </div>
     <div id="nav-comando-status" style="font-size:11px;min-height:14px"></div>
   </div>

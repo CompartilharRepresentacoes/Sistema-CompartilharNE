@@ -432,6 +432,77 @@
       #page-pedido-list .ped-r-datafat::before { content:'Fat: '; color:#94a3b8; }
       #page-pedido-list .ped-r-peso::before { content:'Peso: '; color:#94a3b8; }
 
+      /* Pedidos: ajustes visuais pedidos por Marcos (2026-09-16) -- cartao com
+         sombra em vez de linha flat, campos reagrupados (data+pedido+status
+         numa linha, cliente em destaque, fornecedor em maiusculo sem rotulo
+         + vendedor por extenso, valores por ultimo), rotulos atualizados. */
+      #page-pedido-list .ped-r-forn::before { content:''; }
+      #page-pedido-list .ped-r-vend::before { content:'Vendedor: '; color:#94a3b8; }
+      #page-pedido-list .ped-r-valfat::before { content:'Fat.: '; color:#94a3b8; font-weight:400; }
+
+      #ped-tbody .mc-row {
+        display:flex !important; flex-wrap:wrap !important; align-items:center !important;
+        gap:6px 10px !important; background:#fff !important; border-radius:12px !important;
+        box-shadow:0 2px 10px rgba(15,23,42,.08) !important; margin-bottom:10px !important;
+        border:none !important; padding:14px !important;
+      }
+      #ped-tbody .ped-r-data { order:1 !important; }
+      #ped-tbody .ped-r-pedido { order:2 !important; }
+      #ped-tbody .mc-badge { order:3 !important; margin-left:auto !important; }
+      #ped-tbody .mc-primary { order:4 !important; flex-basis:100% !important; }
+      #ped-tbody .ped-r-forn { order:5 !important; text-transform:uppercase !important; font-weight:700 !important; color:#272A4A !important; }
+      #ped-tbody .ped-r-vend { order:6 !important; margin-left:auto !important; }
+      #ped-tbody .ped-r-valor { order:7 !important; }
+      #ped-tbody .ped-r-valfat { order:8 !important; margin-left:auto !important; }
+      #ped-tbody .mc-actions {
+        order:99 !important; flex-basis:100% !important; margin-top:6px !important;
+        padding-top:8px !important; border-top:1px solid #f1f5f9 !important;
+      }
+
+      #pss-tbody .mc-row {
+        display:flex !important; flex-wrap:wrap !important; align-items:center !important;
+        gap:6px 10px !important; background:#fff !important; border-radius:12px !important;
+        box-shadow:0 2px 10px rgba(15,23,42,.08) !important; margin-bottom:10px !important;
+        border:none !important; padding:14px !important;
+      }
+      #pss-tbody .ped-r-data { order:1 !important; }
+      #pss-tbody .ped-r-pedido { order:2 !important; }
+      #pss-tbody .mc-badge { order:3 !important; margin-left:auto !important; }
+      #pss-tbody .mc-primary { order:4 !important; flex-basis:100% !important; }
+      #pss-tbody .ped-r-forn { order:5 !important; text-transform:uppercase !important; font-weight:700 !important; color:#272A4A !important; }
+      #pss-tbody .ped-r-uf { order:6 !important; margin-left:auto !important; }
+      #pss-tbody .ped-r-vend { order:7 !important; }
+      #pss-tbody .ped-r-valor { order:8 !important; margin-left:auto !important; }
+
+      #psn-tbody .mc-row {
+        display:flex !important; flex-wrap:wrap !important; align-items:center !important;
+        gap:6px 10px !important; background:#fff !important; border-radius:12px !important;
+        box-shadow:0 2px 10px rgba(15,23,42,.08) !important; margin-bottom:10px !important;
+        border:none !important; padding:14px !important;
+      }
+      #psn-tbody .ped-r-pedido { order:1 !important; }
+      #psn-tbody .ped-r-datafat { order:2 !important; margin-left:auto !important; }
+      #psn-tbody .mc-primary { order:3 !important; flex-basis:100% !important; }
+      #psn-tbody .ped-r-forn { order:4 !important; text-transform:uppercase !important; font-weight:700 !important; color:#272A4A !important; }
+      #psn-tbody .ped-r-vend { order:5 !important; margin-left:auto !important; }
+      #psn-tbody .ped-r-cidade { order:6 !important; }
+      #psn-tbody .ped-r-uf { order:7 !important; }
+      #psn-tbody .ped-r-transp { order:8 !important; margin-left:auto !important; }
+      #psn-tbody .ped-r-duplicata { order:9 !important; }
+      #psn-tbody .ped-r-peso { order:10 !important; margin-left:auto !important; }
+      #psn-tbody .ped-r-valor {
+        order:11 !important; flex-basis:100% !important; text-align:right !important;
+        margin-top:6px !important; padding-top:6px !important; border-top:1px solid #f1f5f9 !important;
+      }
+
+      /* Vendas Completas / Completas Faturadas / Vendas Nao Faturadas: mesmo
+         padrao visual (fornecedor maiusculo, Vendedor por extenso) -- ja
+         usam cartao com sombra por pedido, so empilha o cabecalho no mobile
+         em vez do flex-wrap corrido, que ficava dificil de ler. */
+      #page-pedido-list .vcx-header-row { flex-direction:column !important; align-items:stretch !important; gap:5px !important; }
+      #page-pedido-list .vcx-r-forn { text-transform:uppercase !important; }
+
+
       /* Dashboard (Início): evita espremer/quebrar em telas de celular */
       .dash-root #kpis { grid-template-columns: repeat(2, 1fr) !important; }
       .dash-root #podio { grid-template-columns: 1fr !important; gap:10px !important; }
@@ -16007,7 +16078,7 @@ function _pedToggleAbasMenu() {
   var aberto = menu.style.display === 'block';
   if (aberto) { _pedFecharAbasMenu(); return; }
   menu.innerHTML = PED_ABAS.filter(function(a){ return a !== _pedAbaAtiva; }).map(function(a){
-    return '<div onclick="pedSetAba(\'' + a + '\')" style="padding:11px 14px;font-size:12px;color:#1e293b;cursor:pointer;border-bottom:1px solid #f1f5f9">' + PED_ABA_LABELS[a] + '</div>';
+    return '<div onclick="pedSetAba(\'' + a + '\')" style="padding:13px 16px;font-size:14px;font-weight:600;color:#1e293b;cursor:pointer;border-bottom:1px solid #f1f5f9">' + PED_ABA_LABELS[a] + '</div>';
   }).join('');
   menu.style.display = 'block';
 }
@@ -19478,12 +19549,13 @@ function renderNaoFaturados() {
         + '</tr>';
     }).join('');
     return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
-      + '<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
-      + '<div style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
-      + '<div style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-      + '<div style="font-size:11.5px;color:#475569">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fefce8;color:#a16207">' + _pedEsc(p.status) + '</span>'
+      + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
+      + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
+      + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="vcx-r-forn" style="font-size:11.5px;color:#272A4A;font-weight:700">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
+      + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+      + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fefce8;color:#a16207">' + _pedEsc(p.status) + '</span>'
       + '<div style="flex:1"></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Pendente</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + pesoPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Não Faturado</div><div style="font-size:12px;font-weight:700;color:#dc2626">' + _pedFmtMoeda(valorPendente) + '</div></div>'
@@ -19639,12 +19711,13 @@ function renderVendasCompletas() {
         + '</tr>';
     }).join('');
     return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
-      + '<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
-      + '<div style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
-      + '<div style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-      + '<div style="font-size:11.5px;color:#475569">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
+      + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
+      + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
+      + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="vcx-r-forn" style="font-size:11.5px;color:#272A4A;font-weight:700">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
+      + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+      + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
       + '<div style="flex:1"></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Total</div><div style="font-size:12px;font-weight:700;color:#15803d">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
@@ -19756,12 +19829,13 @@ function renderVendasCompletasFaturadas() {
         + '</tr>';
     }).join('');
     return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
-      + '<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
-      + '<div style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
-      + '<div style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
-      + '<div style="font-size:11.5px;color:#475569">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
+      + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
+      + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
+      + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="vcx-r-forn" style="font-size:11.5px;color:#272A4A;font-weight:700">' + _pedEsc(fornNomeSo) + '</div>'
+      + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
+      + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+      + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
       + '<div style="flex:1"></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Total</div><div style="font-size:12px;font-weight:700;color:#15803d">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
