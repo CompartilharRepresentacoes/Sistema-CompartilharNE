@@ -14749,16 +14749,7 @@ function _dashConstruirDadosAoVivo() {
   var statusValidos = (typeof PED_STATUS !== 'undefined') ? PED_STATUS : ['Pré-Venda','Aguardando Retorno','Enviado','Faturado','Faturado Parcial','Bonificado','Cancelado'];
 
   var FAB = [], fabIdx = {};
-  var _fabOrdemPrioridade = ['quata','granarolo','sao vicente','prieto','bufalissima','villa germania'];
-  function _fabNormNome(s) { return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
-  var fornecedoresOrdenados = fornecedores.slice().sort(function(a,b){
-    var na = _fabNormNome(a.nome_fantasia || a.codigo || '');
-    var nb = _fabNormNome(b.nome_fantasia || b.codigo || '');
-    var ia = _fabOrdemPrioridade.indexOf(na); if (ia < 0) ia = 999;
-    var ib = _fabOrdemPrioridade.indexOf(nb); if (ib < 0) ib = 999;
-    return ia - ib;
-  });
-  fornecedoresOrdenados.forEach(function (f) { fabIdx[f.id] = FAB.length; FAB.push(f.nome_fantasia || f.codigo || ('Fornecedor ' + f.id)); });
+  fornecedores.forEach(function (f) { fabIdx[f.id] = FAB.length; FAB.push(f.nome_fantasia || f.codigo || ('Fornecedor ' + f.id)); });
   function idxFabrica(id, nome) {
     if (id != null && Object.prototype.hasOwnProperty.call(fabIdx, id)) return fabIdx[id];
     var i = FAB.length; if (id != null) fabIdx[id] = i; FAB.push(nome || 'Fornecedor não cadastrado'); return i;
@@ -15032,37 +15023,6 @@ function dashInit() {
         else el.textContent = (prefix||'') + target.toLocaleString('pt-BR',{minimumFractionDigits:decimals,maximumFractionDigits:decimals}) + (suffix||'');
       }
       requestAnimationFrame(step);
-    }
-    function _dvgAnimarNumero(el, target, fmt) {
-      if (!el) return;
-      const dur = 1000; let start = null;
-      function step(ts) {
-        if (!start) start = ts;
-        const p = Math.min((ts-start)/dur, 1);
-        el.textContent = fmt(target*p);
-        if (p < 1) requestAnimationFrame(step);
-        else el.textContent = fmt(target);
-      }
-      requestAnimationFrame(step);
-    }
-    function _dvgAnimarBarra(el) {
-      if (!el) return;
-      const alvo = parseFloat(el.dataset.pct) || 0;
-      el.style.width = '0%';
-      requestAnimationFrame(() => requestAnimationFrame(() => { el.style.width = alvo + '%'; }));
-    }
-    function _dvgAnimarLinha(pathEl, duracao) {
-      if (!pathEl || typeof pathEl.getTotalLength !== 'function') return;
-      let len;
-      try { len = pathEl.getTotalLength(); } catch (e) { return; }
-      if (!len) return;
-      pathEl.style.transition = 'none';
-      pathEl.style.strokeDasharray = len;
-      pathEl.style.strokeDashoffset = len;
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        pathEl.style.transition = 'stroke-dashoffset ' + (duracao||1200) + 'ms ease';
-        pathEl.style.strokeDashoffset = '0';
-      }));
     }
     let _dvgMesAberto = null;
     let _dvgMesesData = [];
@@ -15376,16 +15336,14 @@ function dashInit() {
       const topC = porCli.map((v,i)=>({i,v})).sort((a,b)=>b.v-a.v).slice(0,5).filter(x=>x.v>0);
       _dvgRenderRank('topClientes', topC.map(x=>({nome:CLI[x.i], val:x.v})));
     }
-    function kpiCard(titulo, valor, color, sub, kind, idx, anim) {
+    function kpiCard(titulo, valor, color, sub, kind, idx) {
       const _gradStops = ['#1c2f66', '#2c4488', '#3d5aa8', '#5b78c9', '#7b93d9', '#a9c2f5'];
       const barColor   = color==='bad' ? '#dc2626' : (_gradStops[idx||0] || '#1c2f66');
       const accentColor = barColor;
       const valColor    = color==='good' ? '#1c2f66' : color==='bad' ? '#dc2626' : '#1e293b';
-      const valTxt = anim ? anim.fmt(0) : valor;
-      const valId = anim ? ` id="${anim.id}"` : '';
       return `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
         <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">${titulo}</div>
-        <div style="font-size:22px;font-weight:800;color:${valColor};line-height:1.2;letter-spacing:-.02em"${valId}>${valTxt}</div>
+        <div style="font-size:22px;font-weight:800;color:${valColor};line-height:1.2;letter-spacing:-.02em">${valor}</div>
         <div style="font-size:11px;color:#94a3b8">${sub}</div>
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${accentColor}"></div>
       </div>`;
@@ -15484,12 +15442,11 @@ function dashInit() {
         return `<div class="dvg-pod-card dvg-pod-${i+1}">
           <span class="dvg-pod-badge" style="${_dvgPodBadge[i]}">${_dvgPodLabels[i]}</span>
           <div class="dvg-pod-nome">${escapeHtml(v.nome)}</div>
-          <div class="dvg-pod-val" id="dvgPodVal${i}" style="color:${valColor}">${fmtBRL(0)}</div>
+          <div class="dvg-pod-val" style="color:${valColor}">${fmtBRL(v.fat)}</div>
           <div class="dvg-pod-sub">${v.n.toLocaleString('pt-BR')} pedidos &middot; ${v.cli} clientes &middot; ${v.fab} fábricas</div>
           ${metaChip ? `<div class="dvg-pod-meta">${metaChip}</div>` : ''}
         </div>`;
       }).join('');
-      ven.slice(0,3).forEach((v,i) => _dvgAnimarNumero(document.getElementById('dvgPodVal'+i), v.fat, fmtBRL));
 
       // Ranking completo (lista com barra em vez de tabela crua)
       const t = document.getElementById('tabVendedores');
@@ -15503,13 +15460,12 @@ function dashInit() {
           <div class="dvg-vrank-body">
             <div class="dvg-vrank-top"><span class="dvg-vrank-nome">${escapeHtml(v.nome)}</span><span class="dvg-vrank-val">${fmtBRL(v.fat)}</span></div>
             <div class="dvg-vrank-sub"><span>${v.n.toLocaleString('pt-BR')} pedidos</span><span>${v.cli} clientes</span><span>${fmtBRL(v.ticket)} ticket</span>${metaChip}${evolTxt}</div>
-            <div class="dvg-vrank-trk"><i data-pct="${pct}"></i></div>
+            <div class="dvg-vrank-trk"><i style="width:${pct}%"></i></div>
           </div>
         </div>`;
         const detHtml = _dvgVendSelecionado===v.i ? _dvgDrillPanelHtml() : '';
         return rowHtml + detHtml;
       }).join('');
-      t.querySelectorAll('.dvg-vrank-trk i[data-pct]').forEach(_dvgAnimarBarra);
       t.querySelectorAll('.dvg-vrank-row').forEach(row => row.addEventListener('click', () => drillVendedor(parseInt(row.dataset.ven,10))));
       const _dvgFecharBtn = t.querySelector('#drillFechar');
       if (_dvgFecharBtn) _dvgFecharBtn.addEventListener('click', (e) => { e.stopPropagation(); drillVendedor(_dvgVendSelecionado); });
@@ -15777,7 +15733,6 @@ function dashInit() {
       path.setAttribute('fill','none'); path.setAttribute('stroke','#d97706'); path.setAttribute('stroke-width','2.5');
       path.style.filter = 'drop-shadow(0 0 5px rgba(217,119,6,.55))';
       g.appendChild(path);
-      _dvgAnimarLinha(path);
       const txtX0 = document.createElementNS(SVGNS,'text');
       txtX0.setAttribute('x', padL); txtX0.setAttribute('y', H-6);
       txtX0.setAttribute('font-size','9.5px'); txtX0.setAttribute('fill','#94a3b8');
@@ -15951,10 +15906,9 @@ function dashInit() {
           const r = _dvgResumoAbc[k];
           const pct = total ? fmtPct(r.fat/total) : '—';
           const ativo = _dvgCliClasseFiltro === k;
-          return `<div class="dvg-abcsum-item${ativo?' active':''}" data-classe="${k}" style="border-left:4px solid ${_dvgAbcCores[k]}"><b id="dvgAbcN${k}">0 clientes</b><span>Classe ${k} &middot; ${pct} do faturamento</span></div>`;
+          return `<div class="dvg-abcsum-item${ativo?' active':''}" data-classe="${k}" style="border-left:4px solid ${_dvgAbcCores[k]}"><b>${r.n} clientes</b><span>Classe ${k} &middot; ${pct} do faturamento</span></div>`;
         }).join('');
         _dvgAbcSumEl.querySelectorAll('.dvg-abcsum-item').forEach(el => { el.onclick = () => _dvgToggleClasseFiltro(el.dataset.classe); });
-        ['A','B','C'].forEach(k => _dvgAnimarNumero(document.getElementById('dvgAbcN'+k), _dvgResumoAbc[k].n, v => Math.round(v).toLocaleString('pt-BR') + ' clientes'));
       }
 
       // Curva ABC (SVG suave com zonas A/B/C)
@@ -16005,7 +15959,7 @@ function dashInit() {
       const _dvgRiskCard = document.getElementById('dvgRiskCard');
       if (_dvgRiskCard) _dvgRiskCard.classList.toggle('dvg-risk-ok', risco.length===0);
       const _dvgRiskNumEl = document.getElementById('dvgRiskNum');
-      if (_dvgRiskNumEl) _dvgAnimarNumero(_dvgRiskNumEl, risco.length, v => Math.round(v).toLocaleString('pt-BR'));
+      if (_dvgRiskNumEl) _dvgRiskNumEl.textContent = risco.length;
       document.getElementById('alertaRisco').innerHTML = risco.length===0 ?
         `<div class="dvg-risk-list" style="text-align:center;padding:16px 0;font-size:12.5px">Nenhum cliente acima de ${dias} dias sem comprar. &#9989;</div>` :
         `<div class="dvg-risk-list">${risco.slice(0,40).map(c=>`<div class="dvg-risk-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0"><b>${escapeHtml(c.nome)}</b><br><span style="opacity:.75;font-size:10.5px">${fmtBRL(c.fat)} no período &middot; última: ${c.ult?fmtDate(c.ult):'—'}</span></span><span style="font-weight:800;white-space:nowrap;flex-shrink:0">${c.dias}d</span></div>`).join('')}</div>` +
@@ -16063,19 +16017,19 @@ function dashInit() {
 
       document.getElementById('fabFicha').innerHTML = `
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          ${kpiCard('Faturamento', fmtBRL(fat), 'brand', `${n} pedidos`, null, 0, {id:'fabKpiFat', fmt:fmtBRL})}
-          ${kpiCard('Volume', fmtNum(vol), 'good', 'unidades líquidas', null, 1, {id:'fabKpiVol', fmt:fmtNum})}
-          ${kpiCard('% do total', fmtPct(part), 'brand', 'da Compartilhar no período', null, 2, {id:'fabKpiPart', fmt:fmtPct})}
-          ${kpiCard('Clientes', cli.toLocaleString('pt-BR'), 'good', 'ativos no período', null, 3, {id:'fabKpiCli', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
-          ${kpiCard('Ticket médio', fmtBRL(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:fmtBRL})}
-          ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${fmtBRL(metaF)}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null)}
+          ${kpiCard('Faturamento', fmtBRL(fat), 'brand', `${n} pedidos`, null, 0)}
+          ${kpiCard('Volume', fmtNum(vol), 'good', 'unidades líquidas', null, 1)}
+          ${kpiCard('% do total', fmtPct(part), 'brand', 'da Compartilhar no período', null, 2)}
+          ${kpiCard('Clientes', cli.toLocaleString('pt-BR'), 'good', 'ativos no período', null, 3)}
+          ${kpiCard('Ticket médio', fmtBRL(ticket), 'brand', 'por pedido', null, 4)}
+          ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${fmtBRL(metaF)}`:'sem meta cadastrada', null, 5)}
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">Evolução Mensal</h3>
+          <div class="card p-4"><h3 class="font-semibold text-[15px] mb-2">Evolução mensal</h3>
             <div style="height:240px;"><canvas id="fabMensal"></canvas></div>
           </div>
-          <div class="card p-4"><h3 class="font-semibold text-[15px] mb-2">Distribuição por Vendedor</h3>
-            <div id="fabVendList"></div>
+          <div class="card p-4"><h3 class="font-semibold text-[15px] mb-2">Distribuição por vendedor</h3>
+            <div style="height:240px;"><canvas id="fabVend"></canvas></div>
           </div>
         </div>
         <div class="card p-4 mt-4">
@@ -16090,38 +16044,14 @@ function dashInit() {
           <p class="text-[13px] text-ink-600 dark:text-ink-400">— A planilha atual não traz código nem descrição de SKU. Esta visão fica reservada para quando o ERP exportar a coluna SKU/Produto.</p>
         </div>
       `;
-      _dvgAnimarNumero(document.getElementById('fabKpiFat'), fat, fmtBRL);
-      _dvgAnimarNumero(document.getElementById('fabKpiVol'), vol, fmtNum);
-      _dvgAnimarNumero(document.getElementById('fabKpiPart'), part, fmtPct);
-      _dvgAnimarNumero(document.getElementById('fabKpiCli'), cli, v => Math.round(v).toLocaleString('pt-BR'));
-      _dvgAnimarNumero(document.getElementById('fabKpiTicket'), ticket, fmtBRL);
-      if (atinge != null) _dvgAnimarNumero(document.getElementById('fabKpiMeta'), atinge, fmtPct);
-      // Mensal (linha com brilho, mesmo padrão do drill-down de Vendedores)
-      window._dashRegChart(document.getElementById('fabMensal'), {
-        type:'line', data:{ labels:monthLabels, datasets:[{ data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.15)', fill:true, tension:.35, pointRadius:0, borderWidth:2.5 }] },
-        options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false }),
-        plugins: [{
-          id: 'dvgFabLineGlow',
-          beforeDatasetsDraw(chart) { chart.ctx.save(); chart.ctx.shadowColor = 'rgba(79,127,224,.85)'; chart.ctx.shadowBlur = 8; },
-          afterDatasetsDraw(chart) { chart.ctx.restore(); }
-        }]
-      });
-      // Vendedor (lista com barra, no mesmo estilo do Ranking de Vendedores)
-      const _fabVendMax = arrV.length ? Math.max(...arrV.map(v=>v.fat)) : 0;
-      document.getElementById('fabVendList').innerHTML = arrV.length ? arrV.map((v,i)=>{
-        const pct = _fabVendMax ? (v.fat/_fabVendMax*100) : 0;
-        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 4px">
-          <span style="width:18px;text-align:center;font-size:11px;font-weight:700;color:#94a3b8">${i+1}</span>
-          <div style="flex:1">
-            <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
-              <span style="font-weight:600;color:#1e293b">${escapeHtml(v.nome)}</span>
-              <span style="font-weight:700;color:#1e293b">${fmtBRL(v.fat)}</span>
-            </div>
-            <div class="dvg-vrank-trk"><i data-pct="${pct}"></i></div>
-          </div>
-        </div>`;
-      }).join('') : '<p class="text-[13px] text-ink-600 dark:text-ink-400">Nenhum pedido no período.</p>';
-      document.getElementById('fabVendList').querySelectorAll('.dvg-vrank-trk i[data-pct]').forEach(_dvgAnimarBarra);
+      // Mensal
+      window._dashRegChart(document.getElementById('fabMensal'), { type:'bar',
+        data:{ labels:monthLabels, datasets:[{ data:meses, backgroundColor:'#4f7fe0', borderRadius:6 }] },
+        options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false }) });
+      // Vendedor
+      window._dashRegChart(document.getElementById('fabVend'), { type:'bar',
+        data:{ labels: arrV.map(v=>v.nome), datasets:[{ data: arrV.map(v=>v.fat), backgroundColor:'#3d5aa8', borderRadius:6 }] },
+        options: { ...chartOpts({ tooltip:c=>fmtBRL(c.parsed.x), yFmt:fmtBRLk, legend:false }), indexAxis:'y' } });
     }
 
     // =============== DADOS ===============
