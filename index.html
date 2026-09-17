@@ -1458,8 +1458,22 @@
   <div class="d-card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:13px;font-weight:700;color:#1e293b">Ranking completo de vendedores</span><span style="font-size:11px;color:#64748b">Clique no vendedor para ver detalhes</span></div><div id="tabVendedores"></div></div>
   <div class="d-card" style="margin-bottom:12px"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px">% atingimento da meta por vendedor</div><div style="height:300px"><canvas id="chartAtingMeta"></canvas></div></div>
   <div id="drillVendedor" class="d-card" style="display:none;margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Drill-down: <span id="drillNome"></span></span><button id="drillFechar" style="font-size:11px;color:#0e7490;background:none;border:none;cursor:pointer">fechar ✕</button></div>
-    <div class="dg11" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><div style="height:220px"><canvas id="drillEvol"></canvas></div></div><div><div style="height:220px"><canvas id="drillFab"></canvas></div></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Detalhamento: <span id="drillNome"></span></span><button id="drillFechar" style="font-size:11px;color:#0e7490;background:none;border:none;cursor:pointer">fechar ✕</button></div>
+    <div class="dg11" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div><div style="height:220px"><canvas id="drillEvol"></canvas></div></div>
+      <div class="dvg-carddark" style="padding:14px 16px;display:flex;flex-direction:column;justify-content:center">
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;text-align:center">Distribuição por fábrica</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
+          <svg id="drillFabSvg" viewBox="0 0 180 180" width="120" height="120" style="flex-shrink:0">
+            <g id="drillFabG" transform="rotate(-90 90 90)"></g>
+            <text id="drillFabTag" x="90" y="84" text-anchor="middle" class="dvg-donuttag">LÍDER</text>
+            <text id="drillFabPct" x="90" y="106" text-anchor="middle" class="dvg-donutpct">0,00%</text>
+            <text id="drillFabNome" x="90" y="122" text-anchor="middle" class="dvg-donutnome">—</text>
+          </svg>
+          <div id="drillFabLegend" style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:110px;max-height:120px;overflow:auto"></div>
+        </div>
+      </div>
+    </div>
     <div id="drillTabela" style="margin-top:12px"></div>
   </div>
 </section>
@@ -15330,7 +15344,78 @@ function dashInit() {
     }
 
     // =============== DRILL VENDEDOR ===============
-    let drillEvol, drillFab;
+    let drillEvol;
+    let _dvgDrillCarteiraArr = [];
+    function _dvgRenderDrillFabDonut(porF) {
+      const svg = document.getElementById('drillFabSvg');
+      if (!svg) return;
+      const g = document.getElementById('drillFabG');
+      g.innerHTML = '';
+      const SVGNS = 'http://www.w3.org/2000/svg';
+      const r = 70, cx = 90, cy = 90, gap = 8;
+      const C = 2 * Math.PI * r;
+      const totalF = porF.reduce((s,v)=>s+v, 0);
+      const ranking = FAB.map((nome,i) => ({ i, nome, v: porF[i] })).filter(f => f.v > 0).sort((a,b) => b.v - a.v);
+      const totalGap = gap * ranking.length;
+      const avail = Math.max(0, C - totalGap);
+      let offset = 0;
+      ranking.forEach((f, rank) => {
+        const pct = totalF ? (f.v/totalF) : 0;
+        const len = pct * avail;
+        const cor = _dvgFabPalette[rank % _dvgFabPalette.length];
+        const destacada = rank === 0;
+        const seg = document.createElementNS(SVGNS,'circle');
+        seg.setAttribute('cx',cx); seg.setAttribute('cy',cy); seg.setAttribute('r',r);
+        seg.setAttribute('fill','none'); seg.setAttribute('stroke',cor);
+        seg.setAttribute('stroke-width', destacada ? 10 : 15);
+        seg.setAttribute('stroke-dasharray', len + ' ' + (C-len));
+        seg.setAttribute('stroke-dashoffset', -offset);
+        seg.setAttribute('opacity', destacada ? 0.32 : 0.55);
+        g.appendChild(seg);
+        if (destacada && pct > 0) {
+          const hi = document.createElementNS(SVGNS,'circle');
+          hi.setAttribute('cx',cx); hi.setAttribute('cy',cy); hi.setAttribute('r',r);
+          hi.setAttribute('fill','none'); hi.setAttribute('stroke',cor);
+          hi.setAttribute('stroke-width', 22); hi.setAttribute('stroke-linecap','round');
+          hi.setAttribute('stroke-dasharray', len + ' ' + (C-len));
+          hi.setAttribute('stroke-dashoffset', -offset);
+          hi.style.filter = 'drop-shadow(0 0 9px ' + cor + 'cc)';
+          g.appendChild(hi);
+        }
+        offset += len + gap;
+      });
+      const tagEl = document.getElementById('drillFabTag');
+      const pctEl = document.getElementById('drillFabPct');
+      const nomeEl = document.getElementById('drillFabNome');
+      const lider = ranking[0];
+      tagEl.textContent = 'LÍDER';
+      pctEl.textContent = totalF && lider ? (lider.v/totalF*100).toFixed(2).replace('.',',') + '%' : '—';
+      nomeEl.textContent = lider ? lider.nome : '—';
+      const legWrap = document.getElementById('drillFabLegend');
+      legWrap.innerHTML = '';
+      ranking.forEach((f, rank) => {
+        const pct = totalF ? (f.v/totalF*100) : 0;
+        const cor = _dvgFabPalette[rank % _dvgFabPalette.length];
+        const row = document.createElement('div');
+        row.className = 'dvg-leg-row' + (rank===0 ? ' active' : '');
+        row.style.cursor = 'default';
+        row.innerHTML = '<span class="dvg-leg-dot" style="background:' + cor + '"></span>' +
+          '<span class="dvg-leg-nome">' + escapeHtml(f.nome) + '</span>' +
+          '<span class="dvg-leg-pct">' + pct.toFixed(2).replace('.',',') + '%</span>';
+        legWrap.appendChild(row);
+      });
+    }
+    function _dvgRenderCarteiraTabela() {
+      const arr = _dvgDrillCarteiraArr;
+      const sel = document.getElementById('drillCarteiraLimit');
+      const limVal = sel ? sel.value : '25';
+      const lim = limVal === 'todos' ? arr.length : parseInt(limVal, 10);
+      const tbody = document.getElementById('drillCarteiraBody');
+      if (!tbody) return;
+      tbody.innerHTML = arr.slice(0, lim).map((c,i)=>`<tr><td class="text-ink-400">${i+1}</td><td>${escapeHtml(c.nome)}</td><td class="num font-semibold">${fmtBRL(c.fat)}</td><td class="num">${c.n}</td><td>${fmtDate(c.ult)}</td></tr>`).join('');
+      const msg = document.getElementById('drillCarteiraMsg');
+      if (msg) msg.textContent = arr.length > lim ? `Mostrando ${lim} de ${arr.length} clientes.` : `Mostrando todos os ${arr.length} clientes.`;
+    }
     function drillVendedor(i) {
       const peds = filtraPedidos().filter(p => p[3]===i);
       document.getElementById('drillVendedor').style.display='block';
@@ -15343,25 +15428,35 @@ function dashInit() {
         type:'line', data:{ labels:monthLabels, datasets:[{ label:'Faturamento mensal', data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.12)', fill:true, tension:.3 }]},
         options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk })
       });
+      document.getElementById('drillEvol').style.filter = 'drop-shadow(0 0 6px rgba(79,127,224,.5)) drop-shadow(0 0 2px rgba(79,127,224,.8))';
       // Por fábrica
       const porF = Array(FAB.length).fill(0);
       for (const p of peds) porF[p[2]] += p[5];
-      if (drillFab) drillFab.destroy();
-      drillFab = window._dashRegChart(document.getElementById('drillFab'), {
-        type:'doughnut',
-        data:{ labels:FAB, datasets:[{ data:porF, backgroundColor:['#1c2f66','#2c4488','#3d5aa8','#5b78c9','#7b93d9','#a9c2f5'], borderColor:getCardBg(), borderWidth:2 }] },
-        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ color:getTickColor(), font:{ size:11 }}}, tooltip:{ callbacks:{ label:c=>`${c.label}: ${fmtBRL(c.parsed)}` }}} }
-      });
-      // Tabela carteira
+      _dvgRenderDrillFabDonut(porF);
+      // Tabela carteira (paginada: 25/50/75/100/Todos)
       const ag = new Map();
       for (const p of peds) { let a = ag.get(p[1]); if (!a) { a={fat:0,n:0,ult:''}; ag.set(p[1],a);} a.fat+=p[5]; a.n++; if (p[0]>a.ult) a.ult=p[0]; }
-      const arr = [...ag.entries()].map(([ci,a])=>({nome:CLI[ci], ...a})).sort((a,b)=>b.fat-a.fat);
+      _dvgDrillCarteiraArr = [...ag.entries()].map(([ci,a])=>({nome:CLI[ci], ...a})).sort((a,b)=>b.fat-a.fat);
       document.getElementById('drillTabela').innerHTML = `
-        <h4 class="font-semibold text-[13px] mb-2">Carteira (${arr.length} clientes)</h4>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+          <h4 class="font-semibold text-[13px]">Carteira (${_dvgDrillCarteiraArr.length} clientes)</h4>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="text-[11px] text-ink-600 dark:text-ink-400">Mostrar:</span>
+            <select id="drillCarteiraLimit" style="font-size:11px;padding:3px 6px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#1e293b">
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="75">75</option>
+              <option value="100">100</option>
+              <option value="todos">Todos</option>
+            </select>
+          </div>
+        </div>
         <div class="scroll-x"><table>
         <thead><tr><th>#</th><th>Cliente</th><th class="num">Faturamento</th><th class="num">Pedidos</th><th>Última compra</th></tr></thead>
-        <tbody>${arr.slice(0,50).map((c,i)=>`<tr><td class="text-ink-400">${i+1}</td><td>${escapeHtml(c.nome)}</td><td class="num font-semibold">${fmtBRL(c.fat)}</td><td class="num">${c.n}</td><td>${fmtDate(c.ult)}</td></tr>`).join('')}</tbody></table></div>
-        ${arr.length>50?`<div class="text-[12px] text-ink-600 dark:text-ink-400 mt-1">…e mais ${arr.length-50} clientes (use o filtro para refinar).</div>`:''}`;
+        <tbody id="drillCarteiraBody"></tbody></table></div>
+        <div id="drillCarteiraMsg" class="text-[12px] text-ink-600 dark:text-ink-400 mt-1"></div>`;
+      document.getElementById('drillCarteiraLimit').onchange = _dvgRenderCarteiraTabela;
+      _dvgRenderCarteiraTabela();
       document.getElementById('drillVendedor').scrollIntoView({ behavior:'smooth', block:'start' });
     }
     document.getElementById('drillFechar').addEventListener('click', () => document.getElementById('drillVendedor').classList.add('hidden'));
