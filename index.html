@@ -1325,6 +1325,8 @@
 .dash-root .dvg-pod-meta{margin-top:8px}
 .dash-root .dvg-vrank-row{display:flex;align-items:center;gap:12px;padding:10px 8px;border-radius:10px;cursor:pointer;transition:background .15s}
 .dash-root .dvg-vrank-row:hover{background:#f8fafc}
+.dash-root .dvg-vrank-row.active{background:#eff6ff}
+.dash-root .dvg-vrank-detail{margin:2px 0 10px;padding:12px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0}
 .dash-root .dvg-vrank-pos{width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#64748b;background:#f1f5f9}
 .dash-root .dvg-vrank-body{flex:1;min-width:0}
 .dash-root .dvg-vrank-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
@@ -1343,7 +1345,9 @@
 .dash-root .dvg-risk-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.14);font-size:12.5px}
 .dash-root .dvg-risk-row:last-child{border-bottom:none}
 .dash-root .dvg-abcsum{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.dash-root .dvg-abcsum-item{flex:1;min-width:120px;background:#f8fafc;border-radius:10px;padding:8px 10px}
+.dash-root .dvg-abcsum-item{flex:1;min-width:120px;background:#f8fafc;border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .15s}
+.dash-root .dvg-abcsum-item:hover{background:#eef2ff}
+.dash-root .dvg-abcsum-item.active{background:#dbeafe}
 .dash-root .dvg-abcsum-item b{display:block;font-size:15px;font-weight:800;color:#1e293b}
 .dash-root .dvg-abcsum-item span{font-size:10.5px;color:#64748b}
 .dash-root .dvg-scrub{background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:16px;padding:22px 24px;box-shadow:0 4px 16px rgba(0,0,0,.22);color:#fff}
@@ -1493,30 +1497,44 @@
 <section id="tab-vendedores" class="tab-content">
   <div id="podio" class="dvg-podium"></div>
   <div class="d-card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:13px;font-weight:700;color:#1e293b">Ranking Completo de Vendedores</span><span style="font-size:11px;color:#64748b">Clique no vendedor para ver detalhes</span></div><div id="tabVendedores"></div></div>
-  <div id="drillVendedor" class="d-card" style="display:none;margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Detalhamento: <span id="drillNome"></span></span><button id="drillFechar" style="font-size:11px;color:#0e7490;background:none;border:none;cursor:pointer">Fechar ✕</button></div>
-    <div class="dg11" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div><div style="height:220px"><canvas id="drillEvol"></canvas></div></div>
-      <div class="dvg-carddark" style="padding:14px 16px;display:flex;flex-direction:column;justify-content:center">
-        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;text-align:center">Distribuição por Fábrica</div>
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
-          <svg id="drillFabSvg" viewBox="0 0 180 180" width="120" height="120" style="flex-shrink:0">
-            <g id="drillFabG" transform="rotate(-90 90 90)"></g>
-            <text id="drillFabTag" x="90" y="84" text-anchor="middle" class="dvg-donuttag">LÍDER</text>
-            <text id="drillFabPct" x="90" y="106" text-anchor="middle" class="dvg-donutpct">0,00%</text>
-            <text id="drillFabNome" x="90" y="122" text-anchor="middle" class="dvg-donutnome">—</text>
-          </svg>
-          <div id="drillFabLegend" style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:110px;max-height:120px;overflow:auto"></div>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="d-card dvg-collapsible dvg-collapsed" id="dvgCardAtingMeta" style="margin-bottom:12px"><div class="dvg-ctitrow" id="dvgTitAtingMeta"><div class="dvg-ctit" style="color:#1e293b">% Atingimento da Meta por Vendedor</div><span class="dvg-cchev" style="color:#94a3b8">&#9662;</span></div><div class="dvg-cbody"><div style="height:300px"><canvas id="chartAtingMeta"></canvas></div></div></div>
   <div id="drillCarteiraCard" class="d-card" style="display:none;margin-bottom:12px">
     <div id="drillTabela"></div>
   </div>
 </section>
 <section id="tab-clientes" class="tab-content">
+  <div class="dvg-scrub" id="dvgCliScrubCard" style="margin-bottom:12px">
+    <div class="dvg-scrub-top">
+      <div>
+        <div class="dvg-rankcard-tit" style="color:#fff">Top Clientes</div>
+        <div class="dvg-scrub-sub">Arraste para navegar do maior para o menor faturamento &middot; clique em Pedidos ou Produtos para ver detalhes</div>
+      </div>
+      <div class="dvg-scrub-readout">
+        <div class="dvg-scrub-n" id="dvgCliScrubVal">R$ 0</div>
+        <div class="dvg-scrub-d" id="dvgCliScrubNome">—</div>
+        <div class="dvg-scrub-badge" id="dvgCliScrubBadge">Rank #1</div>
+      </div>
+    </div>
+    <div class="dvg-scrub-track-wrap">
+      <svg id="dvgCliScrubSvg" viewBox="0 0 600 96" preserveAspectRatio="none" style="width:100%;height:96px;display:block">
+        <defs>
+          <linearGradient id="dvgCliScrubGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4f7fe0" stop-opacity="0.45"></stop>
+            <stop offset="100%" stop-color="#4f7fe0" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path id="dvgCliScrubArea" fill="url(#dvgCliScrubGrad)"></path>
+        <path id="dvgCliScrubLine" fill="none" stroke="#4f7fe0" stroke-width="2.5"></path>
+        <circle id="dvgCliScrubDot" r="5" fill="#fff" stroke="#4f7fe0" stroke-width="3"></circle>
+      </svg>
+    </div>
+    <input type="range" class="dvg-scrub-range" id="dvgCliScrubRange" min="0" max="19" value="0" step="1">
+    <div class="dvg-scrub-endlabels"><span id="dvgCliScrubStart"></span><span id="dvgCliScrubEnd"></span></div>
+    <div id="dvgCliScrubStats" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"></div>
+    <div class="dvg-clidetail-row" id="dvgCliDetailRow">
+      <div id="dvgCliDetailBody"></div>
+    </div>
+  </div>
   <div class="dg21 dvg-cli-grid" id="dvgCliGrid" style="display:grid;gap:12px;margin-bottom:12px">
     <div class="d-card dvg-collapsible" id="dvgCliCardAbc">
       <div class="dvg-ctitrow" id="dvgCliTitAbc">
@@ -1557,41 +1575,9 @@
       </div>
     </div>
   </div>
-  <div class="dvg-scrub" id="dvgCliScrubCard" style="margin-bottom:12px">
-    <div class="dvg-scrub-top">
-      <div>
-        <div class="dvg-rankcard-tit" style="color:#fff">Top Clientes</div>
-        <div class="dvg-scrub-sub">Arraste para navegar do maior para o menor faturamento &middot; clique em Pedidos ou Produtos para ver detalhes</div>
-      </div>
-      <div class="dvg-scrub-readout">
-        <div class="dvg-scrub-n" id="dvgCliScrubVal">R$ 0</div>
-        <div class="dvg-scrub-d" id="dvgCliScrubNome">—</div>
-        <div class="dvg-scrub-badge" id="dvgCliScrubBadge">Rank #1</div>
-      </div>
-    </div>
-    <div class="dvg-scrub-track-wrap">
-      <svg id="dvgCliScrubSvg" viewBox="0 0 600 96" preserveAspectRatio="none" style="width:100%;height:96px;display:block">
-        <defs>
-          <linearGradient id="dvgCliScrubGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#4f7fe0" stop-opacity="0.45"></stop>
-            <stop offset="100%" stop-color="#4f7fe0" stop-opacity="0"></stop>
-          </linearGradient>
-        </defs>
-        <path id="dvgCliScrubArea" fill="url(#dvgCliScrubGrad)"></path>
-        <path id="dvgCliScrubLine" fill="none" stroke="#4f7fe0" stroke-width="2.5"></path>
-        <circle id="dvgCliScrubDot" r="5" fill="#fff" stroke="#4f7fe0" stroke-width="3"></circle>
-      </svg>
-    </div>
-    <input type="range" class="dvg-scrub-range" id="dvgCliScrubRange" min="0" max="19" value="0" step="1">
-    <div class="dvg-scrub-endlabels"><span id="dvgCliScrubStart"></span><span id="dvgCliScrubEnd"></span></div>
-    <div id="dvgCliScrubStats" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"></div>
-    <div class="dvg-clidetail-row" id="dvgCliDetailRow">
-      <div id="dvgCliDetailBody"></div>
-    </div>
-  </div>
   <div class="d-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
-      <span style="font-size:13px;font-weight:700;color:#1e293b">Tabela ABC Completa</span>
+      <span style="font-size:13px;font-weight:700;color:#1e293b">Tabela ABC Completa<span id="tabClientesClasseTag" style="font-weight:400"></span></span>
       <div style="display:flex;align-items:center;gap:6px">
         <span style="font-size:11px;color:#64748b">Mostrar:</span>
         <div class="dvg-pagechips" id="tabClientesLimit">
@@ -15085,7 +15071,10 @@ function dashInit() {
     }
     const _dvgFabPalette = ['#1c2f66','#2c4488','#3d5aa8','#5b78c9','#7b93d9','#a9c2f5','#c9d9fb','#e3ecfc'];
     function _dvgToggleFabrica(i) {
-      if (state.fabricas.has(i)) state.fabricas.delete(i); else state.fabricas.add(i);
+      // seleção única: clicar troca pra essa fábrica; clicar na já selecionada limpa (mostra todas de novo)
+      const jaEraSoEssa = state.fabricas.size === 1 && state.fabricas.has(i);
+      state.fabricas.clear();
+      if (!jaEraSoEssa) state.fabricas.add(i);
       buildFiltros(); rerender();
     }
     function _dvgRenderDonut(porFab, totalFab) {
@@ -15401,6 +15390,27 @@ function dashInit() {
 
     // =============== RANKING VENDEDORES ===============
     let chartAtingMeta;
+    let _dvgVendSelecionado = null;
+    function _dvgDrillPanelHtml() {
+      return `<div class="dvg-vrank-detail">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Detalhamento: <span id="drillNome"></span></span><button id="drillFechar" style="font-size:11px;color:#0e7490;background:none;border:none;cursor:pointer">Fechar ✕</button></div>
+        <div class="dg11" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><div style="height:220px"><canvas id="drillEvol"></canvas></div></div>
+          <div class="dvg-carddark" style="padding:14px 16px;display:flex;flex-direction:column;justify-content:center">
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;text-align:center">Distribuição por Fábrica</div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
+              <svg id="drillFabSvg" viewBox="0 0 180 180" width="120" height="120" style="flex-shrink:0">
+                <g id="drillFabG" transform="rotate(-90 90 90)"></g>
+                <text id="drillFabTag" x="90" y="84" text-anchor="middle" class="dvg-donuttag">LÍDER</text>
+                <text id="drillFabPct" x="90" y="106" text-anchor="middle" class="dvg-donutpct">0,00%</text>
+                <text id="drillFabNome" x="90" y="122" text-anchor="middle" class="dvg-donutnome">—</text>
+              </svg>
+              <div id="drillFabLegend" style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:110px;max-height:120px;overflow:auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
     function renderVendedores() {
       const peds = filtraPedidos();
       const ag = new Map(); // ven -> {fat, vol, n, cli:Set, fab:Set, fatMesAtual, fatMesAnt}
@@ -15445,7 +15455,7 @@ function dashInit() {
         const pct = _dvgVendMax ? (v.fat/_dvgVendMax*100) : 0;
         const metaChip = v.atinge!=null ? `<span class="chip ${v.atinge>=1.1?'chip-info':v.atinge>=.95?'chip-good':v.atinge>=.7?'chip-warn':'chip-bad'}" style="font-size:9.5px">${fmtPct(v.atinge)} meta</span>` : '';
         const evolTxt = v.evol==null ? '' : `<span style="color:${v.evol>=0?'#059669':'#dc2626'};font-weight:700">${v.evol>=0?'▲':'▼'} ${(Math.abs(v.evol)*100).toFixed(1)}%</span>`;
-        return `<div class="dvg-vrank-row" data-ven="${v.i}">
+        const rowHtml = `<div class="dvg-vrank-row${_dvgVendSelecionado===v.i?' active':''}" data-ven="${v.i}">
           <span class="dvg-vrank-pos">${i+1}</span>
           <div class="dvg-vrank-body">
             <div class="dvg-vrank-top"><span class="dvg-vrank-nome">${escapeHtml(v.nome)}</span><span class="dvg-vrank-val">${fmtBRL(v.fat)}</span></div>
@@ -15453,8 +15463,19 @@ function dashInit() {
             <div class="dvg-vrank-trk"><i style="width:${pct}%"></i></div>
           </div>
         </div>`;
+        const detHtml = _dvgVendSelecionado===v.i ? _dvgDrillPanelHtml() : '';
+        return rowHtml + detHtml;
       }).join('');
       t.querySelectorAll('.dvg-vrank-row').forEach(row => row.addEventListener('click', () => drillVendedor(parseInt(row.dataset.ven,10))));
+      const _dvgFecharBtn = t.querySelector('#drillFechar');
+      if (_dvgFecharBtn) _dvgFecharBtn.addEventListener('click', (e) => { e.stopPropagation(); drillVendedor(_dvgVendSelecionado); });
+      if (_dvgVendSelecionado != null) {
+        _dvgPopularDrillVendedor(_dvgVendSelecionado);
+        const _dvgDetEl = t.querySelector('.dvg-vrank-detail');
+        if (_dvgDetEl) _dvgDetEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      } else {
+        document.getElementById('drillCarteiraCard').style.display = 'none';
+      }
 
       // % meta gráfico
       const ctx = document.getElementById('chartAtingMeta');
@@ -15581,8 +15602,11 @@ function dashInit() {
       if (msg) msg.textContent = arr.length > lim ? `Mostrando ${lim} de ${arr.length} clientes.` : `Mostrando todos os ${arr.length} clientes.`;
     }
     function drillVendedor(i) {
+      _dvgVendSelecionado = (_dvgVendSelecionado === i) ? null : i;
+      renderVendedores();
+    }
+    function _dvgPopularDrillVendedor(i) {
       const peds = filtraPedidos().filter(p => p[3]===i);
-      document.getElementById('drillVendedor').style.display='block';
       document.getElementById('drillCarteiraCard').style.display='block';
       document.getElementById('drillNome').textContent = VEND[i];
       // Evolução mensal
@@ -15626,9 +15650,7 @@ function dashInit() {
         <div id="drillCarteiraMsg" class="text-[12px] text-ink-600 dark:text-ink-400 mt-1"></div>`;
       _dvgWirePageChips('drillCarteiraLimit', _dvgRenderCarteiraTabela);
       _dvgRenderCarteiraTabela();
-      document.getElementById('drillVendedor').scrollIntoView({ behavior:'smooth', block:'start' });
     }
-    document.getElementById('drillFechar').addEventListener('click', () => { document.getElementById('drillVendedor').style.display = 'none'; document.getElementById('drillCarteiraCard').style.display = 'none'; });
 
     // =============== RANKING CLIENTES ===============
     let chartABC, chartTopClientes;
@@ -15818,8 +15840,18 @@ function dashInit() {
       _dvgRenderCliScrubDetail(0);
     }
     let _dvgClientesArr = [], _dvgClientesTotal = 0, _dvgClientesDias = 60;
+    let _dvgCliClasseFiltro = null;
+    function _dvgToggleClasseFiltro(k) {
+      _dvgCliClasseFiltro = (_dvgCliClasseFiltro === k) ? null : k;
+      const _dvgAbcSumEl = document.getElementById('dvgAbcSum');
+      if (_dvgAbcSumEl) _dvgAbcSumEl.querySelectorAll('.dvg-abcsum-item').forEach(el => el.classList.toggle('active', el.dataset.classe === _dvgCliClasseFiltro));
+      _dvgRenderClientesTabela();
+      const _dvgTabCard = document.getElementById('tabClientes').closest('.d-card');
+      if (_dvgTabCard) _dvgTabCard.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
     function _dvgRenderClientesTabela() {
-      const arr = _dvgClientesArr, total = _dvgClientesTotal, dias = _dvgClientesDias;
+      const arrTotal = _dvgClientesArr, total = _dvgClientesTotal, dias = _dvgClientesDias;
+      const arr = _dvgCliClasseFiltro ? arrTotal.filter(c => c.classe === _dvgCliClasseFiltro) : arrTotal;
       const limVal = _dvgPageChipVal('tabClientesLimit');
       const lim = limVal === 'todos' ? arr.length : parseInt(limVal,10);
       document.getElementById('tabClientes').innerHTML = `
@@ -15841,8 +15873,15 @@ function dashInit() {
             <td class="num ${c.dias>=dias?'text-bad-500 font-semibold':''}">${c.dias===999?'—':c.dias}</td>
             <td>${c.inativo?'<span class="chip chip-bad">inativo</span>':''}</td>
           </tr>`).join('')}</tbody>`;
+      const _dvgTagEl = document.getElementById('tabClientesClasseTag');
+      if (_dvgTagEl) {
+        _dvgTagEl.innerHTML = _dvgCliClasseFiltro ? ` — Classe ${_dvgCliClasseFiltro} <a href="javascript:void(0)" id="tabClientesClasseClear" style="font-weight:400;font-size:11px;color:#0e7490">(limpar)</a>` : '';
+        const _dvgClearEl = document.getElementById('tabClientesClasseClear');
+        if (_dvgClearEl) _dvgClearEl.onclick = () => _dvgToggleClasseFiltro(_dvgCliClasseFiltro);
+      }
       const msg = document.getElementById('tabClientesMsg');
-      if (msg) msg.textContent = arr.length > lim ? `Mostrando ${lim} de ${arr.length} clientes.` : `Mostrando todos os ${arr.length} clientes.`;
+      const _dvgSufixo = _dvgCliClasseFiltro ? ` da Classe ${_dvgCliClasseFiltro}` : '';
+      if (msg) msg.textContent = arr.length > lim ? `Mostrando ${lim} de ${arr.length} clientes${_dvgSufixo}.` : `Mostrando todos os ${arr.length} clientes${_dvgSufixo}.`;
     }
     function renderClientes() {
       const peds = filtraPedidos();
@@ -15866,8 +15905,10 @@ function dashInit() {
         _dvgAbcSumEl.innerHTML = ['A','B','C'].map(k => {
           const r = _dvgResumoAbc[k];
           const pct = total ? fmtPct(r.fat/total) : '—';
-          return `<div class="dvg-abcsum-item" style="border-left:4px solid ${_dvgAbcCores[k]}"><b>${r.n} clientes</b><span>Classe ${k} &middot; ${pct} do faturamento</span></div>`;
+          const ativo = _dvgCliClasseFiltro === k;
+          return `<div class="dvg-abcsum-item${ativo?' active':''}" data-classe="${k}" style="border-left:4px solid ${_dvgAbcCores[k]}"><b>${r.n} clientes</b><span>Classe ${k} &middot; ${pct} do faturamento</span></div>`;
         }).join('');
+        _dvgAbcSumEl.querySelectorAll('.dvg-abcsum-item').forEach(el => { el.onclick = () => _dvgToggleClasseFiltro(el.dataset.classe); });
       }
 
       // Curva ABC (SVG suave com zonas A/B/C)
