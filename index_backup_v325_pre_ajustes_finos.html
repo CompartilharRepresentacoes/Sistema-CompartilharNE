@@ -1333,7 +1333,7 @@
 .dash-root .dvg-vrank-sub{font-size:10.5px;color:#94a3b8;margin-top:2px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .dash-root .dvg-vrank-trk{height:5px;background:#f1f5f9;border-radius:5px;overflow:visible;margin-top:7px}
 .dash-root .dvg-vrank-trk i{display:block;height:100%;border-radius:5px;width:0;background:linear-gradient(90deg,#4f7fe0,#1c2f66);box-shadow:0 0 7px rgba(79,127,224,.7);transition:width 1s ease}
-.dash-root .dvg-riskcard{border-radius:14px;padding:16px 18px;background:linear-gradient(135deg,#4a0d0a 0%,#7a1611 30%,#B01F19 58%,#D82621 82%,#DE7926 100%);color:#fff;position:relative;overflow:hidden;box-shadow:0 6px 20px rgba(216,38,33,.3)}
+.dash-root .dvg-riskcard{border-radius:14px;padding:16px 18px;background:linear-gradient(135deg,#7a1611 0%,#D82621 48%,#DE7926 100%);color:#fff;position:relative;overflow:hidden;box-shadow:0 6px 20px rgba(216,38,33,.3)}
 .dash-root .dvg-riskcard.dvg-risk-ok{background:linear-gradient(135deg,#064e3b 0%,#065f46 55%,#059669 100%);box-shadow:0 6px 20px rgba(6,78,59,.25)}
 .dash-root .dvg-risk-num{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-top:2px}
 .dash-root .dvg-risk-lbl{font-size:11px;opacity:.8;margin-top:2px;max-width:200px}
@@ -1387,7 +1387,6 @@
 .dash-root .dvg-cliexp-pedrow{display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.85);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.08)}
 .dash-root .dvg-cliexp-pedrow:last-child{border-bottom:none}
 .dash-root .dvg-cliexp-empty{font-size:12px;color:rgba(255,255,255,.6)}
-.dash-root #dvgCliScrubNome{font-size:15px;font-weight:600;color:#fff}
 .dash-root .dvg-pagechips{display:flex;gap:4px;flex-wrap:wrap}
 .dash-root .dvg-pagechips button{font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;cursor:pointer;font-weight:600;transition:all .15s}
 .dash-root .dvg-pagechips button:hover{background:#eef2ff}
@@ -1442,7 +1441,7 @@
   <div class="dvg-mixbar"><div class="dvg-mixbar-lbl" id="dvgMixLbl"></div><div class="dvg-mixbar-trk"><div class="dvg-mixbar-fill" id="dvgMixFill"></div></div></div>
   <div class="dvg-charts" id="dvgChartsWrap">
     <div class="dvg-carddark" id="dvgCardMensal">
-      <div class="dvg-titrow" id="dvgTitMensal"><div class="dvg-tit">Faturamento Mensal<span class="dvg-tit-hint">Somente Faturado e Faturado Parcial &middot; clique numa barra</span></div><span class="dvg-chev">&#9662;</span></div>
+      <div class="dvg-titrow" id="dvgTitMensal"><div class="dvg-tit">Faturamento mensal<span class="dvg-tit-hint">Somente Faturado e Faturado Parcial &middot; clique numa barra</span></div><span class="dvg-chev">&#9662;</span></div>
       <div class="dvg-body">
         <div class="dvg-bars" id="dvgBars"></div>
         <div class="dvg-mesdetail" id="dvgMesDetail"><div class="dvg-mesdetail-inner" id="dvgMesDetailInner"></div></div>
@@ -1465,8 +1464,8 @@
     </div>
   </div>
   <div class="dvg-ranks">
-    <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 Vendedores</div><div id="topVendedores"></div></div>
-    <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 Clientes</div><div id="topClientes"></div></div>
+    <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 vendedores</div><div id="topVendedores"></div></div>
+    <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 clientes</div><div id="topClientes"></div></div>
   </div>
   <div class="dvg-scrub" id="dvgScrubCard">
     <div class="dvg-scrub-top">
@@ -1493,13 +1492,13 @@
 <section id="tab-vendedores" class="tab-content">
   <div id="podio" class="dvg-podium"></div>
   <div class="d-card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:13px;font-weight:700;color:#1e293b">Ranking completo de vendedores</span><span style="font-size:11px;color:#64748b">Clique no vendedor para ver detalhes</span></div><div id="tabVendedores"></div></div>
-  <div class="d-card dvg-collapsible dvg-collapsed" id="dvgCardAtingMeta" style="margin-bottom:12px"><div class="dvg-ctitrow" id="dvgTitAtingMeta"><div class="dvg-ctit" style="color:#1e293b">% Atingimento da Meta por Vendedor</div><span class="dvg-cchev" style="color:#94a3b8">&#9662;</span></div><div class="dvg-cbody"><div style="height:300px"><canvas id="chartAtingMeta"></canvas></div></div></div>
+  <div class="d-card" style="margin-bottom:12px"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px">% atingimento da meta por vendedor</div><div style="height:300px"><canvas id="chartAtingMeta"></canvas></div></div>
   <div id="drillVendedor" class="d-card" style="display:none;margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Detalhamento: <span id="drillNome"></span></span><button id="drillFechar" style="font-size:11px;color:#0e7490;background:none;border:none;cursor:pointer">Fechar ✕</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Detalhamento: <span id="drillNome"></span></span><button id="drillFechar" style="font-size:11px;color:#0e7490;background:none;border:none;cursor:pointer">fechar ✕</button></div>
     <div class="dg11" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div><div style="height:220px"><canvas id="drillEvol"></canvas></div></div>
       <div class="dvg-carddark" style="padding:14px 16px;display:flex;flex-direction:column;justify-content:center">
-        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;text-align:center">Distribuição por Fábrica</div>
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;text-align:center">Distribuição por fábrica</div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
           <svg id="drillFabSvg" viewBox="0 0 180 180" width="120" height="120" style="flex-shrink:0">
             <g id="drillFabG" transform="rotate(-90 90 90)"></g>
@@ -1518,7 +1517,7 @@
   <div class="dg21 dvg-cli-grid" id="dvgCliGrid" style="display:grid;gap:12px;margin-bottom:12px">
     <div class="d-card dvg-collapsible" id="dvgCliCardAbc">
       <div class="dvg-ctitrow" id="dvgCliTitAbc">
-        <div class="dvg-ctit" style="color:#1e293b">Curva ABC de Clientes (Pareto)</div>
+        <div class="dvg-ctit" style="color:#1e293b">Curva ABC de clientes (Pareto)</div>
         <span class="dvg-cchev" style="color:#94a3b8">&#9662;</span>
       </div>
       <div class="dvg-cbody">
@@ -1541,7 +1540,7 @@
     </div>
     <div class="dvg-riskcard dvg-collapsible" id="dvgRiskCard">
       <div class="dvg-ctitrow" id="dvgCliTitRisco">
-        <div class="dvg-ctit" style="color:#fff;text-transform:uppercase;letter-spacing:.04em;font-size:12px">Risco de Inatividade</div>
+        <div class="dvg-ctit" style="color:#fff;text-transform:uppercase;letter-spacing:.04em;font-size:12px">Risco de inatividade</div>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:20px">&#9888;&#65039;</span>
           <span class="dvg-cchev" style="color:rgba(255,255,255,.6)">&#9662;</span>
@@ -1558,8 +1557,8 @@
   <div class="dvg-scrub" id="dvgCliScrubCard" style="margin-bottom:12px">
     <div class="dvg-scrub-top">
       <div>
-        <div class="dvg-rankcard-tit" style="color:#fff">Top Clientes</div>
-        <div class="dvg-scrub-sub">Arraste para navegar do maior para o menor faturamento &middot; clique em Pedidos ou Produtos para ver detalhes</div>
+        <div class="dvg-rankcard-tit" style="color:#fff">Top clientes</div>
+        <div class="dvg-scrub-sub">Arraste para navegar do maior para o menor faturamento &middot; clique em Pedidos ou Fábricas compradas para ver detalhes</div>
       </div>
       <div class="dvg-scrub-readout">
         <div class="dvg-scrub-n" id="dvgCliScrubVal">R$ 0</div>
@@ -1589,7 +1588,7 @@
   </div>
   <div class="d-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
-      <span style="font-size:13px;font-weight:700;color:#1e293b">Tabela ABC Completa</span>
+      <span style="font-size:13px;font-weight:700;color:#1e293b">Tabela ABC completa</span>
       <div style="display:flex;align-items:center;gap:6px">
         <span style="font-size:11px;color:#64748b">Mostrar:</span>
         <div class="dvg-pagechips" id="tabClientesLimit">
@@ -15097,36 +15096,6 @@ function dashInit() {
       const totalGap = gap * ranking.length;
       const avail = Math.max(0, C - totalGap);
       const selecionadas = state.fabricas;
-      const tagEl = document.getElementById('dvgDonutTag');
-      const pctEl = document.getElementById('dvgDonutPct');
-      const nomeEl = document.getElementById('dvgDonutNome');
-      const legWrap = document.getElementById('dvgFabLegend');
-      legWrap.innerHTML = '';
-      function mostrarSelecionado() {
-        const destaque = selecionadas.size===1 ? ranking.find(f=>selecionadas.has(f.i)) : ranking[0];
-        if (selecionadas.size === 0) {
-          tagEl.textContent = 'LÍDER';
-          pctEl.textContent = totalFab && destaque ? (destaque.v/totalFab*100).toFixed(2).replace('.',',') + '%' : '—';
-          nomeEl.textContent = destaque ? destaque.nome : '—';
-        } else if (selecionadas.size === 1) {
-          tagEl.textContent = 'FILTRANDO';
-          pctEl.textContent = totalFab && destaque ? (destaque.v/totalFab*100).toFixed(2).replace('.',',') + '%' : '—';
-          nomeEl.textContent = destaque ? destaque.nome : '—';
-        } else {
-          tagEl.textContent = 'FILTRANDO';
-          pctEl.textContent = selecionadas.size + ' fábricas';
-          nomeEl.textContent = 'selecionadas';
-        }
-        legWrap.querySelectorAll('.dvg-leg-row').forEach((row, idx) => row.classList.toggle('active', selecionadas.has(ranking[idx].i)));
-      }
-      function mostrarPreview(rank) {
-        const f = ranking[rank];
-        if (!f) return;
-        tagEl.textContent = 'FÁBRICA';
-        pctEl.textContent = totalFab ? (f.v/totalFab*100).toFixed(2).replace('.',',') + '%' : '—';
-        nomeEl.textContent = f.nome;
-        legWrap.querySelectorAll('.dvg-leg-row').forEach((row, idx) => row.classList.toggle('active', idx===rank));
-      }
       let offset = 0;
       ranking.forEach((f, rank) => {
         const pct = totalFab ? (f.v/totalFab) : 0;
@@ -15159,10 +15128,28 @@ function dashInit() {
         hit.setAttribute('stroke-dashoffset', -offset);
         hit.style.cursor = 'pointer';
         hit.addEventListener('click', () => _dvgToggleFabrica(f.i));
-        hit.addEventListener('mouseenter', () => mostrarPreview(rank));
         g.appendChild(hit);
         offset += len + gap;
       });
+      const tagEl = document.getElementById('dvgDonutTag');
+      const pctEl = document.getElementById('dvgDonutPct');
+      const nomeEl = document.getElementById('dvgDonutNome');
+      const destaque = selecionadas.size===1 ? ranking.find(f=>selecionadas.has(f.i)) : ranking[0];
+      if (selecionadas.size === 0) {
+        tagEl.textContent = 'LÍDER';
+        pctEl.textContent = totalFab && destaque ? (destaque.v/totalFab*100).toFixed(2).replace('.',',') + '%' : '—';
+        nomeEl.textContent = destaque ? destaque.nome : '—';
+      } else if (selecionadas.size === 1) {
+        tagEl.textContent = 'FILTRANDO';
+        pctEl.textContent = totalFab && destaque ? (destaque.v/totalFab*100).toFixed(2).replace('.',',') + '%' : '—';
+        nomeEl.textContent = destaque ? destaque.nome : '—';
+      } else {
+        tagEl.textContent = 'FILTRANDO';
+        pctEl.textContent = selecionadas.size + ' fábricas';
+        nomeEl.textContent = 'selecionadas';
+      }
+      const legWrap = document.getElementById('dvgFabLegend');
+      legWrap.innerHTML = '';
       ranking.forEach((f, rank) => {
         const pct = totalFab ? (f.v/totalFab*100) : 0;
         const cor = _dvgFabPalette[rank % _dvgFabPalette.length];
@@ -15173,17 +15160,10 @@ function dashInit() {
           '<span class="dvg-leg-nome">' + escapeHtml(f.nome) + '</span>' +
           '<span class="dvg-leg-pct">' + pct.toFixed(2).replace('.',',') + '%</span>';
         row.onclick = () => _dvgToggleFabrica(f.i);
-        row.addEventListener('mouseenter', () => mostrarPreview(rank));
         legWrap.appendChild(row);
       });
-      const donutWrap = svg.closest('.dvg-donutrow');
-      if (donutWrap && !donutWrap._dvgWiredLeave) {
-        donutWrap.addEventListener('mouseleave', mostrarSelecionado);
-        donutWrap._dvgWiredLeave = true;
-      }
       const btnLimpar = document.getElementById('dvgBtnLimparFabrica');
       if (btnLimpar) btnLimpar.style.display = selecionadas.size ? 'inline-block' : 'none';
-      mostrarSelecionado();
     }
     const _dvgMedalhas = [
       ['linear-gradient(135deg,#a9c2f5,#4f7fe0)','#0d1e4a','linear-gradient(90deg,#4f7fe0,#1c2f66)','rgba(79,127,224,.85)'],
@@ -15281,7 +15261,7 @@ function dashInit() {
       if (kpiEl) {
         kpiEl.innerHTML = `
           <div class="dvg-hero">
-            <div class="dvg-hero-lbl">Faturamento do Período</div>
+            <div class="dvg-hero-lbl">Faturamento do período</div>
             <div class="dvg-hero-val" id="dvgHeroValue">R$ 0,00</div>
             <div class="dvg-hero-pills">
               <span>${k.nPedidos.toLocaleString('pt-BR')} pedidos</span>
@@ -15464,13 +15444,6 @@ function dashInit() {
         type:'bar', data:{ labels: ven.map(v=>v.nome), datasets: [{ label:'% da meta', data:dataM, backgroundColor:colors, borderRadius:6 }] },
         options: { ...chartOpts({ tooltip:(c)=> ven[c.dataIndex].atinge==null ? 'Sem meta cadastrada' : `${c.parsed.x}% da meta`, yFmt:v=>v+'%' }), indexAxis:'y' }
       });
-      const _dvgCardAtingMetaEl = document.getElementById('dvgCardAtingMeta');
-      if (_dvgCardAtingMetaEl) _dvgCardAtingMetaEl.onclick = () => {
-        _dvgCardAtingMetaEl.classList.toggle('dvg-collapsed');
-        if (!_dvgCardAtingMetaEl.classList.contains('dvg-collapsed') && chartAtingMeta) {
-          setTimeout(() => chartAtingMeta.resize(), 0);
-        }
-      };
     }
 
     // =============== DRILL VENDEDOR ===============
@@ -15591,7 +15564,7 @@ function dashInit() {
       for (const p of peds) meses[parseInt(p[0].slice(5,7),10)-1] += p[5];
       if (drillEvol) drillEvol.destroy();
       drillEvol = window._dashRegChart(document.getElementById('drillEvol'), {
-        type:'line', data:{ labels:monthLabels, datasets:[{ label:'Faturamento Mensal', data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.12)', fill:true, tension:.3 }]},
+        type:'line', data:{ labels:monthLabels, datasets:[{ label:'Faturamento mensal', data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.12)', fill:true, tension:.3 }]},
         options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk }),
         plugins: [{
           id: 'dvgLineGlow',
@@ -15629,7 +15602,7 @@ function dashInit() {
       _dvgRenderCarteiraTabela();
       document.getElementById('drillVendedor').scrollIntoView({ behavior:'smooth', block:'start' });
     }
-    document.getElementById('drillFechar').addEventListener('click', () => { document.getElementById('drillVendedor').style.display = 'none'; });
+    document.getElementById('drillFechar').addEventListener('click', () => document.getElementById('drillVendedor').classList.add('hidden'));
 
     // =============== RANKING CLIENTES ===============
     let chartABC, chartTopClientes;
@@ -15753,7 +15726,7 @@ function dashInit() {
       const y = padT + (1 - _dvgCliTop[i].fat/maxV) * (H-padT-padB);
       dot.setAttribute('cx', x); dot.setAttribute('cy', y);
     }
-    let _dvgCliDetailMode = null; // null | 'pedidos' | 'fabricas' | 'produtos'
+    let _dvgCliDetailMode = null; // null | 'pedidos' | 'fabricas'
     function _dvgRenderCliDetailBody(c) {
       const row = document.getElementById('dvgCliDetailRow');
       const body = document.getElementById('dvgCliDetailBody');
@@ -15762,20 +15735,13 @@ function dashInit() {
       row.classList.add('dvg-cliexp-open');
       if (_dvgCliDetailMode === 'pedidos') {
         body.innerHTML = c.ultimos.length ? c.ultimos.map(p => `<div class="dvg-cliexp-pedrow"><span>${fmtDate(p.data)} &middot; ${escapeHtml(FAB[p.fab])}</span><span style="font-weight:700">${fmtBRL(p.valor)}</span></div>`).join('') : '<div class="dvg-cliexp-empty">Sem pedidos no período.</div>';
-      } else if (_dvgCliDetailMode === 'fabricas') {
+      } else {
         const fabArr = [...c.porFab.entries()].map(([fi,v])=>({nome:FAB[fi], v})).sort((a,b)=>b.v-a.v);
         const maxFab = fabArr.length ? fabArr[0].v : 0;
         body.innerHTML = fabArr.length ? fabArr.map(f => {
           const pct = maxFab ? (f.v/maxFab*100) : 0;
           return `<div class="dvg-cliexp-fabrow"><span>${escapeHtml(f.nome)}</span><span>${fmtBRL(f.v)}</span></div><div class="dvg-cliexp-fabtrk"><i style="width:${pct}%"></i></div>`;
         }).join('') : '<div class="dvg-cliexp-empty">Sem dados de fábrica no período.</div>';
-      } else if (_dvgCliDetailMode === 'produtos') {
-        const prodArr = [...c.porProd.values()].sort((a,b)=>b.valor-a.valor).slice(0,5);
-        const maxProd = prodArr.length ? prodArr[0].valor : 0;
-        body.innerHTML = prodArr.length ? prodArr.map(p => {
-          const pct = maxProd ? (p.valor/maxProd*100) : 0;
-          return `<div class="dvg-cliexp-fabrow"><span>${escapeHtml(p.nome)}</span><span>${fmtBRL(p.valor)}</span></div><div class="dvg-cliexp-fabtrk"><i style="width:${pct}%"></i></div>`;
-        }).join('') : '<div class="dvg-cliexp-empty">Sem dados de produto no período.</div>';
       }
     }
     function _dvgToggleCliDetail(mode) {
@@ -15797,11 +15763,12 @@ function dashInit() {
       if (elNome) elNome.innerHTML = escapeHtml(c.nome);
       if (elBadge) elBadge.textContent = 'Rank #' + (i+1) + ' de ' + _dvgCliTop.length;
       _dvgUpdateCliScrubDot(i);
+      const ticket = c.n ? c.fat / c.n : 0;
       const statsEl = document.getElementById('dvgCliScrubStats');
       if (statsEl) {
         statsEl.innerHTML = [
           { v: c.n.toLocaleString('pt-BR'), l:'pedidos', k:'pedidos' },
-          { v: c.porProd.size.toLocaleString('pt-BR'), l:'produtos', k:'produtos' },
+          { v: fmtBRL(ticket), l:'ticket médio', k:null },
           { v: c.fabs.size, l:'fábricas compradas', k:'fabricas' },
           { v: c.ult?fmtDate(c.ult):'—', l:'última compra', k:null },
         ].map(s => `<div class="dvg-cliexp-stat${s.k?' dvg-clidetail-trigger':''}${s.k===_dvgCliDetailMode?' active':''}"${s.k?` data-k="${s.k}"`:''}><b>${s.v}</b><span>${s.l}</span></div>`).join('');
@@ -15874,7 +15841,7 @@ function dashInit() {
       // Curva ABC (SVG suave com zonas A/B/C)
       _dvgRenderAbcCurve(arr);
 
-      // Top clientes (scrubber, maior -> menor, com detalhamento por fábrica/pedidos/produtos)
+      // Top clientes (scrubber, maior -> menor, com detalhamento por fábrica/pedidos)
       const topN = arr.slice(0, 20);
       const topCiSet = new Set(topN.map(c=>c.ci));
       const detFab = new Map(), detPed = new Map();
@@ -15886,36 +15853,12 @@ function dashInit() {
         lp.push({ data:p[0], fab:p[2], valor:p[5] });
       }
       detPed.forEach(lp => lp.sort((a,b)=> b.data.localeCompare(a.data)));
-      // Produtos: só getPedidos() real tem itens/SKU (o array denormalizado do dashboard não tem) —
-      // cruza pelo clienteId real (getClientesVisiveis()[ci].id), respeitando período + status ok.
-      const detProd = new Map();
-      try {
-        const clientesReais = getClientesVisiveis();
-        const clienteIdParaCi = new Map();
-        topN.forEach(c => { const cr = clientesReais[c.ci]; if (cr) clienteIdParaCi.set(cr.id, c.ci); });
-        if (clienteIdParaCi.size) {
-          for (const pedidoReal of getPedidos()) {
-            const ciAlvo = clienteIdParaCi.get(pedidoReal.clienteId);
-            if (ciAlvo === undefined) continue;
-            if (pedidoReal.data < state.dtIni || pedidoReal.data > state.dtFim) continue;
-            if (!ST_OK.has(STATUS.indexOf(pedidoReal.status))) continue;
-            let mProd = detProd.get(ciAlvo); if (!mProd) { mProd = new Map(); detProd.set(ciAlvo, mProd); }
-            (pedidoReal.itens || []).forEach(it => {
-              const chave = it.prodId != null ? it.prodId : (it.prodNome || it.prodCodigo);
-              let acc = mProd.get(chave);
-              if (!acc) { acc = { nome: it.prodNome || it.prodCodigo || 'Produto', qtd:0, valor:0 }; mProd.set(chave, acc); }
-              acc.qtd += Number(it.quantidade) || 0;
-              acc.valor += Number(it.valorTotal) || 0;
-            });
-          }
-        }
-      } catch (e) { /* getClientesVisiveis/getPedidos indisponíveis neste contexto */ }
-      _dvgCliTop = topN.map(c => ({ ...c, porFab: detFab.get(c.ci) || new Map(), ultimos: (detPed.get(c.ci) || []).slice(0,3), porProd: detProd.get(c.ci) || new Map() }));
+      _dvgCliTop = topN.map(c => ({ ...c, porFab: detFab.get(c.ci) || new Map(), ultimos: (detPed.get(c.ci) || []).slice(0,3) }));
       _dvgRenderCliScrub();
 
       // Risco (cartão vermelho/laranja da marca, mesmo dado e mesmo input #diasRisco)
       const dias = parseInt(document.getElementById('diasRisco').value,10)||60;
-      const risco = arr.filter(c => c.dias >= dias && !c.inativo).sort((a,b)=>b.dias-a.dias);
+      const risco = arr.filter(c => c.dias >= dias && !c.inativo).sort((a,b)=>b.fat-a.fat);
       const _dvgRiskCard = document.getElementById('dvgRiskCard');
       if (_dvgRiskCard) _dvgRiskCard.classList.toggle('dvg-risk-ok', risco.length===0);
       const _dvgRiskNumEl = document.getElementById('dvgRiskNum');
