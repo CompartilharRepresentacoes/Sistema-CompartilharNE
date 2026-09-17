@@ -15210,10 +15210,10 @@ function dashInit() {
       _dvgRenderRank('topClientes', topC.map(x=>({nome:CLI[x.i], val:x.v})));
     }
     function kpiCard(titulo, valor, color, sub, kind, idx) {
-      const _gradStops = ['#1c2f66', '#2c4488', '#3d5aa8', '#5b78c9', '#7b93d9', '#a9c2f5'];
-      const barColor   = color==='bad' ? '#dc2626' : (_gradStops[idx||0] || '#1c2f66');
+      const _gradStops = ['#D82621', '#D93722', '#DA4723', '#DC5824', '#DD6825', '#DE7926'];
+      const barColor   = color==='bad' ? '#dc2626' : (_gradStops[idx||0] || '#D82621');
       const accentColor = barColor;
-      const valColor    = color==='good' ? '#1c2f66' : color==='bad' ? '#dc2626' : '#1e293b';
+      const valColor    = color==='good' ? '#DE7926' : color==='bad' ? '#dc2626' : '#1e293b';
       return `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
         <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">${titulo}</div>
         <div style="font-size:22px;font-weight:800;color:${valColor};line-height:1.2;letter-spacing:-.02em">${valor}</div>
@@ -15528,11 +15528,11 @@ function dashInit() {
       `;
       // Mensal
       window._dashRegChart(document.getElementById('fabMensal'), { type:'bar',
-        data:{ labels:monthLabels, datasets:[{ data:meses, backgroundColor:'#4f7fe0', borderRadius:6 }] },
+        data:{ labels:monthLabels, datasets:[{ data:meses, backgroundColor:'#0e7490', borderRadius:6 }] },
         options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false }) });
       // Vendedor
       window._dashRegChart(document.getElementById('fabVend'), { type:'bar',
-        data:{ labels: arrV.map(v=>v.nome), datasets:[{ data: arrV.map(v=>v.fat), backgroundColor:'#3d5aa8', borderRadius:6 }] },
+        data:{ labels: arrV.map(v=>v.nome), datasets:[{ data: arrV.map(v=>v.fat), backgroundColor:'#0891b2', borderRadius:6 }] },
         options: { ...chartOpts({ tooltip:c=>fmtBRL(c.parsed.x), yFmt:fmtBRLk, legend:false }), indexAxis:'y' } });
     }
 

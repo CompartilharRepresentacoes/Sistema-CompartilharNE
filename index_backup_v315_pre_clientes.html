@@ -1333,19 +1333,6 @@
 .dash-root .dvg-vrank-sub{font-size:10.5px;color:#94a3b8;margin-top:2px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .dash-root .dvg-vrank-trk{height:5px;background:#f1f5f9;border-radius:5px;overflow:visible;margin-top:7px}
 .dash-root .dvg-vrank-trk i{display:block;height:100%;border-radius:5px;width:0;background:linear-gradient(90deg,#4f7fe0,#1c2f66);box-shadow:0 0 7px rgba(79,127,224,.7);transition:width 1s ease}
-.dash-root .dvg-riskcard{border-radius:14px;padding:16px 18px;background:linear-gradient(135deg,#7c2d12 0%,#c2410c 55%,#ea580c 100%);color:#fff;position:relative;overflow:hidden;box-shadow:0 6px 20px rgba(124,45,18,.25)}
-.dash-root .dvg-riskcard.dvg-risk-ok{background:linear-gradient(135deg,#064e3b 0%,#065f46 55%,#059669 100%);box-shadow:0 6px 20px rgba(6,78,59,.25)}
-.dash-root .dvg-risk-num{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-top:2px}
-.dash-root .dvg-risk-lbl{font-size:11px;opacity:.8;margin-top:2px;max-width:200px}
-.dash-root .dvg-risk-input{display:flex;align-items:center;gap:8px;margin:14px 0 10px}
-.dash-root .dvg-risk-input input{width:60px;padding:4px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:#fff;font-size:12px}
-.dash-root .dvg-risk-list{max-height:230px;overflow:auto;background:rgba(255,255,255,.10);border-radius:10px;padding:6px 10px}
-.dash-root .dvg-risk-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.14);font-size:12.5px}
-.dash-root .dvg-risk-row:last-child{border-bottom:none}
-.dash-root .dvg-abcsum{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.dash-root .dvg-abcsum-item{flex:1;min-width:120px;background:#f8fafc;border-radius:10px;padding:8px 10px}
-.dash-root .dvg-abcsum-item b{display:block;font-size:15px;font-weight:800;color:#1e293b}
-.dash-root .dvg-abcsum-item span{font-size:10.5px;color:#64748b}
 .dash-root .dvg-scrub{background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:16px;padding:22px 24px;box-shadow:0 4px 16px rgba(0,0,0,.22);color:#fff}
 .dash-root .dvg-scrub-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:14px}
 .dash-root .dvg-scrub-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:3px}
@@ -1465,24 +1452,8 @@
 </section>
 <section id="tab-clientes" class="tab-content">
   <div class="dg21" style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px">
-    <div class="d-card">
-      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">Curva ABC de clientes (Pareto)</div>
-      <div class="dvg-abcsum" id="dvgAbcSum"></div>
-      <div style="height:260px"><canvas id="chartABC"></canvas></div>
-      <div style="margin-top:8px;font-size:11px;color:#64748b">A: até 80% do faturamento · B: 80–95% · C: 95–100%</div>
-    </div>
-    <div class="dvg-riskcard" id="dvgRiskCard">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;opacity:.85">Risco de inatividade</div>
-          <div class="dvg-risk-num" id="dvgRiskNum">0</div>
-          <div class="dvg-risk-lbl">clientes sem comprar há mais tempo que o limite</div>
-        </div>
-        <div style="font-size:24px">&#9888;&#65039;</div>
-      </div>
-      <div class="dvg-risk-input"><span style="font-size:12px;opacity:.85">Dias sem comprar &ge;</span><input id="diasRisco" type="number" min="0" max="365" value="60"></div>
-      <div id="alertaRisco"></div>
-    </div>
+    <div class="d-card"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">Curva ABC de clientes (Pareto)</div><div style="height:300px"><canvas id="chartABC"></canvas></div><div style="margin-top:8px;font-size:11px;color:#64748b">A: até 80% do faturamento · B: 80–95% · C: 95–100%</div></div>
+    <div class="d-card"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px">Risco de inatividade</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-size:12px;color:#64748b">Dias sem comprar ≥</span><input id="diasRisco" type="number" min="0" max="365" value="60" style="width:60px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px"></div><div id="alertaRisco" style="font-size:12px;color:#334155"></div></div>
   </div>
   <div class="d-card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Top 20 clientes</span><span style="font-size:11px;color:#64748b">Faturamento no período filtrado</span></div><div style="height:440px"><canvas id="chartTopClientes"></canvas></div></div>
   <div class="d-card"><div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px">Tabela ABC completa</div><div class="scroll-x"><table id="tabClientes"></table></div></div>
@@ -15210,10 +15181,10 @@ function dashInit() {
       _dvgRenderRank('topClientes', topC.map(x=>({nome:CLI[x.i], val:x.v})));
     }
     function kpiCard(titulo, valor, color, sub, kind, idx) {
-      const _gradStops = ['#1c2f66', '#2c4488', '#3d5aa8', '#5b78c9', '#7b93d9', '#a9c2f5'];
-      const barColor   = color==='bad' ? '#dc2626' : (_gradStops[idx||0] || '#1c2f66');
+      const _gradStops = ['#D82621', '#D93722', '#DA4723', '#DC5824', '#DD6825', '#DE7926'];
+      const barColor   = color==='bad' ? '#dc2626' : (_gradStops[idx||0] || '#D82621');
       const accentColor = barColor;
-      const valColor    = color==='good' ? '#1c2f66' : color==='bad' ? '#dc2626' : '#1e293b';
+      const valColor    = color==='good' ? '#DE7926' : color==='bad' ? '#dc2626' : '#1e293b';
       return `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
         <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">${titulo}</div>
         <div style="font-size:22px;font-weight:800;color:${valColor};line-height:1.2;letter-spacing:-.02em">${valor}</div>
@@ -15381,26 +15352,13 @@ function dashInit() {
       const fimDt = parseDate(state.dtFim);
       arr.forEach(c => c.dias = c.ult ? daysBetween(parseDate(c.ult), fimDt) : 999);
 
-      // Resumo ABC (contagem e % de faturamento por classe)
-      const _dvgResumoAbc = { A:{n:0,fat:0}, B:{n:0,fat:0}, C:{n:0,fat:0} };
-      arr.forEach(c => { _dvgResumoAbc[c.classe].n++; _dvgResumoAbc[c.classe].fat += c.fat; });
-      const _dvgAbcSumEl = document.getElementById('dvgAbcSum');
-      if (_dvgAbcSumEl) {
-        const _dvgAbcCores = { A:'#0e2f6e', B:'#3d5aa8', C:'#94a3b8' };
-        _dvgAbcSumEl.innerHTML = ['A','B','C'].map(k => {
-          const r = _dvgResumoAbc[k];
-          const pct = total ? fmtPct(r.fat/total) : '—';
-          return `<div class="dvg-abcsum-item" style="border-left:4px solid ${_dvgAbcCores[k]}"><b>${r.n} clientes</b><span>Classe ${k} &middot; ${pct} do faturamento</span></div>`;
-        }).join('');
-      }
-
       // Curva ABC
       if (chartABC) chartABC.destroy();
       chartABC = window._dashRegChart(document.getElementById('chartABC'), {
         data: {
           labels: arr.map((_,i)=>i+1),
           datasets: [
-            { type:'bar', label:'Faturamento (R$)', data: arr.map(c=>c.fat), backgroundColor: arr.map(c=>c.classe==='A'?'#1c2f66':c.classe==='B'?'#5b78c9':'#cbd5e1'), yAxisID:'y', borderRadius:2, maxBarThickness:8 },
+            { type:'bar', label:'Faturamento (R$)', data: arr.map(c=>c.fat), backgroundColor: arr.map(c=>c.classe==='A'?'#0e7490':c.classe==='B'?'#67e8f9':'#cbd5e1'), yAxisID:'y', borderRadius:2, maxBarThickness:8 },
             { type:'line', label:'% acumulado', data: arr.map(c=>c.acumPct*100), borderColor:'#d97706', borderWidth:2, pointRadius:0, yAxisID:'y2', tension:.2 }
           ]
         },
@@ -15422,21 +15380,18 @@ function dashInit() {
       if (chartTopClientes) chartTopClientes.destroy();
       chartTopClientes = window._dashRegChart(document.getElementById('chartTopClientes'), {
         type:'bar',
-        data:{ labels: top.map(c=>c.nome), datasets:[{ label:'Faturamento', data: top.map(c=>c.fat), backgroundColor:'#4f7fe0', borderRadius:6 }] },
+        data:{ labels: top.map(c=>c.nome), datasets:[{ label:'Faturamento', data: top.map(c=>c.fat), backgroundColor:'#0e7490', borderRadius:6 }] },
         options:{ ...chartOpts({ tooltip:c=>fmtBRL(c.parsed.x), yFmt:fmtBRLk, legend:false }), indexAxis:'y' }
       });
 
-      // Risco (cartão navy/laranja de impacto, mesmo dado e mesmo input #diasRisco)
+      // Risco
       const dias = parseInt(document.getElementById('diasRisco').value,10)||60;
       const risco = arr.filter(c => c.dias >= dias && !c.inativo).sort((a,b)=>b.fat-a.fat);
-      const _dvgRiskCard = document.getElementById('dvgRiskCard');
-      if (_dvgRiskCard) _dvgRiskCard.classList.toggle('dvg-risk-ok', risco.length===0);
-      const _dvgRiskNumEl = document.getElementById('dvgRiskNum');
-      if (_dvgRiskNumEl) _dvgRiskNumEl.textContent = risco.length;
       document.getElementById('alertaRisco').innerHTML = risco.length===0 ?
-        `<div class="dvg-risk-list" style="text-align:center;padding:16px 0;font-size:12.5px">Nenhum cliente acima de ${dias} dias sem comprar. &#9989;</div>` :
-        `<div class="dvg-risk-list">${risco.slice(0,40).map(c=>`<div class="dvg-risk-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0"><b>${escapeHtml(c.nome)}</b><br><span style="opacity:.75;font-size:10.5px">${fmtBRL(c.fat)} no período &middot; última: ${c.ult?fmtDate(c.ult):'—'}</span></span><span style="font-weight:800;white-space:nowrap;flex-shrink:0">${c.dias}d</span></div>`).join('')}</div>` +
-        (risco.length>40?`<div style="font-size:11px;opacity:.8;margin-top:6px;text-align:center">…e mais ${risco.length-40}.</div>`:'');
+        `<div class="text-good-500">Nenhum cliente acima de ${dias} dias sem comprar.</div>` :
+        `<div class="mb-2"><span class="chip chip-warn">${risco.length} clientes</span> com ${dias}+ dias sem comprar.</div>` +
+        `<div class="space-y-1 max-h-72 overflow-auto pr-1">${risco.slice(0,40).map(c=>`<div class="flex items-center justify-between gap-2 text-[13px]"><span class="truncate"><b>${escapeHtml(c.nome)}</b></span><span class="text-bad-500 font-semibold tabular-nums">${c.dias}d</span></div><div class="text-[11px] text-ink-600 dark:text-ink-400">${fmtBRL(c.fat)} no período · última: ${c.ult?fmtDate(c.ult):'—'}</div>`).join('')}</div>` +
+        (risco.length>40?`<div class="text-[12px] text-ink-600 dark:text-ink-400 mt-1">…e mais ${risco.length-40}.</div>`:'');
 
       // Tabela completa
       document.getElementById('tabClientes').innerHTML = `
@@ -15528,11 +15483,11 @@ function dashInit() {
       `;
       // Mensal
       window._dashRegChart(document.getElementById('fabMensal'), { type:'bar',
-        data:{ labels:monthLabels, datasets:[{ data:meses, backgroundColor:'#4f7fe0', borderRadius:6 }] },
+        data:{ labels:monthLabels, datasets:[{ data:meses, backgroundColor:'#0e7490', borderRadius:6 }] },
         options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false }) });
       // Vendedor
       window._dashRegChart(document.getElementById('fabVend'), { type:'bar',
-        data:{ labels: arrV.map(v=>v.nome), datasets:[{ data: arrV.map(v=>v.fat), backgroundColor:'#3d5aa8', borderRadius:6 }] },
+        data:{ labels: arrV.map(v=>v.nome), datasets:[{ data: arrV.map(v=>v.fat), backgroundColor:'#0891b2', borderRadius:6 }] },
         options: { ...chartOpts({ tooltip:c=>fmtBRL(c.parsed.x), yFmt:fmtBRLk, legend:false }), indexAxis:'y' } });
     }
 
