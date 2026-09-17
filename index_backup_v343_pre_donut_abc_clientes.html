@@ -1543,17 +1543,19 @@
       </div>
       <div class="dvg-cbody">
         <div class="dvg-abcsum" id="dvgAbcSum"></div>
-        <div class="dvg-carddark" style="padding:16px 18px">
-          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
-            <svg id="dvgAbcDonutSvg" viewBox="0 0 180 180" width="150" height="150" style="flex-shrink:0">
-              <g id="dvgAbcDonutG" transform="rotate(-90 90 90)"></g>
-              <text id="dvgAbcDonutTag" x="90" y="82" text-anchor="middle" class="dvg-donuttag">TOTAL FATURADO</text>
-              <foreignObject x="30" y="88" width="120" height="24">
-                <div id="dvgAbcDonutVal" xmlns="http://www.w3.org/1999/xhtml" style="font-size:15px;color:#fff;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden">R$ 0</div>
-              </foreignObject>
-            </svg>
-            <div class="dvg-legend" id="dvgAbcDonutLegend" style="flex:1;min-width:150px"></div>
-          </div>
+        <svg id="dvgAbcCurveSvg" viewBox="0 0 600 240" style="width:100%;height:240px;overflow:visible">
+          <defs>
+            <linearGradient id="dvgAbcGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#d97706" stop-opacity="0.35"></stop>
+              <stop offset="100%" stop-color="#d97706" stop-opacity="0"></stop>
+            </linearGradient>
+          </defs>
+          <g id="dvgAbcCurveG"></g>
+        </svg>
+        <div style="display:flex;gap:14px;justify-content:center;margin-top:8px;font-size:11px;color:#64748b;flex-wrap:wrap">
+          <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#1c2f66;margin-right:4px;vertical-align:-1px"></i>Classe A (até 80% do faturamento)</span>
+          <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#5b78c9;margin-right:4px;vertical-align:-1px"></i>Classe B (80–95%)</span>
+          <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#cbd5e1;margin-right:4px;vertical-align:-1px"></i>Classe C (95–100%)</span>
         </div>
       </div>
     </div>
@@ -15713,55 +15715,79 @@ function dashInit() {
         cardAbc.classList.remove('dvg-collapsed');
       }
     }
-    function _dvgRenderAbcDonut(resumo) {
-      const svg = document.getElementById('dvgAbcDonutSvg');
+    function _dvgRenderAbcCurve(arr) {
+      const svg = document.getElementById('dvgAbcCurveSvg');
       if (!svg) return;
-      const g = document.getElementById('dvgAbcDonutG');
+      const g = document.getElementById('dvgAbcCurveG');
       g.innerHTML = '';
       const SVGNS = 'http://www.w3.org/2000/svg';
-      const r = 70, cx = 90, cy = 90, gap = 8;
-      const C = 2 * Math.PI * r;
-      const cores = { A:'#0e2f6e', B:'#3d5aa8', C:'#94a3b8' };
-      const classes = ['A','B','C'];
-      const total = classes.reduce((s,k) => s + resumo[k].fat, 0);
-      const tagEl = document.getElementById('dvgAbcDonutTag');
-      const valEl = document.getElementById('dvgAbcDonutVal');
-      function fitVal(text) {
-        valEl.textContent = text;
-        let size = 15;
-        valEl.style.fontSize = size + 'px';
-        while (valEl.scrollWidth > 112 && size > 9) { size -= 1; valEl.style.fontSize = size + 'px'; }
-      }
-      function mostrarTotal() { tagEl.textContent = 'TOTAL FATURADO'; fitVal(fmtBRLk(total)); }
-      function mostrarClasse(k) { tagEl.textContent = 'CLASSE ' + k; fitVal(fmtBRLk(resumo[k].fat)); }
-      const legWrap = document.getElementById('dvgAbcDonutLegend');
-      legWrap.innerHTML = '';
-      const totalGap = gap * classes.length;
-      const avail = Math.max(0, C - totalGap);
-      let offset = 0;
-      classes.forEach(k => {
-        const frac = total ? resumo[k].fat/total : 0;
-        const len = avail * frac;
-        const circle = document.createElementNS(SVGNS,'circle');
-        circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', r);
-        circle.setAttribute('fill','none'); circle.setAttribute('stroke', cores[k]); circle.setAttribute('stroke-width', 22);
-        circle.setAttribute('stroke-dasharray', len + ' ' + (C-len));
-        circle.setAttribute('stroke-dashoffset', -offset);
-        circle.style.cursor = 'pointer';
-        circle.addEventListener('mouseenter', () => mostrarClasse(k));
-        g.appendChild(circle);
-        offset += len + gap;
-        const row = document.createElement('div');
-        row.className = 'dvg-leg-row';
-        row.innerHTML = '<span class="dvg-leg-dot" style="background:' + cores[k] + '"></span>' +
-          '<span class="dvg-leg-nome">Classe ' + k + '</span>' +
-          '<span class="dvg-leg-pct">' + fmtBRL(resumo[k].fat) + '</span>';
-        row.addEventListener('mouseenter', () => mostrarClasse(k));
-        legWrap.appendChild(row);
+      const n = arr.length;
+      if (!n) return;
+      const padL = 42, padR = 14, padT = 14, padB = 26;
+      const W = 600, H = 240;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const xAt = i => padL + (n>1 ? (i/(n-1))*plotW : 0);
+      const yAt = pct => padT + (1 - pct/100) * plotH;
+      const idxFimA = arr.findIndex(c => c.acumPct > 0.8);
+      const idxFimB = arr.findIndex(c => c.acumPct > 0.95);
+      const fimA = idxFimA === -1 ? n : idxFimA;
+      const fimB = idxFimB === -1 ? n : idxFimB;
+      const zonas = [
+        { de:0, ate:fimA, cor:'#1c2f66', op:.07 },
+        { de:fimA, ate:fimB, cor:'#5b78c9', op:.08 },
+        { de:fimB, ate:n, cor:'#94a3b8', op:.10 },
+      ];
+      zonas.forEach(z => {
+        if (z.ate <= z.de) return;
+        const xStart = xAt(z.de);
+        const xEnd = z.ate >= n ? (padL+plotW) : xAt(z.ate);
+        const rect = document.createElementNS(SVGNS,'rect');
+        rect.setAttribute('x', xStart); rect.setAttribute('y', padT);
+        rect.setAttribute('width', Math.max(0, xEnd - xStart)); rect.setAttribute('height', plotH);
+        rect.setAttribute('fill', z.cor); rect.setAttribute('opacity', z.op);
+        g.appendChild(rect);
       });
-      const cardEl = svg.closest('.dvg-carddark');
-      if (cardEl) cardEl.onmouseleave = mostrarTotal;
-      mostrarTotal();
+      [0,80,95,100].forEach(pct => {
+        const y = yAt(pct);
+        if (pct===80||pct===95) {
+          const line = document.createElementNS(SVGNS,'line');
+          line.setAttribute('x1', padL); line.setAttribute('x2', W-padR);
+          line.setAttribute('y1', y); line.setAttribute('y2', y);
+          line.setAttribute('stroke', '#cbd5e1'); line.setAttribute('stroke-width', 1);
+          line.setAttribute('stroke-dasharray', '4 4');
+          g.appendChild(line);
+        }
+        const txt = document.createElementNS(SVGNS,'text');
+        txt.setAttribute('x', padL - 6); txt.setAttribute('y', y+3);
+        txt.setAttribute('text-anchor','end'); txt.setAttribute('font-size','9.5px'); txt.setAttribute('fill','#94a3b8');
+        txt.textContent = pct + '%';
+        g.appendChild(txt);
+      });
+      let d = '';
+      arr.forEach((c,i) => {
+        const x = xAt(i), y = yAt(c.acumPct*100);
+        d += (i===0?'M':'L') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
+      });
+      const area = document.createElementNS(SVGNS,'path');
+      area.setAttribute('d', d + `L ${xAt(n-1).toFixed(1)} ${(padT+plotH).toFixed(1)} L ${xAt(0).toFixed(1)} ${(padT+plotH).toFixed(1)} Z`);
+      area.setAttribute('fill', 'url(#dvgAbcGrad)');
+      g.appendChild(area);
+      const path = document.createElementNS(SVGNS,'path');
+      path.setAttribute('d', d);
+      path.setAttribute('fill','none'); path.setAttribute('stroke','#d97706'); path.setAttribute('stroke-width','2.5');
+      path.style.filter = 'drop-shadow(0 0 5px rgba(217,119,6,.55))';
+      g.appendChild(path);
+      _dvgAnimarLinha(path);
+      const txtX0 = document.createElementNS(SVGNS,'text');
+      txtX0.setAttribute('x', padL); txtX0.setAttribute('y', H-6);
+      txtX0.setAttribute('font-size','9.5px'); txtX0.setAttribute('fill','#94a3b8');
+      txtX0.textContent = '1º cliente';
+      g.appendChild(txtX0);
+      const txtXN = document.createElementNS(SVGNS,'text');
+      txtXN.setAttribute('x', W-padR); txtXN.setAttribute('y', H-6);
+      txtXN.setAttribute('text-anchor','end'); txtXN.setAttribute('font-size','9.5px'); txtXN.setAttribute('fill','#94a3b8');
+      txtXN.textContent = n + 'º cliente';
+      g.appendChild(txtXN);
     }
     let _dvgCliTop = [];
     function _dvgRenderCliScrubCurve() {
@@ -15931,8 +15957,8 @@ function dashInit() {
         ['A','B','C'].forEach(k => _dvgAnimarNumero(document.getElementById('dvgAbcN'+k), _dvgResumoAbc[k].n, v => Math.round(v).toLocaleString('pt-BR') + ' clientes'));
       }
 
-      // Distribuição ABC por faturamento (donut, mesmo padrão do donut de Fábricas)
-      _dvgRenderAbcDonut(_dvgResumoAbc);
+      // Curva ABC (SVG suave com zonas A/B/C)
+      _dvgRenderAbcCurve(arr);
 
       // Top clientes (scrubber, maior -> menor, com detalhamento por fábrica/pedidos/produtos)
       const topN = arr.slice(0, 20);
