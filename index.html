@@ -15298,7 +15298,7 @@ function dashInit() {
         const pct = totalFab ? (f.v/totalFab) : 0;
         const len = pct * avail;
         const cor = _dvgFabPalette[rank % _dvgFabPalette.length];
-        const destacada = selecionadas.size ? selecionadas.has(f.i) : rank === 0;
+        const destacada = selecionadas.has(f.i);
         const seg = document.createElementNS(SVGNS,'circle');
         seg.setAttribute('cx',cx); seg.setAttribute('cy',cy); seg.setAttribute('r',r);
         seg.setAttribute('fill','none'); seg.setAttribute('stroke',cor);
