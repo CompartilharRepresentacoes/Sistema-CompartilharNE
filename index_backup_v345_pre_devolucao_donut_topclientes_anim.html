@@ -1348,24 +1348,6 @@
 .dash-root .dvg-abcsum-item{flex:1;min-width:120px;background:#f8fafc;border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .15s}
 .dash-root .dvg-abcsum-item:hover{background:#eef2ff}
 .dash-root .dvg-abcsum-item.active{background:#dbeafe}
-.dash-root .dvg-devol-row{border-radius:10px;padding:4px}
-.dash-root .dvg-devol-main{display:flex;align-items:center;gap:10px;padding:8px 6px;cursor:pointer;border-radius:10px;transition:background .15s}
-.dash-root .dvg-devol-main:hover{background:#f8fafc}
-.dash-root .dvg-devol-rank{width:18px;text-align:center;font-size:11.5px;font-weight:700;color:#94a3b8;flex-shrink:0}
-.dash-root .dvg-devol-info{flex:1;min-width:0}
-.dash-root .dvg-devol-linha1{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;margin-bottom:4px}
-.dash-root .dvg-devol-nome{font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dash-root .dvg-devol-vals{font-size:10.5px;color:#94a3b8;white-space:nowrap;flex-shrink:0}
-.dash-root .dvg-devol-vals b{color:#1e293b}
-.dash-root .dvg-devol-trk{height:8px;background:#e3ebfa;border-radius:5px;overflow:hidden}
-.dash-root .dvg-devol-trk i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#1c2f66,#4f7fe0)}
-.dash-root .dvg-devol-pct{font-size:13px;font-weight:800;color:#1c3f8c;width:52px;text-align:right;flex-shrink:0}
-.dash-root .dvg-devol-chev{font-size:10px;color:#c3cbdb;flex-shrink:0;transition:transform .15s;display:inline-block}
-.dash-root .dvg-devol-row.open .dvg-devol-chev{transform:rotate(180deg)}
-.dash-root .dvg-devol-detail{padding:2px 6px 10px 40px}
-.dash-root .dvg-devol-detail-tit{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
-.dash-root .dvg-devol-item{display:flex;justify-content:space-between;font-size:12px;color:#334155;padding:3px 0}
-.dash-root .dvg-devol-item b{color:#1c3f8c}
 .dash-root .dvg-abcsum-item b{display:block;font-size:15px;font-weight:800;color:#1e293b}
 .dash-root .dvg-abcsum-item span{font-size:10.5px;color:#64748b}
 .dash-root .dvg-scrub{background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:16px;padding:22px 24px;box-shadow:0 4px 16px rgba(0,0,0,.22);color:#fff}
@@ -1540,12 +1522,9 @@
             <stop offset="0%" stop-color="#4f7fe0" stop-opacity="0.45"></stop>
             <stop offset="100%" stop-color="#4f7fe0" stop-opacity="0"></stop>
           </linearGradient>
-          <clipPath id="dvgCliScrubClip"><rect id="dvgCliScrubClipRect" x="0" y="0" width="600" height="96"></rect></clipPath>
         </defs>
-        <g clip-path="url(#dvgCliScrubClip)">
-          <path id="dvgCliScrubArea" fill="url(#dvgCliScrubGrad)"></path>
-          <path id="dvgCliScrubLine" fill="none" stroke="#4f7fe0" stroke-width="2.5"></path>
-        </g>
+        <path id="dvgCliScrubArea" fill="url(#dvgCliScrubGrad)"></path>
+        <path id="dvgCliScrubLine" fill="none" stroke="#4f7fe0" stroke-width="2.5"></path>
         <circle id="dvgCliScrubDot" r="5" fill="#fff" stroke="#4f7fe0" stroke-width="3"></circle>
       </svg>
     </div>
@@ -1555,14 +1534,6 @@
     <div class="dvg-clidetail-row" id="dvgCliDetailRow">
       <div id="dvgCliDetailBody"></div>
     </div>
-  </div>
-  <div class="d-card" style="margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;flex-wrap:wrap;gap:6px">
-      <span style="font-size:13px;font-weight:700;color:#1e293b">Rank de Devolução por Cliente</span>
-      <span style="font-size:10.5px;color:#94a3b8;background:#f1f4f9;border-radius:20px;padding:3px 9px">sincronizado aos filtros</span>
-    </div>
-    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Faturamento x Devolução no período &middot; clique num cliente para ver os itens mais devolvidos</div>
-    <div id="dvgDevolRank"></div>
   </div>
   <div class="dg21 dvg-cli-grid" id="dvgCliGrid" style="display:grid;gap:12px;margin-bottom:12px">
     <div class="d-card dvg-collapsible" id="dvgCliCardAbc">
@@ -14830,21 +14801,6 @@ function _dashConstruirDadosAoVivo() {
     }
   });
 
-  var devolucoesBase = (typeof getDevolucoes === 'function') ? getDevolucoes() : [];
-  var DEVOL = [];
-  devolucoesBase.forEach(function (dev) {
-    var cIdxD = idxCliente(dev.clienteId, dev.clienteNome);
-    var fIdxD = idxFabrica(dev.fornecedorId, dev.fornecedorNome);
-    var vIdxD = idxVendedor(dev.vendedorId, dev.vendedorNome);
-    var dataDev = (dev.dataNfEmitida || dev.data || '').slice(0, 10);
-    if (!dataDev) return;
-    var itensSimples = (dev.itens || []).map(function (it) {
-      return { n: it.prodNome || it.prodCodigo || 'Produto', q: Number(it.quantidade) || 0, v: Number(it.valorTotal) || 0 };
-    });
-    var valorTotalDev = Number(dev.totalProdutos) || itensSimples.reduce(function (s, it) { return s + it.v; }, 0);
-    DEVOL.push([dataDev, cIdxD, fIdxD, vIdxD, valorTotalDev, itensSimples]);
-  });
-
   var hoje = new Date();
   var ano = hoje.getFullYear();
   var pad = function (n) { return String(n).padStart(2, '0'); };
@@ -14868,7 +14824,6 @@ function _dashConstruirDadosAoVivo() {
     clientes: CLI,
     clientes_inativo: CLI_INATIVO,
     pedidos: PED,
-    devolucoes: DEVOL,
   };
 }
 
@@ -14889,8 +14844,7 @@ function dashInit() {
     // =============== DADOS ===============
     const _dashHistorico = window._dashModoHistorico2025 === true;
     const DATA = _dashHistorico ? JSON.parse(document.getElementById('dash-dados').textContent) : _dashConstruirDadosAoVivo();
-    const { vendedores: VEND, fabricas: FAB, clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, meta: METAINFO, devolucoes: DEVOL_RAW } = DATA;
-    const DEVOL = DEVOL_RAW || [];
+    const { vendedores: VEND, fabricas: FAB, clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, meta: METAINFO } = DATA;
     const ST_FATURADO = STATUS.indexOf('Faturado');
     const ST_FAT_PARC = STATUS.indexOf('Faturado Parcial');
     const ST_OK = new Set([ST_FATURADO, ST_FAT_PARC].filter(x => x >= 0));
@@ -15019,86 +14973,6 @@ function dashInit() {
       return out;
     }
 
-    function filtraDevolucoes() {
-      const ini = state.dtIni, fim = state.dtFim;
-      const fabSet = state.fabricas, venSet = state.vendedores, cliSet = state.clientes;
-      const out = [];
-      for (let i=0;i<DEVOL.length;i++) {
-        const d = DEVOL[i];
-        // [data, cli, fab, ven, valor, itens]
-        if (d[0] < ini || d[0] > fim) continue;
-        if (fabSet.size && !fabSet.has(d[2])) continue;
-        if (venSet.size && !venSet.has(d[3])) continue;
-        if (cliSet.size && !cliSet.has(d[1])) continue;
-        out.push(d);
-      }
-      return out;
-    }
-
-    function _dvgRenderRankDevolucao(arrClientes) {
-      const el = document.getElementById('dvgDevolRank');
-      if (!el) return;
-      const devs = filtraDevolucoes();
-      const fatPorCliente = new Map(arrClientes.map(c => [c.ci, c.fat]));
-      const ag = new Map();
-      for (const d of devs) {
-        let a = ag.get(d[1]);
-        if (!a) { a = { valor: 0, itens: new Map() }; ag.set(d[1], a); }
-        a.valor += d[4];
-        for (const it of (d[5] || [])) {
-          let acc = a.itens.get(it.n);
-          if (!acc) { acc = { nome: it.n, qtd: 0, valor: 0 }; a.itens.set(it.n, acc); }
-          acc.qtd += it.q; acc.valor += it.v;
-        }
-      }
-      const rank = [...ag.entries()]
-        .map(([ci, a]) => ({ ci, nome: CLI[ci], devolvido: a.valor, fat: fatPorCliente.get(ci) || 0, itens: [...a.itens.values()].sort((x,y)=>y.valor-x.valor).slice(0,5) }))
-        .filter(c => c.devolvido > 0)
-        .map(c => ({ ...c, pct: c.fat ? c.devolvido / c.fat : null }))
-        .sort((a,b) => b.devolvido - a.devolvido);
-
-      if (!rank.length) {
-        el.innerHTML = `<div style="text-align:center;padding:16px 0;color:#94a3b8;font-size:12.5px">Nenhuma devolução no período/filtro selecionado.</div>`;
-        return;
-      }
-
-      el.innerHTML = rank.map((c,i) => {
-        const pctTxt = c.fat ? fmtPct(c.pct) : '—';
-        const barPct = c.fat ? Math.min(100, c.pct*100) : 0;
-        const itensHtml = c.itens.length
-          ? c.itens.map(it => `<div class="dvg-devol-item"><span>${escapeHtml(it.nome)}</span><span>${fmtNum(it.qtd)} un &middot; <b>${fmtBRL(it.valor)}</b></span></div>`).join('')
-          : '<div class="dvg-devol-item" style="opacity:.6">sem itens detalhados</div>';
-        return `
-        <div class="dvg-devol-row" data-ci="${c.ci}">
-          <div class="dvg-devol-main">
-            <span class="dvg-devol-rank">${i+1}</span>
-            <div class="dvg-devol-info">
-              <div class="dvg-devol-linha1">
-                <span class="dvg-devol-nome">${escapeHtml(c.nome)}</span>
-                <span class="dvg-devol-vals">Fat: <b>${fmtBRLk(c.fat)}</b> &middot; Dev: <b>${fmtBRLk(c.devolvido)}</b></span>
-              </div>
-              <div class="dvg-devol-trk"><i style="width:${barPct}%"></i></div>
-            </div>
-            <span class="dvg-devol-pct">${pctTxt}</span>
-            <span class="dvg-devol-chev">&#9662;</span>
-          </div>
-          <div class="dvg-devol-detail" style="display:none">
-            <div class="dvg-devol-detail-tit">5 itens mais devolvidos</div>
-            ${itensHtml}
-          </div>
-        </div>`;
-      }).join('');
-
-      el.querySelectorAll('.dvg-devol-row').forEach(row => {
-        row.querySelector('.dvg-devol-main').addEventListener('click', () => {
-          const det = row.querySelector('.dvg-devol-detail');
-          const abrindo = det.style.display === 'none';
-          el.querySelectorAll('.dvg-devol-row').forEach(r => { r.classList.remove('open'); r.querySelector('.dvg-devol-detail').style.display = 'none'; });
-          if (abrindo) { det.style.display = 'block'; row.classList.add('open'); }
-        });
-      });
-    }
-
     // =============== KPIs ===============
     function kpis(peds) {
       let fat=0, vol=0, n=0;
@@ -15186,16 +15060,6 @@ function dashInit() {
       requestAnimationFrame(() => requestAnimationFrame(() => {
         pathEl.style.transition = 'stroke-dashoffset ' + (duracao||1200) + 'ms ease';
         pathEl.style.strokeDashoffset = '0';
-      }));
-    }
-    function _dvgAnimarRevelarEsquerdaDireita(rectEl, duracao) {
-      if (!rectEl) return;
-      rectEl.style.transition = 'none';
-      rectEl.style.transformOrigin = '0 0';
-      rectEl.style.transform = 'scaleX(0)';
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        rectEl.style.transition = 'transform ' + (duracao||900) + 'ms ease';
-        rectEl.style.transform = 'scaleX(1)';
       }));
     }
     let _dvgMesAberto = null;
@@ -15694,47 +15558,37 @@ function dashInit() {
       const legWrap = document.getElementById('drillFabLegend');
       legWrap.innerHTML = '';
       const segsByRank = [];
-      function aplicarFoco(rank) {
-        segsByRank.forEach((s,idx) => {
-          const emFoco = idx===rank;
-          s.seg.setAttribute('opacity', emFoco ? 0.85 : 0.55);
-          s.seg.setAttribute('stroke-width', emFoco ? 10 : 15);
-          if (s.hi) s.hi.style.opacity = emFoco ? 1 : 0;
-        });
-        legWrap.querySelectorAll('.dvg-leg-row').forEach((row,idx) => row.classList.toggle('active', idx===rank));
-      }
       function mostrar(rank) {
         const f = ranking[rank];
-        if (!f) { tagEl.textContent = 'LÍDER'; pctEl.textContent = '—'; nomeEl.textContent = '—'; aplicarFoco(-1); return; }
+        if (!f) { tagEl.textContent = 'LÍDER'; pctEl.textContent = '—'; nomeEl.textContent = '—'; return; }
         tagEl.textContent = rank === 0 ? 'LÍDER' : 'FÁBRICA';
         pctEl.textContent = totalF ? (f.v/totalF*100).toFixed(2).replace('.',',') + '%' : '—';
         nomeEl.textContent = f.nome;
-        aplicarFoco(rank);
-      }
-      function mostrarRepouso() {
-        const f = ranking[0];
-        tagEl.textContent = 'LÍDER';
-        pctEl.textContent = totalF && f ? (f.v/totalF*100).toFixed(2).replace('.',',') + '%' : '—';
-        nomeEl.textContent = f ? f.nome : '—';
-        aplicarFoco(-1);
+        legWrap.querySelectorAll('.dvg-leg-row').forEach((row,idx) => row.classList.toggle('active', idx===rank));
+        segsByRank.forEach((s,idx) => {
+          const emFoco = idx===rank;
+          s.seg.setAttribute('opacity', emFoco ? 0.85 : (idx===0?0.32:0.55));
+          if (s.hi) s.hi.style.opacity = (emFoco || idx===0) ? 1 : 0;
+        });
       }
       let offset = 0;
       ranking.forEach((f, rank) => {
         const pct = totalF ? (f.v/totalF) : 0;
         const len = pct * avail;
         const cor = _dvgFabPalette[rank % _dvgFabPalette.length];
+        const destacada = rank === 0;
         const seg = document.createElementNS(SVGNS,'circle');
         seg.setAttribute('cx',cx); seg.setAttribute('cy',cy); seg.setAttribute('r',r);
         seg.setAttribute('fill','none'); seg.setAttribute('stroke',cor);
-        seg.setAttribute('stroke-width', 15);
+        seg.setAttribute('stroke-width', destacada ? 10 : 15);
         seg.setAttribute('stroke-dasharray', len + ' ' + (C-len));
         seg.setAttribute('stroke-dashoffset', -offset);
-        seg.setAttribute('opacity', 0.55);
+        seg.setAttribute('opacity', destacada ? 0.32 : 0.55);
         seg.style.cursor = 'pointer';
         seg.addEventListener('mouseenter', () => mostrar(rank));
         g.appendChild(seg);
         let hi = null;
-        if (pct > 0) {
+        if (destacada && pct > 0) {
           hi = document.createElementNS(SVGNS,'circle');
           hi.setAttribute('cx',cx); hi.setAttribute('cy',cy); hi.setAttribute('r',r);
           hi.setAttribute('fill','none'); hi.setAttribute('stroke',cor);
@@ -15743,7 +15597,6 @@ function dashInit() {
           hi.setAttribute('stroke-dashoffset', -offset);
           hi.style.filter = 'drop-shadow(0 0 9px ' + cor + 'cc)';
           hi.style.pointerEvents = 'none';
-          hi.style.opacity = 0;
           g.appendChild(hi);
         }
         segsByRank.push({ seg, hi });
@@ -15753,7 +15606,7 @@ function dashInit() {
         const pct = totalF ? (f.v/totalF*100) : 0;
         const cor = _dvgFabPalette[rank % _dvgFabPalette.length];
         const row = document.createElement('div');
-        row.className = 'dvg-leg-row';
+        row.className = 'dvg-leg-row' + (rank===0 ? ' active' : '');
         row.innerHTML = '<span class="dvg-leg-dot" style="background:' + cor + '"></span>' +
           '<span class="dvg-leg-nome">' + escapeHtml(f.nome) + '</span>' +
           '<span class="dvg-leg-pct">' + pct.toFixed(2).replace('.',',') + '%</span>';
@@ -15761,8 +15614,8 @@ function dashInit() {
         legWrap.appendChild(row);
       });
       const donutWrap = svg.closest('.dvg-carddark');
-      if (donutWrap) donutWrap.onmouseleave = mostrarRepouso;
-      mostrarRepouso();
+      if (donutWrap) donutWrap.onmouseleave = () => mostrar(0);
+      mostrar(0);
     }
     function _dvgWirePageChips(id, onChange) {
       const wrap = document.getElementById(id);
@@ -15974,13 +15827,13 @@ function dashInit() {
       const c = _dvgCliTop[i];
       if (c) _dvgRenderCliDetailBody(c);
     }
-    function _dvgRenderCliScrubDetail(i, animar) {
+    function _dvgRenderCliScrubDetail(i) {
       const c = _dvgCliTop[i];
       if (!c) return;
       const elVal = document.getElementById('dvgCliScrubVal');
       const elNome = document.getElementById('dvgCliScrubNome');
       const elBadge = document.getElementById('dvgCliScrubBadge');
-      if (elVal) { if (animar) _dvgAnimarNumero(elVal, c.fat, fmtBRL); else elVal.textContent = fmtBRL(c.fat); }
+      if (elVal) elVal.textContent = fmtBRL(c.fat);
       if (elNome) elNome.innerHTML = escapeHtml(c.nome);
       if (elBadge) elBadge.textContent = 'Rank #' + (i+1) + ' de ' + _dvgCliTop.length;
       _dvgUpdateCliScrubDot(i);
@@ -16003,8 +15856,7 @@ function dashInit() {
       range.value = 0;
       range.oninput = (e) => _dvgRenderCliScrubDetail(parseInt(e.target.value,10)||0);
       _dvgRenderCliScrubCurve();
-      _dvgAnimarRevelarEsquerdaDireita(document.getElementById('dvgCliScrubClipRect'), 900);
-      _dvgRenderCliScrubDetail(0, true);
+      _dvgRenderCliScrubDetail(0);
     }
     let _dvgClientesArr = [], _dvgClientesTotal = 0, _dvgClientesDias = 60;
     let _dvgCliClasseFiltro = null;
@@ -16120,9 +15972,6 @@ function dashInit() {
       } catch (e) { /* getClientesVisiveis/getPedidos indisponíveis neste contexto */ }
       _dvgCliTop = topN.map(c => ({ ...c, porFab: detFab.get(c.ci) || new Map(), ultimos: (detPed.get(c.ci) || []).slice(0,3), porProd: detProd.get(c.ci) || new Map() }));
       _dvgRenderCliScrub();
-
-      // Rank de Devolução por Cliente (Faturamento x Devolução, mesmos filtros do topo)
-      _dvgRenderRankDevolucao(arr);
 
       // Risco (cartão vermelho/laranja da marca, mesmo dado e mesmo input #diasRisco)
       const dias = parseInt(document.getElementById('diasRisco').value,10)||60;
