@@ -16098,7 +16098,7 @@ function dashInit() {
       if (atinge != null) _dvgAnimarNumero(document.getElementById('fabKpiMeta'), atinge, fmtPct);
       // Mensal (linha com brilho, mesmo padrão do drill-down de Vendedores)
       window._dashRegChart(document.getElementById('fabMensal'), {
-        type:'line', data:{ labels:monthLabels, datasets:[{ data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.15)', fill:true, tension:.35, pointRadius:0, borderWidth:2.5 }] },
+        type:'line', data:{ labels:monthLabels, datasets:[{ data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.15)', fill:true, tension:.35, pointRadius:2.5, pointBackgroundColor:'#4f7fe0', pointBorderColor:'#4f7fe0', pointHoverRadius:6, pointHoverBackgroundColor:'#a9c2f5', pointHoverBorderColor:'#fff', pointHoverBorderWidth:2, borderWidth:2.5 }] },
         options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false }),
         plugins: [{
           id: 'dvgFabLineGlow',
