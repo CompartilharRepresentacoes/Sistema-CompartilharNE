@@ -1269,8 +1269,8 @@
 .dash-root .dvg-greet{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px}
 .dash-root .dvg-greet-txt{font-size:14px;font-weight:700;color:#1e293b}
 .dash-root .dvg-greet-txt span{font-weight:400;color:#64748b;font-size:11px;margin-left:8px}
-.dash-root .dvg-kpis{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
-.dash-root .dvg-hero{background:linear-gradient(135deg,#14162c 0%,#272A4A 55%,#40446e 100%);border-radius:16px;padding:22px 26px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 22px rgba(0,0,0,.22)}
+.dash-root .dvg-kpis{display:grid;grid-template-columns:1.9fr 1fr 1fr;grid-template-rows:auto auto;gap:12px;margin-bottom:14px}
+.dash-root .dvg-hero{grid-row:span 2;background:linear-gradient(135deg,#14162c 0%,#272A4A 55%,#40446e 100%);border-radius:16px;padding:22px 26px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 22px rgba(0,0,0,.22)}
 .dash-root .dvg-hero-lbl{font-size:13px;opacity:.85;font-weight:600}
 .dash-root .dvg-hero-val{font-weight:800;margin-top:6px;line-height:1.05;white-space:nowrap;font-size:34px}
 .dash-root .dvg-hero-pills{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}
@@ -1293,10 +1293,14 @@
 .dash-root .dvg-metaring-txt b{font-size:14px;color:#1e293b}
 .dash-root .dvg-metaring-txt span{font-size:9.5px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
 .dash-root .dvg-skel{background:linear-gradient(90deg,#eef1f6 25%,#e2e8f0 37%,#eef1f6 63%);background-size:400% 100%;animation:dvgSkelShimmer 1.4s ease infinite;border-radius:14px;min-height:64px}
-.dash-root .dvg-skel-hero{min-height:150px}
+.dash-root .dvg-skel-hero{min-height:150px;grid-row:span 2}
 .dash-root .dvg-skel-row{height:14px;border-radius:7px;margin-bottom:14px;background:linear-gradient(90deg,#eef1f6 25%,#e2e8f0 37%,#eef1f6 63%);background-size:400% 100%;animation:dvgSkelShimmer 1.4s ease infinite}
 @keyframes dvgSkelShimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
 .dash-root .dvg-kpi-val-exact{font-size:9.5px;color:#94a3b8;margin-top:-2px}
+.dash-root .dvg-mixbar{background:#fff;border-radius:14px;padding:13px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(15,23,42,.06)}
+.dash-root .dvg-mixbar-lbl{font-size:12px;font-weight:700;color:#1e293b}
+.dash-root .dvg-mixbar-trk{flex:1;max-width:260px;height:9px;background:#e6ecfb;border-radius:6px;margin-left:16px;overflow:hidden}
+.dash-root .dvg-mixbar-fill{height:100%;background:linear-gradient(90deg,#1e3a8a,#4f7fe0);border-radius:6px;width:0;transition:width 1s ease}
 .dash-root .dvg-charts{display:grid;grid-template-columns:2.4fr 0.85fr;gap:14px;margin-bottom:14px;align-items:start;transition:grid-template-columns .35s ease}
 .dash-root .dvg-charts.dvg-focus-fabrica{grid-template-columns:0.85fr 2.4fr}
 .dash-root .dvg-carddark{background:#101a3d;border-radius:14px;padding:18px 20px;box-shadow:0 4px 16px rgba(15,23,42,.2);transition:opacity .25s ease}
@@ -1497,6 +1501,7 @@
 <section id="tab-home" class="tab-content active">
   <div class="dvg-greet" id="dvgGreet"></div>
   <div class="dvg-kpis" id="kpis"><div class="dvg-skel dvg-skel-hero"></div><div class="dvg-skel"></div><div class="dvg-skel"></div><div class="dvg-skel"></div><div class="dvg-skel"></div></div>
+  <div class="dvg-mixbar"><div class="dvg-mixbar-lbl" id="dvgMixLbl"></div><div class="dvg-mixbar-trk"><div class="dvg-mixbar-fill" id="dvgMixFill"></div></div></div>
   <div class="dvg-charts" id="dvgChartsWrap">
     <div class="dvg-carddark" id="dvgCardMensal">
       <div class="dvg-titrow" id="dvgTitMensal"><div class="dvg-tit">Faturamento Mensal<span class="dvg-tit-hint">Somente Faturado e Faturado Parcial &middot; clique numa barra</span></div><span class="dvg-chev">&#9662;</span></div>
@@ -15627,6 +15632,10 @@ function dashInit() {
         _dvgAnimarNumero(document.getElementById('dvgKpiTicket'), k.ticket, _dvgFmtBRLAbrev);
         _dvgCountUp(document.getElementById('dvgKpiCli'), k.ativos, 0, '', '');
       }
+      const mixLbl = document.getElementById('dvgMixLbl');
+      if (mixLbl) mixLbl.innerHTML = 'Mix médio: <span style="color:#1e3a8a">' + k.mix.toFixed(2).replace('.',',') + ' fábricas/cliente</span>';
+      const mixFill = document.getElementById('dvgMixFill');
+      if (mixFill) setTimeout(()=>{ mixFill.style.width = Math.min(100, k.mix/6*100) + '%'; }, 100);
 
       // Faturamento mensal
       const meses = Array(12).fill(0);
