@@ -1397,7 +1397,6 @@
 .dash-root .dvg-collapsible.dvg-collapsed:hover{opacity:1}
 .dash-root .dg21.dvg-cli-grid{grid-template-columns:2.4fr 0.85fr!important}
 .dash-root .dg21.dvg-cli-grid.dvg-cli-focus-risco{grid-template-columns:0.85fr 2.4fr!important}
-@media (max-width: 767px) { .dash-root .dg21.dvg-cli-grid, .dash-root .dg21.dvg-cli-grid.dvg-cli-focus-risco { grid-template-columns: 1fr !important; } }
 .dash-root input#diasRisco::-webkit-outer-spin-button,.dash-root input#diasRisco::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .dash-root input#diasRisco{-moz-appearance:textfield}
 .dash-root .dvg-cliexp-row{border-top:1px solid rgba(255,255,255,.12);margin-top:12px;padding-top:10px}
@@ -16225,20 +16224,18 @@ function dashInit() {
           <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">Evolução Mensal</h3>
             <div style="height:240px;"><canvas id="fabMensal"></canvas></div>
           </div>
-          <div class="d-card"><h3 class="font-semibold text-[15px] mb-2">Distribuição por Vendedor</h3>
+          <div class="card p-4"><h3 class="font-semibold text-[15px] mb-2">Distribuição por Vendedor</h3>
             <div id="fabVendList"></div>
           </div>
         </div>
-        <div class="d-card mt-4">
+        <div class="card p-4 mt-4">
           <h3 class="font-semibold text-[15px] mb-2">Top 10 clientes de ${escapeHtml(FAB[fi])}</h3>
-          <div class="scroll-x">
           <table>
             <thead><tr><th>#</th><th>Cliente</th><th class="num">Faturamento</th><th class="num">Pedidos</th><th class="num">% da fábrica</th></tr></thead>
             <tbody>${topC.map((c,i)=>`<tr><td class="text-ink-400">${i+1}</td><td>${escapeHtml(c.nome)}</td><td class="num font-semibold">${fmtBRL(c.fat)}</td><td class="num">${c.n}</td><td class="num">${fat?fmtPct(c.fat/fat):'—'}</td></tr>`).join('')}</tbody>
           </table>
-          </div>
         </div>
-        <div class="d-card mt-4">
+        <div class="card p-4 mt-4">
           <h3 class="font-semibold text-[15px] mb-2">SKUs (Top 10)</h3>
           <p class="text-[13px] text-ink-600 dark:text-ink-400">— A planilha atual não traz código nem descrição de SKU. Esta visão fica reservada para quando o ERP exportar a coluna SKU/Produto.</p>
         </div>
