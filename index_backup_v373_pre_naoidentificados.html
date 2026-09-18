@@ -19264,8 +19264,7 @@ function _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos) 
     if (!item.dados) { naoIdentificados.push({ nome: item.file.name, motivo: 'Não foi possível ler este XML (arquivo inválido ou corrompido).' }); return; }
     var escolha = _pimEscolherPedidoCandidato(item.dados, pedidosCandidatos);
     if (!escolha.pedido) {
-      var pdfParNaoIdent = _pinfLocalizarPdfParaNf(item.dados, pdfFiles, usadosPdf);
-      naoIdentificados.push({ nome: item.file.name, nNF: item.dados.nNF, clienteNome: item.dados.destNome || item.dados.emitNome || '', motivo: escolha.motivo || 'Pedido correspondente não identificado automaticamente.', pdfFile: pdfParNaoIdent });
+      naoIdentificados.push({ nome: item.file.name, nNF: item.dados.nNF, motivo: escolha.motivo || 'Pedido correspondente não identificado automaticamente.' });
       return;
     }
     var pid = escolha.pedido.id;
@@ -19362,13 +19361,8 @@ function _pinfRenderRevisao() {
   var extras = '';
   if (_pinfNaoIdentificados.length) {
     extras += '<div style="margin-top:6px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:11px;color:#92400e">'
-      + '<b>NF(s) não anexada(s) automaticamente</b> (o arquivo continua no seu computador — pode ser anexado manualmente depois, pela tela de Anexos do pedido):'
-      + _pinfNaoIdentificados.map(function (n, ni) {
-          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #fde68a">'
-            + '<div>' + (n.nNF ? ('<b>NF ' + _pedEsc(n.nNF) + '</b>') : ('<b>' + _pedEsc(n.nome) + '</b>')) + (n.clienteNome ? (' — ' + _pedEsc(n.clienteNome)) : '') + '<div style="font-size:10px;color:#92400e;margin-top:1px">' + _pedEsc(n.motivo) + '</div></div>'
-            + (n.pdfFile ? ('<button type="button" onclick="_pinfVerPdfNaoIdentificado(' + ni + ')" style="background:#fff;border:1px solid #fde68a;color:#92400e;border-radius:6px;padding:4px 10px;font-size:10.5px;cursor:pointer;white-space:nowrap;flex-shrink:0"><i class="ti ti-file-type-pdf" style="color:#dc2626;margin-right:3px"></i>Ver PDF</button>') : '')
-            + '</div>';
-        }).join('')
+      + '<b>NF(s) não identificada(s) automaticamente</b> (o arquivo continua no seu computador — pode ser anexado manualmente depois, pela tela de Anexos do pedido):<br>'
+      + _pinfNaoIdentificados.map(function (n) { return '• ' + _pedEsc(n.nome) + (n.nNF ? (' (NF ' + _pedEsc(n.nNF) + ')') : '') + ' — ' + _pedEsc(n.motivo); }).join('<br>')
       + '</div>';
   }
   if (_pinfPdfsAvulsos.length) {
@@ -19391,12 +19385,6 @@ function _pinfVerPdf(ri, pdfIdx) {
   var f = pdfs[pdfIdx] && pdfs[pdfIdx].pdfFile;
   if (!f) return;
   var url = URL.createObjectURL(f);
-  window.open(url, '_blank');
-  setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-}
-function _pinfVerPdfNaoIdentificado(ni) {
-  var n = _pinfNaoIdentificados[ni]; if (!n || !n.pdfFile) return;
-  var url = URL.createObjectURL(n.pdfFile);
   window.open(url, '_blank');
   setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
 }
