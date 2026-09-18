@@ -14828,7 +14828,7 @@ function _dashConstruirDadosAoVivo() {
   var pedidosBase = ((typeof getPedidos === 'function') ? getPedidos() : []) || [];
   var statusValidos = (typeof PED_STATUS !== 'undefined') ? PED_STATUS : ['Pré-Venda','Aguardando Retorno','Enviado','Faturado','Faturado Parcial','Bonificado','Cancelado'];
 
-  var FAB = [], FAB_ID = [], fabIdx = {};
+  var FAB = [], fabIdx = {};
   var _fabOrdemPrioridade = ['quata','granarolo','sao vicente','prieto','bufalissima','villa germania'];
   function _fabNormNome(s) { return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
   var fornecedoresOrdenados = fornecedores.slice().sort(function(a,b){
@@ -14838,10 +14838,10 @@ function _dashConstruirDadosAoVivo() {
     var ib = _fabOrdemPrioridade.indexOf(nb); if (ib < 0) ib = 999;
     return ia - ib;
   });
-  fornecedoresOrdenados.forEach(function (f) { fabIdx[f.id] = FAB.length; FAB.push(f.nome_fantasia || f.codigo || ('Fornecedor ' + f.id)); FAB_ID.push(f.id); });
+  fornecedoresOrdenados.forEach(function (f) { fabIdx[f.id] = FAB.length; FAB.push(f.nome_fantasia || f.codigo || ('Fornecedor ' + f.id)); });
   function idxFabrica(id, nome) {
     if (id != null && Object.prototype.hasOwnProperty.call(fabIdx, id)) return fabIdx[id];
-    var i = FAB.length; if (id != null) fabIdx[id] = i; FAB.push(nome || 'Fornecedor não cadastrado'); FAB_ID.push(id != null ? id : null); return i;
+    var i = FAB.length; if (id != null) fabIdx[id] = i; FAB.push(nome || 'Fornecedor não cadastrado'); return i;
   }
 
   var VEND = [], vendIdx = {};
@@ -14930,7 +14930,6 @@ function _dashConstruirDadosAoVivo() {
     },
     vendedores: VEND,
     fabricas: FAB,
-    fabricas_id: FAB_ID,
     status: STATUS,
     clientes: CLI,
     clientes_inativo: CLI_INATIVO,
@@ -14956,7 +14955,7 @@ function dashInit() {
     // =============== DADOS ===============
     const _dashHistorico = window._dashModoHistorico2025 === true;
     const DATA = _dashHistorico ? JSON.parse(document.getElementById('dash-dados').textContent) : _dashConstruirDadosAoVivo();
-    const { vendedores: VEND, fabricas: FAB, fabricas_id: FAB_ID = [], clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, meta: METAINFO, devolucoes: DEVOL_RAW } = DATA;
+    const { vendedores: VEND, fabricas: FAB, clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, meta: METAINFO, devolucoes: DEVOL_RAW } = DATA;
     const DEVOL = DEVOL_RAW || [];
     const ST_FATURADO = STATUS.indexOf('Faturado');
     const ST_FAT_PARC = STATUS.indexOf('Faturado Parcial');
@@ -16343,26 +16342,6 @@ function dashInit() {
       const agC = new Map();
       for (const p of peds) { let a=agC.get(p[1]); if(!a){a={fat:0,n:0};agC.set(p[1],a);} a.fat+=p[5]; a.n++; }
       const topC = [...agC.entries()].map(([ci,a])=>({nome:CLI[ci], ...a})).sort((a,b)=>b.fat-a.fat).slice(0,10);
-      // Produtos mais vendidos da fábrica (Top 10) — PED denormalizado não tem itens/produto,
-      // então cruza com getPedidos() real pelo fornecedorId (ou nome, se não cadastrado), respeitando período + status ok.
-      const agProd = new Map();
-      try {
-        const fabIdReal = FAB_ID[fi];
-        for (const pedidoReal of getPedidos()) {
-          const mesmoFornecedor = fabIdReal != null ? pedidoReal.fornecedorId === fabIdReal : (pedidoReal.fornecedorNome || '') === FAB[fi];
-          if (!mesmoFornecedor) continue;
-          if (pedidoReal.data < state.dtIni || pedidoReal.data > state.dtFim) continue;
-          if (!ST_OK.has(STATUS.indexOf(pedidoReal.status))) continue;
-          (pedidoReal.itens || []).forEach(it => {
-            const chave = it.prodId != null ? it.prodId : (it.prodNome || it.prodCodigo);
-            let acc = agProd.get(chave);
-            if (!acc) { acc = { nome: it.prodNome || it.prodCodigo || 'Produto', qtd: 0, valor: 0 }; agProd.set(chave, acc); }
-            acc.qtd += Number(it.quantidade) || 0;
-            acc.valor += Number(it.valorTotal) || 0;
-          });
-        }
-      } catch (e) { /* getPedidos indisponível neste contexto (ex.: modo histórico) */ }
-      const topProd = [...agProd.values()].sort((a,b)=>b.valor-a.valor).slice(0,10);
       // por vendedor
       const agV = new Map();
       for (const p of peds) { let a=agV.get(p[3]); if(!a){a={fat:0,n:0};agV.set(p[3],a);} a.fat+=p[5]; a.n++; }
@@ -16398,13 +16377,8 @@ function dashInit() {
           </div>
         </div>
         <div class="d-card mt-4">
-          <h3 class="font-semibold text-[15px] mb-2">Produtos (Top 10)</h3>
-          <div class="scroll-x">
-          <table>
-            <thead><tr><th>#</th><th>Produto</th><th class="num">Qtd</th><th class="num">Valor</th><th class="num">% da fábrica</th></tr></thead>
-            <tbody>${topProd.length ? topProd.map((p,i)=>`<tr><td class="text-ink-400">${i+1}</td><td>${escapeHtml(p.nome)}</td><td class="num">${fmtNum(p.qtd)}</td><td class="num font-semibold">${fmtBRL(p.valor)}</td><td class="num">${fat?fmtPct(p.valor/fat):'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="text-center text-ink-400">Nenhum produto no período.</td></tr>'}</tbody>
-          </table>
-          </div>
+          <h3 class="font-semibold text-[15px] mb-2">SKUs (Top 10)</h3>
+          <p class="text-[13px] text-ink-600 dark:text-ink-400">— A planilha atual não traz código nem descrição de SKU. Esta visão fica reservada para quando o ERP exportar a coluna SKU/Produto.</p>
         </div>
       `;
       _dvgAnimarNumero(document.getElementById('fabKpiFat'), fat, _dvgFmtBRLAbrev);
