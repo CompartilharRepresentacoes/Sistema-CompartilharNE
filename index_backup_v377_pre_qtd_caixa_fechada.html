@@ -18469,22 +18469,13 @@ function _pedDiagnosticoCodigoPedido(fornId, clienteId, codigoCandidatos, client
 // de Preco e quantidade abaixo de 1 caixa. Isolada numa funcao propria pra poder
 // ser rechamada quando o usuario edita Qtd/Preco na tela de conferencia, sem
 // duplicar a logica que ja existia dentro de _pedMontarItemImportadoPdf.
-function _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxNum, valorTabela, qtdOriginalPdf) {
+function _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxNum, valorTabela) {
   var avisos = [];
   if (valorTabela > 0 && Math.abs(precoUnit - valorTabela) > 0.01) {
     avisos.push('Preço (' + _pedFmtMoeda(precoUnit) + ') diverge do preço cadastrado na Tabela de Preço (' + _pedFmtMoeda(valorTabela) + ').');
   }
   if (modoUnid === 'un' && cxNum > 0 && quantidadeReal < cxNum) {
     avisos.push('Quantidade (' + quantidadeReal + ') é menor que 1 caixa (' + cxNum + ') deste produto — corrija a quantidade ou remova o item do pedido.');
-  } else if (modoUnid === 'un' && cxNum > 0 && quantidadeReal >= cxNum) {
-    var restoCx = quantidadeReal % cxNum;
-    var ehMultiploCx = restoCx < 0.0001 || (cxNum - restoCx) < 0.0001;
-    if (!ehMultiploCx) {
-      var qtdAbaixo = Math.floor(quantidadeReal / cxNum) * cxNum;
-      avisos.push('Quantidade (' + quantidadeReal + ') não fecha caixa cheia deste produto (caixa = ' + cxNum + ') — o valor mais próximo para baixo seria ' + qtdAbaixo + '.');
-    } else if (qtdOriginalPdf != null && Math.abs(qtdOriginalPdf - quantidadeReal) > 0.0001) {
-      avisos.push('Cliente pediu ' + qtdOriginalPdf + ', mas a caixa deste produto é fechada com ' + cxNum + ' — quantidade ajustada para ' + quantidadeReal + ' (caixa fechada). Se quiser completar mais uma caixa, digite ' + (quantidadeReal + cxNum) + '.');
-    }
   }
   return avisos;
 }
@@ -18513,21 +18504,8 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
     precoUnit = itemPdf.unitario;
   }
 
-  // Quantidade pedida em UN/kg (nao em CXA) que nao fecha caixa cheia deste
-  // produto: pre-fixa ja arredondada pra baixo (caixa fechada mais proxima),
-  // sem mandar mais do que o cliente pediu -- o campo continua editavel na
-  // tela de conferencia caso queiram completar mais uma caixa manualmente.
-  var qtdOriginalPdf = null;
-  if (modoUnid === 'un' && cxValido && quantidadeReal >= cxNum) {
-    var restoCxImport = quantidadeReal % cxNum;
-    if (restoCxImport > 0.0001 && (cxNum - restoCxImport) > 0.0001) {
-      qtdOriginalPdf = quantidadeReal;
-      quantidadeReal = Math.floor(quantidadeReal / cxNum) * cxNum;
-    }
-  }
-
   var valorTabela = _pedParseMoeda(tabItem.valor);
-  var avisos = _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxValido ? cxNum : 0, valorTabela, qtdOriginalPdf);
+  var avisos = _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxValido ? cxNum : 0, valorTabela);
 
   return {
     prodId: produto.id, prodCodigo: produto.codigo, prodNome: produto.nome,
@@ -18535,7 +18513,7 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
     quantidade: quantidadeReal, precoUnit: precoUnit, desconto: 0,
     valorTotal: quantidadeReal * precoUnit, modoUnid: modoUnid, qtdCaixas: qtdCaixas,
     avisos: avisos, _excluidoImport: false,
-    _cxNum: cxValido ? cxNum : 0, _valorTabela: valorTabela, _qtdOriginalPdf: qtdOriginalPdf,
+    _cxNum: cxValido ? cxNum : 0, _valorTabela: valorTabela,
     _origemPdf: { codigo: itemPdf.codigo, unidade: itemPdf.unidade, qtd: itemPdf.qtd, unitario: itemPdf.unitario, descricao: itemPdf.descricao }
   };
 }
@@ -18726,7 +18704,7 @@ function _pedImportRecalcularItem(ri, ii) {
   it.precoUnit = novoPreco;
   it.valorTotal = novaQtd * novoPreco;
   if (it.modoUnid === 'cx' && it._cxNum) it.qtdCaixas = novaQtd / it._cxNum;
-  it.avisos = _pedCalcularAvisosImportado(novoPreco, novaQtd, it.modoUnid, it._cxNum || 0, it._valorTabela || 0, it._qtdOriginalPdf);
+  it.avisos = _pedCalcularAvisosImportado(novoPreco, novaQtd, it.modoUnid, it._cxNum || 0, it._valorTabela || 0);
   it._editadoManualmente = true;
 
   _pedRenderRevisaoImportacao();
