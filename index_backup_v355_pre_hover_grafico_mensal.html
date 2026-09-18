@@ -15226,10 +15226,8 @@ function dashInit() {
         div.style.height = pct + '%';
         div.innerHTML = '<span class="dvg-mlabel">' + monthLabels[i].toUpperCase() + '</span>';
         div.onclick = () => _dvgToggleMes(i);
-        div.onmouseenter = () => _dvgHoverMes(i);
         wrap.appendChild(div);
       });
-      wrap.onmouseleave = () => _dvgHoverMesFim();
       if (_dvgMetaMensal) {
         const line = document.createElement('div');
         line.className = 'dvg-meta-line';
@@ -15239,15 +15237,10 @@ function dashInit() {
     }
     function _dvgToggleMes(i) {
       const det = document.getElementById('dvgMesDetail');
+      const inner = document.getElementById('dvgMesDetailInner');
       document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
       if (_dvgMesAberto === i) { det.classList.remove('open'); _dvgMesAberto = null; return; }
       _dvgMesAberto = i;
-      _dvgHoverMes(i);
-    }
-    function _dvgHoverMes(i) {
-      const det = document.getElementById('dvgMesDetail');
-      const inner = document.getElementById('dvgMesDetailInner');
-      document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
       const el = document.querySelector('#dvgBars .dvg-bar[data-i="'+i+'"]');
       if (el) el.classList.add('active');
       const m = _dvgMesesData[i];
@@ -15257,12 +15250,6 @@ function dashInit() {
         '<div>Pedidos<b>' + m.n.toLocaleString('pt-BR') + '</b></div>' +
         '<div>Ticket médio<b>' + fmtBRL(m.n ? m.fat/m.n : 0) + '</b></div>';
       det.classList.add('open');
-    }
-    function _dvgHoverMesFim() {
-      if (_dvgMesAberto != null) { _dvgHoverMes(_dvgMesAberto); return; }
-      const det = document.getElementById('dvgMesDetail');
-      document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
-      if (det) det.classList.remove('open');
     }
     const _dvgFabPalette = ['#1c2f66','#2c4488','#3d5aa8','#5b78c9','#7b93d9','#a9c2f5','#c9d9fb','#e3ecfc'];
     function _dvgToggleFabrica(i) {
