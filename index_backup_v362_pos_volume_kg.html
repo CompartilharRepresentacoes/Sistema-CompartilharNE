@@ -153,6 +153,11 @@
       align-items: center; padding: 10px 0; gap: 2px; position: fixed; top: 0;
       left: 0; height: 100vh; z-index: 300; flex-shrink: 0;
     }
+    #btnSidebarFechar {
+      display: none; position: absolute; top: 10px; right: 10px; width: 32px; height: 32px;
+      align-items: center; justify-content: center; background: rgba(255,255,255,.1);
+      border: none; border-radius: 8px; color: #fff; cursor: pointer; z-index: 5; font-size: 16px;
+    }
     #appMainArea { flex: 1; margin-left: 76px; display: flex; flex-direction: column; min-width: 0; }
     #appTopbar {
       background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 20px;
@@ -515,9 +520,21 @@
       .dash-root .d-tab-bar { overflow-x: auto !important; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; }
       .dash-root .d-tab-btn { flex-shrink: 0 !important; }
 
+      /* Checkbox maior no dropdown de filtro (area de toque no celular) */
+      .dash-root .ms-row input[type=checkbox] { width: 20px !important; height: 20px !important; }
+      .dash-root .ms-row { padding: 8px !important; }
+
+      /* Painel de filtros (Periodo/Fabricas/Vendedores/Clientes) comeca recolhido no celular */
+      .dash-root #dvgFiltrosBar { display: none !important; }
+      .dash-root #dvgFiltrosBar.dvg-filtros-aberto { display: flex !important; }
+      .dash-root #btnToggleFiltros { display: inline-flex !important; align-items: center; gap: 5px; }
+
+      /* Botao X pra fechar o menu-gaveta lateral */
+      #btnSidebarFechar { display: flex; }
+
       /* Visao Geral redesenhada (hero + kpis + donut + ranks + scrub): mobile */
       .dash-root .dvg-kpis { grid-template-columns: 1fr !important; }
-      .dash-root .dvg-hero { grid-row: auto !important; }
+      .dash-root .dvg-hero { grid-row: auto !important; grid-column: 1 / -1 !important; }
       .dash-root .dvg-hero-val { font-size: 26px !important; }
       .dash-root .dvg-charts { grid-template-columns: 1fr !important; }
       .dash-root .dvg-charts.dvg-focus-fabrica { grid-template-columns: 1fr !important; }
@@ -1063,6 +1080,7 @@
 
   <!-- ── SIDEBAR ── -->
   <aside id="appSidebar">
+    <button id="btnSidebarFechar" onclick="_mobMenuFechar()" title="Fechar menu"><i class="ti ti-x"></i></button>
 
     <!-- Itens de navegação -->
     <div class="sb-item active" id="sb-inicio" onclick="showPage('page-home')" title="Início">
@@ -1227,11 +1245,12 @@
 .dash-root .pod-2{background:linear-gradient(135deg,#e2e8f0,#94a3b8)}
 .dash-root .pod-3{background:linear-gradient(135deg,#fed7aa,#c2410c)}
 .dash-root .multiselect{position:relative;display:inline-block}
-.dash-root .ms-pop{position:absolute;z-index:200;top:calc(100% + 4px);left:0;min-width:220px;max-height:280px;overflow:auto;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.dash-root .ms-pop{position:absolute;z-index:200;top:calc(100% + 4px);left:0;min-width:220px;max-width:calc(100vw - 24px);max-height:280px;overflow:auto;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.12)}
 .dash-root .ms-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;cursor:pointer;font-size:12px}
 .dash-root .ms-row:hover{background:#f1f5f9}
 .dash-root .ms-search{width:100%;padding:5px 8px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;margin-bottom:4px}
-.dash-root .d-tab-bar{display:flex;gap:2px;border-bottom:2px solid #e2e8f0;margin-bottom:14px;background:#f8fafc;border-radius:10px 10px 0 0;padding:4px 4px 0}
+.dash-root .d-tab-bar{position:relative;display:flex;gap:2px;border-bottom:2px solid #e2e8f0;margin-bottom:14px;background:#f8fafc;border-radius:10px 10px 0 0;padding:4px 4px 0}
+.dash-root .d-tab-bar.dvg-tem-scroll::after{content:'';position:absolute;top:2px;right:2px;bottom:4px;width:26px;background:linear-gradient(90deg,rgba(248,250,252,0),rgba(248,250,252,.95));pointer-events:none;border-radius:0 8px 0 0}
 .dash-root .d-tab-btn{padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;transition:all .15s}
 .dash-root .d-tab-btn.active{color:#272A4A;border-bottom-color:#DE7926;background:#fff;box-shadow:0 -1px 4px rgba(15,23,42,.06)}
 .dash-root .d-tab-btn:hover:not(.active){color:#475569;background:rgba(255,255,255,.6)}
@@ -1247,8 +1266,9 @@
 .dash-root .multiselect details>summary{list-style:none;cursor:pointer}
 .dash-root .multiselect details>summary::-webkit-details-marker{display:none}
 .dash-root .multiselect details>summary::marker{display:none}
-.dash-root .dvg-greet{font-size:14px;font-weight:700;color:#1e293b;margin-bottom:10px}
-.dash-root .dvg-greet span{font-weight:400;color:#64748b;font-size:11px;margin-left:8px}
+.dash-root .dvg-greet{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.dash-root .dvg-greet-txt{font-size:14px;font-weight:700;color:#1e293b}
+.dash-root .dvg-greet-txt span{font-weight:400;color:#64748b;font-size:11px;margin-left:8px}
 .dash-root .dvg-kpis{display:grid;grid-template-columns:1.9fr 1fr 1fr;grid-template-rows:auto auto;gap:12px;margin-bottom:14px}
 .dash-root .dvg-hero{grid-row:span 2;background:linear-gradient(135deg,#14162c 0%,#272A4A 55%,#40446e 100%);border-radius:16px;padding:22px 26px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 22px rgba(0,0,0,.22)}
 .dash-root .dvg-hero-lbl{font-size:13px;opacity:.85;font-weight:600}
@@ -1259,6 +1279,24 @@
 .dash-root .dvg-kpi-lbl{font-size:9.5px;color:#94a3b8;font-weight:700;letter-spacing:.04em}
 .dash-root .dvg-kpi-val{font-size:17px;font-weight:800;color:#1e293b;margin-top:4px}
 .dash-root .dvg-kpi-sub{font-size:9.5px;color:#94a3b8;margin-top:2px}
+.dash-root .dvg-hero-val-exact{font-size:11.5px;opacity:.55;margin-top:2px}
+.dash-root .dvg-hero-trend{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:10px;width:fit-content}
+.dash-root .dvg-hero-trend.up{background:rgba(99,153,34,.28);color:#c0dd97}
+.dash-root .dvg-hero-trend.down{background:rgba(220,38,38,.28);color:#fca5a5}
+.dash-root .dvg-hero-spark-wrap{margin-top:10px}
+.dash-root .dvg-hero-spark{display:block}
+.dash-root .dvg-kpi-trend{display:inline-flex;align-items:center;gap:2px;font-size:9.5px;font-weight:700;margin-top:3px}
+.dash-root .dvg-kpi-trend.up{color:#15803d}
+.dash-root .dvg-kpi-trend.down{color:#dc2626}
+.dash-root .dvg-metaring{display:flex;align-items:center;gap:8px}
+.dash-root .dvg-metaring-txt{display:flex;flex-direction:column;line-height:1.15}
+.dash-root .dvg-metaring-txt b{font-size:14px;color:#1e293b}
+.dash-root .dvg-metaring-txt span{font-size:9.5px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.dash-root .dvg-skel{background:linear-gradient(90deg,#eef1f6 25%,#e2e8f0 37%,#eef1f6 63%);background-size:400% 100%;animation:dvgSkelShimmer 1.4s ease infinite;border-radius:14px;min-height:64px}
+.dash-root .dvg-skel-hero{min-height:150px;grid-row:span 2}
+.dash-root .dvg-skel-row{height:14px;border-radius:7px;margin-bottom:14px;background:linear-gradient(90deg,#eef1f6 25%,#e2e8f0 37%,#eef1f6 63%);background-size:400% 100%;animation:dvgSkelShimmer 1.4s ease infinite}
+@keyframes dvgSkelShimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+.dash-root .dvg-kpi-val-exact{font-size:9.5px;color:#94a3b8;margin-top:-2px}
 .dash-root .dvg-mixbar{background:#fff;border-radius:14px;padding:13px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(15,23,42,.06)}
 .dash-root .dvg-mixbar-lbl{font-size:12px;font-weight:700;color:#1e293b}
 .dash-root .dvg-mixbar-trk{flex:1;max-width:260px;height:9px;background:#e6ecfb;border-radius:6px;margin-left:16px;overflow:hidden}
@@ -1307,7 +1345,7 @@
 .dash-root .dvg-rankcard-tit{font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px}
 .dash-root .dvg-rrow{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .dash-root .dvg-rpos{width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.dash-root .dvg-rnome{flex:1;font-size:12px;color:#1e293b;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-root .dvg-rnome{flex:1;min-width:0;font-size:12px;color:#1e293b;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dash-root .dvg-rval{font-size:12px;font-weight:700;color:#1e293b;white-space:nowrap}
 .dash-root .dvg-rtrk{height:6px;background:#f1f5f9;border-radius:6px;overflow:visible;margin:0 0 10px 32px}
 .dash-root .dvg-rtrk i{display:block;height:100%;border-radius:6px;width:0;transition:width 1s ease}
@@ -1348,6 +1386,24 @@
 .dash-root .dvg-abcsum-item{flex:1;min-width:120px;background:#f8fafc;border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .15s}
 .dash-root .dvg-abcsum-item:hover{background:#eef2ff}
 .dash-root .dvg-abcsum-item.active{background:#dbeafe}
+.dash-root .dvg-devol-row{border-radius:10px;padding:4px}
+.dash-root .dvg-devol-main{display:flex;align-items:center;gap:10px;padding:8px 6px;cursor:pointer;border-radius:10px;transition:background .15s}
+.dash-root .dvg-devol-main:hover{background:#f8fafc}
+.dash-root .dvg-devol-rank{width:18px;text-align:center;font-size:11.5px;font-weight:700;color:#94a3b8;flex-shrink:0}
+.dash-root .dvg-devol-info{flex:1;min-width:0}
+.dash-root .dvg-devol-linha1{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;margin-bottom:4px}
+.dash-root .dvg-devol-nome{font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-root .dvg-devol-vals{font-size:10.5px;color:#94a3b8;white-space:nowrap;flex-shrink:0}
+.dash-root .dvg-devol-vals b{color:#1e293b}
+.dash-root .dvg-devol-trk{height:8px;background:#e3ebfa;border-radius:5px;overflow:hidden}
+.dash-root .dvg-devol-trk i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#1c2f66,#4f7fe0)}
+.dash-root .dvg-devol-pct{font-size:13px;font-weight:800;color:#1c3f8c;width:52px;text-align:right;flex-shrink:0}
+.dash-root .dvg-devol-chev{font-size:10px;color:#c3cbdb;flex-shrink:0;transition:transform .15s;display:inline-block}
+.dash-root .dvg-devol-row.open .dvg-devol-chev{transform:rotate(180deg)}
+.dash-root .dvg-devol-detail{padding:2px 6px 10px 40px}
+.dash-root .dvg-devol-detail-tit{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+.dash-root .dvg-devol-item{display:flex;justify-content:space-between;font-size:12px;color:#334155;padding:3px 0}
+.dash-root .dvg-devol-item b{color:#1c3f8c}
 .dash-root .dvg-abcsum-item b{display:block;font-size:15px;font-weight:800;color:#1e293b}
 .dash-root .dvg-abcsum-item span{font-size:10.5px;color:#64748b}
 .dash-root .dvg-scrub{background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:16px;padding:22px 24px;box-shadow:0 4px 16px rgba(0,0,0,.22);color:#fff}
@@ -1374,6 +1430,7 @@
 .dash-root .dvg-collapsible.dvg-collapsed:hover{opacity:1}
 .dash-root .dg21.dvg-cli-grid{grid-template-columns:2.4fr 0.85fr!important}
 .dash-root .dg21.dvg-cli-grid.dvg-cli-focus-risco{grid-template-columns:0.85fr 2.4fr!important}
+@media (max-width: 767px) { .dash-root .dg21.dvg-cli-grid, .dash-root .dg21.dvg-cli-grid.dvg-cli-focus-risco { grid-template-columns: 1fr !important; } }
 .dash-root input#diasRisco::-webkit-outer-spin-button,.dash-root input#diasRisco::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .dash-root input#diasRisco{-moz-appearance:textfield}
 .dash-root .dvg-cliexp-row{border-top:1px solid rgba(255,255,255,.12);margin-top:12px;padding-top:10px}
@@ -1413,12 +1470,13 @@
     <div id="periodoInfo" style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px"></div>
   </div>
   <div style="display:flex;gap:8px">
+    <button id="btnToggleFiltros" onclick="document.getElementById('dvgFiltrosBar').classList.toggle('dvg-filtros-aberto')" style="display:none;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer"><i class="ti ti-filter"></i> Filtros</button>
     <button id="btnHistorico2025" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background=this.dataset.ativo?'#c96a1f':'rgba(255,255,255,.2)'" onmouseout="this.style.background=this.dataset.ativo?'#DE7926':'rgba(255,255,255,.12)'">Ver histórico 2025</button>
     <button id="btnReset" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">Limpar filtros</button>
   </div>
 </div>
 <!-- Linha de filtros -->
-<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:9px 14px;margin-bottom:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+<div id="dvgFiltrosBar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:9px 14px;margin-bottom:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
   <span style="font-size:11px;font-weight:600;color:#64748b;margin-right:2px">Período</span>
   <input type="date" id="dtIni" style="border:1px solid #e2e8f0;border-radius:7px;padding:4px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
   <span style="color:#94a3b8;font-size:13px">→</span>
@@ -1434,7 +1492,7 @@
   <div id="msVendedores" class="multiselect"></div>
   <div id="msClientes" class="multiselect"></div>
 </div>
-<div class="d-tab-bar">
+<div class="d-tab-bar" id="dTabBar">
   <div class="d-tab-btn active" data-tab="home">VISÃO GERAL</div>
   <div class="d-tab-btn" data-tab="vendedores">VENDEDORES</div>
   <div class="d-tab-btn" data-tab="clientes">CLIENTES</div>
@@ -1442,7 +1500,7 @@
 </div>
 <section id="tab-home" class="tab-content active">
   <div class="dvg-greet" id="dvgGreet"></div>
-  <div class="dvg-kpis" id="kpis"></div>
+  <div class="dvg-kpis" id="kpis"><div class="dvg-skel dvg-skel-hero"></div><div class="dvg-skel"></div><div class="dvg-skel"></div><div class="dvg-skel"></div><div class="dvg-skel"></div></div>
   <div class="dvg-mixbar"><div class="dvg-mixbar-lbl" id="dvgMixLbl"></div><div class="dvg-mixbar-trk"><div class="dvg-mixbar-fill" id="dvgMixFill"></div></div></div>
   <div class="dvg-charts" id="dvgChartsWrap">
     <div class="dvg-carddark" id="dvgCardMensal">
@@ -1469,8 +1527,8 @@
     </div>
   </div>
   <div class="dvg-ranks">
-    <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 Vendedores</div><div id="topVendedores"></div></div>
-    <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 Clientes</div><div id="topClientes"></div></div>
+    <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 Vendedores</div><div id="topVendedores"><div class="dvg-skel-row"></div><div class="dvg-skel-row"></div><div class="dvg-skel-row"></div></div></div>
+    <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 Clientes</div><div id="topClientes"><div class="dvg-skel-row"></div><div class="dvg-skel-row"></div><div class="dvg-skel-row"></div></div></div>
   </div>
   <div class="dvg-scrub" id="dvgScrubCard">
     <div class="dvg-scrub-top">
@@ -1522,9 +1580,12 @@
             <stop offset="0%" stop-color="#4f7fe0" stop-opacity="0.45"></stop>
             <stop offset="100%" stop-color="#4f7fe0" stop-opacity="0"></stop>
           </linearGradient>
+          <clipPath id="dvgCliScrubClip"><rect id="dvgCliScrubClipRect" x="0" y="0" width="600" height="96"></rect></clipPath>
         </defs>
-        <path id="dvgCliScrubArea" fill="url(#dvgCliScrubGrad)"></path>
-        <path id="dvgCliScrubLine" fill="none" stroke="#4f7fe0" stroke-width="2.5"></path>
+        <g clip-path="url(#dvgCliScrubClip)">
+          <path id="dvgCliScrubArea" fill="url(#dvgCliScrubGrad)"></path>
+          <path id="dvgCliScrubLine" fill="none" stroke="#4f7fe0" stroke-width="2.5"></path>
+        </g>
         <circle id="dvgCliScrubDot" r="5" fill="#fff" stroke="#4f7fe0" stroke-width="3"></circle>
       </svg>
     </div>
@@ -1535,6 +1596,14 @@
       <div id="dvgCliDetailBody"></div>
     </div>
   </div>
+  <div class="d-card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;flex-wrap:wrap;gap:6px">
+      <span style="font-size:13px;font-weight:700;color:#1e293b">Rank de Devolução por Cliente</span>
+      <span style="font-size:10.5px;color:#94a3b8;background:#f1f4f9;border-radius:20px;padding:3px 9px">sincronizado aos filtros</span>
+    </div>
+    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Faturamento x Devolução no período &middot; clique num cliente para ver os itens mais devolvidos</div>
+    <div id="dvgDevolRank"></div>
+  </div>
   <div class="dg21 dvg-cli-grid" id="dvgCliGrid" style="display:grid;gap:12px;margin-bottom:12px">
     <div class="d-card dvg-collapsible" id="dvgCliCardAbc">
       <div class="dvg-ctitrow" id="dvgCliTitAbc">
@@ -1543,19 +1612,17 @@
       </div>
       <div class="dvg-cbody">
         <div class="dvg-abcsum" id="dvgAbcSum"></div>
-        <svg id="dvgAbcCurveSvg" viewBox="0 0 600 240" style="width:100%;height:240px;overflow:visible">
-          <defs>
-            <linearGradient id="dvgAbcGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#d97706" stop-opacity="0.35"></stop>
-              <stop offset="100%" stop-color="#d97706" stop-opacity="0"></stop>
-            </linearGradient>
-          </defs>
-          <g id="dvgAbcCurveG"></g>
-        </svg>
-        <div style="display:flex;gap:14px;justify-content:center;margin-top:8px;font-size:11px;color:#64748b;flex-wrap:wrap">
-          <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#1c2f66;margin-right:4px;vertical-align:-1px"></i>Classe A (até 80% do faturamento)</span>
-          <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#5b78c9;margin-right:4px;vertical-align:-1px"></i>Classe B (80–95%)</span>
-          <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#cbd5e1;margin-right:4px;vertical-align:-1px"></i>Classe C (95–100%)</span>
+        <div class="dvg-carddark" style="padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
+            <svg id="dvgAbcDonutSvg" viewBox="0 0 180 180" width="150" height="150" style="flex-shrink:0">
+              <g id="dvgAbcDonutG" transform="rotate(-90 90 90)"></g>
+              <text id="dvgAbcDonutTag" x="90" y="82" text-anchor="middle" class="dvg-donuttag">TOTAL FATURADO</text>
+              <foreignObject x="30" y="88" width="120" height="24">
+                <div id="dvgAbcDonutVal" xmlns="http://www.w3.org/1999/xhtml" style="font-size:15px;color:#fff;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden">R$ 0</div>
+              </foreignObject>
+            </svg>
+            <div class="dvg-legend" id="dvgAbcDonutLegend" style="flex:1;min-width:150px"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -8563,6 +8630,12 @@ function _mobMenuFechar(){
   document.body.classList.remove('mob-menu-open');
   document.querySelectorAll('#appSidebar .sb-item.sb-flyout-open').forEach(function(el){ el.classList.remove('sb-flyout-open'); });
 }
+function _dvgCheckTabScroll(){
+  var tb = document.getElementById('dTabBar');
+  if (!tb) return;
+  if (tb.scrollWidth > tb.clientWidth + 2) tb.classList.add('dvg-tem-scroll');
+  else tb.classList.remove('dvg-tem-scroll');
+}
 
 document.addEventListener('DOMContentLoaded', function() {
   // setupResponsivo() monta o carrossel de logos das representadas na tela de login
@@ -8570,6 +8643,17 @@ document.addEventListener('DOMContentLoaded', function() {
   // o que deixou o carrossel sempre vazio depois que o Firebase foi ativado (13/08/2026).
   setupResponsivo();
   setTimeout(dashInit, 50);
+  _dvgCheckTabScroll();
+  window.addEventListener('resize', _dvgCheckTabScroll);
+  try {
+    var _loginSalvoUser = localStorage.getItem('loginSalvo');
+    if (_loginSalvoUser) {
+      var _elLoginUsuario = document.getElementById('loginUsuario');
+      var _elLoginLembrar = document.getElementById('loginLembrar');
+      if (_elLoginUsuario) _elLoginUsuario.value = _loginSalvoUser;
+      if (_elLoginLembrar) _elLoginLembrar.checked = true;
+    }
+  } catch (e) {}
 
   // Menu-gaveta mobile: fecha ao clicar no backdrop, alterna submenu por toque (accordion)
   document.getElementById('sidebarBackdrop')?.addEventListener('click', _mobMenuFechar);
@@ -14781,6 +14865,17 @@ function _dashConstruirDadosAoVivo() {
   var STATUS = statusValidos.slice();
   function idxStatus(status) { var i = STATUS.indexOf(status); return i >= 0 ? i : 0; }
 
+  var produtosPesoMap = {};
+  ((typeof getProdutos === 'function') ? getProdutos() : []).forEach(function (pr) {
+    produtosPesoMap[pr.id] = parseFloat(String(pr.peso).replace(',', '.')) || 0;
+  });
+  function _dashPesoItens(itens, campoQtd) {
+    return (itens || []).reduce(function (s, it) {
+      var pesoUnit = produtosPesoMap[it.prodId] || 0;
+      return s + pesoUnit * (Number(it[campoQtd]) || 0);
+    }, 0);
+  }
+
   var PED = [];
   pedidosBase.forEach(function (pedido) {
     var cIdx = idxCliente(pedido.clienteId, pedido.clienteNome);
@@ -14791,16 +14886,33 @@ function _dashConstruirDadosAoVivo() {
     if ((pedido.status === 'Faturado' || pedido.status === 'Faturado Parcial') && faturasAtivas.length) {
       faturasAtivas.forEach(function (fat) {
         var vol = (fat.itens || []).reduce(function (s, it) { return s + (Number(it.qtd) || 0); }, 0);
+        var peso = _dashPesoItens(fat.itens, 'qtd');
         var data = (fat.data || pedido.data || '').slice(0, 10);
         if (!data) return;
-        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx]);
+        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx, peso]);
       });
     } else {
       var volPed = (pedido.itens || []).reduce(function (s, it) { return s + (Number(it.quantidade) || 0); }, 0);
+      var pesoPed = _dashPesoItens(pedido.itens, 'quantidade');
       var dataPed = (pedido.data || '').slice(0, 10);
       if (!dataPed) return;
-      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx]);
+      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx, pesoPed]);
     }
+  });
+
+  var devolucoesBase = (typeof getDevolucoes === 'function') ? getDevolucoes() : [];
+  var DEVOL = [];
+  devolucoesBase.forEach(function (dev) {
+    var cIdxD = idxCliente(dev.clienteId, dev.clienteNome);
+    var fIdxD = idxFabrica(dev.fornecedorId, dev.fornecedorNome);
+    var vIdxD = idxVendedor(dev.vendedorId, dev.vendedorNome);
+    var dataDev = (dev.dataNfEmitida || dev.data || '').slice(0, 10);
+    if (!dataDev) return;
+    var itensSimples = (dev.itens || []).map(function (it) {
+      return { n: it.prodNome || it.prodCodigo || 'Produto', q: Number(it.quantidade) || 0, v: Number(it.valorTotal) || 0 };
+    });
+    var valorTotalDev = Number(dev.totalProdutos) || itensSimples.reduce(function (s, it) { return s + it.v; }, 0);
+    DEVOL.push([dataDev, cIdxD, fIdxD, vIdxD, valorTotalDev, itensSimples]);
   });
 
   var hoje = new Date();
@@ -14826,6 +14938,7 @@ function _dashConstruirDadosAoVivo() {
     clientes: CLI,
     clientes_inativo: CLI_INATIVO,
     pedidos: PED,
+    devolucoes: DEVOL,
   };
 }
 
@@ -14846,7 +14959,8 @@ function dashInit() {
     // =============== DADOS ===============
     const _dashHistorico = window._dashModoHistorico2025 === true;
     const DATA = _dashHistorico ? JSON.parse(document.getElementById('dash-dados').textContent) : _dashConstruirDadosAoVivo();
-    const { vendedores: VEND, fabricas: FAB, clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, meta: METAINFO } = DATA;
+    const { vendedores: VEND, fabricas: FAB, clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, meta: METAINFO, devolucoes: DEVOL_RAW } = DATA;
+    const DEVOL = DEVOL_RAW || [];
     const ST_FATURADO = STATUS.indexOf('Faturado');
     const ST_FAT_PARC = STATUS.indexOf('Faturado Parcial');
     const ST_OK = new Set([ST_FATURADO, ST_FAT_PARC].filter(x => x >= 0));
@@ -14869,6 +14983,8 @@ function dashInit() {
     const fmtNum = v => (v||0).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
     const fmtPct = v => (v*100).toFixed(1) + '%';
     const fmtDate = ymd => { const [y,m,d] = ymd.split('-'); return `${d}/${m}/${y}`; };
+    function _dvgFmtAbrev(v) { v = v||0; const s = v<0?'-':''; v = Math.abs(v); if (v >= 1e6) return s + (v/1e6).toFixed(1).replace('.',',') + ' mi'; if (v >= 1e3) return s + (v/1e3).toFixed(1).replace('.',',') + ' mil'; return s + Math.round(v).toLocaleString('pt-BR'); }
+    function _dvgFmtBRLAbrev(v) { return 'R$ ' + _dvgFmtAbrev(v); }
     const monthLabels = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
     const parseDate = ymd => { const [y,m,d] = ymd.split('-').map(Number); return new Date(y, m-1, d); };
     const daysBetween = (a,b) => Math.round((b - a) / 86400000);
@@ -14947,6 +15063,16 @@ function dashInit() {
             rerender();
           });
         });
+        // Reposiciona o popup pra nao cortar na borda direita da tela
+        det.addEventListener('toggle', () => {
+          const pop = det.querySelector('.ms-pop');
+          if (!pop) return;
+          pop.style.left = ''; pop.style.right = '';
+          if (det.open) {
+            const r = pop.getBoundingClientRect();
+            if (r.right > window.innerWidth - 8) { pop.style.left = 'auto'; pop.style.right = '0'; }
+          }
+        });
         // fechar ao clicar fora
         document.addEventListener('click', (ev) => {
           if (!el.contains(ev.target)) det.open = false;
@@ -14957,7 +15083,7 @@ function dashInit() {
 
     // =============== FILTRAR ===============
     function filtraPedidos(opts={}) {
-      const ini = state.dtIni, fim = state.dtFim;
+      const ini = opts.dtIni || state.dtIni, fim = opts.dtFim || state.dtFim;
       const fabSet = state.fabricas, venSet = state.vendedores, cliSet = state.clientes;
       const ignorarStatus = opts.todosStatus === true;
       const ignorarFabrica = opts.ignorarFabrica === true;
@@ -14975,13 +15101,93 @@ function dashInit() {
       return out;
     }
 
+    function filtraDevolucoes() {
+      const ini = state.dtIni, fim = state.dtFim;
+      const fabSet = state.fabricas, venSet = state.vendedores, cliSet = state.clientes;
+      const out = [];
+      for (let i=0;i<DEVOL.length;i++) {
+        const d = DEVOL[i];
+        // [data, cli, fab, ven, valor, itens]
+        if (d[0] < ini || d[0] > fim) continue;
+        if (fabSet.size && !fabSet.has(d[2])) continue;
+        if (venSet.size && !venSet.has(d[3])) continue;
+        if (cliSet.size && !cliSet.has(d[1])) continue;
+        out.push(d);
+      }
+      return out;
+    }
+
+    function _dvgRenderRankDevolucao(arrClientes) {
+      const el = document.getElementById('dvgDevolRank');
+      if (!el) return;
+      const devs = filtraDevolucoes();
+      const fatPorCliente = new Map(arrClientes.map(c => [c.ci, c.fat]));
+      const ag = new Map();
+      for (const d of devs) {
+        let a = ag.get(d[1]);
+        if (!a) { a = { valor: 0, itens: new Map() }; ag.set(d[1], a); }
+        a.valor += d[4];
+        for (const it of (d[5] || [])) {
+          let acc = a.itens.get(it.n);
+          if (!acc) { acc = { nome: it.n, qtd: 0, valor: 0 }; a.itens.set(it.n, acc); }
+          acc.qtd += it.q; acc.valor += it.v;
+        }
+      }
+      const rank = [...ag.entries()]
+        .map(([ci, a]) => ({ ci, nome: CLI[ci], devolvido: a.valor, fat: fatPorCliente.get(ci) || 0, itens: [...a.itens.values()].sort((x,y)=>y.valor-x.valor).slice(0,5) }))
+        .filter(c => c.devolvido > 0)
+        .map(c => ({ ...c, pct: c.fat ? c.devolvido / c.fat : null }))
+        .sort((a,b) => b.devolvido - a.devolvido);
+
+      if (!rank.length) {
+        el.innerHTML = `<div style="text-align:center;padding:16px 0;color:#94a3b8;font-size:12.5px">Nenhuma devolução no período/filtro selecionado.</div>`;
+        return;
+      }
+
+      el.innerHTML = rank.map((c,i) => {
+        const pctTxt = c.fat ? fmtPct(c.pct) : '—';
+        const barPct = c.fat ? Math.min(100, c.pct*100) : 0;
+        const itensHtml = c.itens.length
+          ? c.itens.map(it => `<div class="dvg-devol-item"><span>${escapeHtml(it.nome)}</span><span>${fmtNum(it.qtd)} un &middot; <b>${fmtBRL(it.valor)}</b></span></div>`).join('')
+          : '<div class="dvg-devol-item" style="opacity:.6">sem itens detalhados</div>';
+        return `
+        <div class="dvg-devol-row" data-ci="${c.ci}">
+          <div class="dvg-devol-main">
+            <span class="dvg-devol-rank">${i+1}</span>
+            <div class="dvg-devol-info">
+              <div class="dvg-devol-linha1">
+                <span class="dvg-devol-nome">${escapeHtml(c.nome)}</span>
+                <span class="dvg-devol-vals">Fat: <b>${fmtBRLk(c.fat)}</b> &middot; Dev: <b>${fmtBRLk(c.devolvido)}</b></span>
+              </div>
+              <div class="dvg-devol-trk"><i style="width:${barPct}%"></i></div>
+            </div>
+            <span class="dvg-devol-pct">${pctTxt}</span>
+            <span class="dvg-devol-chev">&#9662;</span>
+          </div>
+          <div class="dvg-devol-detail" style="display:none">
+            <div class="dvg-devol-detail-tit">5 itens mais devolvidos</div>
+            ${itensHtml}
+          </div>
+        </div>`;
+      }).join('');
+
+      el.querySelectorAll('.dvg-devol-row').forEach(row => {
+        row.querySelector('.dvg-devol-main').addEventListener('click', () => {
+          const det = row.querySelector('.dvg-devol-detail');
+          const abrindo = det.style.display === 'none';
+          el.querySelectorAll('.dvg-devol-row').forEach(r => { r.classList.remove('open'); r.querySelector('.dvg-devol-detail').style.display = 'none'; });
+          if (abrindo) { det.style.display = 'block'; row.classList.add('open'); }
+        });
+      });
+    }
+
     // =============== KPIs ===============
     function kpis(peds) {
-      let fat=0, vol=0, n=0;
+      let fat=0, vol=0, n=0, pesoKg=0;
       const cliSet = new Set();
       const cliFabs = new Map();
       for (const p of peds) {
-        fat += p[5]; vol += p[4]; n++;
+        fat += p[5]; vol += p[4]; n++; pesoKg += (p[7]||0);
         cliSet.add(p[1]);
         let s = cliFabs.get(p[1]); if (!s) { s = new Set(); cliFabs.set(p[1], s); }
         s.add(p[2]);
@@ -14992,7 +15198,7 @@ function dashInit() {
       // carteira = clientes não inativos
       const carteira = CLI_INATIVO.filter(x => !x).length;
       const pos = carteira ? ativos/carteira : 0;
-      return { fat, vol, ticket, ativos, mix, pos, nPedidos: n, carteira };
+      return { fat, vol, pesoKg, ticket, ativos, mix, pos, nPedidos: n, carteira };
     }
 
     // =============== HOME ===============
@@ -15016,8 +15222,8 @@ function dashInit() {
       function step(ts) {
         if (!start) start = ts;
         const p = Math.min((ts-start)/dur, 1);
-        _dvgFitHero(el, fmtBRL(target*p));
-        if (p < 1) requestAnimationFrame(step); else _dvgFitHero(el, fmtBRL(target));
+        _dvgFitHero(el, _dvgFmtBRLAbrev(target*p));
+        if (p < 1) requestAnimationFrame(step); else _dvgFitHero(el, _dvgFmtBRLAbrev(target));
       }
       requestAnimationFrame(step);
     }
@@ -15064,6 +15270,16 @@ function dashInit() {
         pathEl.style.strokeDashoffset = '0';
       }));
     }
+    function _dvgAnimarRevelarEsquerdaDireita(rectEl, duracao) {
+      if (!rectEl) return;
+      rectEl.style.transition = 'none';
+      rectEl.style.transformOrigin = '0 0';
+      rectEl.style.transform = 'scaleX(0)';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        rectEl.style.transition = 'transform ' + (duracao||900) + 'ms ease';
+        rectEl.style.transform = 'scaleX(1)';
+      }));
+    }
     let _dvgMesAberto = null;
     let _dvgMesesData = [];
     let _dvgMetaMensal = null;
@@ -15084,8 +15300,10 @@ function dashInit() {
         div.style.height = pct + '%';
         div.innerHTML = '<span class="dvg-mlabel">' + monthLabels[i].toUpperCase() + '</span>';
         div.onclick = () => _dvgToggleMes(i);
+        div.onmouseenter = () => _dvgHoverMes(i);
         wrap.appendChild(div);
       });
+      wrap.onmouseleave = () => _dvgHoverMesFim();
       if (_dvgMetaMensal) {
         const line = document.createElement('div');
         line.className = 'dvg-meta-line';
@@ -15095,10 +15313,15 @@ function dashInit() {
     }
     function _dvgToggleMes(i) {
       const det = document.getElementById('dvgMesDetail');
-      const inner = document.getElementById('dvgMesDetailInner');
       document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
       if (_dvgMesAberto === i) { det.classList.remove('open'); _dvgMesAberto = null; return; }
       _dvgMesAberto = i;
+      _dvgHoverMes(i);
+    }
+    function _dvgHoverMes(i) {
+      const det = document.getElementById('dvgMesDetail');
+      const inner = document.getElementById('dvgMesDetailInner');
+      document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
       const el = document.querySelector('#dvgBars .dvg-bar[data-i="'+i+'"]');
       if (el) el.classList.add('active');
       const m = _dvgMesesData[i];
@@ -15108,6 +15331,12 @@ function dashInit() {
         '<div>Pedidos<b>' + m.n.toLocaleString('pt-BR') + '</b></div>' +
         '<div>Ticket médio<b>' + fmtBRL(m.n ? m.fat/m.n : 0) + '</b></div>';
       det.classList.add('open');
+    }
+    function _dvgHoverMesFim() {
+      if (_dvgMesAberto != null) { _dvgHoverMes(_dvgMesAberto); return; }
+      const det = document.getElementById('dvgMesDetail');
+      document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
+      if (det) det.classList.remove('open');
     }
     const _dvgFabPalette = ['#1c2f66','#2c4488','#3d5aa8','#5b78c9','#7b93d9','#a9c2f5','#c9d9fb','#e3ecfc'];
     function _dvgToggleFabrica(i) {
@@ -15164,7 +15393,7 @@ function dashInit() {
         const pct = totalFab ? (f.v/totalFab) : 0;
         const len = pct * avail;
         const cor = _dvgFabPalette[rank % _dvgFabPalette.length];
-        const destacada = selecionadas.size ? selecionadas.has(f.i) : rank === 0;
+        const destacada = selecionadas.has(f.i);
         const seg = document.createElementNS(SVGNS,'circle');
         seg.setAttribute('cx',cx); seg.setAttribute('cy',cy); seg.setAttribute('r',r);
         seg.setAttribute('fill','none'); seg.setAttribute('stroke',cor);
@@ -15299,33 +15528,120 @@ function dashInit() {
         cardM.classList.remove('dvg-collapsed');
       }
     }
+    function _dvgPeriodoAnteriorPeds() {
+      const iniAtual = parseDate(state.dtIni), fimAtual = parseDate(state.dtFim);
+      const dias = daysBetween(iniAtual, fimAtual) + 1;
+      const fimAnterior = new Date(iniAtual); fimAnterior.setDate(fimAnterior.getDate() - 1);
+      const iniAnterior = new Date(fimAnterior); iniAnterior.setDate(iniAnterior.getDate() - (dias - 1));
+      const ymd = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      return filtraPedidos({ dtIni: ymd(iniAnterior), dtFim: ymd(fimAnterior) });
+    }
+    function _dvgPctVar(atual, anterior) {
+      if (!anterior) return null;
+      return (atual - anterior) / anterior;
+    }
+    function _dvgTrendMiniHtml(pct) {
+      if (pct == null) return '';
+      return '<div class="dvg-kpi-trend ' + (pct>=0?'up':'down') + '">' + (pct>=0?'▲':'▼') + ' ' + (Math.abs(pct)*100).toFixed(1).replace('.',',') + '%</div>';
+    }
+    function _dvgTrendPPHtml(diffPP) {
+      if (diffPP == null) return '';
+      return '<div class="dvg-kpi-trend ' + (diffPP>=0?'up':'down') + '">' + (diffPP>=0?'▲':'▼') + ' ' + Math.abs(diffPP).toFixed(1).replace('.',',') + ' p.p.</div>';
+    }
+    function _dvgMetaProporcional() {
+      const metaAnual = sumMetas();
+      if (!metaAnual) return null;
+      const dias = daysBetween(parseDate(state.dtIni), parseDate(state.dtFim)) + 1;
+      return metaAnual * (dias/365);
+    }
+    function _dvgRenderMetaRing(fatAtual) {
+      const wrap = document.getElementById('dvgMetaRingWrap');
+      if (!wrap) return;
+      const metaProp = _dvgMetaProporcional();
+      if (!metaProp) { wrap.innerHTML = ''; return; }
+      const pct = fatAtual / metaProp;
+      const pctClamp = Math.max(0, Math.min(1, pct));
+      const r = 22, circ = 2*Math.PI*r;
+      const offset = circ * (1 - pctClamp);
+      const cor = pct >= 1 ? '#16a34a' : (pct >= 0.7 ? '#DE7926' : '#dc2626');
+      wrap.innerHTML = '<div class="dvg-metaring"><svg viewBox="0 0 52 52" width="52" height="52">' +
+        '<circle cx="26" cy="26" r="' + r + '" fill="none" stroke="#e2e8f0" stroke-width="5"/>' +
+        '<circle cx="26" cy="26" r="' + r + '" fill="none" stroke="' + cor + '" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '" transform="rotate(-90 26 26)"/>' +
+        '</svg><div class="dvg-metaring-txt"><b>' + (pct*100).toFixed(0) + '%</b><span>da meta</span></div></div>';
+    }
+    function _dvgSparklineSvg(valores) {
+      let lastIdx = -1;
+      for (let i=0;i<valores.length;i++) if (valores[i]) lastIdx = i;
+      const arr = valores.slice(0, lastIdx+1);
+      if (arr.length < 2) return '';
+      const w = 130, h = 34, pad = 3;
+      const max = Math.max.apply(null, arr), min = Math.min.apply(null, arr);
+      const range = (max - min) || 1;
+      const stepX = (w - pad*2) / (arr.length - 1);
+      const pts = arr.map(function(v,i){
+        const x = pad + i*stepX;
+        const y = h - pad - ((v - min) / range) * (h - pad*2);
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+      const lastX = pad + (arr.length-1)*stepX;
+      const lastY = h - pad - ((arr[arr.length-1] - min) / range) * (h - pad*2);
+      return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" class="dvg-hero-spark"><polyline points="' + pts + '" fill="none" stroke="#a9c2f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="' + lastX.toFixed(1) + '" cy="' + lastY.toFixed(1) + '" r="2.5" fill="#fff"/></svg>';
+    }
+    function _dvgVariacaoFaturamento(fatAtual) {
+      const iniAtual = parseDate(state.dtIni), fimAtual = parseDate(state.dtFim);
+      const dias = daysBetween(iniAtual, fimAtual) + 1;
+      const fimAnterior = new Date(iniAtual); fimAnterior.setDate(fimAnterior.getDate() - 1);
+      const iniAnterior = new Date(fimAnterior); iniAnterior.setDate(iniAnterior.getDate() - (dias - 1));
+      const ymd = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      const pedsAnt = filtraPedidos({ dtIni: ymd(iniAnterior), dtFim: ymd(fimAnterior) });
+      const fatAnterior = pedsAnt.reduce((s,p)=>s+p[5], 0);
+      if (!fatAnterior) return null;
+      return (fatAtual - fatAnterior) / fatAnterior;
+    }
     function renderHome() {
       const peds = filtraPedidos();
       const k = kpis(peds);
 
       const greetEl = document.getElementById('dvgGreet');
-      if (greetEl) greetEl.innerHTML = _dvgSaudacao() + ', ' + escapeHtml(_appNomeUsuarioAtual().split(' ')[0]) + '<span>resumo do período selecionado</span>';
+      if (greetEl) greetEl.innerHTML = '<div class="dvg-greet-txt">' + _dvgSaudacao() + ', ' + escapeHtml(_appNomeUsuarioAtual().split(' ')[0]) + '<span>resumo do período selecionado</span></div><div id="dvgMetaRingWrap"></div>';
 
       const kpiEl = document.getElementById('kpis');
       if (kpiEl) {
+        const _dvgVarFat = _dvgVariacaoFaturamento(k.fat);
+        const _dvgTrendHtml = _dvgVarFat != null ? `<div class="dvg-hero-trend ${_dvgVarFat>=0?'up':'down'}">${_dvgVarFat>=0?'▲':'▼'} ${(Math.abs(_dvgVarFat)*100).toFixed(1).replace('.',',')}% vs período anterior</div>` : '';
+        const _dvgPedsAnt = _dvgPeriodoAnteriorPeds();
+        const _dvgKAnt = _dvgPedsAnt.length ? kpis(_dvgPedsAnt) : null;
+        const _dvgTrendVol = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.pesoKg, _dvgKAnt.pesoKg)) : '';
+        const _dvgTrendPos = _dvgKAnt ? _dvgTrendPPHtml((k.pos - _dvgKAnt.pos) * 100) : '';
+        const _dvgTrendTicket = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.ticket, _dvgKAnt.ticket)) : '';
+        const _dvgTrendCli = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.ativos, _dvgKAnt.ativos)) : '';
+        const _dvgSparkMeses = Array(12).fill(0);
+        for (const p of peds) { const m = parseInt(p[0].slice(5,7),10)-1; _dvgSparkMeses[m] += p[5]; }
+        const _dvgSparkHtml = _dvgSparklineSvg(_dvgSparkMeses);
         kpiEl.innerHTML = `
           <div class="dvg-hero">
             <div class="dvg-hero-lbl">Faturamento do Período</div>
             <div class="dvg-hero-val" id="dvgHeroValue">R$ 0,00</div>
+            <div class="dvg-hero-val-exact" id="dvgHeroValueExact"></div>
+            ${_dvgTrendHtml}
             <div class="dvg-hero-pills">
               <span>${k.nPedidos.toLocaleString('pt-BR')} pedidos</span>
-              <span>${(k.pos*100).toFixed(1).replace('.',',')}% da carteira ativa</span>
             </div>
+            ${_dvgSparkHtml ? '<div class="dvg-hero-spark-wrap">'+_dvgSparkHtml+'</div>' : ''}
           </div>
-          <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66"><div class="dvg-kpi-lbl">VOLUME</div><div class="dvg-kpi-val" id="dvgKpiVol">0</div><div class="dvg-kpi-sub">unidades líquidas (caixas)</div></div>
-          <div class="dvg-kpi" style="border-bottom:3px solid #3d5aa8"><div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div><div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} ativos</div></div>
-          <div class="dvg-kpi" style="border-bottom:3px solid #5b78c9"><div class="dvg-kpi-lbl">TICKET MÉDIO</div><div class="dvg-kpi-val" id="dvgKpiTicket">R$ 0,00</div><div class="dvg-kpi-sub">por pedido</div></div>
-          <div class="dvg-kpi" style="border-bottom:3px solid #7b93d9"><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div class="dvg-kpi-val" id="dvgKpiCli">0</div><div class="dvg-kpi-sub">no período</div></div>
+          <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66"><div class="dvg-kpi-lbl">VOLUME</div><div class="dvg-kpi-val" id="dvgKpiVol">0 kg</div><div class="dvg-kpi-val-exact" id="dvgKpiVolExact"></div><div class="dvg-kpi-sub">${fmtNum(k.vol)} cx no período</div>${_dvgTrendVol}</div>
+          <div class="dvg-kpi" style="border-bottom:3px solid #3d5aa8"><div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div><div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} ativos</div>${_dvgTrendPos}</div>
+          <div class="dvg-kpi" style="border-bottom:3px solid #5b78c9"><div class="dvg-kpi-lbl">TICKET MÉDIO</div><div class="dvg-kpi-val" id="dvgKpiTicket">R$ 0,00</div><div class="dvg-kpi-val-exact" id="dvgKpiTicketExact"></div><div class="dvg-kpi-sub">por pedido</div>${_dvgTrendTicket}</div>
+          <div class="dvg-kpi" style="border-bottom:3px solid #7b93d9"><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div class="dvg-kpi-val" id="dvgKpiCli">0</div><div class="dvg-kpi-sub">no período</div>${_dvgTrendCli}</div>
         `;
         _dvgAnimateHero(k.fat);
-        _dvgCountUp(document.getElementById('dvgKpiVol'), k.vol, 0, '', '');
+        _dvgRenderMetaRing(k.fat);
+        document.getElementById('dvgHeroValueExact').textContent = fmtBRL(k.fat) + ' exatos';
+        _dvgAnimarNumero(document.getElementById('dvgKpiVol'), k.pesoKg, v => _dvgFmtAbrev(v) + ' kg');
+        document.getElementById('dvgKpiVolExact').textContent = k.pesoKg.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg exatos';
         _dvgCountUp(document.getElementById('dvgKpiPos'), k.pos*100, 1, '', '%');
-        _dvgCountUp(document.getElementById('dvgKpiTicket'), k.ticket, 2, 'R$ ', '');
+        _dvgAnimarNumero(document.getElementById('dvgKpiTicket'), k.ticket, _dvgFmtBRLAbrev);
+        document.getElementById('dvgKpiTicketExact').textContent = fmtBRL(k.ticket) + ' exatos';
         _dvgCountUp(document.getElementById('dvgKpiCli'), k.ativos, 0, '', '');
       }
       const mixLbl = document.getElementById('dvgMixLbl');
@@ -15376,18 +15692,18 @@ function dashInit() {
       const topC = porCli.map((v,i)=>({i,v})).sort((a,b)=>b.v-a.v).slice(0,5).filter(x=>x.v>0);
       _dvgRenderRank('topClientes', topC.map(x=>({nome:CLI[x.i], val:x.v})));
     }
-    function kpiCard(titulo, valor, color, sub, kind, idx, anim) {
+    function kpiCard(titulo, valor, color, sub, kind, idx, anim, exact) {
       const _gradStops = ['#1c2f66', '#2c4488', '#3d5aa8', '#5b78c9', '#7b93d9', '#a9c2f5'];
       const barColor   = color==='bad' ? '#dc2626' : (_gradStops[idx||0] || '#1c2f66');
       const accentColor = barColor;
       const valColor    = color==='good' ? '#1c2f66' : color==='bad' ? '#dc2626' : '#1e293b';
       const valTxt = anim ? anim.fmt(0) : valor;
       const valId = anim ? ` id="${anim.id}"` : '';
-      return `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+      return `<div style="background:#fff;border:1px solid #e5e7eb;border-bottom:3px solid ${accentColor};border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
         <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">${titulo}</div>
         <div style="font-size:22px;font-weight:800;color:${valColor};line-height:1.2;letter-spacing:-.02em"${valId}>${valTxt}</div>
+        ${exact ? `<div style="font-size:10px;color:#94a3b8;margin-top:-2px">${exact}</div>` : ''}
         <div style="font-size:11px;color:#94a3b8">${sub}</div>
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${accentColor}"></div>
       </div>`;
     }
     function miniRank(items) {
@@ -15560,37 +15876,47 @@ function dashInit() {
       const legWrap = document.getElementById('drillFabLegend');
       legWrap.innerHTML = '';
       const segsByRank = [];
+      function aplicarFoco(rank) {
+        segsByRank.forEach((s,idx) => {
+          const emFoco = idx===rank;
+          s.seg.setAttribute('opacity', emFoco ? 0.85 : 0.55);
+          s.seg.setAttribute('stroke-width', emFoco ? 10 : 15);
+          if (s.hi) s.hi.style.opacity = emFoco ? 1 : 0;
+        });
+        legWrap.querySelectorAll('.dvg-leg-row').forEach((row,idx) => row.classList.toggle('active', idx===rank));
+      }
       function mostrar(rank) {
         const f = ranking[rank];
-        if (!f) { tagEl.textContent = 'LÍDER'; pctEl.textContent = '—'; nomeEl.textContent = '—'; return; }
+        if (!f) { tagEl.textContent = 'LÍDER'; pctEl.textContent = '—'; nomeEl.textContent = '—'; aplicarFoco(-1); return; }
         tagEl.textContent = rank === 0 ? 'LÍDER' : 'FÁBRICA';
         pctEl.textContent = totalF ? (f.v/totalF*100).toFixed(2).replace('.',',') + '%' : '—';
         nomeEl.textContent = f.nome;
-        legWrap.querySelectorAll('.dvg-leg-row').forEach((row,idx) => row.classList.toggle('active', idx===rank));
-        segsByRank.forEach((s,idx) => {
-          const emFoco = idx===rank;
-          s.seg.setAttribute('opacity', emFoco ? 0.85 : (idx===0?0.32:0.55));
-          if (s.hi) s.hi.style.opacity = (emFoco || idx===0) ? 1 : 0;
-        });
+        aplicarFoco(rank);
+      }
+      function mostrarRepouso() {
+        const f = ranking[0];
+        tagEl.textContent = 'LÍDER';
+        pctEl.textContent = totalF && f ? (f.v/totalF*100).toFixed(2).replace('.',',') + '%' : '—';
+        nomeEl.textContent = f ? f.nome : '—';
+        aplicarFoco(-1);
       }
       let offset = 0;
       ranking.forEach((f, rank) => {
         const pct = totalF ? (f.v/totalF) : 0;
         const len = pct * avail;
         const cor = _dvgFabPalette[rank % _dvgFabPalette.length];
-        const destacada = rank === 0;
         const seg = document.createElementNS(SVGNS,'circle');
         seg.setAttribute('cx',cx); seg.setAttribute('cy',cy); seg.setAttribute('r',r);
         seg.setAttribute('fill','none'); seg.setAttribute('stroke',cor);
-        seg.setAttribute('stroke-width', destacada ? 10 : 15);
+        seg.setAttribute('stroke-width', 15);
         seg.setAttribute('stroke-dasharray', len + ' ' + (C-len));
         seg.setAttribute('stroke-dashoffset', -offset);
-        seg.setAttribute('opacity', destacada ? 0.32 : 0.55);
+        seg.setAttribute('opacity', 0.55);
         seg.style.cursor = 'pointer';
         seg.addEventListener('mouseenter', () => mostrar(rank));
         g.appendChild(seg);
         let hi = null;
-        if (destacada && pct > 0) {
+        if (pct > 0) {
           hi = document.createElementNS(SVGNS,'circle');
           hi.setAttribute('cx',cx); hi.setAttribute('cy',cy); hi.setAttribute('r',r);
           hi.setAttribute('fill','none'); hi.setAttribute('stroke',cor);
@@ -15599,6 +15925,7 @@ function dashInit() {
           hi.setAttribute('stroke-dashoffset', -offset);
           hi.style.filter = 'drop-shadow(0 0 9px ' + cor + 'cc)';
           hi.style.pointerEvents = 'none';
+          hi.style.opacity = 0;
           g.appendChild(hi);
         }
         segsByRank.push({ seg, hi });
@@ -15608,7 +15935,7 @@ function dashInit() {
         const pct = totalF ? (f.v/totalF*100) : 0;
         const cor = _dvgFabPalette[rank % _dvgFabPalette.length];
         const row = document.createElement('div');
-        row.className = 'dvg-leg-row' + (rank===0 ? ' active' : '');
+        row.className = 'dvg-leg-row';
         row.innerHTML = '<span class="dvg-leg-dot" style="background:' + cor + '"></span>' +
           '<span class="dvg-leg-nome">' + escapeHtml(f.nome) + '</span>' +
           '<span class="dvg-leg-pct">' + pct.toFixed(2).replace('.',',') + '%</span>';
@@ -15616,8 +15943,8 @@ function dashInit() {
         legWrap.appendChild(row);
       });
       const donutWrap = svg.closest('.dvg-carddark');
-      if (donutWrap) donutWrap.onmouseleave = () => mostrar(0);
-      mostrar(0);
+      if (donutWrap) donutWrap.onmouseleave = mostrarRepouso;
+      mostrarRepouso();
     }
     function _dvgWirePageChips(id, onChange) {
       const wrap = document.getElementById(id);
@@ -15715,79 +16042,55 @@ function dashInit() {
         cardAbc.classList.remove('dvg-collapsed');
       }
     }
-    function _dvgRenderAbcCurve(arr) {
-      const svg = document.getElementById('dvgAbcCurveSvg');
+    function _dvgRenderAbcDonut(resumo) {
+      const svg = document.getElementById('dvgAbcDonutSvg');
       if (!svg) return;
-      const g = document.getElementById('dvgAbcCurveG');
+      const g = document.getElementById('dvgAbcDonutG');
       g.innerHTML = '';
       const SVGNS = 'http://www.w3.org/2000/svg';
-      const n = arr.length;
-      if (!n) return;
-      const padL = 42, padR = 14, padT = 14, padB = 26;
-      const W = 600, H = 240;
-      const plotW = W - padL - padR, plotH = H - padT - padB;
-      const xAt = i => padL + (n>1 ? (i/(n-1))*plotW : 0);
-      const yAt = pct => padT + (1 - pct/100) * plotH;
-      const idxFimA = arr.findIndex(c => c.acumPct > 0.8);
-      const idxFimB = arr.findIndex(c => c.acumPct > 0.95);
-      const fimA = idxFimA === -1 ? n : idxFimA;
-      const fimB = idxFimB === -1 ? n : idxFimB;
-      const zonas = [
-        { de:0, ate:fimA, cor:'#1c2f66', op:.07 },
-        { de:fimA, ate:fimB, cor:'#5b78c9', op:.08 },
-        { de:fimB, ate:n, cor:'#94a3b8', op:.10 },
-      ];
-      zonas.forEach(z => {
-        if (z.ate <= z.de) return;
-        const xStart = xAt(z.de);
-        const xEnd = z.ate >= n ? (padL+plotW) : xAt(z.ate);
-        const rect = document.createElementNS(SVGNS,'rect');
-        rect.setAttribute('x', xStart); rect.setAttribute('y', padT);
-        rect.setAttribute('width', Math.max(0, xEnd - xStart)); rect.setAttribute('height', plotH);
-        rect.setAttribute('fill', z.cor); rect.setAttribute('opacity', z.op);
-        g.appendChild(rect);
+      const r = 70, cx = 90, cy = 90, gap = 8;
+      const C = 2 * Math.PI * r;
+      const cores = { A:'#0e2f6e', B:'#3d5aa8', C:'#94a3b8' };
+      const classes = ['A','B','C'];
+      const total = classes.reduce((s,k) => s + resumo[k].fat, 0);
+      const tagEl = document.getElementById('dvgAbcDonutTag');
+      const valEl = document.getElementById('dvgAbcDonutVal');
+      function fitVal(text) {
+        valEl.textContent = text;
+        let size = 15;
+        valEl.style.fontSize = size + 'px';
+        while (valEl.scrollWidth > 112 && size > 9) { size -= 1; valEl.style.fontSize = size + 'px'; }
+      }
+      function mostrarTotal() { tagEl.textContent = 'TOTAL FATURADO'; fitVal(fmtBRLk(total)); }
+      function mostrarClasse(k) { tagEl.textContent = 'CLASSE ' + k; fitVal(fmtBRLk(resumo[k].fat)); }
+      const legWrap = document.getElementById('dvgAbcDonutLegend');
+      legWrap.innerHTML = '';
+      const totalGap = gap * classes.length;
+      const avail = Math.max(0, C - totalGap);
+      let offset = 0;
+      classes.forEach(k => {
+        const frac = total ? resumo[k].fat/total : 0;
+        const len = avail * frac;
+        const circle = document.createElementNS(SVGNS,'circle');
+        circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', r);
+        circle.setAttribute('fill','none'); circle.setAttribute('stroke', cores[k]); circle.setAttribute('stroke-width', 22);
+        circle.setAttribute('stroke-dasharray', len + ' ' + (C-len));
+        circle.setAttribute('stroke-dashoffset', -offset);
+        circle.style.cursor = 'pointer';
+        circle.addEventListener('mouseenter', () => mostrarClasse(k));
+        g.appendChild(circle);
+        offset += len + gap;
+        const row = document.createElement('div');
+        row.className = 'dvg-leg-row';
+        row.innerHTML = '<span class="dvg-leg-dot" style="background:' + cores[k] + '"></span>' +
+          '<span class="dvg-leg-nome">Classe ' + k + '</span>' +
+          '<span class="dvg-leg-pct">' + fmtBRL(resumo[k].fat) + '</span>';
+        row.addEventListener('mouseenter', () => mostrarClasse(k));
+        legWrap.appendChild(row);
       });
-      [0,80,95,100].forEach(pct => {
-        const y = yAt(pct);
-        if (pct===80||pct===95) {
-          const line = document.createElementNS(SVGNS,'line');
-          line.setAttribute('x1', padL); line.setAttribute('x2', W-padR);
-          line.setAttribute('y1', y); line.setAttribute('y2', y);
-          line.setAttribute('stroke', '#cbd5e1'); line.setAttribute('stroke-width', 1);
-          line.setAttribute('stroke-dasharray', '4 4');
-          g.appendChild(line);
-        }
-        const txt = document.createElementNS(SVGNS,'text');
-        txt.setAttribute('x', padL - 6); txt.setAttribute('y', y+3);
-        txt.setAttribute('text-anchor','end'); txt.setAttribute('font-size','9.5px'); txt.setAttribute('fill','#94a3b8');
-        txt.textContent = pct + '%';
-        g.appendChild(txt);
-      });
-      let d = '';
-      arr.forEach((c,i) => {
-        const x = xAt(i), y = yAt(c.acumPct*100);
-        d += (i===0?'M':'L') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
-      });
-      const area = document.createElementNS(SVGNS,'path');
-      area.setAttribute('d', d + `L ${xAt(n-1).toFixed(1)} ${(padT+plotH).toFixed(1)} L ${xAt(0).toFixed(1)} ${(padT+plotH).toFixed(1)} Z`);
-      area.setAttribute('fill', 'url(#dvgAbcGrad)');
-      g.appendChild(area);
-      const path = document.createElementNS(SVGNS,'path');
-      path.setAttribute('d', d);
-      path.setAttribute('fill','none'); path.setAttribute('stroke','#d97706'); path.setAttribute('stroke-width','2.5');
-      path.style.filter = 'drop-shadow(0 0 5px rgba(217,119,6,.55))';
-      g.appendChild(path);
-      _dvgAnimarLinha(path);
-      const txtX0 = document.createElementNS(SVGNS,'text');
-      txtX0.setAttribute('x', padL); txtX0.setAttribute('y', H-6);
-      txtX0.setAttribute('font-size','9.5px'); txtX0.setAttribute('fill','#94a3b8');
-      txtX0.textContent = '1º cliente';
-      g.appendChild(txtX0);
-      const txtXN = document.createElementNS(SVGNS,'text');
-      txtXN.setAttribute('x', W-padR); txtXN.setAttribute('y', H-6);
-      txtXN.setAttribute('text-anchor','end'); txtXN.setAttribute('font-size','9.5px'); txtXN.setAttribute('fill','#94a3b8');
-      txtXN.textContent = n + 'º cliente';
-      g.appendChild(txtXN);
+      const cardEl = svg.closest('.dvg-carddark');
+      if (cardEl) cardEl.onmouseleave = mostrarTotal;
+      mostrarTotal();
     }
     let _dvgCliTop = [];
     function _dvgRenderCliScrubCurve() {
@@ -15853,13 +16156,13 @@ function dashInit() {
       const c = _dvgCliTop[i];
       if (c) _dvgRenderCliDetailBody(c);
     }
-    function _dvgRenderCliScrubDetail(i) {
+    function _dvgRenderCliScrubDetail(i, animar) {
       const c = _dvgCliTop[i];
       if (!c) return;
       const elVal = document.getElementById('dvgCliScrubVal');
       const elNome = document.getElementById('dvgCliScrubNome');
       const elBadge = document.getElementById('dvgCliScrubBadge');
-      if (elVal) elVal.textContent = fmtBRL(c.fat);
+      if (elVal) { if (animar) _dvgAnimarNumero(elVal, c.fat, fmtBRL); else elVal.textContent = fmtBRL(c.fat); }
       if (elNome) elNome.innerHTML = escapeHtml(c.nome);
       if (elBadge) elBadge.textContent = 'Rank #' + (i+1) + ' de ' + _dvgCliTop.length;
       _dvgUpdateCliScrubDot(i);
@@ -15882,7 +16185,8 @@ function dashInit() {
       range.value = 0;
       range.oninput = (e) => _dvgRenderCliScrubDetail(parseInt(e.target.value,10)||0);
       _dvgRenderCliScrubCurve();
-      _dvgRenderCliScrubDetail(0);
+      _dvgAnimarRevelarEsquerdaDireita(document.getElementById('dvgCliScrubClipRect'), 900);
+      _dvgRenderCliScrubDetail(0, true);
     }
     let _dvgClientesArr = [], _dvgClientesTotal = 0, _dvgClientesDias = 60;
     let _dvgCliClasseFiltro = null;
@@ -15957,8 +16261,8 @@ function dashInit() {
         ['A','B','C'].forEach(k => _dvgAnimarNumero(document.getElementById('dvgAbcN'+k), _dvgResumoAbc[k].n, v => Math.round(v).toLocaleString('pt-BR') + ' clientes'));
       }
 
-      // Curva ABC (SVG suave com zonas A/B/C)
-      _dvgRenderAbcCurve(arr);
+      // Distribuição ABC por faturamento (donut, mesmo padrão do donut de Fábricas)
+      _dvgRenderAbcDonut(_dvgResumoAbc);
 
       // Top clientes (scrubber, maior -> menor, com detalhamento por fábrica/pedidos/produtos)
       const topN = arr.slice(0, 20);
@@ -15998,6 +16302,9 @@ function dashInit() {
       } catch (e) { /* getClientesVisiveis/getPedidos indisponíveis neste contexto */ }
       _dvgCliTop = topN.map(c => ({ ...c, porFab: detFab.get(c.ci) || new Map(), ultimos: (detPed.get(c.ci) || []).slice(0,3), porProd: detProd.get(c.ci) || new Map() }));
       _dvgRenderCliScrub();
+
+      // Rank de Devolução por Cliente (Faturamento x Devolução, mesmos filtros do topo)
+      _dvgRenderRankDevolucao(arr);
 
       // Risco (cartão vermelho/laranja da marca, mesmo dado e mesmo input #diasRisco)
       const dias = parseInt(document.getElementById('diasRisco').value,10)||60;
@@ -16063,42 +16370,44 @@ function dashInit() {
 
       document.getElementById('fabFicha').innerHTML = `
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          ${kpiCard('Faturamento', fmtBRL(fat), 'brand', `${n} pedidos`, null, 0, {id:'fabKpiFat', fmt:fmtBRL})}
-          ${kpiCard('Volume', fmtNum(vol), 'good', 'unidades líquidas', null, 1, {id:'fabKpiVol', fmt:fmtNum})}
+          ${kpiCard('Faturamento', _dvgFmtBRLAbrev(fat), 'brand', `${n} pedidos`, null, 0, {id:'fabKpiFat', fmt:_dvgFmtBRLAbrev}, fmtBRL(fat))}
+          ${kpiCard('Volume', _dvgFmtAbrev(vol), 'good', 'unidades líquidas', null, 1, {id:'fabKpiVol', fmt:_dvgFmtAbrev}, fmtNum(vol) + ' cx')}
           ${kpiCard('% do total', fmtPct(part), 'brand', 'da Compartilhar no período', null, 2, {id:'fabKpiPart', fmt:fmtPct})}
           ${kpiCard('Clientes', cli.toLocaleString('pt-BR'), 'good', 'ativos no período', null, 3, {id:'fabKpiCli', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
-          ${kpiCard('Ticket médio', fmtBRL(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:fmtBRL})}
+          ${kpiCard('Ticket médio', _dvgFmtBRLAbrev(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:_dvgFmtBRLAbrev}, fmtBRL(ticket))}
           ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${fmtBRL(metaF)}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null)}
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
           <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">Evolução Mensal</h3>
             <div style="height:240px;"><canvas id="fabMensal"></canvas></div>
           </div>
-          <div class="card p-4"><h3 class="font-semibold text-[15px] mb-2">Distribuição por Vendedor</h3>
+          <div class="d-card"><h3 class="font-semibold text-[15px] mb-2">Distribuição por Vendedor</h3>
             <div id="fabVendList"></div>
           </div>
         </div>
-        <div class="card p-4 mt-4">
+        <div class="d-card mt-4">
           <h3 class="font-semibold text-[15px] mb-2">Top 10 clientes de ${escapeHtml(FAB[fi])}</h3>
+          <div class="scroll-x">
           <table>
             <thead><tr><th>#</th><th>Cliente</th><th class="num">Faturamento</th><th class="num">Pedidos</th><th class="num">% da fábrica</th></tr></thead>
             <tbody>${topC.map((c,i)=>`<tr><td class="text-ink-400">${i+1}</td><td>${escapeHtml(c.nome)}</td><td class="num font-semibold">${fmtBRL(c.fat)}</td><td class="num">${c.n}</td><td class="num">${fat?fmtPct(c.fat/fat):'—'}</td></tr>`).join('')}</tbody>
           </table>
+          </div>
         </div>
-        <div class="card p-4 mt-4">
+        <div class="d-card mt-4">
           <h3 class="font-semibold text-[15px] mb-2">SKUs (Top 10)</h3>
           <p class="text-[13px] text-ink-600 dark:text-ink-400">— A planilha atual não traz código nem descrição de SKU. Esta visão fica reservada para quando o ERP exportar a coluna SKU/Produto.</p>
         </div>
       `;
-      _dvgAnimarNumero(document.getElementById('fabKpiFat'), fat, fmtBRL);
-      _dvgAnimarNumero(document.getElementById('fabKpiVol'), vol, fmtNum);
+      _dvgAnimarNumero(document.getElementById('fabKpiFat'), fat, _dvgFmtBRLAbrev);
+      _dvgAnimarNumero(document.getElementById('fabKpiVol'), vol, _dvgFmtAbrev);
       _dvgAnimarNumero(document.getElementById('fabKpiPart'), part, fmtPct);
       _dvgAnimarNumero(document.getElementById('fabKpiCli'), cli, v => Math.round(v).toLocaleString('pt-BR'));
-      _dvgAnimarNumero(document.getElementById('fabKpiTicket'), ticket, fmtBRL);
+      _dvgAnimarNumero(document.getElementById('fabKpiTicket'), ticket, _dvgFmtBRLAbrev);
       if (atinge != null) _dvgAnimarNumero(document.getElementById('fabKpiMeta'), atinge, fmtPct);
       // Mensal (linha com brilho, mesmo padrão do drill-down de Vendedores)
       window._dashRegChart(document.getElementById('fabMensal'), {
-        type:'line', data:{ labels:monthLabels, datasets:[{ data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.15)', fill:true, tension:.35, pointRadius:0, borderWidth:2.5 }] },
+        type:'line', data:{ labels:monthLabels, datasets:[{ data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.15)', fill:true, tension:.35, pointRadius:2.5, pointBackgroundColor:'#4f7fe0', pointBorderColor:'#4f7fe0', pointHoverRadius:6, pointHoverBackgroundColor:'#a9c2f5', pointHoverBorderColor:'#fff', pointHoverBorderWidth:2, borderWidth:2.5 }] },
         options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false }),
         plugins: [{
           id: 'dvgFabLineGlow',

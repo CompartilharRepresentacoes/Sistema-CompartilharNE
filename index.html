@@ -14865,6 +14865,17 @@ function _dashConstruirDadosAoVivo() {
   var STATUS = statusValidos.slice();
   function idxStatus(status) { var i = STATUS.indexOf(status); return i >= 0 ? i : 0; }
 
+  var produtosPesoMap = {};
+  ((typeof getProdutos === 'function') ? getProdutos() : []).forEach(function (pr) {
+    produtosPesoMap[pr.id] = parseFloat(String(pr.peso).replace(',', '.')) || 0;
+  });
+  function _dashPesoItens(itens, campoQtd) {
+    return (itens || []).reduce(function (s, it) {
+      var pesoUnit = produtosPesoMap[it.prodId] || 0;
+      return s + pesoUnit * (Number(it[campoQtd]) || 0);
+    }, 0);
+  }
+
   var PED = [];
   pedidosBase.forEach(function (pedido) {
     var cIdx = idxCliente(pedido.clienteId, pedido.clienteNome);
@@ -14875,15 +14886,17 @@ function _dashConstruirDadosAoVivo() {
     if ((pedido.status === 'Faturado' || pedido.status === 'Faturado Parcial') && faturasAtivas.length) {
       faturasAtivas.forEach(function (fat) {
         var vol = (fat.itens || []).reduce(function (s, it) { return s + (Number(it.qtd) || 0); }, 0);
+        var peso = _dashPesoItens(fat.itens, 'qtd');
         var data = (fat.data || pedido.data || '').slice(0, 10);
         if (!data) return;
-        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx]);
+        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx, peso]);
       });
     } else {
       var volPed = (pedido.itens || []).reduce(function (s, it) { return s + (Number(it.quantidade) || 0); }, 0);
+      var pesoPed = _dashPesoItens(pedido.itens, 'quantidade');
       var dataPed = (pedido.data || '').slice(0, 10);
       if (!dataPed) return;
-      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx]);
+      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx, pesoPed]);
     }
   });
 
@@ -15170,11 +15183,11 @@ function dashInit() {
 
     // =============== KPIs ===============
     function kpis(peds) {
-      let fat=0, vol=0, n=0;
+      let fat=0, vol=0, n=0, pesoKg=0;
       const cliSet = new Set();
       const cliFabs = new Map();
       for (const p of peds) {
-        fat += p[5]; vol += p[4]; n++;
+        fat += p[5]; vol += p[4]; n++; pesoKg += (p[7]||0);
         cliSet.add(p[1]);
         let s = cliFabs.get(p[1]); if (!s) { s = new Set(); cliFabs.set(p[1], s); }
         s.add(p[2]);
@@ -15185,7 +15198,7 @@ function dashInit() {
       // carteira = clientes não inativos
       const carteira = CLI_INATIVO.filter(x => !x).length;
       const pos = carteira ? ativos/carteira : 0;
-      return { fat, vol, ticket, ativos, mix, pos, nPedidos: n, carteira };
+      return { fat, vol, pesoKg, ticket, ativos, mix, pos, nPedidos: n, carteira };
     }
 
     // =============== HOME ===============
@@ -15598,7 +15611,7 @@ function dashInit() {
         const _dvgTrendHtml = _dvgVarFat != null ? `<div class="dvg-hero-trend ${_dvgVarFat>=0?'up':'down'}">${_dvgVarFat>=0?'▲':'▼'} ${(Math.abs(_dvgVarFat)*100).toFixed(1).replace('.',',')}% vs período anterior</div>` : '';
         const _dvgPedsAnt = _dvgPeriodoAnteriorPeds();
         const _dvgKAnt = _dvgPedsAnt.length ? kpis(_dvgPedsAnt) : null;
-        const _dvgTrendVol = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.vol, _dvgKAnt.vol)) : '';
+        const _dvgTrendVol = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.pesoKg, _dvgKAnt.pesoKg)) : '';
         const _dvgTrendPos = _dvgKAnt ? _dvgTrendPPHtml((k.pos - _dvgKAnt.pos) * 100) : '';
         const _dvgTrendTicket = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.ticket, _dvgKAnt.ticket)) : '';
         const _dvgTrendCli = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.ativos, _dvgKAnt.ativos)) : '';
@@ -15613,11 +15626,10 @@ function dashInit() {
             ${_dvgTrendHtml}
             <div class="dvg-hero-pills">
               <span>${k.nPedidos.toLocaleString('pt-BR')} pedidos</span>
-              <span>${(k.pos*100).toFixed(1).replace('.',',')}% da carteira ativa</span>
             </div>
             ${_dvgSparkHtml ? '<div class="dvg-hero-spark-wrap">'+_dvgSparkHtml+'</div>' : ''}
           </div>
-          <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66"><div class="dvg-kpi-lbl">VOLUME</div><div class="dvg-kpi-val" id="dvgKpiVol">0</div><div class="dvg-kpi-val-exact" id="dvgKpiVolExact"></div><div class="dvg-kpi-sub">unidades líquidas (caixas)</div>${_dvgTrendVol}</div>
+          <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66"><div class="dvg-kpi-lbl">VOLUME</div><div class="dvg-kpi-val" id="dvgKpiVol">0 kg</div><div class="dvg-kpi-val-exact" id="dvgKpiVolExact"></div><div class="dvg-kpi-sub">${fmtNum(k.vol)} cx no período</div>${_dvgTrendVol}</div>
           <div class="dvg-kpi" style="border-bottom:3px solid #3d5aa8"><div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div><div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} ativos</div>${_dvgTrendPos}</div>
           <div class="dvg-kpi" style="border-bottom:3px solid #5b78c9"><div class="dvg-kpi-lbl">TICKET MÉDIO</div><div class="dvg-kpi-val" id="dvgKpiTicket">R$ 0,00</div><div class="dvg-kpi-val-exact" id="dvgKpiTicketExact"></div><div class="dvg-kpi-sub">por pedido</div>${_dvgTrendTicket}</div>
           <div class="dvg-kpi" style="border-bottom:3px solid #7b93d9"><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div class="dvg-kpi-val" id="dvgKpiCli">0</div><div class="dvg-kpi-sub">no período</div>${_dvgTrendCli}</div>
@@ -15625,8 +15637,8 @@ function dashInit() {
         _dvgAnimateHero(k.fat);
         _dvgRenderMetaRing(k.fat);
         document.getElementById('dvgHeroValueExact').textContent = fmtBRL(k.fat) + ' exatos';
-        _dvgAnimarNumero(document.getElementById('dvgKpiVol'), k.vol, _dvgFmtAbrev);
-        document.getElementById('dvgKpiVolExact').textContent = fmtNum(k.vol) + ' cx exatas';
+        _dvgAnimarNumero(document.getElementById('dvgKpiVol'), k.pesoKg, v => _dvgFmtAbrev(v) + ' kg');
+        document.getElementById('dvgKpiVolExact').textContent = k.pesoKg.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg exatos';
         _dvgCountUp(document.getElementById('dvgKpiPos'), k.pos*100, 1, '', '%');
         _dvgAnimarNumero(document.getElementById('dvgKpiTicket'), k.ticket, _dvgFmtBRLAbrev);
         document.getElementById('dvgKpiTicketExact').textContent = fmtBRL(k.ticket) + ' exatos';
