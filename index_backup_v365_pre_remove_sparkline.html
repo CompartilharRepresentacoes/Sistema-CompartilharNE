@@ -1285,6 +1285,8 @@
 .dash-root .dvg-hero-trend{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:10px;width:fit-content}
 .dash-root .dvg-hero-trend.up{background:rgba(99,153,34,.28);color:#c0dd97}
 .dash-root .dvg-hero-trend.down{background:rgba(220,38,38,.28);color:#fca5a5}
+.dash-root .dvg-hero-spark-wrap{margin-top:10px}
+.dash-root .dvg-hero-spark{display:block}
 .dash-root .dvg-kpi-trend{display:inline-flex;align-items:center;gap:2px;font-size:9.5px;font-weight:700;margin-top:3px}
 .dash-root .dvg-kpi-trend.up{color:#15803d}
 .dash-root .dvg-kpi-trend.down{color:#dc2626}
@@ -15569,6 +15571,24 @@ function dashInit() {
         '<circle cx="26" cy="26" r="' + r + '" fill="none" stroke="' + cor + '" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '" transform="rotate(-90 26 26)"/>' +
         '</svg><div class="dvg-metaring-txt"><b>' + (pct*100).toFixed(0) + '%</b><span>da meta</span></div></div>';
     }
+    function _dvgSparklineSvg(valores) {
+      let lastIdx = -1;
+      for (let i=0;i<valores.length;i++) if (valores[i]) lastIdx = i;
+      const arr = valores.slice(0, lastIdx+1);
+      if (arr.length < 2) return '';
+      const w = 130, h = 34, pad = 3;
+      const max = Math.max.apply(null, arr), min = Math.min.apply(null, arr);
+      const range = (max - min) || 1;
+      const stepX = (w - pad*2) / (arr.length - 1);
+      const pts = arr.map(function(v,i){
+        const x = pad + i*stepX;
+        const y = h - pad - ((v - min) / range) * (h - pad*2);
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+      const lastX = pad + (arr.length-1)*stepX;
+      const lastY = h - pad - ((arr[arr.length-1] - min) / range) * (h - pad*2);
+      return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" class="dvg-hero-spark"><polyline points="' + pts + '" fill="none" stroke="#a9c2f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="' + lastX.toFixed(1) + '" cy="' + lastY.toFixed(1) + '" r="2.5" fill="#fff"/></svg>';
+    }
     function _dvgVariacaoFaturamento(fatAtual) {
       const iniAtual = parseDate(state.dtIni), fimAtual = parseDate(state.dtFim);
       const dias = daysBetween(iniAtual, fimAtual) + 1;
@@ -15597,6 +15617,9 @@ function dashInit() {
         const _dvgTrendPos = _dvgKAnt ? _dvgTrendPPHtml((k.pos - _dvgKAnt.pos) * 100) : '';
         const _dvgTrendTicket = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.ticket, _dvgKAnt.ticket)) : '';
         const _dvgTrendCli = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.ativos, _dvgKAnt.ativos)) : '';
+        const _dvgSparkMeses = Array(12).fill(0);
+        for (const p of peds) { const m = parseInt(p[0].slice(5,7),10)-1; _dvgSparkMeses[m] += p[5]; }
+        const _dvgSparkHtml = _dvgSparklineSvg(_dvgSparkMeses);
         kpiEl.innerHTML = `
           <div class="dvg-hero">
             <div class="dvg-hero-lbl">Faturamento do Período</div>
@@ -15606,6 +15629,7 @@ function dashInit() {
             <div class="dvg-hero-pills">
               <span>${k.nPedidos.toLocaleString('pt-BR')} pedidos</span>
             </div>
+            ${_dvgSparkHtml ? '<div class="dvg-hero-spark-wrap">'+_dvgSparkHtml+'</div>' : ''}
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66">
             <div class="dvg-kpi-top"><div class="dvg-kpi-icon" style="color:#1c2f66"><i class="ti ti-package"></i></div>${_dvgTrendVol}</div>
