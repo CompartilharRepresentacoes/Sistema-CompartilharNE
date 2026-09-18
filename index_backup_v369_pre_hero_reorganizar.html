@@ -1271,22 +1271,21 @@
 .dash-root .dvg-greet-txt span{font-weight:400;color:#64748b;font-size:11px;margin-left:8px}
 .dash-root .dvg-kpis{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
 .dash-root .dvg-hero{background:linear-gradient(135deg,#14162c 0%,#272A4A 55%,#40446e 100%);border-radius:16px;padding:22px 26px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 22px rgba(0,0,0,.22)}
-.dash-root .dvg-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .dash-root .dvg-hero-lbl{font-size:13px;opacity:.85;font-weight:600}
-.dash-root .dvg-hero-pill-top{background:rgba(255,255,255,.16);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
-.dash-root .dvg-hero-valrow{display:flex;align-items:baseline;gap:10px;margin-top:6px;flex-wrap:wrap}
-.dash-root .dvg-hero-val{font-weight:800;line-height:1.05;white-space:nowrap;font-size:34px}
+.dash-root .dvg-hero-val{font-weight:800;margin-top:6px;line-height:1.05;white-space:nowrap;font-size:34px}
+.dash-root .dvg-hero-pills{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}
+.dash-root .dvg-hero-pills span{background:rgba(255,255,255,.16);padding:6px 13px;border-radius:20px;font-size:11.5px;font-weight:600}
 .dash-root .dvg-kpi{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 3px 12px rgba(15,23,42,.1)}
 .dash-root .dvg-kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .dash-root .dvg-kpi-icon{width:26px;height:26px;border-radius:8px;background:#eef2fb;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.dash-root .dvg-kpi-lbl{font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:.03em}
-.dash-root .dvg-kpi-val{font-size:19px;font-weight:800;color:#1e293b;margin-top:4px}
-.dash-root .dvg-kpi-sub{font-size:10.5px;color:#94a3b8;margin-top:2px}
+.dash-root .dvg-kpi-lbl{font-size:9.5px;color:#94a3b8;font-weight:700;letter-spacing:.04em}
+.dash-root .dvg-kpi-val{font-size:17px;font-weight:800;color:#1e293b;margin-top:4px}
+.dash-root .dvg-kpi-sub{font-size:9.5px;color:#94a3b8;margin-top:2px}
 .dash-root .dvg-hero-val-exact{font-size:11.5px;opacity:.55;margin-top:2px}
-.dash-root .dvg-hero-trend{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.dash-root .dvg-hero-trend{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:10px;width:fit-content}
 .dash-root .dvg-hero-trend.up{background:rgba(99,153,34,.28);color:#c0dd97}
 .dash-root .dvg-hero-trend.down{background:rgba(220,38,38,.28);color:#fca5a5}
-.dash-root .dvg-kpi-trend{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:700;margin-top:3px}
+.dash-root .dvg-kpi-trend{display:inline-flex;align-items:center;gap:2px;font-size:9.5px;font-weight:700;margin-top:3px}
 .dash-root .dvg-kpi-trend.up{color:#15803d}
 .dash-root .dvg-kpi-trend.down{color:#dc2626}
 .dash-root .dvg-metaring{display:flex;align-items:center;gap:8px}
@@ -15595,15 +15594,13 @@ function dashInit() {
         const _dvgTrendCli = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.ativos, _dvgKAnt.ativos)) : '';
         kpiEl.innerHTML = `
           <div class="dvg-hero">
-            <div class="dvg-hero-top">
-              <div class="dvg-hero-lbl">Faturamento do Período</div>
-              <div class="dvg-hero-pill-top">${k.nPedidos.toLocaleString('pt-BR')} pedidos</div>
-            </div>
-            <div class="dvg-hero-valrow">
-              <div class="dvg-hero-val" id="dvgHeroValue">R$ 0,00</div>
-              ${_dvgTrendHtml}
-            </div>
+            <div class="dvg-hero-lbl">Faturamento do Período</div>
+            <div class="dvg-hero-val" id="dvgHeroValue">R$ 0,00</div>
             <div class="dvg-hero-val-exact" id="dvgHeroValueExact"></div>
+            ${_dvgTrendHtml}
+            <div class="dvg-hero-pills">
+              <span>${k.nPedidos.toLocaleString('pt-BR')} pedidos</span>
+            </div>
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66">
             <div class="dvg-kpi-top"><div class="dvg-kpi-icon" style="color:#1c2f66"><i class="ti ti-package"></i></div>${_dvgTrendVol}</div>
