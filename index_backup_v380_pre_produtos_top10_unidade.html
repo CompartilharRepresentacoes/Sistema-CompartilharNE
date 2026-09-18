@@ -16348,7 +16348,6 @@ function dashInit() {
       const agProd = new Map();
       try {
         const fabIdReal = FAB_ID[fi];
-        const produtosPorId = new Map((getProdutos() || []).map(pr => [pr.id, pr]));
         for (const pedidoReal of getPedidos()) {
           const mesmoFornecedor = fabIdReal != null ? pedidoReal.fornecedorId === fabIdReal : (pedidoReal.fornecedorNome || '') === FAB[fi];
           if (!mesmoFornecedor) continue;
@@ -16357,16 +16356,12 @@ function dashInit() {
           (pedidoReal.itens || []).forEach(it => {
             const chave = it.prodId != null ? it.prodId : (it.prodNome || it.prodCodigo);
             let acc = agProd.get(chave);
-            if (!acc) {
-              const prodCad = it.prodId != null ? produtosPorId.get(it.prodId) : null;
-              acc = { nome: it.prodNome || it.prodCodigo || 'Produto', qtd: 0, valor: 0, unidade: (prodCad && prodCad.unidade) ? String(prodCad.unidade) : '' };
-              agProd.set(chave, acc);
-            }
+            if (!acc) { acc = { nome: it.prodNome || it.prodCodigo || 'Produto', qtd: 0, valor: 0 }; agProd.set(chave, acc); }
             acc.qtd += Number(it.quantidade) || 0;
             acc.valor += Number(it.valorTotal) || 0;
           });
         }
-      } catch (e) { /* getPedidos/getProdutos indisponível neste contexto (ex.: modo histórico) */ }
+      } catch (e) { /* getPedidos indisponível neste contexto (ex.: modo histórico) */ }
       const topProd = [...agProd.values()].sort((a,b)=>b.valor-a.valor).slice(0,10);
       // por vendedor
       const agV = new Map();
@@ -16407,7 +16402,7 @@ function dashInit() {
           <div class="scroll-x">
           <table>
             <thead><tr><th>#</th><th>Produto</th><th class="num">Qtd</th><th class="num">Valor</th><th class="num">% da fábrica</th></tr></thead>
-            <tbody>${topProd.length ? topProd.map((p,i)=>`<tr><td class="text-ink-400">${i+1}</td><td>${escapeHtml(p.nome)}</td><td class="num">${fmtNum(p.qtd)}${p.unidade ? ' ' + escapeHtml(p.unidade) : ''}</td><td class="num font-semibold">${fmtBRL(p.valor)}</td><td class="num">${fat?fmtPct(p.valor/fat):'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="text-center text-ink-400">Nenhum produto no período.</td></tr>'}</tbody>
+            <tbody>${topProd.length ? topProd.map((p,i)=>`<tr><td class="text-ink-400">${i+1}</td><td>${escapeHtml(p.nome)}</td><td class="num">${fmtNum(p.qtd)}</td><td class="num font-semibold">${fmtBRL(p.valor)}</td><td class="num">${fat?fmtPct(p.valor/fat):'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="text-center text-ink-400">Nenhum produto no período.</td></tr>'}</tbody>
           </table>
           </div>
         </div>
