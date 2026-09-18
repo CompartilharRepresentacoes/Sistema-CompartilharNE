@@ -7340,7 +7340,7 @@
       <span id="pinf-revisao-resumo" style="font-size:11.5px;color:#64748b"></span>
       <div style="display:flex;gap:10px">
         <button onclick="_pinfFecharRevisao()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
-        <button id="pinf-btn-concluir" onclick="_pinfConcluirEAnexar()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">Concluir e anexar</button>
+        <button onclick="_pinfConcluirEAnexar()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">Concluir e anexar</button>
       </div>
     </div>
   </div>
@@ -19258,7 +19258,6 @@ function _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos) 
   var gruposPorPedido = {};
   var ordemPedidos = [];
   var naoIdentificados = [];
-  var jaImportadas = [];
   var usadosPdf = [];
 
   xmlLidos.forEach(function (item) {
@@ -19267,12 +19266,6 @@ function _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos) 
     if (!escolha.pedido) {
       var pdfParNaoIdent = _pinfLocalizarPdfParaNf(item.dados, pdfFiles, usadosPdf);
       naoIdentificados.push({ nome: item.file.name, nNF: item.dados.nNF, clienteNome: item.dados.destNome || item.dados.emitNome || '', motivo: escolha.motivo || 'Pedido correspondente não identificado automaticamente.', pdfFile: pdfParNaoIdent });
-      return;
-    }
-    var duplicata = _pfatNumDuplicataJaExiste(escolha.pedido.clienteId, escolha.pedido.fornecedorId, item.dados.nNF);
-    if (duplicata) {
-      var pdfParDup = _pinfLocalizarPdfParaNf(item.dados, pdfFiles, usadosPdf);
-      jaImportadas.push({ nome: item.file.name, nNF: item.dados.nNF, clienteNome: _cpSemColchetes(escolha.pedido.clienteNome || ''), pdfFile: pdfParDup, pedidoNum: duplicata.pedido.numPedidoCliente || duplicata.pedido.lancamento || '' });
       return;
     }
     var pid = escolha.pedido.id;
@@ -19292,14 +19285,12 @@ function _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos) 
 
   _pinfResultados = resultados;
   _pinfNaoIdentificados = naoIdentificados;
-  _pinfJaImportadas = jaImportadas;
   _pinfPdfsAvulsos = pdfsAvulsos;
 }
 
 // -- Passo 2: revisao/conferencia --
 var _pinfResultados = [];
 var _pinfNaoIdentificados = [];
-var _pinfJaImportadas = [];
 var _pinfPdfsAvulsos = [];
 function _pinfAbrirRevisao() {
   var okCount = _pinfResultados.filter(function (r) { return r.status === 'ok'; }).length;
@@ -19307,8 +19298,7 @@ function _pinfAbrirRevisao() {
   var sub = document.getElementById('pinf-revisao-subtitulo');
   if (sub) {
     sub.textContent = _pinfResultados.length + ' pedido(s) reconhecido(s) — ' + okCount + ' sem divergência, ' + divCount + ' com divergência.'
-      + (_pinfNaoIdentificados.length ? (' ' + _pinfNaoIdentificados.length + ' NF(s) não identificada(s).') : '')
-      + (_pinfJaImportadas.length ? (' ' + _pinfJaImportadas.length + ' NF(s) já importada(s) anteriormente (ignorada(s)).') : '');
+      + (_pinfNaoIdentificados.length ? (' ' + _pinfNaoIdentificados.length + ' NF(s) não identificada(s).') : '');
   }
   _pinfRenderRevisao();
   var modal = document.getElementById('modal-pinf-revisao');
@@ -19381,17 +19371,6 @@ function _pinfRenderRevisao() {
         }).join('')
       + '</div>';
   }
-  if (_pinfJaImportadas.length) {
-    extras += '<div style="margin-top:6px;padding:10px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:11px;color:#1e40af">'
-      + '<b>NF(s) já importada(s) anteriormente</b> (já existe uma fatura com este número para este cliente/fábrica — não foi importada de novo, para não duplicar o faturamento):'
-      + _pinfJaImportadas.map(function (n, ni) {
-          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #bfdbfe">'
-            + '<div>' + (n.nNF ? ('<b>NF ' + _pedEsc(n.nNF) + '</b>') : ('<b>' + _pedEsc(n.nome) + '</b>')) + (n.clienteNome ? (' — ' + _pedEsc(n.clienteNome)) : '') + (n.pedidoNum ? ('<div style="font-size:10px;color:#1e40af;margin-top:1px">já faturada no Pedido nº ' + _pedEsc(String(n.pedidoNum)) + '</div>') : '') + '</div>'
-            + (n.pdfFile ? ('<button type="button" onclick="_pinfVerPdfJaImportada(' + ni + ')" style="background:#fff;border:1px solid #bfdbfe;color:#1e40af;border-radius:6px;padding:4px 10px;font-size:10.5px;cursor:pointer;white-space:nowrap;flex-shrink:0"><i class="ti ti-file-type-pdf" style="color:#dc2626;margin-right:3px"></i>Ver PDF</button>') : '')
-            + '</div>';
-        }).join('')
-      + '</div>';
-  }
   if (_pinfPdfsAvulsos.length) {
     extras += '<div style="margin-top:6px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:11px;color:#475569">'
       + '<b>PDF(s) sem XML correspondente no lote</b> (não vinculados automaticamente): ' + _pinfPdfsAvulsos.map(function (f) { return _pedEsc(f.name); }).join(', ')
@@ -19421,12 +19400,6 @@ function _pinfVerPdfNaoIdentificado(ni) {
   window.open(url, '_blank');
   setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
 }
-function _pinfVerPdfJaImportada(ni) {
-  var n = _pinfJaImportadas[ni]; if (!n || !n.pdfFile) return;
-  var url = URL.createObjectURL(n.pdfFile);
-  window.open(url, '_blank');
-  setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-}
 function _pinfAprovarDivergencia(ri) { var r = _pinfResultados[ri]; if (!r) return; r.aprovadoManual = true; _pinfRenderRevisao(); }
 function _pinfDesfazerAprovacao(ri) { var r = _pinfResultados[ri]; if (!r) return; r.aprovadoManual = false; _pinfRenderRevisao(); }
 
@@ -19436,12 +19409,9 @@ function _pinfDesfazerAprovacao(ri) { var r = _pinfResultados[ri]; if (!r) retur
 // processados agora (o usuario pode reabrir o Importar > XML/NF e selecionar os mesmos arquivos
 // de novo depois de resolver a divergencia).
 function _pinfConcluirEAnexar() {
-  var btnConcluir = document.getElementById('pinf-btn-concluir');
-  if (btnConcluir && btnConcluir.disabled) return; // ja esta processando -- ignora cliques repetidos
   var prontos = _pinfResultados.filter(function (r) { return r.status === 'ok' || r.aprovadoManual; });
   if (!prontos.length) { alert('Nenhum pedido pronto para concluir (sem divergência ou aprovado manualmente).'); return; }
 
-  if (btnConcluir) { btnConcluir.disabled = true; btnConcluir.style.cursor = 'not-allowed'; btnConcluir.style.opacity = '0.6'; }
   var fila = [];
   prontos.forEach(function (r) {
     r.nfs.forEach(function (nf) {
@@ -19451,7 +19421,6 @@ function _pinfConcluirEAnexar() {
   });
   var totalPedidos = prontos.length;
   _pinfProcessarFilaAnexos(fila, 0, { ok: 0, avisos: [] }, function (resumo) {
-    if (btnConcluir) { btnConcluir.disabled = false; btnConcluir.style.cursor = 'pointer'; btnConcluir.style.opacity = '1'; }
     _pinfFecharRevisao();
     if (typeof renderPedidoList === 'function') renderPedidoList();
     alert(totalPedidos + ' pedido(s) concluído(s), ' + resumo.ok + ' arquivo(s) anexado(s).' + (resumo.avisos.length ? (' Avisos: ' + resumo.avisos.join(' ')) : ''));
@@ -19469,7 +19438,7 @@ function _pinfProcessarFilaAnexos(fila, idx, resumo, done) {
   _pedSalvarAnexoAoPedido(item.pedidoId, item.file, item.tipo, {
     onWarn: function (txt) { resumo.avisos.push(txt); },
     onCnpjErro: function (txt) { resumo.avisos.push(txt); proximo(); },
-    onXmlTexto: function (xmlTexto) { var r = _pfatCriarFaturaAutoXml(item.pedidoId, xmlTexto, item.file.name); if (r && !r.ok) resumo.avisos.push(r.motivo); },
+    onXmlTexto: function (xmlTexto) { _pfatCriarFaturaAutoXml(item.pedidoId, xmlTexto, item.file.name); },
     onSaved: function () { resumo.ok++; proximo(); }
   });
 }
@@ -19732,7 +19701,7 @@ function _pedProcessarArquivosAnexo(files, idx, resumo) {
   _pedSalvarAnexoAoPedido(_pedAnexoPedidoId, file, tipo, {
     onWarn:     function(txt) { resumo.avisos.push('"' + file.name + '": ' + txt); },
     onCnpjErro: function(txt) { resumo.avisos.push('"' + file.name + '": ' + txt); proximo(); },
-    onXmlTexto: function(xmlTexto) { var r = _pfatCriarFaturaAutoXml(_pedAnexoPedidoId, xmlTexto, file.name); if (r && !r.ok) resumo.avisos.push('"' + file.name + '": ' + r.motivo); },
+    onXmlTexto: function(xmlTexto) { _pfatCriarFaturaAutoXml(_pedAnexoPedidoId, xmlTexto, file.name); },
     onSaved:    function() { resumo.ok++; proximo(); }
   });
 }
@@ -20025,8 +19994,6 @@ function pedSalvarFatura() {
 
   if (!numDup) { if (msg) msg.textContent = 'Informe o Número da Duplicata.'; return; }
   if (!dataFat) { if (msg) msg.textContent = 'Informe a Data de Faturamento.'; return; }
-  var duplicataManual = _pfatNumDuplicataJaExiste(pedido.clienteId, pedido.fornecedorId, numDup);
-  if (duplicataManual) { if (msg) msg.textContent = 'Já existe uma fatura com o número "' + numDup + '" para este cliente e fábrica (Pedido nº ' + (duplicataManual.pedido.numPedidoCliente || duplicataManual.pedido.lancamento || '') + ').'; return; }
 
   var itensFatura = [];
   var rows = document.querySelectorAll('#pfat-itens-tbody tr[data-prodid]');
@@ -20178,42 +20145,13 @@ function _pfatConverterItemXmlParaUnidades(match, produto) {
     precoFat: qtdEmUnidades > 0 ? (valorItemXml / qtdEmUnidades) : match.precoUnit
   };
 }
-function _pfatNormNumNF(v) {
-  return String(v || '').trim().replace(/^0+(?=\d)/, '');
-}
-// Retorna { pedido, fatura } do PRIMEIRO pedido do MESMO cliente+fornecedor que ja tem uma
-// fatura ativa (nao cancelada) com este numero de NF, ou null se nao existir. Varre TODOS os
-// pedidos do cliente+fornecedor (nao so o pedido atual), porque a mesma NF nunca pode
-// aparecer 2x faturando o mesmo cliente na mesma fabrica, esteja ela em qual pedido estiver.
-function _pfatNumDuplicataJaExiste(clienteId, fornecedorId, numDup) {
-  var alvo = _pfatNormNumNF(numDup);
-  if (!alvo) return null;
-  var pedidos = getPedidos();
-  for (var i = 0; i < pedidos.length; i++) {
-    var p = pedidos[i];
-    if (String(p.clienteId || '') !== String(clienteId || '')) continue;
-    if (String(p.fornecedorId || '') !== String(fornecedorId || '')) continue;
-    var faturas = p.faturas || [];
-    for (var j = 0; j < faturas.length; j++) {
-      var f = faturas[j];
-      if (f.status === 'Cancelado') continue;
-      if (_pfatNormNumNF(f.numDuplicata) === alvo) return { pedido: p, fatura: f };
-    }
-  }
-  return null;
-}
 function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
   var dados = _pfatExtrairDadosXmlPedido(xmlText);
-  if (!dados) return { ok: false, motivo: 'XML inválido.' };
+  if (!dados) return;
   var data = getPedidos();
   var idx = data.findIndex(function(x){ return x.id === pedidoId; });
-  if (idx < 0) return { ok: false, motivo: 'Pedido não encontrado.' };
+  if (idx < 0) return;
   var pedido = data[idx];
-  var numNfCandidata = dados.nNF || nomeArquivo;
-  var duplicata = _pfatNumDuplicataJaExiste(pedido.clienteId, pedido.fornecedorId, numNfCandidata);
-  if (duplicata) {
-    return { ok: false, motivo: 'NF ' + (dados.nNF || numNfCandidata) + ' já foi faturada anteriormente para este cliente/fábrica (Pedido nº ' + (duplicata.pedido.numPedidoCliente || duplicata.pedido.lancamento || '') + ') — não foi lançada de novo.' };
-  }
   var produtos = getProdutos();
   var itensFatura = [];
   (pedido.itens || []).forEach(function(it){
@@ -20235,7 +20173,6 @@ function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
   _pfatAtualizarStatusPedido(pedido);
   setPedidos(data);
   if (_pfatPedidoId === pedidoId) _pfatRender();
-  return { ok: true };
 }
 
 // ── Vendas Simples NFs: uma linha por Fatura/Duplicata lancada (NF emitida) ──
