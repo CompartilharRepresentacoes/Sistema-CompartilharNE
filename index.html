@@ -15324,7 +15324,7 @@ function dashInit() {
       const m = _dvgMesesData[i];
       inner.innerHTML =
         '<div>Faturamento<b>' + fmtBRL(m.fat) + '</b></div>' +
-        '<div>Volume<b>' + fmtNum(m.vol) + ' cx</b></div>' +
+        '<div>Volume<b>' + fmtNum(m.peso) + ' kg</b></div>' +
         '<div>Pedidos<b>' + m.n.toLocaleString('pt-BR') + '</b></div>' +
         '<div>Ticket médio<b>' + fmtBRL(m.n ? m.fat/m.n : 0) + '</b></div>';
       det.classList.add('open');
@@ -15635,11 +15635,12 @@ function dashInit() {
       // Faturamento mensal
       const meses = Array(12).fill(0);
       const mesesVol = Array(12).fill(0);
+      const mesesPeso = Array(12).fill(0);
       const mesesN = Array(12).fill(0);
-      for (const p of peds) { const m = parseInt(p[0].slice(5,7),10)-1; meses[m]+=p[5]; mesesVol[m]+=p[4]; mesesN[m]++; }
+      for (const p of peds) { const m = parseInt(p[0].slice(5,7),10)-1; meses[m]+=p[5]; mesesVol[m]+=p[4]; mesesPeso[m]+=(p[7]||0); mesesN[m]++; }
       const metaTotal = sumMetas();
       _dvgMetaMensal = metaTotal ? metaTotal/12 : null;
-      _dvgMesesData = meses.map((fat,i)=>({ fat, vol: mesesVol[i], n: mesesN[i] }));
+      _dvgMesesData = meses.map((fat,i)=>({ fat, vol: mesesVol[i], peso: mesesPeso[i], n: mesesN[i] }));
       _dvgRenderBars();
 
       // Fábricas (donut) — mantém a proporção real de todas as fábricas, mesmo com uma fábrica selecionada no filtro

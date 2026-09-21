@@ -1269,23 +1269,24 @@
 .dash-root .dvg-greet{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px}
 .dash-root .dvg-greet-txt{font-size:14px;font-weight:700;color:#1e293b}
 .dash-root .dvg-greet-txt span{font-weight:400;color:#64748b;font-size:11px;margin-left:8px}
-.dash-root .dvg-kpis{display:grid;grid-template-columns:1.9fr 1fr 1fr;grid-template-rows:auto auto;gap:12px;margin-bottom:14px}
-.dash-root .dvg-hero{grid-row:span 2;background:linear-gradient(135deg,#14162c 0%,#272A4A 55%,#40446e 100%);border-radius:16px;padding:22px 26px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 22px rgba(0,0,0,.22)}
+.dash-root .dvg-kpis{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.dash-root .dvg-hero{background:linear-gradient(135deg,#14162c 0%,#272A4A 55%,#40446e 100%);border-radius:16px;padding:22px 26px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 22px rgba(0,0,0,.22)}
+.dash-root .dvg-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .dash-root .dvg-hero-lbl{font-size:13px;opacity:.85;font-weight:600}
-.dash-root .dvg-hero-val{font-weight:800;margin-top:6px;line-height:1.05;white-space:nowrap;font-size:34px}
-.dash-root .dvg-hero-pills{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}
-.dash-root .dvg-hero-pills span{background:rgba(255,255,255,.16);padding:6px 13px;border-radius:20px;font-size:11.5px;font-weight:600}
+.dash-root .dvg-hero-pill-top{background:rgba(255,255,255,.16);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.dash-root .dvg-hero-valrow{display:flex;align-items:baseline;gap:10px;margin-top:6px;flex-wrap:wrap}
+.dash-root .dvg-hero-val{font-weight:800;line-height:1.05;white-space:nowrap;font-size:34px}
 .dash-root .dvg-kpi{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 3px 12px rgba(15,23,42,.1)}
-.dash-root .dvg-kpi-lbl{font-size:9.5px;color:#94a3b8;font-weight:700;letter-spacing:.04em}
-.dash-root .dvg-kpi-val{font-size:17px;font-weight:800;color:#1e293b;margin-top:4px}
-.dash-root .dvg-kpi-sub{font-size:9.5px;color:#94a3b8;margin-top:2px}
+.dash-root .dvg-kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.dash-root .dvg-kpi-icon{width:26px;height:26px;border-radius:8px;background:#eef2fb;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.dash-root .dvg-kpi-lbl{font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:.03em}
+.dash-root .dvg-kpi-val{font-size:19px;font-weight:800;color:#1e293b;margin-top:4px}
+.dash-root .dvg-kpi-sub{font-size:10.5px;color:#94a3b8;margin-top:2px}
 .dash-root .dvg-hero-val-exact{font-size:11.5px;opacity:.55;margin-top:2px}
-.dash-root .dvg-hero-trend{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:10px;width:fit-content}
+.dash-root .dvg-hero-trend{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
 .dash-root .dvg-hero-trend.up{background:rgba(99,153,34,.28);color:#c0dd97}
 .dash-root .dvg-hero-trend.down{background:rgba(220,38,38,.28);color:#fca5a5}
-.dash-root .dvg-hero-spark-wrap{margin-top:10px}
-.dash-root .dvg-hero-spark{display:block}
-.dash-root .dvg-kpi-trend{display:inline-flex;align-items:center;gap:2px;font-size:9.5px;font-weight:700;margin-top:3px}
+.dash-root .dvg-kpi-trend{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:700;margin-top:3px}
 .dash-root .dvg-kpi-trend.up{color:#15803d}
 .dash-root .dvg-kpi-trend.down{color:#dc2626}
 .dash-root .dvg-metaring{display:flex;align-items:center;gap:8px}
@@ -1293,14 +1294,10 @@
 .dash-root .dvg-metaring-txt b{font-size:14px;color:#1e293b}
 .dash-root .dvg-metaring-txt span{font-size:9.5px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
 .dash-root .dvg-skel{background:linear-gradient(90deg,#eef1f6 25%,#e2e8f0 37%,#eef1f6 63%);background-size:400% 100%;animation:dvgSkelShimmer 1.4s ease infinite;border-radius:14px;min-height:64px}
-.dash-root .dvg-skel-hero{min-height:150px;grid-row:span 2}
+.dash-root .dvg-skel-hero{min-height:150px}
 .dash-root .dvg-skel-row{height:14px;border-radius:7px;margin-bottom:14px;background:linear-gradient(90deg,#eef1f6 25%,#e2e8f0 37%,#eef1f6 63%);background-size:400% 100%;animation:dvgSkelShimmer 1.4s ease infinite}
 @keyframes dvgSkelShimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
 .dash-root .dvg-kpi-val-exact{font-size:9.5px;color:#94a3b8;margin-top:-2px}
-.dash-root .dvg-mixbar{background:#fff;border-radius:14px;padding:13px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(15,23,42,.06)}
-.dash-root .dvg-mixbar-lbl{font-size:12px;font-weight:700;color:#1e293b}
-.dash-root .dvg-mixbar-trk{flex:1;max-width:260px;height:9px;background:#e6ecfb;border-radius:6px;margin-left:16px;overflow:hidden}
-.dash-root .dvg-mixbar-fill{height:100%;background:linear-gradient(90deg,#1e3a8a,#4f7fe0);border-radius:6px;width:0;transition:width 1s ease}
 .dash-root .dvg-charts{display:grid;grid-template-columns:2.4fr 0.85fr;gap:14px;margin-bottom:14px;align-items:start;transition:grid-template-columns .35s ease}
 .dash-root .dvg-charts.dvg-focus-fabrica{grid-template-columns:0.85fr 2.4fr}
 .dash-root .dvg-carddark{background:#101a3d;border-radius:14px;padding:18px 20px;box-shadow:0 4px 16px rgba(15,23,42,.2);transition:opacity .25s ease}
@@ -1501,7 +1498,6 @@
 <section id="tab-home" class="tab-content active">
   <div class="dvg-greet" id="dvgGreet"></div>
   <div class="dvg-kpis" id="kpis"><div class="dvg-skel dvg-skel-hero"></div><div class="dvg-skel"></div><div class="dvg-skel"></div><div class="dvg-skel"></div><div class="dvg-skel"></div></div>
-  <div class="dvg-mixbar"><div class="dvg-mixbar-lbl" id="dvgMixLbl"></div><div class="dvg-mixbar-trk"><div class="dvg-mixbar-fill" id="dvgMixFill"></div></div></div>
   <div class="dvg-charts" id="dvgChartsWrap">
     <div class="dvg-carddark" id="dvgCardMensal">
       <div class="dvg-titrow" id="dvgTitMensal"><div class="dvg-tit">Faturamento Mensal<span class="dvg-tit-hint">Somente Faturado e Faturado Parcial &middot; clique numa barra</span></div><span class="dvg-chev">&#9662;</span></div>
@@ -7344,7 +7340,7 @@
       <span id="pinf-revisao-resumo" style="font-size:11.5px;color:#64748b"></span>
       <div style="display:flex;gap:10px">
         <button onclick="_pinfFecharRevisao()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
-        <button onclick="_pinfConcluirEAnexar()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">Concluir e anexar</button>
+        <button id="pinf-btn-concluir" onclick="_pinfConcluirEAnexar()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">Concluir e anexar</button>
       </div>
     </div>
   </div>
@@ -14832,7 +14828,7 @@ function _dashConstruirDadosAoVivo() {
   var pedidosBase = ((typeof getPedidos === 'function') ? getPedidos() : []) || [];
   var statusValidos = (typeof PED_STATUS !== 'undefined') ? PED_STATUS : ['Pré-Venda','Aguardando Retorno','Enviado','Faturado','Faturado Parcial','Bonificado','Cancelado'];
 
-  var FAB = [], fabIdx = {};
+  var FAB = [], FAB_ID = [], fabIdx = {};
   var _fabOrdemPrioridade = ['quata','granarolo','sao vicente','prieto','bufalissima','villa germania'];
   function _fabNormNome(s) { return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
   var fornecedoresOrdenados = fornecedores.slice().sort(function(a,b){
@@ -14842,10 +14838,10 @@ function _dashConstruirDadosAoVivo() {
     var ib = _fabOrdemPrioridade.indexOf(nb); if (ib < 0) ib = 999;
     return ia - ib;
   });
-  fornecedoresOrdenados.forEach(function (f) { fabIdx[f.id] = FAB.length; FAB.push(f.nome_fantasia || f.codigo || ('Fornecedor ' + f.id)); });
+  fornecedoresOrdenados.forEach(function (f) { fabIdx[f.id] = FAB.length; FAB.push(f.nome_fantasia || f.codigo || ('Fornecedor ' + f.id)); FAB_ID.push(f.id); });
   function idxFabrica(id, nome) {
     if (id != null && Object.prototype.hasOwnProperty.call(fabIdx, id)) return fabIdx[id];
-    var i = FAB.length; if (id != null) fabIdx[id] = i; FAB.push(nome || 'Fornecedor não cadastrado'); return i;
+    var i = FAB.length; if (id != null) fabIdx[id] = i; FAB.push(nome || 'Fornecedor não cadastrado'); FAB_ID.push(id != null ? id : null); return i;
   }
 
   var VEND = [], vendIdx = {};
@@ -14865,6 +14861,17 @@ function _dashConstruirDadosAoVivo() {
   var STATUS = statusValidos.slice();
   function idxStatus(status) { var i = STATUS.indexOf(status); return i >= 0 ? i : 0; }
 
+  var produtosPesoMap = {};
+  ((typeof getProdutos === 'function') ? getProdutos() : []).forEach(function (pr) {
+    produtosPesoMap[pr.id] = parseFloat(String(pr.peso).replace(',', '.')) || 0;
+  });
+  function _dashPesoItens(itens, campoQtd) {
+    return (itens || []).reduce(function (s, it) {
+      var pesoUnit = produtosPesoMap[it.prodId] || 0;
+      return s + pesoUnit * (Number(it[campoQtd]) || 0);
+    }, 0);
+  }
+
   var PED = [];
   pedidosBase.forEach(function (pedido) {
     var cIdx = idxCliente(pedido.clienteId, pedido.clienteNome);
@@ -14875,15 +14882,17 @@ function _dashConstruirDadosAoVivo() {
     if ((pedido.status === 'Faturado' || pedido.status === 'Faturado Parcial') && faturasAtivas.length) {
       faturasAtivas.forEach(function (fat) {
         var vol = (fat.itens || []).reduce(function (s, it) { return s + (Number(it.qtd) || 0); }, 0);
+        var peso = _dashPesoItens(fat.itens, 'qtd');
         var data = (fat.data || pedido.data || '').slice(0, 10);
         if (!data) return;
-        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx]);
+        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx, peso]);
       });
     } else {
       var volPed = (pedido.itens || []).reduce(function (s, it) { return s + (Number(it.quantidade) || 0); }, 0);
+      var pesoPed = _dashPesoItens(pedido.itens, 'quantidade');
       var dataPed = (pedido.data || '').slice(0, 10);
       if (!dataPed) return;
-      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx]);
+      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx, pesoPed]);
     }
   });
 
@@ -14921,6 +14930,7 @@ function _dashConstruirDadosAoVivo() {
     },
     vendedores: VEND,
     fabricas: FAB,
+    fabricas_id: FAB_ID,
     status: STATUS,
     clientes: CLI,
     clientes_inativo: CLI_INATIVO,
@@ -14946,7 +14956,7 @@ function dashInit() {
     // =============== DADOS ===============
     const _dashHistorico = window._dashModoHistorico2025 === true;
     const DATA = _dashHistorico ? JSON.parse(document.getElementById('dash-dados').textContent) : _dashConstruirDadosAoVivo();
-    const { vendedores: VEND, fabricas: FAB, clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, meta: METAINFO, devolucoes: DEVOL_RAW } = DATA;
+    const { vendedores: VEND, fabricas: FAB, fabricas_id: FAB_ID = [], clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, meta: METAINFO, devolucoes: DEVOL_RAW } = DATA;
     const DEVOL = DEVOL_RAW || [];
     const ST_FATURADO = STATUS.indexOf('Faturado');
     const ST_FAT_PARC = STATUS.indexOf('Faturado Parcial');
@@ -15170,11 +15180,11 @@ function dashInit() {
 
     // =============== KPIs ===============
     function kpis(peds) {
-      let fat=0, vol=0, n=0;
+      let fat=0, vol=0, n=0, pesoKg=0;
       const cliSet = new Set();
       const cliFabs = new Map();
       for (const p of peds) {
-        fat += p[5]; vol += p[4]; n++;
+        fat += p[5]; vol += p[4]; n++; pesoKg += (p[7]||0);
         cliSet.add(p[1]);
         let s = cliFabs.get(p[1]); if (!s) { s = new Set(); cliFabs.set(p[1], s); }
         s.add(p[2]);
@@ -15185,7 +15195,7 @@ function dashInit() {
       // carteira = clientes não inativos
       const carteira = CLI_INATIVO.filter(x => !x).length;
       const pos = carteira ? ativos/carteira : 0;
-      return { fat, vol, ticket, ativos, mix, pos, nPedidos: n, carteira };
+      return { fat, vol, pesoKg, ticket, ativos, mix, pos, nPedidos: n, carteira };
     }
 
     // =============== HOME ===============
@@ -15556,24 +15566,6 @@ function dashInit() {
         '<circle cx="26" cy="26" r="' + r + '" fill="none" stroke="' + cor + '" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '" transform="rotate(-90 26 26)"/>' +
         '</svg><div class="dvg-metaring-txt"><b>' + (pct*100).toFixed(0) + '%</b><span>da meta</span></div></div>';
     }
-    function _dvgSparklineSvg(valores) {
-      let lastIdx = -1;
-      for (let i=0;i<valores.length;i++) if (valores[i]) lastIdx = i;
-      const arr = valores.slice(0, lastIdx+1);
-      if (arr.length < 2) return '';
-      const w = 130, h = 34, pad = 3;
-      const max = Math.max.apply(null, arr), min = Math.min.apply(null, arr);
-      const range = (max - min) || 1;
-      const stepX = (w - pad*2) / (arr.length - 1);
-      const pts = arr.map(function(v,i){
-        const x = pad + i*stepX;
-        const y = h - pad - ((v - min) / range) * (h - pad*2);
-        return x.toFixed(1) + ',' + y.toFixed(1);
-      }).join(' ');
-      const lastX = pad + (arr.length-1)*stepX;
-      const lastY = h - pad - ((arr[arr.length-1] - min) / range) * (h - pad*2);
-      return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" class="dvg-hero-spark"><polyline points="' + pts + '" fill="none" stroke="#a9c2f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="' + lastX.toFixed(1) + '" cy="' + lastY.toFixed(1) + '" r="2.5" fill="#fff"/></svg>';
-    }
     function _dvgVariacaoFaturamento(fatAtual) {
       const iniAtual = parseDate(state.dtIni), fimAtual = parseDate(state.dtFim);
       const dias = daysBetween(iniAtual, fimAtual) + 1;
@@ -15598,43 +15590,47 @@ function dashInit() {
         const _dvgTrendHtml = _dvgVarFat != null ? `<div class="dvg-hero-trend ${_dvgVarFat>=0?'up':'down'}">${_dvgVarFat>=0?'▲':'▼'} ${(Math.abs(_dvgVarFat)*100).toFixed(1).replace('.',',')}% vs período anterior</div>` : '';
         const _dvgPedsAnt = _dvgPeriodoAnteriorPeds();
         const _dvgKAnt = _dvgPedsAnt.length ? kpis(_dvgPedsAnt) : null;
-        const _dvgTrendVol = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.vol, _dvgKAnt.vol)) : '';
+        const _dvgTrendVol = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.pesoKg, _dvgKAnt.pesoKg)) : '';
         const _dvgTrendPos = _dvgKAnt ? _dvgTrendPPHtml((k.pos - _dvgKAnt.pos) * 100) : '';
         const _dvgTrendTicket = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.ticket, _dvgKAnt.ticket)) : '';
         const _dvgTrendCli = _dvgKAnt ? _dvgTrendMiniHtml(_dvgPctVar(k.ativos, _dvgKAnt.ativos)) : '';
-        const _dvgSparkMeses = Array(12).fill(0);
-        for (const p of peds) { const m = parseInt(p[0].slice(5,7),10)-1; _dvgSparkMeses[m] += p[5]; }
-        const _dvgSparkHtml = _dvgSparklineSvg(_dvgSparkMeses);
         kpiEl.innerHTML = `
           <div class="dvg-hero">
-            <div class="dvg-hero-lbl">Faturamento do Período</div>
-            <div class="dvg-hero-val" id="dvgHeroValue">R$ 0,00</div>
-            <div class="dvg-hero-val-exact" id="dvgHeroValueExact"></div>
-            ${_dvgTrendHtml}
-            <div class="dvg-hero-pills">
-              <span>${k.nPedidos.toLocaleString('pt-BR')} pedidos</span>
+            <div class="dvg-hero-top">
+              <div class="dvg-hero-lbl">Faturamento do Período</div>
+              <div class="dvg-hero-pill-top">${k.nPedidos.toLocaleString('pt-BR')} pedidos</div>
             </div>
-            ${_dvgSparkHtml ? '<div class="dvg-hero-spark-wrap">'+_dvgSparkHtml+'</div>' : ''}
+            <div class="dvg-hero-valrow">
+              <div class="dvg-hero-val" id="dvgHeroValue">R$ 0,00</div>
+              ${_dvgTrendHtml}
+            </div>
+            <div class="dvg-hero-val-exact" id="dvgHeroValueExact"></div>
           </div>
-          <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66"><div class="dvg-kpi-lbl">VOLUME</div><div class="dvg-kpi-val" id="dvgKpiVol">0</div><div class="dvg-kpi-val-exact" id="dvgKpiVolExact"></div><div class="dvg-kpi-sub">unidades líquidas (caixas)</div>${_dvgTrendVol}</div>
-          <div class="dvg-kpi" style="border-bottom:3px solid #3d5aa8"><div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div><div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} ativos</div>${_dvgTrendPos}</div>
-          <div class="dvg-kpi" style="border-bottom:3px solid #5b78c9"><div class="dvg-kpi-lbl">TICKET MÉDIO</div><div class="dvg-kpi-val" id="dvgKpiTicket">R$ 0,00</div><div class="dvg-kpi-val-exact" id="dvgKpiTicketExact"></div><div class="dvg-kpi-sub">por pedido</div>${_dvgTrendTicket}</div>
-          <div class="dvg-kpi" style="border-bottom:3px solid #7b93d9"><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div class="dvg-kpi-val" id="dvgKpiCli">0</div><div class="dvg-kpi-sub">no período</div>${_dvgTrendCli}</div>
+          <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66">
+            <div class="dvg-kpi-top"><div class="dvg-kpi-icon" style="color:#1c2f66"><i class="ti ti-package"></i></div>${_dvgTrendVol}</div>
+            <div class="dvg-kpi-lbl">VOLUME</div><div class="dvg-kpi-val" id="dvgKpiVol">0 kg</div><div class="dvg-kpi-sub">${fmtNum(k.vol)} cx no período</div>
+          </div>
+          <div class="dvg-kpi" style="border-bottom:3px solid #3d5aa8">
+            <div class="dvg-kpi-top"><div class="dvg-kpi-icon" style="color:#3d5aa8"><i class="ti ti-target-arrow"></i></div>${_dvgTrendPos}</div>
+            <div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div><div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} ativos</div>
+          </div>
+          <div class="dvg-kpi" style="border-bottom:3px solid #5b78c9">
+            <div class="dvg-kpi-top"><div class="dvg-kpi-icon" style="color:#5b78c9"><i class="ti ti-receipt"></i></div>${_dvgTrendTicket}</div>
+            <div class="dvg-kpi-lbl">TICKET MÉDIO</div><div class="dvg-kpi-val" id="dvgKpiTicket">R$ 0,00</div><div class="dvg-kpi-sub">por pedido</div>
+          </div>
+          <div class="dvg-kpi" style="border-bottom:3px solid #7b93d9">
+            <div class="dvg-kpi-top"><div class="dvg-kpi-icon" style="color:#7b93d9"><i class="ti ti-users"></i></div>${_dvgTrendCli}</div>
+            <div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div class="dvg-kpi-val" id="dvgKpiCli">0</div><div class="dvg-kpi-sub">no período</div>
+          </div>
         `;
         _dvgAnimateHero(k.fat);
         _dvgRenderMetaRing(k.fat);
         document.getElementById('dvgHeroValueExact').textContent = fmtBRL(k.fat) + ' exatos';
-        _dvgAnimarNumero(document.getElementById('dvgKpiVol'), k.vol, _dvgFmtAbrev);
-        document.getElementById('dvgKpiVolExact').textContent = fmtNum(k.vol) + ' cx exatas';
+        _dvgAnimarNumero(document.getElementById('dvgKpiVol'), k.pesoKg, v => _dvgFmtAbrev(v) + ' kg');
         _dvgCountUp(document.getElementById('dvgKpiPos'), k.pos*100, 1, '', '%');
         _dvgAnimarNumero(document.getElementById('dvgKpiTicket'), k.ticket, _dvgFmtBRLAbrev);
-        document.getElementById('dvgKpiTicketExact').textContent = fmtBRL(k.ticket) + ' exatos';
         _dvgCountUp(document.getElementById('dvgKpiCli'), k.ativos, 0, '', '');
       }
-      const mixLbl = document.getElementById('dvgMixLbl');
-      if (mixLbl) mixLbl.innerHTML = 'Mix médio: <span style="color:#1e3a8a">' + k.mix.toFixed(2).replace('.',',') + ' fábricas/cliente</span>';
-      const mixFill = document.getElementById('dvgMixFill');
-      if (mixFill) setTimeout(()=>{ mixFill.style.width = Math.min(100, k.mix/6*100) + '%'; }, 100);
 
       // Faturamento mensal
       const meses = Array(12).fill(0);
@@ -16347,6 +16343,31 @@ function dashInit() {
       const agC = new Map();
       for (const p of peds) { let a=agC.get(p[1]); if(!a){a={fat:0,n:0};agC.set(p[1],a);} a.fat+=p[5]; a.n++; }
       const topC = [...agC.entries()].map(([ci,a])=>({nome:CLI[ci], ...a})).sort((a,b)=>b.fat-a.fat).slice(0,10);
+      // Produtos mais vendidos da fábrica (Top 10) — PED denormalizado não tem itens/produto,
+      // então cruza com getPedidos() real pelo fornecedorId (ou nome, se não cadastrado), respeitando período + status ok.
+      const agProd = new Map();
+      try {
+        const fabIdReal = FAB_ID[fi];
+        const produtosPorId = new Map((getProdutos() || []).map(pr => [pr.id, pr]));
+        for (const pedidoReal of getPedidos()) {
+          const mesmoFornecedor = fabIdReal != null ? pedidoReal.fornecedorId === fabIdReal : (pedidoReal.fornecedorNome || '') === FAB[fi];
+          if (!mesmoFornecedor) continue;
+          if (pedidoReal.data < state.dtIni || pedidoReal.data > state.dtFim) continue;
+          if (!ST_OK.has(STATUS.indexOf(pedidoReal.status))) continue;
+          (pedidoReal.itens || []).forEach(it => {
+            const chave = it.prodId != null ? it.prodId : (it.prodNome || it.prodCodigo);
+            let acc = agProd.get(chave);
+            if (!acc) {
+              const prodCad = it.prodId != null ? produtosPorId.get(it.prodId) : null;
+              acc = { nome: it.prodNome || it.prodCodigo || 'Produto', qtd: 0, valor: 0, unidade: (prodCad && prodCad.unidade) ? String(prodCad.unidade) : '' };
+              agProd.set(chave, acc);
+            }
+            acc.qtd += Number(it.quantidade) || 0;
+            acc.valor += Number(it.valorTotal) || 0;
+          });
+        }
+      } catch (e) { /* getPedidos/getProdutos indisponível neste contexto (ex.: modo histórico) */ }
+      const topProd = [...agProd.values()].sort((a,b)=>b.valor-a.valor).slice(0,10);
       // por vendedor
       const agV = new Map();
       for (const p of peds) { let a=agV.get(p[3]); if(!a){a={fat:0,n:0};agV.set(p[3],a);} a.fat+=p[5]; a.n++; }
@@ -16382,8 +16403,13 @@ function dashInit() {
           </div>
         </div>
         <div class="d-card mt-4">
-          <h3 class="font-semibold text-[15px] mb-2">SKUs (Top 10)</h3>
-          <p class="text-[13px] text-ink-600 dark:text-ink-400">— A planilha atual não traz código nem descrição de SKU. Esta visão fica reservada para quando o ERP exportar a coluna SKU/Produto.</p>
+          <h3 class="font-semibold text-[15px] mb-2">Produtos (Top 10)</h3>
+          <div class="scroll-x">
+          <table>
+            <thead><tr><th>#</th><th>Produto</th><th class="num">Qtd</th><th class="num">Valor</th><th class="num">% da fábrica</th></tr></thead>
+            <tbody>${topProd.length ? topProd.map((p,i)=>`<tr><td class="text-ink-400">${i+1}</td><td>${escapeHtml(p.nome)}</td><td class="num">${fmtNum(p.qtd)}${p.unidade ? ' ' + escapeHtml(p.unidade) : ''}</td><td class="num font-semibold">${fmtBRL(p.valor)}</td><td class="num">${fat?fmtPct(p.valor/fat):'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="text-center text-ink-400">Nenhum produto no período.</td></tr>'}</tbody>
+          </table>
+          </div>
         </div>
       `;
       _dvgAnimarNumero(document.getElementById('fabKpiFat'), fat, _dvgFmtBRLAbrev);
@@ -18474,13 +18500,22 @@ function _pedDiagnosticoCodigoPedido(fornId, clienteId, codigoCandidatos, client
 // de Preco e quantidade abaixo de 1 caixa. Isolada numa funcao propria pra poder
 // ser rechamada quando o usuario edita Qtd/Preco na tela de conferencia, sem
 // duplicar a logica que ja existia dentro de _pedMontarItemImportadoPdf.
-function _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxNum, valorTabela) {
+function _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxNum, valorTabela, qtdOriginalPdf) {
   var avisos = [];
   if (valorTabela > 0 && Math.abs(precoUnit - valorTabela) > 0.01) {
     avisos.push('Preço (' + _pedFmtMoeda(precoUnit) + ') diverge do preço cadastrado na Tabela de Preço (' + _pedFmtMoeda(valorTabela) + ').');
   }
   if (modoUnid === 'un' && cxNum > 0 && quantidadeReal < cxNum) {
     avisos.push('Quantidade (' + quantidadeReal + ') é menor que 1 caixa (' + cxNum + ') deste produto — corrija a quantidade ou remova o item do pedido.');
+  } else if (modoUnid === 'un' && cxNum > 0 && quantidadeReal >= cxNum) {
+    var restoCx = quantidadeReal % cxNum;
+    var ehMultiploCx = restoCx < 0.0001 || (cxNum - restoCx) < 0.0001;
+    if (!ehMultiploCx) {
+      var qtdAbaixo = Math.floor(quantidadeReal / cxNum) * cxNum;
+      avisos.push('Quantidade (' + quantidadeReal + ') não fecha caixa cheia deste produto (caixa = ' + cxNum + ') — o valor mais próximo para baixo seria ' + qtdAbaixo + '.');
+    } else if (qtdOriginalPdf != null && Math.abs(qtdOriginalPdf - quantidadeReal) > 0.0001) {
+      avisos.push('Cliente pediu ' + qtdOriginalPdf + ', mas a caixa deste produto é fechada com ' + cxNum + ' — quantidade ajustada para ' + quantidadeReal + ' (caixa fechada). Se quiser completar mais uma caixa, digite ' + (quantidadeReal + cxNum) + '.');
+    }
   }
   return avisos;
 }
@@ -18509,8 +18544,21 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
     precoUnit = itemPdf.unitario;
   }
 
+  // Quantidade pedida em UN/kg (nao em CXA) que nao fecha caixa cheia deste
+  // produto: pre-fixa ja arredondada pra baixo (caixa fechada mais proxima),
+  // sem mandar mais do que o cliente pediu -- o campo continua editavel na
+  // tela de conferencia caso queiram completar mais uma caixa manualmente.
+  var qtdOriginalPdf = null;
+  if (modoUnid === 'un' && cxValido && quantidadeReal >= cxNum) {
+    var restoCxImport = quantidadeReal % cxNum;
+    if (restoCxImport > 0.0001 && (cxNum - restoCxImport) > 0.0001) {
+      qtdOriginalPdf = quantidadeReal;
+      quantidadeReal = Math.floor(quantidadeReal / cxNum) * cxNum;
+    }
+  }
+
   var valorTabela = _pedParseMoeda(tabItem.valor);
-  var avisos = _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxValido ? cxNum : 0, valorTabela);
+  var avisos = _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxValido ? cxNum : 0, valorTabela, qtdOriginalPdf);
 
   return {
     prodId: produto.id, prodCodigo: produto.codigo, prodNome: produto.nome,
@@ -18518,7 +18566,7 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
     quantidade: quantidadeReal, precoUnit: precoUnit, desconto: 0,
     valorTotal: quantidadeReal * precoUnit, modoUnid: modoUnid, qtdCaixas: qtdCaixas,
     avisos: avisos, _excluidoImport: false,
-    _cxNum: cxValido ? cxNum : 0, _valorTabela: valorTabela,
+    _cxNum: cxValido ? cxNum : 0, _valorTabela: valorTabela, _qtdOriginalPdf: qtdOriginalPdf,
     _origemPdf: { codigo: itemPdf.codigo, unidade: itemPdf.unidade, qtd: itemPdf.qtd, unitario: itemPdf.unitario, descricao: itemPdf.descricao }
   };
 }
@@ -18709,7 +18757,7 @@ function _pedImportRecalcularItem(ri, ii) {
   it.precoUnit = novoPreco;
   it.valorTotal = novaQtd * novoPreco;
   if (it.modoUnid === 'cx' && it._cxNum) it.qtdCaixas = novaQtd / it._cxNum;
-  it.avisos = _pedCalcularAvisosImportado(novoPreco, novaQtd, it.modoUnid, it._cxNum || 0, it._valorTabela || 0);
+  it.avisos = _pedCalcularAvisosImportado(novoPreco, novaQtd, it.modoUnid, it._cxNum || 0, it._valorTabela || 0, it._qtdOriginalPdf);
   it._editadoManualmente = true;
 
   _pedRenderRevisaoImportacao();
@@ -19181,9 +19229,10 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
     return String(v || '').trim().toLowerCase().replace(/^0+(?=\d)/, '');
   }
 
+  var numPedNf = _pinfNormNumPedido(nfDados.numPedido);
+
   if (porCnpj.length === 1) return { pedido: porCnpj[0], ambiguo: false, motivo: 'cnpj' };
   if (porCnpj.length > 1) {
-    var numPedNf = _pinfNormNumPedido(nfDados.numPedido);
     if (numPedNf) {
       var porNumero = porCnpj.filter(function (p) { return _pinfNormNumPedido(p.numPedidoCliente) === numPedNf; });
       if (porNumero.length === 1) return { pedido: porNumero[0], ambiguo: false, motivo: 'cnpj+numeroPedido' };
@@ -19196,16 +19245,20 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
     return { pedido: melhorCnpj.p, ambiguo: false, motivo: 'cnpj+itens' };
   }
 
-  var ordenadosTodos = ordenarPorScoreEValor(pedidosCandidatos);
-  var topTodos = ordenadosTodos[0];
-  if (!topTodos || topTodos.score === 0) {
-    return { pedido: null, ambiguo: true, motivo: 'Não foi possível identificar o pedido correspondente automaticamente (CNPJ do cliente não bateu e nenhum item em comum) — vincule manualmente.' };
+  // porCnpj vazio: o CNPJ da NF não bateu com NENHUM pedido candidato do período (cliente
+  // sem CNPJ cadastrado, ou CNPJ divergente). NUNCA cai mais para casar por itens/valor
+  // entre pedidos de OUTROS clientes -- era assim que uma NF acabava vinculada ao pedido
+  // de um cliente diferente. 2ª prioridade (única): número do pedido do cliente, se a NF
+  // trouxer essa informação, buscando entre TODOS os candidatos do período.
+  if (numPedNf) {
+    var porNumeroTodos = pedidosCandidatos.filter(function (p) { return _pinfNormNumPedido(p.numPedidoCliente) === numPedNf; });
+    if (porNumeroTodos.length === 1) return { pedido: porNumeroTodos[0], ambiguo: false, motivo: 'numeroPedido' };
+    if (porNumeroTodos.length > 1) {
+      return { pedido: null, ambiguo: true, motivo: 'Mais de um pedido com o mesmo número no período — não foi possível decidir automaticamente qual corresponde a esta NF.' };
+    }
   }
-  var empatadosTodos = ordenadosTodos.filter(function (x) { return x.score === topTodos.score && Math.abs(x.diff - topTodos.diff) < 0.01; });
-  if (empatadosTodos.length > 1) {
-    return { pedido: null, ambiguo: true, motivo: 'Mais de um pedido candidato com itens semelhantes — não foi possível decidir automaticamente.' };
-  }
-  return { pedido: topTodos.p, ambiguo: false, motivo: 'itens' };
+
+  return { pedido: null, ambiguo: true, motivo: 'Não foi possível identificar o pedido correspondente automaticamente (CNPJ do cliente não bateu com nenhum pedido do período, e não há número de pedido correspondente) — vincule manualmente.' };
 }
 
 // Compara os itens do Pedido com os itens da(s) NF(s) ja convertidos p/ unidades reais e ja
@@ -19258,13 +19311,21 @@ function _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos) 
   var gruposPorPedido = {};
   var ordemPedidos = [];
   var naoIdentificados = [];
+  var jaImportadas = [];
   var usadosPdf = [];
 
   xmlLidos.forEach(function (item) {
     if (!item.dados) { naoIdentificados.push({ nome: item.file.name, motivo: 'Não foi possível ler este XML (arquivo inválido ou corrompido).' }); return; }
     var escolha = _pimEscolherPedidoCandidato(item.dados, pedidosCandidatos);
     if (!escolha.pedido) {
-      naoIdentificados.push({ nome: item.file.name, nNF: item.dados.nNF, motivo: escolha.motivo || 'Pedido correspondente não identificado automaticamente.' });
+      var pdfParNaoIdent = _pinfLocalizarPdfParaNf(item.dados, pdfFiles, usadosPdf);
+      naoIdentificados.push({ nome: item.file.name, nNF: item.dados.nNF, clienteNome: item.dados.destNome || item.dados.emitNome || '', motivo: escolha.motivo || 'Pedido correspondente não identificado automaticamente.', pdfFile: pdfParNaoIdent });
+      return;
+    }
+    var duplicata = _pfatNumDuplicataJaExiste(escolha.pedido.clienteId, escolha.pedido.fornecedorId, item.dados.nNF);
+    if (duplicata) {
+      var pdfParDup = _pinfLocalizarPdfParaNf(item.dados, pdfFiles, usadosPdf);
+      jaImportadas.push({ nome: item.file.name, nNF: item.dados.nNF, clienteNome: _cpSemColchetes(escolha.pedido.clienteNome || ''), pdfFile: pdfParDup, pedidoNum: duplicata.pedido.numPedidoCliente || duplicata.pedido.lancamento || '' });
       return;
     }
     var pid = escolha.pedido.id;
@@ -19284,12 +19345,14 @@ function _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos) 
 
   _pinfResultados = resultados;
   _pinfNaoIdentificados = naoIdentificados;
+  _pinfJaImportadas = jaImportadas;
   _pinfPdfsAvulsos = pdfsAvulsos;
 }
 
 // -- Passo 2: revisao/conferencia --
 var _pinfResultados = [];
 var _pinfNaoIdentificados = [];
+var _pinfJaImportadas = [];
 var _pinfPdfsAvulsos = [];
 function _pinfAbrirRevisao() {
   var okCount = _pinfResultados.filter(function (r) { return r.status === 'ok'; }).length;
@@ -19297,7 +19360,8 @@ function _pinfAbrirRevisao() {
   var sub = document.getElementById('pinf-revisao-subtitulo');
   if (sub) {
     sub.textContent = _pinfResultados.length + ' pedido(s) reconhecido(s) — ' + okCount + ' sem divergência, ' + divCount + ' com divergência.'
-      + (_pinfNaoIdentificados.length ? (' ' + _pinfNaoIdentificados.length + ' NF(s) não identificada(s).') : '');
+      + (_pinfNaoIdentificados.length ? (' ' + _pinfNaoIdentificados.length + ' NF(s) não identificada(s).') : '')
+      + (_pinfJaImportadas.length ? (' ' + _pinfJaImportadas.length + ' NF(s) já importada(s) anteriormente (ignorada(s)).') : '');
   }
   _pinfRenderRevisao();
   var modal = document.getElementById('modal-pinf-revisao');
@@ -19361,8 +19425,24 @@ function _pinfRenderRevisao() {
   var extras = '';
   if (_pinfNaoIdentificados.length) {
     extras += '<div style="margin-top:6px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:11px;color:#92400e">'
-      + '<b>NF(s) não identificada(s) automaticamente</b> (o arquivo continua no seu computador — pode ser anexado manualmente depois, pela tela de Anexos do pedido):<br>'
-      + _pinfNaoIdentificados.map(function (n) { return '• ' + _pedEsc(n.nome) + (n.nNF ? (' (NF ' + _pedEsc(n.nNF) + ')') : '') + ' — ' + _pedEsc(n.motivo); }).join('<br>')
+      + '<b>NF(s) não anexada(s) automaticamente</b> (o arquivo continua no seu computador — pode ser anexado manualmente depois, pela tela de Anexos do pedido):'
+      + _pinfNaoIdentificados.map(function (n, ni) {
+          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #fde68a">'
+            + '<div>' + (n.nNF ? ('<b>NF ' + _pedEsc(n.nNF) + '</b>') : ('<b>' + _pedEsc(n.nome) + '</b>')) + (n.clienteNome ? (' — ' + _pedEsc(n.clienteNome)) : '') + '<div style="font-size:10px;color:#92400e;margin-top:1px">' + _pedEsc(n.motivo) + '</div></div>'
+            + (n.pdfFile ? ('<button type="button" onclick="_pinfVerPdfNaoIdentificado(' + ni + ')" style="background:#fff;border:1px solid #fde68a;color:#92400e;border-radius:6px;padding:4px 10px;font-size:10.5px;cursor:pointer;white-space:nowrap;flex-shrink:0"><i class="ti ti-file-type-pdf" style="color:#dc2626;margin-right:3px"></i>Ver PDF</button>') : '')
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+  if (_pinfJaImportadas.length) {
+    extras += '<div style="margin-top:6px;padding:10px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:11px;color:#1e40af">'
+      + '<b>NF(s) já importada(s) anteriormente</b> (já existe uma fatura com este número para este cliente/fábrica — não foi importada de novo, para não duplicar o faturamento):'
+      + _pinfJaImportadas.map(function (n, ni) {
+          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #bfdbfe">'
+            + '<div>' + (n.nNF ? ('<b>NF ' + _pedEsc(n.nNF) + '</b>') : ('<b>' + _pedEsc(n.nome) + '</b>')) + (n.clienteNome ? (' — ' + _pedEsc(n.clienteNome)) : '') + (n.pedidoNum ? ('<div style="font-size:10px;color:#1e40af;margin-top:1px">já faturada no Pedido nº ' + _pedEsc(String(n.pedidoNum)) + '</div>') : '') + '</div>'
+            + (n.pdfFile ? ('<button type="button" onclick="_pinfVerPdfJaImportada(' + ni + ')" style="background:#fff;border:1px solid #bfdbfe;color:#1e40af;border-radius:6px;padding:4px 10px;font-size:10.5px;cursor:pointer;white-space:nowrap;flex-shrink:0"><i class="ti ti-file-type-pdf" style="color:#dc2626;margin-right:3px"></i>Ver PDF</button>') : '')
+            + '</div>';
+        }).join('')
       + '</div>';
   }
   if (_pinfPdfsAvulsos.length) {
@@ -19388,6 +19468,18 @@ function _pinfVerPdf(ri, pdfIdx) {
   window.open(url, '_blank');
   setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
 }
+function _pinfVerPdfNaoIdentificado(ni) {
+  var n = _pinfNaoIdentificados[ni]; if (!n || !n.pdfFile) return;
+  var url = URL.createObjectURL(n.pdfFile);
+  window.open(url, '_blank');
+  setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+}
+function _pinfVerPdfJaImportada(ni) {
+  var n = _pinfJaImportadas[ni]; if (!n || !n.pdfFile) return;
+  var url = URL.createObjectURL(n.pdfFile);
+  window.open(url, '_blank');
+  setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+}
 function _pinfAprovarDivergencia(ri) { var r = _pinfResultados[ri]; if (!r) return; r.aprovadoManual = true; _pinfRenderRevisao(); }
 function _pinfDesfazerAprovacao(ri) { var r = _pinfResultados[ri]; if (!r) return; r.aprovadoManual = false; _pinfRenderRevisao(); }
 
@@ -19397,9 +19489,12 @@ function _pinfDesfazerAprovacao(ri) { var r = _pinfResultados[ri]; if (!r) retur
 // processados agora (o usuario pode reabrir o Importar > XML/NF e selecionar os mesmos arquivos
 // de novo depois de resolver a divergencia).
 function _pinfConcluirEAnexar() {
+  var btnConcluir = document.getElementById('pinf-btn-concluir');
+  if (btnConcluir && btnConcluir.disabled) return; // ja esta processando -- ignora cliques repetidos
   var prontos = _pinfResultados.filter(function (r) { return r.status === 'ok' || r.aprovadoManual; });
   if (!prontos.length) { alert('Nenhum pedido pronto para concluir (sem divergência ou aprovado manualmente).'); return; }
 
+  if (btnConcluir) { btnConcluir.disabled = true; btnConcluir.style.cursor = 'not-allowed'; btnConcluir.style.opacity = '0.6'; }
   var fila = [];
   prontos.forEach(function (r) {
     r.nfs.forEach(function (nf) {
@@ -19409,6 +19504,7 @@ function _pinfConcluirEAnexar() {
   });
   var totalPedidos = prontos.length;
   _pinfProcessarFilaAnexos(fila, 0, { ok: 0, avisos: [] }, function (resumo) {
+    if (btnConcluir) { btnConcluir.disabled = false; btnConcluir.style.cursor = 'pointer'; btnConcluir.style.opacity = '1'; }
     _pinfFecharRevisao();
     if (typeof renderPedidoList === 'function') renderPedidoList();
     alert(totalPedidos + ' pedido(s) concluído(s), ' + resumo.ok + ' arquivo(s) anexado(s).' + (resumo.avisos.length ? (' Avisos: ' + resumo.avisos.join(' ')) : ''));
@@ -19426,7 +19522,7 @@ function _pinfProcessarFilaAnexos(fila, idx, resumo, done) {
   _pedSalvarAnexoAoPedido(item.pedidoId, item.file, item.tipo, {
     onWarn: function (txt) { resumo.avisos.push(txt); },
     onCnpjErro: function (txt) { resumo.avisos.push(txt); proximo(); },
-    onXmlTexto: function (xmlTexto) { _pfatCriarFaturaAutoXml(item.pedidoId, xmlTexto, item.file.name); },
+    onXmlTexto: function (xmlTexto) { var r = _pfatCriarFaturaAutoXml(item.pedidoId, xmlTexto, item.file.name); if (r && !r.ok) resumo.avisos.push(r.motivo); },
     onSaved: function () { resumo.ok++; proximo(); }
   });
 }
@@ -19689,7 +19785,7 @@ function _pedProcessarArquivosAnexo(files, idx, resumo) {
   _pedSalvarAnexoAoPedido(_pedAnexoPedidoId, file, tipo, {
     onWarn:     function(txt) { resumo.avisos.push('"' + file.name + '": ' + txt); },
     onCnpjErro: function(txt) { resumo.avisos.push('"' + file.name + '": ' + txt); proximo(); },
-    onXmlTexto: function(xmlTexto) { _pfatCriarFaturaAutoXml(_pedAnexoPedidoId, xmlTexto, file.name); },
+    onXmlTexto: function(xmlTexto) { var r = _pfatCriarFaturaAutoXml(_pedAnexoPedidoId, xmlTexto, file.name); if (r && !r.ok) resumo.avisos.push('"' + file.name + '": ' + r.motivo); },
     onSaved:    function() { resumo.ok++; proximo(); }
   });
 }
@@ -19982,6 +20078,8 @@ function pedSalvarFatura() {
 
   if (!numDup) { if (msg) msg.textContent = 'Informe o Número da Duplicata.'; return; }
   if (!dataFat) { if (msg) msg.textContent = 'Informe a Data de Faturamento.'; return; }
+  var duplicataManual = _pfatNumDuplicataJaExiste(pedido.clienteId, pedido.fornecedorId, numDup);
+  if (duplicataManual) { if (msg) msg.textContent = 'Já existe uma fatura com o número "' + numDup + '" para este cliente e fábrica (Pedido nº ' + (duplicataManual.pedido.numPedidoCliente || duplicataManual.pedido.lancamento || '') + ').'; return; }
 
   var itensFatura = [];
   var rows = document.querySelectorAll('#pfat-itens-tbody tr[data-prodid]');
@@ -20133,13 +20231,42 @@ function _pfatConverterItemXmlParaUnidades(match, produto) {
     precoFat: qtdEmUnidades > 0 ? (valorItemXml / qtdEmUnidades) : match.precoUnit
   };
 }
+function _pfatNormNumNF(v) {
+  return String(v || '').trim().replace(/^0+(?=\d)/, '');
+}
+// Retorna { pedido, fatura } do PRIMEIRO pedido do MESMO cliente+fornecedor que ja tem uma
+// fatura ativa (nao cancelada) com este numero de NF, ou null se nao existir. Varre TODOS os
+// pedidos do cliente+fornecedor (nao so o pedido atual), porque a mesma NF nunca pode
+// aparecer 2x faturando o mesmo cliente na mesma fabrica, esteja ela em qual pedido estiver.
+function _pfatNumDuplicataJaExiste(clienteId, fornecedorId, numDup) {
+  var alvo = _pfatNormNumNF(numDup);
+  if (!alvo) return null;
+  var pedidos = getPedidos();
+  for (var i = 0; i < pedidos.length; i++) {
+    var p = pedidos[i];
+    if (String(p.clienteId || '') !== String(clienteId || '')) continue;
+    if (String(p.fornecedorId || '') !== String(fornecedorId || '')) continue;
+    var faturas = p.faturas || [];
+    for (var j = 0; j < faturas.length; j++) {
+      var f = faturas[j];
+      if (f.status === 'Cancelado') continue;
+      if (_pfatNormNumNF(f.numDuplicata) === alvo) return { pedido: p, fatura: f };
+    }
+  }
+  return null;
+}
 function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
   var dados = _pfatExtrairDadosXmlPedido(xmlText);
-  if (!dados) return;
+  if (!dados) return { ok: false, motivo: 'XML inválido.' };
   var data = getPedidos();
   var idx = data.findIndex(function(x){ return x.id === pedidoId; });
-  if (idx < 0) return;
+  if (idx < 0) return { ok: false, motivo: 'Pedido não encontrado.' };
   var pedido = data[idx];
+  var numNfCandidata = dados.nNF || nomeArquivo;
+  var duplicata = _pfatNumDuplicataJaExiste(pedido.clienteId, pedido.fornecedorId, numNfCandidata);
+  if (duplicata) {
+    return { ok: false, motivo: 'NF ' + (dados.nNF || numNfCandidata) + ' já foi faturada anteriormente para este cliente/fábrica (Pedido nº ' + (duplicata.pedido.numPedidoCliente || duplicata.pedido.lancamento || '') + ') — não foi lançada de novo.' };
+  }
   var produtos = getProdutos();
   var itensFatura = [];
   (pedido.itens || []).forEach(function(it){
@@ -20161,6 +20288,7 @@ function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
   _pfatAtualizarStatusPedido(pedido);
   setPedidos(data);
   if (_pfatPedidoId === pedidoId) _pfatRender();
+  return { ok: true };
 }
 
 // ── Vendas Simples NFs: uma linha por Fatura/Duplicata lancada (NF emitida) ──
