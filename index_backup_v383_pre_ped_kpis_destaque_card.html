@@ -378,7 +378,17 @@
       #page-pedido-list #ped-filtros-geral .ped-limpar-btn,
       #page-pedido-list #ped-filtros-geral .ped-imprimir-btn { width:100% !important; justify-content:center !important; margin:0 !important; }
       #page-pedido-list #ped-filtros-geral .ped-spacer { display:none !important; }
+      #page-pedido-list #ped-filtros-geral .ped-kpis-wrap {
+        display:grid !important; grid-template-columns:repeat(2,1fr) !important; gap:8px !important;
+        width:100% !important; padding-left:0 !important; order:20 !important;
+      }
       #page-pedido-list #ped-filtros-geral .ped-imprimir-btn { order:21 !important; }
+      #page-pedido-list #ped-filtros-geral .ped-kpi-item {
+        display:flex !important; flex-direction:column-reverse !important; align-items:center !important;
+        text-align:center !important; background:#f8fafc !important; border-radius:10px !important; padding:10px !important;
+      }
+      #page-pedido-list #ped-filtros-geral .ped-kpi-item > div:last-child { font-size:15px !important; }
+      #page-pedido-list #ped-filtros-geral .ped-kpi-item:nth-child(3) { grid-column:1 / span 2 !important; }
       #page-pedido-list .ped-header-row { display:none !important; }
       #page-pedido-list .ped-r-pedido::before { content:'Pedido nº '; color:#94a3b8; }
       #page-pedido-list .ped-r-forn::before { content:'Forn: '; color:#94a3b8; }
@@ -446,7 +456,7 @@
       #ped-tbody .mc-badge { order:3 !important; margin-left:auto !important; }
       #ped-tbody .mc-primary { order:4 !important; flex-basis:100% !important; }
       #ped-tbody .ped-r-forn { order:5 !important; text-transform:uppercase !important; font-weight:700 !important; color:#272A4A !important; }
-      #ped-tbody .ped-r-vend { order:6 !important; flex-basis:100% !important; }
+      #ped-tbody .ped-r-vend { order:6 !important; margin-left:auto !important; }
       #ped-tbody .ped-r-valor { order:7 !important; }
       #ped-tbody .ped-r-valfat { order:8 !important; margin-left:auto !important; }
       #ped-tbody .mc-actions {
@@ -4496,19 +4506,10 @@
         </div>
         <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
         <div class="ped-spacer" style="flex:1"></div>
-      </div>
-      <div class="ped-kpis-box" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.04);display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
-        <div style="text-align:center;padding:0 10px">
-          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Pedidos</div>
-          <div style="font-size:20px;font-weight:800;color:#272A4A" id="ped-kpi-total">0</div>
-        </div>
-        <div style="text-align:center;padding:0 10px;border-left:1px solid #f1f5f9;border-right:1px solid #f1f5f9">
-          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Total</div>
-          <div style="font-size:20px;font-weight:800;color:#16a34a" id="ped-kpi-valor">R$ 0,00</div>
-        </div>
-        <div style="text-align:center;padding:0 10px">
-          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Peso Total</div>
-          <div style="font-size:20px;font-weight:800;color:#272A4A" id="ped-kpi-peso">0 kg</div>
+        <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
+          <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="ped-kpi-total">0</div></div>
+          <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="ped-kpi-valor">R$ 0,00</div></div>
+          <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="ped-kpi-peso">0 kg</div></div>
         </div>
       </div>
       <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
