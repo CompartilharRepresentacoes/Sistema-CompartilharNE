@@ -2835,6 +2835,8 @@
         <button onclick="_cliExportarExcel()" title="Exportar clientes em Excel" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-file-spreadsheet" style="font-size:10px"></i> Exportar</button>
         <button onclick="document.getElementById('cli-import-file').click()" title="Importar clientes de Excel" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-file-import" style="font-size:10px"></i> Importar</button>
         <input type="file" id="cli-import-file" accept=".xlsx,.xls" style="display:none" onchange="_cliImportarExcel(this)">
+        <button onclick="document.getElementById('cli-cadcompleto-file').click()" title="Importar planilha Cadastro Completo (Clientes + Codigos por Fabrica + Vendedor por Fabrica)" style="background:#fff;color:#D82621;border:2px solid #D82621;border-radius:7px;padding:5px 13px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-database-import" style="font-size:10px"></i> Cadastro Completo</button>
+        <input type="file" id="cli-cadcompleto-file" accept=".xlsx,.xls" style="display:none" onchange="_cadCompletoArquivoSelecionado(this)">
         <button onclick="showPage('page-cliente-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
       <div class="pg-two-col">
@@ -6745,20 +6747,20 @@
   <button onclick="fpBaixarFotoAtual()" style="background:#0ea5e9;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-download" style="font-size:11px"></i> Baixar foto</button>
 </div>
 
-<!-- ── Modal: preview do Importar de Clientes ── -->
-<div id="modal-cli-import" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
+<!-- ── Modal: Código do Cliente por Fornecedor ── -->
+<div id="modal-cadcompleto" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:12px;width:100%;max-width:560px;max-height:88vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
-    <div style="background:linear-gradient(90deg,#15803d,#22c55e) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700;color:#fff">Importar Clientes</div>
-        <div id="cli-import-subtitulo" style="font-size:10.5px;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+        <div style="font-size:13px;font-weight:700;color:#fff">Importar Cadastro Completo</div>
+        <div id="cadcompleto-subtitulo" style="font-size:10.5px;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
       </div>
-      <button onclick="fecharModalCliImport()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
+      <button onclick="fecharModalCadCompleto()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
     </div>
-    <div id="cli-import-body" style="padding:16px 18px;overflow-y:auto;flex:1"></div>
+    <div id="cadcompleto-body" style="padding:16px 18px;overflow-y:auto;flex:1"></div>
     <div style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
-      <button onclick="fecharModalCliImport()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>
-      <button id="cli-import-btn-confirmar" onclick="_cliImportarConfirmar()" style="background:#15803d;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">Confirmar importação</button>
+      <button onclick="fecharModalCadCompleto()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>
+      <button id="cadcompleto-btn-confirmar" onclick="_cadCompletoConfirmar()" style="background:#D82621;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">Confirmar importação</button>
     </div>
   </div>
 </div>
@@ -11178,6 +11180,22 @@ function _cliFornLabel(f) {
   return (f.codigo ? f.codigo + ' ' : '') + (f.nome_fantasia || f.razao_social || '');
 }
 
+// Cabecalho fixo (sempre nesta ordem na exportacao) + 3 colunas por fornecedor cadastrado
+// (Vendedor / Prazo / Tabela de Preco). A importacao le por NOME de coluna (nao por posicao),
+// entao a ordem das colunas na planilha do usuario nao importa.
+var CLI_COLS_FIXAS = [
+  'Código','Nome Fantasia','Razão Social','Tipo Doc (CNPJ/CPF)','CNPJ/CPF','Inscrição Estadual',
+  'Email','Email XML (NF-e)','Telefone','Telefone 2','WhatsApp','Contato','Site',
+  'CEP','Endereço','Número','Bairro','Cidade','UF','Complemento','País',
+  'Rede','Loja','Vendedor Principal','Ativo',
+  'CEP Entrega','Endereço Entrega','Número Entrega','Bairro Entrega','Complemento Entrega','Cidade Entrega','UF Entrega','País Entrega',
+  'Observações'
+];
+
+function _cliFornLabel(f) {
+  return (f.codigo ? f.codigo + ' ' : '') + (f.nome_fantasia || f.razao_social || '');
+}
+
 // Cabecalho fixo (sempre nesta ordem na exportacao) + 4 colunas por fornecedor cadastrado
 // (Vendedor / Prazo / Tabela de Preco / Codigo do Cliente no fornecedor). A importacao le
 // por NOME de coluna (nao por posicao), entao a ordem das colunas na planilha nao importa.
@@ -11230,9 +11248,9 @@ function _cliExportarExcel() {
 }
 
 // Acha o indice de uma coluna pelo NOME exato (case-insensitive, ignora espacos nas pontas).
-// Diferente de _cadCol (usado no antigo Cadastro Completo, ja removido): aqui e' match EXATO,
-// nao substring -- necessario porque temos pares de nomes parecidos (CEP / CEP Entrega, Cidade /
-// Cidade Entrega etc) que um match por substring confundiria.
+// Diferente de _cadCol (usada no Cadastro Completo): aqui e' match EXATO, nao substring --
+// necessario porque temos pares de nomes parecidos (CEP / CEP Entrega, Cidade / Cidade Entrega etc)
+// que um match por substring confundiria.
 function _cliColIdx(header, nome) {
   var alvo = String(nome).trim().toLowerCase();
   for (var i = 0; i < header.length; i++) {
@@ -11243,7 +11261,7 @@ function _cliColIdx(header, nome) {
 
 // Fallback quando o nome exato do fornecedor na planilha nao bate 100% com o cadastro atual
 // (ex: planilha antiga, fornecedor renomeado) -- procura uma coluna "Prefixo - algumacoisa" cujo
-// "algumacoisa" combine com o fornecedor via _cadNomeMatch.
+// "algumacoisa" combine com o fornecedor via _cadNomeMatch (mesma logica ja usada no Cadastro Completo).
 function _cliColHeaderFuzzy(header, prefixo, forn) {
   var prefixoLower = prefixo.toLowerCase();
   for (var i = 0; i < header.length; i++) {
@@ -11258,16 +11276,13 @@ function _cliColHeaderFuzzy(header, prefixo, forn) {
 // Processa linhas já lidas da planilha (array de arrays, COM cabeçalho separado) e faz upsert por
 // Código. Le por NOME de coluna (nao por posicao) -- uma planilha com colunas faltando, fora de
 // ordem, ou de uma exportacao mais antiga (so as colunas basicas) continua funcionando: coluna que
-// nao existe vira _cliColIdx===-1, tratada como vazia em todo lugar.
-// commit=false (padrao false): so calcula e devolve o resumo, SEM gravar nada (modo preview) --
-// trabalha em cima de uma copia dos clientes pra nao alterar os dados reais.
-// commit=true: grava de verdade via setClientes().
-function _cliImportarLinhas(header, linhas, commit) {
+// nao existe vira _cliColIdx===-1, tratada como vazia em todo lugar. Funcao pura, testavel isolada.
+function _cliImportarLinhas(header, linhas) {
   header = header || [];
   var cats = getCatClientes();
   var vendedores = getVendedoresAtivos();
   var fornecedores = getFornecedores();
-  var clientes = getClientes().map(function(c){ return Object.assign({}, c); });
+  var clientes = getClientes();
   var resumo = { total: 0, criados: 0, atualizados: 0, redeNaoEncontrada: 0, lojaNaoEncontrada: 0, vendedorNaoEncontrado: 0, cnpjDuplicado: [] };
 
   var col = {
@@ -11421,7 +11436,7 @@ function _cliImportarLinhas(header, linhas, commit) {
     }
   });
 
-  if (commit) setClientes(clientes);
+  setClientes(clientes);
   return resumo;
 }
 
@@ -11436,27 +11451,6 @@ function _cliMontarMensagemResumo(resumo) {
   return msg;
 }
 
-// Monta o HTML de preview mostrado no modal antes de confirmar a importacao.
-function _cliMontarPreviewHtml(resumo) {
-  var html = '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px">'
-    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Clientes</span><span>' + resumo.total + ' linha(s)</span></div>'
-    + '<div style="font-size:12px;color:#555;line-height:1.8">'
-    + '<div>' + resumo.criados + ' novo(s) &bull; ' + resumo.atualizados + ' atualizado(s)</div>'
-    + (resumo.redeNaoEncontrada ? '<div style="color:#B45309">' + resumo.redeNaoEncontrada + ' linha(s) com Rede não encontrada</div>' : '')
-    + (resumo.lojaNaoEncontrada ? '<div style="color:#B45309">' + resumo.lojaNaoEncontrada + ' linha(s) com Loja não encontrada</div>' : '')
-    + (resumo.vendedorNaoEncontrado ? '<div style="color:#B45309">' + resumo.vendedorNaoEncontrado + ' linha(s)/coluna(s) com Vendedor não encontrado</div>' : '')
-    + (resumo.cnpjDuplicado.length ? '<div style="color:#B91C1C">' + resumo.cnpjDuplicado.length + ' linha(s) ignorada(s) por CNPJ/CPF duplicado</div>' : '')
-    + '</div></div>';
-  return html;
-}
-
-function fecharModalCliImport() {
-  document.getElementById('modal-cli-import').style.display = 'none';
-  window._cliImportPendente = null;
-}
-
-// Abre o arquivo e roda em modo PREVIEW (commit=false) -- so calcula o resumo, nao grava nada.
-// Guarda header+linhas em window._cliImportPendente pra usar depois se o usuario confirmar.
 function _cliImportarExcel(input) {
   var file = input.files[0];
   if (!file) return;
@@ -11469,39 +11463,28 @@ function _cliImportarExcel(input) {
       var ws = wb.Sheets[wb.SheetNames[0]];
       var aoa = XLSX.utils.sheet_to_json(ws, { header: 1 });
       var header = aoa.shift() || [];
-      var resumo = _cliImportarLinhas(header, aoa, false);
-      window._cliImportPendente = { header: header, linhas: aoa };
-      document.getElementById('cli-import-subtitulo').textContent = file.name;
-      document.getElementById('cli-import-body').innerHTML = _cliMontarPreviewHtml(resumo);
-      document.getElementById('cli-import-btn-confirmar').disabled = (resumo.total === 0);
-      document.getElementById('modal-cli-import').style.display = 'flex';
+      var resumo = _cliImportarLinhas(header, aoa);
+      renderClienteList();
+      alert(_cliMontarMensagemResumo(resumo));
     } catch (err) {
-      alert('Erro ao ler a planilha: ' + (err && err.message ? err.message : err));
+      alert('Erro ao importar planilha: ' + (err && err.message ? err.message : err));
     }
     input.value = '';
   };
   reader.readAsArrayBuffer(file);
 }
 
-// Confirma a importacao em modo commit=true (grava de verdade).
-function _cliImportarConfirmar() {
-  if (!window._cliImportPendente) { fecharModalCliImport(); return; }
-  try {
-    var resumo = _cliImportarLinhas(window._cliImportPendente.header, window._cliImportPendente.linhas, true);
-    fecharModalCliImport();
-    renderClienteList();
-    alert(_cliMontarMensagemResumo(resumo));
-  } catch (err) {
-    alert('Erro ao confirmar importação: ' + (err && err.message ? err.message : err));
+// ═══════ Importar Cadastro Completo (Clientes + Codigos por Fabrica + Vendedor por Fabrica) ═══════
+function _cadCol(header, candidatos) {
+  for (var k = 0; k < candidatos.length; k++) {
+    var alvo = candidatos[k].toLowerCase();
+    for (var i = 0; i < header.length; i++) {
+      if (String(header[i] || '').toLowerCase().indexOf(alvo) !== -1) return i;
+    }
   }
+  return -1;
 }
 
-// _cadVal/_cadNomeMatch seguem usadas pelo Importar simples de Clientes (_cliImportarLinhas /
-// _cliColHeaderFuzzy). O restante do fluxo "Cadastro Completo" (4 abas) foi removido: o Importar
-// simples de Clientes (com preview antes de gravar) ja cobre tudo que ele fazia, e mais --
-// endereco de entrega, Site, Prazo/Tabela por fabrica (que no Cadastro Completo eram lidos mas
-// nunca gravados de fato) e Codigo do Cliente por fabrica pra qualquer fornecedor (nao so
-// Allfood/Nova Mix). Ver memoria do projeto v386.
 function _cadVal(row, idx) {
   if (idx == null || idx < 0 || !row) return '';
   var v = row[idx];
@@ -11517,6 +11500,328 @@ function _cadNomeMatch(forn, nomeAlvo) {
   return nf === alvo || rs === alvo
     || (nf && (nf.indexOf(alvo) !== -1 || alvo.indexOf(nf) !== -1))
     || (rs && (rs.indexOf(alvo) !== -1 || alvo.indexOf(rs) !== -1));
+}
+
+function _cadUpsertCodigoForn(cliObj, fornId, codigoCliente) {
+  if (!cliObj.codigos_fornecedor) cliObj.codigos_fornecedor = [];
+  var idx = cliObj.codigos_fornecedor.findIndex(function(x){ return x.fornecedor_id === fornId; });
+  if (idx >= 0) cliObj.codigos_fornecedor[idx].codigo_cliente = codigoCliente;
+  else cliObj.codigos_fornecedor.push({ fornecedor_id: fornId, codigo_cliente: codigoCliente });
+}
+
+function _cadCompletoArquivoSelecionado(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (typeof XLSX === 'undefined') { alert('Biblioteca de Excel não carregou. Verifique a conexão com a internet e tente novamente.'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var wb = XLSX.read(data, { type: 'array' });
+      var resultado = _cadCompletoProcessar(wb, false);
+      window._cadCompletoWb = wb;
+      _cadCompletoAbrirPreview(file.name, resultado.resumo);
+    } catch (err) {
+      alert('Erro ao ler a planilha: ' + (err && err.message ? err.message : err));
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function _cadCompletoAbrirPreview(nomeArquivo, resumo) {
+  document.getElementById('cadcompleto-subtitulo').textContent = nomeArquivo + ' • ' + resumo.abasEncontradas.join(', ');
+  var html = '';
+
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Aba Clientes</span><span>' + resumo.clientes.total + ' linha(s)</span></div>'
+    + '<div style="font-size:12px;color:#555;line-height:1.8">'
+    + '<div>' + resumo.clientes.novos + ' cliente(s) novo(s) &bull; ' + resumo.clientes.atualizados + ' atualizado(s)</div>'
+    + (resumo.clientes.redeNaoEncontrada ? '<div style="color:#B45309">' + resumo.clientes.redeNaoEncontrada + ' linha(s) com Rede não encontrada</div>' : '')
+    + (resumo.clientes.lojaNaoEncontrada ? '<div style="color:#B45309">' + resumo.clientes.lojaNaoEncontrada + ' linha(s) com Loja não encontrada</div>' : '')
+    + (resumo.clientes.cnpjDuplicado.length ? '<div style="color:#B91C1C">' + resumo.clientes.cnpjDuplicado.length + ' linha(s) ignorada(s) por CNPJ/CPF duplicado</div>' : '')
+    + '</div></div>';
+
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Códigos por Fábrica (Allfood / Nova Mix)</span><span>' + (resumo.codigosFabrica.allfood + resumo.codigosFabrica.novamix) + ' código(s)</span></div>'
+    + '<div style="font-size:12px;color:#555">' + resumo.codigosFabrica.allfood + ' Allfood &bull; ' + resumo.codigosFabrica.novamix + ' Nova Mix / Quatá</div>'
+    + (resumo.codigosFabrica.allfoodNaoCadastrado ? '<div style="color:#B45309;font-size:12px;margin-top:4px">Fornecedor "Allfood" não encontrado no Cadastro de Fornecedores — nenhum código Allfood foi aplicado.</div>' : '')
+    + (resumo.codigosFabrica.novaMixNaoCadastrado ? '<div style="color:#B45309;font-size:12px;margin-top:4px">Fornecedor "Quatá"/"Nova Mix" não encontrado no Cadastro de Fornecedores — nenhum código Nova Mix/Quatá foi aplicado.</div>' : '')
+    + '</div>';
+
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A;margin-bottom:6px"><span>Vendedor por Fábrica</span><span>' + resumo.vendedorForn.total + ' linha(s)</span></div>'
+    + '<div style="font-size:12px;color:#555;line-height:1.8">'
+    + '<div>' + resumo.vendedorForn.principalDefinido + ' cliente(s) com Vendedor Principal definido</div>'
+    + (resumo.vendedorForn.excecoesCriadas ? '<div>' + resumo.vendedorForn.excecoesCriadas + ' exceção(ões) por fábrica (vendedor diferente do principal)</div>' : '<div style="color:#888">Nenhuma exceção — mesmo vendedor em todas as fábricas de cada cliente</div>')
+    + (resumo.vendedorForn.semCodigoCliente ? '<div style="color:#B91C1C">' + resumo.vendedorForn.semCodigoCliente + ' linha(s) com Código Cliente não encontrado</div>' : '')
+    + (resumo.vendedorForn.fabricaNaoEncontrada ? '<div style="color:#B45309">' + resumo.vendedorForn.fabricaNaoEncontrada + ' linha(s) com Fábrica não cadastrada em Fornecedores</div>' : '')
+    + (resumo.vendedorForn.vendedorNaoEncontrado ? '<div style="color:#B45309">' + resumo.vendedorForn.vendedorNaoEncontrado + ' linha(s) com Vendedor não cadastrado/ativo</div>' : '')
+    + '</div></div>';
+
+  var totalPrazoTabela = resumo.prazoForn.total + resumo.tabelaForn.total;
+  html += '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#272A4A"><span>Prazo / Tabela por Fábrica</span><span>' + totalPrazoTabela + ' linha(s)</span></div>'
+    + '<div style="font-size:12px;color:#888;margin-top:4px">' + (totalPrazoTabela === 0 ? 'Abas vazias na planilha — nada a importar.' : (resumo.prazoForn.total + ' de Prazo, ' + resumo.tabelaForn.total + ' de Tabela — mesma lógica de Vendedor por Fábrica.')) + '</div>'
+    + '</div>';
+
+  document.getElementById('cadcompleto-body').innerHTML = html;
+  document.getElementById('cadcompleto-btn-confirmar').disabled = (resumo.clientes.total === 0);
+  document.getElementById('modal-cadcompleto').style.display = 'flex';
+}
+
+function fecharModalCadCompleto() {
+  document.getElementById('modal-cadcompleto').style.display = 'none';
+  window._cadCompletoWb = null;
+}
+
+function _cadCompletoConfirmar() {
+  if (!window._cadCompletoWb) { fecharModalCadCompleto(); return; }
+  try {
+    var resultado = _cadCompletoProcessar(window._cadCompletoWb, true);
+    fecharModalCadCompleto();
+    renderClienteList();
+    alert('Importação concluída.\n\n'
+      + resultado.resumo.clientes.novos + ' cliente(s) novo(s), ' + resultado.resumo.clientes.atualizados + ' atualizado(s).\n'
+      + (resultado.resumo.codigosFabrica.allfood + resultado.resumo.codigosFabrica.novamix) + ' código(s) de fábrica aplicado(s).\n'
+      + resultado.resumo.vendedorForn.principalDefinido + ' cliente(s) com Vendedor Principal definido, ' + resultado.resumo.vendedorForn.excecoesCriadas + ' exceção(ões) por fábrica.');
+  } catch (err) {
+    alert('Erro ao confirmar importação: ' + (err && err.message ? err.message : err));
+  }
+}
+
+// Faz o parse das 4 abas do arquivo "Cadastro Completo". Se commit=true, grava de verdade (setClientes).
+// Sempre retorna o resumo, seja em modo preview (commit=false) ou gravação real (commit=true).
+function _cadCompletoProcessar(wb, commit) {
+  var abasEncontradas = [];
+  var wsClientes = wb.Sheets['Clientes']; if (wsClientes) abasEncontradas.push('Clientes');
+  var wsVend = wb.Sheets['Vendedor por Fábrica']; if (wsVend) abasEncontradas.push('Vendedor por Fábrica');
+  var wsPrazo = wb.Sheets['Prazo por Fábrica']; if (wsPrazo) abasEncontradas.push('Prazo por Fábrica');
+  var wsTabela = wb.Sheets['Tabela de Preço por Fábrica']; if (wsTabela) abasEncontradas.push('Tabela de Preço por Fábrica');
+
+  var cats = getCatClientes();
+  var vendedoresAtivos = getVendedoresAtivos();
+  var fornecedores = getFornecedores();
+  var clientes = JSON.parse(JSON.stringify(getClientes()));
+
+  var fornAllfood = fornecedores.find(function(f){ return _cadNomeMatch(f, 'allfood'); });
+  var fornNovaMix = fornecedores.find(function(f){ return _cadNomeMatch(f, 'quatá') || _cadNomeMatch(f, 'nova mix'); });
+
+  var resumo = {
+    abasEncontradas: abasEncontradas,
+    clientes: { total: 0, novos: 0, atualizados: 0, redeNaoEncontrada: 0, lojaNaoEncontrada: 0, cnpjDuplicado: [] },
+    codigosFabrica: { allfood: 0, novamix: 0, allfoodNaoCadastrado: !fornAllfood, novaMixNaoCadastrado: !fornNovaMix },
+    vendedorForn: { total: 0, principalDefinido: 0, excecoesCriadas: 0, semCodigoCliente: 0, fabricaNaoEncontrada: 0, vendedorNaoEncontrado: 0 },
+    prazoForn: { total: 0 },
+    tabelaForn: { total: 0 }
+  };
+
+  // ── aba Clientes ──
+  if (wsClientes) {
+    var aoaCli = XLSX.utils.sheet_to_json(wsClientes, { header: 1 });
+    var header = aoaCli[0] || [];
+    var C = {
+      codigo:      _cadCol(header, ['código']),
+      nome:        _cadCol(header, ['nome fantasia']),
+      razao:       _cadCol(header, ['razão social']),
+      tipoDoc:     _cadCol(header, ['tipo documento']),
+      doc:         _cadCol(header, ['cnpj']),
+      ie:          _cadCol(header, ['insc']),
+      tel1:        _cadCol(header, ['telefone 1']),
+      tel2:        _cadCol(header, ['telefone 2']),
+      whats:       _cadCol(header, ['whatsapp']),
+      contato:     _cadCol(header, ['contato']),
+      emailXml:    _cadCol(header, ['e-mail xml']),
+      email:       -1,
+      cep:         _cadCol(header, ['cep']),
+      endereco:    _cadCol(header, ['endereço']),
+      numero:      _cadCol(header, ['número']),
+      complemento: _cadCol(header, ['complemento']),
+      bairro:      _cadCol(header, ['bairro']),
+      cidade:      _cadCol(header, ['cidade']),
+      uf:          -1,
+      pais:        -1,
+      rede:        _cadCol(header, ['nome real']),
+      loja:        _cadCol(header, ['sub-rede', 'loja']),
+      ativo:       -1,
+      obs:         _cadCol(header, ['observaç']),
+      codAllfood:  _cadCol(header, ['allfood']),
+      codNovaMix:  _cadCol(header, ['nova mix'])
+    };
+    for (var ih = 0; ih < header.length; ih++) {
+      var h = String(header[ih] || '').trim().toLowerCase();
+      if (h === 'e-mail') C.email = ih;
+      if (h === 'uf') C.uf = ih;
+      if (h === 'país' || h === 'pais') C.pais = ih;
+      if (h === 'ativo') C.ativo = ih;
+    }
+
+    for (var r = 1; r < aoaCli.length; r++) {
+      var row = aoaCli[r];
+      if (!row || !row.length) continue;
+      var codigo = _cadVal(row, C.codigo).trim();
+      if (!codigo) continue;
+      resumo.clientes.total++;
+
+      var redeNome = _cadVal(row, C.rede).trim();
+      var lojaNome = _cadVal(row, C.loja).trim();
+      var rede = redeNome ? cats.find(function(c){ return String(c.nome||'').trim().toLowerCase() === redeNome.toLowerCase() && !c.pai; }) : null;
+      if (redeNome && !rede) resumo.clientes.redeNaoEncontrada++;
+      var loja = lojaNome ? cats.find(function(c){ return String(c.nome||'').trim().toLowerCase() === lojaNome.toLowerCase() && c.pai; }) : null;
+      if (lojaNome && !loja) resumo.clientes.lojaNaoEncontrada++;
+
+      var docTipoRaw = _cadVal(row, C.tipoDoc).trim().toLowerCase();
+      var docTipo = docTipoRaw.indexOf('cpf') !== -1 ? 'cpf' : 'cnpj';
+      var ativoRaw = _cadVal(row, C.ativo).trim().toLowerCase();
+      var docValor = _cadVal(row, C.doc).trim();
+
+      var existente = clientes.find(function(c){ return String(c.codigo||'').trim() === codigo; });
+
+      var docDigits = docValor.replace(/\D/g, '');
+      if (docDigits) {
+        var idExistente = existente ? existente.id : null;
+        var conflito = clientes.find(function(c){
+          return c.id !== idExistente && String(c.cpf_cnpj||'').replace(/\D/g,'') === docDigits;
+        });
+        if (conflito) {
+          resumo.clientes.cnpjDuplicado.push(codigo + ' - ' + _cadVal(row, C.nome) + ' (mesmo CNPJ/CPF do cliente código ' + conflito.codigo + ')');
+          continue;
+        }
+      }
+
+      var obj = existente ? JSON.parse(JSON.stringify(existente)) : {
+        id: 'c' + Date.now() + '_' + r,
+        prazos_fornecedor: [], tabelas_fornecedor: [], vendedores_fornecedor: [], codigos_fornecedor: []
+      };
+      obj.codigo = codigo;
+      obj.nome_fantasia = _cadVal(row, C.nome).trim();
+      obj.razao_social  = _cadVal(row, C.razao).trim();
+      obj.doc_tipo = docTipo;
+      obj.cpf_cnpj = docValor;
+      if (!obj.insc_estadual) obj.insc_estadual = docTipo === 'cpf' ? 'Isento' : '';
+      var ieVal = _cadVal(row, C.ie).trim(); if (ieVal) obj.insc_estadual = ieVal;
+      obj.email = _cadVal(row, C.email).trim();
+      obj.email_xml = _cadVal(row, C.emailXml).trim();
+      obj.tel1 = _cadVal(row, C.tel1).trim();
+      obj.tel2 = _cadVal(row, C.tel2).trim();
+      obj.whatsapp = _cadVal(row, C.whats).trim();
+      obj.contato = _cadVal(row, C.contato).trim();
+      obj.cep = _cadVal(row, C.cep).trim();
+      obj.endereco = _cadVal(row, C.endereco).trim();
+      obj.numero = _cadVal(row, C.numero).trim();
+      obj.bairro = _cadVal(row, C.bairro).trim();
+      obj.cidade = _cadVal(row, C.cidade).trim();
+      obj.estado = _cadVal(row, C.uf).trim();
+      obj.complemento = _cadVal(row, C.complemento).trim();
+      obj.pais = _cadVal(row, C.pais).trim() || 'Brasil';
+      if (rede) obj.categoria = rede.id;
+      if (loja) obj.subcategoria = loja.id;
+      obj.ativo = (ativoRaw === 'não' || ativoRaw === 'nao') ? 'Não' : 'Sim';
+      var obsVal = _cadVal(row, C.obs).trim(); if (obsVal) obj.obs = obsVal;
+      if (!obj.codigos_fornecedor) obj.codigos_fornecedor = [];
+
+      var codAllfoodVal = _cadVal(row, C.codAllfood).trim();
+      if (codAllfoodVal && fornAllfood) {
+        resumo.codigosFabrica.allfood++;
+        _cadUpsertCodigoForn(obj, fornAllfood.id, codAllfoodVal);
+      }
+      var codNovaMixVal = _cadVal(row, C.codNovaMix).trim();
+      if (codNovaMixVal && fornNovaMix) {
+        resumo.codigosFabrica.novamix++;
+        _cadUpsertCodigoForn(obj, fornNovaMix.id, codNovaMixVal);
+      }
+
+      if (existente) {
+        var idxE = clientes.indexOf(existente);
+        clientes[idxE] = obj;
+        resumo.clientes.atualizados++;
+      } else {
+        clientes.push(obj);
+        resumo.clientes.novos++;
+      }
+    }
+  }
+
+  // ── aba Vendedor por Fábrica ──
+  // O sistema agora tem Vendedor Principal (vale pra todas as fábricas) + excecao pontual por fábrica.
+  // Por isso primeiro agrupamos as linhas por cliente: o vendedor que mais aparece pros fornecedores
+  // desse cliente vira o Principal; qualquer fábrica com um vendedor diferente da maioria vira excecao.
+  // Quando só existe 1 linha pro cliente (caso mais comum), ela sozinha já define o Principal e nenhuma
+  // excecao e criada.
+  if (wsVend) {
+    var aoaVend = XLSX.utils.sheet_to_json(wsVend, { header: 1 });
+    var headerV = aoaVend[0] || [];
+    var V = {
+      codigo:  _cadCol(headerV, ['código cliente']),
+      fabrica: _cadCol(headerV, ['fábrica', 'fabrica']),
+      vendedor:_cadCol(headerV, ['vendedor'])
+    };
+    var mapaClientesPorCodigo = {};
+    clientes.forEach(function(c){ mapaClientesPorCodigo[String(c.codigo||'').trim()] = c; });
+
+    var linhasPorCliente = {}; // codigo -> [{ cli, forn, vend }]
+    for (var rv = 1; rv < aoaVend.length; rv++) {
+      var rowV = aoaVend[rv];
+      if (!rowV || !rowV.length) continue;
+      var codV = _cadVal(rowV, V.codigo).trim();
+      if (!codV) continue;
+      resumo.vendedorForn.total++;
+
+      var cli = mapaClientesPorCodigo[codV];
+      if (!cli) { resumo.vendedorForn.semCodigoCliente++; continue; }
+
+      var fabricaNome = _cadVal(rowV, V.fabrica).trim();
+      var forn = fornecedores.find(function(f){ return _cadNomeMatch(f, fabricaNome); });
+      if (!forn) { resumo.vendedorForn.fabricaNaoEncontrada++; continue; }
+
+      var vendNomeV = _cadVal(rowV, V.vendedor).trim();
+      var vend = vendedoresAtivos.find(function(v){ return String(v.nome||v.nome_fantasia||'').trim().toLowerCase() === vendNomeV.toLowerCase(); });
+      if (!vend) { resumo.vendedorForn.vendedorNaoEncontrado++; continue; }
+
+      if (!linhasPorCliente[codV]) linhasPorCliente[codV] = [];
+      linhasPorCliente[codV].push({ cli: cli, forn: forn, vend: vend });
+    }
+
+    Object.keys(linhasPorCliente).forEach(function(codV){
+      var linhas = linhasPorCliente[codV];
+      var cli = linhas[0].cli;
+
+      // conta quantas vezes cada vendedor aparece pra esse cliente -> o mais frequente vira o Principal
+      var contagem = {};
+      linhas.forEach(function(l){ contagem[l.vend.id] = (contagem[l.vend.id]||0) + 1; });
+      var principalId = linhas[0].vend.id, maiorContagem = 0;
+      Object.keys(contagem).forEach(function(vid){
+        if (contagem[vid] > maiorContagem) { maiorContagem = contagem[vid]; principalId = vid; }
+      });
+      cli.vendedor_principal = principalId;
+      resumo.vendedorForn.principalDefinido++;
+
+      // fábricas cujo vendedor diverge do Principal viram excecao em vendedores_fornecedor
+      linhas.forEach(function(l){
+        if (l.vend.id === principalId) return;
+        var fornNomeFmt = (l.forn.codigo ? l.forn.codigo + ' ' : '') + (l.forn.nome_fantasia || l.forn.razao_social || '');
+        if (!cli.vendedores_fornecedor) cli.vendedores_fornecedor = [];
+        var idxV = cli.vendedores_fornecedor.findIndex(function(p){ return p.fornId === l.forn.id; });
+        var item = { fornId: l.forn.id, fornNome: fornNomeFmt, vendId: l.vend.id, vendNome: (l.vend.nome || l.vend.nome_fantasia || '') };
+        if (idxV >= 0) cli.vendedores_fornecedor[idxV] = item; else cli.vendedores_fornecedor.push(item);
+        resumo.vendedorForn.excecoesCriadas++;
+      });
+    });
+  }
+
+  // ── abas Prazo / Tabela por Fábrica (mesmo layout de Vendedor; hoje ainda vazias) ──
+  if (wsPrazo) {
+    var aoaPrazo = XLSX.utils.sheet_to_json(wsPrazo, { header: 1 });
+    for (var rp = 1; rp < aoaPrazo.length; rp++) { if (aoaPrazo[rp] && String(aoaPrazo[rp][0]||'').trim()) resumo.prazoForn.total++; }
+  }
+  if (wsTabela) {
+    var aoaTabela = XLSX.utils.sheet_to_json(wsTabela, { header: 1 });
+    for (var rt = 1; rt < aoaTabela.length; rt++) { if (aoaTabela[rt] && String(aoaTabela[rt][0]||'').trim()) resumo.tabelaForn.total++; }
+  }
+
+  if (commit) setClientes(clientes);
+
+  return { resumo: resumo, clientes: clientes };
 }
 
 function previewCliFoto(input) {
