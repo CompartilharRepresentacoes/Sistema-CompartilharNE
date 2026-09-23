@@ -378,17 +378,7 @@
       #page-pedido-list #ped-filtros-geral .ped-limpar-btn,
       #page-pedido-list #ped-filtros-geral .ped-imprimir-btn { width:100% !important; justify-content:center !important; margin:0 !important; }
       #page-pedido-list #ped-filtros-geral .ped-spacer { display:none !important; }
-      #page-pedido-list #ped-filtros-geral .ped-kpis-wrap {
-        display:grid !important; grid-template-columns:repeat(2,1fr) !important; gap:8px !important;
-        width:100% !important; padding-left:0 !important; order:20 !important;
-      }
       #page-pedido-list #ped-filtros-geral .ped-imprimir-btn { order:21 !important; }
-      #page-pedido-list #ped-filtros-geral .ped-kpi-item {
-        display:flex !important; flex-direction:column-reverse !important; align-items:center !important;
-        text-align:center !important; background:#f8fafc !important; border-radius:10px !important; padding:10px !important;
-      }
-      #page-pedido-list #ped-filtros-geral .ped-kpi-item > div:last-child { font-size:15px !important; }
-      #page-pedido-list #ped-filtros-geral .ped-kpi-item:nth-child(3) { grid-column:1 / span 2 !important; }
       #page-pedido-list .ped-header-row { display:none !important; }
       #page-pedido-list .ped-r-pedido::before { content:'Pedido nº '; color:#94a3b8; }
       #page-pedido-list .ped-r-forn::before { content:'Forn: '; color:#94a3b8; }
@@ -456,7 +446,7 @@
       #ped-tbody .mc-badge { order:3 !important; margin-left:auto !important; }
       #ped-tbody .mc-primary { order:4 !important; flex-basis:100% !important; }
       #ped-tbody .ped-r-forn { order:5 !important; text-transform:uppercase !important; font-weight:700 !important; color:#272A4A !important; }
-      #ped-tbody .ped-r-vend { order:6 !important; margin-left:auto !important; }
+      #ped-tbody .ped-r-vend { order:6 !important; flex-basis:100% !important; }
       #ped-tbody .ped-r-valor { order:7 !important; }
       #ped-tbody .ped-r-valfat { order:8 !important; margin-left:auto !important; }
       #ped-tbody .mc-actions {
@@ -539,6 +529,7 @@
       .dash-root .dvg-charts { grid-template-columns: 1fr !important; }
       .dash-root .dvg-charts.dvg-focus-fabrica { grid-template-columns: 1fr !important; }
       .dash-root .dvg-ranks { grid-template-columns: 1fr !important; }
+      .dash-root .dvg-rankcard { min-width: 0 !important; overflow: hidden !important; }
       .dash-root .dvg-donutrow { flex-direction: column; align-items: flex-start; }
       .dash-root .dvg-scrub-top { flex-direction: column; }
       .dash-root .dvg-scrub-readout { text-align: left; }
@@ -4505,10 +4496,19 @@
         </div>
         <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
         <div class="ped-spacer" style="flex:1"></div>
-        <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
-          <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="ped-kpi-total">0</div></div>
-          <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="ped-kpi-valor">R$ 0,00</div></div>
-          <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="ped-kpi-peso">0 kg</div></div>
+      </div>
+      <div class="ped-kpis-box" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.04);display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
+        <div style="text-align:center;padding:0 10px">
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Pedidos</div>
+          <div style="font-size:20px;font-weight:800;color:#272A4A" id="ped-kpi-total">0</div>
+        </div>
+        <div style="text-align:center;padding:0 10px;border-left:1px solid #f1f5f9;border-right:1px solid #f1f5f9">
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Total</div>
+          <div style="font-size:20px;font-weight:800;color:#16a34a" id="ped-kpi-valor">R$ 0,00</div>
+        </div>
+        <div style="text-align:center;padding:0 10px">
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Peso Total</div>
+          <div style="font-size:20px;font-weight:800;color:#272A4A" id="ped-kpi-peso">0 kg</div>
         </div>
       </div>
       <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
@@ -11176,22 +11176,69 @@ function deleteCliente(id) {
 }
 
 // ============ Exportar/Importar Clientes (Excel) ============
+function _cliFornLabel(f) {
+  return (f.codigo ? f.codigo + ' ' : '') + (f.nome_fantasia || f.razao_social || '');
+}
+
+// Cabecalho fixo (sempre nesta ordem na exportacao) + 3 colunas por fornecedor cadastrado
+// (Vendedor / Prazo / Tabela de Preco). A importacao le por NOME de coluna (nao por posicao),
+// entao a ordem das colunas na planilha do usuario nao importa.
+var CLI_COLS_FIXAS = [
+  'Código','Nome Fantasia','Razão Social','Tipo Doc (CNPJ/CPF)','CNPJ/CPF','Inscrição Estadual',
+  'Email','Email XML (NF-e)','Telefone','Telefone 2','WhatsApp','Contato','Site',
+  'CEP','Endereço','Número','Bairro','Cidade','UF','Complemento','País',
+  'Rede','Loja','Vendedor Principal','Ativo',
+  'CEP Entrega','Endereço Entrega','Número Entrega','Bairro Entrega','Complemento Entrega','Cidade Entrega','UF Entrega','País Entrega',
+  'Observações'
+];
+
+function _cliFornLabel(f) {
+  return (f.codigo ? f.codigo + ' ' : '') + (f.nome_fantasia || f.razao_social || '');
+}
+
+// Cabecalho fixo (sempre nesta ordem na exportacao) + 4 colunas por fornecedor cadastrado
+// (Vendedor / Prazo / Tabela de Preco / Codigo do Cliente no fornecedor). A importacao le
+// por NOME de coluna (nao por posicao), entao a ordem das colunas na planilha nao importa.
+var CLI_COLS_FIXAS = [
+  'Código','Nome Fantasia','Razão Social','Tipo Doc (CNPJ/CPF)','CNPJ/CPF','Inscrição Estadual',
+  'Email','Email XML (NF-e)','Telefone','Telefone 2','WhatsApp','Contato','Site',
+  'CEP','Endereço','Número','Bairro','Cidade','UF','Complemento','País',
+  'Rede','Loja','Vendedor Principal','Ativo',
+  'CEP Entrega','Endereço Entrega','Número Entrega','Bairro Entrega','Complemento Entrega','Cidade Entrega','UF Entrega','País Entrega',
+  'Observações'
+];
+
 function _cliExportarExcel() {
   if (typeof XLSX === 'undefined') { alert('Biblioteca de Excel não carregou. Verifique a conexão com a internet e tente novamente.'); return; }
   var cats = getCatClientes();
-  var usuarios = getUsuariosSistema();
-  var header = ['Código','Nome Fantasia','Razão Social','Tipo Doc (CNPJ/CPF)','CNPJ/CPF','Email','Telefone','WhatsApp','CEP','Endereço','Número','Bairro','Cidade','UF','Complemento','Rede','Loja','Vendedor','Ativo'];
+  var vendedores = getVendedoresAtivos();
+  var fornecedores = getFornecedores();
+  var header = CLI_COLS_FIXAS.slice();
+  fornecedores.forEach(function(f){
+    var lbl = _cliFornLabel(f);
+    header.push('Vendedor - ' + lbl, 'Prazo - ' + lbl, 'Tabela de Preço - ' + lbl, 'Código Cliente - ' + lbl);
+  });
   var aoa = [header];
   getClientes().forEach(function(c){
     var rede = cats.find(function(x){ return String(x.id)===String(c.categoria); });
     var loja = cats.find(function(x){ return String(x.id)===String(c.subcategoria); });
-    var vendResumo = (c.vendedores_fornecedor||[]).map(function(v){ return v.fornNome + ': ' + v.vendNome; }).join('; ');
-    aoa.push([
-      c.codigo||'', c.nome_fantasia||'', c.razao_social||'', (c.doc_tipo==='cpf'?'CPF':'CNPJ'), c.cpf_cnpj||'',
-      c.email||'', c.tel1||'', c.whatsapp||'', c.cep||'', c.endereco||'', c.numero||'', c.bairro||'',
-      c.cidade||'', c.estado||'', c.complemento||'', (rede&&rede.nome)||'', (loja&&loja.nome)||'',
-      vendResumo, c.ativo||'Sim'
-    ]);
+    var vendPrinc = vendedores.find(function(v){ return String(v.id)===String(c.vendedor_principal); });
+    var linha = [
+      c.codigo||'', c.nome_fantasia||'', c.razao_social||'', (c.doc_tipo==='cpf'?'CPF':'CNPJ'), c.cpf_cnpj||'', c.insc_estadual||'',
+      c.email||'', c.email_xml||'', c.tel1||'', c.tel2||'', c.whatsapp||'', c.contato||'', c.site||'',
+      c.cep||'', c.endereco||'', c.numero||'', c.bairro||'', c.cidade||'', c.estado||'', c.complemento||'', c.pais||'',
+      (rede&&rede.nome)||'', (loja&&loja.nome)||'', (vendPrinc && (vendPrinc.nome||vendPrinc.nome_fantasia))||'', c.ativo||'Sim',
+      c.ent_cep||'', c.ent_endereco||'', c.ent_numero||'', c.ent_bairro||'', c.ent_complemento||'', c.ent_cidade||'', c.ent_estado||'', c.ent_pais||'',
+      c.obs||''
+    ];
+    fornecedores.forEach(function(f){
+      var v = (c.vendedores_fornecedor||[]).find(function(x){ return x.fornId===f.id; });
+      var p = (c.prazos_fornecedor||[]).find(function(x){ return x.fornId===f.id; });
+      var t = (c.tabelas_fornecedor||[]).find(function(x){ return x.fornId===f.id; });
+      var cf = (c.codigos_fornecedor||[]).find(function(x){ return x.fornecedor_id===f.id; });
+      linha.push((v&&v.vendNome)||'', (p&&p.valor)||'', (t&&t.valor)||'', (cf&&cf.codigo_cliente)||'');
+    });
+    aoa.push(linha);
   });
   var ws = XLSX.utils.aoa_to_sheet(aoa);
   var wb = XLSX.utils.book_new();
@@ -11200,65 +11247,169 @@ function _cliExportarExcel() {
   catch (err) { alert('Erro ao gerar Excel: ' + (err && err.message ? err.message : err)); }
 }
 
-// Processa linhas já lidas da planilha (array de arrays, sem cabeçalho) e faz upsert por Código.
-// Função pura (não depende de FileReader/XLSX) para poder ser testada isoladamente.
-function _cliImportarLinhas(linhas) {
+// Acha o indice de uma coluna pelo NOME exato (case-insensitive, ignora espacos nas pontas).
+// Diferente de _cadCol (usada no Cadastro Completo): aqui e' match EXATO, nao substring --
+// necessario porque temos pares de nomes parecidos (CEP / CEP Entrega, Cidade / Cidade Entrega etc)
+// que um match por substring confundiria.
+function _cliColIdx(header, nome) {
+  var alvo = String(nome).trim().toLowerCase();
+  for (var i = 0; i < header.length; i++) {
+    if (String(header[i] || '').trim().toLowerCase() === alvo) return i;
+  }
+  return -1;
+}
+
+// Fallback quando o nome exato do fornecedor na planilha nao bate 100% com o cadastro atual
+// (ex: planilha antiga, fornecedor renomeado) -- procura uma coluna "Prefixo - algumacoisa" cujo
+// "algumacoisa" combine com o fornecedor via _cadNomeMatch (mesma logica ja usada no Cadastro Completo).
+function _cliColHeaderFuzzy(header, prefixo, forn) {
+  var prefixoLower = prefixo.toLowerCase();
+  for (var i = 0; i < header.length; i++) {
+    var h = String(header[i] || '');
+    if (h.toLowerCase().indexOf(prefixoLower) === 0) {
+      if (_cadNomeMatch(forn, h.slice(prefixo.length))) return i;
+    }
+  }
+  return -1;
+}
+
+// Processa linhas já lidas da planilha (array de arrays, COM cabeçalho separado) e faz upsert por
+// Código. Le por NOME de coluna (nao por posicao) -- uma planilha com colunas faltando, fora de
+// ordem, ou de uma exportacao mais antiga (so as colunas basicas) continua funcionando: coluna que
+// nao existe vira _cliColIdx===-1, tratada como vazia em todo lugar. Funcao pura, testavel isolada.
+function _cliImportarLinhas(header, linhas) {
+  header = header || [];
   var cats = getCatClientes();
   var vendedores = getVendedoresAtivos();
+  var fornecedores = getFornecedores();
   var clientes = getClientes();
   var resumo = { total: 0, criados: 0, atualizados: 0, redeNaoEncontrada: 0, lojaNaoEncontrada: 0, vendedorNaoEncontrado: 0, cnpjDuplicado: [] };
 
+  var col = {
+    codigo: _cliColIdx(header,'Código'), nomeFantasia: _cliColIdx(header,'Nome Fantasia'), razaoSocial: _cliColIdx(header,'Razão Social'),
+    tipoDoc: _cliColIdx(header,'Tipo Doc (CNPJ/CPF)'), cpfCnpj: _cliColIdx(header,'CNPJ/CPF'), inscEstadual: _cliColIdx(header,'Inscrição Estadual'),
+    email: _cliColIdx(header,'Email'), emailXml: _cliColIdx(header,'Email XML (NF-e)'),
+    tel1: _cliColIdx(header,'Telefone'), tel2: _cliColIdx(header,'Telefone 2'), whatsapp: _cliColIdx(header,'WhatsApp'),
+    contato: _cliColIdx(header,'Contato'), site: _cliColIdx(header,'Site'),
+    cep: _cliColIdx(header,'CEP'), endereco: _cliColIdx(header,'Endereço'), numero: _cliColIdx(header,'Número'), bairro: _cliColIdx(header,'Bairro'),
+    cidade: _cliColIdx(header,'Cidade'), estado: _cliColIdx(header,'UF'), complemento: _cliColIdx(header,'Complemento'), pais: _cliColIdx(header,'País'),
+    rede: _cliColIdx(header,'Rede'), loja: _cliColIdx(header,'Loja'), vendPrincipal: _cliColIdx(header,'Vendedor Principal'), ativo: _cliColIdx(header,'Ativo'),
+    entCep: _cliColIdx(header,'CEP Entrega'), entEndereco: _cliColIdx(header,'Endereço Entrega'), entNumero: _cliColIdx(header,'Número Entrega'),
+    entBairro: _cliColIdx(header,'Bairro Entrega'), entComplemento: _cliColIdx(header,'Complemento Entrega'), entCidade: _cliColIdx(header,'Cidade Entrega'),
+    entEstado: _cliColIdx(header,'UF Entrega'), entPais: _cliColIdx(header,'País Entrega'),
+    obs: _cliColIdx(header,'Observações')
+  };
+
+  var colForn = fornecedores.map(function(f){
+    var lbl = _cliFornLabel(f);
+    var iVend = _cliColIdx(header, 'Vendedor - ' + lbl);
+    var iPrazo = _cliColIdx(header, 'Prazo - ' + lbl);
+    var iTabela = _cliColIdx(header, 'Tabela de Preço - ' + lbl);
+    var iCodigo = _cliColIdx(header, 'Código Cliente - ' + lbl);
+    if (iVend < 0) iVend = _cliColHeaderFuzzy(header, 'Vendedor - ', f);
+    if (iPrazo < 0) iPrazo = _cliColHeaderFuzzy(header, 'Prazo - ', f);
+    if (iTabela < 0) iTabela = _cliColHeaderFuzzy(header, 'Tabela de Preço - ', f);
+    if (iCodigo < 0) iCodigo = _cliColHeaderFuzzy(header, 'Código Cliente - ', f);
+    return { forn: f, iVend: iVend, iPrazo: iPrazo, iTabela: iTabela, iCodigo: iCodigo };
+  });
+
   linhas.forEach(function(row, i) {
-    var codigo = String(row[0] || '').trim();
+    var codigo = _cadVal(row, col.codigo).trim();
     if (!codigo) return;
     resumo.total++;
 
-    var redeNome = String(row[15] || '').trim();
-    var lojaNome = String(row[16] || '').trim();
-    var vendNome = String(row[17] || '').trim();
+    var redeNome = _cadVal(row, col.rede).trim();
+    var lojaNome = _cadVal(row, col.loja).trim();
+    var vendPrincNome = _cadVal(row, col.vendPrincipal).trim();
 
     var rede = redeNome ? cats.find(function(c){ return String(c.nome||'').trim().toLowerCase() === redeNome.toLowerCase() && !c.pai; }) : null;
     if (redeNome && !rede) resumo.redeNaoEncontrada++;
     var loja = lojaNome ? cats.find(function(c){ return String(c.nome||'').trim().toLowerCase() === lojaNome.toLowerCase() && c.pai; }) : null;
     if (lojaNome && !loja) resumo.lojaNaoEncontrada++;
-    var vend = vendNome ? vendedores.find(function(v){ return String(v.nome||v.nome_fantasia||'').trim().toLowerCase() === vendNome.toLowerCase(); }) : null;
-    if (vendNome && !vend) resumo.vendedorNaoEncontrado++;
+    var vendPrinc = vendPrincNome ? vendedores.find(function(v){ return String(v.nome||v.nome_fantasia||'').trim().toLowerCase() === vendPrincNome.toLowerCase(); }) : null;
+    if (vendPrincNome && !vendPrinc) resumo.vendedorNaoEncontrado++;
 
-    var docTipoRaw = String(row[3] || '').trim().toLowerCase();
+    var docTipoRaw = _cadVal(row, col.tipoDoc).trim().toLowerCase();
     var docTipo = docTipoRaw.indexOf('cpf') !== -1 ? 'cpf' : 'cnpj';
-    var ativoRaw = String(row[18] || '').trim().toLowerCase();
+    var ativoRaw = _cadVal(row, col.ativo).trim().toLowerCase();
+
+    var existente = clientes.find(function(c){ return String(c.codigo||'').trim() === codigo; });
+
+    // Vendedor/Prazo/Tabela/Codigo por fabrica: SO mexe na fabrica cuja celula veio preenchida
+    // na planilha -- fabrica com celula vazia mantem o que ja existia no cadastro (evita apagar
+    // relacionamento comercial so porque uma reimportacao parcial deixou a coluna em branco).
+    var vendedoresFornecedor = (existente && existente.vendedores_fornecedor) ? existente.vendedores_fornecedor.slice() : [];
+    var prazosFornecedor = (existente && existente.prazos_fornecedor) ? existente.prazos_fornecedor.slice() : [];
+    var tabelasFornecedor = (existente && existente.tabelas_fornecedor) ? existente.tabelas_fornecedor.slice() : [];
+    var codigosFornecedor = (existente && existente.codigos_fornecedor) ? existente.codigos_fornecedor.slice() : [];
+    colForn.forEach(function(cf){
+      var vendNome = _cadVal(row, cf.iVend).trim();
+      if (vendNome) {
+        var vend = vendedores.find(function(v){ return String(v.nome||v.nome_fantasia||'').trim().toLowerCase() === vendNome.toLowerCase(); });
+        if (vend) {
+          var item = { fornId: cf.forn.id, fornNome: _cliFornLabel(cf.forn), vendId: vend.id, vendNome: vend.nome||vend.nome_fantasia||'' };
+          var idxV = vendedoresFornecedor.findIndex(function(x){ return x.fornId === cf.forn.id; });
+          if (idxV >= 0) vendedoresFornecedor[idxV] = item; else vendedoresFornecedor.push(item);
+        } else resumo.vendedorNaoEncontrado++;
+      }
+      var prazoVal = _cadVal(row, cf.iPrazo).trim();
+      if (prazoVal) {
+        var itemP = { fornId: cf.forn.id, fornNome: _cliFornLabel(cf.forn), valor: prazoVal };
+        var idxP = prazosFornecedor.findIndex(function(x){ return x.fornId === cf.forn.id; });
+        if (idxP >= 0) prazosFornecedor[idxP] = itemP; else prazosFornecedor.push(itemP);
+      }
+      var tabelaVal = _cadVal(row, cf.iTabela).trim();
+      if (tabelaVal) {
+        var itemT = { fornId: cf.forn.id, fornNome: _cliFornLabel(cf.forn), valor: tabelaVal };
+        var idxT = tabelasFornecedor.findIndex(function(x){ return x.fornId === cf.forn.id; });
+        if (idxT >= 0) tabelasFornecedor[idxT] = itemT; else tabelasFornecedor.push(itemT);
+      }
+      var codigoVal = _cadVal(row, cf.iCodigo).trim();
+      if (codigoVal) {
+        var itemC = { fornecedor_id: cf.forn.id, codigo_cliente: codigoVal };
+        var idxC = codigosFornecedor.findIndex(function(x){ return x.fornecedor_id === cf.forn.id; });
+        if (idxC >= 0) codigosFornecedor[idxC] = itemC; else codigosFornecedor.push(itemC);
+      }
+    });
 
     var obj = {
       codigo: codigo,
-      nome_fantasia: String(row[1] || '').trim(),
-      razao_social:  String(row[2] || '').trim(),
+      nome_fantasia: _cadVal(row, col.nomeFantasia).trim(),
+      razao_social:  _cadVal(row, col.razaoSocial).trim(),
       doc_tipo: docTipo,
-      cpf_cnpj: String(row[4] || '').trim(),
-      insc_estadual: docTipo === 'cpf' ? 'Isento' : '',
-      email: String(row[5] || '').trim(),
-      email_xml: '',
-      tel1: String(row[6] || '').trim(),
-      tel2: '',
-      whatsapp: String(row[7] || '').trim(),
-      contato: '',
-      site: '',
-      cep: String(row[8] || '').trim(),
-      endereco: String(row[9] || '').trim(),
-      numero: String(row[10] || '').trim(),
-      bairro: String(row[11] || '').trim(),
-      cidade: String(row[12] || '').trim(),
-      estado: String(row[13] || '').trim(),
-      complemento: String(row[14] || '').trim(),
-      pais: 'Brasil',
+      cpf_cnpj: _cadVal(row, col.cpfCnpj).trim(),
+      insc_estadual: docTipo === 'cpf' ? 'Isento' : _cadVal(row, col.inscEstadual).trim(),
+      email: _cadVal(row, col.email).trim(),
+      email_xml: _cadVal(row, col.emailXml).trim(),
+      tel1: _cadVal(row, col.tel1).trim(),
+      tel2: _cadVal(row, col.tel2).trim(),
+      whatsapp: _cadVal(row, col.whatsapp).trim(),
+      contato: _cadVal(row, col.contato).trim(),
+      site: _cadVal(row, col.site).trim(),
+      cep: _cadVal(row, col.cep).trim(),
+      endereco: _cadVal(row, col.endereco).trim(),
+      numero: _cadVal(row, col.numero).trim(),
+      bairro: _cadVal(row, col.bairro).trim(),
+      cidade: _cadVal(row, col.cidade).trim(),
+      estado: _cadVal(row, col.estado).trim(),
+      complemento: _cadVal(row, col.complemento).trim(),
+      pais: _cadVal(row, col.pais).trim() || 'Brasil',
       categoria: rede ? rede.id : '',
       subcategoria: loja ? loja.id : '',
+      vendedor_principal: vendPrinc ? vendPrinc.id : (existente ? (existente.vendedor_principal||'') : ''),
       ativo: (ativoRaw === 'não' || ativoRaw === 'nao') ? 'Não' : 'Sim',
-      ent_cep: '', ent_endereco: '', ent_numero: '', ent_bairro: '', ent_complemento: '', ent_cidade: '', ent_estado: '', ent_pais: '',
-      obs: '',
-      prazos_fornecedor: [], tabelas_fornecedor: [], vendedores_fornecedor: []
+      ent_cep: _cadVal(row, col.entCep).trim(),
+      ent_endereco: _cadVal(row, col.entEndereco).trim(),
+      ent_numero: _cadVal(row, col.entNumero).trim(),
+      ent_bairro: _cadVal(row, col.entBairro).trim(),
+      ent_complemento: _cadVal(row, col.entComplemento).trim(),
+      ent_cidade: _cadVal(row, col.entCidade).trim(),
+      ent_estado: _cadVal(row, col.entEstado).trim(),
+      ent_pais: _cadVal(row, col.entPais).trim(),
+      obs: _cadVal(row, col.obs).trim(),
+      prazos_fornecedor: prazosFornecedor, tabelas_fornecedor: tabelasFornecedor, vendedores_fornecedor: vendedoresFornecedor,
+      codigos_fornecedor: codigosFornecedor
     };
-
-    var existente = clientes.find(function(c){ return String(c.codigo||'').trim() === codigo; });
 
     // O Código pode vir digitado de forma diferente entre planilhas (ex: "026418" vs "26418")
     // para a MESMA loja -- sem essa checagem, isso cria um cliente duplicado com o mesmo CNPJ.
@@ -11275,9 +11426,6 @@ function _cliImportarLinhas(linhas) {
 
     if (existente) {
       obj.id = existente.id;
-      obj.prazos_fornecedor = existente.prazos_fornecedor || [];
-      obj.tabelas_fornecedor = existente.tabelas_fornecedor || [];
-      obj.codigos_fornecedor = existente.codigos_fornecedor || [];
       var idx = clientes.indexOf(existente);
       clientes[idx] = obj;
       resumo.atualizados++;
@@ -11297,7 +11445,7 @@ function _cliMontarMensagemResumo(resumo) {
   var avisos = [];
   if (resumo.redeNaoEncontrada)     avisos.push(resumo.redeNaoEncontrada + ' linha(s) com Rede não encontrada');
   if (resumo.lojaNaoEncontrada)     avisos.push(resumo.lojaNaoEncontrada + ' linha(s) com Loja não encontrada');
-  if (resumo.vendedorNaoEncontrado) avisos.push(resumo.vendedorNaoEncontrado + ' linha(s) com Vendedor não encontrado');
+  if (resumo.vendedorNaoEncontrado) avisos.push(resumo.vendedorNaoEncontrado + ' linha(s)/coluna(s) com Vendedor não encontrado');
   if ((resumo.cnpjDuplicado||[]).length) avisos.push(resumo.cnpjDuplicado.length + ' linha(s) IGNORADA(S) por já existir outro cliente com o mesmo CNPJ/CPF: ' + resumo.cnpjDuplicado.join('; '));
   if (avisos.length) msg += '\n\nAtenção: ' + avisos.join('; ') + '.';
   return msg;
@@ -11314,8 +11462,8 @@ function _cliImportarExcel(input) {
       var wb = XLSX.read(data, { type: 'array' });
       var ws = wb.Sheets[wb.SheetNames[0]];
       var aoa = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      aoa.shift();
-      var resumo = _cliImportarLinhas(aoa);
+      var header = aoa.shift() || [];
+      var resumo = _cliImportarLinhas(header, aoa);
       renderClienteList();
       alert(_cliMontarMensagemResumo(resumo));
     } catch (err) {
@@ -15324,7 +15472,7 @@ function dashInit() {
       const m = _dvgMesesData[i];
       inner.innerHTML =
         '<div>Faturamento<b>' + fmtBRL(m.fat) + '</b></div>' +
-        '<div>Volume<b>' + fmtNum(m.vol) + ' cx</b></div>' +
+        '<div>Volume<b>' + fmtNum(m.peso) + ' kg</b></div>' +
         '<div>Pedidos<b>' + m.n.toLocaleString('pt-BR') + '</b></div>' +
         '<div>Ticket médio<b>' + fmtBRL(m.n ? m.fat/m.n : 0) + '</b></div>';
       det.classList.add('open');
@@ -15635,11 +15783,12 @@ function dashInit() {
       // Faturamento mensal
       const meses = Array(12).fill(0);
       const mesesVol = Array(12).fill(0);
+      const mesesPeso = Array(12).fill(0);
       const mesesN = Array(12).fill(0);
-      for (const p of peds) { const m = parseInt(p[0].slice(5,7),10)-1; meses[m]+=p[5]; mesesVol[m]+=p[4]; mesesN[m]++; }
+      for (const p of peds) { const m = parseInt(p[0].slice(5,7),10)-1; meses[m]+=p[5]; mesesVol[m]+=p[4]; mesesPeso[m]+=(p[7]||0); mesesN[m]++; }
       const metaTotal = sumMetas();
       _dvgMetaMensal = metaTotal ? metaTotal/12 : null;
-      _dvgMesesData = meses.map((fat,i)=>({ fat, vol: mesesVol[i], n: mesesN[i] }));
+      _dvgMesesData = meses.map((fat,i)=>({ fat, vol: mesesVol[i], peso: mesesPeso[i], n: mesesN[i] }));
       _dvgRenderBars();
 
       // Fábricas (donut) — mantém a proporção real de todas as fábricas, mesmo com uma fábrica selecionada no filtro
@@ -16348,6 +16497,7 @@ function dashInit() {
       const agProd = new Map();
       try {
         const fabIdReal = FAB_ID[fi];
+        const produtosPorId = new Map((getProdutos() || []).map(pr => [pr.id, pr]));
         for (const pedidoReal of getPedidos()) {
           const mesmoFornecedor = fabIdReal != null ? pedidoReal.fornecedorId === fabIdReal : (pedidoReal.fornecedorNome || '') === FAB[fi];
           if (!mesmoFornecedor) continue;
@@ -16356,12 +16506,16 @@ function dashInit() {
           (pedidoReal.itens || []).forEach(it => {
             const chave = it.prodId != null ? it.prodId : (it.prodNome || it.prodCodigo);
             let acc = agProd.get(chave);
-            if (!acc) { acc = { nome: it.prodNome || it.prodCodigo || 'Produto', qtd: 0, valor: 0 }; agProd.set(chave, acc); }
+            if (!acc) {
+              const prodCad = it.prodId != null ? produtosPorId.get(it.prodId) : null;
+              acc = { nome: it.prodNome || it.prodCodigo || 'Produto', qtd: 0, valor: 0, unidade: (prodCad && prodCad.unidade) ? String(prodCad.unidade) : '' };
+              agProd.set(chave, acc);
+            }
             acc.qtd += Number(it.quantidade) || 0;
             acc.valor += Number(it.valorTotal) || 0;
           });
         }
-      } catch (e) { /* getPedidos indisponível neste contexto (ex.: modo histórico) */ }
+      } catch (e) { /* getPedidos/getProdutos indisponível neste contexto (ex.: modo histórico) */ }
       const topProd = [...agProd.values()].sort((a,b)=>b.valor-a.valor).slice(0,10);
       // por vendedor
       const agV = new Map();
@@ -16402,7 +16556,7 @@ function dashInit() {
           <div class="scroll-x">
           <table>
             <thead><tr><th>#</th><th>Produto</th><th class="num">Qtd</th><th class="num">Valor</th><th class="num">% da fábrica</th></tr></thead>
-            <tbody>${topProd.length ? topProd.map((p,i)=>`<tr><td class="text-ink-400">${i+1}</td><td>${escapeHtml(p.nome)}</td><td class="num">${fmtNum(p.qtd)}</td><td class="num font-semibold">${fmtBRL(p.valor)}</td><td class="num">${fat?fmtPct(p.valor/fat):'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="text-center text-ink-400">Nenhum produto no período.</td></tr>'}</tbody>
+            <tbody>${topProd.length ? topProd.map((p,i)=>`<tr><td class="text-ink-400">${i+1}</td><td>${escapeHtml(p.nome)}</td><td class="num">${fmtNum(p.qtd)}${p.unidade ? ' ' + escapeHtml(p.unidade) : ''}</td><td class="num font-semibold">${fmtBRL(p.valor)}</td><td class="num">${fat?fmtPct(p.valor/fat):'—'}</td></tr>`).join('') : '<tr><td colspan="5" class="text-center text-ink-400">Nenhum produto no período.</td></tr>'}</tbody>
           </table>
           </div>
         </div>
@@ -17685,6 +17839,14 @@ function _pimpLogoOuPlaceholder(foto, texto) {
   if (foto) return '<img src="' + foto + '" style="max-width:100%;max-height:56px;object-fit:contain">';
   return '<div style="font-size:11px;font-weight:700;color:#94a3b8;text-align:center">' + _pedEsc(texto || '') + '</div>';
 }
+// Codigo do cliente para exibir na impressao do pedido: se o cliente tem um codigo proprio
+// cadastrado especificamente para este fornecedor (codigos_fornecedor), usa ele -- a fabrica
+// conhece o cliente pelo codigo dela, nao pelo nosso. Sem cadastro para esse fornecedor, cai
+// no codigo interno normalmente (nunca fica vazio).
+function _pimpCodigoCliente(cliente, fornecedorId) {
+  var item = (cliente.codigos_fornecedor || []).find(function(x){ return x.fornecedor_id === fornecedorId; });
+  return (item && item.codigo_cliente) ? item.codigo_cliente : (cliente.codigo || '');
+}
 function _pimpRender() {
   var pedido = _pimpPedidoAtual();
   var cont = document.getElementById('pimp-conteudo');
@@ -17757,7 +17919,7 @@ function _pimpRender() {
     + '</div>'
 
     + cardSecao('Dados do Cliente',
-        linha([['Código', _pedEsc(cliente.codigo || '—')], ['Vendedor', _pedEsc(pedido.vendedorNome || '—')]])
+        linha([['Código', _pedEsc(_pimpCodigoCliente(cliente, pedido.fornecedorId) || '—')], ['Vendedor', _pedEsc(pedido.vendedorNome || '—')]])
         + linha([['Nome Fantasia', _pedEsc(cliente.nome_fantasia || '—')], ['Razão Social', _pedEsc(cliente.razao_social || '—')]])
         + linha([[cliente.doc_tipo === 'CPF' ? 'CPF' : 'CNPJ', _pedEsc(cliente.cpf_cnpj || '—')], ['Inscrição Estadual', _pedEsc(cliente.insc_estadual || '—')]])
         + linha([['Endereço', _pedEsc(enderecoCliente || '—')], ['Telefone', _pedEsc(cliente.tel1 || cliente.whatsapp || cliente.tel2 || '—')]])

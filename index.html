@@ -11192,6 +11192,22 @@ var CLI_COLS_FIXAS = [
   'Observações'
 ];
 
+function _cliFornLabel(f) {
+  return (f.codigo ? f.codigo + ' ' : '') + (f.nome_fantasia || f.razao_social || '');
+}
+
+// Cabecalho fixo (sempre nesta ordem na exportacao) + 4 colunas por fornecedor cadastrado
+// (Vendedor / Prazo / Tabela de Preco / Codigo do Cliente no fornecedor). A importacao le
+// por NOME de coluna (nao por posicao), entao a ordem das colunas na planilha nao importa.
+var CLI_COLS_FIXAS = [
+  'Código','Nome Fantasia','Razão Social','Tipo Doc (CNPJ/CPF)','CNPJ/CPF','Inscrição Estadual',
+  'Email','Email XML (NF-e)','Telefone','Telefone 2','WhatsApp','Contato','Site',
+  'CEP','Endereço','Número','Bairro','Cidade','UF','Complemento','País',
+  'Rede','Loja','Vendedor Principal','Ativo',
+  'CEP Entrega','Endereço Entrega','Número Entrega','Bairro Entrega','Complemento Entrega','Cidade Entrega','UF Entrega','País Entrega',
+  'Observações'
+];
+
 function _cliExportarExcel() {
   if (typeof XLSX === 'undefined') { alert('Biblioteca de Excel não carregou. Verifique a conexão com a internet e tente novamente.'); return; }
   var cats = getCatClientes();
@@ -11200,7 +11216,7 @@ function _cliExportarExcel() {
   var header = CLI_COLS_FIXAS.slice();
   fornecedores.forEach(function(f){
     var lbl = _cliFornLabel(f);
-    header.push('Vendedor - ' + lbl, 'Prazo - ' + lbl, 'Tabela de Preço - ' + lbl);
+    header.push('Vendedor - ' + lbl, 'Prazo - ' + lbl, 'Tabela de Preço - ' + lbl, 'Código Cliente - ' + lbl);
   });
   var aoa = [header];
   getClientes().forEach(function(c){
@@ -11219,7 +11235,8 @@ function _cliExportarExcel() {
       var v = (c.vendedores_fornecedor||[]).find(function(x){ return x.fornId===f.id; });
       var p = (c.prazos_fornecedor||[]).find(function(x){ return x.fornId===f.id; });
       var t = (c.tabelas_fornecedor||[]).find(function(x){ return x.fornId===f.id; });
-      linha.push((v&&v.vendNome)||'', (p&&p.valor)||'', (t&&t.valor)||'');
+      var cf = (c.codigos_fornecedor||[]).find(function(x){ return x.fornecedor_id===f.id; });
+      linha.push((v&&v.vendNome)||'', (p&&p.valor)||'', (t&&t.valor)||'', (cf&&cf.codigo_cliente)||'');
     });
     aoa.push(linha);
   });
@@ -11288,10 +11305,12 @@ function _cliImportarLinhas(header, linhas) {
     var iVend = _cliColIdx(header, 'Vendedor - ' + lbl);
     var iPrazo = _cliColIdx(header, 'Prazo - ' + lbl);
     var iTabela = _cliColIdx(header, 'Tabela de Preço - ' + lbl);
+    var iCodigo = _cliColIdx(header, 'Código Cliente - ' + lbl);
     if (iVend < 0) iVend = _cliColHeaderFuzzy(header, 'Vendedor - ', f);
     if (iPrazo < 0) iPrazo = _cliColHeaderFuzzy(header, 'Prazo - ', f);
     if (iTabela < 0) iTabela = _cliColHeaderFuzzy(header, 'Tabela de Preço - ', f);
-    return { forn: f, iVend: iVend, iPrazo: iPrazo, iTabela: iTabela };
+    if (iCodigo < 0) iCodigo = _cliColHeaderFuzzy(header, 'Código Cliente - ', f);
+    return { forn: f, iVend: iVend, iPrazo: iPrazo, iTabela: iTabela, iCodigo: iCodigo };
   });
 
   linhas.forEach(function(row, i) {
@@ -11316,12 +11335,13 @@ function _cliImportarLinhas(header, linhas) {
 
     var existente = clientes.find(function(c){ return String(c.codigo||'').trim() === codigo; });
 
-    // Vendedor/Prazo/Tabela por fabrica: SO mexe na fabrica cuja celula veio preenchida na
-    // planilha -- fabrica com celula vazia mantem o que ja existia no cadastro (evita apagar
+    // Vendedor/Prazo/Tabela/Codigo por fabrica: SO mexe na fabrica cuja celula veio preenchida
+    // na planilha -- fabrica com celula vazia mantem o que ja existia no cadastro (evita apagar
     // relacionamento comercial so porque uma reimportacao parcial deixou a coluna em branco).
     var vendedoresFornecedor = (existente && existente.vendedores_fornecedor) ? existente.vendedores_fornecedor.slice() : [];
     var prazosFornecedor = (existente && existente.prazos_fornecedor) ? existente.prazos_fornecedor.slice() : [];
     var tabelasFornecedor = (existente && existente.tabelas_fornecedor) ? existente.tabelas_fornecedor.slice() : [];
+    var codigosFornecedor = (existente && existente.codigos_fornecedor) ? existente.codigos_fornecedor.slice() : [];
     colForn.forEach(function(cf){
       var vendNome = _cadVal(row, cf.iVend).trim();
       if (vendNome) {
@@ -11343,6 +11363,12 @@ function _cliImportarLinhas(header, linhas) {
         var itemT = { fornId: cf.forn.id, fornNome: _cliFornLabel(cf.forn), valor: tabelaVal };
         var idxT = tabelasFornecedor.findIndex(function(x){ return x.fornId === cf.forn.id; });
         if (idxT >= 0) tabelasFornecedor[idxT] = itemT; else tabelasFornecedor.push(itemT);
+      }
+      var codigoVal = _cadVal(row, cf.iCodigo).trim();
+      if (codigoVal) {
+        var itemC = { fornecedor_id: cf.forn.id, codigo_cliente: codigoVal };
+        var idxC = codigosFornecedor.findIndex(function(x){ return x.fornecedor_id === cf.forn.id; });
+        if (idxC >= 0) codigosFornecedor[idxC] = itemC; else codigosFornecedor.push(itemC);
       }
     });
 
@@ -11381,7 +11407,8 @@ function _cliImportarLinhas(header, linhas) {
       ent_estado: _cadVal(row, col.entEstado).trim(),
       ent_pais: _cadVal(row, col.entPais).trim(),
       obs: _cadVal(row, col.obs).trim(),
-      prazos_fornecedor: prazosFornecedor, tabelas_fornecedor: tabelasFornecedor, vendedores_fornecedor: vendedoresFornecedor
+      prazos_fornecedor: prazosFornecedor, tabelas_fornecedor: tabelasFornecedor, vendedores_fornecedor: vendedoresFornecedor,
+      codigos_fornecedor: codigosFornecedor
     };
 
     // O Código pode vir digitado de forma diferente entre planilhas (ex: "026418" vs "26418")
@@ -11399,13 +11426,11 @@ function _cliImportarLinhas(header, linhas) {
 
     if (existente) {
       obj.id = existente.id;
-      obj.codigos_fornecedor = existente.codigos_fornecedor || [];
       var idx = clientes.indexOf(existente);
       clientes[idx] = obj;
       resumo.atualizados++;
     } else {
       obj.id = 'c' + Date.now() + '_' + i;
-      obj.codigos_fornecedor = [];
       clientes.push(obj);
       resumo.criados++;
     }
@@ -17814,6 +17839,14 @@ function _pimpLogoOuPlaceholder(foto, texto) {
   if (foto) return '<img src="' + foto + '" style="max-width:100%;max-height:56px;object-fit:contain">';
   return '<div style="font-size:11px;font-weight:700;color:#94a3b8;text-align:center">' + _pedEsc(texto || '') + '</div>';
 }
+// Codigo do cliente para exibir na impressao do pedido: se o cliente tem um codigo proprio
+// cadastrado especificamente para este fornecedor (codigos_fornecedor), usa ele -- a fabrica
+// conhece o cliente pelo codigo dela, nao pelo nosso. Sem cadastro para esse fornecedor, cai
+// no codigo interno normalmente (nunca fica vazio).
+function _pimpCodigoCliente(cliente, fornecedorId) {
+  var item = (cliente.codigos_fornecedor || []).find(function(x){ return x.fornecedor_id === fornecedorId; });
+  return (item && item.codigo_cliente) ? item.codigo_cliente : (cliente.codigo || '');
+}
 function _pimpRender() {
   var pedido = _pimpPedidoAtual();
   var cont = document.getElementById('pimp-conteudo');
@@ -17886,7 +17919,7 @@ function _pimpRender() {
     + '</div>'
 
     + cardSecao('Dados do Cliente',
-        linha([['Código', _pedEsc(cliente.codigo || '—')], ['Vendedor', _pedEsc(pedido.vendedorNome || '—')]])
+        linha([['Código', _pedEsc(_pimpCodigoCliente(cliente, pedido.fornecedorId) || '—')], ['Vendedor', _pedEsc(pedido.vendedorNome || '—')]])
         + linha([['Nome Fantasia', _pedEsc(cliente.nome_fantasia || '—')], ['Razão Social', _pedEsc(cliente.razao_social || '—')]])
         + linha([[cliente.doc_tipo === 'CPF' ? 'CPF' : 'CNPJ', _pedEsc(cliente.cpf_cnpj || '—')], ['Inscrição Estadual', _pedEsc(cliente.insc_estadual || '—')]])
         + linha([['Endereço', _pedEsc(enderecoCliente || '—')], ['Telefone', _pedEsc(cliente.tel1 || cliente.whatsapp || cliente.tel2 || '—')]])
