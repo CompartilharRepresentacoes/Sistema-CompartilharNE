@@ -13550,14 +13550,14 @@ function _prodExportarExcel() {
   if (typeof XLSX === 'undefined') { alert('Biblioteca de Excel não carregou. Verifique a conexão com a internet e tente novamente.'); return; }
   var cats = getCatProdutos();
   var forns = getFornecedores();
-  var header = ['Código','Nome','Unidade','Quant. Caixa','Peso','Shelf Life','EAN','Descrição','Categoria','Subcategoria','Fornecedor','Ativo'];
+  var header = ['Código','Nome','Unidade','Quant. Caixa','Preço','Peso','Shelf Life','EAN','Descrição','Categoria','Subcategoria','Fornecedor','Ativo'];
   var aoa = [header];
   getProdutos().forEach(function(p){
     var cat = cats.find(function(x){ return String(x.id)===String(p.categoria); });
     var sub = cats.find(function(x){ return String(x.id)===String(p.subcategoria); });
     var forn = forns.find(function(x){ return String(x.id)===String(p.fornecedor); });
     aoa.push([
-      p.codigo||'', p.nome||'', p.unidade||'', p.quant||'', p.peso||'', p.shelf||'', p.ean||'', p.descricao||'',
+      p.codigo||'', p.nome||'', p.unidade||'', p.quant||'', p.preco||'', p.peso||'', p.shelf||'', p.ean||'', p.descricao||'',
       (cat&&cat.nome)||'', (sub&&sub.nome)||'', (forn&&(forn.nome_fantasia||forn.razao_social))||'', p.ativo||'Sim'
     ]);
   });
@@ -13570,9 +13570,6 @@ function _prodExportarExcel() {
 
 // Processa linhas já lidas da planilha (array de arrays, sem cabeçalho) e faz upsert por Código.
 // Função pura (não depende de FileReader/XLSX) para poder ser testada isoladamente.
-// Nao ha coluna "Preco": o cadastro de Produto nunca teve esse campo no formulario (era uma
-// coluna morta, nunca preenchida pela UI -- preco de venda vem da Tabela de Preco, nao daqui).
-// O campo p.preco, se algum produto antigo ainda tiver, e' preservado na atualizacao (nao apagado).
 function _prodImportarLinhas(linhas) {
   var cats = getCatProdutos();
   var forns = getFornecedores();
@@ -13584,9 +13581,9 @@ function _prodImportarLinhas(linhas) {
     if (!codigo) return;
     resumo.total++;
 
-    var catNome = String(row[8] || '').trim();
-    var subNome = String(row[9] || '').trim();
-    var fornNome = String(row[10] || '').trim();
+    var catNome = String(row[9] || '').trim();
+    var subNome = String(row[10] || '').trim();
+    var fornNome = String(row[11] || '').trim();
 
     var cat = catNome ? cats.find(function(c){ return String(c.nome||'').trim().toLowerCase() === catNome.toLowerCase() && !c.pai; }) : null;
     if (catNome && !cat) resumo.categoriaNaoEncontrada++;
@@ -13595,20 +13592,18 @@ function _prodImportarLinhas(linhas) {
     var forn = fornNome ? forns.find(function(f){ return String(f.nome_fantasia||f.razao_social||'').trim().toLowerCase() === fornNome.toLowerCase(); }) : null;
     if (fornNome && !forn) resumo.fornecedorNaoEncontrado++;
 
-    var ativoRaw = String(row[11] || '').trim().toLowerCase();
-
-    var existente = produtos.find(function(p){ return String(p.codigo||'').trim() === codigo; });
+    var ativoRaw = String(row[12] || '').trim().toLowerCase();
 
     var obj = {
       codigo: codigo,
       nome: String(row[1] || '').trim(),
       unidade: String(row[2] || '').trim(),
       quant: row[3] !== undefined && row[3] !== null ? String(row[3]).trim() : '',
-      preco: existente ? (existente.preco || '') : '',
-      peso:  row[4] !== undefined && row[4] !== null ? String(row[4]).trim() : '',
-      shelf: row[5] !== undefined && row[5] !== null ? String(row[5]).trim() : '',
-      ean: String(row[6] || '').trim(),
-      descricao: String(row[7] || '').trim(),
+      preco: row[4] !== undefined && row[4] !== null ? String(row[4]).trim() : '',
+      peso:  row[5] !== undefined && row[5] !== null ? String(row[5]).trim() : '',
+      shelf: row[6] !== undefined && row[6] !== null ? String(row[6]).trim() : '',
+      ean: String(row[7] || '').trim(),
+      descricao: String(row[8] || '').trim(),
       categoria: cat ? cat.id : '',
       subcategoria: sub ? sub.id : '',
       fornecedor: forn ? forn.id : '',
@@ -13616,6 +13611,7 @@ function _prodImportarLinhas(linhas) {
       foto: ''
     };
 
+    var existente = produtos.find(function(p){ return String(p.codigo||'').trim() === codigo; });
     if (existente) {
       obj.id = existente.id;
       obj.foto = existente.foto || '';
