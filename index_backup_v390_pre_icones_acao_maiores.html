@@ -13788,7 +13788,7 @@ function renderListaCodCliForn() {
         <button onclick="removerCodCliForn(${idx})" title="Remover"
           style="background:none;border:none;cursor:pointer;padding:4px;border-radius:5px;color:#dc2626;display:inline-flex;align-items:center"
           onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-          <i class="ti ti-trash" style="font-size:14px"></i>
+          <i class="ti ti-trash" style="font-size:12px"></i>
         </button>
       </div>
     </div>`;
@@ -17518,14 +17518,14 @@ function renderPedidoList() {
       + '<div class="mc-meta ped-r-valfat" style="font-size:12.5px;' + (p.valorFaturado ? 'font-weight:700;color:#15803d' : 'color:#cbd5e1') + '">' + (p.valorFaturado ? _pedFmtMoeda(p.valorFaturado) : '—') + '</div>'
       + '<div class="mc-badge">' + statusHtml + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:14px"></i></button>'
-      + '<button onclick="pedAbrirImpressao(\'' + p.id + '\')" title="Imprimir pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#272A4A" onmouseover="this.style.background=\'#eef2ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-printer" style="font-size:14px"></i></button>'
-      + '<button onmouseover="this.style.background=\'#f5f3ff\';pedMostrarItensTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderItensTooltip()" title="Ver produtos do pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#7c3aed"><i class="ti ti-box-multiple" style="font-size:14px"></i></button>'
-      + '<button onclick="pedAbrirStatusPopover(event,\'' + p.id + '\')" title="Alterar status" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#0e7490" onmouseover="this.style.background=\'#ecfeff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-arrows-exchange" style="font-size:14px"></i></button>'
-      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#a16207" onmouseover="this.style.background=\'#fefce8\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-file-invoice" style="font-size:14px"></i></button>'
-      + '<button onclick="duplicarPedido(\'' + p.id + '\')" title="Duplicar pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-copy" style="font-size:14px"></i></button>'
-      + '<button onclick="pedAbrirAnexos(\'' + p.id + '\')" title="Anexar Nota Fiscal (PDF ou XML)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#DE7926;position:relative" onmouseover="this.style.background=\'#fff7ed\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-paperclip" style="font-size:14px"></i>' + ((p.anexos && p.anexos.length) ? '<span style="position:absolute;top:1px;right:1px;background:#DE7926;color:#fff;border-radius:50%;width:12px;height:12px;font-size:8px;line-height:12px;text-align:center;font-weight:700">' + p.anexos.length + '</span>' : '') + '</button>'
-      + '<button onclick="deletePedido(\'' + p.id + '\')" title="' + (podeExcluir ? 'Excluir' : 'Só é possível excluir pedidos com status Cancelado') + '" style="background:none;border:none;padding:5px;border-radius:6px;' + (podeExcluir ? 'color:#dc2626;cursor:pointer' : 'color:#cbd5e1;cursor:not-allowed') + '"' + (podeExcluir ? ' onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"' : '') + '><i class="ti ti-trash" style="font-size:14px"></i></button>'
+      + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:12px"></i></button>'
+      + '<button onclick="pedAbrirImpressao(\'' + p.id + '\')" title="Imprimir pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#272A4A" onmouseover="this.style.background=\'#eef2ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-printer" style="font-size:12px"></i></button>'
+      + '<button onmouseover="this.style.background=\'#f5f3ff\';pedMostrarItensTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderItensTooltip()" title="Ver produtos do pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#7c3aed"><i class="ti ti-box-multiple" style="font-size:12px"></i></button>'
+      + '<button onclick="pedAbrirStatusPopover(event,\'' + p.id + '\')" title="Alterar status" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#0e7490" onmouseover="this.style.background=\'#ecfeff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-arrows-exchange" style="font-size:12px"></i></button>'
+      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#a16207" onmouseover="this.style.background=\'#fefce8\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-file-invoice" style="font-size:12px"></i></button>'
+      + '<button onclick="duplicarPedido(\'' + p.id + '\')" title="Duplicar pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-copy" style="font-size:12px"></i></button>'
+      + '<button onclick="pedAbrirAnexos(\'' + p.id + '\')" title="Anexar Nota Fiscal (PDF ou XML)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#DE7926;position:relative" onmouseover="this.style.background=\'#fff7ed\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-paperclip" style="font-size:12px"></i>' + ((p.anexos && p.anexos.length) ? '<span style="position:absolute;top:1px;right:1px;background:#DE7926;color:#fff;border-radius:50%;width:12px;height:12px;font-size:8px;line-height:12px;text-align:center;font-weight:700">' + p.anexos.length + '</span>' : '') + '</button>'
+      + '<button onclick="deletePedido(\'' + p.id + '\')" title="' + (podeExcluir ? 'Excluir' : 'Só é possível excluir pedidos com status Cancelado') + '" style="background:none;border:none;padding:5px;border-radius:6px;' + (podeExcluir ? 'color:#dc2626;cursor:pointer' : 'color:#cbd5e1;cursor:not-allowed') + '"' + (podeExcluir ? ' onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"' : '') + '><i class="ti ti-trash" style="font-size:12px"></i></button>'
       + '</div></div>';
   }).join('');
 }
@@ -19546,9 +19546,9 @@ function _pedRenderAnexos() {
       + '<div style="font-size:12px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(a.nome) + '">' + _pedEsc(a.nome) + '</div>'
       + '<div style="font-size:10px;color:#94a3b8">' + detalhe + '</div>'
       + '</div>'
-      + '<button onclick="pedAbrirAnexo(' + i + ')" title="Abrir" style="background:none;border:none;cursor:pointer;padding:5px;color:#475569"><i class="ti ti-eye" style="font-size:14px"></i></button>'
-      + '<button onclick="pedBaixarAnexo(' + i + ')" title="Baixar" style="background:none;border:none;cursor:pointer;padding:5px;color:#2563eb"><i class="ti ti-download" style="font-size:14px"></i></button>'
-      + '<button onclick="pedRemoverAnexo(' + i + ')" title="Remover" style="background:none;border:none;cursor:pointer;padding:5px;color:#dc2626"><i class="ti ti-trash" style="font-size:14px"></i></button>'
+      + '<button onclick="pedAbrirAnexo(' + i + ')" title="Abrir" style="background:none;border:none;cursor:pointer;padding:5px;color:#475569"><i class="ti ti-eye" style="font-size:12px"></i></button>'
+      + '<button onclick="pedBaixarAnexo(' + i + ')" title="Baixar" style="background:none;border:none;cursor:pointer;padding:5px;color:#2563eb"><i class="ti ti-download" style="font-size:12px"></i></button>'
+      + '<button onclick="pedRemoverAnexo(' + i + ')" title="Remover" style="background:none;border:none;cursor:pointer;padding:5px;color:#dc2626"><i class="ti ti-trash" style="font-size:12px"></i></button>'
       + '</div>';
   }).join('');
 }
@@ -21548,7 +21548,7 @@ function renderBloqueios() {
       + '<span>' + _pedEsc(b.alvoNome) + '</span>'
       + '<span style="color:#64748b;font-size:11px">' + (b.motivo ? _pedEsc(b.motivo) : '—') + '</span>'
       + '<span onclick="_bloqToggleAtivo(\'' + b.id + '\')" title="Clique para ' + (ativo ? 'desativar' : 'ativar') + '" style="cursor:pointer;width:32px;height:18px;border-radius:9px;background:' + (ativo ? '#15803d' : '#cbd5e1') + ';position:relative;display:block"><span style="position:absolute;' + (ativo ? 'right' : 'left') + ':2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff"></span></span>'
-      + '<span style="text-align:right"><button onclick="_bloqExcluir(\'' + b.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:14px"></i></button></span>'
+      + '<span style="text-align:right"><button onclick="_bloqExcluir(\'' + b.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:12px"></i></button></span>'
       + '</div>';
   }).join('');
 }
@@ -21800,8 +21800,8 @@ function renderMetaList() {
       + '<div style="font-weight:700;color:#1e293b">' + _metaFmtValor(m.valor, m.tipo) + '</div>'
       + '<div style="color:#94a3b8;font-size:11px">' + _metaEsc(m.dtCadastro||'') + '</div>'
       + '<div style="text-align:center;white-space:nowrap">'
-      + '<button onclick="editMeta(\''+m.id+'\')" title="Editar" style="background:none;border:none;cursor:pointer;color:#475569;padding:4px"><i class="ti ti-edit" style="font-size:14px"></i></button>'
-      + '<button onclick="deleteMeta(\''+m.id+'\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:14px"></i></button>'
+      + '<button onclick="editMeta(\''+m.id+'\')" title="Editar" style="background:none;border:none;cursor:pointer;color:#475569;padding:4px"><i class="ti ti-edit" style="font-size:12px"></i></button>'
+      + '<button onclick="deleteMeta(\''+m.id+'\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:12px"></i></button>'
       + '</div>'
       + '</div>';
   }).join('');
@@ -22057,8 +22057,8 @@ function renderPedItens() {
   var _pedItensCliId  = document.getElementById('ped-cli-id') ? document.getElementById('ped-cli-id').value : '';
   tbody.innerHTML = _pedItens.map(function(it, i){
     total += Number(it.valorTotal) || 0;
-    var acoesCell = '<button onclick="pedAbrirEdicaoItem('+i+')" title="Editar preço, quantidade e desconto" style="background:none;border:none;cursor:pointer;color:#475569;padding:4px"><i class="ti ti-edit" style="font-size:14px"></i></button>'
-      + '<button onclick="pedRemoveItem('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:14px"></i></button>';
+    var acoesCell = '<button onclick="pedAbrirEdicaoItem('+i+')" title="Editar preço, quantidade e desconto" style="background:none;border:none;cursor:pointer;color:#475569;padding:4px"><i class="ti ti-edit" style="font-size:12px"></i></button>'
+      + '<button onclick="pedRemoveItem('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:12px"></i></button>';
     var nomeComCodigo = (it.prodCodigo ? it.prodCodigo+' ' : '') + (it.prodNome||'');
     var bloqueioItem = _bloqVerificar(_pedItensFornId, it.prodId, _pedItensCliId);
     var tagBloqueado = bloqueioItem ? '<span title="'+_pedEsc(bloqueioItem.motivo || 'Produto bloqueado para este cliente')+'" style="background:#fef2f2;color:#dc2626;font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-left:6px;white-space:nowrap">Bloqueado</span>' : '';
@@ -22334,9 +22334,9 @@ function renderDevolucaoList() {
       + '<div class="mc-meta" style="font-size:12.5px;color:#475569">' + _pedEsc(d.motivo||'—') + '</div>'
       + '<div class="mc-meta" style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedFmtMoeda(d.totalProdutos) + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editDevolucao(\'' + d.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:14px"></i></button>'
-      + (temXml ? '<button onclick="devAbrirXml(\''+d.id+'\')" title="' + _pedEsc('Ver XML anexado' + (d.nfEmitida ? ' — NF ' + d.nfEmitida : '')) + '" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#15803d" onmouseover="this.style.background=\'#f0fdf4\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-file-code" style="font-size:14px"></i></button>' : '')
-      + '<button onclick="deleteDevolucao(\'' + d.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:14px"></i></button>'
+      + '<button onclick="editDevolucao(\'' + d.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:12px"></i></button>'
+      + (temXml ? '<button onclick="devAbrirXml(\''+d.id+'\')" title="' + _pedEsc('Ver XML anexado' + (d.nfEmitida ? ' — NF ' + d.nfEmitida : '')) + '" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#15803d" onmouseover="this.style.background=\'#f0fdf4\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-file-code" style="font-size:12px"></i></button>' : '')
+      + '<button onclick="deleteDevolucao(\'' + d.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:12px"></i></button>'
       + '</div></div>';
   }).join('');
 }
@@ -23140,11 +23140,11 @@ function renderRevendaList() {
       + '<div class="mc-badge">' + statusHtml + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
       + (podeAgir
-          ? '<button onclick="abrirRevendaVender(\'' + it.id + '\')" title="Revender" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#15803d" onmouseover="this.style.background=\'#f0fdf4\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-recycle" style="font-size:14px"></i></button>'
-          + '<button onclick="abrirRevendaDescartar(\'' + it.id + '\')" title="Descartar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash-x" style="font-size:14px"></i></button>'
-          + '<button onclick="editRevendaItem(\'' + it.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:14px"></i></button>'
-          : (pedidoRevenda ? '<button onclick="verPedidoRevenda(\'' + pedidoRevenda.pedidoId + '\')" title="Ver pedido de revenda" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#1d4ed8" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-file-invoice" style="font-size:14px"></i></button>' : ''))
-      + ((!it.revendas || !it.revendas.length) && !it.descarte ? '<button onclick="deleteRevendaItem(\'' + it.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:14px"></i></button>' : '')
+          ? '<button onclick="abrirRevendaVender(\'' + it.id + '\')" title="Revender" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#15803d" onmouseover="this.style.background=\'#f0fdf4\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-recycle" style="font-size:12px"></i></button>'
+          + '<button onclick="abrirRevendaDescartar(\'' + it.id + '\')" title="Descartar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash-x" style="font-size:12px"></i></button>'
+          + '<button onclick="editRevendaItem(\'' + it.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:12px"></i></button>'
+          : (pedidoRevenda ? '<button onclick="verPedidoRevenda(\'' + pedidoRevenda.pedidoId + '\')" title="Ver pedido de revenda" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#1d4ed8" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-file-invoice" style="font-size:12px"></i></button>' : ''))
+      + ((!it.revendas || !it.revendas.length) && !it.descarte ? '<button onclick="deleteRevendaItem(\'' + it.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:12px"></i></button>' : '')
       + '</div></div>';
   }).join('');
 }
@@ -23899,8 +23899,8 @@ function renderUsuarioList() {
       + '<div class="mc-meta" style="color:#475569">' + _usuEsc(u.grupoNome||'—') + '</div>'
       + '<div>' + (u.ativo!=='Não' ? '<span style="color:#15803d;font-weight:700">Sim</span>' : '<span style="color:#dc2626;font-weight:700">Não</span>') + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editUsuario(\'' + u.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:14px"></i></button>'
-      + '<button onclick="deleteUsuario(\'' + u.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:14px"></i></button>'
+      + '<button onclick="editUsuario(\'' + u.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:12px"></i></button>'
+      + '<button onclick="deleteUsuario(\'' + u.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:12px"></i></button>'
       + '</div></div>';
   }).join('');
 }
@@ -24030,8 +24030,8 @@ function renderGrupoList() {
       + '<div class="mc-primary" style="font-weight:700;color:#1e293b">' + _usuEsc(g.nome) + '</div>'
       + '<div class="mc-meta" style="color:#475569">' + qtd + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editGrupo(\'' + g.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:14px"></i></button>'
-      + '<button onclick="deleteGrupo(\'' + g.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:14px"></i></button>'
+      + '<button onclick="editGrupo(\'' + g.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:12px"></i></button>'
+      + '<button onclick="deleteGrupo(\'' + g.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:12px"></i></button>'
       + '</div></div>';
   }).join('');
 }
@@ -26726,7 +26726,7 @@ function renderOcorrencias() {
       + '<div class="mc-meta" style="color:' + cor + ';font-weight:700">' + _pedEsc(o.tipo || '—') + '</div>'
       + '<div class="mc-meta">' + valorTxt + '</div>'
       + '<div class="mc-meta" style="color:#94a3b8;font-size:11px">' + dataTxt + '</div>'
-      + '<div class="mc-actions" style="text-align:right"><button onclick="ocExcluir(\'' + o.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:14px"></i></button></div>'
+      + '<div class="mc-actions" style="text-align:right"><button onclick="ocExcluir(\'' + o.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:12px"></i></button></div>'
       + '</div>';
   }).join('');
 }
