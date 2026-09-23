@@ -183,9 +183,9 @@
     }
     .sb-item:hover { background: rgba(255,255,255,.10); }
     .sb-item.active { background: #DE7926; }
-    .sb-item i, .sb-item svg { font-size: 19px; color: rgba(255,255,255,.55); -webkit-font-smoothing:antialiased; transition: color .15s; }
-    .sb-item.active i, .sb-item.active svg { color: #fff; }
-    .sb-item:hover i, .sb-item:hover svg { color: #fff; }
+    .sb-item i { font-size: 19px; color: rgba(255,255,255,.55); -webkit-font-smoothing:antialiased; transition: color .15s; }
+    .sb-item.active i { color: #fff; }
+    .sb-item:hover i { color: #fff; }
     .sb-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,.45); letter-spacing:.03em; text-align:center; line-height:1; transition: color .15s; }
     .sb-item.active .sb-label { color: #fff; }
     .sb-item:hover .sb-label { color: rgba(255,255,255,.9); }
@@ -1115,11 +1115,11 @@
 
     <!-- Itens de navegação -->
     <div class="sb-item active" id="sb-inicio" onclick="showPage('page-home')" title="Início">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="inicio"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5A1.5 1.5 0 0 0 7 21h3v-6h4v6h3a1.5 1.5 0 0 0 1.5-1.5V10"/></svg><span class="sb-label">Início</span>
+      <i class="ti ti-home"></i><span class="sb-label">Início</span>
     </div>
 
     <div class="sb-item" id="sb-pedidos" title="Pedidos">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="pedidos"><rect x="5" y="4" width="14" height="17" rx="2.5"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 11h6M9 15h4"/></svg><span class="sb-label">Pedidos</span>
+      <i class="ti ti-clipboard-list"></i><span class="sb-label">Pedidos</span>
       <div class="sb-flyout">
         <div class="sb-flyout-title">Pedidos</div>
         <a href="#" onclick="showPage('page-pedido-list');return false">Digitação de Pedidos</a>
@@ -1129,7 +1129,7 @@
     </div>
 
     <div class="sb-item" id="sb-tabelas" title="Tabelas">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="tabelas"><path d="M4.5 3.5H11l9.5 9.5a1.5 1.5 0 0 1 0 2.1l-5.4 5.4a1.5 1.5 0 0 1-2.1 0L3.5 11V4.5a1 1 0 0 1 1-1z"/><circle cx="8" cy="8" r="1.5"/></svg><span class="sb-label">Tabelas</span>
+      <i class="ti ti-tags"></i><span class="sb-label">Tabelas</span>
       <div class="sb-flyout">
         <div class="sb-flyout-title">Tabelas</div>
         <a href="#" onclick="showPage('page-consulta-preco');return false">Consulta de Preço</a>
@@ -1139,7 +1139,7 @@
     </div>
 
     <div class="sb-item" id="sb-operacoes" title="Operações">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="operacoes"><path d="M12 2.5l8.2 4.7v9.6L12 21.5l-8.2-4.7V7.2z"/><circle cx="12" cy="12" r="3"/></svg><span class="sb-label">Operações</span>
+      <i class="ti ti-settings-2"></i><span class="sb-label">Operações</span>
       <div class="sb-flyout">
         <div class="sb-flyout-title">Operações</div>
         <a href="#" onclick="showPage('page-dados-representadas');return false">Dados Representadas</a>
@@ -1148,7 +1148,7 @@
     </div>
 
     <div class="sb-item" id="sb-entregas" title="Entregas">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="entregas"><rect x="2" y="5" width="12" height="11" rx="1.5"/><path d="M14 9h4l3 3.5V16h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg><span class="sb-label">Entregas</span>
+      <i class="ti ti-truck"></i><span class="sb-label">Entregas</span>
       <div class="sb-flyout">
         <div class="sb-flyout-title">Entregas</div>
         <a href="#" onclick="showPage('page-entrega-controle');return false">Controle de Entrega</a>
@@ -1158,7 +1158,7 @@
     </div>
 
     <div class="sb-item" id="sb-marketing" title="Marketing">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="marketing"><path d="M3 10v4a1 1 0 0 0 1 1h3l9 5V4L7 9H4a1 1 0 0 0-1 1z"/><path d="M19.5 9a4.5 4.5 0 0 1 0 6"/><path d="M8 15l1 5h3l-1-4.5"/></svg><span class="sb-label">Marketing</span>
+      <i class="ti ti-speakerphone"></i><span class="sb-label">Marketing</span>
       <div class="sb-flyout">
         <div class="sb-flyout-title">Marketing</div>
         <a href="#" onclick="showPage('page-catalogo-list');return false">Catálogos</a>
@@ -1168,7 +1168,7 @@
     </div>
 
     <div class="sb-item" id="sb-relatorios" title="Relatórios">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="relatorios"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></svg><span class="sb-label">Relatórios</span>
+      <i class="ti ti-chart-pie-2"></i><span class="sb-label">Relatórios</span>
       <div class="sb-flyout">
         <div class="sb-flyout-title">Relatórios</div>
         <a href="#" onclick="showPage('page-relatorios');return false">Relatórios</a>
@@ -1176,7 +1176,7 @@
     </div>
 
     <div class="sb-item" id="sb-cadastros" title="Cadastros">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="cadastros"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></svg><span class="sb-label">Cadastros</span>
+      <i class="ti ti-folders"></i><span class="sb-label">Cadastros</span>
       <div class="sb-flyout">
         <div class="sb-flyout-title">Cadastros</div>
         <div class="fly-grid">
@@ -1205,11 +1205,11 @@
     </div>
 
     <div class="sb-item" id="sb-comando-voz" onclick="_navTogglePainel()" title="Comando de navegação (fale ou digite)" style="margin-top:auto">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="suporte"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/><path d="M19 20v.5a2.5 2.5 0 0 1-2.5 2.5H13"/></svg><span class="sb-label">Comando</span>
+      <i class="ti ti-microphone"></i><span class="sb-label">Comando</span>
     </div>
 
     <div class="sb-item" id="sb-gerenciar" title="Gerenciar">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="seguranca"><path d="M12 3l7.5 3v5.5c0 4.5-3 8-7.5 9.5-4.5-1.5-7.5-5-7.5-9.5V6z"/><path d="M9 12l2.2 2.2L15 10"/></svg><span class="sb-label">Gerenciar</span>
+      <i class="ti ti-shield-lock"></i><span class="sb-label">Gerenciar</span>
       <div class="sb-flyout">
         <div class="sb-flyout-title">Gerenciar</div>
         <a href="#" onclick="showPage('page-backup');return false">Backup</a>
