@@ -1706,7 +1706,7 @@
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
             <div style="display:flex;align-items:center;gap:12px">
               <div style="width:38px;height:38px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="metas" style="font-size:18px;color:#fff"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+                <i class="ti ti-target" style="font-size:18px;color:#fff"></i>
               </div>
               <div>
                 <div id="meta-form-titulo" style="font-size:14px;font-weight:600;color:#fff">Nova Meta</div>
@@ -1819,7 +1819,7 @@
           <!-- Header -->
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:10px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="tabelas" style="font-size:15px;color:#fff"><path d="M4.5 3.5H11l9.5 9.5a1.5 1.5 0 0 1 0 2.1l-5.4 5.4a1.5 1.5 0 0 1-2.1 0L3.5 11V4.5a1 1 0 0 1 1-1z"/><circle cx="8" cy="8" r="1.5"/></svg>
+              <i class="ti ti-tags" style="font-size:15px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div id="form-cat-header-title" style="font-size:14px;font-weight:600;color:#fff">Nova Categoria de Cliente</div>
@@ -1854,11 +1854,11 @@
                 <div style="display:flex;flex-direction:column;gap:7px">
                   <button onclick="document.getElementById('form-cat-foto-input').click()"
                     style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Anexar Foto
+                    <i class="ti ti-upload" style="font-size:10px"></i> Anexar Foto
                   </button>
                   <button onclick="removerFotoCatCliente()"
                     style="background:#fff0f0;color:#dc2626;border:1px solid #fecaca;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:600;cursor:pointer">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:10px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg> Remover
+                    <i class="ti ti-trash" style="font-size:10px"></i> Remover
                   </button>
                   <input type="file" id="form-cat-foto-input" accept="image/*" style="display:none" onchange="previewFotoCatCliente(event)">
                 </div>
@@ -1941,7 +1941,7 @@
           <!-- Header -->
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:10px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:15px;color:#fff"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
+              <i class="ti ti-box" style="font-size:15px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div id="form-catp-header-title" style="font-size:14px;font-weight:600;color:#fff">Nova Categoria de Produto</div>
@@ -2080,11 +2080,11 @@
                     <img id="forn-foto-img" style="display:none;width:100%;height:100%;object-fit:contain">
                   </div>
                   <label style="background:#272A4A;color:#fff;border-radius:6px;padding:5px 10px;font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:9px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Logo
+                    <i class="ti ti-upload" style="font-size:9px"></i> Logo
                     <input type="file" id="forn-foto-input" accept="image/*" style="display:none" onchange="previewFornFoto(this)">
                   </label>
                   <button onclick="removerFornFoto()" style="background:#fff0f0;color:#dc2626;border:1px solid #fecaca;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;cursor:pointer">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:9px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg> Remover
+                    <i class="ti ti-trash" style="font-size:9px"></i> Remover
                   </button>
                 </div>
                 <!-- Campos -->
@@ -2119,7 +2119,7 @@
             <!-- ── Contato ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="telefone" style="font-size:11px;color:#272A4A"><path d="M6 3h3.5l2 5-2.5 1.5a12 12 0 0 0 5.5 5.5L16 12.5l5 2v3.5a2 2 0 0 1-2 2C11 20 4 13 4 5a2 2 0 0 1 2-2z"/></svg>
+                <i class="ti ti-phone" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Contato</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2154,7 +2154,7 @@
             <!-- ── Dados Fiscais ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px;color:#272A4A"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>
+                <i class="ti ti-file-invoice" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Dados Fiscais</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2165,7 +2165,7 @@
                 </div>
                 <div>
                   <button onclick="buscarCNPJ()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="busca" style="font-size:10px"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg> Buscar CNPJ
+                    <i class="ti ti-search" style="font-size:10px"></i> Buscar CNPJ
                   </button>
                 </div>
                 <div>
@@ -2182,7 +2182,7 @@
             <!-- ── Endereço ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="rotas" style="font-size:11px;color:#272A4A"><path d="M12 21s-6.5-5.5-6.5-11a6.5 6.5 0 0 1 13 0c0 5.5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                <i class="ti ti-map-pin" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Endereço</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2346,7 +2346,7 @@
           <!-- Header -->
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="entregas" style="font-size:15px;color:#fff"><rect x="2" y="5" width="12" height="11" rx="1.5"/><path d="M14 9h4l3 3.5V16h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+              <i class="ti ti-truck" style="font-size:15px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div id="transp-header-title" style="font-size:14px;font-weight:600;color:#fff">Nova Transportadora</div>
@@ -2361,7 +2361,7 @@
             <!-- ── Identificação ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="entregas" style="font-size:11px;color:#272A4A"><rect x="2" y="5" width="12" height="11" rx="1.5"/><path d="M14 9h4l3 3.5V16h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+                <i class="ti ti-truck" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Identificação</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2373,11 +2373,11 @@
                     <img id="transp-foto-img" style="display:none;width:100%;height:100%;object-fit:contain">
                   </div>
                   <label style="background:#272A4A;color:#fff;border-radius:6px;padding:5px 10px;font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:9px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Logo
+                    <i class="ti ti-upload" style="font-size:9px"></i> Logo
                     <input type="file" id="transp-foto-input" accept="image/*" style="display:none" onchange="previewTranspFoto(this)">
                   </label>
                   <button onclick="removerTranspFoto()" style="background:#fff0f0;color:#dc2626;border:1px solid #fecaca;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;cursor:pointer">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:9px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg> Remover
+                    <i class="ti ti-trash" style="font-size:9px"></i> Remover
                   </button>
                 </div>
                 <!-- Campos -->
@@ -2416,7 +2416,7 @@
             <!-- ── Contato ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="telefone" style="font-size:11px;color:#272A4A"><path d="M6 3h3.5l2 5-2.5 1.5a12 12 0 0 0 5.5 5.5L16 12.5l5 2v3.5a2 2 0 0 1-2 2C11 20 4 13 4 5a2 2 0 0 1 2-2z"/></svg>
+                <i class="ti ti-phone" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Contato</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2451,7 +2451,7 @@
             <!-- ── Dados Fiscais ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px;color:#272A4A"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>
+                <i class="ti ti-file-invoice" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Dados Fiscais</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2463,7 +2463,7 @@
                   </div>
                   <div>
                     <button onclick="buscarCNPJTransp()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
-                      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="busca" style="font-size:10px"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg> Buscar CNPJ
+                      <i class="ti ti-search" style="font-size:10px"></i> Buscar CNPJ
                     </button>
                   </div>
                   <div>
@@ -2488,7 +2488,7 @@
             <!-- ── Endereço ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="rotas" style="font-size:11px;color:#272A4A"><path d="M12 21s-6.5-5.5-6.5-11a6.5 6.5 0 0 1 13 0c0 5.5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                <i class="ti ti-map-pin" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Endereço</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2637,11 +2637,11 @@
                     <img id="emp-foto-img" style="display:none;width:100%;height:100%;object-fit:contain">
                   </div>
                   <label style="background:#272A4A;color:#fff;border-radius:6px;padding:5px 10px;font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:9px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Logo
+                    <i class="ti ti-upload" style="font-size:9px"></i> Logo
                     <input type="file" id="emp-foto-input" accept="image/*" style="display:none" onchange="previewEmpFoto(this)">
                   </label>
                   <button onclick="removerEmpFoto()" style="background:#fff0f0;color:#dc2626;border:1px solid #fecaca;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;cursor:pointer">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:9px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg> Remover
+                    <i class="ti ti-trash" style="font-size:9px"></i> Remover
                   </button>
                 </div>
                 <!-- Campos -->
@@ -2667,7 +2667,7 @@
             <!-- ── Contato ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="telefone" style="font-size:11px;color:#272A4A"><path d="M6 3h3.5l2 5-2.5 1.5a12 12 0 0 0 5.5 5.5L16 12.5l5 2v3.5a2 2 0 0 1-2 2C11 20 4 13 4 5a2 2 0 0 1 2-2z"/></svg>
+                <i class="ti ti-phone" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Contato</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2700,7 +2700,7 @@
             <!-- ── Dados Fiscais ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px;color:#272A4A"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>
+                <i class="ti ti-file-invoice" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Dados Fiscais</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2711,7 +2711,7 @@
                 </div>
                 <div>
                   <button onclick="buscarCNPJEmp()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="busca" style="font-size:10px"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg> Buscar CNPJ
+                    <i class="ti ti-search" style="font-size:10px"></i> Buscar CNPJ
                   </button>
                 </div>
                 <div>
@@ -2728,7 +2728,7 @@
             <!-- ── Endereço ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="rotas" style="font-size:11px;color:#272A4A"><path d="M12 21s-6.5-5.5-6.5-11a6.5 6.5 0 0 1 13 0c0 5.5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                <i class="ti ti-map-pin" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Endereço</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2834,7 +2834,7 @@
       </div>
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="_cliExportarExcel()" title="Exportar clientes em Excel" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-file-spreadsheet" style="font-size:10px"></i> Exportar</button>
-        <button onclick="document.getElementById('cli-import-file').click()" title="Importar clientes de Excel" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
+        <button onclick="document.getElementById('cli-import-file').click()" title="Importar clientes de Excel" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-file-import" style="font-size:10px"></i> Importar</button>
         <input type="file" id="cli-import-file" accept=".xlsx,.xls" style="display:none" onchange="_cliImportarExcel(this)">
         <button onclick="showPage('page-cliente-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
@@ -2891,7 +2891,7 @@
           <!-- Header -->
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="usuario" style="font-size:15px;color:#fff"><circle cx="12" cy="8" r="4"/><path d="M4 20.5v-1A5.5 5.5 0 0 1 9.5 14h5a5.5 5.5 0 0 1 5.5 5.5v1"/></svg>
+              <i class="ti ti-user" style="font-size:15px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div id="cli-header-title" style="font-size:14px;font-weight:600;color:#fff">Novo Cliente</div>
@@ -2906,7 +2906,7 @@
             <!-- ── Identificação ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="usuario" style="font-size:11px;color:#272A4A"><circle cx="12" cy="8" r="4"/><path d="M4 20.5v-1A5.5 5.5 0 0 1 9.5 14h5a5.5 5.5 0 0 1 5.5 5.5v1"/></svg>
+                <i class="ti ti-id-badge-2" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Identificação</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -2934,7 +2934,7 @@
             <!-- ── Dados Fiscais ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px;color:#272A4A"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>
+                <i class="ti ti-file-invoice" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Dados Fiscais</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
                 <!-- Toggle CNPJ / CPF -->
@@ -2954,7 +2954,7 @@
                   </div>
                   <div id="cli-buscar-cnpj-wrap">
                     <button id="btn-buscar-cnpj-cli" onclick="buscarCNPJCliente()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
-                      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="busca" style="font-size:10px"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg> Buscar CNPJ
+                      <i class="ti ti-search" style="font-size:10px"></i> Buscar CNPJ
                     </button>
                   </div>
                   <div>
@@ -2972,7 +2972,7 @@
             <!-- ── Contato ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="telefone" style="font-size:11px;color:#272A4A"><path d="M6 3h3.5l2 5-2.5 1.5a12 12 0 0 0 5.5 5.5L16 12.5l5 2v3.5a2 2 0 0 1-2 2C11 20 4 13 4 5a2 2 0 0 1 2-2z"/></svg>
+                <i class="ti ti-phone" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Contato</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -3011,7 +3011,7 @@
             <!-- ── Endereço ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="rotas" style="font-size:11px;color:#272A4A"><path d="M12 21s-6.5-5.5-6.5-11a6.5 6.5 0 0 1 13 0c0 5.5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                <i class="ti ti-map-pin" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Endereço</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -3072,7 +3072,7 @@
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
                 <button onclick="toggleEndEntrega()" id="btn-end-entrega"
                   style="background:#f1f5f9;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:5px 14px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">
-                  <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:9px" id="btn-end-entrega-icon"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span id="btn-end-entrega-text"> Adicionar End. Entrega</span>
+                  <i class="ti ti-plus" style="font-size:9px" id="btn-end-entrega-icon"></i><span id="btn-end-entrega-text"> Adicionar End. Entrega</span>
                 </button>
               </div>
               <div id="cli-end-entrega-block" style="display:none;flex-direction:column;gap:10px">
@@ -3126,7 +3126,7 @@
             <!-- ── Dados Financeiros ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="financeiro" style="font-size:11px;color:#272A4A"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1.1 0-2-.5-2.5-1.5M12 6.5V8M12 16v1.5"/></svg>
+                <i class="ti ti-currency-dollar" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Dados Financeiros</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -3135,13 +3135,13 @@
               <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px">
                 <div style="padding:9px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between">
                   <div style="display:flex;align-items:center;gap:6px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="relogio" style="font-size:11px;color:#0ea5e9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+                    <i class="ti ti-clock" style="font-size:11px;color:#0ea5e9"></i>
                     <span style="font-size:12px;font-weight:700;color:#1e293b">Prazo Cliente</span>
                     <span style="font-size:10px;color:#94a3b8">prazo de pagamento por fornecedor</span>
                   </div>
                   <button onclick="toggleFormPrazo()" id="btn-prazo-open"
                     style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:9px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar
+                    <i class="ti ti-plus" style="font-size:9px"></i> Cadastrar
                   </button>
                 </div>
                 <div id="cli-prazo-form" style="display:none;padding:10px 14px;border-bottom:1px solid #f1f5f9;background:#fafcff">
@@ -3176,13 +3176,13 @@
               <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px">
                 <div style="padding:9px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between">
                   <div style="display:flex;align-items:center;gap:6px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="tabelas" style="font-size:11px;color:#0ea5e9"><path d="M4.5 3.5H11l9.5 9.5a1.5 1.5 0 0 1 0 2.1l-5.4 5.4a1.5 1.5 0 0 1-2.1 0L3.5 11V4.5a1 1 0 0 1 1-1z"/><circle cx="8" cy="8" r="1.5"/></svg>
+                    <i class="ti ti-table" style="font-size:11px;color:#0ea5e9"></i>
                     <span style="font-size:12px;font-weight:700;color:#1e293b">Tabela Cliente</span>
                     <span style="font-size:10px;color:#94a3b8">tabela de preço por fornecedor</span>
                   </div>
                   <button onclick="toggleFormTabela()" id="btn-tabela-open"
                     style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:9px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar
+                    <i class="ti ti-plus" style="font-size:9px"></i> Cadastrar
                   </button>
                 </div>
                 <div id="cli-tabela-form" style="display:none;padding:10px 14px;border-bottom:1px solid #f1f5f9;background:#fafcff">
@@ -3217,7 +3217,7 @@
             <!-- ── Dados Operacionais ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="tendencia" style="font-size:11px;color:#272A4A"><path d="M3 17l6-6 4 4 8-9M15 6h6v6"/></svg>
+                <i class="ti ti-chart-line" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Dados Operacionais</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -3225,7 +3225,7 @@
               <!-- Vendedor Principal -->
               <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px">
                 <div style="padding:9px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:6px">
-                  <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="avaliacoes" style="font-size:11px;color:#0ea5e9"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9L3.5 9.7l5.9-.8z"/></svg>
+                  <i class="ti ti-star" style="font-size:11px;color:#0ea5e9"></i>
                   <span style="font-size:12px;font-weight:700;color:#1e293b">Vendedor principal</span>
                   <span style="font-size:10px;color:#94a3b8">atende este cliente em todas as fábricas</span>
                 </div>
@@ -3240,13 +3240,13 @@
               <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px">
                 <div style="padding:9px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between">
                   <div style="display:flex;align-items:center;gap:6px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="usuario" style="font-size:11px;color:#0ea5e9"><circle cx="12" cy="8" r="4"/><path d="M4 20.5v-1A5.5 5.5 0 0 1 9.5 14h5a5.5 5.5 0 0 1 5.5 5.5v1"/></svg>
+                    <i class="ti ti-user-star" style="font-size:11px;color:#0ea5e9"></i>
                     <span style="font-size:12px;font-weight:700;color:#1e293b">Segundo vendedor (exceção por fábrica)</span>
                     <span style="font-size:10px;color:#94a3b8">só preencha se alguma fábrica tiver vendedor diferente do principal</span>
                   </div>
                   <button onclick="toggleFormVendForn()" id="btn-vendforn-open"
                     style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:9px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar
+                    <i class="ti ti-plus" style="font-size:9px"></i> Cadastrar
                   </button>
                 </div>
                 <div id="cli-vendforn-form" style="display:none;padding:10px 14px;border-bottom:1px solid #f1f5f9;background:#fafcff">
@@ -3298,7 +3298,7 @@
             <!-- ── Observação ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="mensagens" style="font-size:11px;color:#272A4A"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4A1.5 1.5 0 0 1 4 14.5z"/></svg>
+                <i class="ti ti-message" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Observação</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -3337,7 +3337,7 @@
       </div>
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="_prodExportarExcel()" title="Exportar produtos em Excel" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-file-spreadsheet" style="font-size:10px"></i> Exportar</button>
-        <button onclick="document.getElementById('prod-import-file').click()" title="Importar produtos de Excel" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
+        <button onclick="document.getElementById('prod-import-file').click()" title="Importar produtos de Excel" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-file-import" style="font-size:10px"></i> Importar</button>
         <input type="file" id="prod-import-file" accept=".xlsx,.xls" style="display:none" onchange="_prodImportarExcel(this)">
         <button onclick="showPage('page-produto-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
@@ -3394,7 +3394,7 @@
           <!-- Header -->
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:15px;color:#fff"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
+              <i class="ti ti-box" style="font-size:15px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div id="form-prod-header-title" style="font-size:14px;font-weight:600;color:#fff">Novo Produto</div>
@@ -3409,7 +3409,7 @@
             <!-- ── Identificação ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="cupom" style="font-size:11px;color:#272A4A"><path d="M3 7.5h18V11a1.5 1.5 0 0 0 0 3v3.5H3V14a1.5 1.5 0 0 0 0-3z"/><path d="M14 9v6" stroke-dasharray="1.5 2"/></svg>
+                <i class="ti ti-tag" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Identificação</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -3421,11 +3421,11 @@
                     <img id="prod-foto-img" style="display:none;width:100%;height:100%;object-fit:contain">
                   </div>
                   <label style="background:#272A4A;color:#fff;border-radius:6px;padding:5px 10px;font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:9px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Foto
+                    <i class="ti ti-upload" style="font-size:9px"></i> Foto
                     <input type="file" id="prod-foto-input" accept="image/*" style="display:none" onchange="previewProdFoto(this)">
                   </label>
                   <button onclick="removerProdFoto()" style="background:#fff0f0;color:#dc2626;border:1px solid #fecaca;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;cursor:pointer">
-                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:9px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg> Remover
+                    <i class="ti ti-trash" style="font-size:9px"></i> Remover
                   </button>
                 </div>
                 <!-- Campos Identificação -->
@@ -3483,7 +3483,7 @@
             <!-- ── Dados Comerciais ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="codigo-barras" style="font-size:11px;color:#272A4A"><path d="M4 7V5.5A1.5 1.5 0 0 1 5.5 4H7M17 4h1.5A1.5 1.5 0 0 1 20 5.5V7M20 17v1.5a1.5 1.5 0 0 1-1.5 1.5H17M7 20H5.5A1.5 1.5 0 0 1 4 18.5V17M8 8v8M12 8v8M16 8v8"/></svg>
+                <i class="ti ti-barcode" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Dados Comerciais</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -3685,7 +3685,7 @@
       <!-- Header -->
       <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:14px">
         <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="tabelas" style="font-size:15px;color:#fff"><path d="M4.5 3.5H11l9.5 9.5a1.5 1.5 0 0 1 0 2.1l-5.4 5.4a1.5 1.5 0 0 1-2.1 0L3.5 11V4.5a1 1 0 0 1 1-1z"/><circle cx="8" cy="8" r="1.5"/></svg>
+          <i class="ti ti-tags" style="font-size:15px;color:#fff"></i>
         </div>
         <div style="flex:1">
           <div id="tabpreco-form-titulo" style="font-size:14px;font-weight:600;color:#fff">Nova Tabela de Preço</div>
@@ -3698,7 +3698,7 @@
       <div style="background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 4px 24px rgba(39,42,74,.08);margin-bottom:14px">
         <!-- Dados Gerais -->
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px;color:#272A4A"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>
+          <i class="ti ti-file-invoice" style="font-size:11px;color:#272A4A"></i>
           <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Dados Gerais</span>
           <div style="flex:1;height:1px;background:#f1f5f9"></div>
         </div>
@@ -3726,7 +3726,7 @@
               <button type="button" onclick="document.getElementById('tabpreco-import-file').click()" title="Importar produtos de Excel"
                 style="background:#15803d;color:#fff;border:none;border-radius:6px;padding:7px 10px;font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;height:34px"
                 onmouseover="this.style.background='#166534'" onmouseout="this.style.background='#15803d'">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar
+                <i class="ti ti-file-import" style="font-size:10px"></i> Importar
               </button>
               <input type="file" id="tabpreco-import-file" accept=".xlsx,.xls" style="display:none" onchange="importTabPrecoFile(this)">
             </div>
@@ -3738,7 +3738,7 @@
 
         <!-- Adicionar Produto -->
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:11px;color:#272A4A"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
+          <i class="ti ti-box" style="font-size:11px;color:#272A4A"></i>
           <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Adicionar Produto</span>
           <div style="flex:1;height:1px;background:#f1f5f9"></div>
         </div>
@@ -3798,7 +3798,7 @@
       <!-- Card: Adicionar Cliente -->
       <div style="background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 4px 24px rgba(39,42,74,.08);margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="equipe" style="font-size:11px;color:#272A4A"><circle cx="12" cy="8" r="3"/><path d="M6.5 20v-.5a5.5 5.5 0 0 1 11 0v.5"/><circle cx="5" cy="10" r="2.5"/><path d="M1.5 19a4 4 0 0 1 4-4"/><circle cx="19" cy="10" r="2.5"/><path d="M22.5 19a4 4 0 0 0-4-4"/></svg>
+          <i class="ti ti-users" style="font-size:11px;color:#272A4A"></i>
           <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Adicionar Cliente</span>
           <div style="flex:1;height:1px;background:#f1f5f9"></div>
         </div>
@@ -3918,7 +3918,7 @@
       <!-- Header -->
       <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:14px">
         <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="contratos" style="font-size:15px;color:#fff"><path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 3v5h5"/><path d="M8 17c1-2 2-2 3-.5s2 1 3-.5"/></svg>
+          <i class="ti ti-handshake" style="font-size:15px;color:#fff"></i>
         </div>
         <div style="flex:1">
           <div id="negpreco-form-titulo" style="font-size:14px;font-weight:600;color:#fff">Nova Negociação de Preço</div>
@@ -3930,7 +3930,7 @@
       <div style="background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 4px 24px rgba(39,42,74,.08);margin-bottom:14px">
         <!-- Produto -->
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:11px;color:#272A4A"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
+          <i class="ti ti-box" style="font-size:11px;color:#272A4A"></i>
           <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Produto</span>
           <div style="flex:1;height:1px;background:#f1f5f9"></div>
         </div>
@@ -3963,7 +3963,7 @@
 
         <!-- Alvo da negociação -->
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="metas" style="font-size:11px;color:#272A4A"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+          <i class="ti ti-target" style="font-size:11px;color:#272A4A"></i>
           <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Alvo da Negociação</span>
           <div style="flex:1;height:1px;background:#f1f5f9"></div>
         </div>
@@ -4001,7 +4001,7 @@
 
         <!-- Condições -->
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px;color:#272A4A"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>
+          <i class="ti ti-file-invoice" style="font-size:11px;color:#272A4A"></i>
           <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Condições</span>
           <div style="flex:1;height:1px;background:#f1f5f9"></div>
         </div>
@@ -4157,7 +4157,7 @@
         <div id="cp-resultado" style="background:#fff;border-radius:12px;border:1px solid #e5e7eb;padding:28px;display:flex;flex-direction:column;min-height:400px">
           <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
             <div style="width:56px;height:56px;border-radius:14px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin-bottom:6px">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="busca" style="font-size:22px;color:#cbd5e1"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg>
+              <i class="ti ti-search" style="font-size:22px;color:#cbd5e1"></i>
             </div>
             <div style="font-size:14px;font-weight:700;color:#94a3b8">Configure os filtros ao lado</div>
             <div style="font-size:12px;color:#cbd5e1">e clique em Consultar para ver os preços</div>
@@ -4268,7 +4268,7 @@
         <div style="background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(39,42,74,.10)">
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px;border-radius:12px 12px 0 0">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="codigo-barras" style="font-size:17px;color:#fff"><path d="M4 7V5.5A1.5 1.5 0 0 1 5.5 4H7M17 4h1.5A1.5 1.5 0 0 1 20 5.5V7M20 17v1.5a1.5 1.5 0 0 1-1.5 1.5H17M7 20H5.5A1.5 1.5 0 0 1 4 18.5V17M8 8v8M12 8v8M16 8v8"/></svg>
+              <i class="ti ti-barcode" style="font-size:17px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div id="sku-header-title" style="font-size:14px;font-weight:600;color:#fff">Novo SKU de Cliente</div>
@@ -4282,7 +4282,7 @@
             <!-- Identificação -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fornecedores" style="font-size:13px;color:#272A4A"><path d="M3 20.5V10.5l6 3.5v-3.5l6 3.5V4h6v16.5z"/><path d="M17 8h2M17 12h2"/></svg>
+                <i class="ti ti-building-store" style="font-size:13px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Fornecedor e cliente</span>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -4327,7 +4327,7 @@
             <!-- SKU e Forma (modo Cliente específico / edição) -->
             <div id="sku-codigo-unico-wrap">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="codigo-barras" style="font-size:13px;color:#272A4A"><path d="M4 7V5.5A1.5 1.5 0 0 1 5.5 4H7M17 4h1.5A1.5 1.5 0 0 1 20 5.5V7M20 17v1.5a1.5 1.5 0 0 1-1.5 1.5H17M7 20H5.5A1.5 1.5 0 0 1 4 18.5V17M8 8v8M12 8v8M16 8v8"/></svg>
+                <i class="ti ti-barcode" style="font-size:13px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Código e embalagem</span>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -4351,7 +4351,7 @@
             <!-- Adicionar Produto (modo Rede - lote) -->
             <div id="sku-lote-add-wrap" style="display:none">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:13px;color:#272A4A"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
+                <i class="ti ti-box" style="font-size:13px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Adicionar Produto</span>
               </div>
               <div style="display:grid;grid-template-columns:1fr 160px 110px auto;gap:10px;align-items:flex-end">
@@ -4410,7 +4410,7 @@
       <div style="background:#fff;border-radius:12px;width:100%;max-width:560px;max-height:85vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
         <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0">
           <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="codigo-barras" style="font-size:17px;color:#fff"><path d="M4 7V5.5A1.5 1.5 0 0 1 5.5 4H7M17 4h1.5A1.5 1.5 0 0 1 20 5.5V7M20 17v1.5a1.5 1.5 0 0 1-1.5 1.5H17M7 20H5.5A1.5 1.5 0 0 1 4 18.5V17M8 8v8M12 8v8M16 8v8"/></svg>
+            <i class="ti ti-barcode" style="font-size:17px;color:#fff"></i>
           </div>
           <div style="flex:1;min-width:0">
             <div id="skured-titulo" style="font-size:14px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
@@ -4423,7 +4423,7 @@
         </div>
         <div id="skured-tbody" style="overflow-y:auto;flex:1"></div>
         <div style="padding:12px 16px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;flex-shrink:0">
-          <button id="skured-btn-add" onclick="_skuRedeDetalheAdicionar()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Adicionar SKU nesta rede</button>
+          <button id="skured-btn-add" onclick="_skuRedeDetalheAdicionar()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer"><i class="ti ti-plus" style="margin-right:4px"></i>Adicionar SKU nesta rede</button>
         </div>
       </div>
     </div>
@@ -4441,9 +4441,9 @@
         </div>
       </div>
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
-        <button onclick="pedAbrirEscolhaImportar()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
+        <button onclick="pedAbrirEscolhaImportar()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-import" style="font-size:10px"></i> Importar</button>
         <input type="file" id="ped-import-file" accept=".xlsx,.xls,.pdf" style="display:none" onchange="importarPedidosArquivo(this)">
-        <button onclick="relatorioPedidos()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="graficos" style="font-size:10px"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="5" width="4" height="15.5" rx="1"/><rect x="15" y="9" width="4" height="11.5" rx="1"/></svg> Relatório</button>
+        <button onclick="relatorioPedidos()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-chart-bar" style="font-size:10px"></i> Relatório</button>
         <button onclick="showPage('page-pedido-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
       <!-- Abas de visao (mesmo estilo das abas da pagina Inicio: maiusculas + sublinhado laranja) -->
@@ -4493,7 +4493,7 @@
           <option value="Cancelado">Cancelado</option>
         </select>
         </div>
-        <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+        <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
         <div class="ped-spacer" style="flex:1"></div>
       </div>
       <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -4557,7 +4557,7 @@
           <span style="font-size:11px;font-weight:600;color:#64748b">Loja</span>
           <select id="pss-loja" onchange="renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
         </div>
-          <button class="ped-limpar-btn" onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-limpar-btn" onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
@@ -4615,7 +4615,7 @@
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="vc-cliente" oninput="renderVendasCompletas()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
-          <button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -4641,7 +4641,7 @@
         </div>
         <div id="vc-lista" style="display:flex;flex-direction:column;gap:10px"></div>
         <div id="vc-vazio" style="display:none;background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:60px 20px;text-align:center">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:26px;color:#cbd5e1;margin-bottom:14px;display:block"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
+          <i class="ti ti-box-multiple" style="font-size:26px;color:#cbd5e1;margin-bottom:14px;display:block"></i>
           <div style="font-size:14px;font-weight:700;color:#475569;margin-bottom:6px">Nenhum pedido encontrado</div>
           <div style="font-size:12px;color:#94a3b8">Ajuste os filtros ou cadastre um novo pedido.</div>
         </div>
@@ -4673,7 +4673,7 @@
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="vcf-cliente" oninput="renderVendasCompletasFaturadas()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
-          <button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -4692,7 +4692,7 @@
         </div>
         <div id="vcf-lista" style="display:flex;flex-direction:column;gap:10px"></div>
         <div id="vcf-vazio" style="display:none;background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:60px 20px;text-align:center">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:26px;color:#cbd5e1;margin-bottom:14px;display:block"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>
+          <i class="ti ti-file-invoice" style="font-size:26px;color:#cbd5e1;margin-bottom:14px;display:block"></i>
           <div style="font-size:14px;font-weight:700;color:#475569;margin-bottom:6px">Nenhum pedido faturado encontrado</div>
           <div style="font-size:12px;color:#94a3b8">Ajuste os filtros. Esta aba mostra somente pedidos com status Faturado ou Faturado Parcial.</div>
         </div>
@@ -4724,7 +4724,7 @@
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="psn-cliente" oninput="renderVendasSimplesNfs()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
-          <button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -4780,7 +4780,7 @@
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input id="pnf-cliente" oninput="renderNaoFaturados()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
-          <button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -4815,7 +4815,7 @@
           <!-- Header gradiente -->
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="pedidos" style="font-size:17px;color:#fff"><rect x="5" y="4" width="14" height="17" rx="2.5"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 11h6M9 15h4"/></svg>
+              <i class="ti ti-clipboard-list" style="font-size:17px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div id="ped-header-title" style="font-size:14px;font-weight:600;color:#fff">Novo Pedido</div>
@@ -4831,7 +4831,7 @@
             <!-- ── Dados do Pedido ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px;color:#272A4A"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>
+                <i class="ti ti-file-invoice" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Dados do Pedido</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -4895,7 +4895,7 @@
             <!-- ── Itens do Pedido ── -->
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:11px;color:#272A4A"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
+                <i class="ti ti-box-multiple" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Itens do Pedido</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -4994,8 +4994,8 @@
         </div>
       </div>
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
-        <button onclick="relatorioEntregas()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="graficos" style="font-size:10px"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="5" width="4" height="15.5" rx="1"/><rect x="15" y="9" width="4" height="11.5" rx="1"/></svg> Relatório</button>
-        <button onclick="abrirModalImportEntrega()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
+        <button onclick="relatorioEntregas()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-chart-bar" style="font-size:10px"></i> Relatório</button>
+        <button onclick="abrirModalImportEntrega()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-import" style="font-size:10px"></i> Importar</button>
       </div>
 
       <!-- Cards -->
@@ -5031,7 +5031,7 @@
           <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="entctrl-data-ate" oninput="_entctrlMaskData(this);renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
           <button id="entctrl-mais-filtros-btn" onclick="entctrlToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="filtro" style="font-size:13px"><path d="M3.5 5h17l-6.5 7.5V19l-4 2v-8.5z"/></svg> <span id="entctrl-mais-filtros-txt">Mais filtros</span> <i id="entctrl-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
+            <i class="ti ti-adjustments-horizontal" style="font-size:13px"></i> <span id="entctrl-mais-filtros-txt">Mais filtros</span> <i id="entctrl-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
           </button>
         </div>
         <div id="entctrl-filtros-extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:10px;flex-wrap:wrap">
@@ -5096,7 +5096,7 @@
         </div>
       </div>
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
-        <button onclick="relatorioDevolucoes()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="graficos" style="font-size:10px"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="5" width="4" height="15.5" rx="1"/><rect x="15" y="9" width="4" height="11.5" rx="1"/></svg> Relatório</button>
+        <button onclick="relatorioDevolucoes()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-chart-bar" style="font-size:10px"></i> Relatório</button>
         <button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
       <div class="pg-two-col">
@@ -5119,7 +5119,7 @@
           </div>
         </div>
         <div class="dev-mobile-actions" style="display:none;margin-bottom:10px">
-          <button onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:12px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar</button>
+          <button onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-plus" style="font-size:12px"></i> Cadastrar</button>
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:75px 1fr 1fr 100px 100px 118px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
@@ -5242,7 +5242,7 @@
 
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:11px;color:#272A4A"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
+                <i class="ti ti-box" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Produto</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -5377,12 +5377,12 @@
           </span>
           <button onclick="limparFiltrosRelatorio()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
           <div style="flex:1"></div>
-          <button onclick="gerarRelatorio()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="graficos" style="font-size:11px"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="5" width="4" height="15.5" rx="1"/><rect x="15" y="9" width="4" height="11.5" rx="1"/></svg> Gerar relatório</button>
+          <button onclick="gerarRelatorio()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-chart-bar" style="font-size:11px"></i> Gerar relatório</button>
         </div>
 
         <div id="rel-resultado">
           <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:50px 20px;text-align:center">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="graficos" style="font-size:22px;color:#cbd5e1;margin-bottom:10px;display:block"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="5" width="4" height="15.5" rx="1"/><rect x="15" y="9" width="4" height="11.5" rx="1"/></svg>
+            <i class="ti ti-chart-bar" style="font-size:22px;color:#cbd5e1;margin-bottom:10px;display:block"></i>
             <div style="font-size:12px;color:#94a3b8">Configure os filtros e clique em "Gerar relatório"</div>
           </div>
         </div>
@@ -5489,7 +5489,7 @@
           <div style="font-size:10.5px;color:#94a3b8;margin-top:4px">Se preenchido, entra como último slide da apresentação.</div>
         </div>
         <div style="display:flex;justify-content:flex-end">
-          <button onclick="gerarApresentacaoPPT()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="relatorios" style="font-size:11px"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></svg> Gerar apresentação</button>
+          <button onclick="gerarApresentacaoPPT()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px"><i class="ti ti-presentation" style="font-size:11px"></i> Gerar apresentação</button>
         </div>
       </div>
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
@@ -5682,7 +5682,7 @@
           <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="oc-filtro-data-ate" oninput="_entctrlMaskData(this);renderOcorrencias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
           <button id="oc-mais-filtros-btn" onclick="_ocToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="filtro" style="font-size:13px"><path d="M3.5 5h17l-6.5 7.5V19l-4 2v-8.5z"/></svg> <span id="oc-mais-filtros-txt">Mais filtros</span> <i id="oc-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
+            <i class="ti ti-adjustments-horizontal" style="font-size:13px"></i> <span id="oc-mais-filtros-txt">Mais filtros</span> <i id="oc-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
           </button>
         </div>
         <div id="oc-filtros-extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:10px;flex-wrap:wrap">
@@ -5776,7 +5776,7 @@
           ondragover="_ocEmailDragOver(event)" ondragenter="_ocEmailDragOver(event)"
           ondragleave="_ocEmailDragLeave(event)" ondrop="_ocEmailDrop(event)"
           style="border:2px dashed #cbd5e1;border-radius:10px;padding:26px;text-align:center;cursor:pointer;color:#94a3b8;font-size:12.5px;margin-bottom:14px;transition:background .15s,border-color .15s">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="email" style="font-size:22px;display:block;margin-bottom:8px;color:#94a3b8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5 12 13.5l8.5-6"/></svg>
+          <i class="ti ti-mail-opened" style="font-size:22px;display:block;margin-bottom:8px;color:#94a3b8"></i>
           Arraste o e-mail aqui ou clique para selecionar (.eml, .msg, .pdf, .txt)
         </div>
         <div id="oc-email-msg" style="font-size:12px;margin-bottom:10px;min-height:14px"></div>
@@ -5861,7 +5861,7 @@
             <input id="rev-busca" oninput="renderRevendaList()" placeholder="Produto, cliente ou fornecedor..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           </div>
           <button id="rev-mais-filtros-btn" onclick="_revToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="filtro" style="font-size:13px"><path d="M3.5 5h17l-6.5 7.5V19l-4 2v-8.5z"/></svg> <span id="rev-mais-filtros-txt">Mais filtros</span> <i id="rev-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
+            <i class="ti ti-adjustments-horizontal" style="font-size:13px"></i> <span id="rev-mais-filtros-txt">Mais filtros</span> <i id="rev-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
           </button>
         </div>
         <div id="rev-filtros-extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:10px;flex-wrap:wrap">
@@ -5910,7 +5910,7 @@
 
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="devolucoes" style="font-size:15px;color:#fff"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+              <i class="ti ti-recycle" style="font-size:15px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div id="rev-header-title" style="font-size:14px;font-weight:600;color:#fff">Registrar Item para Revenda</div>
@@ -5942,7 +5942,7 @@
 
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-                <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:11px;color:#272A4A"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
+                <i class="ti ti-box" style="font-size:11px;color:#272A4A"></i>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Item para Revenda</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
               </div>
@@ -6209,7 +6209,7 @@
         <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(39,42,74,.10)">
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="usuario" style="font-size:15px;color:#fff"><circle cx="12" cy="8" r="4"/><path d="M4 20.5v-1A5.5 5.5 0 0 1 9.5 14h5a5.5 5.5 0 0 1 5.5 5.5v1"/></svg>
+              <i class="ti ti-user" style="font-size:15px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div id="usu-header-title" style="font-size:14px;font-weight:600;color:#fff">Novo Usuário</div>
@@ -6249,7 +6249,7 @@
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;margin:4px 0 -2px">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="seguranca" style="font-size:11px;color:#272A4A"><path d="M12 3l7.5 3v5.5c0 4.5-3 8-7.5 9.5-4.5-1.5-7.5-5-7.5-9.5V6z"/><path d="M9 12l2.2 2.2L15 10"/></svg>
+              <i class="ti ti-key" style="font-size:11px;color:#272A4A"></i>
               <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Acesso ao Sistema</span>
               <div style="flex:1;height:1px;background:#f1f5f9"></div>
             </div>
@@ -6264,7 +6264,7 @@
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;margin:4px 0 -2px">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="rotas" style="font-size:11px;color:#272A4A"><path d="M12 21s-6.5-5.5-6.5-11a6.5 6.5 0 0 1 13 0c0 5.5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              <i class="ti ti-map-pin" style="font-size:11px;color:#272A4A"></i>
               <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Regiões de Atuação (UF)</span>
               <div style="flex:1;height:1px;background:#f1f5f9"></div>
             </div>
@@ -6300,7 +6300,7 @@
         <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(39,42,74,.10)">
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="seguranca" style="font-size:15px;color:#fff"><path d="M12 3l7.5 3v5.5c0 4.5-3 8-7.5 9.5-4.5-1.5-7.5-5-7.5-9.5V6z"/><path d="M9 12l2.2 2.2L15 10"/></svg>
+              <i class="ti ti-shield-lock" style="font-size:15px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div id="grp-header-title" style="font-size:14px;font-weight:600;color:#fff">Novo Grupo de Acesso</div>
@@ -6335,7 +6335,7 @@
         <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(39,42,74,.10)">
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="seguranca" style="font-size:15px;color:#fff"><path d="M12 3l7.5 3v5.5c0 4.5-3 8-7.5 9.5-4.5-1.5-7.5-5-7.5-9.5V6z"/><path d="M9 12l2.2 2.2L15 10"/></svg>
+              <i class="ti ti-shield-lock" style="font-size:15px;color:#fff"></i>
             </div>
             <div style="flex:1">
               <div style="font-size:14px;font-weight:600;color:#fff">Permissões</div>
@@ -6561,7 +6561,7 @@
     <span id="cartilha-pag-info" style="color:rgba(255,255,255,.45);font-size:11px">Páginas 1–2 de 1</span>
     <div style="display:flex;gap:8px;align-items:center">
       <span style="color:rgba(255,255,255,.25);font-size:10px">← →</span>
-      <button onclick="baixarCatalogoAtual()" style="background:#0ea5e9;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="exportar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 4v11M7.5 10.5 12 15l4.5-4.5"/></svg> Baixar PDF</button>
+      <button onclick="baixarCatalogoAtual()" style="background:#0ea5e9;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-download" style="font-size:10px"></i> Baixar PDF</button>
       <button onclick="fecharCartilha()" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:600;cursor:pointer">Fechar</button>
     </div>
   </div>
@@ -6589,7 +6589,7 @@
         ondragover="pedAnexoDragOver(event)" ondragenter="pedAnexoDragOver(event)"
         ondragleave="pedAnexoDragLeave(event)" ondrop="pedAnexoDrop(event)"
         style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1.5px dashed #cbd5e1;border-radius:9px;padding:20px 16px;cursor:pointer;color:#64748b;font-size:12px;font-weight:600;text-align:center;transition:background .15s,border-color .15s">
-        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="backup" style="color:#DE7926;font-size:20px"><path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.75 3.75 0 0 1 18.5 18z"/><path d="M12 16.5V11M9.5 13.5 12 11l2.5 2.5"/></svg>
+        <i class="ti ti-cloud-upload" style="color:#DE7926;font-size:20px"></i>
         <span>Arraste os arquivos aqui ou clique para selecionar</span>
         <span style="font-size:10px;color:#94a3b8;font-weight:400">PDF e XML juntos, quantos precisar</span>
       </label>
@@ -6700,7 +6700,7 @@
     </div>
     <div id="pimp-footer-modal" style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
       <button onclick="pedFecharImpressao()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
-      <button onclick="pedImprimirPopup()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+      <button onclick="pedImprimirPopup()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
       <button onclick="pedGerarPdfImpressao()" style="background:#D82621;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-type-pdf" style="font-size:11px"></i> Gerar PDF</button>
     </div>
   </div>
@@ -6720,7 +6720,7 @@
     </div>
     <div id="pimprel-footer-modal" style="padding:12px 18px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
       <button onclick="pedFecharImpressaoRelacao()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
-      <button onclick="pedImprimirRelacaoPopup()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+      <button onclick="pedImprimirRelacaoPopup()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
       <button onclick="pedGerarPdfRelacao()" style="background:#D82621;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-type-pdf" style="font-size:11px"></i> Gerar PDF</button>
     </div>
   </div>
@@ -6779,7 +6779,7 @@
   <div style="max-width:700px;max-height:520px;display:flex;align-items:center;justify-content:center">
     <img id="fpv-img" style="max-width:700px;max-height:520px;border-radius:8px;background:#fff;object-fit:contain">
   </div>
-  <button onclick="fpBaixarFotoAtual()" style="background:#0ea5e9;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="exportar" style="font-size:11px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 4v11M7.5 10.5 12 15l4.5-4.5"/></svg> Baixar foto</button>
+  <button onclick="fpBaixarFotoAtual()" style="background:#0ea5e9;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-download" style="font-size:11px"></i> Baixar foto</button>
 </div>
 
 <!-- ── Modal: preview do Importar de Clientes ── -->
@@ -6829,7 +6829,7 @@
             <input class="form-input" id="mccf-cod-input" placeholder="Ex.: 12345" style="width:100%">
           </div>
           <button onclick="adicionarCodCliForn()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:10px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Adicionar
+            <i class="ti ti-plus" style="font-size:10px"></i> Adicionar
           </button>
         </div>
       </div>
@@ -6913,7 +6913,7 @@
           </div>
         </div>
         <div style="background:#eff6ff;border-radius:8px;padding:10px 12px;font-size:11px;color:#1d4ed8;display:flex;gap:8px;align-items:flex-start">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="ajuda" style="font-size:14px;flex-shrink:0"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/></svg>
+          <i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0"></i>
           <span>Confirmar cria um pedido normal para este cliente, com o selo "Revenda". Depois disso, ele segue o fluxo comum de Pedidos: editar, faturar, mudar status etc.</span>
         </div>
         <div id="revv-msg" style="font-size:11px;color:#dc2626;min-height:14px"></div>
@@ -7293,14 +7293,14 @@
     </div>
     <div style="padding:18px;display:flex;flex-direction:column;gap:10px">
       <button onclick="_pinfEscolherImportarPedido()" style="display:flex;align-items:center;gap:12px;text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:14px 16px;cursor:pointer">
-        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:20px;color:#272A4A;flex-shrink:0"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg>
+        <i class="ti ti-file-import" style="font-size:20px;color:#272A4A;flex-shrink:0"></i>
         <span>
           <span style="display:block;font-size:12.5px;font-weight:700;color:#1e293b">Importar Pedido</span>
           <span style="display:block;font-size:10.5px;color:#64748b;margin-top:2px">Planilha/PDF do pedido de compra (fluxo atual)</span>
         </span>
       </button>
       <button onclick="_pinfEscolherImportarXmlNf()" style="display:flex;align-items:center;gap:12px;text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:14px 16px;cursor:pointer">
-        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:20px;color:#DE7926;flex-shrink:0"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>
+        <i class="ti ti-file-invoice" style="font-size:20px;color:#DE7926;flex-shrink:0"></i>
         <span>
           <span style="display:block;font-size:12.5px;font-weight:700;color:#1e293b">XML / NF</span>
           <span style="display:block;font-size:10.5px;color:#64748b;margin-top:2px">Confere as NFs recebidas contra os pedidos e anexa em lote</span>
@@ -7340,7 +7340,7 @@
         ondragover="_pinfDragOver(event)" ondragenter="_pinfDragOver(event)"
         ondragleave="_pinfDragLeave(event)" ondrop="_pinfDrop(event)"
         style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1.5px dashed #cbd5e1;border-radius:9px;padding:20px 16px;cursor:pointer;color:#64748b;font-size:12px;font-weight:600;text-align:center;transition:background .15s,border-color .15s">
-        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="backup" style="color:#DE7926;font-size:20px"><path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.75 3.75 0 0 1 18.5 18z"/><path d="M12 16.5V11M9.5 13.5 12 11l2.5 2.5"/></svg>
+        <i class="ti ti-cloud-upload" style="color:#DE7926;font-size:20px"></i>
         <span>Arraste os XMLs/PDFs aqui ou clique para selecionar</span>
         <span style="font-size:10px;color:#94a3b8;font-weight:400">Vários arquivos de uma vez — o sistema casa cada NF com o pedido correspondente</span>
       </label>
@@ -8313,17 +8313,17 @@ function renderCatClienteList() {
           <button onclick="visualizarLogoCatCliente(${r.id})" title="Visualizar logo"
             style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb;display:flex;align-items:center"
             onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='none'">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="visualizar" style="font-size:13px"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            <i class="ti ti-eye" style="font-size:13px"></i>
           </button>
           <button onclick="editCatCliente(${r.id})" title="Editar"
             style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
             onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:13px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg>
+            <i class="ti ti-edit" style="font-size:13px"></i>
           </button>
           <button onclick="deleteCatCliente(${r.id})" title="Excluir"
             style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
             onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:13px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+            <i class="ti ti-trash" style="font-size:13px"></i>
           </button>
         </div>
       </div>`;
@@ -8340,17 +8340,17 @@ function renderCatClienteList() {
         <button onclick="visualizarLogoCatCliente(${r.id})" title="Visualizar logo"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb;display:flex;align-items:center"
           onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="visualizar" style="font-size:13px"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          <i class="ti ti-eye" style="font-size:13px"></i>
         </button>
         <button onclick="editCatCliente(${r.id})" title="Editar"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:13px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg>
+          <i class="ti ti-edit" style="font-size:13px"></i>
         </button>
         <button onclick="deleteCatCliente(${r.id})" title="Excluir"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
           onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:13px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+          <i class="ti ti-trash" style="font-size:13px"></i>
         </button>
       </div>
     </div>`;
@@ -8538,12 +8538,12 @@ function renderCatProdutoList() {
           <button onclick="editCatProduto(${r.id})" title="Editar"
             style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
             onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:13px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg>
+            <i class="ti ti-edit" style="font-size:13px"></i>
           </button>
           <button onclick="deleteCatProduto(${r.id})" title="Excluir"
             style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
             onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-            <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:13px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+            <i class="ti ti-trash" style="font-size:13px"></i>
           </button>
         </div>
       </div>`;
@@ -8560,12 +8560,12 @@ function renderCatProdutoList() {
         <button onclick="editCatProduto(${r.id})" title="Editar"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:13px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg>
+          <i class="ti ti-edit" style="font-size:13px"></i>
         </button>
         <button onclick="deleteCatProduto(${r.id})" title="Excluir"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
           onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:13px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+          <i class="ti ti-trash" style="font-size:13px"></i>
         </button>
       </div>
     </div>`;
@@ -8855,12 +8855,12 @@ function renderFornecedorList() {
         <button onclick="editFornecedor('${r.id}')" title="Editar"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:13px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg>
+          <i class="ti ti-edit" style="font-size:13px"></i>
         </button>
         <button onclick="deleteFornecedor('${r.id}')" title="Excluir"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
           onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:13px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+          <i class="ti ti-trash" style="font-size:13px"></i>
         </button>
       </div>
     </div>`;
@@ -9193,7 +9193,7 @@ function renderEmpresaView() {
         <div style="font-size:14px;font-weight:700;color:#272A4A;margin-bottom:6px">Nenhuma empresa cadastrada</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:18px">Cadastre os dados da sua empresa para começar.</div>
         <button onclick="showPage('page-empresa-form')" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:11px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar Empresa
+          <i class="ti ti-plus" style="font-size:11px"></i> Cadastrar Empresa
         </button>
       </div>`;
     return;
@@ -9210,15 +9210,15 @@ function renderEmpresaView() {
           <div style="font-size:16px;font-weight:800;color:#272A4A">${_empEsc(e.nomeFantasia)}</div>
           ${e.razaoSocial ? `<div style="font-size:12px;color:#64748b;margin-top:2px">${_empEsc(e.razaoSocial)}</div>` : ''}
           <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:11px;color:#475569">
-            ${e.cnpj ? `<div><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="color:#94a3b8;margin-right:5px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>${_empEsc(e.cnpj)}</div>` : ''}
-            ${e.tel1 ? `<div><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="telefone" style="color:#94a3b8;margin-right:5px"><path d="M6 3h3.5l2 5-2.5 1.5a12 12 0 0 0 5.5 5.5L16 12.5l5 2v3.5a2 2 0 0 1-2 2C11 20 4 13 4 5a2 2 0 0 1 2-2z"/></svg>${_empEsc(e.tel1)}</div>` : ''}
-            ${e.email ? `<div><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="email" style="color:#94a3b8;margin-right:5px"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5 12 13.5l8.5-6"/></svg>${_empEsc(e.email)}</div>` : ''}
+            ${e.cnpj ? `<div><i class="ti ti-file-invoice" style="color:#94a3b8;margin-right:5px"></i>${_empEsc(e.cnpj)}</div>` : ''}
+            ${e.tel1 ? `<div><i class="ti ti-phone" style="color:#94a3b8;margin-right:5px"></i>${_empEsc(e.tel1)}</div>` : ''}
+            ${e.email ? `<div><i class="ti ti-mail" style="color:#94a3b8;margin-right:5px"></i>${_empEsc(e.email)}</div>` : ''}
             ${e.site ? `<div><i class="ti ti-globe" style="color:#94a3b8;margin-right:5px"></i>${_empEsc(e.site)}</div>` : ''}
           </div>
-          ${(endereco || cidadeUf) ? `<div style="font-size:11px;color:#64748b;margin-top:8px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="rotas" style="color:#94a3b8;margin-right:5px"><path d="M12 21s-6.5-5.5-6.5-11a6.5 6.5 0 0 1 13 0c0 5.5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.5"/></svg>${_empEsc([endereco, e.bairro, cidadeUf].filter(Boolean).join(' \u2013 '))}</div>` : ''}
+          ${(endereco || cidadeUf) ? `<div style="font-size:11px;color:#64748b;margin-top:8px"><i class="ti ti-map-pin" style="color:#94a3b8;margin-right:5px"></i>${_empEsc([endereco, e.bairro, cidadeUf].filter(Boolean).join(' \u2013 '))}</div>` : ''}
         </div>
         <button onclick="showPage('page-empresa-form')" style="background:#f1f5f9;color:#272A4A;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:10px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg> Editar
+          <i class="ti ti-pencil" style="font-size:10px"></i> Editar
         </button>
       </div>
     </div>`;
@@ -9525,7 +9525,7 @@ async function renderCatalogoList() {
       </div>
       <div>
         <div class="mc-secondary mc-hide" style="font-size:12px;font-weight:600;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${arquivo}">${arquivo}</div>
-        ${temCat ? `<div class="mc-hide" style="font-size:10px;color:#94a3b8;margin-top:3px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="agenda" style="font-size:9px"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg> ${dataUpload}</div>` : ''}
+        ${temCat ? `<div class="mc-hide" style="font-size:10px;color:#94a3b8;margin-top:3px"><i class="ti ti-calendar" style="font-size:9px"></i> ${dataUpload}</div>` : ''}
       </div>
       <div class="mc-meta" style="font-size:13px;font-weight:600;color:#475569">${temCat ? dataUpload : 'Sem catalogo'}</div>
       <div class="mc-badge mc-hide">${statusHtml}</div>
@@ -9769,7 +9769,7 @@ async function abrirCartilha(fornId) {
     lib = _getPdfjsLib();
   }
   if (!lib) {
-    document.getElementById('cartilha-loading').innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="alertas" style="font-size:24px;color:#f87171"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.5h.01"/></svg><span style="color:#f87171;margin-top:8px">PDF.js indisponível.</span>';
+    document.getElementById('cartilha-loading').innerHTML = '<i class="ti ti-alert-triangle" style="font-size:24px;color:#f87171"></i><span style="color:#f87171;margin-top:8px">PDF.js indisponível.</span>';
     return;
   }
   lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -9787,7 +9787,7 @@ async function abrirCartilha(fornId) {
     }
     document.getElementById('cartilha-loading').style.display = 'none';
   } catch(e) {
-    document.getElementById('cartilha-loading').innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="alertas" style="font-size:24px;color:#f87171"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.5h.01"/></svg><span style="color:#f87171;margin-top:8px">Erro ao carregar o PDF.</span>';
+    document.getElementById('cartilha-loading').innerHTML = '<i class="ti ti-alert-triangle" style="font-size:24px;color:#f87171"></i><span style="color:#f87171;margin-top:8px">Erro ao carregar o PDF.</span>';
   }
 }
 async function navegarCartilha(delta) {
@@ -9905,9 +9905,9 @@ function _fpHeaderFolder() {
 function _fpFolderRow(onclick, label, statsText, downloadOnclick) {
   return '<div class="fp-row" onclick="' + onclick + '" style="display:grid;grid-template-columns:1fr 190px 130px;padding:13px 16px;align-items:center;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background .12s"' +
     ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">' +
-    '<div style="display:flex;align-items:center;gap:10px;min-width:0"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="cadastros" style="font-size:17px;color:#DE7926;flex-shrink:0"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></svg><span style="font-size:13.5px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + label + '</span></div>' +
+    '<div style="display:flex;align-items:center;gap:10px;min-width:0"><i class="ti ti-folder" style="font-size:17px;color:#DE7926;flex-shrink:0"></i><span style="font-size:13.5px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + label + '</span></div>' +
     '<div style="font-size:12px;color:#64748b">' + statsText + '</div>' +
-    '<div style="text-align:right"><button onclick="event.stopPropagation();' + downloadOnclick + '" title="Baixar fotos desta pasta (.zip)" style="padding:6px 12px;background:#eff6ff;color:#2563eb;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="exportar" style="font-size:11px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 4v11M7.5 10.5 12 15l4.5-4.5"/></svg> Baixar</button></div></div>';
+    '<div style="text-align:right"><button onclick="event.stopPropagation();' + downloadOnclick + '" title="Baixar fotos desta pasta (.zip)" style="padding:6px 12px;background:#eff6ff;color:#2563eb;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px"><i class="ti ti-download" style="font-size:11px"></i> Baixar</button></div></div>';
 }
 function _fpHeaderFotos() {
   return '<div class="fp-header" style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:8px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center"><span></span><span>Produto</span><span>Código</span><span style="text-align:right">Ações</span></div>';
@@ -10223,7 +10223,7 @@ function renderTranspList() {
 
   if (!rows.length) {
     tbody.innerHTML = `<div style="text-align:center;padding:36px 16px;color:#94a3b8;font-size:13px">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="entregas" style="font-size:28px;margin-bottom:10px;display:block;opacity:.3"><rect x="2" y="5" width="12" height="11" rx="1.5"/><path d="M14 9h4l3 3.5V16h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+      <i class="ti ti-truck" style="font-size:28px;margin-bottom:10px;display:block;opacity:.3"></i>
       Nenhuma transportadora encontrada.
     </div>`;
     return;
@@ -10248,12 +10248,12 @@ function renderTranspList() {
         <button onclick="editTransp('${r.id}')" title="Editar"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:13px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg>
+          <i class="ti ti-edit" style="font-size:13px"></i>
         </button>
         <button onclick="deleteTransp('${r.id}')" title="Excluir"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
           onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:13px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+          <i class="ti ti-trash" style="font-size:13px"></i>
         </button>
       </div>
     </div>`;
@@ -10449,7 +10449,7 @@ async function buscarCNPJTransp() {
   } catch(e) {
     alert('CNPJ não encontrado ou erro na consulta.');
   } finally {
-    btn.innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="busca" style="font-size:10px"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg> Buscar CNPJ';
+    btn.innerHTML = '<i class="ti ti-search" style="font-size:10px"></i> Buscar CNPJ';
     btn.disabled = false;
   }
 }
@@ -10578,7 +10578,7 @@ function renderClienteList() {
         <button onclick="abrirModalCodCliForn('${r.id}')" title="${tooltipQr}"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:${codigos.length?'#272A4A':'#94a3b8'};display:flex;align-items:center"
           onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="codigo-barras" style="font-size:13px"><path d="M4 7V5.5A1.5 1.5 0 0 1 5.5 4H7M17 4h1.5A1.5 1.5 0 0 1 20 5.5V7M20 17v1.5a1.5 1.5 0 0 1-1.5 1.5H17M7 20H5.5A1.5 1.5 0 0 1 4 18.5V17M8 8v8M12 8v8M16 8v8"/></svg>
+          <i class="ti ti-qrcode" style="font-size:13px"></i>
         </button>
         <button onclick="abrirModalCliView('${r.id}')" title="Visualizar cadastro"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#0ea5e9;display:flex;align-items:center"
@@ -10588,17 +10588,17 @@ function renderClienteList() {
         <button onclick="abrirHistoricoCliente('${r.id}')" title="Histórico de pedidos"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#DE7926;display:flex;align-items:center"
           onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:13px"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
+          <i class="ti ti-box" style="font-size:13px"></i>
         </button>
         <button onclick="editCliente('${r.id}')" title="Editar"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:13px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg>
+          <i class="ti ti-edit" style="font-size:13px"></i>
         </button>
         <button onclick="deleteCliente('${r.id}')" title="Excluir"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
           onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:13px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+          <i class="ti ti-trash" style="font-size:13px"></i>
         </button>
       </div>
     </div>`;
@@ -10827,7 +10827,7 @@ function openClienteForm(params) {
   // Vendedor por Fábrica (exceções)
   window._cliVendedoresForn = JSON.parse(JSON.stringify(r.vendedores_fornecedor || []));
   document.getElementById('cli-vendforn-form').style.display = 'none';
-  document.getElementById('btn-vendforn-open').innerHTML = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:9px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar';
+  document.getElementById('btn-vendforn-open').innerHTML = '<i class="ti ti-plus" style="font-size:9px"></i> Cadastrar';
   renderVendedoresForn();
   // Categoria Principal (somente categorias sem pai)
   const catSel = document.getElementById('cli-categoria');
@@ -10876,7 +10876,7 @@ function toggleFormVendForn() {
   if (!form) return;
   var abrir = form.style.display === 'none';
   form.style.display = abrir ? 'block' : 'none';
-  if (btn) btn.innerHTML = abrir ? '<i class="ti ti-x" style="font-size:9px"></i> Cancelar' : '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:9px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar';
+  if (btn) btn.innerHTML = abrir ? '<i class="ti ti-x" style="font-size:9px"></i> Cancelar' : '<i class="ti ti-plus" style="font-size:9px"></i> Cadastrar';
   document.getElementById('cli-vendforn-forn-busca').value = '';
   document.getElementById('cli-vendforn-forn-sel').value = '';
   var vendSel = document.getElementById('cli-vendforn-vend-sel');
@@ -10959,7 +10959,7 @@ function renderVendedoresForn() {
       + '<div style="font-size:12px;color:#334155"><span style="font-weight:700;color:#1e293b">'+_pedEsc(p.fornNome)+'</span>'
       + ' <span style="color:#94a3b8">&rarr;</span> <span style="font-weight:600">'+_pedEsc(p.vendNome)+'</span>'
       + ' <span style="font-size:10px;color:#94a3b8">(exceção)</span></div>'
-      + '<button onclick="removerVendedorForn('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:11px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="removerVendedorForn('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:11px"></i></button>'
       + '</div>';
   }).join('') + rodape;
 }
@@ -10979,7 +10979,7 @@ function toggleFormPrazo() {
   if (!form) return;
   var abrir = form.style.display === 'none';
   form.style.display = abrir ? 'block' : 'none';
-  if (btn) btn.innerHTML = abrir ? '<i class="ti ti-x" style="font-size:9px"></i> Cancelar' : '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:9px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar';
+  if (btn) btn.innerHTML = abrir ? '<i class="ti ti-x" style="font-size:9px"></i> Cancelar' : '<i class="ti ti-plus" style="font-size:9px"></i> Cadastrar';
   document.getElementById('cli-prazo-forn-busca').value = '';
   document.getElementById('cli-prazo-forn-sel').value = '';
   document.getElementById('cli-prazo-valor').value = '';
@@ -10991,7 +10991,7 @@ function toggleFormTabela() {
   if (!form) return;
   var abrir = form.style.display === 'none';
   form.style.display = abrir ? 'block' : 'none';
-  if (btn) btn.innerHTML = abrir ? '<i class="ti ti-x" style="font-size:9px"></i> Cancelar' : '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:9px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar';
+  if (btn) btn.innerHTML = abrir ? '<i class="ti ti-x" style="font-size:9px"></i> Cancelar' : '<i class="ti ti-plus" style="font-size:9px"></i> Cadastrar';
   document.getElementById('cli-tabela-forn-busca').value = '';
   document.getElementById('cli-tabela-forn-sel').value = '';
   document.getElementById('cli-tabela-valor').value = '';
@@ -11093,7 +11093,7 @@ function renderPrazosCliente() {
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #f1f5f9">'
       + '<div style="font-size:12px;color:#334155"><span style="font-weight:700;color:#1e293b">'+_pedEsc(p.fornNome)+'</span>'
       + ' <span style="color:#94a3b8">&rarr;</span> <span style="font-weight:600">'+_pedEsc(p.valor)+'</span></div>'
-      + '<button onclick="removerPrazoCliente('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:11px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="removerPrazoCliente('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:11px"></i></button>'
       + '</div>';
   }).join('');
 }
@@ -11127,7 +11127,7 @@ function renderTabelasCliente() {
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #f1f5f9">'
       + '<div style="font-size:12px;color:#334155"><span style="font-weight:700;color:#1e293b">'+_pedEsc(t.fornNome)+'</span>'
       + ' <span style="color:#94a3b8">&rarr;</span> <span style="font-weight:600">'+_pedEsc(t.valor)+'</span></div>'
-      + '<button onclick="removerTabelaCliente('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:11px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="removerTabelaCliente('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:11px"></i></button>'
       + '</div>';
   }).join('');
 }
@@ -13402,12 +13402,12 @@ function renderProdutoList() {
         <button onclick="editProduto('${r.id}')" title="Editar"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569;display:flex;align-items:center"
           onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:13px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg>
+          <i class="ti ti-edit" style="font-size:13px"></i>
         </button>
         <button onclick="deleteProduto('${r.id}')" title="Excluir"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626;display:flex;align-items:center"
           onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:13px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+          <i class="ti ti-trash" style="font-size:13px"></i>
         </button>
       </div>
     </div>`;
@@ -13788,7 +13788,7 @@ function renderListaCodCliForn() {
         <button onclick="removerCodCliForn(${idx})" title="Remover"
           style="background:none;border:none;cursor:pointer;padding:4px;border-radius:5px;color:#dc2626;display:inline-flex;align-items:center"
           onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='none'">
-          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+          <i class="ti ti-trash" style="font-size:14px"></i>
         </button>
       </div>
     </div>`;
@@ -14324,7 +14324,7 @@ function _cpShowEmpty() {
   if (!res) return;
   res.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
     <div style="width:56px;height:56px;border-radius:14px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin-bottom:6px">
-      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="busca" style="font-size:22px;color:#cbd5e1"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg>
+      <i class="ti ti-search" style="font-size:22px;color:#cbd5e1"></i>
     </div>
     <div style="font-size:14px;font-weight:700;color:#94a3b8">Configure os filtros ao lado</div>
     <div style="font-size:12px;color:#cbd5e1">e clique em Consultar para ver os preços</div>
@@ -14471,7 +14471,7 @@ function consultarPreco() {
   if (!_cpResultados.length) {
     el.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
       <div style="width:56px;height:56px;border-radius:14px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin-bottom:6px">
-        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="busca" style="font-size:22px;color:#cbd5e1"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg>
+        <i class="ti ti-search" style="font-size:22px;color:#cbd5e1"></i>
       </div>
       <div style="font-size:14px;font-weight:700;color:#94a3b8">Nenhuma tabela encontrada</div>
       <div style="font-size:12px;color:#cbd5e1">Este produto não possui preço cadastrado em nenhuma tabela ativa.</div>
@@ -17511,21 +17511,21 @@ function renderPedidoList() {
       + ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">'
       + '<div class="mc-meta ped-r-data" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
       + '<div class="mc-meta ped-r-pedido" style="font-size:12.5px;color:#475569;white-space:normal;word-break:break-all;line-height:1.25;padding-right:6px">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<div class="mc-primary" style="font-size:13px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word;line-height:1.3;padding-right:8px">' + (p.revenda ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:#eff6ff;color:#1d4ed8;margin-right:6px;vertical-align:middle"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="devolucoes" style="font-size:9px"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Revenda</span>' : '') + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
+      + '<div class="mc-primary" style="font-size:13px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word;line-height:1.3;padding-right:8px">' + (p.revenda ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:#eff6ff;color:#1d4ed8;margin-right:6px;vertical-align:middle"><i class="ti ti-recycle" style="font-size:9px"></i>Revenda</span>' : '') + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
       + '<div class="mc-meta ped-r-forn" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
       + '<div class="mc-meta ped-r-vend" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px">' + _pedEsc(p.vendedorNome || '—') + '</div>'
       + '<div class="mc-meta ped-r-valor" style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedFmtMoeda(p.valorTotal) + '</div>'
       + '<div class="mc-meta ped-r-valfat" style="font-size:12.5px;' + (p.valorFaturado ? 'font-weight:700;color:#15803d' : 'color:#cbd5e1') + '">' + (p.valorFaturado ? _pedFmtMoeda(p.valorFaturado) : '—') + '</div>'
       + '<div class="mc-badge">' + statusHtml + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
-      + '<button onclick="pedAbrirImpressao(\'' + p.id + '\')" title="Imprimir pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#272A4A" onmouseover="this.style.background=\'#eef2ff\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:14px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg></button>'
-      + '<button onmouseover="this.style.background=\'#f5f3ff\';pedMostrarItensTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderItensTooltip()" title="Ver produtos do pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#7c3aed"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:14px"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg></button>'
+      + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:14px"></i></button>'
+      + '<button onclick="pedAbrirImpressao(\'' + p.id + '\')" title="Imprimir pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#272A4A" onmouseover="this.style.background=\'#eef2ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-printer" style="font-size:14px"></i></button>'
+      + '<button onmouseover="this.style.background=\'#f5f3ff\';pedMostrarItensTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderItensTooltip()" title="Ver produtos do pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#7c3aed"><i class="ti ti-box-multiple" style="font-size:14px"></i></button>'
       + '<button onclick="pedAbrirStatusPopover(event,\'' + p.id + '\')" title="Alterar status" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#0e7490" onmouseover="this.style.background=\'#ecfeff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-arrows-exchange" style="font-size:14px"></i></button>'
-      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#a16207" onmouseover="this.style.background=\'#fefce8\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:14px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg></button>'
+      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#a16207" onmouseover="this.style.background=\'#fefce8\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-file-invoice" style="font-size:14px"></i></button>'
       + '<button onclick="duplicarPedido(\'' + p.id + '\')" title="Duplicar pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-copy" style="font-size:14px"></i></button>'
       + '<button onclick="pedAbrirAnexos(\'' + p.id + '\')" title="Anexar Nota Fiscal (PDF ou XML)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#DE7926;position:relative" onmouseover="this.style.background=\'#fff7ed\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-paperclip" style="font-size:14px"></i>' + ((p.anexos && p.anexos.length) ? '<span style="position:absolute;top:1px;right:1px;background:#DE7926;color:#fff;border-radius:50%;width:12px;height:12px;font-size:8px;line-height:12px;text-align:center;font-weight:700">' + p.anexos.length + '</span>' : '') + '</button>'
-      + '<button onclick="deletePedido(\'' + p.id + '\')" title="' + (podeExcluir ? 'Excluir' : 'Só é possível excluir pedidos com status Cancelado') + '" style="background:none;border:none;padding:5px;border-radius:6px;' + (podeExcluir ? 'color:#dc2626;cursor:pointer' : 'color:#cbd5e1;cursor:not-allowed') + '"' + (podeExcluir ? ' onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"' : '') + '><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="deletePedido(\'' + p.id + '\')" title="' + (podeExcluir ? 'Excluir' : 'Só é possível excluir pedidos com status Cancelado') + '" style="background:none;border:none;padding:5px;border-radius:6px;' + (podeExcluir ? 'color:#dc2626;cursor:pointer' : 'color:#cbd5e1;cursor:not-allowed') + '"' + (podeExcluir ? ' onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"' : '') + '><i class="ti ti-trash" style="font-size:14px"></i></button>'
       + '</div></div>';
   }).join('');
 }
@@ -19478,7 +19478,7 @@ function openPedidoForm(params) {
     if (params.revenda && params.revendaOrigem) {
       var ro = params.revendaOrigem;
       pedRevendaEl.innerHTML = '<div style="background:#eff6ff;border-radius:8px;padding:10px 12px;font-size:11.5px;color:#1d4ed8;display:flex;gap:8px;align-items:flex-start;margin-bottom:4px">'
-        + '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="devolucoes" style="font-size:14px;flex-shrink:0"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>'
+        + '<i class="ti ti-recycle" style="font-size:14px;flex-shrink:0"></i>'
         + '<span>Pedido de <b>revenda</b> — produto devolvido por <b>' + _pedEsc(_cpSemColchetes(ro.clienteOrigemNome||'')) + '</b>' + (ro.motivoDevolucao ? (' (motivo original: ' + _pedEsc(ro.motivoDevolucao) + ')') : '') + (ro.nfOrigem ? (', NF origem ' + _pedEsc(ro.nfOrigem)) : '') + '.</span>'
         + '</div>';
     } else {
@@ -19546,9 +19546,9 @@ function _pedRenderAnexos() {
       + '<div style="font-size:12px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(a.nome) + '">' + _pedEsc(a.nome) + '</div>'
       + '<div style="font-size:10px;color:#94a3b8">' + detalhe + '</div>'
       + '</div>'
-      + '<button onclick="pedAbrirAnexo(' + i + ')" title="Abrir" style="background:none;border:none;cursor:pointer;padding:5px;color:#475569"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="visualizar" style="font-size:14px"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>'
-      + '<button onclick="pedBaixarAnexo(' + i + ')" title="Baixar" style="background:none;border:none;cursor:pointer;padding:5px;color:#2563eb"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="exportar" style="font-size:14px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 4v11M7.5 10.5 12 15l4.5-4.5"/></svg></button>'
-      + '<button onclick="pedRemoverAnexo(' + i + ')" title="Remover" style="background:none;border:none;cursor:pointer;padding:5px;color:#dc2626"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="pedAbrirAnexo(' + i + ')" title="Abrir" style="background:none;border:none;cursor:pointer;padding:5px;color:#475569"><i class="ti ti-eye" style="font-size:14px"></i></button>'
+      + '<button onclick="pedBaixarAnexo(' + i + ')" title="Baixar" style="background:none;border:none;cursor:pointer;padding:5px;color:#2563eb"><i class="ti ti-download" style="font-size:14px"></i></button>'
+      + '<button onclick="pedRemoverAnexo(' + i + ')" title="Remover" style="background:none;border:none;cursor:pointer;padding:5px;color:#dc2626"><i class="ti ti-trash" style="font-size:14px"></i></button>'
       + '</div>';
   }).join('');
 }
@@ -19953,7 +19953,7 @@ function _pfatRenderFaturas(pedido) {
       + '<td style="padding:6px 8px;font-size:11px;font-weight:700">' + _pedFmtMoeda(f.valor) + '</td>'
       + '<td style="padding:6px 8px;font-size:10.5px;font-weight:700;color:' + (cancelada ? '#dc2626' : '#15803d') + '">' + (cancelada ? 'Cancelado' : 'Enviado') + '</td>'
       + '<td style="padding:6px 8px;text-align:center"><button onclick="pedCancelarFatura(\'' + f.id + '\')" title="' + (cancelada ? 'Reativar' : 'Cancelar') + '" style="background:none;border:none;cursor:pointer;color:' + (cancelada ? '#15803d' : '#DE7926') + '"><i class="ti ti-' + (cancelada ? 'arrow-back-up' : 'ban') + '" style="font-size:11px"></i></button></td>'
-      + '<td style="padding:6px 8px;text-align:center"><button onclick="pedExcluirFatura(\'' + f.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:11px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button></td>'
+      + '<td style="padding:6px 8px;text-align:center"><button onclick="pedExcluirFatura(\'' + f.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626"><i class="ti ti-trash" style="font-size:11px"></i></button></td>'
       + '<td style="padding:6px 8px;font-size:11px;color:#64748b">' + _pedEsc(f.transportadoraNome || '—') + '</td>'
       + '</tr>';
   }).join('');
@@ -20896,7 +20896,7 @@ function renderNaoFaturados() {
       + '<div style="flex:1"></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Pendente</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + pesoPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Não Faturado</div><div style="font-size:12px;font-weight:700;color:#dc2626">' + _pedFmtMoeda(valorPendente) + '</div></div>'
-      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:#f1f5f9;color:#a16207;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg> Faturar</button>'
+      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:#f1f5f9;color:#a16207;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-invoice" style="font-size:11px"></i> Faturar</button>'
       + '</div>'
       + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Pedida</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Falta Faturar</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Não Faturado</th></tr></thead>'
@@ -21058,7 +21058,7 @@ function renderVendasCompletas() {
       + '<div style="flex:1"></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Total</div><div style="font-size:12px;font-weight:700;color:#15803d">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
-      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:#f1f5f9;color:#a16207;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg> Faturar</button>'
+      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:#f1f5f9;color:#a16207;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-invoice" style="font-size:11px"></i> Faturar</button>'
       + '</div>'
       + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Unit.</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Peso (kg)</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Total</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Não Faturada</th></tr></thead>'
@@ -21176,7 +21176,7 @@ function renderVendasCompletasFaturadas() {
       + '<div style="flex:1"></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Total</div><div style="font-size:12px;font-weight:700;color:#15803d">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
-      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:#f1f5f9;color:#a16207;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg> Faturar</button>'
+      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:#f1f5f9;color:#a16207;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-invoice" style="font-size:11px"></i> Faturar</button>'
       + '</div>'
       + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Unit.</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Peso (kg)</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Total</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Não Faturada</th></tr></thead>'
@@ -21548,7 +21548,7 @@ function renderBloqueios() {
       + '<span>' + _pedEsc(b.alvoNome) + '</span>'
       + '<span style="color:#64748b;font-size:11px">' + (b.motivo ? _pedEsc(b.motivo) : '—') + '</span>'
       + '<span onclick="_bloqToggleAtivo(\'' + b.id + '\')" title="Clique para ' + (ativo ? 'desativar' : 'ativar') + '" style="cursor:pointer;width:32px;height:18px;border-radius:9px;background:' + (ativo ? '#15803d' : '#cbd5e1') + ';position:relative;display:block"><span style="position:absolute;' + (ativo ? 'right' : 'left') + ':2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff"></span></span>'
-      + '<span style="text-align:right"><button onclick="_bloqExcluir(\'' + b.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button></span>'
+      + '<span style="text-align:right"><button onclick="_bloqExcluir(\'' + b.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:14px"></i></button></span>'
       + '</div>';
   }).join('');
 }
@@ -21800,8 +21800,8 @@ function renderMetaList() {
       + '<div style="font-weight:700;color:#1e293b">' + _metaFmtValor(m.valor, m.tipo) + '</div>'
       + '<div style="color:#94a3b8;font-size:11px">' + _metaEsc(m.dtCadastro||'') + '</div>'
       + '<div style="text-align:center;white-space:nowrap">'
-      + '<button onclick="editMeta(\''+m.id+'\')" title="Editar" style="background:none;border:none;cursor:pointer;color:#475569;padding:4px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
-      + '<button onclick="deleteMeta(\''+m.id+'\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="editMeta(\''+m.id+'\')" title="Editar" style="background:none;border:none;cursor:pointer;color:#475569;padding:4px"><i class="ti ti-edit" style="font-size:14px"></i></button>'
+      + '<button onclick="deleteMeta(\''+m.id+'\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:14px"></i></button>'
       + '</div>'
       + '</div>';
   }).join('');
@@ -22057,8 +22057,8 @@ function renderPedItens() {
   var _pedItensCliId  = document.getElementById('ped-cli-id') ? document.getElementById('ped-cli-id').value : '';
   tbody.innerHTML = _pedItens.map(function(it, i){
     total += Number(it.valorTotal) || 0;
-    var acoesCell = '<button onclick="pedAbrirEdicaoItem('+i+')" title="Editar preço, quantidade e desconto" style="background:none;border:none;cursor:pointer;color:#475569;padding:4px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
-      + '<button onclick="pedRemoveItem('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>';
+    var acoesCell = '<button onclick="pedAbrirEdicaoItem('+i+')" title="Editar preço, quantidade e desconto" style="background:none;border:none;cursor:pointer;color:#475569;padding:4px"><i class="ti ti-edit" style="font-size:14px"></i></button>'
+      + '<button onclick="pedRemoveItem('+i+')" title="Remover" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:14px"></i></button>';
     var nomeComCodigo = (it.prodCodigo ? it.prodCodigo+' ' : '') + (it.prodNome||'');
     var bloqueioItem = _bloqVerificar(_pedItensFornId, it.prodId, _pedItensCliId);
     var tagBloqueado = bloqueioItem ? '<span title="'+_pedEsc(bloqueioItem.motivo || 'Produto bloqueado para este cliente')+'" style="background:#fef2f2;color:#dc2626;font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-left:6px;white-space:nowrap">Bloqueado</span>' : '';
@@ -22334,9 +22334,9 @@ function renderDevolucaoList() {
       + '<div class="mc-meta" style="font-size:12.5px;color:#475569">' + _pedEsc(d.motivo||'—') + '</div>'
       + '<div class="mc-meta" style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedFmtMoeda(d.totalProdutos) + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editDevolucao(\'' + d.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
+      + '<button onclick="editDevolucao(\'' + d.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:14px"></i></button>'
       + (temXml ? '<button onclick="devAbrirXml(\''+d.id+'\')" title="' + _pedEsc('Ver XML anexado' + (d.nfEmitida ? ' — NF ' + d.nfEmitida : '')) + '" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#15803d" onmouseover="this.style.background=\'#f0fdf4\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-file-code" style="font-size:14px"></i></button>' : '')
-      + '<button onclick="deleteDevolucao(\'' + d.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="deleteDevolucao(\'' + d.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:14px"></i></button>'
       + '</div></div>';
   }).join('');
 }
@@ -22548,7 +22548,7 @@ function renderDevItens() {
       + '<div class="dev-item-valor">' + _pedFmtMoeda(it.valor) + '</div>'
       + '<div class="dev-item-qtd">' + it.quantidade + '</div>'
       + '<div class="dev-item-total" style="font-weight:700">' + _pedFmtMoeda(it.valorTotal) + '</div>'
-      + '<div class="dev-item-acoes"><button onclick="devRemoveItem(' + i + ')" style="background:none;border:none;cursor:pointer;color:#dc2626"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:11px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button></div>'
+      + '<div class="dev-item-acoes"><button onclick="devRemoveItem(' + i + ')" style="background:none;border:none;cursor:pointer;color:#dc2626"><i class="ti ti-trash" style="font-size:11px"></i></button></div>'
       + '</div>';
   }).join('');
   var totalEl = document.getElementById('dev-total-produtos'); if (totalEl) totalEl.textContent = _pedFmtMoeda(total);
@@ -23140,11 +23140,11 @@ function renderRevendaList() {
       + '<div class="mc-badge">' + statusHtml + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
       + (podeAgir
-          ? '<button onclick="abrirRevendaVender(\'' + it.id + '\')" title="Revender" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#15803d" onmouseover="this.style.background=\'#f0fdf4\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="devolucoes" style="font-size:14px"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>'
-          + '<button onclick="abrirRevendaDescartar(\'' + it.id + '\')" title="Descartar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
-          + '<button onclick="editRevendaItem(\'' + it.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
-          : (pedidoRevenda ? '<button onclick="verPedidoRevenda(\'' + pedidoRevenda.pedidoId + '\')" title="Ver pedido de revenda" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#1d4ed8" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:14px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg></button>' : ''))
-      + ((!it.revendas || !it.revendas.length) && !it.descarte ? '<button onclick="deleteRevendaItem(\'' + it.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>' : '')
+          ? '<button onclick="abrirRevendaVender(\'' + it.id + '\')" title="Revender" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#15803d" onmouseover="this.style.background=\'#f0fdf4\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-recycle" style="font-size:14px"></i></button>'
+          + '<button onclick="abrirRevendaDescartar(\'' + it.id + '\')" title="Descartar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash-x" style="font-size:14px"></i></button>'
+          + '<button onclick="editRevendaItem(\'' + it.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:14px"></i></button>'
+          : (pedidoRevenda ? '<button onclick="verPedidoRevenda(\'' + pedidoRevenda.pedidoId + '\')" title="Ver pedido de revenda" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#1d4ed8" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-file-invoice" style="font-size:14px"></i></button>' : ''))
+      + ((!it.revendas || !it.revendas.length) && !it.descarte ? '<button onclick="deleteRevendaItem(\'' + it.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:14px"></i></button>' : '')
       + '</div></div>';
   }).join('');
 }
@@ -23899,8 +23899,8 @@ function renderUsuarioList() {
       + '<div class="mc-meta" style="color:#475569">' + _usuEsc(u.grupoNome||'—') + '</div>'
       + '<div>' + (u.ativo!=='Não' ? '<span style="color:#15803d;font-weight:700">Sim</span>' : '<span style="color:#dc2626;font-weight:700">Não</span>') + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editUsuario(\'' + u.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
-      + '<button onclick="deleteUsuario(\'' + u.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="editUsuario(\'' + u.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:14px"></i></button>'
+      + '<button onclick="deleteUsuario(\'' + u.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:14px"></i></button>'
       + '</div></div>';
   }).join('');
 }
@@ -24030,8 +24030,8 @@ function renderGrupoList() {
       + '<div class="mc-primary" style="font-weight:700;color:#1e293b">' + _usuEsc(g.nome) + '</div>'
       + '<div class="mc-meta" style="color:#475569">' + qtd + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editGrupo(\'' + g.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
-      + '<button onclick="deleteGrupo(\'' + g.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="editGrupo(\'' + g.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:14px"></i></button>'
+      + '<button onclick="deleteGrupo(\'' + g.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:14px"></i></button>'
       + '</div></div>';
   }).join('');
 }
@@ -24272,8 +24272,8 @@ function renderComandoList() {
       + '<div style="font-size:12.5px;color:#1e293b">' + _navEsc((c.frases||[]).join(', ')) + '</div>'
       + '<div style="font-size:11.5px;color:#64748b">' + _navEsc(tituloPagina) + filtroTxt + '</div>'
       + '<div style="display:flex;gap:1px;justify-content:flex-end">'
-        + '<button onclick="showPage(\'page-comando-form\',{id:\'' + c.id + '\'})" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:13px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
-        + '<button onclick="deleteComandoNavegacao(\'' + c.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:13px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+        + '<button onclick="showPage(\'page-comando-form\',{id:\'' + c.id + '\'})" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-edit" style="font-size:13px"></i></button>'
+        + '<button onclick="deleteComandoNavegacao(\'' + c.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-trash" style="font-size:13px"></i></button>'
       + '</div>'
     + '</div>';
   }).join('');
@@ -24805,7 +24805,7 @@ function abrirRelatorio(id) {
       statusSel.innerHTML = '<option value="">Todos</option>';
     }
   }
-  document.getElementById('rel-resultado').innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:50px 20px;text-align:center"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="graficos" style="font-size:22px;color:#cbd5e1;margin-bottom:10px;display:block"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="5" width="4" height="15.5" rx="1"/><rect x="15" y="9" width="4" height="11.5" rx="1"/></svg><div style="font-size:12px;color:#94a3b8">Configure os filtros e clique em "Gerar relatório"</div></div>';
+  document.getElementById('rel-resultado').innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:50px 20px;text-align:center"><i class="ti ti-chart-bar" style="font-size:22px;color:#cbd5e1;margin-bottom:10px;display:block"></i><div style="font-size:12px;color:#94a3b8">Configure os filtros e clique em "Gerar relatório"</div></div>';
   document.getElementById('rel-lista-view').style.display = 'none';
   document.getElementById('rel-tipo-view').style.display = 'none';
   document.getElementById('rel-detalhe-view').style.display = 'block';
@@ -25819,8 +25819,8 @@ function _apresRenderArquivadas() {
         '<div style="font-size:11px;color:#94a3b8">Período: ' + periodo + ' · gerado por ' + _pedEsc(a.criadoPor || '') + ' em ' + dataCriacao + '</div>' +
       '</div>' +
       '<div style="display:flex;gap:6px;flex-shrink:0">' +
-        '<button onclick="_apresBaixarGerada(' + a.id + ')" title="Baixar novamente" style="background:#f1f5f9;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;color:#272A4A"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="exportar" style="font-size:13px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 4v11M7.5 10.5 12 15l4.5-4.5"/></svg></button>' +
-        '<button onclick="_apresExcluirGerada(' + a.id + ')" title="Excluir do arquivo" style="background:#fef2f2;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;color:#dc2626"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:13px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>' +
+        '<button onclick="_apresBaixarGerada(' + a.id + ')" title="Baixar novamente" style="background:#f1f5f9;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;color:#272A4A"><i class="ti ti-download" style="font-size:13px"></i></button>' +
+        '<button onclick="_apresExcluirGerada(' + a.id + ')" title="Excluir do arquivo" style="background:#fef2f2;border:none;border-radius:6px;padding:6px 10px;cursor:pointer;color:#dc2626"><i class="ti ti-trash" style="font-size:13px"></i></button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -26726,7 +26726,7 @@ function renderOcorrencias() {
       + '<div class="mc-meta" style="color:' + cor + ';font-weight:700">' + _pedEsc(o.tipo || '—') + '</div>'
       + '<div class="mc-meta">' + valorTxt + '</div>'
       + '<div class="mc-meta" style="color:#94a3b8;font-size:11px">' + dataTxt + '</div>'
-      + '<div class="mc-actions" style="text-align:right"><button onclick="ocExcluir(\'' + o.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button></div>'
+      + '<div class="mc-actions" style="text-align:right"><button onclick="ocExcluir(\'' + o.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><i class="ti ti-trash" style="font-size:14px"></i></button></div>'
       + '</div>';
   }).join('');
 }
