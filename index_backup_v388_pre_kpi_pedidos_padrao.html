@@ -407,12 +407,19 @@
       #page-pedido-list .ped-filtros-extra.ped-mf-aberta > span { margin-top:4px !important; }
       #page-pedido-list .ped-filtros-extra.ped-mf-aberta input,
       #page-pedido-list .ped-filtros-extra.ped-mf-aberta select { width:100% !important; box-sizing:border-box !important; }
-      #page-pedido-list .ped-kpi-grid {
-        grid-template-columns:repeat(2,1fr) !important; gap:8px !important;
+      #page-pedido-list .ped-kpis-wrap {
+        display:grid !important; grid-template-columns:repeat(2,1fr) !important; gap:8px !important;
+        width:100% !important; padding-left:0 !important;
       }
-      #page-pedido-list .ped-kpi-card { padding:10px 12px !important; }
-      #page-pedido-list .ped-kpi-card .ped-kpi-val { font-size:17px !important; }
-      #page-pedido-list .ped-kpi-grid > .ped-kpi-card:nth-child(3):last-child { grid-column:1 / span 2 !important; }
+      #page-pedido-list .ped-kpi-item {
+        display:flex !important; flex-direction:column-reverse !important; align-items:center !important;
+        text-align:center !important; background:#f8fafc !important; border-radius:10px !important; padding:10px !important;
+      }
+      #page-pedido-list .ped-kpi-item > div:last-child { font-size:15px !important; }
+      #page-pedido-list .ped-kpi-item:nth-child(3):last-child { grid-column:1 / span 2 !important; }
+      #page-pedido-list .ped-kpis-box { grid-template-columns:1fr !important; gap:10px !important; }
+      #page-pedido-list .ped-kpis-box > div { border-left:none !important; border-right:none !important; border-top:1px solid #f1f5f9 !important; padding-top:10px !important; }
+      #page-pedido-list .ped-kpis-box > div:first-child { border-top:none !important; padding-top:0 !important; }
       #page-pedido-list .ped-r-uf::before { content:'UF: '; color:#94a3b8; }
       #page-pedido-list .ped-r-cidade::before { content:'Cidade: '; color:#94a3b8; }
       #page-pedido-list .ped-r-transp::before { content:'Transp: '; color:#94a3b8; }
@@ -4488,18 +4495,18 @@
         <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
         <div class="ped-spacer" style="flex:1"></div>
       </div>
-      <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-          <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Pedidos</div>
-          <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="ped-kpi-total">0</div>
+      <div class="ped-kpis-box" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.04);display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
+        <div style="text-align:center;padding:0 10px">
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Pedidos</div>
+          <div style="font-size:20px;font-weight:800;color:#272A4A" id="ped-kpi-total">0</div>
         </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-          <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor Total</div>
-          <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#16a34a" id="ped-kpi-valor">R$ 0,00</div>
+        <div style="text-align:center;padding:0 10px;border-left:1px solid #f1f5f9;border-right:1px solid #f1f5f9">
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Total</div>
+          <div style="font-size:20px;font-weight:800;color:#16a34a" id="ped-kpi-valor">R$ 0,00</div>
         </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-          <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Peso Total</div>
-          <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="ped-kpi-peso">0 kg</div>
+        <div style="text-align:center;padding:0 10px">
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Peso Total</div>
+          <div style="font-size:20px;font-weight:800;color:#272A4A" id="ped-kpi-peso">0 kg</div>
         </div>
       </div>
       <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
@@ -4551,15 +4558,9 @@
         </div>
           <button class="ped-limpar-btn" onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
-        </div>
-        <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor total</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#16a34a" id="pss-kpi-valor">R$ 0,00</div>
-          </div>
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Peso Total</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="pss-kpi-peso">0 kg</div>
+          <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="pss-kpi-valor">R$ 0,00</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pss-kpi-peso">0 kg</div></div>
           </div>
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
@@ -4609,25 +4610,22 @@
           </div>
           <button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
+          <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px"><div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vc-kpi-total">0</div></div></div>
         </div>
-        <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px">
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Pedidos</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="vc-kpi-total">0</div>
-          </div>
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor Total</div>
-            <div class="ped-kpi-val" style="font-size:18px;font-weight:800;color:#272A4A" id="vc-kpi-valor">R$ 0,00</div>
+        <div class="ped-kpis-box" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.04);display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
+          <div style="text-align:center;padding:0 10px">
+            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Total</div>
+            <div style="font-size:16px;font-weight:800;color:#272A4A" id="vc-kpi-valor">R$ 0,00</div>
             <div style="font-size:11.5px;color:#64748b;margin-top:2px" id="vc-kpi-peso">0 kg</div>
           </div>
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor Faturado</div>
-            <div class="ped-kpi-val" style="font-size:18px;font-weight:800;color:#15803d" id="vc-kpi-valor-fat">R$ 0,00</div>
+          <div style="text-align:center;padding:0 10px;border-left:1px solid #f1f5f9;border-right:1px solid #f1f5f9">
+            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Faturado</div>
+            <div style="font-size:16px;font-weight:800;color:#15803d" id="vc-kpi-valor-fat">R$ 0,00</div>
             <div style="font-size:11.5px;color:#64748b;margin-top:2px" id="vc-kpi-peso-fat">0 kg</div>
           </div>
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #5b78c9">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor Não Faturado</div>
-            <div class="ped-kpi-val" style="font-size:18px;font-weight:800;color:#dc2626" id="vc-kpi-valor-naofat">R$ 0,00</div>
+          <div style="text-align:center;padding:0 10px">
+            <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Valor Não Faturado</div>
+            <div style="font-size:16px;font-weight:800;color:#dc2626" id="vc-kpi-valor-naofat">R$ 0,00</div>
             <div style="font-size:11.5px;color:#64748b;margin-top:2px" id="vc-kpi-peso-naofat">0 kg</div>
           </div>
         </div>
@@ -4667,19 +4665,10 @@
           </div>
           <button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
-        </div>
-        <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Pedidos</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="vcf-kpi-total">0</div>
-          </div>
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor Faturado</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#16a34a" id="vcf-kpi-valor">R$ 0,00</div>
-          </div>
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Peso Total</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="vcf-kpi-peso">0 kg</div>
+          <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vcf-kpi-total">0</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Faturado</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="vcf-kpi-valor">R$ 0,00</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="vcf-kpi-peso">0 kg</div></div>
           </div>
         </div>
         <div id="vcf-lista" style="display:flex;flex-direction:column;gap:10px"></div>
@@ -4718,19 +4707,10 @@
           </div>
           <button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
-        </div>
-        <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">NFs</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="psn-kpi-total">0</div>
-          </div>
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor total</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#16a34a" id="psn-kpi-valor">R$ 0,00</div>
-          </div>
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Peso Total</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="psn-kpi-peso">0 kg</div>
+          <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">NFs</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="psn-kpi-total">0</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor total</div><div style="font-size:13px;font-weight:700;color:#16a34a" id="psn-kpi-valor">R$ 0,00</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="psn-kpi-peso">0 kg</div></div>
           </div>
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
@@ -4774,19 +4754,10 @@
           </div>
           <button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-printer" style="font-size:11px"></i> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
-        </div>
-        <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Pedidos pendentes</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="pnf-kpi-total">0</div>
-          </div>
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor Não Faturado</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#dc2626" id="pnf-kpi-valor">R$ 0,00</div>
-          </div>
-          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Peso Pendente</div>
-            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="pnf-kpi-peso">0 kg</div>
+          <div class="ped-kpis-wrap" style="display:flex;gap:18px;align-items:center;padding-left:6px">
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Pedidos pendentes</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pnf-kpi-total">0</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Não Faturado</div><div style="font-size:13px;font-weight:700;color:#dc2626" id="pnf-kpi-valor">R$ 0,00</div></div>
+            <div class="ped-kpi-item" style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Pendente</div><div style="font-size:13px;font-weight:700;color:#1e293b" id="pnf-kpi-peso">0 kg</div></div>
           </div>
         </div>
         <div id="pnf-lista" style="display:flex;flex-direction:column;gap:10px"></div>
