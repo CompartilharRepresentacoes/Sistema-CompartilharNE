@@ -1089,12 +1089,6 @@
 
       <!-- Footer do form (desktop) -->
       <div id="loginFormFooter">
-        <div class="flex justify-center mt-4">
-          <button onclick="toggleDarkMode()" title="Alternar modo escuro"
-            class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg px-3 py-1.5 transition flex items-center gap-2">
-            🌙 Tema Escuro
-          </button>
-        </div>
         <div id="installBtnWrap" class="flex flex-col items-center mt-3 gap-1">
           <button onclick="instalarApp()" class="flex items-center gap-2 text-xs font-semibold rounded-lg px-4 py-2 transition border w-full justify-center"
             style="background:#fff5f5;color:var(--brand-red);border-color:#fecaca">
@@ -1117,10 +1111,6 @@
 
     <!-- Footer mobile -->
     <div id="loginMobileFooter" class="flex flex-col items-center mt-4 gap-2">
-      <button onclick="toggleDarkMode()" title="Alternar modo escuro"
-        class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg px-3 py-1.5 transition flex items-center gap-2">
-        🌙 Tema Escuro
-      </button>
       <div id="installBtnWrapMobile" class="flex flex-col items-center gap-1 w-full">
         <button onclick="instalarApp()" class="flex items-center gap-2 text-xs font-semibold rounded-lg px-4 py-2 transition border w-full justify-center"
           style="background:#fff5f5;color:var(--brand-red);border-color:#fecaca">
@@ -1536,9 +1526,9 @@
 <!-- Linha de filtros -->
 <div id="dvgFiltrosBar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:9px 14px;margin-bottom:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
   <span style="font-size:11px;font-weight:600;color:#64748b;margin-right:2px">Período</span>
-  <input type="date" id="dtIni" style="border:1px solid #e2e8f0;border-radius:7px;padding:4px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+  <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="dtIni" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:4px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
   <span style="color:#94a3b8;font-size:13px">→</span>
-  <input type="date" id="dtFim" style="border:1px solid #e2e8f0;border-radius:7px;padding:4px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+  <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="dtFim" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:4px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
   <div style="width:1px;height:18px;background:#e2e8f0;margin:0 2px"></div>
   <button class="qbtn active" data-r="ytd">Ano</button>
   <button class="qbtn" data-r="q1">T1</button>
@@ -4085,11 +4075,11 @@
           </div>
           <div>
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Início da Vigência</label>
-            <input type="date" class="form-input" id="negpreco-data-inicio" style="width:100%">
+            <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" class="form-input" id="negpreco-data-inicio" oninput="_entctrlMaskData(this)" style="width:100%">
           </div>
           <div>
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Prazo de Encerramento</label>
-            <input type="date" class="form-input" id="negpreco-data-fim" style="width:100%">
+            <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" class="form-input" id="negpreco-data-fim" oninput="_entctrlMaskData(this)" style="width:100%">
           </div>
           <div>
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Status</label>
@@ -4544,9 +4534,9 @@
         <div class="ped-divider" style="width:1px;height:22px;background:#e2e8f0"></div>
         <div class="ped-data-row">
         <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-        <input type="date" id="ped-data-de" onchange="renderPedidoList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+        <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="ped-data-de" oninput="_entctrlMaskData(this)" onchange="renderPedidoList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
         <span style="color:#94a3b8;font-size:13px">→</span>
-        <input type="date" id="ped-data-ate" onchange="renderPedidoList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+        <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="ped-data-ate" oninput="_entctrlMaskData(this)" onchange="renderPedidoList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
         </div>
         <div class="ped-divider" style="width:1px;height:22px;background:#e2e8f0"></div>
         <div class="ped-status-row">
@@ -4661,9 +4651,9 @@
         <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
           <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-          <input type="date" id="vc-data-de" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vc-data-de" oninput="_entctrlMaskData(this)" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="date" id="vc-data-ate" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vc-data-ate" oninput="_entctrlMaskData(this)" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
           <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('vc')">Mais filtros <span>&#9662;</span></div>
           <div id="vc-filtros-extra" class="ped-filtros-extra" style="display:contents">
@@ -4719,9 +4709,9 @@
         <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
           <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-          <input type="date" id="vcf-data-de" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vcf-data-de" oninput="_entctrlMaskData(this)" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="date" id="vcf-data-ate" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vcf-data-ate" oninput="_entctrlMaskData(this)" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
           <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('vcf')">Mais filtros <span>&#9662;</span></div>
           <div id="vcf-filtros-extra" class="ped-filtros-extra" style="display:contents">
@@ -4770,9 +4760,9 @@
         <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
           <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-          <input type="date" id="psn-data-de" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="psn-data-de" oninput="_entctrlMaskData(this)" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="date" id="psn-data-ate" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="psn-data-ate" oninput="_entctrlMaskData(this)" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
           <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('psn')">Mais filtros <span>&#9662;</span></div>
           <div id="psn-filtros-extra" class="ped-filtros-extra" style="display:contents">
@@ -4826,9 +4816,9 @@
         <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
           <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-          <input type="date" id="pnf-data-de" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="pnf-data-de" oninput="_entctrlMaskData(this)" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="date" id="pnf-data-ate" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="pnf-data-ate" oninput="_entctrlMaskData(this)" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
           <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('pnf')">Mais filtros <span>&#9662;</span></div>
           <div id="pnf-filtros-extra" class="ped-filtros-extra" style="display:contents">
@@ -4911,7 +4901,7 @@
                 </div>
                 <div>
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Data do Pedido <span style="color:#D82621">*</span></label>
-                  <input class="form-input" id="ped-data" type="date" style="width:100%">
+                  <input class="form-input" id="ped-data" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="_entctrlMaskData(this)" style="width:100%">
                 </div>
                 <div>
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Fornecedor / Fábrica <span style="color:#D82621">*</span></label>
@@ -5253,7 +5243,7 @@
                 </div>
                 <div class="dev-fld-datalanc">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Data Lançamento <span style="color:#D82621">*</span></label>
-                  <input class="form-input" id="dev-data" type="date" onkeydown="_pedEnterAvanca(event,'dev-forn-input')" style="width:100%">
+                  <input class="form-input" id="dev-data" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="_entctrlMaskData(this)" onkeydown="_pedEnterAvanca(event,'dev-forn-input')" style="width:100%">
                 </div>
                 <div class="dev-fld-forn">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Fornecedor <span style="color:#D82621">*</span></label>
@@ -5285,7 +5275,7 @@
                 </div>
                 <div class="dev-fld-datadevol">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Data Devolução <span style="color:#D82621">*</span></label>
-                  <input class="form-input" id="dev-data-nf-emitida" type="date" onkeydown="_pedEnterAvanca(event,'dev-nf-origem')" style="width:100%">
+                  <input class="form-input" id="dev-data-nf-emitida" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="_entctrlMaskData(this)" onkeydown="_pedEnterAvanca(event,'dev-nf-origem')" style="width:100%">
                 </div>
                 <div class="dev-fld-nforigem">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">NF Origem <span style="color:#D82621">*</span></label>
@@ -5294,7 +5284,7 @@
                 </div>
                 <div class="dev-fld-datanforigem">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Data NF Origem <span style="color:#D82621">*</span></label>
-                  <input class="form-input" id="dev-data-nf-origem" type="date" onkeydown="_pedEnterAvanca(event,'dev-motivo')" style="width:100%">
+                  <input class="form-input" id="dev-data-nf-origem" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="_entctrlMaskData(this)" onkeydown="_pedEnterAvanca(event,'dev-motivo')" style="width:100%">
                 </div>
                 <div class="dev-fld-motivo">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Motivo</label>
@@ -5413,9 +5403,9 @@
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)" id="rel-filtros">
           <span class="rel-campo" data-campo="data" style="display:flex;align-items:center;gap:6px">
             <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-            <input type="date" id="rel-f-data-de" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+            <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="rel-f-data-de" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
             <span style="color:#94a3b8;font-size:13px">→</span>
-            <input type="date" id="rel-f-data-ate" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+            <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="rel-f-data-ate" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </span>
           <span class="rel-campo" data-campo="fornecedor" style="display:flex;align-items:center;gap:6px">
             <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
@@ -5488,9 +5478,9 @@
         <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
         <select id="apres-fornecedor" onchange="_apresRenderProdutosNovos()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Selecione...</option></select>
         <span style="font-size:11px;font-weight:600;color:#64748b">Período</span>
-        <input type="date" id="apres-data-de" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b">
+        <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="apres-data-de" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;width:90px">
         <span style="color:#94a3b8;font-size:13px">→</span>
-        <input type="date" id="apres-data-ate" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b">
+        <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="apres-data-ate" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;width:90px">
         <div style="flex:1"></div>
       </div>
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
@@ -6080,7 +6070,7 @@
                   </div>
                   <div>
                     <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Validade do Produto <span style="color:#D82621">*</span></label>
-                    <input class="form-input" id="rev-validade" type="date" onkeydown="_pedEnterAvanca(event,'rev-valor-custo')" style="width:100%">
+                    <input class="form-input" id="rev-validade" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="_entctrlMaskData(this)" onkeydown="_pedEnterAvanca(event,'rev-valor-custo')" style="width:100%">
                   </div>
                   <div>
                     <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Valor de Referência (custo)</label>
@@ -6179,9 +6169,9 @@
           <div>
             <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Período</div>
             <div style="display:flex;gap:6px;align-items:center">
-              <input type="date" id="dr-data-de" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc">
+              <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="dr-data-de" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:90px">
               <span style="color:#94a3b8;font-size:12px">→</span>
-              <input type="date" id="dr-data-ate" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc">
+              <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="dr-data-ate" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:90px">
             </div>
           </div>
           <div style="flex:1"></div>
@@ -6723,7 +6713,7 @@
           </div>
           <div>
             <label style="font-size:10.5px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Data Faturamento</label>
-            <input class="form-input" id="pfat-data" type="date" style="width:100%">
+            <input class="form-input" id="pfat-data" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="_entctrlMaskData(this)" style="width:100%">
           </div>
           <div>
             <label style="font-size:10.5px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Valor</label>
@@ -7403,11 +7393,11 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
         <div>
           <label style="font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em">Data Inicial</label>
-          <input type="date" id="pinf-data-ini" style="width:100%;border:1px solid #e2e8f0;border-radius:7px;padding:7px 9px;font-size:12px;margin-top:4px;box-sizing:border-box">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="pinf-data-ini" oninput="_entctrlMaskData(this)" style="width:100%;border:1px solid #e2e8f0;border-radius:7px;padding:7px 9px;font-size:12px;margin-top:4px;box-sizing:border-box">
         </div>
         <div>
           <label style="font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em">Data Final</label>
-          <input type="date" id="pinf-data-fim" style="width:100%;border:1px solid #e2e8f0;border-radius:7px;padding:7px 9px;font-size:12px;margin-top:4px;box-sizing:border-box">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="pinf-data-fim" oninput="_entctrlMaskData(this)" style="width:100%;border:1px solid #e2e8f0;border-radius:7px;padding:7px 9px;font-size:12px;margin-top:4px;box-sizing:border-box">
         </div>
       </div>
       <div style="margin-bottom:12px">
@@ -13144,8 +13134,8 @@ function openNegPrecoForm(params) {
       }
       var valorEl = document.getElementById('negpreco-valor'); if (valorEl) valorEl.value = rec.valor || '';
       var comEl   = document.getElementById('negpreco-comissao'); if (comEl) comEl.value = rec.comissao || '';
-      if (iniEl) iniEl.value = rec.dataInicio || '';
-      if (fimEl) fimEl.value = rec.dataFim || '';
+      if (iniEl) iniEl.value = _entctrlDataParaBR(rec.dataInicio || '');
+      if (fimEl) fimEl.value = _entctrlDataParaBR(rec.dataFim || '');
       var obsEl = document.getElementById('negpreco-obs'); if (obsEl) obsEl.value = rec.obs || '';
       var negprecoAutoriaEl = document.getElementById('negpreco-autoria-info');
       if (negprecoAutoriaEl) negprecoAutoriaEl.innerHTML = _appRenderAutoriaHtml(rec);
@@ -13308,10 +13298,14 @@ function salvarNegPreco() {
   var valor = (document.getElementById('negpreco-valor').value || '').trim();
   if (_pedParseMoeda(valor) <= 0) { if (msg) msg.textContent = 'Informe um Valor Negociado válido, maior que zero.'; return; }
 
-  var dataFim = document.getElementById('negpreco-data-fim').value;
-  if (!dataFim) { if (msg) msg.textContent = 'Informe o Prazo de Encerramento.'; return; }
+  var dataFimRaw = document.getElementById('negpreco-data-fim').value;
+  if (!dataFimRaw) { if (msg) msg.textContent = 'Informe o Prazo de Encerramento.'; return; }
+  var dataFim = _entctrlParseDataBR(dataFimRaw);
+  if (!dataFim) { if (msg) msg.textContent = 'Prazo de Encerramento inválido. Use o formato dd/mm/aaaa.'; return; }
 
-  var dataInicio = document.getElementById('negpreco-data-inicio').value;
+  var dataInicioRaw = document.getElementById('negpreco-data-inicio').value;
+  var dataInicio = dataInicioRaw ? _entctrlParseDataBR(dataInicioRaw) : '';
+  if (dataInicioRaw && !dataInicio) { if (msg) msg.textContent = 'Início da Vigência inválido. Use o formato dd/mm/aaaa.'; return; }
   if (dataInicio && dataInicio > dataFim) { if (msg) msg.textContent = 'O Prazo de Encerramento não pode ser antes do Início da Vigência.'; return; }
 
   var prod = getProdutos().find(function(p){ return p.id === prodId; }) || {};
@@ -16493,8 +16487,8 @@ function dashInit() {
       const prefixo = _dashHistorico ? 'Histórico 2025 · ' : '';
       document.getElementById('periodoInfo').textContent = `${prefixo}Período: ${fmtDate(state.dtIni)} → ${fmtDate(state.dtFim)}`;
     }
-    document.getElementById('dtIni').addEventListener('change', e => { state.dtIni = e.target.value; rerender(); });
-    document.getElementById('dtFim').addEventListener('change', e => { state.dtFim = e.target.value; rerender(); });
+    document.getElementById('dtIni').onchange = e => { var iso = _entctrlParseDataBR(e.target.value); if (iso) { state.dtIni = iso; rerender(); } else { e.target.value = _entctrlDataParaBR(state.dtIni); } };
+    document.getElementById('dtFim').onchange = e => { var iso = _entctrlParseDataBR(e.target.value); if (iso) { state.dtFim = iso; rerender(); } else { e.target.value = _entctrlDataParaBR(state.dtFim); } };
     document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(b => b.addEventListener('click', () => {
       document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
@@ -16505,8 +16499,8 @@ function dashInit() {
       else if (r==='q2') { state.dtIni = `${ano}-04-01`; state.dtFim = `${ano}-06-30`; }
       else if (r==='q3') { state.dtIni = `${ano}-07-01`; state.dtFim = `${ano}-09-30`; }
       else if (r==='q4') { state.dtIni = `${ano}-10-01`; state.dtFim = `${ano}-12-31`; }
-      document.getElementById('dtIni').value = state.dtIni;
-      document.getElementById('dtFim').value = state.dtFim;
+      document.getElementById('dtIni').value = _entctrlDataParaBR(state.dtIni);
+      document.getElementById('dtFim').value = _entctrlDataParaBR(state.dtFim);
       rerender();
     }));
 
@@ -16514,8 +16508,8 @@ function dashInit() {
     document.getElementById('btnReset').addEventListener('click', () => {
       state.dtIni = periodoMin; state.dtFim = periodoMax;
       state.fabricas.clear(); state.vendedores.clear(); state.clientes.clear();
-      document.getElementById('dtIni').value = state.dtIni;
-      document.getElementById('dtFim').value = state.dtFim;
+      document.getElementById('dtIni').value = _entctrlDataParaBR(state.dtIni);
+      document.getElementById('dtFim').value = _entctrlDataParaBR(state.dtFim);
       buildFiltros(); rerender();
     });
     // onclick (nao addEventListener) de proposito: dashInit() roda de novo toda vez que a
@@ -16544,8 +16538,8 @@ function dashInit() {
     }
 
     // =============== INIT ===============
-    document.getElementById('dtIni').value = state.dtIni;
-    document.getElementById('dtFim').value = state.dtFim;
+    document.getElementById('dtIni').value = _entctrlDataParaBR(state.dtIni);
+    document.getElementById('dtFim').value = _entctrlDataParaBR(state.dtFim);
 
     buildFiltros();
     updatePeriodoInfo();
@@ -17530,8 +17524,8 @@ function renderPedidoList() {
   const pag     = document.getElementById('ped-paginacao');
   if (!tbody) return;
 
-  const dataDe  = document.getElementById('ped-data-de')?.value || '';
-  const dataAte = document.getElementById('ped-data-ate')?.value || '';
+  const dataDe  = _entctrlParseDataBR(document.getElementById('ped-data-de')?.value || '');
+  const dataAte = _entctrlParseDataBR(document.getElementById('ped-data-ate')?.value || '');
   let rows = pedidos.filter(function(p){
     if (!_appRegistroVisivelUF(p)) return false;
     if (_pedStatusFiltro && p.status !== _pedStatusFiltro) return false;
@@ -17919,8 +17913,8 @@ function _pimprelMontarDocumentoItemizado(titulo, subtitulo, blocos, totalReais,
 function _pimprelDadosGeral() {
   var pedidos = getPedidos();
   var busca   = (document.getElementById('ped-busca') ? document.getElementById('ped-busca').value : '').toLowerCase();
-  var dataDe  = document.getElementById('ped-data-de') ? document.getElementById('ped-data-de').value : '';
-  var dataAte = document.getElementById('ped-data-ate') ? document.getElementById('ped-data-ate').value : '';
+  var dataDe  = document.getElementById('ped-data-de') ? _entctrlParseDataBR(document.getElementById('ped-data-de').value) : '';
+  var dataAte = document.getElementById('ped-data-ate') ? _entctrlParseDataBR(document.getElementById('ped-data-ate').value) : '';
   var rows = pedidos.filter(function(p){
     if (!_appRegistroVisivelUF(p)) return false;
     if (_pedStatusFiltro && p.status !== _pedStatusFiltro) return false;
@@ -18024,8 +18018,8 @@ function _pimprelColItensNaoFat() {
   ];
 }
 function _pimprelDadosCompletas() {
-  var dataDe  = document.getElementById('vc-data-de') ? document.getElementById('vc-data-de').value : '';
-  var dataAte = document.getElementById('vc-data-ate') ? document.getElementById('vc-data-ate').value : '';
+  var dataDe  = document.getElementById('vc-data-de') ? _entctrlParseDataBR(document.getElementById('vc-data-de').value) : '';
+  var dataAte = document.getElementById('vc-data-ate') ? _entctrlParseDataBR(document.getElementById('vc-data-ate').value) : '';
   var fornF   = (document.getElementById('vc-fornecedor') ? document.getElementById('vc-fornecedor').value : '').trim().toLowerCase();
   var vendF   = document.getElementById('vc-vendedor') ? document.getElementById('vc-vendedor').value : '';
   var catF    = document.getElementById('vc-categoria') ? document.getElementById('vc-categoria').value : '';
@@ -18070,8 +18064,8 @@ function _pimprelDadosCompletas() {
   return { titulo:'Relação de Pedidos', subtitulo:'Vendas Completas' + _pimprelPeriodoTxt(dataDe, dataAte), itemizado:true, blocos:blocos, totalReais:totalReais, totalKg:totalKg, fornecedorFiltro:fornecedorFiltro };
 }
 function _pimprelDadosCompletasFat() {
-  var dataDe  = document.getElementById('vcf-data-de') ? document.getElementById('vcf-data-de').value : '';
-  var dataAte = document.getElementById('vcf-data-ate') ? document.getElementById('vcf-data-ate').value : '';
+  var dataDe  = document.getElementById('vcf-data-de') ? _entctrlParseDataBR(document.getElementById('vcf-data-de').value) : '';
+  var dataAte = document.getElementById('vcf-data-ate') ? _entctrlParseDataBR(document.getElementById('vcf-data-ate').value) : '';
   var fornF   = (document.getElementById('vcf-fornecedor') ? document.getElementById('vcf-fornecedor').value : '').trim().toLowerCase();
   var vendF   = document.getElementById('vcf-vendedor') ? document.getElementById('vcf-vendedor').value : '';
   var catF    = document.getElementById('vcf-categoria') ? document.getElementById('vcf-categoria').value : '';
@@ -18117,8 +18111,8 @@ function _pimprelDadosCompletasFat() {
   return { titulo:'Relação de Pedidos', subtitulo:'Vendas Completas Faturadas' + _pimprelPeriodoTxt(dataDe, dataAte), itemizado:true, blocos:blocos, totalReais:totalReais, totalKg:totalKg, fornecedorFiltro:fornecedorFiltro };
 }
 function _pimprelDadosSimplesNf() {
-  var dataDe  = document.getElementById('psn-data-de') ? document.getElementById('psn-data-de').value : '';
-  var dataAte = document.getElementById('psn-data-ate') ? document.getElementById('psn-data-ate').value : '';
+  var dataDe  = document.getElementById('psn-data-de') ? _entctrlParseDataBR(document.getElementById('psn-data-de').value) : '';
+  var dataAte = document.getElementById('psn-data-ate') ? _entctrlParseDataBR(document.getElementById('psn-data-ate').value) : '';
   var fornF   = (document.getElementById('psn-fornecedor') ? document.getElementById('psn-fornecedor').value : '').trim().toLowerCase();
   var vendF   = document.getElementById('psn-vendedor') ? document.getElementById('psn-vendedor').value : '';
   var catF    = document.getElementById('psn-categoria') ? document.getElementById('psn-categoria').value : '';
@@ -18160,8 +18154,8 @@ function _pimprelDadosSimplesNf() {
   return { titulo:'Relação de Pedidos', subtitulo:'Vendas Simples NFs' + _pimprelPeriodoTxt(dataDe, dataAte), colunas:colunas, linhas:linhas, totalReais:totalReais, totalKg:totalKg, fornecedorFiltro:fornecedorFiltro };
 }
 function _pimprelDadosNaoFat() {
-  var dataDe  = document.getElementById('pnf-data-de') ? document.getElementById('pnf-data-de').value : '';
-  var dataAte = document.getElementById('pnf-data-ate') ? document.getElementById('pnf-data-ate').value : '';
+  var dataDe  = document.getElementById('pnf-data-de') ? _entctrlParseDataBR(document.getElementById('pnf-data-de').value) : '';
+  var dataAte = document.getElementById('pnf-data-ate') ? _entctrlParseDataBR(document.getElementById('pnf-data-ate').value) : '';
   var fornF   = (document.getElementById('pnf-fornecedor') ? document.getElementById('pnf-fornecedor').value : '').trim().toLowerCase();
   var vendF   = document.getElementById('pnf-vendedor') ? document.getElementById('pnf-vendedor').value : '';
   var catF    = document.getElementById('pnf-categoria') ? document.getElementById('pnf-categoria').value : '';
@@ -19001,8 +18995,8 @@ function _pinfAbrirFiltro() {
   var iniEl = document.getElementById('pinf-data-ini');
   var fimEl = document.getElementById('pinf-data-fim');
   if (iniEl && fimEl) {
-    fimEl.value = new Date().toISOString().slice(0, 10);
-    iniEl.value = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    fimEl.value = _entctrlDataParaBR(new Date().toISOString().slice(0, 10));
+    iniEl.value = _entctrlDataParaBR(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10));
   }
   var modal = document.getElementById('modal-pinf-filtro');
   if (modal) modal.style.display = 'flex';
@@ -19056,11 +19050,14 @@ function _pinfRenderArquivosSelecionados() {
 function _pinfProcessar() {
   var msg = document.getElementById('pinf-filtro-msg');
   if (msg) { msg.style.color = '#dc2626'; msg.textContent = ''; }
-  var dataIni = document.getElementById('pinf-data-ini').value;
-  var dataFim = document.getElementById('pinf-data-fim').value;
+  var dataIniRaw = document.getElementById('pinf-data-ini').value;
+  var dataFimRaw = document.getElementById('pinf-data-fim').value;
+  var dataIni = _entctrlParseDataBR(dataIniRaw);
+  var dataFim = _entctrlParseDataBR(dataFimRaw);
   var fornecedorId = document.getElementById('pinf-fornecedor').value;
   if (!fornecedorId) { if (msg) msg.textContent = 'Selecione a Fábrica.'; return; }
-  if (!dataIni || !dataFim) { if (msg) msg.textContent = 'Informe o período (data inicial e final).'; return; }
+  if (!dataIniRaw || !dataFimRaw) { if (msg) msg.textContent = 'Informe o período (data inicial e final).'; return; }
+  if (!dataIni || !dataFim) { if (msg) msg.textContent = 'Data inválida. Use o formato dd/mm/aaaa.'; return; }
   if (dataIni > dataFim) { if (msg) msg.textContent = 'A data inicial não pode ser depois da data final.'; return; }
   if (!_pinfArquivosSelecionados.length) { if (msg) msg.textContent = 'Selecione ao menos um arquivo XML ou PDF.'; return; }
 
@@ -19527,7 +19524,7 @@ function openPedidoForm(params) {
   document.getElementById('ped-cli-input').value   = _cpSemColchetes(params.clienteNome || '');
   document.getElementById('ped-num-cliente').value    = params.numPedidoCliente || '';
   document.getElementById('ped-num-fornecedor').value = params.numPedidoFornecedor || '';
-  document.getElementById('ped-data').value        = params.data || new Date().toISOString().slice(0,10);
+  document.getElementById('ped-data').value        = _entctrlDataParaBR(params.data || new Date().toISOString().slice(0,10));
   document.getElementById('ped-status').value      = params.status || 'Pré-Venda';
   document.getElementById('ped-obs').value         = params.obs || '';
 
@@ -19974,7 +19971,7 @@ function _pfatRender() {
     transpSel.value = '';
   }
   var numDupEl = document.getElementById('pfat-num-duplicata'); if (numDupEl) numDupEl.value = '';
-  var dataEl = document.getElementById('pfat-data'); if (dataEl) dataEl.value = new Date().toISOString().slice(0,10);
+  var dataEl = document.getElementById('pfat-data'); if (dataEl) dataEl.value = _entctrlDataParaBR(new Date().toISOString().slice(0,10));
   var valorEl = document.getElementById('pfat-valor'); if (valorEl) valorEl.value = '';
 
   var tbody = document.getElementById('pfat-itens-tbody');
@@ -20045,14 +20042,16 @@ function pedSalvarFatura() {
   if (!pedido) return;
   var msg = document.getElementById('pfat-msg');
   var numDup = (document.getElementById('pfat-num-duplicata').value || '').trim();
-  var dataFat = document.getElementById('pfat-data').value;
+  var dataFatRaw = document.getElementById('pfat-data').value;
+  var dataFat = _entctrlParseDataBR(dataFatRaw);
   var valorInput = _pedParseMoeda(document.getElementById('pfat-valor').value);
   var transpSel = document.getElementById('pfat-transportadora');
   var transpId = transpSel ? transpSel.value : '';
   var transpNome = (transpId && transpSel.selectedIndex >= 0) ? (transpSel.options[transpSel.selectedIndex].textContent || '') : '';
 
   if (!numDup) { if (msg) msg.textContent = 'Informe o Número da Duplicata.'; return; }
-  if (!dataFat) { if (msg) msg.textContent = 'Informe a Data de Faturamento.'; return; }
+  if (!dataFatRaw) { if (msg) msg.textContent = 'Informe a Data de Faturamento.'; return; }
+  if (!dataFat) { if (msg) msg.textContent = 'Data de Faturamento inválida. Use o formato dd/mm/aaaa.'; return; }
   var duplicataManual = _pfatNumDuplicataJaExiste(pedido.clienteId, pedido.fornecedorId, numDup);
   if (duplicataManual) { if (msg) msg.textContent = 'Já existe uma fatura com o número "' + numDup + '" para este cliente e fábrica (Pedido nº ' + (duplicataManual.pedido.numPedidoCliente || duplicataManual.pedido.lancamento || '') + ').'; return; }
 
@@ -20320,8 +20319,8 @@ function renderVendasSimplesNfs() {
   var tbody = document.getElementById('psn-tbody');
   if (!tbody) return;
 
-  var dataDe  = document.getElementById('psn-data-de') ? document.getElementById('psn-data-de').value : '';
-  var dataAte = document.getElementById('psn-data-ate') ? document.getElementById('psn-data-ate').value : '';
+  var dataDe  = document.getElementById('psn-data-de') ? _entctrlParseDataBR(document.getElementById('psn-data-de').value) : '';
+  var dataAte = document.getElementById('psn-data-ate') ? _entctrlParseDataBR(document.getElementById('psn-data-ate').value) : '';
   var fornF   = (document.getElementById('psn-fornecedor') ? document.getElementById('psn-fornecedor').value : '').trim().toLowerCase();
   var vendF   = document.getElementById('psn-vendedor') ? document.getElementById('psn-vendedor').value : '';
   var catF    = document.getElementById('psn-categoria') ? document.getElementById('psn-categoria').value : '';
@@ -20904,8 +20903,8 @@ function renderNaoFaturados() {
   var kpi = document.getElementById('pnf-kpi-total');
   if (!cont || !vazio) return;
 
-  var dataDe  = document.getElementById('pnf-data-de') ? document.getElementById('pnf-data-de').value : '';
-  var dataAte = document.getElementById('pnf-data-ate') ? document.getElementById('pnf-data-ate').value : '';
+  var dataDe  = document.getElementById('pnf-data-de') ? _entctrlParseDataBR(document.getElementById('pnf-data-de').value) : '';
+  var dataAte = document.getElementById('pnf-data-ate') ? _entctrlParseDataBR(document.getElementById('pnf-data-ate').value) : '';
   var fornF   = (document.getElementById('pnf-fornecedor') ? document.getElementById('pnf-fornecedor').value : '').trim().toLowerCase();
   var vendF   = document.getElementById('pnf-vendedor') ? document.getElementById('pnf-vendedor').value : '';
   var catF    = document.getElementById('pnf-categoria') ? document.getElementById('pnf-categoria').value : '';
@@ -21051,8 +21050,8 @@ function renderVendasCompletas() {
   var vazio = document.getElementById('vc-vazio');
   if (!cont || !vazio) return;
 
-  var dataDe  = document.getElementById('vc-data-de') ? document.getElementById('vc-data-de').value : '';
-  var dataAte = document.getElementById('vc-data-ate') ? document.getElementById('vc-data-ate').value : '';
+  var dataDe  = document.getElementById('vc-data-de') ? _entctrlParseDataBR(document.getElementById('vc-data-de').value) : '';
+  var dataAte = document.getElementById('vc-data-ate') ? _entctrlParseDataBR(document.getElementById('vc-data-ate').value) : '';
   var fornF   = (document.getElementById('vc-fornecedor') ? document.getElementById('vc-fornecedor').value : '').trim().toLowerCase();
   var vendF   = document.getElementById('vc-vendedor') ? document.getElementById('vc-vendedor').value : '';
   var catF    = document.getElementById('vc-categoria') ? document.getElementById('vc-categoria').value : '';
@@ -21187,8 +21186,8 @@ function renderVendasCompletasFaturadas() {
   var vazio = document.getElementById('vcf-vazio');
   if (!cont || !vazio) return;
 
-  var dataDe  = document.getElementById('vcf-data-de') ? document.getElementById('vcf-data-de').value : '';
-  var dataAte = document.getElementById('vcf-data-ate') ? document.getElementById('vcf-data-ate').value : '';
+  var dataDe  = document.getElementById('vcf-data-de') ? _entctrlParseDataBR(document.getElementById('vcf-data-de').value) : '';
+  var dataAte = document.getElementById('vcf-data-ate') ? _entctrlParseDataBR(document.getElementById('vcf-data-ate').value) : '';
   var fornF   = (document.getElementById('vcf-fornecedor') ? document.getElementById('vcf-fornecedor').value : '').trim().toLowerCase();
   var vendF   = document.getElementById('vcf-vendedor') ? document.getElementById('vcf-vendedor').value : '';
   var catF    = document.getElementById('vcf-categoria') ? document.getElementById('vcf-categoria').value : '';
@@ -22214,11 +22213,13 @@ function salvarPedido() {
   var fornNome = document.getElementById('ped-forn-input').value.trim();
   var cliId    = document.getElementById('ped-cli-id').value;
   var cliNome  = document.getElementById('ped-cli-input').value.trim();
-  var data     = document.getElementById('ped-data').value;
+  var dataRaw  = document.getElementById('ped-data').value;
+  var data     = _entctrlParseDataBR(dataRaw);
 
   if (!fornId)  { msg.textContent = 'Selecione o Fornecedor / Fábrica na lista de sugestões.'; return; }
   if (!cliId)   { msg.textContent = 'Selecione o Cliente na lista de sugestões.'; return; }
-  if (!data)    { msg.textContent = 'Informe a Data do Pedido.'; return; }
+  if (!dataRaw) { msg.textContent = 'Informe a Data do Pedido.'; return; }
+  if (!data)    { msg.textContent = 'Data do Pedido inválida. Use o formato dd/mm/aaaa.'; return; }
   if (!_pedItens.length) { msg.textContent = 'Adicione ao menos um item ao pedido.'; return; }
   // Última linha de defesa contra produto bloqueado: cobre também itens trazidos por "Duplicar Pedido"
   // ou qualquer outro caminho que monte _pedItens sem passar por pedAddItem().
@@ -22553,7 +22554,7 @@ function _devBuscarDataNfOrigem() {
     });
   });
   if (achada) {
-    document.getElementById('dev-data-nf-origem').value = achada.data || '';
+    document.getElementById('dev-data-nf-origem').value = _entctrlDataParaBR(achada.data || '');
     if (msgEl) { msgEl.style.color = '#15803d'; msgEl.textContent = 'Data preenchida a partir do pedido deste cliente.'; }
   } else {
     if (msgEl) { msgEl.style.color = '#94a3b8'; msgEl.textContent = 'NF não encontrada para este cliente — informe a data manualmente.'; }
@@ -22663,7 +22664,7 @@ function openDevolucaoForm(params) {
   document.getElementById('dev-edit-id').value = params.id || '';
   document.getElementById('dev-header-title').textContent = params.id ? 'Editar Devolução' : 'Nova Devolução';
   document.getElementById('dev-lancamento').value = params.lancamento || devProximoLancamento();
-  document.getElementById('dev-data').value = params.data || new Date().toISOString().slice(0,10);
+  document.getElementById('dev-data').value = _entctrlDataParaBR(params.data || new Date().toISOString().slice(0,10));
 
   document.getElementById('dev-forn-id').value    = params.fornecedorId || '';
   document.getElementById('dev-forn-input').value = _cpSemColchetes(params.fornecedorNome || '');
@@ -22671,9 +22672,9 @@ function openDevolucaoForm(params) {
   document.getElementById('dev-cli-input').value   = _cpSemColchetes(params.clienteNome || '');
 
   document.getElementById('dev-nf-emitida').value     = params.nfEmitida || '';
-  document.getElementById('dev-data-nf-emitida').value = params.dataNfEmitida || '';
+  document.getElementById('dev-data-nf-emitida').value = _entctrlDataParaBR(params.dataNfEmitida || '');
   document.getElementById('dev-nf-origem').value      = params.nfOrigem || '';
-  document.getElementById('dev-data-nf-origem').value = params.dataNfOrigem || '';
+  document.getElementById('dev-data-nf-origem').value = _entctrlDataParaBR(params.dataNfOrigem || '');
   document.getElementById('dev-motivo').value         = params.motivo || DEV_MOTIVOS[0];
   document.getElementById('dev-obs').value            = params.obs || '';
 
@@ -22812,7 +22813,7 @@ function _devProcessarArquivoXml(file) {
     var avisos = [];
 
     if (dados.nNF) document.getElementById('dev-nf-emitida').value = dados.nNF;
-    if (dados.dataEmissao) document.getElementById('dev-data-nf-emitida').value = dados.dataEmissao;
+    if (dados.dataEmissao) document.getElementById('dev-data-nf-emitida').value = _entctrlDataParaBR(dados.dataEmissao);
 
     if (dados.refNFe && dados.refNFe.length === 44) {
       var numOrigem = dados.refNFe.substring(25,34).replace(/^0+/, '');
@@ -23039,19 +23040,25 @@ function salvarDevolucao() {
   var fornNome = document.getElementById('dev-forn-input').value.trim();
   var cliId    = document.getElementById('dev-cli-id').value;
   var cliNome  = document.getElementById('dev-cli-input').value.trim();
-  var data     = document.getElementById('dev-data').value;
+  var dataRaw  = document.getElementById('dev-data').value;
+  var data     = _entctrlParseDataBR(dataRaw);
   var nfEmitida     = document.getElementById('dev-nf-emitida').value.trim();
-  var dataNfEmitida = document.getElementById('dev-data-nf-emitida').value;
+  var dataNfEmitidaRaw = document.getElementById('dev-data-nf-emitida').value;
+  var dataNfEmitida = _entctrlParseDataBR(dataNfEmitidaRaw);
   var nfOrigem      = document.getElementById('dev-nf-origem').value.trim();
-  var dataNfOrigem  = document.getElementById('dev-data-nf-origem').value;
+  var dataNfOrigemRaw = document.getElementById('dev-data-nf-origem').value;
+  var dataNfOrigem  = _entctrlParseDataBR(dataNfOrigemRaw);
 
-  if (!data)      { msg.textContent = 'Informe a Data de Lançamento.'; return; }
+  if (!dataRaw)   { msg.textContent = 'Informe a Data de Lançamento.'; return; }
+  if (!data)      { msg.textContent = 'Data de Lançamento inválida. Use o formato dd/mm/aaaa.'; return; }
   if (!fornId)    { msg.textContent = 'Selecione o Fornecedor na lista de sugestões.'; return; }
   if (!cliId)     { msg.textContent = 'Selecione o Cliente na lista de sugestões.'; return; }
   if (!nfEmitida) { msg.textContent = 'Informe a NF Emitida.'; return; }
-  if (!dataNfEmitida) { msg.textContent = 'Informe a Data da Devolução (data da NF emitida pelo cliente).'; return; }
+  if (!dataNfEmitidaRaw) { msg.textContent = 'Informe a Data da Devolução (data da NF emitida pelo cliente).'; return; }
+  if (!dataNfEmitida) { msg.textContent = 'Data da Devolução inválida. Use o formato dd/mm/aaaa.'; return; }
   if (!nfOrigem)  { msg.textContent = 'Informe a NF Origem.'; return; }
-  if (!dataNfOrigem) { msg.textContent = 'Informe a Data da NF Origem.'; return; }
+  if (!dataNfOrigemRaw) { msg.textContent = 'Informe a Data da NF Origem.'; return; }
+  if (!dataNfOrigem) { msg.textContent = 'Data da NF Origem inválida. Use o formato dd/mm/aaaa.'; return; }
   if (!_devItens.length) { msg.textContent = 'Adicione ao menos um produto.'; return; }
 
   var vendSel     = document.getElementById('dev-vendedor');
@@ -23497,7 +23504,7 @@ function revAnexarXml(input) {
 
 function _revXmlItemToggle(i, checked) { if (_revXmlItens[i]) _revXmlItens[i].selecionado = checked; }
 function _revXmlItemQtd(i, val) { if (_revXmlItens[i]) _revXmlItens[i].qtdDisponivel = parseFloat(val) || 0; }
-function _revXmlItemValidade(i, val) { if (_revXmlItens[i]) _revXmlItens[i].validade = val; }
+function _revXmlItemValidade(i, val) { if (_revXmlItens[i]) _revXmlItens[i].validade = _entctrlParseDataBR(val); }
 function _revXmlItemCusto(i, el) { if (_revXmlItens[i]) _revXmlItens[i].valorCusto = _pedParseMoeda(el.value); }
 
 function _revRenderXmlItens() {
@@ -23523,7 +23530,7 @@ function _revRenderXmlItens() {
       + '<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + rotulo + '">' + rotulo + '</div>'
       + '<div>' + (it.qtd||0) + '</div>'
       + '<div><input class="form-input no-spin" type="number" min="0" step="1" value="' + (it.qtdDisponivel!=null?it.qtdDisponivel:'') + '" oninput="_revXmlItemQtd(' + i + ',this.value)" style="width:100%;padding:4px 6px;font-size:11px"></div>'
-      + '<div><input class="form-input" type="date" value="' + (it.validade||'') + '" oninput="_revXmlItemValidade(' + i + ',this.value)" style="width:100%;padding:4px 6px;font-size:11px"></div>'
+      + '<div><input class="form-input" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="' + (it.validade?_entctrlDataParaBR(it.validade):'') + '" oninput="_entctrlMaskData(this);_revXmlItemValidade(' + i + ',this.value)" style="width:100%;padding:4px 6px;font-size:11px"></div>'
       + '<div><input class="form-input" type="text" inputmode="decimal" value="' + custoStr + '" oninput="_pedMaskPreco(this);_revXmlItemCusto(' + i + ',this)" style="width:100%;padding:4px 6px;font-size:11px"></div>'
       + '</div>';
   }).join('');
@@ -23596,7 +23603,7 @@ function openRevendaForm(params) {
   document.getElementById('rev-prod-input').value = (params.prodCodigo?params.prodCodigo+' ':'')+(params.prodNome||'');
   document.getElementById('rev-qtd-devolvida').value = params.quantidadeDevolvida || '';
   document.getElementById('rev-qtd-disponivel').value = (params.quantidadeDisponivel != null) ? params.quantidadeDisponivel : '';
-  document.getElementById('rev-validade').value = params.validade || '';
+  document.getElementById('rev-validade').value = _entctrlDataParaBR(params.validade || '');
   document.getElementById('rev-valor-custo').value = params.valorCusto ? Number(params.valorCusto).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
   document.getElementById('rev-obs').value = params.obs || '';
   document.getElementById('rev-msg').textContent = '';
@@ -23637,13 +23644,15 @@ function salvarRevendaItem() {
   var prodId = document.getElementById('rev-prod-id').value;
   var prodInput = document.getElementById('rev-prod-input').value.trim();
   var qtdDisponivel = parseFloat(document.getElementById('rev-qtd-disponivel').value) || 0;
-  var validade = document.getElementById('rev-validade').value;
+  var validadeRaw = document.getElementById('rev-validade').value;
+  var validade = _entctrlParseDataBR(validadeRaw);
 
   if (!fornId) { msg.textContent = 'Selecione o Fornecedor na lista de sugestões.'; return; }
   if (!cliOrigId) { msg.textContent = 'Selecione o Cliente de Origem na lista de sugestões.'; return; }
   if (!prodId) { msg.textContent = 'Selecione o Produto na lista de sugestões.'; return; }
   if (qtdDisponivel <= 0) { msg.textContent = 'Informe uma Quantidade Disponível para Revenda maior que zero.'; return; }
-  if (!validade) { msg.textContent = 'Informe a Validade do Produto.'; return; }
+  if (!validadeRaw) { msg.textContent = 'Informe a Validade do Produto.'; return; }
+  if (!validade) { msg.textContent = 'Validade inválida. Use o formato dd/mm/aaaa.'; return; }
 
   var produto = getProdutos().find(function(p){ return p.id === prodId; });
 
@@ -24929,7 +24938,7 @@ function limparFiltrosRelatorio() {
 function _relFiltros() {
   function v(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; }
   return {
-    dataDe: v('rel-f-data-de'), dataAte: v('rel-f-data-ate'),
+    dataDe: _entctrlParseDataBR(v('rel-f-data-de')), dataAte: _entctrlParseDataBR(v('rel-f-data-ate')),
     fornecedor: v('rel-f-fornecedor'), vendedor: v('rel-f-vendedor'),
     categoria: v('rel-f-categoria'), subcategoria: v('rel-f-subcategoria'),
     uf: v('rel-f-uf'), cliente: v('rel-f-cliente'),
@@ -25809,8 +25818,8 @@ function gerarApresentacaoPPT() {
   var redeId = document.getElementById('apres-rede').value;
   var subId = document.getElementById('apres-subcategoria').value;
   var fornId = document.getElementById('apres-fornecedor').value;
-  var dataDe = document.getElementById('apres-data-de').value;
-  var dataAte = document.getElementById('apres-data-ate').value;
+  var dataDe = _entctrlParseDataBR(document.getElementById('apres-data-de').value);
+  var dataAte = _entctrlParseDataBR(document.getElementById('apres-data-ate').value);
   var observacaoEl = document.getElementById('apres-observacao');
   var observacao = observacaoEl ? observacaoEl.value.trim() : '';
   var msg = document.getElementById('apres-msg');
@@ -27859,8 +27868,8 @@ function _drGerarPdf() {
   }
   var nomesFornecedores = [];
   _drUltimosGrupos.forEach(function (g) { if (g.fornNome && nomesFornecedores.indexOf(g.fornNome) === -1) nomesFornecedores.push(g.fornNome); });
-  var dataDe = document.getElementById('dr-data-de').value;
-  var dataAte = document.getElementById('dr-data-ate').value;
+  var dataDe = _entctrlParseDataBR(document.getElementById('dr-data-de').value);
+  var dataAte = _entctrlParseDataBR(document.getElementById('dr-data-ate').value);
   var periodoTxt = (typeof _pimprelPeriodoTxt === 'function') ? _pimprelPeriodoTxt(dataDe, dataAte) : '';
   var subtitulo = 'F\u00e1brica' + (nomesFornecedores.length > 1 ? 's' : '') + ': ' + nomesFornecedores.join(', ') + periodoTxt;
   var periodoTxtPlano = (dataDe ? dataDe.split('-').reverse().join('/') : '\u2014') + ' a ' + (dataAte ? dataAte.split('-').reverse().join('/') : '\u2014');
@@ -28366,8 +28375,8 @@ function _drRecortarLogo(dataUrl) {
 
 function _drRenderVisualizar() {
   var grupos = _drUltimosGrupos || [];
-  var dataDe = document.getElementById('dr-data-de').value;
-  var dataAte = document.getElementById('dr-data-ate').value;
+  var dataDe = _entctrlParseDataBR(document.getElementById('dr-data-de').value);
+  var dataAte = _entctrlParseDataBR(document.getElementById('dr-data-ate').value);
   var periodoTxt = (dataDe ? dataDe.split('-').reverse().join('/') : '\u2014') + ' a ' + (dataAte ? dataAte.split('-').reverse().join('/') : '\u2014');
   var multiFornecedor = _drFornecedoresSelecionados.length > 1;
 
@@ -28423,8 +28432,8 @@ function _drVisualizar() {
   var msg = document.getElementById('dr-msg');
   if (!_drFornecedoresSelecionados.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma F\u00e1brica (Fornecedor).'; return; }
   if (!_drSelecoes.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma Rede ou Cliente.'; return; }
-  var dataDe = document.getElementById('dr-data-de').value;
-  var dataAte = document.getElementById('dr-data-ate').value;
+  var dataDe = _entctrlParseDataBR(document.getElementById('dr-data-de').value);
+  var dataAte = _entctrlParseDataBR(document.getElementById('dr-data-ate').value);
   var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoesEfetivas(), dataDe, dataAte);
   if (!grupos.length) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhum dado encontrado com esses filtros.'; return; }
   _drUltimosGrupos = grupos;
@@ -28439,8 +28448,8 @@ function _drGerar() {
   var msg = document.getElementById('dr-msg');
   if (!_drFornecedoresSelecionados.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma F\u00e1brica (Fornecedor).'; return; }
   if (!_drSelecoes.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma Rede ou Cliente.'; return; }
-  var dataDe = document.getElementById('dr-data-de').value;
-  var dataAte = document.getElementById('dr-data-ate').value;
+  var dataDe = _entctrlParseDataBR(document.getElementById('dr-data-de').value);
+  var dataAte = _entctrlParseDataBR(document.getElementById('dr-data-ate').value);
 
   var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoesEfetivas(), dataDe, dataAte);
   _drUltimosGrupos = grupos;
