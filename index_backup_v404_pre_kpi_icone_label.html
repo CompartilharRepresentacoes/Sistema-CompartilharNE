@@ -1346,7 +1346,6 @@
 .dash-root .dvg-kpi{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 3px 12px rgba(15,23,42,.1)}
 .dash-root .dvg-kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .dash-root .dvg-kpi-icon{width:26px;height:26px;border-radius:8px;background:#eef2fb;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.dash-root .dvg-kpi-titlewrap{display:flex;align-items:center;gap:6px}
 .dash-root .dvg-kpi-lbl{font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:.03em}
 .dash-root .dvg-kpi-val{font-size:19px;font-weight:800;color:#1e293b;margin-top:4px}
 .dash-root .dvg-kpi-sub{font-size:10.5px;color:#94a3b8;margin-top:2px}
@@ -15584,20 +15583,20 @@ function dashInit() {
             <div class="dvg-hero-val-exact" id="dvgHeroValueExact"></div>
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66">
-            <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#1c2f66"><i class="ti ti-package"></i></div><div class="dvg-kpi-lbl">VOLUME</div></div>${_dvgTrendVol}</div>
-            <div class="dvg-kpi-val" id="dvgKpiVol">0 kg</div><div class="dvg-kpi-sub">${fmtNum(k.vol)} cx no período</div>
+            <div class="dvg-kpi-top"><div class="dvg-kpi-icon" style="color:#1c2f66"><i class="ti ti-package"></i></div>${_dvgTrendVol}</div>
+            <div class="dvg-kpi-lbl">VOLUME</div><div class="dvg-kpi-val" id="dvgKpiVol">0 kg</div><div class="dvg-kpi-sub">${fmtNum(k.vol)} cx no período</div>
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #3d5aa8">
-            <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#3d5aa8"><i class="ti ti-target-arrow"></i></div><div class="dvg-kpi-lbl">POSITIVAÇÃO</div></div>${_dvgTrendPos}</div>
-            <div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div><div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} ativos</div>
+            <div class="dvg-kpi-top"><div class="dvg-kpi-icon" style="color:#3d5aa8"><i class="ti ti-target-arrow"></i></div>${_dvgTrendPos}</div>
+            <div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div><div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} ativos</div>
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #5b78c9">
-            <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#5b78c9"><i class="ti ti-receipt"></i></div><div class="dvg-kpi-lbl">TICKET MÉDIO</div></div>${_dvgTrendTicket}</div>
-            <div class="dvg-kpi-val" id="dvgKpiTicket">R$ 0,00</div><div class="dvg-kpi-sub">por pedido</div>
+            <div class="dvg-kpi-top"><div class="dvg-kpi-icon" style="color:#5b78c9"><i class="ti ti-receipt"></i></div>${_dvgTrendTicket}</div>
+            <div class="dvg-kpi-lbl">TICKET MÉDIO</div><div class="dvg-kpi-val" id="dvgKpiTicket">R$ 0,00</div><div class="dvg-kpi-sub">por pedido</div>
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #7b93d9">
-            <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#7b93d9"><i class="ti ti-users"></i></div><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div></div>${_dvgTrendCli}</div>
-            <div class="dvg-kpi-val" id="dvgKpiCli">0</div><div class="dvg-kpi-sub">no período</div>
+            <div class="dvg-kpi-top"><div class="dvg-kpi-icon" style="color:#7b93d9"><i class="ti ti-users"></i></div>${_dvgTrendCli}</div>
+            <div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div class="dvg-kpi-val" id="dvgKpiCli">0</div><div class="dvg-kpi-sub">no período</div>
           </div>
         `;
         _dvgAnimateHero(k.fat);
