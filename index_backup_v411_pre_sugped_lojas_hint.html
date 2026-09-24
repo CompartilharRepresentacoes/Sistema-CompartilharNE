@@ -5640,14 +5640,8 @@
             </div>
           </div>
           <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:6px">Lojas</div>
-          <div onclick="_sugToggleLojasPanel()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;max-width:360px">
-            <span id="sug-lojas-contador" style="font-size:12.5px;color:#1e293b;font-weight:600">Selecione uma rede</span>
-            <svg id="sug-lojas-chevron" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .15s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div id="sug-lojas-painel" style="display:none;margin-top:8px;padding:10px;border:1px solid #f1f5f9;border-radius:7px">
-            <label style="font-size:12.5px;display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:8px;font-weight:600"><input type="checkbox" id="sug-todas-lojas" onchange="_sugToggleTodasLojas(this.checked)"> Todas as lojas</label>
-            <div id="sug-lojas-lista" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px;padding-left:2px;color:#94a3b8;font-size:12px">Selecione uma rede para ver as lojas.</div>
-          </div>
+          <label style="font-size:12.5px;display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:8px"><input type="checkbox" id="sug-todas-lojas" onchange="_sugToggleTodasLojas(this.checked)"> Todas as lojas</label>
+          <div id="sug-lojas-lista" style="display:flex;gap:14px;flex-wrap:wrap;padding-left:2px;color:#94a3b8;font-size:12px">Selecione uma rede para ver as lojas.</div>
         </div>
 
         <div id="sug-bloco-cliente" style="display:none;position:relative;max-width:360px">
@@ -26204,7 +26198,6 @@ function _sugResetar() {
   if (todas) todas.checked = false;
   var lista = document.getElementById('sug-lojas-lista');
   if (lista) lista.innerHTML = 'Selecione uma rede para ver as lojas.';
-  _sugAtualizarContadorLojas();
   var cliInput = document.getElementById('sug-cliente-input');
   if (cliInput) cliInput.value = '';
   var cliId = document.getElementById('sug-cliente-id');
@@ -26281,27 +26274,6 @@ function _sugLojasAtivasFiltro() {
   });
 }
 
-function _sugToggleLojasPanel() {
-  var painel = document.getElementById('sug-lojas-painel');
-  var chevron = document.getElementById('sug-lojas-chevron');
-  if (!painel) return;
-  var aberto = painel.style.display !== 'none';
-  painel.style.display = aberto ? 'none' : 'block';
-  if (chevron) chevron.style.transform = aberto ? 'rotate(0deg)' : 'rotate(180deg)';
-}
-
-function _sugAtualizarContadorLojas() {
-  var contador = document.getElementById('sug-lojas-contador');
-  if (!contador) return;
-  var lojas = _sugLojasAtivasFiltro();
-  if (!lojas.length) {
-    contador.textContent = 'Selecione uma rede';
-    return;
-  }
-  var selecionadas = lojas.filter(function(l){ return _sugLojasSelecionadas[l.id]; }).length;
-  contador.textContent = selecionadas + ' de ' + lojas.length + ' selecionadas';
-}
-
 function _sugAtualizarLojas() {
   var redeId = document.getElementById('sug-rede').value;
   var subWrap = document.getElementById('sug-subrede-wrap');
@@ -26313,7 +26285,6 @@ function _sugAtualizarLojas() {
   if (!redeId || (temSubRede && !subId)) {
     lista.innerHTML = temSubRede ? 'Selecione uma sub rede para ver as lojas.' : 'Selecione uma rede para ver as lojas.';
     if (todas) todas.checked = false;
-    _sugAtualizarContadorLojas();
     _sugRenderTabela();
     return;
   }
@@ -26321,7 +26292,6 @@ function _sugAtualizarLojas() {
   if (!lojas.length) {
     lista.innerHTML = 'Nenhuma loja cadastrada para esta ' + (temSubRede ? 'sub rede' : 'rede') + '.';
     if (todas) todas.checked = false;
-    _sugAtualizarContadorLojas();
     _sugRenderTabela();
     return;
   }
@@ -26330,7 +26300,6 @@ function _sugAtualizarLojas() {
     return '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#1e293b"><input type="checkbox" id="sug-loja-' + l.id + '" checked onchange="_sugToggleLoja(\'' + l.id + '\',this.checked)"> ' + _pedEsc(_cpSemColchetes(l.nome_fantasia || l.razao_social || '')) + '</label>';
   }).join('');
   if (todas) todas.checked = true;
-  _sugAtualizarContadorLojas();
   _sugRenderTabela();
 }
 
@@ -26341,7 +26310,6 @@ function _sugToggleTodasLojas(checked) {
     var el = document.getElementById('sug-loja-' + l.id);
     if (el) el.checked = checked;
   });
-  _sugAtualizarContadorLojas();
   _sugRenderTabela();
 }
 
@@ -26351,7 +26319,6 @@ function _sugToggleLoja(id, checked) {
   var todasMarcadas = lojas.length > 0 && lojas.every(function(l){ return _sugLojasSelecionadas[l.id]; });
   var todas = document.getElementById('sug-todas-lojas');
   if (todas) todas.checked = todasMarcadas;
-  _sugAtualizarContadorLojas();
   _sugRenderTabela();
 }
 
@@ -26613,10 +26580,8 @@ function _sugRenderTabela() {
       var step = _sugEhKg(p) ? '0.001' : '1';
       var hintTxt = _sugHintCelula(p, v);
       return '<td style="padding:4px;text-align:center">'
-        + '<div style="display:inline-flex;align-items:center;gap:6px">'
         + '<input type="number" min="0" step="' + step + '" placeholder="' + placeholder + '" value="' + v + '" oninput="_sugAtualizarQtd(\'' + l.produtoId + '\',\'' + c.id + '\',this.value,this)" style="width:60px;height:26px;border:1px solid ' + (valido ? '#e2e8f0' : '#dc2626') + ';border-radius:4px;text-align:center;font-size:12px;background:' + (valido ? '#fff' : '#fef2f2') + '">'
-        + '<span id="sug-hint-' + l.produtoId + '-' + c.id + '" style="font-size:9px;color:' + (valido ? '#94a3b8' : '#dc2626') + ';white-space:nowrap">' + _pedEsc(hintTxt) + '</span>'
-        + '</div>'
+        + '<div id="sug-hint-' + l.produtoId + '-' + c.id + '" style="font-size:9px;color:' + (valido ? '#94a3b8' : '#dc2626') + ';margin-top:2px">' + _pedEsc(hintTxt) + '</div>'
         + '</td>';
     }).join('');
     return '<tr style="border-bottom:1px solid #f1f5f9">'
