@@ -432,8 +432,9 @@
       #page-consulta-preco .cp-res-row > div:nth-child(3) {
         display:inline-block !important; margin-right:14px; font-size:11px !important; vertical-align:top;
       }
-      #page-consulta-preco .cp-res-row > div:nth-child(4) {
-        display:block !important; margin-top:10px; text-align:left !important;
+      #page-consulta-preco .cp-res-row > div:nth-child(4),
+      #page-consulta-preco .cp-res-row > div:nth-child(5) {
+        display:inline-block !important; margin-top:8px; margin-right:20px; vertical-align:top;
       }
 
       /* Pedidos (Digitacao de Pedidos): no mobile as abas viram "atual + 3 pontos",
@@ -14590,7 +14591,7 @@ function consultarPreco() {
     const valFmt = 'R$ ' + val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const badge  = r.especifica
       ? `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:#dcfce7;color:#15803d;margin-left:7px">Específica</span>` : '';
-    return `<div class="cp-res-row" style="display:grid;grid-template-columns:2fr 120px 120px 1fr;padding:13px 18px;align-items:center;border-bottom:1px solid #f1f5f9;transition:background .1s"
+    return `<div class="cp-res-row" style="display:grid;grid-template-columns:2fr 120px 120px 150px 150px;padding:13px 18px;align-items:center;border-bottom:1px solid #f1f5f9;transition:background .1s"
         onmouseover="this.style.background='#f8fbff'" onmouseout="this.style.background=''">
       <div>
         <div style="font-size:13px;font-weight:700;color:#1e293b">${r.tabela.nome}${badge}</div>
@@ -14598,9 +14599,8 @@ function consultarPreco() {
       </div>
       <div style="font-size:12px;font-weight:600;color:#475569">${tercNome}</div>
       <div style="font-size:12px;color:#64748b;font-weight:500">${r.item.periodo || '—'}</div>
-      <div style="text-align:center" id="cp-preco-wrap-${i}">
-        <div style="font-size:18px;font-weight:800;color:#15803d">${valFmt}</div>
-      </div>
+      <div style="font-size:16px;font-weight:800;color:#15803d">${valFmt}</div>
+      <div style="font-size:16px;font-weight:800;color:#DE7926" id="cp-desc-val-${i}">${valFmt}</div>
     </div>`;
   }).join('');
 
@@ -14623,20 +14623,21 @@ function consultarPreco() {
             <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Tipo / ${tipoLabel}</div>
             <div style="font-size:13px;font-weight:700;color:${tipoColor}">${tercNome}</div>
           </div>
+          ${hasEspecifica ? '<div style="margin-left:auto"><span style="font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;background:#dcfce7;color:#15803d">✓ Possui preço específico</span></div>' : ''}
         </div>
-        ${hasEspecifica ? '<div style="margin-top:10px"><span style="font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;background:#dcfce7;color:#15803d">✓ Possui preço específico</span></div>' : ''}
       </div>
       <!-- Cabeçalho colunas -->
-      <div class="cp-res-header" style="display:grid;grid-template-columns:2fr 120px 120px 1fr;padding:9px 18px;background:#f8fafc;border-bottom:2px solid #e2e8f0">
+      <div class="cp-res-header" style="display:grid;grid-template-columns:2fr 120px 120px 150px 150px;padding:9px 18px;background:#f8fafc;border-bottom:2px solid #e2e8f0">
         <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Tabela</div>
         <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">${tipoLabel}</div>
         <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Período</div>
-        <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;text-align:center">Preço</div>
+        <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Preço</div>
+        <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">C/ Desconto</div>
       </div>
       <!-- Desconto global -->
       <div class="cp-res-desconto" style="padding:10px 18px;background:#fffbf5;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:12px">
-        <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase">Desconto %:</label>
-        <input type="number" id="cp-desc-pct" min="0" max="100" step="0.1" placeholder="0"
+        <label style="font-size:11px;font-weight:700;color:#64748b">Desconto %:</label>
+        <input type="number" id="cp-desc-pct" min="0" max="100" step="0.1" value="0"
           oninput="cpAplicarDesconto()"
           style="width:80px;padding:5px 8px;border-radius:7px;border:1px solid #e2e8f0;font-size:12px;font-weight:700;color:#272A4A;outline:none;text-align:right">
         <span style="font-size:11px;color:#94a3b8">Aplicar desconto sobre o preço</span>
@@ -14650,18 +14651,9 @@ function cpAplicarDesconto() {
   const pct = parseFloat(document.getElementById('cp-desc-pct')?.value || '0') || 0;
   _cpResultados.forEach((r, i) => {
     const val = parseFloat(String(r.item.valor || '0').replace(',', '.')) || 0;
-    const valFmt = 'R$ ' + val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const wrap = document.getElementById('cp-preco-wrap-' + i);
-    if (!wrap) return;
-    if (pct > 0) {
-      const desc = val * (1 - pct / 100);
-      const descFmt = 'R$ ' + desc.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      wrap.innerHTML = '<div style="font-size:11px;color:#94a3b8;text-decoration:line-through">' + valFmt + '</div>'
-        + '<div style="font-size:18px;font-weight:800;color:#DE7926">' + descFmt + '</div>'
-        + '<div style="font-size:9px;font-weight:700;color:#DE7926;background:#fff2e0;border-radius:8px;padding:1px 7px;display:inline-block;margin-top:2px">-' + pct.toLocaleString('pt-BR') + '% aplicado</div>';
-    } else {
-      wrap.innerHTML = '<div style="font-size:18px;font-weight:800;color:#15803d">' + valFmt + '</div>';
-    }
+    const desc = val * (1 - pct / 100);
+    const el = document.getElementById('cp-desc-val-' + i);
+    if (el) el.textContent = 'R$ ' + desc.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   });
 }
 
