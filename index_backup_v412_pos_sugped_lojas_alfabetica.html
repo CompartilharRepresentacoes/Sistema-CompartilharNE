@@ -5680,7 +5680,7 @@
             <tfoot></tfoot>
           </table>
         </div>
-        <div id="sug-vazio" style="padding:24px 0;text-align:center;color:#1e293b;font-size:12.5px">Busque e adicione produtos acima para montar a simulação.</div>
+        <div id="sug-vazio" style="padding:24px 0;text-align:center;color:#94a3b8;font-size:12.5px">Busque e adicione produtos acima para montar a simulação.</div>
       </div>
 
     </div>
@@ -26593,7 +26593,7 @@ function _sugRenderTabela() {
   if (vazio) vazio.style.display = 'none';
 
   var produtos = getProdutos();
-  thead.innerHTML = '<tr style="border-bottom:1px solid #e2e8f0;color:#1e293b;text-align:left">'
+  thead.innerHTML = '<tr style="border-bottom:1px solid #e2e8f0;color:#94a3b8;text-align:left">'
     + '<td style="position:sticky;left:0;background:#fff;padding:6px;min-width:150px;z-index:2">Produto</td>'
     + '<td style="position:sticky;left:150px;background:#fff;padding:6px;min-width:70px;z-index:2;box-shadow:2px 0 4px -2px rgba(0,0,0,.12)">Cx</td>'
     + cols.map(function(c){ return '<td style="padding:6px;text-align:center;min-width:90px">' + _pedEsc(c.nome) + '</td>'; }).join('')
@@ -26620,16 +26620,16 @@ function _sugRenderTabela() {
       return '<td style="padding:4px;text-align:center">'
         + '<div style="display:inline-flex;align-items:center;gap:6px">'
         + '<input type="number" min="0" step="' + step + '" placeholder="' + placeholder + '" value="' + v + '" oninput="_sugAtualizarQtd(\'' + l.produtoId + '\',\'' + c.id + '\',this.value,this)" style="width:60px;height:26px;border:1px solid ' + (valido ? '#e2e8f0' : '#dc2626') + ';border-radius:4px;text-align:center;font-size:12px;background:' + (valido ? '#fff' : '#fef2f2') + '">'
-        + '<span id="sug-hint-' + l.produtoId + '-' + c.id + '" style="font-size:9px;color:' + (valido ? '#1e293b' : '#dc2626') + ';white-space:nowrap">' + _pedEsc(hintTxt) + '</span>'
+        + '<span id="sug-hint-' + l.produtoId + '-' + c.id + '" style="font-size:9px;color:' + (valido ? '#94a3b8' : '#dc2626') + ';white-space:nowrap">' + _pedEsc(hintTxt) + '</span>'
         + '</div>'
         + '</td>';
     }).join('');
     return '<tr style="border-bottom:1px solid #f1f5f9">'
       + '<td style="position:sticky;left:0;background:#fff;padding:6px;z-index:1">' + _pedEsc(p.nome || '') + '</td>'
-      + '<td style="position:sticky;left:150px;background:#fff;padding:6px;color:#1e293b;white-space:nowrap;z-index:1;box-shadow:2px 0 4px -2px rgba(0,0,0,.12)">' + _pedEsc(_sugCxLabel(p)) + '</td>'
+      + '<td style="position:sticky;left:150px;background:#fff;padding:6px;color:#64748b;white-space:nowrap;z-index:1;box-shadow:2px 0 4px -2px rgba(0,0,0,.12)">' + _pedEsc(_sugCxLabel(p)) + '</td>'
       + celulas
       + '<td id="sug-lin-qtd-' + l.produtoId + '" style="position:sticky;right:114px;background:#fff;padding:6px;text-align:center;font-weight:700;z-index:1;box-shadow:-2px 0 4px -2px rgba(0,0,0,.12)">' + _sugFmtNum(somaQtd) + '</td>'
-      + '<td id="sug-lin-peso-' + l.produtoId + '" style="position:sticky;right:34px;background:#fff;padding:6px;text-align:center;color:#1e293b;z-index:1">' + _sugFmtNum(somaPeso) + '</td>'
+      + '<td id="sug-lin-peso-' + l.produtoId + '" style="position:sticky;right:34px;background:#fff;padding:6px;text-align:center;color:#64748b;z-index:1">' + _sugFmtNum(somaPeso) + '</td>'
       + '<td style="position:sticky;right:0;background:#fff;padding:6px;text-align:center;z-index:1"><span onclick="_sugRemoverProduto(\'' + l.produtoId + '\')" title="Remover" style="cursor:pointer;color:#dc2626;font-size:13px">&#10005;</span></td>'
       + '</tr>';
   }).join('');
