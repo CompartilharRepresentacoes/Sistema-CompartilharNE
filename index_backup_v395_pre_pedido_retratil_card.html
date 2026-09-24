@@ -234,58 +234,30 @@
       #page-pedido-form #ped-item-add-btn { height: 44px !important; }
       #page-pedido-form .ped-add-txt { display: inline !important; }
       #page-pedido-form .ped-itens-header { display: none !important; }
-
-      #page-pedido-form .ped-dados-toggle { display: flex !important; }
-      #page-pedido-form .ped-dados-wrap.ped-dados-recolhido > .ped-dados-header,
-      #page-pedido-form .ped-dados-wrap.ped-dados-recolhido > .ped-grid-dados1,
-      #page-pedido-form .ped-dados-wrap.ped-dados-recolhido > .ped-grid-dados2,
-      #page-pedido-form .ped-dados-wrap.ped-dados-recolhido > .ped-dados-toggle { display: none !important; }
-      #page-pedido-form .ped-dados-wrap.ped-dados-recolhido > .ped-dados-resumo { display: flex !important; }
-
       #page-pedido-form .ped-item-row {
-        display: block !important;
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        row-gap: 6px !important;
         padding: 10px 12px !important;
         border: 1px solid #eef2f7 !important;
         border-radius: 10px !important;
         margin-bottom: 8px !important;
       }
-      #page-pedido-form .ped-item-row > *:not(.ped-item-mobile) { display: none !important; }
-      #page-pedido-form .ped-item-mobile { display: block !important; }
+      #page-pedido-form .ped-item-row > *:first-child {
+        grid-column: 1 / -1 !important;
+        font-size: 13px !important;
+        margin-bottom: 2px !important;
+        white-space: normal !important;
+      }
+      #page-pedido-form .ped-item-lbl {
+        display: block;
+        font-size: 8px;
+        color: #94a3b8;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: .04em;
+      }
     }
-    #page-pedido-form .ped-dados-toggle {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 1px;
-      padding-top: 6px;
-      cursor: pointer;
-      background: none;
-      border: none;
-      width: 100%;
-      color: #94a3b8;
-      font-size: 8px;
-      font-weight: 600;
-    }
-    #page-pedido-form .ped-dados-resumo {
-      display: none;
-      align-items: center;
-      gap: 12px;
-      background: #f8fafc;
-      border: 1px solid #eef2f7;
-      border-radius: 8px;
-      padding: 8px 10px;
-      cursor: pointer;
-      flex-wrap: wrap;
-    }
-    #page-pedido-form .ped-dados-resumo > div { font-size: 11px; color: #1e293b; }
-    #page-pedido-form .ped-dados-resumo .pdr-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-right: 2px; }
-    #page-pedido-form .ped-dados-resumo svg { margin-left: auto; flex-shrink: 0; color: #94a3b8; }
-    #page-pedido-form .ped-item-mobile { display: none; }
-    #page-pedido-form .ped-item-mobile .pim-nome { font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; }
-    #page-pedido-form .ped-item-mobile .pim-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #334155; margin-top: 4px; }
-    #page-pedido-form .ped-item-mobile .pim-row b { color: #94a3b8; font-size: 9px; text-transform: uppercase; font-weight: 700; margin-right: 3px; }
-    #page-pedido-form .ped-item-mobile .pim-total em { font-style: normal; color: #15803d; font-weight: 800; font-size: 13px; }
-    #page-pedido-form .ped-item-mobile .pim-acoes { display: flex; gap: 10px; }
 
     /* ── Mobile: menu-gaveta ── */
     #btnMobileMenu { display:none; }
@@ -4896,8 +4868,8 @@
             <input type="hidden" id="ped-edit-id">
 
             <!-- ── Dados do Pedido ── -->
-            <div id="ped-dados-wrap">
-              <div class="ped-dados-header" style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
                 <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px;color:#272A4A"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg>
                 <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b">Dados do Pedido</span>
                 <div style="flex:1;height:1px;background:#f1f5f9"></div>
@@ -4956,15 +4928,6 @@
                     <option value="Cancelado">Cancelado</option>
                   </select>
                 </div>
-              </div>
-              <div class="ped-dados-toggle" onclick="_pedToggleDadosPedido()">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                <span>Recolher</span>
-              </div>
-              <div class="ped-dados-resumo" onclick="_pedToggleDadosPedido()">
-                <div><span class="pdr-lbl">Fornecedor</span><b id="ped-dados-resumo-forn">—</b></div>
-                <div><span class="pdr-lbl">Cliente</span><b id="ped-dados-resumo-cli">—</b></div>
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9l-6 6-6-6"/></svg>
               </div>
             </div>
 
@@ -22123,19 +22086,6 @@ function _pedEditItemModalKey(e) {
   if (e.key === 'Enter') { e.preventDefault(); pedSalvarEdicaoItemModal(); }
   if (e.key === 'Escape') { e.preventDefault(); pedFecharEdicaoItem(); }
 }
-function _pedToggleDadosPedido() {
-  var wrap = document.getElementById('ped-dados-wrap');
-  if (!wrap) return;
-  var recolhido = wrap.classList.toggle('ped-dados-recolhido');
-  if (recolhido) {
-    var fornTxt = (document.getElementById('ped-forn-input')||{}).value || '—';
-    var cliTxt  = (document.getElementById('ped-cli-input')||{}).value || '—';
-    var fEl = document.getElementById('ped-dados-resumo-forn');
-    var cEl = document.getElementById('ped-dados-resumo-cli');
-    if (fEl) fEl.textContent = fornTxt;
-    if (cEl) cEl.textContent = cliTxt;
-  }
-}
 function renderPedItens() {
   var tbody = document.getElementById('ped-itens-tbody');
   var totalEl = document.getElementById('ped-total-geral');
@@ -22155,22 +22105,16 @@ function renderPedItens() {
     var nomeComCodigo = (it.prodCodigo ? it.prodCodigo+' ' : '') + (it.prodNome||'');
     var bloqueioItem = _bloqVerificar(_pedItensFornId, it.prodId, _pedItensCliId);
     var tagBloqueado = bloqueioItem ? '<span title="'+_pedEsc(bloqueioItem.motivo || 'Produto bloqueado para este cliente')+'" style="background:#fef2f2;color:#dc2626;font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-left:6px;white-space:nowrap">Bloqueado</span>' : '';
-    var qtdLabel = (it.modoUnid==='cx' && it.qtdCaixas) ? (it.qtdCaixas+' CX') : (it.quantidade + (it.medida ? (' '+it.medida) : ''));
     return '<div class="ped-item-row" style="display:grid;grid-template-columns:1fr 50px 45px 90px 75px 55px 55px 95px 66px;padding:9px 12px;align-items:center;border-bottom:1px solid #f8fafc;font-size:12.5px;'+(bloqueioItem?'background:#fffbfb':'')+'">'
       + '<div style="font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+_pedEsc(nomeComCodigo)+'">'+_pedEsc(nomeComCodigo)+tagBloqueado+'</div>'
-      + '<div style="color:#64748b">'+(it.medida!==undefined && it.medida!==''?_pedEsc(it.medida):'—')+'</div>'
-      + '<div style="color:#64748b">'+(it.cx!==undefined && it.cx!==''?it.cx:'—')+'</div>'
-      + '<div style="color:#64748b">'+_pedFmtMoeda(it.precoUnit)+'</div>'
-      + '<div style="color:#64748b">'+(it.comissao && it.comissao!=='' ? it.comissao+'%' : '—')+'</div>'
-      + '<div style="color:#64748b">'+(it.desconto||0)+'%</div>'
-      + '<div style="color:#64748b" title="'+((it.modoUnid==='cx' && it.qtdCaixas)?(_pedEsc(String(it.qtdCaixas))+' CX × '+_pedEsc(String(it.cx||''))+' = '+it.quantidade+' '+_pedEsc(it.medida||'')):'')+'">'+((it.modoUnid==='cx' && it.qtdCaixas)?(it.qtdCaixas+' CX'):it.quantidade)+'</div>'
-      + '<div style="font-weight:700;color:#1e293b">'+_pedFmtMoeda(it.valorTotal)+'</div>'
+      + '<div style="color:#64748b"><span class="ped-item-lbl">Medida</span>'+(it.medida!==undefined && it.medida!==''?_pedEsc(it.medida):'—')+'</div>'
+      + '<div style="color:#64748b"><span class="ped-item-lbl">CX</span>'+(it.cx!==undefined && it.cx!==''?it.cx:'—')+'</div>'
+      + '<div style="color:#64748b"><span class="ped-item-lbl">Preço</span>'+_pedFmtMoeda(it.precoUnit)+'</div>'
+      + '<div style="color:#64748b"><span class="ped-item-lbl">Comissão</span>'+(it.comissao && it.comissao!=='' ? it.comissao+'%' : '—')+'</div>'
+      + '<div style="color:#64748b"><span class="ped-item-lbl">Desc.</span>'+(it.desconto||0)+'%</div>'
+      + '<div style="color:#64748b" title="'+((it.modoUnid==='cx' && it.qtdCaixas)?(_pedEsc(String(it.qtdCaixas))+' CX × '+_pedEsc(String(it.cx||''))+' = '+it.quantidade+' '+_pedEsc(it.medida||'')):'')+'"><span class="ped-item-lbl">Qtd.</span>'+((it.modoUnid==='cx' && it.qtdCaixas)?(it.qtdCaixas+' CX'):it.quantidade)+'</div>'
+      + '<div style="font-weight:700;color:#1e293b"><span class="ped-item-lbl">Total</span>'+_pedFmtMoeda(it.valorTotal)+'</div>'
       + '<div style="text-align:right;white-space:nowrap">'+acoesCell+'</div>'
-      + '<div class="ped-item-mobile">'
-        + '<div class="pim-nome">'+_pedEsc(nomeComCodigo)+tagBloqueado+'</div>'
-        + '<div class="pim-row"><span><b>QTD.</b>'+_pedEsc(String(qtdLabel))+'</span><span><b>PREÇO</b>'+_pedFmtMoeda(it.precoUnit)+'</span></div>'
-        + '<div class="pim-row"><span><b>DESC.</b>'+(it.desconto||0)+'%</span><span class="pim-total"><b>TOTAL</b><em>'+_pedFmtMoeda(it.valorTotal)+'</em></span><span class="pim-acoes">'+acoesCell+'</span></div>'
-      + '</div>'
       + '</div>';
   }).join('');
   if (totalEl) totalEl.textContent = _pedFmtMoeda(total);
