@@ -632,8 +632,7 @@
       .mc-row .mc-actions { display:flex !important; flex-wrap:wrap !important; gap:2px !important; justify-content:flex-start !important; margin-top:6px; }
       .mc-row .mc-hide { display:none !important; }
       .mc-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-      .mc-table-wrap table { min-width:640px; width:auto !important; }
-      .mc-table-wrap td, .mc-table-wrap th { white-space:nowrap !important; }
+      .mc-table-wrap table { min-width:640px; }
 
       /* Controle de Entrega: linha de 12 colunas vira cartao no mobile (cabecalho de coluna nao faz sentido empilhado).
          Layout pedido pelo Marcos (2026-09-11): Nome da loja > Cidade-UF/Fabrica/Transp > Pedido/NF/Status
@@ -20985,7 +20984,7 @@ function renderNaoFaturados() {
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#dc2626;font-weight:700">' + _pedFmtMoeda(it.valorNaoFaturado) + '</td>'
         + '</tr>';
     }).join('');
-    return '<div style="background:#fff;border-radius:12px;border-bottom:3px solid #3d5aa8;box-shadow:0 4px 20px rgba(39,42,74,.12);overflow:hidden">'
+    return '<div style="background:#fff;border-radius:12px;border-left:4px solid #3d5aa8;box-shadow:0 4px 20px rgba(39,42,74,.12);overflow:hidden">'
       + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
       + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
       + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
