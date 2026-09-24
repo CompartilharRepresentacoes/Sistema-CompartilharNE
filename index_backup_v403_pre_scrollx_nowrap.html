@@ -604,14 +604,6 @@
       .dash-root .dvg-scrub-top { flex-direction: column; }
       .dash-root .dvg-scrub-readout { text-align: left !important; }
 
-      /* Tabelas com rolagem horizontal (Top 10 Clientes/Produtos por fabrica, Carteira
-         de Clientes) -- no celular o "width:100%" da regra generica ".dash-root table"
-         forcava a tabela a caber na largura do cartao, quebrando nomes de cliente/produto
-         em varias linhas mesmo already existindo scroll horizontal. Marcos pediu pra
-         aproveitar o scroll: nomes inteiros numa linha so, rolando de lado (2026-09-24). */
-      .dash-root .scroll-x table { width: auto !important; min-width: 620px !important; }
-      .dash-root .scroll-x td, .dash-root .scroll-x th { white-space: nowrap !important; }
-
       /* Faturamento Mensal (resumo abaixo do grafico): 4 dados (Faturamento/Volume/
          Pedidos/Ticket medio) nao cabiam numa faixa de altura fixa de 80px no celular
          -- ao quebrar pra 2 linhas, "Ticket medio" ficava cortado pelo overflow:hidden.
