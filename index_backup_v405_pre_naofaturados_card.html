@@ -20984,7 +20984,7 @@ function renderNaoFaturados() {
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#dc2626;font-weight:700">' + _pedFmtMoeda(it.valorNaoFaturado) + '</td>'
         + '</tr>';
     }).join('');
-    return '<div style="background:#fff;border-radius:12px;border-left:4px solid #3d5aa8;box-shadow:0 4px 20px rgba(39,42,74,.12);overflow:hidden">'
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
       + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
       + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
       + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
@@ -20992,15 +20992,14 @@ function renderNaoFaturados() {
       + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
       + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fefce8;color:#a16207">' + _pedEsc(p.status) + '</span>'
+      + '<div style="flex:1"></div>'
+      + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Pendente</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + pesoPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
+      + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Não Faturado</div><div style="font-size:12px;font-weight:700;color:#dc2626">' + _pedFmtMoeda(valorPendente) + '</div></div>'
+      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:#f1f5f9;color:#a16207;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:11px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg> Faturar</button>'
       + '</div>'
       + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Pedida</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Falta Faturar</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Não Faturado</th></tr></thead>'
       + '<tbody>' + itensHtml + '</tbody></table></div>'
-      + '<div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;background:#fef2f2;border-top:1px solid #fee2e2;padding:9px 16px">'
-      + '<div style="text-align:right"><div style="font-size:9px;color:#b91c1c;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Peso Pendente</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + pesoPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
-      + '<div style="width:1px;height:26px;background:#fecaca"></div>'
-      + '<div style="text-align:right"><div style="font-size:9px;color:#b91c1c;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Não Faturado</div><div style="font-size:14px;font-weight:800;color:#dc2626;margin-top:1px">' + _pedFmtMoeda(valorPendente) + '</div></div>'
-      + '</div>'
       + '</div>';
   }).join('');
 }
