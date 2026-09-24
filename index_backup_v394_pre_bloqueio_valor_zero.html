@@ -12375,12 +12375,8 @@ function addTabPrecoProduto() {
   var codCli  = (document.getElementById('tabpreco-prod-codcliente')||{}).value || '';
   var comissao= (document.getElementById('tabpreco-prod-comissao')||{}).value || '';
 
-  if (!prodId) {
-    alert('Selecione um produto.');
-    return;
-  }
-  if (_pedParseMoeda(valor) <= 0) {
-    alert('Informe um valor válido, maior que zero.');
+  if (!prodId || !valor) {
+    alert('Selecione um produto e informe o valor.');
     return;
   }
 
@@ -12472,7 +12468,7 @@ function _tpSalvarEdicaoProd() {
   var idx = parseInt((document.getElementById('tpprodedit-index')||{}).value, 10);
   if (isNaN(idx) || !_tpItens[idx]) { _tpFecharModalEditProd(); return; }
   var valor = (document.getElementById('tpprodedit-valor')||{}).value || '';
-  if (_pedParseMoeda(valor) <= 0) { alert('Informe um valor válido, maior que zero.'); return; }
+  if (!valor) { alert('Informe o valor.'); return; }
   _tpItens[idx].valor      = valor;
   _tpItens[idx].comissao   = (document.getElementById('tpprodedit-comissao')||{}).value || '';
   _tpItens[idx].periodo    = (document.getElementById('tpprodedit-periodo')||{}).value || '';
@@ -13267,7 +13263,7 @@ function salvarNegPreco() {
   }
 
   var valor = (document.getElementById('negpreco-valor').value || '').trim();
-  if (_pedParseMoeda(valor) <= 0) { if (msg) msg.textContent = 'Informe um Valor Negociado válido, maior que zero.'; return; }
+  if (!valor) { if (msg) msg.textContent = 'Informe o Valor Negociado.'; return; }
 
   var dataFim = document.getElementById('negpreco-data-fim').value;
   if (!dataFim) { if (msg) msg.textContent = 'Informe o Prazo de Encerramento.'; return; }
