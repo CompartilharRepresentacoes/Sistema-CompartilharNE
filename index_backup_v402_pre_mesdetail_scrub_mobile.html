@@ -602,15 +602,7 @@
       .dash-root .dvg-rankcard { min-width: 0 !important; overflow: hidden !important; }
       .dash-root .dvg-donutrow { flex-direction: column; align-items: flex-start; }
       .dash-root .dvg-scrub-top { flex-direction: column; }
-      .dash-root .dvg-scrub-readout { text-align: left !important; }
-
-      /* Faturamento Mensal (resumo abaixo do grafico): 4 dados (Faturamento/Volume/
-         Pedidos/Ticket medio) nao cabiam numa faixa de altura fixa de 80px no celular
-         -- ao quebrar pra 2 linhas, "Ticket medio" ficava cortado pelo overflow:hidden.
-         Vira grid 2x2 fixo (Faturamento+Volume em cima, Pedidos+Ticket medio embaixo)
-         com altura suficiente pras 2 linhas (Marcos, 2026-09-24). */
-      .dash-root .dvg-mesdetail.open { max-height: 160px !important; }
-      .dash-root .dvg-mesdetail-inner { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px 16px !important; }
+      .dash-root .dvg-scrub-readout { text-align: left; }
 
       /* Padrao generico de cartao mobile (Fornecedores, Transportadoras, Produtos,
          Tabela de Preco, Negociacao de Preco, Pedidos, Devolucoes, Ocorrencias,
