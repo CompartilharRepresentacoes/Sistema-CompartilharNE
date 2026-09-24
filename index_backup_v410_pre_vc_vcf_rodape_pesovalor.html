@@ -21156,15 +21156,13 @@ function renderVendasCompletas() {
       + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
       + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
+      + '<div style="flex:1"></div>'
+      + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
+      + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Total</div><div style="font-size:12px;font-weight:700;color:#15803d">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
       + '</div>'
       + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Unit.</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Peso (kg)</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Total</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Não Faturada</th></tr></thead>'
       + '<tbody>' + itensHtml + '</tbody></table></div>'
-      + '<div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;background:#eff6ff;border-top:1px solid #dbeafe;padding:9px 16px">'
-      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Peso Total</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
-      + '<div style="width:1px;height:26px;background:#bfdbfe"></div>'
-      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Total</div><div style="font-size:14px;font-weight:800;color:#15803d;margin-top:1px">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
-      + '</div>'
       + '</div>';
   }).join('');
 }
@@ -21275,15 +21273,13 @@ function renderVendasCompletasFaturadas() {
       + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
       + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
+      + '<div style="flex:1"></div>'
+      + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Peso Total</div><div style="font-size:12px;font-weight:700;color:#1e293b">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
+      + '<div style="text-align:right"><div style="font-size:8.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor Total</div><div style="font-size:12px;font-weight:700;color:#15803d">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
       + '</div>'
       + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Unit.</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Peso (kg)</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Total</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Não Faturada</th></tr></thead>'
       + '<tbody>' + itensHtml + '</tbody></table></div>'
-      + '<div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;background:#eff6ff;border-top:1px solid #dbeafe;padding:9px 16px">'
-      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Peso Total</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
-      + '<div style="width:1px;height:26px;background:#bfdbfe"></div>'
-      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Total</div><div style="font-size:14px;font-weight:800;color:#15803d;margin-top:1px">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
-      + '</div>'
       + '</div>';
   }).join('');
 }
