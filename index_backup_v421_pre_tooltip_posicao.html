@@ -19855,14 +19855,8 @@ function pedMostrarItensTooltip(ev, id, fixado) {
   var rect = ev.currentTarget.getBoundingClientRect();
   var left = rect.right - 260; if (left < 8) left = 8;
   tip.style.left = left + 'px';
+  tip.style.top  = (rect.bottom + 6) + 'px';
   tip.style.display = 'block';
-  var tipH = tip.offsetHeight;
-  var top = rect.bottom + 6;
-  if (top + tipH > window.innerHeight - 8) {
-    var acima = rect.top - tipH - 6;
-    top = acima > 8 ? acima : Math.max(8, window.innerHeight - tipH - 8);
-  }
-  tip.style.top = top + 'px';
 }
 function pedEsconderItensTooltip() {
   if (_pedItensTooltipFixadoId) return;
@@ -19917,14 +19911,8 @@ function pedMostrarFaturasTooltip(ev, id) {
   var rect = ev.currentTarget.getBoundingClientRect();
   var left = rect.right - 280; if (left < 8) left = 8;
   tip.style.left = left + 'px';
+  tip.style.top  = (rect.bottom + 6) + 'px';
   tip.style.display = 'block';
-  var tipH = tip.offsetHeight;
-  var top = rect.bottom + 6;
-  if (top + tipH > window.innerHeight - 8) {
-    var acima = rect.top - tipH - 6;
-    top = acima > 8 ? acima : Math.max(8, window.innerHeight - tipH - 8);
-  }
-  tip.style.top = top + 'px';
 }
 function pedEsconderFaturasTooltip() {
   var tip = document.getElementById('ped-faturas-tooltip');
