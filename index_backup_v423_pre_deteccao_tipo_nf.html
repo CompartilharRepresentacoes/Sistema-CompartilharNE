@@ -19402,14 +19402,6 @@ function _pinfRenderRevisao() {
     } else {
       wrap.innerHTML = _pinfResultados.map(function (r, ri) {
         var nfNums = r.nfs.map(function (x) { return x.dados.nNF; }).filter(Boolean).join(', ');
-        var nfBadgesHtml = r.nfs.map(function (x) { return _nfBadgeHtml(x.dados.nNF, _nfClassificarTipo(x.dados.natOp, x.dados.cfop)); }).join('');
-        var avisosTipo = r.nfs.map(function (x) {
-          var tipo = _nfClassificarTipo(x.dados.natOp, x.dados.cfop);
-          if (tipo === 'Bonificação' && r.pedido.status !== 'Bonificado') return '<div>NF ' + _pedEsc(x.dados.nNF || '') + ' identificada como <b>Bonificação</b> pelo XML, mas o pedido está com status "' + _pedEsc(r.pedido.status || '') + '". Confira se o status deveria virar "Bonificado".</div>';
-          if (tipo === 'Remessa') return '<div>NF ' + _pedEsc(x.dados.nNF || '') + ' identificada como <b>Remessa</b> pelo XML — normalmente não representa uma venda faturável. Confira antes de aprovar.</div>';
-          return '';
-        }).filter(Boolean).join('');
-        var avisoTipoHtml = avisosTipo ? ('<div style="color:#92400e;font-size:11px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;margin-top:8px;display:flex;flex-direction:column;gap:3px">' + avisosTipo + '</div>') : '';
         var valorNf = r.nfs.reduce(function (s, x) { return s + (Number(x.dados.valor) || 0); }, 0);
         var pdfsDisponiveis = r.nfs.filter(function (x) { return x.pdfFile; });
         var aprovadoOk = r.status === 'ok' || r.aprovadoManual;
@@ -19443,13 +19435,11 @@ function _pinfRenderRevisao() {
           + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
           + '<div>'
           + '<div style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(r.pedido.clienteNome || '')) + '</div>'
-          + '<div style="font-size:11px;color:#64748b;margin-top:2px">Pedido nº ' + _pedEsc(r.pedido.numPedidoCliente || String(r.pedido.lancamento || '')) + ' · Valor NF: ' + _pedFmtMoeda(valorNf) + '</div>'
-          + (nfBadgesHtml ? ('<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' + nfBadgesHtml + '</div>') : '')
+          + '<div style="font-size:11px;color:#64748b;margin-top:2px">Pedido nº ' + _pedEsc(r.pedido.numPedidoCliente || String(r.pedido.lancamento || '')) + (nfNums ? (' · NF ' + _pedEsc(nfNums)) : '') + ' · Valor NF: ' + _pedFmtMoeda(valorNf) + '</div>'
           + '</div>'
           + '<div>' + pdfsBtns + '</div>'
           + '</div>'
           + corpo
-          + avisoTipoHtml
           + '</div>';
       }).join('');
     }
@@ -22864,7 +22854,6 @@ function _devExtrairDadosXml(xmlText) {
     var ide  = doc.getElementsByTagName('ide')[0];
 
     var nNF      = _devXmlTag(ide, 'nNF');
-    var natOp    = _devXmlTag(ide, 'natOp');
     var dataEmissaoRaw = _devXmlTag(ide, 'dhEmi') || _devXmlTag(ide, 'dEmi');
     var dataEmissao = dataEmissaoRaw ? dataEmissaoRaw.slice(0,10) : '';
     var emitCNPJ = _devXmlTag(emit, 'CNPJ') || _devXmlTag(emit, 'CPF');
@@ -22888,7 +22877,6 @@ function _devExtrairDadosXml(xmlText) {
     if (chave.length !== 44) chave = '';
 
     var itens = [];
-    var cfop = '';
     var detEls = doc.getElementsByTagName('det');
     for (var i = 0; i < detEls.length; i++) {
       var prod = detEls[i].getElementsByTagName('prod')[0];
@@ -22896,9 +22884,6 @@ function _devExtrairDadosXml(xmlText) {
       var qtd = parseFloat(_devXmlTag(prod,'qCom')) || 0;
       var vUn = parseFloat(_devXmlTag(prod,'vUnCom')) || 0;
       var vTot = parseFloat(_devXmlTag(prod,'vProd')) || 0;
-      // cfop: CFOP do primeiro item, usado por _nfClassificarTipo para identificar
-      // Venda/Bonificacao/Remessa junto com natOp (tela de revisao do Import XML/NF em lote).
-      if (!cfop) cfop = _devXmlTag(prod,'CFOP');
       // unidadeXml (uCom): adicionado para o Import XML/NF em lote (_pinfAgregarItensNfsPedido),
       // que precisa saber se o fornecedor faturou por caixa ou por unidade para poder converter
       // via _pfatConverterItemXmlParaUnidades (mesma engine ja usada no Faturamento por XML avulso).
@@ -22929,32 +22914,10 @@ function _devExtrairDadosXml(xmlText) {
       }
     }
 
-    return { nNF: nNF, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
+    return { nNF: nNF, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml };
   } catch (e) {
     return null;
   }
-}
-
-// Classifica a natureza da NF (Venda / Bonificacao / Remessa) a partir do natOp e do CFOP
-// do XML, para sinalizar na tela de revisao do Import XML/NF em lote (_pinfRenderRevisao).
-// Retorna null quando nao reconhece (nao bloqueia nada, e so um selo informativo).
-function _nfClassificarTipo(natOp, cfop) {
-  var op = String(natOp || '').toUpperCase();
-  if (op.normalize) op = op.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  var cf = String(cfop || '').replace(/\D/g, '');
-  var CFOP_BONIFICACAO = ['5910', '6910'];
-  var CFOP_REMESSA = ['5901','5902','5903','5904','5905','5906','5908','5909','5912','5913','5914','5915','5916','5917','5918','5919','5920','5921','5923','5924','5925','5926','5927','5928','5929','5931','5932','5933','5934','5935','5936','5937','5938','5939','5940','5941','5942','5943','5944','5945','5946','5947','5948','5949','6901','6902','6903','6904','6905','6906','6908','6909','6912','6913','6914','6915','6916','6917','6918','6919','6920','6921','6923','6924','6925','6926','6927','6928','6929','6931','6932','6933','6934','6935','6936','6937','6938','6939','6940','6941','6942','6943','6944','6945','6946','6947','6948','6949'];
-  var CFOP_VENDA = ['5101','5102','5103','5104','5105','5106','5109','5110','5111','5112','5113','5114','5115','5116','5117','5118','5119','5120','5122','5123','5124','5125','5401','5402','5403','5405','6101','6102','6104','6105','6106','6107','6108','6109','6401','6402','6403','6404','6405'];
-  if (op.indexOf('BONIFICA') !== -1 || CFOP_BONIFICACAO.indexOf(cf) !== -1) return 'Bonificação';
-  if (op.indexOf('REMESSA') !== -1 || CFOP_REMESSA.indexOf(cf) !== -1) return 'Remessa';
-  if (op.indexOf('VENDA') !== -1 || CFOP_VENDA.indexOf(cf) !== -1) return 'Venda';
-  return null;
-}
-function _nfBadgeHtml(nNF, tipo) {
-  var cores = { 'Venda': ['#f0fdf4', '#15803d'], 'Bonificação': ['#eff6ff', '#1d4ed8'], 'Remessa': ['#fff7ed', '#c2410c'] };
-  var c = cores[tipo] || ['#f1f5f9', '#64748b'];
-  var rotulo = 'NF ' + _pedEsc(nNF || '—') + (tipo ? (' · ' + tipo) : '');
-  return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;background:' + c[0] + ';color:' + c[1] + '">' + rotulo + '</span>';
 }
 
 function devAnexarXml(input) {
