@@ -1403,6 +1403,7 @@
 .dash-root .dvg-leg-nome{flex:1;font-size:11.5px;color:rgba(255,255,255,.85);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dash-root .dvg-leg-row.active .dvg-leg-nome{color:#fff;font-weight:800}
 .dash-root .dvg-leg-pct{font-size:11.5px;color:rgba(255,255,255,.75);font-weight:700}
+      .dash-root #dvgAbcDonutLegend .dvg-leg-pct{font-size:14px;color:#fff;font-weight:800;white-space:nowrap;flex-shrink:0}
 .dash-root .dvg-leg-row.active .dvg-leg-pct{color:#fff}
 .dash-root .dvg-btnlimpar{font-size:10.5px;color:#a9c2f5;background:none;border:none;cursor:pointer;text-decoration:underline;padding:0}
 .dash-root .dvg-ranks{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
@@ -1678,11 +1679,11 @@
         <div class="dvg-abcsum" id="dvgAbcSum"></div>
         <div class="dvg-carddark" style="padding:16px 18px">
           <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
-            <svg id="dvgAbcDonutSvg" viewBox="0 0 180 180" width="150" height="150" style="flex-shrink:0">
+            <svg id="dvgAbcDonutSvg" viewBox="0 0 180 180" width="170" height="170" style="flex-shrink:0">
               <g id="dvgAbcDonutG" transform="rotate(-90 90 90)"></g>
               <text id="dvgAbcDonutTag" x="90" y="82" text-anchor="middle" class="dvg-donuttag">TOTAL FATURADO</text>
               <foreignObject x="30" y="88" width="120" height="24">
-                <div id="dvgAbcDonutVal" xmlns="http://www.w3.org/1999/xhtml" style="font-size:15px;color:#fff;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden">R$ 0</div>
+                <div id="dvgAbcDonutVal" xmlns="http://www.w3.org/1999/xhtml" style="font-size:15px;color:#fff;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;width:fit-content;max-width:112px;margin:0 auto">R$ 0</div>
               </foreignObject>
             </svg>
             <div class="dvg-legend" id="dvgAbcDonutLegend" style="flex:1;min-width:150px"></div>
@@ -12798,13 +12799,18 @@ function _tpParsearPeriodoCelula(v) {
 function _tpImportarLinhas(linhas) {
   var produtos = getProdutos();
   var fornecedores = getFornecedores();
-  var resumo = { total: 0, adicionados: 0, atualizados: 0, codigosNaoEncontrados: [], semValor: [] };
+  var resumo = { total: 0, adicionados: 0, atualizados: 0, codigosNaoEncontrados: [], semValor: [], codigosAmbiguos: [] };
   linhas.forEach(function(row){
     var codigo = String(row[0] || '').trim();
     if (!codigo) return;
     resumo.total++;
-    var prod = produtos.find(function(p){ return _cpNorm(p.codigo||'') === _cpNorm(codigo); });
-    if (!prod) { resumo.codigosNaoEncontrados.push(codigo); return; }
+    var candidatos = produtos.filter(function(p){ return _cpNorm(p.codigo||'') === _cpNorm(codigo); });
+    if (!candidatos.length) { resumo.codigosNaoEncontrados.push(codigo); return; }
+    var prod = candidatos[0];
+    if (candidatos.length > 1) {
+      var _nomesForn = candidatos.map(function(p){ var _f = fornecedores.find(function(x){ return x.id === p.fornecedor; }); return _f ? (_f.nome_fantasia||_f.razao_social) : '—'; });
+      resumo.codigosAmbiguos.push(codigo + ' (' + _nomesForn.join(', ') + ') — usado: ' + _nomesForn[0]);
+    }
     var valor = String(row[4] || '').trim();
     if (!valor) { resumo.semValor.push(codigo + ' - ' + (prod.nome||'')); return; }
     var forn = fornecedores.find(function(f){ return f.id === prod.fornecedor; }) || {};
@@ -12825,6 +12831,7 @@ function _tpMontarMensagemResumo(resumo) {
   var msg = resumo.adicionados + ' produto(s) adicionado(s), ' + resumo.atualizados + ' atualizado(s) (de ' + resumo.total + ' linha(s) na planilha).';
   var avisos = [];
   if (resumo.codigosNaoEncontrados.length) avisos.push(resumo.codigosNaoEncontrados.length + ' código(s) não encontrado(s) no cadastro de Produtos: ' + resumo.codigosNaoEncontrados.join(', '));
+  if (resumo.codigosAmbiguos && resumo.codigosAmbiguos.length) avisos.push(resumo.codigosAmbiguos.length + ' código(s) cadastrado(s) em mais de um fornecedor — confira se o fornecedor certo foi usado: ' + resumo.codigosAmbiguos.join('; '));
   if (resumo.semValor.length) avisos.push(resumo.semValor.length + ' linha(s) sem valor preenchido: ' + resumo.semValor.join(', '));
   if (avisos.length) msg += '\n\nAtenção: ' + avisos.join('; ') + '.';
   msg += '\n\nRevise a lista de produtos na tela antes de clicar em Salvar.';
@@ -13631,8 +13638,9 @@ function salvarProduto() {
     const nome = document.getElementById('prod-nome').value.trim();
     if (!nome) { alert('Nome é obrigatório.'); return; }
     const todos = getProdutos();
-    const dup = todos.find(r => r.codigo === codigo && r.id !== (_prodEditId||''));
-    if (dup) { alert(`Já existe um produto com o código "${codigo}".`); return; }
+    const fornecedorSel = document.getElementById('prod-fornecedor').value;
+    const dup = todos.find(r => r.codigo === codigo && (r.fornecedor||'') === fornecedorSel && r.id !== (_prodEditId||''));
+    if (dup) { alert(`Já existe um produto com o código "${codigo}" para este fornecedor.`); return; }
     const foto = document.getElementById('prod-foto-img').style.display !== 'none'
       ? document.getElementById('prod-foto-img').src : '';
     const subcatEl = document.getElementById('prod-subcategoria');
@@ -13736,7 +13744,7 @@ function _prodImportarLinhas(linhas) {
 
     var ativoRaw = String(row[11] || '').trim().toLowerCase();
 
-    var existente = produtos.find(function(p){ return String(p.codigo||'').trim() === codigo; });
+    var existente = produtos.find(function(p){ return String(p.codigo||'').trim() === codigo && (p.fornecedor||'') === (forn ? forn.id : ''); });
 
     var obj = {
       codigo: codigo,
@@ -16036,7 +16044,7 @@ function dashInit() {
       const valEl = document.getElementById('dvgAbcDonutVal');
       function fitVal(text) {
         valEl.textContent = text;
-        let size = 15;
+        let size = 18;
         valEl.style.fontSize = size + 'px';
         while (valEl.scrollWidth > 112 && size > 9) { size -= 1; valEl.style.fontSize = size + 'px'; }
       }
@@ -17629,14 +17637,14 @@ function renderPedidoList() {
       + '<div class="mc-meta ped-r-valfat" style="font-size:12.5px;' + (p.valorFaturado ? 'font-weight:700;color:#15803d' : 'color:#cbd5e1') + '">' + (p.valorFaturado ? _pedFmtMoeda(p.valorFaturado) : '—') + '</div>'
       + '<div class="mc-badge">' + statusHtml + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
-      + '<button onclick="pedAbrirImpressao(\'' + p.id + '\')" title="Imprimir pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#272A4A" onmouseover="this.style.background=\'#eef2ff\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:14px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg></button>'
-      + '<button onclick="pedToggleItensTooltip(event,\'' + p.id + '\')" onmouseover="this.style.background=\'#e6f1fb\';pedMostrarItensTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderItensTooltip()" title="Ver produtos do pedido (clique para fixar)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#123E7A;position:relative"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-icon="produtos-pedido" style="font-size:14px"><path d="m4 8 8-5 8 5-8 5-8-5Z"/><path d="M4 8v8l8 5 8-5V8M12 13v8"/></svg>' + ((p.itens && p.itens.length) ? '<span style="position:absolute;top:1px;right:1px;background:#fff;color:#123E7A;border:1.3px solid #123E7A;border-radius:50%;width:12px;height:12px;font-size:8px;line-height:10px;text-align:center;font-weight:700;box-sizing:border-box">' + p.itens.length + '</span>' : '') + '</button>'
-      + '<button onclick="pedAbrirStatusPopover(event,\'' + p.id + '\')" title="Alterar status" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#0e7490" onmouseover="this.style.background=\'#ecfeff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-arrows-exchange" style="font-size:14px"></i></button>'
-      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#a16207" onmouseover="this.style.background=\'#fefce8\';pedMostrarFaturasTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderFaturasTooltip()"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:14px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg></button>'
-      + '<button onclick="duplicarPedido(\'' + p.id + '\')" title="Duplicar pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-copy" style="font-size:14px"></i></button>'
-      + '<button onclick="pedAbrirAnexos(\'' + p.id + '\')" title="Anexar Nota Fiscal (PDF ou XML)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#DE7926;position:relative" onmouseover="this.style.background=\'#fff7ed\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-paperclip" style="font-size:14px"></i>' + ((p.anexos && p.anexos.length) ? '<span style="position:absolute;top:1px;right:1px;background:#DE7926;color:#fff;border-radius:50%;width:12px;height:12px;font-size:8px;line-height:12px;text-align:center;font-weight:700">' + p.anexos.length + '</span>' : '') + '</button>'
-      + '<button onclick="deletePedido(\'' + p.id + '\')" title="' + (podeExcluir ? 'Excluir' : 'Só é possível excluir pedidos com status Cancelado') + '" style="background:none;border:none;padding:5px;border-radius:6px;' + (podeExcluir ? 'color:#dc2626;cursor:pointer' : 'color:#cbd5e1;cursor:not-allowed') + '"' + (podeExcluir ? ' onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"' : '') + '><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:18px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
+      + '<button onclick="pedAbrirImpressao(\'' + p.id + '\')" title="Imprimir pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#272A4A" onmouseover="this.style.background=\'#eef2ff\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:18px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg></button>'
+      + '<button onclick="pedToggleItensTooltip(event,\'' + p.id + '\')" onmouseover="this.style.background=\'#e6f1fb\';pedMostrarItensTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderItensTooltip()" title="Ver produtos do pedido (clique para fixar)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#123E7A;position:relative"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-icon="produtos-pedido" style="font-size:18px"><path d="m4 8 8-5 8 5-8 5-8-5Z"/><path d="M4 8v8l8 5 8-5V8M12 13v8"/></svg>' + ((p.itens && p.itens.length) ? '<span style="position:absolute;top:-2px;right:-2px;background:#fff;color:#123E7A;border:1.3px solid #123E7A;border-radius:50%;width:15px;height:15px;font-size:9.5px;line-height:13px;text-align:center;font-weight:700;box-sizing:border-box">' + p.itens.length + '</span>' : '') + '</button>'
+      + '<button onclick="pedAbrirStatusPopover(event,\'' + p.id + '\')" title="Alterar status" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#0e7490" onmouseover="this.style.background=\'#ecfeff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-arrows-exchange" style="font-size:18px"></i></button>'
+      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#a16207" onmouseover="this.style.background=\'#fefce8\';pedMostrarFaturasTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderFaturasTooltip()"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:18px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg></button>'
+      + '<button onclick="duplicarPedido(\'' + p.id + '\')" title="Duplicar pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-copy" style="font-size:18px"></i></button>'
+      + '<button onclick="pedAbrirAnexos(\'' + p.id + '\')" title="Anexar Nota Fiscal (PDF ou XML)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#DE7926;position:relative" onmouseover="this.style.background=\'#fff7ed\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-paperclip" style="font-size:18px"></i>' + ((p.anexos && p.anexos.length) ? '<span style="position:absolute;top:-2px;right:-2px;background:#DE7926;color:#fff;border-radius:50%;width:15px;height:15px;font-size:9.5px;line-height:15px;text-align:center;font-weight:700">' + p.anexos.length + '</span>' : '') + '</button>'
+      + '<button onclick="deletePedido(\'' + p.id + '\')" title="' + (podeExcluir ? 'Excluir' : 'Só é possível excluir pedidos com status Cancelado') + '" style="background:none;border:none;padding:5px;border-radius:6px;' + (podeExcluir ? 'color:#dc2626;cursor:pointer' : 'color:#cbd5e1;cursor:not-allowed') + '"' + (podeExcluir ? ' onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"' : '') + '><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:18px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
       + '</div></div>';
   }).join('');
 }
@@ -19113,7 +19121,7 @@ function _pinfProcessar() {
   if (!_pinfArquivosSelecionados.length) { if (msg) msg.textContent = 'Selecione ao menos um arquivo XML ou PDF.'; return; }
 
   var clientes = getClientes();
-  var produtos = getProdutos();
+  var produtos = getProdutos().filter(function (p) { return String(p.fornecedor || '') === String(fornecedorId); });
   var pedidosCandidatos = getPedidos().filter(function (p) {
     if (String(p.fornecedorId || '') !== String(fornecedorId)) return false;
     var dt = String(p.dtCadastro || '').slice(0, 10);
@@ -19402,6 +19410,14 @@ function _pinfRenderRevisao() {
     } else {
       wrap.innerHTML = _pinfResultados.map(function (r, ri) {
         var nfNums = r.nfs.map(function (x) { return x.dados.nNF; }).filter(Boolean).join(', ');
+        var nfBadgesHtml = r.nfs.map(function (x) { return _nfBadgeHtml(x.dados.nNF, _nfClassificarTipo(x.dados.natOp, x.dados.cfop)); }).join('');
+        var avisosTipo = r.nfs.map(function (x) {
+          var tipo = _nfClassificarTipo(x.dados.natOp, x.dados.cfop);
+          if (tipo === 'Bonificação' && r.pedido.status !== 'Bonificado') return '<div>NF ' + _pedEsc(x.dados.nNF || '') + ' identificada como <b>Bonificação</b> pelo XML, mas o pedido está com status "' + _pedEsc(r.pedido.status || '') + '". Confira se o status deveria virar "Bonificado".</div>';
+          if (tipo === 'Remessa') return '<div>NF ' + _pedEsc(x.dados.nNF || '') + ' identificada como <b>Remessa</b> pelo XML — normalmente não representa uma venda faturável. Confira antes de aprovar.</div>';
+          return '';
+        }).filter(Boolean).join('');
+        var avisoTipoHtml = avisosTipo ? ('<div style="color:#92400e;font-size:11px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;margin-top:8px;display:flex;flex-direction:column;gap:3px">' + avisosTipo + '</div>') : '';
         var valorNf = r.nfs.reduce(function (s, x) { return s + (Number(x.dados.valor) || 0); }, 0);
         var pdfsDisponiveis = r.nfs.filter(function (x) { return x.pdfFile; });
         var aprovadoOk = r.status === 'ok' || r.aprovadoManual;
@@ -19435,11 +19451,13 @@ function _pinfRenderRevisao() {
           + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
           + '<div>'
           + '<div style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(r.pedido.clienteNome || '')) + '</div>'
-          + '<div style="font-size:11px;color:#64748b;margin-top:2px">Pedido nº ' + _pedEsc(r.pedido.numPedidoCliente || String(r.pedido.lancamento || '')) + (nfNums ? (' · NF ' + _pedEsc(nfNums)) : '') + ' · Valor NF: ' + _pedFmtMoeda(valorNf) + '</div>'
+          + '<div style="font-size:11px;color:#64748b;margin-top:2px">Pedido nº ' + _pedEsc(r.pedido.numPedidoCliente || String(r.pedido.lancamento || '')) + ' · Valor NF: ' + _pedFmtMoeda(valorNf) + '</div>'
+          + (nfBadgesHtml ? ('<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' + nfBadgesHtml + '</div>') : '')
           + '</div>'
           + '<div>' + pdfsBtns + '</div>'
           + '</div>'
           + corpo
+          + avisoTipoHtml
           + '</div>';
       }).join('');
     }
@@ -22854,6 +22872,7 @@ function _devExtrairDadosXml(xmlText) {
     var ide  = doc.getElementsByTagName('ide')[0];
 
     var nNF      = _devXmlTag(ide, 'nNF');
+    var natOp    = _devXmlTag(ide, 'natOp');
     var dataEmissaoRaw = _devXmlTag(ide, 'dhEmi') || _devXmlTag(ide, 'dEmi');
     var dataEmissao = dataEmissaoRaw ? dataEmissaoRaw.slice(0,10) : '';
     var emitCNPJ = _devXmlTag(emit, 'CNPJ') || _devXmlTag(emit, 'CPF');
@@ -22877,6 +22896,7 @@ function _devExtrairDadosXml(xmlText) {
     if (chave.length !== 44) chave = '';
 
     var itens = [];
+    var cfop = '';
     var detEls = doc.getElementsByTagName('det');
     for (var i = 0; i < detEls.length; i++) {
       var prod = detEls[i].getElementsByTagName('prod')[0];
@@ -22884,6 +22904,9 @@ function _devExtrairDadosXml(xmlText) {
       var qtd = parseFloat(_devXmlTag(prod,'qCom')) || 0;
       var vUn = parseFloat(_devXmlTag(prod,'vUnCom')) || 0;
       var vTot = parseFloat(_devXmlTag(prod,'vProd')) || 0;
+      // cfop: CFOP do primeiro item, usado por _nfClassificarTipo para identificar
+      // Venda/Bonificacao/Remessa junto com natOp (tela de revisao do Import XML/NF em lote).
+      if (!cfop) cfop = _devXmlTag(prod,'CFOP');
       // unidadeXml (uCom): adicionado para o Import XML/NF em lote (_pinfAgregarItensNfsPedido),
       // que precisa saber se o fornecedor faturou por caixa ou por unidade para poder converter
       // via _pfatConverterItemXmlParaUnidades (mesma engine ja usada no Faturamento por XML avulso).
@@ -22914,10 +22937,32 @@ function _devExtrairDadosXml(xmlText) {
       }
     }
 
-    return { nNF: nNF, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml };
+    return { nNF: nNF, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
   } catch (e) {
     return null;
   }
+}
+
+// Classifica a natureza da NF (Venda / Bonificacao / Remessa) a partir do natOp e do CFOP
+// do XML, para sinalizar na tela de revisao do Import XML/NF em lote (_pinfRenderRevisao).
+// Retorna null quando nao reconhece (nao bloqueia nada, e so um selo informativo).
+function _nfClassificarTipo(natOp, cfop) {
+  var op = String(natOp || '').toUpperCase();
+  if (op.normalize) op = op.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var cf = String(cfop || '').replace(/\D/g, '');
+  var CFOP_BONIFICACAO = ['5910', '6910'];
+  var CFOP_REMESSA = ['5901','5902','5903','5904','5905','5906','5908','5909','5912','5913','5914','5915','5916','5917','5918','5919','5920','5921','5923','5924','5925','5926','5927','5928','5929','5931','5932','5933','5934','5935','5936','5937','5938','5939','5940','5941','5942','5943','5944','5945','5946','5947','5948','5949','6901','6902','6903','6904','6905','6906','6908','6909','6912','6913','6914','6915','6916','6917','6918','6919','6920','6921','6923','6924','6925','6926','6927','6928','6929','6931','6932','6933','6934','6935','6936','6937','6938','6939','6940','6941','6942','6943','6944','6945','6946','6947','6948','6949'];
+  var CFOP_VENDA = ['5101','5102','5103','5104','5105','5106','5109','5110','5111','5112','5113','5114','5115','5116','5117','5118','5119','5120','5122','5123','5124','5125','5401','5402','5403','5405','6101','6102','6104','6105','6106','6107','6108','6109','6401','6402','6403','6404','6405'];
+  if (op.indexOf('BONIFICA') !== -1 || CFOP_BONIFICACAO.indexOf(cf) !== -1) return 'Bonificação';
+  if (op.indexOf('REMESSA') !== -1 || CFOP_REMESSA.indexOf(cf) !== -1) return 'Remessa';
+  if (op.indexOf('VENDA') !== -1 || CFOP_VENDA.indexOf(cf) !== -1) return 'Venda';
+  return null;
+}
+function _nfBadgeHtml(nNF, tipo) {
+  var cores = { 'Venda': ['#f0fdf4', '#15803d'], 'Bonificação': ['#eff6ff', '#1d4ed8'], 'Remessa': ['#fff7ed', '#c2410c'] };
+  var c = cores[tipo] || ['#f1f5f9', '#64748b'];
+  var rotulo = 'NF ' + _pedEsc(nNF || '—') + (tipo ? (' · ' + tipo) : '');
+  return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;background:' + c[0] + ';color:' + c[1] + '">' + rotulo + '</span>';
 }
 
 function devAnexarXml(input) {
@@ -24086,7 +24131,7 @@ function getGruposAcesso() { return firebaseConfigurado ? _fsGet('gruposAcesso')
 function setGruposAcesso(data) { if (firebaseConfigurado) { _fsSet('gruposAcesso', data); } else { localStorage.setItem('gruposAcesso', JSON.stringify(data)); } }
 function getUsuariosSistema() { return firebaseConfigurado ? _fsGet('usuarios') : JSON.parse(localStorage.getItem('usuarios') || '[]'); }
 function setUsuariosSistema(data) { if (firebaseConfigurado) { _fsSet('usuarios', data); } else { localStorage.setItem('usuarios', JSON.stringify(data)); } }
-function getVendedoresAtivos() { return getUsuariosSistema().filter(function(u){ return (u.ativo||'Sim') !== 'Não' && String(u.grupoNome||'').trim().toLowerCase() === 'vendas'; }); }
+function getVendedoresAtivos() { return getUsuariosSistema().filter(function(u){ return (u.ativo||'Sim') !== 'Não' && /^vend/i.test(String(u.grupoNome||'').trim()); }); }
 
 function _usuEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
