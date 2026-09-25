@@ -17631,7 +17631,7 @@ function renderPedidoList() {
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
       + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
       + '<button onclick="pedAbrirImpressao(\'' + p.id + '\')" title="Imprimir pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#272A4A" onmouseover="this.style.background=\'#eef2ff\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:14px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg></button>'
-      + '<button onmouseover="this.style.background=\'#e6f1fb\';pedMostrarItensTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderItensTooltip()" title="Ver produtos do pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#123E7A;position:relative"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-icon="produtos-pedido" style="font-size:14px"><path d="m4 8 8-5 8 5-8 5-8-5Z"/><path d="M4 8v8l8 5 8-5V8M12 13v8"/></svg>' + ((p.itens && p.itens.length) ? '<span style="position:absolute;top:1px;right:1px;background:#123E7A;color:#fff;border-radius:50%;width:12px;height:12px;font-size:8px;line-height:12px;text-align:center;font-weight:700">' + p.itens.length + '</span>' : '') + '</button>'
+      + '<button onclick="pedToggleItensTooltip(event,\'' + p.id + '\')" onmouseover="this.style.background=\'#e6f1fb\';pedMostrarItensTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderItensTooltip()" title="Ver produtos do pedido (clique para fixar)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#123E7A;position:relative"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-icon="produtos-pedido" style="font-size:14px"><path d="m4 8 8-5 8 5-8 5-8-5Z"/><path d="M4 8v8l8 5 8-5V8M12 13v8"/></svg>' + ((p.itens && p.itens.length) ? '<span style="position:absolute;top:1px;right:1px;background:#fff;color:#123E7A;border:1.3px solid #123E7A;border-radius:50%;width:12px;height:12px;font-size:8px;line-height:10px;text-align:center;font-weight:700;box-sizing:border-box">' + p.itens.length + '</span>' : '') + '</button>'
       + '<button onclick="pedAbrirStatusPopover(event,\'' + p.id + '\')" title="Alterar status" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#0e7490" onmouseover="this.style.background=\'#ecfeff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-arrows-exchange" style="font-size:14px"></i></button>'
       + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#a16207" onmouseover="this.style.background=\'#fefce8\';pedMostrarFaturasTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderFaturasTooltip()"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:14px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg></button>'
       + '<button onclick="duplicarPedido(\'' + p.id + '\')" title="Duplicar pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-copy" style="font-size:14px"></i></button>'
@@ -19831,16 +19831,20 @@ function pedAnexoDrop(ev) {
   pedAnexoDragLeave(ev);
   pedAnexarArquivos(ev.dataTransfer.files);
 }
-// Tooltip (hover): mostra os produtos do pedido
-function pedMostrarItensTooltip(ev, id) {
+// Tooltip (hover/clique-fixar): mostra os produtos do pedido
+var _pedItensTooltipFixadoId = null;
+var _pedItensTooltipFixadoBtn = null;
+function pedMostrarItensTooltip(ev, id, fixado) {
   var p = getPedidos().find(function(x){ return x.id === id; });
   var itens = (p && p.itens) || [];
   var tip = document.getElementById('ped-itens-tooltip');
   if (!tip) return;
+  var fechaBtn = fixado ? '<span onclick="pedFecharItensTooltipFixado()" style="cursor:pointer;color:rgba(255,255,255,.6);font-size:14px;line-height:1;padding:0 2px">&times;</span>' : '';
+  var header = '<div style="padding:8px 12px;font-size:10.5px;font-weight:700;color:#fff;border-bottom:1px solid rgba(255,255,255,.15);display:flex;justify-content:space-between;align-items:center">Produtos do Pedido' + fechaBtn + '</div>';
   if (!itens.length) {
-    tip.innerHTML = '<div style="padding:10px 12px;font-size:11px;color:#94a3b8">Nenhum item neste pedido.</div>';
+    tip.innerHTML = header + '<div style="padding:10px 12px;font-size:11px;color:#94a3b8">Nenhum item neste pedido.</div>';
   } else {
-    tip.innerHTML = '<div style="padding:8px 12px;font-size:10.5px;font-weight:700;color:#fff;border-bottom:1px solid rgba(255,255,255,.15)">Produtos do Pedido</div>'
+    tip.innerHTML = header
       + itens.map(function(it){
           return '<div style="padding:6px 12px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.08)">'
             + '<div style="font-weight:600;color:#fff">' + _pedEsc(it.prodNome) + '</div>'
@@ -19855,9 +19859,37 @@ function pedMostrarItensTooltip(ev, id) {
   tip.style.display = 'block';
 }
 function pedEsconderItensTooltip() {
+  if (_pedItensTooltipFixadoId) return;
   var tip = document.getElementById('ped-itens-tooltip');
   if (tip) tip.style.display = 'none';
 }
+function pedToggleItensTooltip(ev, id) {
+  ev.stopPropagation();
+  if (_pedItensTooltipFixadoId === id) {
+    pedFecharItensTooltipFixado();
+    return;
+  }
+  if (_pedItensTooltipFixadoBtn) { _pedItensTooltipFixadoBtn.style.boxShadow = 'none'; }
+  _pedItensTooltipFixadoId = id;
+  _pedItensTooltipFixadoBtn = ev.currentTarget;
+  pedMostrarItensTooltip(ev, id, true);
+  var tip = document.getElementById('ped-itens-tooltip');
+  if (tip) tip.style.pointerEvents = 'auto';
+  ev.currentTarget.style.boxShadow = '0 0 0 2px #123E7A';
+}
+function pedFecharItensTooltipFixado() {
+  _pedItensTooltipFixadoId = null;
+  if (_pedItensTooltipFixadoBtn) { _pedItensTooltipFixadoBtn.style.boxShadow = 'none'; _pedItensTooltipFixadoBtn = null; }
+  var tip = document.getElementById('ped-itens-tooltip');
+  if (tip) { tip.style.display = 'none'; tip.style.pointerEvents = 'none'; }
+}
+document.addEventListener('click', function(e){
+  if (!_pedItensTooltipFixadoId) return;
+  var tip = document.getElementById('ped-itens-tooltip');
+  if (tip && tip.contains(e.target)) return;
+  if (e.target.closest && e.target.closest('[data-icon="produtos-pedido"]')) return;
+  pedFecharItensTooltipFixado();
+});
 // Tooltip (hover): mostra as NFs ja faturadas do pedido
 function pedMostrarFaturasTooltip(ev, id) {
   var p = getPedidos().find(function(x){ return x.id === id; });
