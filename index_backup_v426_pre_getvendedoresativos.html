@@ -24124,7 +24124,7 @@ function getGruposAcesso() { return firebaseConfigurado ? _fsGet('gruposAcesso')
 function setGruposAcesso(data) { if (firebaseConfigurado) { _fsSet('gruposAcesso', data); } else { localStorage.setItem('gruposAcesso', JSON.stringify(data)); } }
 function getUsuariosSistema() { return firebaseConfigurado ? _fsGet('usuarios') : JSON.parse(localStorage.getItem('usuarios') || '[]'); }
 function setUsuariosSistema(data) { if (firebaseConfigurado) { _fsSet('usuarios', data); } else { localStorage.setItem('usuarios', JSON.stringify(data)); } }
-function getVendedoresAtivos() { return getUsuariosSistema().filter(function(u){ return (u.ativo||'Sim') !== 'Não' && /^vend/i.test(String(u.grupoNome||'').trim()); }); }
+function getVendedoresAtivos() { return getUsuariosSistema().filter(function(u){ return (u.ativo||'Sim') !== 'Não' && String(u.grupoNome||'').trim().toLowerCase() === 'vendas'; }); }
 
 function _usuEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
