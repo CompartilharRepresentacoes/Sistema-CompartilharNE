@@ -778,11 +778,11 @@
       #page-fotos-produtos .fp-row > div:nth-child(1) { flex:1 1 auto !important; min-width:0 !important; order:1 !important; }
       #page-fotos-produtos .fp-row > div:nth-child(2) { flex:0 0 100% !important; order:3 !important; padding-left:30px !important; }
       #page-fotos-produtos .fp-row > div:nth-child(3) { flex:0 0 auto !important; order:2 !important; }
-      #page-fotos-produtos .fp-foto-row { display:flex !important; flex-wrap:wrap !important; align-items:center !important; gap:8px 10px !important; padding:12px 14px !important; }
-      #page-fotos-produtos .fp-foto-row > div:nth-child(1) { flex:0 0 auto !important; order:1 !important; }
-      #page-fotos-produtos .fp-foto-row > div:nth-child(2) { flex:1 1 auto !important; min-width:0 !important; order:2 !important; }
-      #page-fotos-produtos .fp-foto-row > div:nth-child(3) { flex:0 0 100% !important; order:4 !important; padding-left:52px !important; font-size:11px !important; }
-      #page-fotos-produtos .fp-foto-row > div:nth-child(4) { flex:0 0 100% !important; order:3 !important; justify-content:flex-end !important; display:flex !important; gap:6px !important; margin-top:2px !important; }
+      #page-fotos-produtos .fp-foto-row { display:grid !important; grid-template-columns:56px 1fr auto !important; grid-template-rows:auto auto !important; column-gap:10px !important; row-gap:2px !important; align-items:center !important; padding:10px 12px !important; }
+      #page-fotos-produtos .fp-foto-row > div:nth-child(1) { grid-column:1 !important; grid-row:1 / 3 !important; }
+      #page-fotos-produtos .fp-foto-row > div:nth-child(2) { grid-column:2 !important; grid-row:1 !important; min-width:0 !important; }
+      #page-fotos-produtos .fp-foto-row > div:nth-child(3) { grid-column:2 !important; grid-row:2 !important; padding-left:0 !important; font-size:11px !important; }
+      #page-fotos-produtos .fp-foto-row > div:nth-child(4) { grid-column:3 !important; grid-row:1 / 3 !important; display:flex !important; gap:4px !important; justify-content:flex-end !important; margin-top:0 !important; }
 
       #page-devolucao-list .pg-two-col { display:block; }
       #page-devolucao-list .pg-side { position:static; margin-bottom:10px; }
@@ -951,6 +951,32 @@
 .pg-stat-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;color:rgba(255,255,255,.5)}
 .pg-stat-row:last-child{margin-bottom:0}
 .pg-two-col{display:grid;grid-template-columns:230px 1fr;gap:12px;align-items:start}
+
+/* -- Barra de filtros horizontal/retratil generica p/ telas de Cadastros -- */
+.cad-filtros-bar{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+.cad-filtros-topo{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cad-filtros-busca{position:relative;flex:1;min-width:180px;max-width:240px;display:flex;align-items:center;gap:7px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 10px;box-sizing:border-box}
+.cad-filtros-busca input{background:transparent;border:none;outline:none;font-size:12.5px;color:#1e293b;width:100%}
+.cad-filtros-busca input::placeholder{color:#94a3b8}
+.cad-chip-row{display:flex;gap:6px;flex-wrap:wrap}
+.cad-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:#f8fafc;color:#64748b}
+.cad-chip.on{background:#272A4A;color:#fff}
+.cad-chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cad-kpi-row{display:flex;gap:14px;font-size:12px;color:#94a3b8;white-space:nowrap}
+.cad-kpi-row b{font-weight:700}
+.cad-mf-btn{margin-left:auto;padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer}
+.cad-filtros-extra{display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:14px;flex-wrap:wrap}
+.cad-filtro-campo{display:flex;flex-direction:column;gap:3px}
+.cad-filtro-campo span{font-size:10.5px;color:#94a3b8}
+.cad-filtro-campo select,.cad-filtro-campo input{padding:6px 8px;border:1px solid #e2e8f0;border-radius:8px;font-size:12.5px;min-width:140px}
+@media (max-width:767px) {
+  .cad-filtros-topo{flex-direction:column!important;align-items:stretch!important;gap:8px!important}
+  .cad-filtros-topo>*{width:100%!important;max-width:100%!important;margin-left:0!important}
+  .cad-mf-btn{justify-content:center!important}
+  .cad-kpi-row{justify-content:space-between!important}
+  .cad-filtros-extra{flex-direction:column!important;align-items:stretch!important}
+  .cad-filtro-campo select,.cad-filtro-campo input{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <!-- jsPDF + html2canvas (geracao de PDF do Pedido na impressao) -->
@@ -1403,6 +1429,7 @@
 .dash-root .dvg-leg-nome{flex:1;font-size:11.5px;color:rgba(255,255,255,.85);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dash-root .dvg-leg-row.active .dvg-leg-nome{color:#fff;font-weight:800}
 .dash-root .dvg-leg-pct{font-size:11.5px;color:rgba(255,255,255,.75);font-weight:700}
+      .dash-root #dvgAbcDonutLegend .dvg-leg-pct{font-size:14px;color:#fff;font-weight:800;white-space:nowrap;flex-shrink:0}
 .dash-root .dvg-leg-row.active .dvg-leg-pct{color:#fff}
 .dash-root .dvg-btnlimpar{font-size:10.5px;color:#a9c2f5;background:none;border:none;cursor:pointer;text-decoration:underline;padding:0}
 .dash-root .dvg-ranks{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
@@ -1678,11 +1705,11 @@
         <div class="dvg-abcsum" id="dvgAbcSum"></div>
         <div class="dvg-carddark" style="padding:16px 18px">
           <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
-            <svg id="dvgAbcDonutSvg" viewBox="0 0 180 180" width="150" height="150" style="flex-shrink:0">
+            <svg id="dvgAbcDonutSvg" viewBox="0 0 180 180" width="170" height="170" style="flex-shrink:0">
               <g id="dvgAbcDonutG" transform="rotate(-90 90 90)"></g>
               <text id="dvgAbcDonutTag" x="90" y="82" text-anchor="middle" class="dvg-donuttag">TOTAL FATURADO</text>
               <foreignObject x="30" y="88" width="120" height="24">
-                <div id="dvgAbcDonutVal" xmlns="http://www.w3.org/1999/xhtml" style="font-size:15px;color:#fff;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden">R$ 0</div>
+                <div id="dvgAbcDonutVal" xmlns="http://www.w3.org/1999/xhtml" style="font-size:15px;color:#fff;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;width:fit-content;max-width:112px;margin:0 auto">R$ 0</div>
               </foreignObject>
             </svg>
             <div class="dvg-legend" id="dvgAbcDonutLegend" style="flex:1;min-width:150px"></div>
@@ -1746,21 +1773,27 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-meta-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="pg-two-col">
-        <div class="pg-side">
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Per&#237;odo</div>
-        <select id="meta-filtro-mes" onchange="renderMetaList()" class="pg-side-sel"><option value="">Todos os meses</option></select>
-      </div>
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Tipo</div>
-        <select id="meta-filtro-tipo" onchange="renderMetaList()" class="pg-side-sel"><option value="">KG e R$</option><option value="kg">Apenas KG</option><option value="rs">Apenas R$</option></select>
-      </div>
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Busca rápida</div>
-        <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="meta-busca" oninput="renderMetaList()" placeholder="F&#225;brica..."></div>
-      </div>
+      <div class="cad-filtros-bar">
+        <div class="cad-filtros-topo">
+          <div class="cad-filtros-busca">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="meta-busca" oninput="renderMetaList()" placeholder="F&#225;brica...">
+          </div>
+          <button type="button" onclick="cadToggleMaisFiltros('meta-filtros-extra','meta-mf-txt','meta-mf-chev')" class="cad-mf-btn">
+            <i class="ti ti-filter"></i><span id="meta-mf-txt">Mais filtros</span><i id="meta-mf-chev" class="ti ti-chevron-down"></i>
+          </button>
         </div>
+        <div id="meta-filtros-extra" class="cad-filtros-extra">
+          <div class="cad-filtro-campo">
+            <span>Período</span>
+            <select id="meta-filtro-mes" onchange="renderMetaList()"><option value="">Todos os meses</option></select>
+          </div>
+          <div class="cad-filtro-campo">
+            <span>Tipo</span>
+            <select id="meta-filtro-tipo" onchange="renderMetaList()"><option value="">KG e R$</option><option value="kg">Apenas KG</option><option value="rs">Apenas R$</option></select>
+          </div>
+        </div>
+      </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:90px 1fr 60px 120px 90px 60px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>M&#234;s</span><span>Fornecedor</span><span>Tipo</span><span>Meta</span><span>Cadastrado</span><span style="text-align:center">Op&#231;&#245;es</span>
@@ -1770,7 +1803,6 @@
             <span style="font-size:10px;color:#94a3b8" id="meta-pag">0 registros</span>
           </div>
         </div>
-      </div>
     </div>
 
     <!-- Metas: Formulário -->
@@ -1851,22 +1883,28 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-cat-cliente-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="pg-two-col">
-        <div class="pg-side">
-          <div class="pg-side-sec">
-            <div class="pg-side-lbl">Pesquisar</div>
-            <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="cat-cliente-busca" oninput="renderCatClienteList()" placeholder="Pesquisar categoria..."></div>
+      <div class="cad-filtros-bar">
+        <div class="cad-filtros-topo">
+          <div class="cad-filtros-busca">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="cat-cliente-busca" oninput="renderCatClienteList()" placeholder="Pesquisar categoria...">
           </div>
-          <div class="pg-side-sec">
-            <div class="pg-side-lbl">Ordenar</div>
-            <select id="cat-cliente-dir" onchange="renderCatClienteList()" class="pg-side-sel"><option value="asc">A &#8594; Z</option><option value="desc">Z &#8594; A</option></select>
+          <div class="cad-kpi-row">
+            <span>Total <b style="color:#1e293b" id="cat-cli-kpi-total">0</b></span>
+            <span>Principais <b style="color:#16a34a" id="cat-cli-kpi-principal">0</b></span>
+            <span>Subcategorias <b style="color:#DE7926" id="cat-cli-kpi-sub">0</b></span>
           </div>
-          <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
-            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="cat-cli-kpi-total">0</span></div>
-            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Principais</span><span style="font-weight:700;color:#16a34a" id="cat-cli-kpi-principal">0</span></div>
-            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Subcategorias</span><span style="font-weight:700;color:#DE7926" id="cat-cli-kpi-sub">0</span></div>
+          <button type="button" onclick="cadToggleMaisFiltros('cat-cliente-filtros-extra','cat-cliente-mf-txt','cat-cliente-mf-chev')" class="cad-mf-btn">
+            <i class="ti ti-filter"></i><span id="cat-cliente-mf-txt">Mais filtros</span><i id="cat-cliente-mf-chev" class="ti ti-chevron-down"></i>
+          </button>
+        </div>
+        <div id="cat-cliente-filtros-extra" class="cad-filtros-extra">
+          <div class="cad-filtro-campo">
+            <span>Ordenar</span>
+            <select id="cat-cliente-dir" onchange="renderCatClienteList()"><option value="asc">A &#8594; Z</option><option value="desc">Z &#8594; A</option></select>
           </div>
         </div>
+      </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:1fr 90px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>Categoria</span><span style="text-align:right">A&#231;&#245;es</span>
@@ -1882,7 +1920,6 @@
             </div>
           </div>
         </div>
-      </div>
       <input type="hidden" id="cat-cliente-ordem" value="nome">
     </div>
 
@@ -1974,22 +2011,28 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-cat-produto-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="pg-two-col">
-        <div class="pg-side">
-          <div class="pg-side-sec">
-            <div class="pg-side-lbl">Pesquisar</div>
-            <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="cat-produto-busca" oninput="renderCatProdutoList()" placeholder="Pesquisar categoria..."></div>
+      <div class="cad-filtros-bar">
+        <div class="cad-filtros-topo">
+          <div class="cad-filtros-busca">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="cat-produto-busca" oninput="renderCatProdutoList()" placeholder="Pesquisar categoria...">
           </div>
-          <div class="pg-side-sec">
-            <div class="pg-side-lbl">Ordenar</div>
-            <select id="cat-produto-dir" onchange="renderCatProdutoList()" class="pg-side-sel"><option value="asc">A &#8594; Z</option><option value="desc">Z &#8594; A</option></select>
+          <div class="cad-kpi-row">
+            <span>Total <b style="color:#1e293b" id="cat-prod-kpi-total">0</b></span>
+            <span>Principais <b style="color:#16a34a" id="cat-prod-kpi-principal">0</b></span>
+            <span>Subcategorias <b style="color:#DE7926" id="cat-prod-kpi-sub">0</b></span>
           </div>
-          <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
-            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="cat-prod-kpi-total">0</span></div>
-            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Principais</span><span style="font-weight:700;color:#16a34a" id="cat-prod-kpi-principal">0</span></div>
-            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Subcategorias</span><span style="font-weight:700;color:#DE7926" id="cat-prod-kpi-sub">0</span></div>
+          <button type="button" onclick="cadToggleMaisFiltros('cat-produto-filtros-extra','cat-produto-mf-txt','cat-produto-mf-chev')" class="cad-mf-btn">
+            <i class="ti ti-filter"></i><span id="cat-produto-mf-txt">Mais filtros</span><i id="cat-produto-mf-chev" class="ti ti-chevron-down"></i>
+          </button>
+        </div>
+        <div id="cat-produto-filtros-extra" class="cad-filtros-extra">
+          <div class="cad-filtro-campo">
+            <span>Ordenar</span>
+            <select id="cat-produto-dir" onchange="renderCatProdutoList()"><option value="asc">A &#8594; Z</option><option value="desc">Z &#8594; A</option></select>
           </div>
         </div>
+      </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:1fr 90px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>Categoria</span><span style="text-align:right">A&#231;&#245;es</span>
@@ -2005,7 +2048,6 @@
             </div>
           </div>
         </div>
-      </div>
       <input type="hidden" id="cat-produto-ordem" value="nome">
     </div>
 
@@ -2075,31 +2117,33 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-fornecedor-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="pg-two-col">
-        <div class="pg-side">
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Busca rápida</div>
-        <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="fornecedor-busca" oninput="renderFornecedorList()" placeholder="Nome, CNPJ, cidade..."></div>
-      </div>
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Status</div>
-        <div class="pg-chip-col">
-          <button id="forn-filtro-ativos" onclick="setFornFiltro('Sim')" class="pg-chip"><span class="pg-chip-dot" style="background:#16a34a"></span>Ativos</button>
-          <button id="forn-filtro-inativos" onclick="setFornFiltro('Não')" class="pg-chip"><span class="pg-chip-dot" style="background:#f87171"></span>Inativos</button>
-          <button id="forn-filtro-todos" onclick="setFornFiltro('')" class="pg-chip on"><span class="pg-chip-dot" style="background:#94a3b8"></span>Todos</button>
+      <div class="cad-filtros-bar">
+        <div class="cad-filtros-topo">
+          <div class="cad-filtros-busca">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="fornecedor-busca" oninput="renderFornecedorList()" placeholder="Nome, CNPJ, cidade...">
+          </div>
+          <div class="cad-chip-row">
+            <button id="forn-filtro-ativos" onclick="setFornFiltro('Sim')" class="cad-chip"><span class="cad-chip-dot" style="background:#16a34a"></span>Ativos</button>
+            <button id="forn-filtro-inativos" onclick="setFornFiltro('Não')" class="cad-chip"><span class="cad-chip-dot" style="background:#f87171"></span>Inativos</button>
+            <button id="forn-filtro-todos" onclick="setFornFiltro('')" class="cad-chip on"><span class="cad-chip-dot" style="background:#94a3b8"></span>Todos</button>
+          </div>
+          <div class="cad-kpi-row">
+            <span>Ativos <b style="color:#16a34a" id="forn-kpi-ativos">0</b></span>
+            <span>Inativos <b style="color:#dc2626" id="forn-kpi-inativos">0</b></span>
+            <span>Total <b style="color:#1e293b" id="forn-kpi-total">0</b></span>
+          </div>
+          <button type="button" onclick="cadToggleMaisFiltros('forn-filtros-extra','forn-mf-txt','forn-mf-chev')" class="cad-mf-btn">
+            <i class="ti ti-filter"></i><span id="forn-mf-txt">Mais filtros</span><i id="forn-mf-chev" class="ti ti-chevron-down"></i>
+          </button>
+        </div>
+        <div id="forn-filtros-extra" class="cad-filtros-extra">
+          <div class="cad-filtro-campo">
+            <span>Ordenar</span>
+            <select id="fornecedor-ordem" onchange="renderFornecedorList()"><option value="nome_fantasia">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
+          </div>
         </div>
       </div>
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Ordenar</div>
-        <select id="fornecedor-ordem" onchange="renderFornecedorList()" class="pg-side-sel"><option value="nome_fantasia">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
-      </div>
-      <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Ativos</span><span style="font-weight:700;color:#16a34a" id="forn-kpi-ativos">0</span></div>
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Inativos</span><span style="font-weight:700;color:#dc2626" id="forn-kpi-inativos">0</span></div>
-        <div style="height:0.5px;background:#e2e8f0;margin:4px 0"></div>
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="forn-kpi-total">0</span></div>
-      </div>
-        </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div id="fornecedor-thead" style="display:grid;grid-template-columns:70px 62px 1fr 150px 130px 60px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>C&#243;digo</span><span></span><span>Fornecedor</span><span>CNPJ</span><span>Cidade</span><span style="text-align:center">Op&#231;&#245;es</span>
@@ -2115,7 +2159,6 @@
             </div>
           </div>
         </div>
-      </div>
       <div id="fornecedor-kpis" style="display:none"></div>
       <input type="hidden" id="fornecedor-ativo-filtro" value="">
       <input type="hidden" id="fornecedor-dir" value="asc">
@@ -2369,31 +2412,33 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-transp-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="pg-two-col">
-        <div class="pg-side">
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Busca rápida</div>
-        <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="transp-busca" oninput="renderTranspList()" placeholder="Nome, CNPJ, cidade..."></div>
-      </div>
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Status</div>
-        <div class="pg-chip-col">
-          <button id="transp-filtro-ativos" onclick="setTranspFiltro('Sim')" class="pg-chip"><span class="pg-chip-dot" style="background:#16a34a"></span>Ativos</button>
-          <button id="transp-filtro-inativos" onclick="setTranspFiltro('Não')" class="pg-chip"><span class="pg-chip-dot" style="background:#f87171"></span>Inativos</button>
-          <button id="transp-filtro-todos" onclick="setTranspFiltro('')" class="pg-chip on"><span class="pg-chip-dot" style="background:#94a3b8"></span>Todos</button>
+      <div class="cad-filtros-bar">
+        <div class="cad-filtros-topo">
+          <div class="cad-filtros-busca">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="transp-busca" oninput="renderTranspList()" placeholder="Nome, CNPJ, cidade...">
+          </div>
+          <div class="cad-chip-row">
+            <button id="transp-filtro-ativos" onclick="setTranspFiltro('Sim')" class="cad-chip"><span class="cad-chip-dot" style="background:#16a34a"></span>Ativos</button>
+            <button id="transp-filtro-inativos" onclick="setTranspFiltro('Não')" class="cad-chip"><span class="cad-chip-dot" style="background:#f87171"></span>Inativos</button>
+            <button id="transp-filtro-todos" onclick="setTranspFiltro('')" class="cad-chip on"><span class="cad-chip-dot" style="background:#94a3b8"></span>Todos</button>
+          </div>
+          <div class="cad-kpi-row">
+            <span>Ativos <b style="color:#16a34a" id="transp-kpi-ativos">0</b></span>
+            <span>Inativos <b style="color:#dc2626" id="transp-kpi-inativos">0</b></span>
+            <span>Total <b style="color:#1e293b" id="transp-kpi-total">0</b></span>
+          </div>
+          <button type="button" onclick="cadToggleMaisFiltros('transp-filtros-extra','transp-mf-txt','transp-mf-chev')" class="cad-mf-btn">
+            <i class="ti ti-filter"></i><span id="transp-mf-txt">Mais filtros</span><i id="transp-mf-chev" class="ti ti-chevron-down"></i>
+          </button>
+        </div>
+        <div id="transp-filtros-extra" class="cad-filtros-extra">
+          <div class="cad-filtro-campo">
+            <span>Ordenar</span>
+            <select id="transp-ordem" onchange="renderTranspList()"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
+          </div>
         </div>
       </div>
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Ordenar</div>
-        <select id="transp-ordem" onchange="renderTranspList()" class="pg-side-sel"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
-      </div>
-      <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Ativos</span><span style="font-weight:700;color:#16a34a" id="transp-kpi-ativos">0</span></div>
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Inativos</span><span style="font-weight:700;color:#dc2626" id="transp-kpi-inativos">0</span></div>
-        <div style="height:0.5px;background:#e2e8f0;margin:4px 0"></div>
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="transp-kpi-total">0</span></div>
-      </div>
-        </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:80px 1fr 170px 160px 80px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>C&#243;digo</span><span>Transportadora</span><span>CNPJ</span><span>Cidade / UF</span><span style="text-align:center">Op&#231;&#245;es</span>
@@ -2409,7 +2454,6 @@
             </div>
           </div>
         </div>
-      </div>
       <input type="hidden" id="transp-ativo-filtro" value="">
       <input type="hidden" id="transp-dir" value="asc">
     </div>
@@ -2914,34 +2958,44 @@
         <input type="file" id="cli-import-file" accept=".xlsx,.xls" style="display:none" onchange="_cliImportarExcel(this)">
         <button onclick="showPage('page-cliente-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="pg-two-col">
-        <div class="pg-side">
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Busca rápida</div>
-        <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="cliente-busca" oninput="renderClienteList()" placeholder="Nome, CNPJ, código..."></div>
-      </div>
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Status</div>
-        <div class="pg-chip-col">
-          <button id="cli-filtro-ativos" onclick="setCliFiltro('Sim')" class="pg-chip"><span class="pg-chip-dot" style="background:#16a34a"></span>Ativos</button>
-          <button id="cli-filtro-inativos" onclick="setCliFiltro('Não')" class="pg-chip"><span class="pg-chip-dot" style="background:#f87171"></span>Inativos</button>
-          <button id="cli-filtro-todos" onclick="setCliFiltro('')" class="pg-chip on"><span class="pg-chip-dot" style="background:#94a3b8"></span>Todos</button>
+      <div class="cad-filtros-bar">
+        <div class="cad-filtros-topo">
+          <div class="cad-filtros-busca">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="cliente-busca" oninput="renderClienteList()" placeholder="Nome, CNPJ, código...">
+          </div>
+          <div class="cad-chip-row">
+            <button id="cli-filtro-ativos" onclick="setCliFiltro('Sim')" class="cad-chip"><span class="cad-chip-dot" style="background:#16a34a"></span>Ativos</button>
+            <button id="cli-filtro-inativos" onclick="setCliFiltro('Não')" class="cad-chip"><span class="cad-chip-dot" style="background:#f87171"></span>Inativos</button>
+            <button id="cli-filtro-todos" onclick="setCliFiltro('')" class="cad-chip on"><span class="cad-chip-dot" style="background:#94a3b8"></span>Todos</button>
+          </div>
+          <div class="cad-kpi-row">
+            <span>Ativos <b style="color:#16a34a" id="cli-kpi-ativos">0</b></span>
+            <span>Inativos <b style="color:#dc2626" id="cli-kpi-inativos">0</b></span>
+            <span>Total <b style="color:#1e293b" id="cli-kpi-total">0</b></span>
+          </div>
+          <button type="button" onclick="cadToggleMaisFiltros('cli-filtros-extra','cli-mf-txt','cli-mf-chev')" class="cad-mf-btn">
+            <i class="ti ti-filter"></i><span id="cli-mf-txt">Mais filtros</span><i id="cli-mf-chev" class="ti ti-chevron-down"></i>
+          </button>
+        </div>
+        <div id="cli-filtros-extra" class="cad-filtros-extra">
+          <div class="cad-filtro-campo">
+            <span>Rede</span>
+            <select id="cliente-filtro-rede" onchange="_cliListAtualizarSubRedes()"><option value="">Todas</option></select>
+          </div>
+          <div class="cad-filtro-campo">
+            <span>Sub Rede</span>
+            <select id="cliente-filtro-subrede" onchange="renderClienteList()"><option value="">Todas</option></select>
+          </div>
+          <div class="cad-filtro-campo">
+            <span>Ordenar</span>
+            <select id="cliente-ordem" onchange="renderClienteList()"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
+          </div>
         </div>
       </div>
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Ordenar</div>
-        <select id="cliente-ordem" onchange="renderClienteList()" class="pg-side-sel"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
-      </div>
-      <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Ativos</span><span style="font-weight:700;color:#16a34a" id="cli-kpi-ativos">0</span></div>
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Inativos</span><span style="font-weight:700;color:#dc2626" id="cli-kpi-inativos">0</span></div>
-        <div style="height:0.5px;background:#e2e8f0;margin:4px 0"></div>
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="cli-kpi-total">0</span></div>
-      </div>
-        </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
-            <span>C&#243;digo</span><span>Cliente</span><span>Raz&#227;o Social</span><span>CNPJ</span><span>Cidade / UF</span><span>Categoria</span><span style="text-align:center">Op&#231;&#245;es</span>
+            <span>C&#243;digo</span><span>Cliente</span><span>Raz&#227;o Social</span><span>CNPJ</span><span>Cidade / UF</span><span>Rede</span><span style="text-align:center">Op&#231;&#245;es</span>
           </div>
           <div id="cliente-tbody"></div>
           <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
@@ -2954,7 +3008,6 @@
             </div>
           </div>
         </div>
-      </div>
       <input type="hidden" id="cliente-ativo-filtro" value="">
       <input type="hidden" id="cliente-dir" value="asc">
     </div>
@@ -3357,15 +3410,15 @@
 
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
                 <div>
-                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Categoria Principal</label>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Rede</label>
                   <select class="form-input" id="cli-categoria" onchange="atualizarSubcatCliente()" style="width:100%">
                     <option value="">-- Selecione --</option>
                   </select>
                 </div>
                 <div>
-                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Subcategoria</label>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Sub Rede</label>
                   <select class="form-input" id="cli-subcategoria" style="width:100%">
-                    <option value="">-- Selecione a categoria primeiro --</option>
+                    <option value="">-- Selecione a rede primeiro --</option>
                   </select>
                 </div>
               </div>
@@ -3417,33 +3470,47 @@
         <input type="file" id="prod-import-file" accept=".xlsx,.xls" style="display:none" onchange="_prodImportarExcel(this)">
         <button onclick="showPage('page-produto-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="pg-two-col">
-        <div class="pg-side">
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Busca rápida</div>
-        <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="produto-busca" oninput="renderProdutoList()" placeholder="Nome ou código..."></div>
-      </div>
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Status</div>
-        <div class="pg-chip-col">
-          <button id="prod-filtro-ativos" onclick="setProdFiltro('Sim')" class="pg-chip"><span class="pg-chip-dot" style="background:#16a34a"></span>Ativos</button>
-          <button id="prod-filtro-inativos" onclick="setProdFiltro('Não')" class="pg-chip"><span class="pg-chip-dot" style="background:#f87171"></span>Inativos</button>
-          <button id="prod-filtro-todos" onclick="setProdFiltro('')" class="pg-chip on"><span class="pg-chip-dot" style="background:#94a3b8"></span>Todos</button>
+      <div class="cad-filtros-bar">
+        <div class="cad-filtros-topo">
+          <div class="cad-filtros-busca">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="produto-busca" oninput="renderProdutoList()" placeholder="Nome ou código...">
+          </div>
+          <div class="cad-chip-row">
+            <button id="prod-filtro-ativos" onclick="setProdFiltro('Sim')" class="cad-chip"><span class="cad-chip-dot" style="background:#16a34a"></span>Ativos</button>
+            <button id="prod-filtro-inativos" onclick="setProdFiltro('Não')" class="cad-chip"><span class="cad-chip-dot" style="background:#f87171"></span>Inativos</button>
+            <button id="prod-filtro-todos" onclick="setProdFiltro('')" class="cad-chip on"><span class="cad-chip-dot" style="background:#94a3b8"></span>Todos</button>
+          </div>
+          <div class="cad-kpi-row">
+            <span>Ativos <b style="color:#16a34a" id="prod-kpi-ativos">0</b></span>
+            <span>Inativos <b style="color:#dc2626" id="prod-kpi-inativos">0</b></span>
+            <span>Total <b style="color:#1e293b" id="prod-kpi-total">0</b></span>
+          </div>
+          <button type="button" onclick="cadToggleMaisFiltros('prod-filtros-extra','prod-mf-txt','prod-mf-chev')" class="cad-mf-btn">
+            <i class="ti ti-filter"></i><span id="prod-mf-txt">Mais filtros</span><i id="prod-mf-chev" class="ti ti-chevron-down"></i>
+          </button>
+        </div>
+        <div id="prod-filtros-extra" class="cad-filtros-extra">
+          <div class="cad-filtro-campo">
+            <span>Fornecedor</span>
+            <select id="produto-filtro-fornecedor" onchange="renderProdutoList()"><option value="">Todos</option></select>
+          </div>
+          <div class="cad-filtro-campo">
+            <span>Categoria</span>
+            <select id="produto-filtro-categoria" onchange="_prodListAtualizarSubcategorias()"><option value="">Todas</option></select>
+          </div>
+          <div class="cad-filtro-campo">
+            <span>Subcategoria</span>
+            <select id="produto-filtro-subcategoria" onchange="renderProdutoList()"><option value="">Todas</option></select>
+          </div>
+          <div class="cad-filtro-campo">
+            <span>Ordenar</span>
+            <select id="produto-ordem" onchange="renderProdutoList()"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="fornecedor">Fornecedor</option></select>
+          </div>
         </div>
       </div>
-      <div class="pg-side-sec">
-        <div class="pg-side-lbl">Ordenar</div>
-        <select id="produto-ordem" onchange="renderProdutoList()" class="pg-side-sel"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="fornecedor">Fornecedor</option></select>
-      </div>
-      <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Ativos</span><span style="font-weight:700;color:#16a34a" id="prod-kpi-ativos">0</span></div>
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Inativos</span><span style="font-weight:700;color:#dc2626" id="prod-kpi-inativos">0</span></div>
-        <div style="height:0.5px;background:#e2e8f0;margin:4px 0"></div>
-        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="prod-kpi-total">0</span></div>
-      </div>
-        </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-          <div style="display:grid;grid-template-columns:80px 70px 1fr 60px 80px 140px 80px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+          <div style="display:grid;grid-template-columns:108px 70px 1fr 60px 80px 140px 80px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>C&#243;digo</span><span></span><span>Produto</span><span>Un.</span><span>Qtde</span><span>Fornecedor</span><span style="text-align:center">Op&#231;&#245;es</span>
           </div>
           <div id="produto-tbody"></div>
@@ -3457,7 +3524,6 @@
             </div>
           </div>
         </div>
-      </div>
       <input type="hidden" id="produto-ativo-filtro" value="">
       <input type="hidden" id="produto-dir" value="asc">
     </div>
@@ -3492,7 +3558,7 @@
               <div style="display:flex;gap:14px;align-items:flex-start">
                 <!-- Foto -->
                 <div style="display:flex;flex-direction:column;align-items:center;gap:7px;flex-shrink:0">
-                  <div id="prod-foto-preview" style="width:80px;height:80px;border:2px dashed #93c5fd;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden">
+                  <div id="prod-foto-preview" ondragover="_prodFotoDragOver(event)" ondragenter="_prodFotoDragOver(event)" ondragleave="_prodFotoDragLeave(event)" ondrop="_prodFotoDrop(event)" style="width:80px;height:80px;border:2px dashed #93c5fd;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden">
                     <span id="prod-foto-placeholder"><i class="ti ti-photo" style="font-size:24px;color:#cbd5e1"></i></span>
                     <img id="prod-foto-img" style="display:none;width:100%;height:100%;object-fit:contain">
                   </div>
@@ -4258,72 +4324,78 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-sku-clientes-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Novo SKU</button>
       </div>
-      <div class="pg-two-col">
-        <div class="pg-side">
-          <div class="pg-side-sec">
-            <div class="pg-side-lbl">Busca rápida</div>
-            <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="sku-busca" oninput="renderSkuList()" placeholder="SKU, produto, cliente..."></div>
+      <div class="cad-filtros-bar">
+        <div class="cad-filtros-topo">
+          <div class="cad-filtros-busca">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="sku-busca" oninput="renderSkuList()" placeholder="SKU, produto, cliente...">
           </div>
-          <div class="pg-side-sec">
-            <div class="pg-side-lbl">Fornecedor</div>
-            <select id="sku-filtro-forn" onchange="renderSkuList()" class="pg-side-sel"><option value="">Todos</option></select>
+          <div class="cad-kpi-row">
+            <span>Registros <b style="color:#1e293b" id="sku-kpi-total">0</b></span>
+          </div>
+          <button type="button" onclick="cadToggleMaisFiltros('sku-filtros-extra','sku-mf-txt','sku-mf-chev')" class="cad-mf-btn">
+            <i class="ti ti-filter"></i><span id="sku-mf-txt">Mais filtros</span><i id="sku-mf-chev" class="ti ti-chevron-down"></i>
+          </button>
+        </div>
+        <div id="sku-filtros-extra" class="cad-filtros-extra">
+          <div class="cad-filtro-campo">
+            <span>Fornecedor</span>
+            <select id="sku-filtro-forn" onchange="renderSkuList()"><option value="">Todos</option></select>
           </div>
           <!-- Tipo: Rede | Cliente -->
-          <div class="pg-side-sec">
-            <div class="pg-side-lbl">Tipo</div>
+          <div class="cad-filtro-campo" style="min-width:220px">
+            <span>Tipo</span>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
               <div id="sku-fil-btn-rede" onclick="skuFilSetTipo('rede')"
-                style="padding:7px 6px;border-radius:9px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1.5px solid #fff;background:#fff;color:#272A4A;display:flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box">
-                <span id="sku-fil-ck-rede" style="width:12px;height:12px;border-radius:3px;background:rgba(39,42,74,.15);display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">✓</span>Rede
+                style="padding:7px 6px;border-radius:9px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1.5px solid #272A4A;background:#272A4A;color:#fff;display:flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box">
+                <span id="sku-fil-ck-rede" style="width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.25);display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">✓</span>Rede
               </div>
               <div id="sku-fil-btn-cli" onclick="skuFilSetTipo('cliente')"
-                style="padding:7px 6px;border-radius:9px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box">
-                <span id="sku-fil-ck-cli" style="width:12px;height:12px;border-radius:3px;border:1.5px solid rgba(255,255,255,.25);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"></span>Cliente
+                style="padding:7px 6px;border-radius:9px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;display:flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box">
+                <span id="sku-fil-ck-cli" style="width:12px;height:12px;border-radius:3px;border:1.5px solid #cbd5e1;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"></span>Cliente
               </div>
             </div>
             <input type="hidden" id="sku-fil-tipo" value="rede">
           </div>
 
           <!-- Busca de Rede -->
-          <div id="sku-fil-rede-wrap" class="pg-side-sec">
-            <div class="pg-side-lbl">Rede / Categoria</div>
+          <div id="sku-fil-rede-wrap" class="cad-filtro-campo" style="min-width:200px">
+            <span>Rede / Sub Rede</span>
             <div style="position:relative">
               <input id="sku-fil-rede-txt" type="text" placeholder="Buscar rede..." autocomplete="off"
                 oninput="skuFilFiltrarRede(this.value)"
                 onblur="setTimeout(function(){var d=document.getElementById('sku-fil-rede-drop');if(d)d.style.display='none';},200)"
-                style="font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;width:100%;outline:none;box-sizing:border-box">
+                style="font-size:12.5px;padding:6px 8px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#1e293b;width:100%;outline:none;box-sizing:border-box">
               <div id="sku-fil-rede-drop" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 3px);background:#fff;border-radius:9px;z-index:9999;max-height:160px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.22)"></div>
             </div>
           </div>
 
           <!-- Busca de Cliente -->
-          <div id="sku-fil-cli-wrap" class="pg-side-sec" style="display:none">
-            <div class="pg-side-lbl">Cliente</div>
+          <div id="sku-fil-cli-wrap" class="cad-filtro-campo" style="display:none;min-width:200px">
+            <span>Cliente</span>
             <div style="position:relative">
               <input id="sku-fil-cli-txt" type="text" placeholder="Buscar cliente..." autocomplete="off"
                 oninput="skuFilFiltrarCli(this.value)"
                 onblur="setTimeout(function(){var d=document.getElementById('sku-fil-cli-drop');if(d)d.style.display='none';},200)"
-                style="font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;width:100%;outline:none;box-sizing:border-box">
+                style="font-size:12.5px;padding:6px 8px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#1e293b;width:100%;outline:none;box-sizing:border-box">
               <div id="sku-fil-cli-drop" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 3px);background:#fff;border-radius:9px;z-index:9999;max-height:160px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.22)"></div>
             </div>
           </div>
 
           <!-- ID oculto do filtro selecionado -->
           <input type="hidden" id="sku-fil-cli-id" value="">
-          <div class="pg-side-sec">
-            <div class="pg-side-lbl">Forma de compra</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-              <button id="sku-f-all" onclick="skuSetForma('')"    class="pg-chip on" style="grid-column:1/-1;justify-content:center">Todas</button>
-              <button id="sku-f-kg"  onclick="skuSetForma('KG')"  class="pg-chip" style="justify-content:center">KG</button>
-              <button id="sku-f-cx"  onclick="skuSetForma('CX')"  class="pg-chip" style="justify-content:center">CX</button>
-              <button id="sku-f-und" onclick="skuSetForma('UND')" class="pg-chip" style="justify-content:center">UN</button>
-              <button id="sku-f-pc"  onclick="skuSetForma('PC')"  class="pg-chip" style="justify-content:center">PC</button>
+          <div class="cad-filtro-campo" style="min-width:260px">
+            <span>Forma de compra</span>
+            <div class="cad-chip-row">
+              <button id="sku-f-all" onclick="skuSetForma('')"    class="cad-chip on">Todas</button>
+              <button id="sku-f-kg"  onclick="skuSetForma('KG')"  class="cad-chip">KG</button>
+              <button id="sku-f-cx"  onclick="skuSetForma('CX')"  class="cad-chip">CX</button>
+              <button id="sku-f-und" onclick="skuSetForma('UND')" class="cad-chip">UN</button>
+              <button id="sku-f-pc"  onclick="skuSetForma('PC')"  class="cad-chip">PC</button>
             </div>
           </div>
-          <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
-            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Registros</span><span style="font-weight:700;color:#fff" id="sku-kpi-total">0</span></div>
-          </div>
         </div>
+      </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div id="sku-tbody-header" style="display:flex;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center;gap:4px">
             <span style="flex:1">Fornecedor</span><span style="flex:1">Rede / Cliente</span><span style="flex:1">Produto</span><span style="width:130px;flex-shrink:0">SKU Cliente</span><span style="width:70px;flex-shrink:0">Forma</span><span style="width:80px;flex-shrink:0;text-align:center">Opções</span>
@@ -4334,7 +4406,6 @@
             <div style="display:flex;gap:3px" id="sku-pag-btns"></div>
           </div>
         </div>
-      </div>
       <input type="hidden" id="sku-forma-filtro" value="">
     </div>
 
@@ -5490,7 +5561,7 @@
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.05)">
         <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
         <select id="apres-rede" onchange="_apresAtualizarSubcategorias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Selecione...</option></select>
-        <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria</span>
+        <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
         <select id="apres-subcategoria" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Todas</option></select>
         <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
         <select id="apres-fornecedor" onchange="_apresRenderProdutosNovos()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Selecione...</option></select>
@@ -6527,7 +6598,7 @@
                 <input class="form-input" id="nav-comando-filtro-cliente" placeholder="ex.: Atacadão" style="width:100%">
               </div>
               <div id="nav-comando-filtro-categoria-wrap">
-                <label style="font-size:10.5px;color:#64748b;display:block;margin-bottom:4px">Rede / Categoria</label>
+                <label style="font-size:10.5px;color:#64748b;display:block;margin-bottom:4px">Rede / Sub Rede</label>
                 <select class="form-input" id="nav-comando-filtro-categoria" style="width:100%"><option value="">Todas</option></select>
               </div>
             </div>
@@ -9961,7 +10032,7 @@ function fpAbrirSub(id) {
   _fpRender();
 }
 
-function _fpProdutosForn(fornId)       { return getProdutos().filter(function(p){ return p.fornecedor === fornId; }); }
+function _fpProdutosForn(fornId)       { return getProdutos().filter(function(p){ return p.fornecedor === fornId && (p.ativo||'Sim') !== 'Não'; }); }
 function _fpProdutosCat(fornId, catId) { return _fpProdutosForn(fornId).filter(function(p){ return p.categoria == catId; }); }
 function _fpProdutosSub(fornId, catId, subId) {
   const base = _fpProdutosCat(fornId, catId);
@@ -10004,7 +10075,7 @@ function _fpFolderRow(onclick, label, statsText, downloadOnclick) {
     '<div style="text-align:right"><button onclick="event.stopPropagation();' + downloadOnclick + '" title="Baixar fotos desta pasta (.zip)" style="padding:6px 12px;background:#eff6ff;color:#2563eb;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="exportar" style="font-size:11px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 4v11M7.5 10.5 12 15l4.5-4.5"/></svg> Baixar</button></div></div>';
 }
 function _fpHeaderFotos() {
-  return '<div class="fp-header" style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:8px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center"><span></span><span>Produto</span><span>Código</span><span style="text-align:right">Ações</span></div>';
+  return '<div class="fp-header" style="display:grid;grid-template-columns:72px 1fr 150px 220px;padding:8px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center"><span></span><span>Produto</span><span>Código</span><span style="text-align:right">Ações</span></div>';
 }
 
 function _fpRender() {
@@ -10030,7 +10101,7 @@ function _fpRender() {
     const fornecedoresBusca = getFornecedores();
     const catsProdBusca = getCatProdutos();
     const encontrados = getProdutos().filter(function (p) {
-      return (p.nome || '').toLowerCase().includes(busca) || (p.codigo || '').toLowerCase().includes(busca);
+      return (p.ativo||'Sim') !== 'Não' && ((p.nome || '').toLowerCase().includes(busca) || (p.codigo || '').toLowerCase().includes(busca));
     });
     const comFotoBusca = encontrados.filter(function (p) { return p.foto; }).length;
     if (kT) kT.textContent = encontrados.length;
@@ -10056,9 +10127,9 @@ function _fpRender() {
       const btnDel = temFoto
         ? '<button onclick="fpRemoverFoto(\'' + p.id + '\')" title="Remover foto" style="padding:6px 8px;background:#fff5f5;color:#dc2626;border:none;border-radius:6px;font-size:12px;cursor:pointer" onmouseover="this.style.background=\'#fecaca\'" onmouseout="this.style.background=\'#fff5f5\'"><i class="ti ti-trash"></i></button>'
         : '<button disabled title="Remover foto" style="padding:6px 8px;background:#f1f5f9;color:#c0ccd8;border:none;border-radius:6px;font-size:12px;cursor:not-allowed"><i class="ti ti-trash"></i></button>';
-      return '<div class="fp-foto-row" style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:9px 16px;align-items:center;border-bottom:1px solid #f1f5f9"' +
+      return '<div class="fp-foto-row" style="display:grid;grid-template-columns:72px 1fr 150px 220px;padding:9px 16px;align-items:center;border-bottom:1px solid #f1f5f9"' +
         ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">' +
-        '<div style="width:42px;height:42px;border-radius:8px;background:#f8fafc;border:1px solid #eef2f7;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px">' + imgHtml + '</div>' +
+        '<div style="width:56px;height:56px;border-radius:8px;background:#f8fafc;border:1px solid #eef2f7;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px">' + imgHtml + '</div>' +
         '<div style="min-width:0;padding-right:10px"><div style="font-size:13px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _fpEsc(p.nome) + '">' + _fpEsc(p.nome) + '</div>' +
         '<div style="font-size:10.5px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px" title="' + _fpEsc(local) + '">' + _fpEsc(local) + '</div></div>' +
         '<div style="font-size:12.5px;color:#64748b">' + _fpEsc(p.codigo) + '</div>' +
@@ -10072,7 +10143,7 @@ function _fpRender() {
   if (window._fpNivel === 'forn') {
     if (buscaInput) buscaInput.placeholder = 'Pesquisar fornecedor...';
     const fornecedores = getFornecedores();
-    const produtos = getProdutos();
+    const produtos = getProdutos().filter(function(p){ return (p.ativo||'Sim') !== 'Não'; });
     let comFotoForn = 0;
     fornecedores.forEach(function(f){ if (produtos.some(function(p){ return p.fornecedor === f.id && p.foto; })) comFotoForn++; });
     if (kT) kT.textContent = fornecedores.length;
@@ -10158,9 +10229,9 @@ function _fpRender() {
       const btnDel = temFoto
         ? '<button onclick="fpRemoverFoto(\'' + p.id + '\')" title="Remover foto" style="padding:6px 8px;background:#fff5f5;color:#dc2626;border:none;border-radius:6px;font-size:12px;cursor:pointer" onmouseover="this.style.background=\'#fecaca\'" onmouseout="this.style.background=\'#fff5f5\'"><i class="ti ti-trash"></i></button>'
         : '<button disabled title="Remover foto" style="padding:6px 8px;background:#f1f5f9;color:#c0ccd8;border:none;border-radius:6px;font-size:12px;cursor:not-allowed"><i class="ti ti-trash"></i></button>';
-      return '<div class="fp-foto-row" style="display:grid;grid-template-columns:58px 1fr 150px 220px;padding:9px 16px;align-items:center;border-bottom:1px solid #f1f5f9"' +
+      return '<div class="fp-foto-row" style="display:grid;grid-template-columns:72px 1fr 150px 220px;padding:9px 16px;align-items:center;border-bottom:1px solid #f1f5f9"' +
         ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">' +
-        '<div style="width:42px;height:42px;border-radius:8px;background:#f8fafc;border:1px solid #eef2f7;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px">' + imgHtml + '</div>' +
+        '<div style="width:56px;height:56px;border-radius:8px;background:#f8fafc;border:1px solid #eef2f7;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4px">' + imgHtml + '</div>' +
         '<div style="font-size:13px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px" title="' + _fpEsc(p.nome) + '">' + _fpEsc(p.nome) + '</div>' +
         '<div style="font-size:12.5px;color:#64748b">' + _fpEsc(p.codigo) + '</div>' +
         '<div style="display:flex;gap:6px;justify-content:flex-end">' + btnAbrir + btnDown + btnUp + btnDel + '</div></div>';
@@ -10599,10 +10670,28 @@ function setCliFiltro(val) {
   renderClienteList();
 }
 
+function _cliListPopularFiltroRedeSeVazio() {
+  const sel = document.getElementById('cliente-filtro-rede');
+  if (!sel || sel.options.length > 1) return;
+  const redes = getCatClientes().filter(c => !c.pai).sort((a,b) => (a.nome||'').localeCompare(b.nome||'', 'pt-BR'));
+  sel.innerHTML = '<option value="">Todas</option>' + redes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+}
+function _cliListAtualizarSubRedes() {
+  const redeId = document.getElementById('cliente-filtro-rede')?.value || '';
+  const sel = document.getElementById('cliente-filtro-subrede');
+  if (sel) {
+    const subs = redeId ? getCatClientes().filter(c => String(c.pai) === String(redeId)).sort((a,b) => (a.nome||'').localeCompare(b.nome||'', 'pt-BR')) : [];
+    sel.innerHTML = '<option value="">Todas</option>' + subs.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+  }
+  renderClienteList();
+}
 function renderClienteList() {
+  _cliListPopularFiltroRedeSeVazio();
   const data   = getClientesVisiveis();
   const busca  = (document.getElementById('cliente-busca')?.value || '').toLowerCase();
   const ordem  = document.getElementById('cliente-ordem')?.value || 'nome_fantasia';
+  const fRede    = document.getElementById('cliente-filtro-rede')?.value || '';
+  const fSubRede = document.getElementById('cliente-filtro-subrede')?.value || '';
   const tbody  = document.getElementById('cliente-tbody');
   const pag    = document.getElementById('cliente-paginacao');
   if (!tbody) return;
@@ -10618,7 +10707,9 @@ function renderClienteList() {
       || (r.cidade||'').toLowerCase().includes(busca)
       || (r.codigo||'').toLowerCase().includes(busca);
     const matchAtivo = !_cliFiltroAtivo || (r.ativo||'Sim') === _cliFiltroAtivo;
-    return matchBusca && matchAtivo;
+    const matchRede = !fRede || String(r.categoria||'') === String(fRede);
+    const matchSubRede = !fSubRede || String(r.subcategoria||'') === String(fSubRede);
+    return matchBusca && matchAtivo && matchRede && matchSubRede;
   });
 
   rows.sort((a, b) => (a[ordem]||'').toLowerCase().localeCompare((b[ordem]||'').toLowerCase(), 'pt-BR'));
@@ -10860,7 +10951,7 @@ function atualizarSubcatCliente() {
   const subSel = document.getElementById('cli-subcategoria');
   const subs = getCatClientes().filter(c => c.pai == catId).sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'', 'pt-BR'); });
   if (!catId || !subs.length) {
-    subSel.innerHTML = '<option value="">-- Nenhuma subcategoria --</option>';
+    subSel.innerHTML = '<option value="">-- Nenhuma sub rede --</option>';
   } else {
     subSel.innerHTML = '<option value="">-- Selecione --</option>' +
       subs.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
@@ -12798,13 +12889,18 @@ function _tpParsearPeriodoCelula(v) {
 function _tpImportarLinhas(linhas) {
   var produtos = getProdutos();
   var fornecedores = getFornecedores();
-  var resumo = { total: 0, adicionados: 0, atualizados: 0, codigosNaoEncontrados: [], semValor: [] };
+  var resumo = { total: 0, adicionados: 0, atualizados: 0, codigosNaoEncontrados: [], semValor: [], codigosAmbiguos: [] };
   linhas.forEach(function(row){
     var codigo = String(row[0] || '').trim();
     if (!codigo) return;
     resumo.total++;
-    var prod = produtos.find(function(p){ return _cpNorm(p.codigo||'') === _cpNorm(codigo); });
-    if (!prod) { resumo.codigosNaoEncontrados.push(codigo); return; }
+    var candidatos = produtos.filter(function(p){ return _cpNorm(p.codigo||'') === _cpNorm(codigo); });
+    if (!candidatos.length) { resumo.codigosNaoEncontrados.push(codigo); return; }
+    var prod = candidatos[0];
+    if (candidatos.length > 1) {
+      var _nomesForn = candidatos.map(function(p){ var _f = fornecedores.find(function(x){ return x.id === p.fornecedor; }); return _f ? (_f.nome_fantasia||_f.razao_social) : '—'; });
+      resumo.codigosAmbiguos.push(codigo + ' (' + _nomesForn.join(', ') + ') — usado: ' + _nomesForn[0]);
+    }
     var valor = String(row[4] || '').trim();
     if (!valor) { resumo.semValor.push(codigo + ' - ' + (prod.nome||'')); return; }
     var forn = fornecedores.find(function(f){ return f.id === prod.fornecedor; }) || {};
@@ -12825,6 +12921,7 @@ function _tpMontarMensagemResumo(resumo) {
   var msg = resumo.adicionados + ' produto(s) adicionado(s), ' + resumo.atualizados + ' atualizado(s) (de ' + resumo.total + ' linha(s) na planilha).';
   var avisos = [];
   if (resumo.codigosNaoEncontrados.length) avisos.push(resumo.codigosNaoEncontrados.length + ' código(s) não encontrado(s) no cadastro de Produtos: ' + resumo.codigosNaoEncontrados.join(', '));
+  if (resumo.codigosAmbiguos && resumo.codigosAmbiguos.length) avisos.push(resumo.codigosAmbiguos.length + ' código(s) cadastrado(s) em mais de um fornecedor — confira se o fornecedor certo foi usado: ' + resumo.codigosAmbiguos.join('; '));
   if (resumo.semValor.length) avisos.push(resumo.semValor.length + ' linha(s) sem valor preenchido: ' + resumo.semValor.join(', '));
   if (avisos.length) msg += '\n\nAtenção: ' + avisos.join('; ') + '.';
   msg += '\n\nRevise a lista de produtos na tela antes de clicar em Salvar.';
@@ -13421,6 +13518,15 @@ function pedResolverPrecoNegociado(fornId, prodId, clienteId) {
 
 
 let _prodFiltroAtivo = '';
+// Generica -- abre/fecha a linha retratil "Mais filtros" das telas de Cadastros.
+function cadToggleMaisFiltros(extraId, txtId, chevId) {
+  var box = document.getElementById(extraId);
+  if (!box) return;
+  var abrir = box.style.display === 'none' || !box.style.display;
+  box.style.display = abrir ? 'flex' : 'none';
+  var txt = document.getElementById(txtId); if (txt) txt.textContent = abrir ? 'Menos filtros' : 'Mais filtros';
+  var chev = document.getElementById(chevId); if (chev) chev.className = abrir ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
+}
 function setProdFiltro(val) {
   _prodFiltroAtivo = val;
   const btnT = document.getElementById('prod-filtro-todos');
@@ -13432,10 +13538,37 @@ function setProdFiltro(val) {
   renderProdutoList();
 }
 
+// Popula os selects de Fornecedor/Categoria da barra de filtros na 1a vez que a tela renderiza
+// (idempotente: so preenche se ainda estiver so com a opcao "Todos"/"Todas").
+function _prodListPopularFiltrosSeVazio() {
+  const selForn = document.getElementById('produto-filtro-fornecedor');
+  if (selForn && selForn.options.length <= 1) {
+    const forns = getFornecedores().slice().sort((a,b) => (a.nome_fantasia||a.razao_social||'').localeCompare((b.nome_fantasia||b.razao_social||''),'pt-BR'));
+    selForn.innerHTML = '<option value="">Todos</option>' + forns.map(f => '<option value="' + f.id + '">' + _pedEsc(f.nome_fantasia||f.razao_social||'') + '</option>').join('');
+  }
+  const selCat = document.getElementById('produto-filtro-categoria');
+  if (selCat && selCat.options.length <= 1) {
+    const cats = getCatProdutos().filter(c => !c.pai).slice().sort((a,b) => (a.nome||'').localeCompare((b.nome||''),'pt-BR'));
+    selCat.innerHTML = '<option value="">Todas</option>' + cats.map(c => '<option value="' + c.id + '">' + _pedEsc(c.nome||'') + '</option>').join('');
+  }
+}
+// Cascata: repopula Subcategoria conforme a Categoria escolhida na barra de filtros.
+function _prodListAtualizarSubcategorias() {
+  const catId = document.getElementById('produto-filtro-categoria')?.value || '';
+  const subSel = document.getElementById('produto-filtro-subcategoria');
+  if (!subSel) return;
+  const subs = catId ? getCatProdutos().filter(c => String(c.pai) === String(catId)) : [];
+  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(c => '<option value="' + c.id + '">' + _pedEsc(c.nome||'') + '</option>').join('');
+  renderProdutoList();
+}
 function renderProdutoList() {
+  _prodListPopularFiltrosSeVazio();
   const data  = getProdutos();
   const busca = (document.getElementById('produto-busca')?.value||'').toLowerCase();
   const ordem = document.getElementById('produto-ordem')?.value||'nome';
+  const fFornecedor = document.getElementById('produto-filtro-fornecedor')?.value || '';
+  const fCategoria = document.getElementById('produto-filtro-categoria')?.value || '';
+  const fSubcategoria = document.getElementById('produto-filtro-subcategoria')?.value || '';
   const tbody = document.getElementById('produto-tbody');
   const pag   = document.getElementById('produto-paginacao');
   if (!tbody) return;
@@ -13446,7 +13579,10 @@ function renderProdutoList() {
       || (r.codigo||'').toLowerCase().includes(busca)
       || (r.ean||'').toLowerCase().includes(busca);
     const matchAtivo = !_prodFiltroAtivo || (r.ativo||'Sim') === _prodFiltroAtivo;
-    return matchBusca && matchAtivo;
+    const matchForn = !fFornecedor || String(r.fornecedor||'') === String(fFornecedor);
+    const matchCat = !fCategoria || String(r.categoria||'') === String(fCategoria);
+    const matchSub = !fSubcategoria || String(r.subcategoria||'') === String(fSubcategoria);
+    return matchBusca && matchAtivo && matchForn && matchCat && matchSub;
   });
 
   rows.sort((a,b) => (a[ordem]||'').toLowerCase().localeCompare((b[ordem]||'').toLowerCase(),'pt-BR'));
@@ -13484,9 +13620,9 @@ function renderProdutoList() {
     const eanInfo   = r.ean   ? `<span style="font-weight:600;color:#64748b">EAN: ${r.ean}</span>` : '';
     const shelfInfo = r.shelf ? `<span style="color:#94a3b8">Shelf: ${r.shelf}d</span>` : '';
     const subInfo   = [eanInfo, shelfInfo].filter(Boolean).join('<span style="color:#cbd5e1;margin:0 4px">·</span>');
-    return `<div class="mc-row" style="display:grid;grid-template-columns:80px 70px 1fr 60px 80px 140px 80px;padding:11px 16px;align-items:center;border-bottom:1px solid #f8fafc;cursor:pointer;transition:background .12s"
+    return `<div class="mc-row" style="display:grid;grid-template-columns:108px 70px 1fr 60px 80px 140px 80px;padding:11px 16px;align-items:center;border-bottom:1px solid #f8fafc;cursor:pointer;transition:background .12s"
         onmouseover="this.style.background='#f8fbff'" onmouseout="this.style.background=''">
-      <div class="mc-meta" style="font-size:13px;font-weight:800;color:#272A4A">${r.codigo||'—'}</div>
+      <div class="mc-meta" style="font-size:13px;font-weight:800;color:#272A4A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${r.codigo||'—'}">${r.codigo||'—'}</div>
       <div class="mc-hide">${avatarHtml}</div>
       <div>
         <div class="mc-primary" style="font-size:13px;font-weight:700;color:#1e293b">${r.nome}</div>
@@ -13631,8 +13767,9 @@ function salvarProduto() {
     const nome = document.getElementById('prod-nome').value.trim();
     if (!nome) { alert('Nome é obrigatório.'); return; }
     const todos = getProdutos();
-    const dup = todos.find(r => r.codigo === codigo && r.id !== (_prodEditId||''));
-    if (dup) { alert(`Já existe um produto com o código "${codigo}".`); return; }
+    const fornecedorSel = document.getElementById('prod-fornecedor').value;
+    const dup = todos.find(r => r.codigo === codigo && (r.fornecedor||'') === fornecedorSel && r.id !== (_prodEditId||''));
+    if (dup) { alert(`Já existe um produto com o código "${codigo}" para este fornecedor.`); return; }
     const foto = document.getElementById('prod-foto-img').style.display !== 'none'
       ? document.getElementById('prod-foto-img').src : '';
     const subcatEl = document.getElementById('prod-subcategoria');
@@ -13736,7 +13873,7 @@ function _prodImportarLinhas(linhas) {
 
     var ativoRaw = String(row[11] || '').trim().toLowerCase();
 
-    var existente = produtos.find(function(p){ return String(p.codigo||'').trim() === codigo; });
+    var existente = produtos.find(function(p){ return String(p.codigo||'').trim() === codigo && (p.fornecedor||'') === (forn ? forn.id : ''); });
 
     var obj = {
       codigo: codigo,
@@ -13806,7 +13943,12 @@ function _prodImportarExcel(input) {
 }
 
 function previewProdFoto(input) {
-  const file = input.files[0]; if (!file) return;
+  _prodProcessarFotoArquivo(input.files && input.files[0]);
+}
+// Processa um arquivo de imagem (vindo do <input> ou de um drag-and-drop) e carrega no preview.
+function _prodProcessarFotoArquivo(file) {
+  if (!file) return;
+  if (file.type && file.type.indexOf('image/') !== 0) { alert('Selecione um arquivo de imagem.'); return; }
   const reader = new FileReader();
   reader.onload = async e => {
     const fotoComprimida = await _comprimirImagem(e.target.result);
@@ -13815,6 +13957,21 @@ function previewProdFoto(input) {
     document.getElementById('prod-foto-placeholder').style.display='none';
   };
   reader.readAsDataURL(file);
+}
+function _prodFotoDragOver(ev) {
+  ev.preventDefault();
+  var zone = document.getElementById('prod-foto-preview');
+  if (zone) { zone.style.borderColor = '#DE7926'; zone.style.background = '#fff7ed'; }
+}
+function _prodFotoDragLeave(ev) {
+  ev.preventDefault();
+  var zone = document.getElementById('prod-foto-preview');
+  if (zone) { zone.style.borderColor = '#93c5fd'; zone.style.background = '#f8fafc'; }
+}
+function _prodFotoDrop(ev) {
+  ev.preventDefault();
+  _prodFotoDragLeave(ev);
+  _prodProcessarFotoArquivo(ev.dataTransfer.files && ev.dataTransfer.files[0]);
 }
 function removerProdFoto() {
   const img = document.getElementById('prod-foto-img');
@@ -16036,7 +16193,7 @@ function dashInit() {
       const valEl = document.getElementById('dvgAbcDonutVal');
       function fitVal(text) {
         valEl.textContent = text;
-        let size = 15;
+        let size = 18;
         valEl.style.fontSize = size + 'px';
         while (valEl.scrollWidth > 112 && size > 9) { size -= 1; valEl.style.fontSize = size + 'px'; }
       }
@@ -16839,17 +16996,17 @@ function skuFilSetTipo(tipo) {
   var hidId   = document.getElementById('sku-fil-cli-id');
 
   if (tipo === 'rede') {
-    if (btnRede) { btnRede.style.border='1.5px solid #fff'; btnRede.style.background='#fff'; btnRede.style.color='#272A4A'; }
-    if (btnCli)  { btnCli.style.border='1.5px solid rgba(255,255,255,.15)'; btnCli.style.background='rgba(255,255,255,.06)'; btnCli.style.color='rgba(255,255,255,.4)'; }
-    if (ckRede)  { ckRede.style.background='rgba(39,42,74,.15)'; ckRede.textContent='✓'; }
-    if (ckCli)   { ckCli.style.border='1.5px solid rgba(255,255,255,.25)'; ckCli.textContent=''; }
+    if (btnRede) { btnRede.style.border='1.5px solid #272A4A'; btnRede.style.background='#272A4A'; btnRede.style.color='#fff'; }
+    if (btnCli)  { btnCli.style.border='1.5px solid #e2e8f0'; btnCli.style.background='#f8fafc'; btnCli.style.color='#64748b'; }
+    if (ckRede)  { ckRede.style.background='rgba(255,255,255,.25)'; ckRede.style.border='none'; ckRede.textContent='✓'; }
+    if (ckCli)   { ckCli.style.background='transparent'; ckCli.style.border='1.5px solid #cbd5e1'; ckCli.textContent=''; }
     if (wRede)   wRede.style.display='';
     if (wCli)    wCli.style.display='none';
   } else {
-    if (btnCli)  { btnCli.style.border='1.5px solid #fff'; btnCli.style.background='#fff'; btnCli.style.color='#272A4A'; }
-    if (btnRede) { btnRede.style.border='1.5px solid rgba(255,255,255,.15)'; btnRede.style.background='rgba(255,255,255,.06)'; btnRede.style.color='rgba(255,255,255,.4)'; }
-    if (ckCli)   { ckCli.style.background='rgba(39,42,74,.15)'; ckCli.style.border='none'; ckCli.textContent='✓'; }
-    if (ckRede)  { ckRede.style.background='transparent'; ckRede.style.border='1.5px solid rgba(255,255,255,.25)'; ckRede.textContent=''; }
+    if (btnCli)  { btnCli.style.border='1.5px solid #272A4A'; btnCli.style.background='#272A4A'; btnCli.style.color='#fff'; }
+    if (btnRede) { btnRede.style.border='1.5px solid #e2e8f0'; btnRede.style.background='#f8fafc'; btnRede.style.color='#64748b'; }
+    if (ckCli)   { ckCli.style.background='rgba(255,255,255,.25)'; ckCli.style.border='none'; ckCli.textContent='✓'; }
+    if (ckRede)  { ckRede.style.background='transparent'; ckRede.style.border='1.5px solid #cbd5e1'; ckRede.textContent=''; }
     if (wCli)    wCli.style.display='';
     if (wRede)   wRede.style.display='none';
   }
@@ -17629,14 +17786,14 @@ function renderPedidoList() {
       + '<div class="mc-meta ped-r-valfat" style="font-size:12.5px;' + (p.valorFaturado ? 'font-weight:700;color:#15803d' : 'color:#cbd5e1') + '">' + (p.valorFaturado ? _pedFmtMoeda(p.valorFaturado) : '—') + '</div>'
       + '<div class="mc-badge">' + statusHtml + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
-      + '<button onclick="pedAbrirImpressao(\'' + p.id + '\')" title="Imprimir pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#272A4A" onmouseover="this.style.background=\'#eef2ff\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:14px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg></button>'
-      + '<button onclick="pedToggleItensTooltip(event,\'' + p.id + '\')" onmouseover="this.style.background=\'#e6f1fb\';pedMostrarItensTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderItensTooltip()" title="Ver produtos do pedido (clique para fixar)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#123E7A;position:relative"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-icon="produtos-pedido" style="font-size:14px"><path d="m4 8 8-5 8 5-8 5-8-5Z"/><path d="M4 8v8l8 5 8-5V8M12 13v8"/></svg>' + ((p.itens && p.itens.length) ? '<span style="position:absolute;top:1px;right:1px;background:#fff;color:#123E7A;border:1.3px solid #123E7A;border-radius:50%;width:12px;height:12px;font-size:8px;line-height:10px;text-align:center;font-weight:700;box-sizing:border-box">' + p.itens.length + '</span>' : '') + '</button>'
-      + '<button onclick="pedAbrirStatusPopover(event,\'' + p.id + '\')" title="Alterar status" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#0e7490" onmouseover="this.style.background=\'#ecfeff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-arrows-exchange" style="font-size:14px"></i></button>'
-      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#a16207" onmouseover="this.style.background=\'#fefce8\';pedMostrarFaturasTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderFaturasTooltip()"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:14px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg></button>'
-      + '<button onclick="duplicarPedido(\'' + p.id + '\')" title="Duplicar pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-copy" style="font-size:14px"></i></button>'
-      + '<button onclick="pedAbrirAnexos(\'' + p.id + '\')" title="Anexar Nota Fiscal (PDF ou XML)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#DE7926;position:relative" onmouseover="this.style.background=\'#fff7ed\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-paperclip" style="font-size:14px"></i>' + ((p.anexos && p.anexos.length) ? '<span style="position:absolute;top:1px;right:1px;background:#DE7926;color:#fff;border-radius:50%;width:12px;height:12px;font-size:8px;line-height:12px;text-align:center;font-weight:700">' + p.anexos.length + '</span>' : '') + '</button>'
-      + '<button onclick="deletePedido(\'' + p.id + '\')" title="' + (podeExcluir ? 'Excluir' : 'Só é possível excluir pedidos com status Cancelado') + '" style="background:none;border:none;padding:5px;border-radius:6px;' + (podeExcluir ? 'color:#dc2626;cursor:pointer' : 'color:#cbd5e1;cursor:not-allowed') + '"' + (podeExcluir ? ' onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"' : '') + '><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:18px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
+      + '<button onclick="pedAbrirImpressao(\'' + p.id + '\')" title="Imprimir pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#272A4A" onmouseover="this.style.background=\'#eef2ff\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:18px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg></button>'
+      + '<button onclick="pedToggleItensTooltip(event,\'' + p.id + '\')" onmouseover="this.style.background=\'#e6f1fb\';pedMostrarItensTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderItensTooltip()" title="Ver produtos do pedido (clique para fixar)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#123E7A;position:relative"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-icon="produtos-pedido" style="font-size:18px"><path d="m4 8 8-5 8 5-8 5-8-5Z"/><path d="M4 8v8l8 5 8-5V8M12 13v8"/></svg>' + ((p.itens && p.itens.length) ? '<span style="position:absolute;top:-2px;right:-2px;background:#fff;color:#123E7A;border:1.3px solid #123E7A;border-radius:50%;width:15px;height:15px;font-size:9.5px;line-height:13px;text-align:center;font-weight:700;box-sizing:border-box">' + p.itens.length + '</span>' : '') + '</button>'
+      + '<button onclick="pedAbrirStatusPopover(event,\'' + p.id + '\')" title="Alterar status" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#0e7490" onmouseover="this.style.background=\'#ecfeff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-arrows-exchange" style="font-size:18px"></i></button>'
+      + '<button onclick="pedAbrirFaturamento(\'' + p.id + '\')" title="Faturamento" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#a16207" onmouseover="this.style.background=\'#fefce8\';pedMostrarFaturasTooltip(event,\'' + p.id + '\')" onmouseout="this.style.background=\'none\';pedEsconderFaturasTooltip()"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="fiscal" style="font-size:18px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5M9.5 12h5"/></svg></button>'
+      + '<button onclick="duplicarPedido(\'' + p.id + '\')" title="Duplicar pedido" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#2563eb" onmouseover="this.style.background=\'#eff6ff\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-copy" style="font-size:18px"></i></button>'
+      + '<button onclick="pedAbrirAnexos(\'' + p.id + '\')" title="Anexar Nota Fiscal (PDF ou XML)" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#DE7926;position:relative" onmouseover="this.style.background=\'#fff7ed\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-paperclip" style="font-size:18px"></i>' + ((p.anexos && p.anexos.length) ? '<span style="position:absolute;top:-2px;right:-2px;background:#DE7926;color:#fff;border-radius:50%;width:15px;height:15px;font-size:9.5px;line-height:15px;text-align:center;font-weight:700">' + p.anexos.length + '</span>' : '') + '</button>'
+      + '<button onclick="deletePedido(\'' + p.id + '\')" title="' + (podeExcluir ? 'Excluir' : 'Só é possível excluir pedidos com status Cancelado') + '" style="background:none;border:none;padding:5px;border-radius:6px;' + (podeExcluir ? 'color:#dc2626;cursor:pointer' : 'color:#cbd5e1;cursor:not-allowed') + '"' + (podeExcluir ? ' onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"' : '') + '><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:18px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
       + '</div></div>';
   }).join('');
 }
@@ -19113,7 +19270,7 @@ function _pinfProcessar() {
   if (!_pinfArquivosSelecionados.length) { if (msg) msg.textContent = 'Selecione ao menos um arquivo XML ou PDF.'; return; }
 
   var clientes = getClientes();
-  var produtos = getProdutos();
+  var produtos = getProdutos().filter(function (p) { return String(p.fornecedor || '') === String(fornecedorId); });
   var pedidosCandidatos = getPedidos().filter(function (p) {
     if (String(p.fornecedorId || '') !== String(fornecedorId)) return false;
     var dt = String(p.dtCadastro || '').slice(0, 10);
@@ -19402,6 +19559,14 @@ function _pinfRenderRevisao() {
     } else {
       wrap.innerHTML = _pinfResultados.map(function (r, ri) {
         var nfNums = r.nfs.map(function (x) { return x.dados.nNF; }).filter(Boolean).join(', ');
+        var nfBadgesHtml = r.nfs.map(function (x) { return _nfBadgeHtml(x.dados.nNF, _nfClassificarTipo(x.dados.natOp, x.dados.cfop)); }).join('');
+        var avisosTipo = r.nfs.map(function (x) {
+          var tipo = _nfClassificarTipo(x.dados.natOp, x.dados.cfop);
+          if (tipo === 'Bonificação' && r.pedido.status !== 'Bonificado') return '<div>NF ' + _pedEsc(x.dados.nNF || '') + ' identificada como <b>Bonificação</b> pelo XML, mas o pedido está com status "' + _pedEsc(r.pedido.status || '') + '". Confira se o status deveria virar "Bonificado".</div>';
+          if (tipo === 'Remessa') return '<div>NF ' + _pedEsc(x.dados.nNF || '') + ' identificada como <b>Remessa</b> pelo XML — normalmente não representa uma venda faturável. Confira antes de aprovar.</div>';
+          return '';
+        }).filter(Boolean).join('');
+        var avisoTipoHtml = avisosTipo ? ('<div style="color:#92400e;font-size:11px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;margin-top:8px;display:flex;flex-direction:column;gap:3px">' + avisosTipo + '</div>') : '';
         var valorNf = r.nfs.reduce(function (s, x) { return s + (Number(x.dados.valor) || 0); }, 0);
         var pdfsDisponiveis = r.nfs.filter(function (x) { return x.pdfFile; });
         var aprovadoOk = r.status === 'ok' || r.aprovadoManual;
@@ -19435,11 +19600,13 @@ function _pinfRenderRevisao() {
           + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
           + '<div>'
           + '<div style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(r.pedido.clienteNome || '')) + '</div>'
-          + '<div style="font-size:11px;color:#64748b;margin-top:2px">Pedido nº ' + _pedEsc(r.pedido.numPedidoCliente || String(r.pedido.lancamento || '')) + (nfNums ? (' · NF ' + _pedEsc(nfNums)) : '') + ' · Valor NF: ' + _pedFmtMoeda(valorNf) + '</div>'
+          + '<div style="font-size:11px;color:#64748b;margin-top:2px">Pedido nº ' + _pedEsc(r.pedido.numPedidoCliente || String(r.pedido.lancamento || '')) + ' · Valor NF: ' + _pedFmtMoeda(valorNf) + '</div>'
+          + (nfBadgesHtml ? ('<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' + nfBadgesHtml + '</div>') : '')
           + '</div>'
           + '<div>' + pdfsBtns + '</div>'
           + '</div>'
           + corpo
+          + avisoTipoHtml
           + '</div>';
       }).join('');
     }
@@ -22854,6 +23021,7 @@ function _devExtrairDadosXml(xmlText) {
     var ide  = doc.getElementsByTagName('ide')[0];
 
     var nNF      = _devXmlTag(ide, 'nNF');
+    var natOp    = _devXmlTag(ide, 'natOp');
     var dataEmissaoRaw = _devXmlTag(ide, 'dhEmi') || _devXmlTag(ide, 'dEmi');
     var dataEmissao = dataEmissaoRaw ? dataEmissaoRaw.slice(0,10) : '';
     var emitCNPJ = _devXmlTag(emit, 'CNPJ') || _devXmlTag(emit, 'CPF');
@@ -22877,6 +23045,7 @@ function _devExtrairDadosXml(xmlText) {
     if (chave.length !== 44) chave = '';
 
     var itens = [];
+    var cfop = '';
     var detEls = doc.getElementsByTagName('det');
     for (var i = 0; i < detEls.length; i++) {
       var prod = detEls[i].getElementsByTagName('prod')[0];
@@ -22884,6 +23053,9 @@ function _devExtrairDadosXml(xmlText) {
       var qtd = parseFloat(_devXmlTag(prod,'qCom')) || 0;
       var vUn = parseFloat(_devXmlTag(prod,'vUnCom')) || 0;
       var vTot = parseFloat(_devXmlTag(prod,'vProd')) || 0;
+      // cfop: CFOP do primeiro item, usado por _nfClassificarTipo para identificar
+      // Venda/Bonificacao/Remessa junto com natOp (tela de revisao do Import XML/NF em lote).
+      if (!cfop) cfop = _devXmlTag(prod,'CFOP');
       // unidadeXml (uCom): adicionado para o Import XML/NF em lote (_pinfAgregarItensNfsPedido),
       // que precisa saber se o fornecedor faturou por caixa ou por unidade para poder converter
       // via _pfatConverterItemXmlParaUnidades (mesma engine ja usada no Faturamento por XML avulso).
@@ -22914,10 +23086,32 @@ function _devExtrairDadosXml(xmlText) {
       }
     }
 
-    return { nNF: nNF, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml };
+    return { nNF: nNF, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
   } catch (e) {
     return null;
   }
+}
+
+// Classifica a natureza da NF (Venda / Bonificacao / Remessa) a partir do natOp e do CFOP
+// do XML, para sinalizar na tela de revisao do Import XML/NF em lote (_pinfRenderRevisao).
+// Retorna null quando nao reconhece (nao bloqueia nada, e so um selo informativo).
+function _nfClassificarTipo(natOp, cfop) {
+  var op = String(natOp || '').toUpperCase();
+  if (op.normalize) op = op.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var cf = String(cfop || '').replace(/\D/g, '');
+  var CFOP_BONIFICACAO = ['5910', '6910'];
+  var CFOP_REMESSA = ['5901','5902','5903','5904','5905','5906','5908','5909','5912','5913','5914','5915','5916','5917','5918','5919','5920','5921','5923','5924','5925','5926','5927','5928','5929','5931','5932','5933','5934','5935','5936','5937','5938','5939','5940','5941','5942','5943','5944','5945','5946','5947','5948','5949','6901','6902','6903','6904','6905','6906','6908','6909','6912','6913','6914','6915','6916','6917','6918','6919','6920','6921','6923','6924','6925','6926','6927','6928','6929','6931','6932','6933','6934','6935','6936','6937','6938','6939','6940','6941','6942','6943','6944','6945','6946','6947','6948','6949'];
+  var CFOP_VENDA = ['5101','5102','5103','5104','5105','5106','5109','5110','5111','5112','5113','5114','5115','5116','5117','5118','5119','5120','5122','5123','5124','5125','5401','5402','5403','5405','6101','6102','6104','6105','6106','6107','6108','6109','6401','6402','6403','6404','6405'];
+  if (op.indexOf('BONIFICA') !== -1 || CFOP_BONIFICACAO.indexOf(cf) !== -1) return 'Bonificação';
+  if (op.indexOf('REMESSA') !== -1 || CFOP_REMESSA.indexOf(cf) !== -1) return 'Remessa';
+  if (op.indexOf('VENDA') !== -1 || CFOP_VENDA.indexOf(cf) !== -1) return 'Venda';
+  return null;
+}
+function _nfBadgeHtml(nNF, tipo) {
+  var cores = { 'Venda': ['#f0fdf4', '#15803d'], 'Bonificação': ['#eff6ff', '#1d4ed8'], 'Remessa': ['#fff7ed', '#c2410c'] };
+  var c = cores[tipo] || ['#f1f5f9', '#64748b'];
+  var rotulo = 'NF ' + _pedEsc(nNF || '—') + (tipo ? (' · ' + tipo) : '');
+  return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;background:' + c[0] + ';color:' + c[1] + '">' + rotulo + '</span>';
 }
 
 function devAnexarXml(input) {
@@ -24086,7 +24280,7 @@ function getGruposAcesso() { return firebaseConfigurado ? _fsGet('gruposAcesso')
 function setGruposAcesso(data) { if (firebaseConfigurado) { _fsSet('gruposAcesso', data); } else { localStorage.setItem('gruposAcesso', JSON.stringify(data)); } }
 function getUsuariosSistema() { return firebaseConfigurado ? _fsGet('usuarios') : JSON.parse(localStorage.getItem('usuarios') || '[]'); }
 function setUsuariosSistema(data) { if (firebaseConfigurado) { _fsSet('usuarios', data); } else { localStorage.setItem('usuarios', JSON.stringify(data)); } }
-function getVendedoresAtivos() { return getUsuariosSistema().filter(function(u){ return (u.ativo||'Sim') !== 'Não' && String(u.grupoNome||'').trim().toLowerCase() === 'vendas'; }); }
+function getVendedoresAtivos() { return getUsuariosSistema().filter(function(u){ return (u.ativo||'Sim') !== 'Não' && /^vend/i.test(String(u.grupoNome||'').trim()); }); }
 
 function _usuEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
@@ -24942,7 +25136,7 @@ var RELATORIOS = [
   { id:'vencimentos', nivel:'operacional', icon:'ti-tag', titulo:'Negociações de preço vencendo', desc:'Vigências a vencer ou já vencidas.', campos:['data','fornecedor'] },
   { id:'devolucoes', nivel:'operacional', icon:'ti-arrow-back-up', titulo:'Devoluções por motivo', desc:'Devoluções agrupadas por motivo.', campos:['data','fornecedor','cliente'] },
   { id:'curva-abc', nivel:'analitico', icon:'ti-chart-pie', titulo:'Curva ABC de clientes', desc:'Classificação A/B/C por faturamento.', campos:['data','categoria','subcategoria'] },
-  { id:'vendas-uf', nivel:'analitico', icon:'ti-map-pin', titulo:'Vendas por UF e categoria', desc:'Faturamento cruzado por estado e rede.', campos:['data','uf','categoria','subcategoria'] },
+  { id:'vendas-uf', nivel:'analitico', icon:'ti-map-pin', titulo:'Vendas por UF e Rede', desc:'Faturamento cruzado por estado e rede.', campos:['data','uf','categoria','subcategoria'] },
   { id:'ticket-vendedor', nivel:'analitico', icon:'ti-users', titulo:'Ticket médio por vendedor', desc:'Valor faturado e ticket médio por vendedor.', campos:['data','vendedor','fornecedor'] },
   { id:'prazo-entrega', nivel:'analitico', icon:'ti-truck', titulo:'Prazo prometido vs. realizado', desc:'Dias de diferença por UF e transportadora.', campos:['data','uf'] },
   { id:'meta-realizado', nivel:'gerencial', icon:'ti-target', titulo:'Faturamento vs. meta', desc:'Realizado por fornecedor e mês, comparado à meta.', campos:['data','vendedor','fornecedor'] },
@@ -25357,11 +25551,11 @@ function _relCalcVendasUf(f) {
   var lista = Object.keys(grupos).map(function(k){ return grupos[k]; }).sort(function(a,b){ return b.valor - a.valor; });
   var total = lista.reduce(function(acc,g){ return acc + g.valor; }, 0);
   var kpis = _relKpis([
-    { label:'Combinações UF/Categoria', valor: lista.length },
+    { label:'Combinações UF/Rede', valor: lista.length },
     { label:'Valor Total Faturado', valor: _pedFmtMoeda(total) }
   ]);
   var cols = [
-    { label:'UF', width:'60px' }, { label:'Categoria' },
+    { label:'UF', width:'60px' }, { label:'Rede' },
     { label:'Qtd. NFs', width:'90px', right:true }, { label:'Valor Faturado', width:'130px', right:true }
   ];
   var rows = lista.map(function(g){
