@@ -2980,14 +2980,6 @@
         </div>
         <div id="cli-filtros-extra" class="cad-filtros-extra">
           <div class="cad-filtro-campo">
-            <span>Rede</span>
-            <select id="cliente-filtro-rede" onchange="_cliListAtualizarSubRedes()"><option value="">Todas</option></select>
-          </div>
-          <div class="cad-filtro-campo">
-            <span>Sub Rede</span>
-            <select id="cliente-filtro-subrede" onchange="renderClienteList()"><option value="">Todas</option></select>
-          </div>
-          <div class="cad-filtro-campo">
             <span>Ordenar</span>
             <select id="cliente-ordem" onchange="renderClienteList()"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
           </div>
@@ -2995,7 +2987,7 @@
       </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
-            <span>C&#243;digo</span><span>Cliente</span><span>Raz&#227;o Social</span><span>CNPJ</span><span>Cidade / UF</span><span>Rede</span><span style="text-align:center">Op&#231;&#245;es</span>
+            <span>C&#243;digo</span><span>Cliente</span><span>Raz&#227;o Social</span><span>CNPJ</span><span>Cidade / UF</span><span>Categoria</span><span style="text-align:center">Op&#231;&#245;es</span>
           </div>
           <div id="cliente-tbody"></div>
           <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
@@ -3410,15 +3402,15 @@
 
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
                 <div>
-                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Rede</label>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Categoria Principal</label>
                   <select class="form-input" id="cli-categoria" onchange="atualizarSubcatCliente()" style="width:100%">
                     <option value="">-- Selecione --</option>
                   </select>
                 </div>
                 <div>
-                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Sub Rede</label>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Subcategoria</label>
                   <select class="form-input" id="cli-subcategoria" style="width:100%">
-                    <option value="">-- Selecione a rede primeiro --</option>
+                    <option value="">-- Selecione a categoria primeiro --</option>
                   </select>
                 </div>
               </div>
@@ -4360,7 +4352,7 @@
 
           <!-- Busca de Rede -->
           <div id="sku-fil-rede-wrap" class="cad-filtro-campo" style="min-width:200px">
-            <span>Rede / Sub Rede</span>
+            <span>Rede / Categoria</span>
             <div style="position:relative">
               <input id="sku-fil-rede-txt" type="text" placeholder="Buscar rede..." autocomplete="off"
                 oninput="skuFilFiltrarRede(this.value)"
@@ -5561,7 +5553,7 @@
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.05)">
         <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
         <select id="apres-rede" onchange="_apresAtualizarSubcategorias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Selecione...</option></select>
-        <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+        <span style="font-size:11px;font-weight:600;color:#64748b">Subcategoria</span>
         <select id="apres-subcategoria" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Todas</option></select>
         <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
         <select id="apres-fornecedor" onchange="_apresRenderProdutosNovos()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Selecione...</option></select>
@@ -6598,7 +6590,7 @@
                 <input class="form-input" id="nav-comando-filtro-cliente" placeholder="ex.: Atacadão" style="width:100%">
               </div>
               <div id="nav-comando-filtro-categoria-wrap">
-                <label style="font-size:10.5px;color:#64748b;display:block;margin-bottom:4px">Rede / Sub Rede</label>
+                <label style="font-size:10.5px;color:#64748b;display:block;margin-bottom:4px">Rede / Categoria</label>
                 <select class="form-input" id="nav-comando-filtro-categoria" style="width:100%"><option value="">Todas</option></select>
               </div>
             </div>
@@ -10670,28 +10662,10 @@ function setCliFiltro(val) {
   renderClienteList();
 }
 
-function _cliListPopularFiltroRedeSeVazio() {
-  const sel = document.getElementById('cliente-filtro-rede');
-  if (!sel || sel.options.length > 1) return;
-  const redes = getCatClientes().filter(c => !c.pai).sort((a,b) => (a.nome||'').localeCompare(b.nome||'', 'pt-BR'));
-  sel.innerHTML = '<option value="">Todas</option>' + redes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
-}
-function _cliListAtualizarSubRedes() {
-  const redeId = document.getElementById('cliente-filtro-rede')?.value || '';
-  const sel = document.getElementById('cliente-filtro-subrede');
-  if (sel) {
-    const subs = redeId ? getCatClientes().filter(c => String(c.pai) === String(redeId)).sort((a,b) => (a.nome||'').localeCompare(b.nome||'', 'pt-BR')) : [];
-    sel.innerHTML = '<option value="">Todas</option>' + subs.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
-  }
-  renderClienteList();
-}
 function renderClienteList() {
-  _cliListPopularFiltroRedeSeVazio();
   const data   = getClientesVisiveis();
   const busca  = (document.getElementById('cliente-busca')?.value || '').toLowerCase();
   const ordem  = document.getElementById('cliente-ordem')?.value || 'nome_fantasia';
-  const fRede    = document.getElementById('cliente-filtro-rede')?.value || '';
-  const fSubRede = document.getElementById('cliente-filtro-subrede')?.value || '';
   const tbody  = document.getElementById('cliente-tbody');
   const pag    = document.getElementById('cliente-paginacao');
   if (!tbody) return;
@@ -10707,9 +10681,7 @@ function renderClienteList() {
       || (r.cidade||'').toLowerCase().includes(busca)
       || (r.codigo||'').toLowerCase().includes(busca);
     const matchAtivo = !_cliFiltroAtivo || (r.ativo||'Sim') === _cliFiltroAtivo;
-    const matchRede = !fRede || String(r.categoria||'') === String(fRede);
-    const matchSubRede = !fSubRede || String(r.subcategoria||'') === String(fSubRede);
-    return matchBusca && matchAtivo && matchRede && matchSubRede;
+    return matchBusca && matchAtivo;
   });
 
   rows.sort((a, b) => (a[ordem]||'').toLowerCase().localeCompare((b[ordem]||'').toLowerCase(), 'pt-BR'));
@@ -10951,7 +10923,7 @@ function atualizarSubcatCliente() {
   const subSel = document.getElementById('cli-subcategoria');
   const subs = getCatClientes().filter(c => c.pai == catId).sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'', 'pt-BR'); });
   if (!catId || !subs.length) {
-    subSel.innerHTML = '<option value="">-- Nenhuma sub rede --</option>';
+    subSel.innerHTML = '<option value="">-- Nenhuma subcategoria --</option>';
   } else {
     subSel.innerHTML = '<option value="">-- Selecione --</option>' +
       subs.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
@@ -25136,7 +25108,7 @@ var RELATORIOS = [
   { id:'vencimentos', nivel:'operacional', icon:'ti-tag', titulo:'Negociações de preço vencendo', desc:'Vigências a vencer ou já vencidas.', campos:['data','fornecedor'] },
   { id:'devolucoes', nivel:'operacional', icon:'ti-arrow-back-up', titulo:'Devoluções por motivo', desc:'Devoluções agrupadas por motivo.', campos:['data','fornecedor','cliente'] },
   { id:'curva-abc', nivel:'analitico', icon:'ti-chart-pie', titulo:'Curva ABC de clientes', desc:'Classificação A/B/C por faturamento.', campos:['data','categoria','subcategoria'] },
-  { id:'vendas-uf', nivel:'analitico', icon:'ti-map-pin', titulo:'Vendas por UF e Rede', desc:'Faturamento cruzado por estado e rede.', campos:['data','uf','categoria','subcategoria'] },
+  { id:'vendas-uf', nivel:'analitico', icon:'ti-map-pin', titulo:'Vendas por UF e categoria', desc:'Faturamento cruzado por estado e rede.', campos:['data','uf','categoria','subcategoria'] },
   { id:'ticket-vendedor', nivel:'analitico', icon:'ti-users', titulo:'Ticket médio por vendedor', desc:'Valor faturado e ticket médio por vendedor.', campos:['data','vendedor','fornecedor'] },
   { id:'prazo-entrega', nivel:'analitico', icon:'ti-truck', titulo:'Prazo prometido vs. realizado', desc:'Dias de diferença por UF e transportadora.', campos:['data','uf'] },
   { id:'meta-realizado', nivel:'gerencial', icon:'ti-target', titulo:'Faturamento vs. meta', desc:'Realizado por fornecedor e mês, comparado à meta.', campos:['data','vendedor','fornecedor'] },
@@ -25551,11 +25523,11 @@ function _relCalcVendasUf(f) {
   var lista = Object.keys(grupos).map(function(k){ return grupos[k]; }).sort(function(a,b){ return b.valor - a.valor; });
   var total = lista.reduce(function(acc,g){ return acc + g.valor; }, 0);
   var kpis = _relKpis([
-    { label:'Combinações UF/Rede', valor: lista.length },
+    { label:'Combinações UF/Categoria', valor: lista.length },
     { label:'Valor Total Faturado', valor: _pedFmtMoeda(total) }
   ]);
   var cols = [
-    { label:'UF', width:'60px' }, { label:'Rede' },
+    { label:'UF', width:'60px' }, { label:'Categoria' },
     { label:'Qtd. NFs', width:'90px', right:true }, { label:'Valor Faturado', width:'130px', right:true }
   ];
   var rows = lista.map(function(g){
