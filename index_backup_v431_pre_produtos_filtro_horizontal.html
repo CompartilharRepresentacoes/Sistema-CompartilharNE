@@ -951,32 +951,6 @@
 .pg-stat-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;color:rgba(255,255,255,.5)}
 .pg-stat-row:last-child{margin-bottom:0}
 .pg-two-col{display:grid;grid-template-columns:230px 1fr;gap:12px;align-items:start}
-
-/* -- Barra de filtros horizontal/retratil generica p/ telas de Cadastros -- */
-.cad-filtros-bar{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)}
-.cad-filtros-topo{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.cad-filtros-busca{position:relative;flex:1;min-width:180px;max-width:240px;display:flex;align-items:center;gap:7px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 10px;box-sizing:border-box}
-.cad-filtros-busca input{background:transparent;border:none;outline:none;font-size:12.5px;color:#1e293b;width:100%}
-.cad-filtros-busca input::placeholder{color:#94a3b8}
-.cad-chip-row{display:flex;gap:6px;flex-wrap:wrap}
-.cad-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:#f8fafc;color:#64748b}
-.cad-chip.on{background:#272A4A;color:#fff}
-.cad-chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.cad-kpi-row{display:flex;gap:14px;font-size:12px;color:#94a3b8;white-space:nowrap}
-.cad-kpi-row b{font-weight:700}
-.cad-mf-btn{margin-left:auto;padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer}
-.cad-filtros-extra{display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:14px;flex-wrap:wrap}
-.cad-filtro-campo{display:flex;flex-direction:column;gap:3px}
-.cad-filtro-campo span{font-size:10.5px;color:#94a3b8}
-.cad-filtro-campo select,.cad-filtro-campo input{padding:6px 8px;border:1px solid #e2e8f0;border-radius:8px;font-size:12.5px;min-width:140px}
-@media (max-width:767px) {
-  .cad-filtros-topo{flex-direction:column!important;align-items:stretch!important;gap:8px!important}
-  .cad-filtros-topo>*{width:100%!important;max-width:100%!important;margin-left:0!important}
-  .cad-mf-btn{justify-content:center!important}
-  .cad-kpi-row{justify-content:space-between!important}
-  .cad-filtros-extra{flex-direction:column!important;align-items:stretch!important}
-  .cad-filtro-campo select,.cad-filtro-campo input{width:100%!important;min-width:0!important;box-sizing:border-box!important}
-}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <!-- jsPDF + html2canvas (geracao de PDF do Pedido na impressao) -->
@@ -1773,27 +1747,21 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-meta-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="cad-filtros-bar">
-        <div class="cad-filtros-topo">
-          <div class="cad-filtros-busca">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="meta-busca" oninput="renderMetaList()" placeholder="F&#225;brica...">
-          </div>
-          <button type="button" onclick="cadToggleMaisFiltros('meta-filtros-extra','meta-mf-txt','meta-mf-chev')" class="cad-mf-btn">
-            <i class="ti ti-filter"></i><span id="meta-mf-txt">Mais filtros</span><i id="meta-mf-chev" class="ti ti-chevron-down"></i>
-          </button>
-        </div>
-        <div id="meta-filtros-extra" class="cad-filtros-extra">
-          <div class="cad-filtro-campo">
-            <span>Período</span>
-            <select id="meta-filtro-mes" onchange="renderMetaList()"><option value="">Todos os meses</option></select>
-          </div>
-          <div class="cad-filtro-campo">
-            <span>Tipo</span>
-            <select id="meta-filtro-tipo" onchange="renderMetaList()"><option value="">KG e R$</option><option value="kg">Apenas KG</option><option value="rs">Apenas R$</option></select>
-          </div>
-        </div>
+      <div class="pg-two-col">
+        <div class="pg-side">
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Per&#237;odo</div>
+        <select id="meta-filtro-mes" onchange="renderMetaList()" class="pg-side-sel"><option value="">Todos os meses</option></select>
       </div>
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Tipo</div>
+        <select id="meta-filtro-tipo" onchange="renderMetaList()" class="pg-side-sel"><option value="">KG e R$</option><option value="kg">Apenas KG</option><option value="rs">Apenas R$</option></select>
+      </div>
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Busca rápida</div>
+        <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="meta-busca" oninput="renderMetaList()" placeholder="F&#225;brica..."></div>
+      </div>
+        </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:90px 1fr 60px 120px 90px 60px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>M&#234;s</span><span>Fornecedor</span><span>Tipo</span><span>Meta</span><span>Cadastrado</span><span style="text-align:center">Op&#231;&#245;es</span>
@@ -1803,6 +1771,7 @@
             <span style="font-size:10px;color:#94a3b8" id="meta-pag">0 registros</span>
           </div>
         </div>
+      </div>
     </div>
 
     <!-- Metas: Formulário -->
@@ -1883,28 +1852,22 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-cat-cliente-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="cad-filtros-bar">
-        <div class="cad-filtros-topo">
-          <div class="cad-filtros-busca">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="cat-cliente-busca" oninput="renderCatClienteList()" placeholder="Pesquisar categoria...">
+      <div class="pg-two-col">
+        <div class="pg-side">
+          <div class="pg-side-sec">
+            <div class="pg-side-lbl">Pesquisar</div>
+            <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="cat-cliente-busca" oninput="renderCatClienteList()" placeholder="Pesquisar categoria..."></div>
           </div>
-          <div class="cad-kpi-row">
-            <span>Total <b style="color:#1e293b" id="cat-cli-kpi-total">0</b></span>
-            <span>Principais <b style="color:#16a34a" id="cat-cli-kpi-principal">0</b></span>
-            <span>Subcategorias <b style="color:#DE7926" id="cat-cli-kpi-sub">0</b></span>
+          <div class="pg-side-sec">
+            <div class="pg-side-lbl">Ordenar</div>
+            <select id="cat-cliente-dir" onchange="renderCatClienteList()" class="pg-side-sel"><option value="asc">A &#8594; Z</option><option value="desc">Z &#8594; A</option></select>
           </div>
-          <button type="button" onclick="cadToggleMaisFiltros('cat-cliente-filtros-extra','cat-cliente-mf-txt','cat-cliente-mf-chev')" class="cad-mf-btn">
-            <i class="ti ti-filter"></i><span id="cat-cliente-mf-txt">Mais filtros</span><i id="cat-cliente-mf-chev" class="ti ti-chevron-down"></i>
-          </button>
-        </div>
-        <div id="cat-cliente-filtros-extra" class="cad-filtros-extra">
-          <div class="cad-filtro-campo">
-            <span>Ordenar</span>
-            <select id="cat-cliente-dir" onchange="renderCatClienteList()"><option value="asc">A &#8594; Z</option><option value="desc">Z &#8594; A</option></select>
+          <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
+            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="cat-cli-kpi-total">0</span></div>
+            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Principais</span><span style="font-weight:700;color:#16a34a" id="cat-cli-kpi-principal">0</span></div>
+            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Subcategorias</span><span style="font-weight:700;color:#DE7926" id="cat-cli-kpi-sub">0</span></div>
           </div>
         </div>
-      </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:1fr 90px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>Categoria</span><span style="text-align:right">A&#231;&#245;es</span>
@@ -1920,6 +1883,7 @@
             </div>
           </div>
         </div>
+      </div>
       <input type="hidden" id="cat-cliente-ordem" value="nome">
     </div>
 
@@ -2011,28 +1975,22 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-cat-produto-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="cad-filtros-bar">
-        <div class="cad-filtros-topo">
-          <div class="cad-filtros-busca">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="cat-produto-busca" oninput="renderCatProdutoList()" placeholder="Pesquisar categoria...">
+      <div class="pg-two-col">
+        <div class="pg-side">
+          <div class="pg-side-sec">
+            <div class="pg-side-lbl">Pesquisar</div>
+            <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="cat-produto-busca" oninput="renderCatProdutoList()" placeholder="Pesquisar categoria..."></div>
           </div>
-          <div class="cad-kpi-row">
-            <span>Total <b style="color:#1e293b" id="cat-prod-kpi-total">0</b></span>
-            <span>Principais <b style="color:#16a34a" id="cat-prod-kpi-principal">0</b></span>
-            <span>Subcategorias <b style="color:#DE7926" id="cat-prod-kpi-sub">0</b></span>
+          <div class="pg-side-sec">
+            <div class="pg-side-lbl">Ordenar</div>
+            <select id="cat-produto-dir" onchange="renderCatProdutoList()" class="pg-side-sel"><option value="asc">A &#8594; Z</option><option value="desc">Z &#8594; A</option></select>
           </div>
-          <button type="button" onclick="cadToggleMaisFiltros('cat-produto-filtros-extra','cat-produto-mf-txt','cat-produto-mf-chev')" class="cad-mf-btn">
-            <i class="ti ti-filter"></i><span id="cat-produto-mf-txt">Mais filtros</span><i id="cat-produto-mf-chev" class="ti ti-chevron-down"></i>
-          </button>
-        </div>
-        <div id="cat-produto-filtros-extra" class="cad-filtros-extra">
-          <div class="cad-filtro-campo">
-            <span>Ordenar</span>
-            <select id="cat-produto-dir" onchange="renderCatProdutoList()"><option value="asc">A &#8594; Z</option><option value="desc">Z &#8594; A</option></select>
+          <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
+            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="cat-prod-kpi-total">0</span></div>
+            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Principais</span><span style="font-weight:700;color:#16a34a" id="cat-prod-kpi-principal">0</span></div>
+            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Subcategorias</span><span style="font-weight:700;color:#DE7926" id="cat-prod-kpi-sub">0</span></div>
           </div>
         </div>
-      </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:1fr 90px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>Categoria</span><span style="text-align:right">A&#231;&#245;es</span>
@@ -2048,6 +2006,7 @@
             </div>
           </div>
         </div>
+      </div>
       <input type="hidden" id="cat-produto-ordem" value="nome">
     </div>
 
@@ -2117,33 +2076,31 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-fornecedor-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="cad-filtros-bar">
-        <div class="cad-filtros-topo">
-          <div class="cad-filtros-busca">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="fornecedor-busca" oninput="renderFornecedorList()" placeholder="Nome, CNPJ, cidade...">
-          </div>
-          <div class="cad-chip-row">
-            <button id="forn-filtro-ativos" onclick="setFornFiltro('Sim')" class="cad-chip"><span class="cad-chip-dot" style="background:#16a34a"></span>Ativos</button>
-            <button id="forn-filtro-inativos" onclick="setFornFiltro('Não')" class="cad-chip"><span class="cad-chip-dot" style="background:#f87171"></span>Inativos</button>
-            <button id="forn-filtro-todos" onclick="setFornFiltro('')" class="cad-chip on"><span class="cad-chip-dot" style="background:#94a3b8"></span>Todos</button>
-          </div>
-          <div class="cad-kpi-row">
-            <span>Ativos <b style="color:#16a34a" id="forn-kpi-ativos">0</b></span>
-            <span>Inativos <b style="color:#dc2626" id="forn-kpi-inativos">0</b></span>
-            <span>Total <b style="color:#1e293b" id="forn-kpi-total">0</b></span>
-          </div>
-          <button type="button" onclick="cadToggleMaisFiltros('forn-filtros-extra','forn-mf-txt','forn-mf-chev')" class="cad-mf-btn">
-            <i class="ti ti-filter"></i><span id="forn-mf-txt">Mais filtros</span><i id="forn-mf-chev" class="ti ti-chevron-down"></i>
-          </button>
-        </div>
-        <div id="forn-filtros-extra" class="cad-filtros-extra">
-          <div class="cad-filtro-campo">
-            <span>Ordenar</span>
-            <select id="fornecedor-ordem" onchange="renderFornecedorList()"><option value="nome_fantasia">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
-          </div>
+      <div class="pg-two-col">
+        <div class="pg-side">
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Busca rápida</div>
+        <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="fornecedor-busca" oninput="renderFornecedorList()" placeholder="Nome, CNPJ, cidade..."></div>
+      </div>
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Status</div>
+        <div class="pg-chip-col">
+          <button id="forn-filtro-ativos" onclick="setFornFiltro('Sim')" class="pg-chip"><span class="pg-chip-dot" style="background:#16a34a"></span>Ativos</button>
+          <button id="forn-filtro-inativos" onclick="setFornFiltro('Não')" class="pg-chip"><span class="pg-chip-dot" style="background:#f87171"></span>Inativos</button>
+          <button id="forn-filtro-todos" onclick="setFornFiltro('')" class="pg-chip on"><span class="pg-chip-dot" style="background:#94a3b8"></span>Todos</button>
         </div>
       </div>
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Ordenar</div>
+        <select id="fornecedor-ordem" onchange="renderFornecedorList()" class="pg-side-sel"><option value="nome_fantasia">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
+      </div>
+      <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Ativos</span><span style="font-weight:700;color:#16a34a" id="forn-kpi-ativos">0</span></div>
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Inativos</span><span style="font-weight:700;color:#dc2626" id="forn-kpi-inativos">0</span></div>
+        <div style="height:0.5px;background:#e2e8f0;margin:4px 0"></div>
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="forn-kpi-total">0</span></div>
+      </div>
+        </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div id="fornecedor-thead" style="display:grid;grid-template-columns:70px 62px 1fr 150px 130px 60px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>C&#243;digo</span><span></span><span>Fornecedor</span><span>CNPJ</span><span>Cidade</span><span style="text-align:center">Op&#231;&#245;es</span>
@@ -2159,6 +2116,7 @@
             </div>
           </div>
         </div>
+      </div>
       <div id="fornecedor-kpis" style="display:none"></div>
       <input type="hidden" id="fornecedor-ativo-filtro" value="">
       <input type="hidden" id="fornecedor-dir" value="asc">
@@ -2412,33 +2370,31 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-transp-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="cad-filtros-bar">
-        <div class="cad-filtros-topo">
-          <div class="cad-filtros-busca">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="transp-busca" oninput="renderTranspList()" placeholder="Nome, CNPJ, cidade...">
-          </div>
-          <div class="cad-chip-row">
-            <button id="transp-filtro-ativos" onclick="setTranspFiltro('Sim')" class="cad-chip"><span class="cad-chip-dot" style="background:#16a34a"></span>Ativos</button>
-            <button id="transp-filtro-inativos" onclick="setTranspFiltro('Não')" class="cad-chip"><span class="cad-chip-dot" style="background:#f87171"></span>Inativos</button>
-            <button id="transp-filtro-todos" onclick="setTranspFiltro('')" class="cad-chip on"><span class="cad-chip-dot" style="background:#94a3b8"></span>Todos</button>
-          </div>
-          <div class="cad-kpi-row">
-            <span>Ativos <b style="color:#16a34a" id="transp-kpi-ativos">0</b></span>
-            <span>Inativos <b style="color:#dc2626" id="transp-kpi-inativos">0</b></span>
-            <span>Total <b style="color:#1e293b" id="transp-kpi-total">0</b></span>
-          </div>
-          <button type="button" onclick="cadToggleMaisFiltros('transp-filtros-extra','transp-mf-txt','transp-mf-chev')" class="cad-mf-btn">
-            <i class="ti ti-filter"></i><span id="transp-mf-txt">Mais filtros</span><i id="transp-mf-chev" class="ti ti-chevron-down"></i>
-          </button>
-        </div>
-        <div id="transp-filtros-extra" class="cad-filtros-extra">
-          <div class="cad-filtro-campo">
-            <span>Ordenar</span>
-            <select id="transp-ordem" onchange="renderTranspList()"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
-          </div>
+      <div class="pg-two-col">
+        <div class="pg-side">
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Busca rápida</div>
+        <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="transp-busca" oninput="renderTranspList()" placeholder="Nome, CNPJ, cidade..."></div>
+      </div>
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Status</div>
+        <div class="pg-chip-col">
+          <button id="transp-filtro-ativos" onclick="setTranspFiltro('Sim')" class="pg-chip"><span class="pg-chip-dot" style="background:#16a34a"></span>Ativos</button>
+          <button id="transp-filtro-inativos" onclick="setTranspFiltro('Não')" class="pg-chip"><span class="pg-chip-dot" style="background:#f87171"></span>Inativos</button>
+          <button id="transp-filtro-todos" onclick="setTranspFiltro('')" class="pg-chip on"><span class="pg-chip-dot" style="background:#94a3b8"></span>Todos</button>
         </div>
       </div>
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Ordenar</div>
+        <select id="transp-ordem" onchange="renderTranspList()" class="pg-side-sel"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
+      </div>
+      <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Ativos</span><span style="font-weight:700;color:#16a34a" id="transp-kpi-ativos">0</span></div>
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Inativos</span><span style="font-weight:700;color:#dc2626" id="transp-kpi-inativos">0</span></div>
+        <div style="height:0.5px;background:#e2e8f0;margin:4px 0"></div>
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="transp-kpi-total">0</span></div>
+      </div>
+        </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:80px 1fr 170px 160px 80px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>C&#243;digo</span><span>Transportadora</span><span>CNPJ</span><span>Cidade / UF</span><span style="text-align:center">Op&#231;&#245;es</span>
@@ -2454,6 +2410,7 @@
             </div>
           </div>
         </div>
+      </div>
       <input type="hidden" id="transp-ativo-filtro" value="">
       <input type="hidden" id="transp-dir" value="asc">
     </div>
@@ -2958,33 +2915,31 @@
         <input type="file" id="cli-import-file" accept=".xlsx,.xls" style="display:none" onchange="_cliImportarExcel(this)">
         <button onclick="showPage('page-cliente-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="cad-filtros-bar">
-        <div class="cad-filtros-topo">
-          <div class="cad-filtros-busca">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="cliente-busca" oninput="renderClienteList()" placeholder="Nome, CNPJ, código...">
-          </div>
-          <div class="cad-chip-row">
-            <button id="cli-filtro-ativos" onclick="setCliFiltro('Sim')" class="cad-chip"><span class="cad-chip-dot" style="background:#16a34a"></span>Ativos</button>
-            <button id="cli-filtro-inativos" onclick="setCliFiltro('Não')" class="cad-chip"><span class="cad-chip-dot" style="background:#f87171"></span>Inativos</button>
-            <button id="cli-filtro-todos" onclick="setCliFiltro('')" class="cad-chip on"><span class="cad-chip-dot" style="background:#94a3b8"></span>Todos</button>
-          </div>
-          <div class="cad-kpi-row">
-            <span>Ativos <b style="color:#16a34a" id="cli-kpi-ativos">0</b></span>
-            <span>Inativos <b style="color:#dc2626" id="cli-kpi-inativos">0</b></span>
-            <span>Total <b style="color:#1e293b" id="cli-kpi-total">0</b></span>
-          </div>
-          <button type="button" onclick="cadToggleMaisFiltros('cli-filtros-extra','cli-mf-txt','cli-mf-chev')" class="cad-mf-btn">
-            <i class="ti ti-filter"></i><span id="cli-mf-txt">Mais filtros</span><i id="cli-mf-chev" class="ti ti-chevron-down"></i>
-          </button>
-        </div>
-        <div id="cli-filtros-extra" class="cad-filtros-extra">
-          <div class="cad-filtro-campo">
-            <span>Ordenar</span>
-            <select id="cliente-ordem" onchange="renderClienteList()"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
-          </div>
+      <div class="pg-two-col">
+        <div class="pg-side">
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Busca rápida</div>
+        <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="cliente-busca" oninput="renderClienteList()" placeholder="Nome, CNPJ, código..."></div>
+      </div>
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Status</div>
+        <div class="pg-chip-col">
+          <button id="cli-filtro-ativos" onclick="setCliFiltro('Sim')" class="pg-chip"><span class="pg-chip-dot" style="background:#16a34a"></span>Ativos</button>
+          <button id="cli-filtro-inativos" onclick="setCliFiltro('Não')" class="pg-chip"><span class="pg-chip-dot" style="background:#f87171"></span>Inativos</button>
+          <button id="cli-filtro-todos" onclick="setCliFiltro('')" class="pg-chip on"><span class="pg-chip-dot" style="background:#94a3b8"></span>Todos</button>
         </div>
       </div>
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Ordenar</div>
+        <select id="cliente-ordem" onchange="renderClienteList()" class="pg-side-sel"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="cidade">Cidade</option></select>
+      </div>
+      <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Ativos</span><span style="font-weight:700;color:#16a34a" id="cli-kpi-ativos">0</span></div>
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Inativos</span><span style="font-weight:700;color:#dc2626" id="cli-kpi-inativos">0</span></div>
+        <div style="height:0.5px;background:#e2e8f0;margin:4px 0"></div>
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="cli-kpi-total">0</span></div>
+      </div>
+        </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>C&#243;digo</span><span>Cliente</span><span>Raz&#227;o Social</span><span>CNPJ</span><span>Cidade / UF</span><span>Categoria</span><span style="text-align:center">Op&#231;&#245;es</span>
@@ -3000,6 +2955,7 @@
             </div>
           </div>
         </div>
+      </div>
       <input type="hidden" id="cliente-ativo-filtro" value="">
       <input type="hidden" id="cliente-dir" value="asc">
     </div>
@@ -3462,45 +3418,31 @@
         <input type="file" id="prod-import-file" accept=".xlsx,.xls" style="display:none" onchange="_prodImportarExcel(this)">
         <button onclick="showPage('page-produto-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
-      <div class="cad-filtros-bar">
-        <div class="cad-filtros-topo">
-          <div class="cad-filtros-busca">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="produto-busca" oninput="renderProdutoList()" placeholder="Nome ou código...">
-          </div>
-          <div class="cad-chip-row">
-            <button id="prod-filtro-ativos" onclick="setProdFiltro('Sim')" class="cad-chip"><span class="cad-chip-dot" style="background:#16a34a"></span>Ativos</button>
-            <button id="prod-filtro-inativos" onclick="setProdFiltro('Não')" class="cad-chip"><span class="cad-chip-dot" style="background:#f87171"></span>Inativos</button>
-            <button id="prod-filtro-todos" onclick="setProdFiltro('')" class="cad-chip on"><span class="cad-chip-dot" style="background:#94a3b8"></span>Todos</button>
-          </div>
-          <div class="cad-kpi-row">
-            <span>Ativos <b style="color:#16a34a" id="prod-kpi-ativos">0</b></span>
-            <span>Inativos <b style="color:#dc2626" id="prod-kpi-inativos">0</b></span>
-            <span>Total <b style="color:#1e293b" id="prod-kpi-total">0</b></span>
-          </div>
-          <button type="button" onclick="cadToggleMaisFiltros('prod-filtros-extra','prod-mf-txt','prod-mf-chev')" class="cad-mf-btn">
-            <i class="ti ti-filter"></i><span id="prod-mf-txt">Mais filtros</span><i id="prod-mf-chev" class="ti ti-chevron-down"></i>
-          </button>
-        </div>
-        <div id="prod-filtros-extra" class="cad-filtros-extra">
-          <div class="cad-filtro-campo">
-            <span>Fornecedor</span>
-            <select id="produto-filtro-fornecedor" onchange="renderProdutoList()"><option value="">Todos</option></select>
-          </div>
-          <div class="cad-filtro-campo">
-            <span>Categoria</span>
-            <select id="produto-filtro-categoria" onchange="_prodListAtualizarSubcategorias()"><option value="">Todas</option></select>
-          </div>
-          <div class="cad-filtro-campo">
-            <span>Subcategoria</span>
-            <select id="produto-filtro-subcategoria" onchange="renderProdutoList()"><option value="">Todas</option></select>
-          </div>
-          <div class="cad-filtro-campo">
-            <span>Ordenar</span>
-            <select id="produto-ordem" onchange="renderProdutoList()"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="fornecedor">Fornecedor</option></select>
-          </div>
+      <div class="pg-two-col">
+        <div class="pg-side">
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Busca rápida</div>
+        <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="produto-busca" oninput="renderProdutoList()" placeholder="Nome ou código..."></div>
+      </div>
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Status</div>
+        <div class="pg-chip-col">
+          <button id="prod-filtro-ativos" onclick="setProdFiltro('Sim')" class="pg-chip"><span class="pg-chip-dot" style="background:#16a34a"></span>Ativos</button>
+          <button id="prod-filtro-inativos" onclick="setProdFiltro('Não')" class="pg-chip"><span class="pg-chip-dot" style="background:#f87171"></span>Inativos</button>
+          <button id="prod-filtro-todos" onclick="setProdFiltro('')" class="pg-chip on"><span class="pg-chip-dot" style="background:#94a3b8"></span>Todos</button>
         </div>
       </div>
+      <div class="pg-side-sec">
+        <div class="pg-side-lbl">Ordenar</div>
+        <select id="produto-ordem" onchange="renderProdutoList()" class="pg-side-sel"><option value="nome">Nome A&#8594;Z</option><option value="codigo">C&#243;digo</option><option value="fornecedor">Fornecedor</option></select>
+      </div>
+      <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Ativos</span><span style="font-weight:700;color:#16a34a" id="prod-kpi-ativos">0</span></div>
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Inativos</span><span style="font-weight:700;color:#dc2626" id="prod-kpi-inativos">0</span></div>
+        <div style="height:0.5px;background:#e2e8f0;margin:4px 0"></div>
+        <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Total</span><span style="font-weight:700;color:#fff" id="prod-kpi-total">0</span></div>
+      </div>
+        </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div style="display:grid;grid-template-columns:80px 70px 1fr 60px 80px 140px 80px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>C&#243;digo</span><span></span><span>Produto</span><span>Un.</span><span>Qtde</span><span>Fornecedor</span><span style="text-align:center">Op&#231;&#245;es</span>
@@ -3516,6 +3458,7 @@
             </div>
           </div>
         </div>
+      </div>
       <input type="hidden" id="produto-ativo-filtro" value="">
       <input type="hidden" id="produto-dir" value="asc">
     </div>
@@ -4316,78 +4259,72 @@
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
         <button onclick="showPage('page-sku-clientes-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Novo SKU</button>
       </div>
-      <div class="cad-filtros-bar">
-        <div class="cad-filtros-topo">
-          <div class="cad-filtros-busca">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="sku-busca" oninput="renderSkuList()" placeholder="SKU, produto, cliente...">
+      <div class="pg-two-col">
+        <div class="pg-side">
+          <div class="pg-side-sec">
+            <div class="pg-side-lbl">Busca rápida</div>
+            <div class="pg-side-srch"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="sku-busca" oninput="renderSkuList()" placeholder="SKU, produto, cliente..."></div>
           </div>
-          <div class="cad-kpi-row">
-            <span>Registros <b style="color:#1e293b" id="sku-kpi-total">0</b></span>
-          </div>
-          <button type="button" onclick="cadToggleMaisFiltros('sku-filtros-extra','sku-mf-txt','sku-mf-chev')" class="cad-mf-btn">
-            <i class="ti ti-filter"></i><span id="sku-mf-txt">Mais filtros</span><i id="sku-mf-chev" class="ti ti-chevron-down"></i>
-          </button>
-        </div>
-        <div id="sku-filtros-extra" class="cad-filtros-extra">
-          <div class="cad-filtro-campo">
-            <span>Fornecedor</span>
-            <select id="sku-filtro-forn" onchange="renderSkuList()"><option value="">Todos</option></select>
+          <div class="pg-side-sec">
+            <div class="pg-side-lbl">Fornecedor</div>
+            <select id="sku-filtro-forn" onchange="renderSkuList()" class="pg-side-sel"><option value="">Todos</option></select>
           </div>
           <!-- Tipo: Rede | Cliente -->
-          <div class="cad-filtro-campo" style="min-width:220px">
-            <span>Tipo</span>
+          <div class="pg-side-sec">
+            <div class="pg-side-lbl">Tipo</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
               <div id="sku-fil-btn-rede" onclick="skuFilSetTipo('rede')"
-                style="padding:7px 6px;border-radius:9px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1.5px solid #272A4A;background:#272A4A;color:#fff;display:flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box">
-                <span id="sku-fil-ck-rede" style="width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.25);display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">✓</span>Rede
+                style="padding:7px 6px;border-radius:9px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1.5px solid #fff;background:#fff;color:#272A4A;display:flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box">
+                <span id="sku-fil-ck-rede" style="width:12px;height:12px;border-radius:3px;background:rgba(39,42,74,.15);display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">✓</span>Rede
               </div>
               <div id="sku-fil-btn-cli" onclick="skuFilSetTipo('cliente')"
-                style="padding:7px 6px;border-radius:9px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;display:flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box">
-                <span id="sku-fil-ck-cli" style="width:12px;height:12px;border-radius:3px;border:1.5px solid #cbd5e1;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"></span>Cliente
+                style="padding:7px 6px;border-radius:9px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;gap:4px;box-sizing:border-box">
+                <span id="sku-fil-ck-cli" style="width:12px;height:12px;border-radius:3px;border:1.5px solid rgba(255,255,255,.25);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"></span>Cliente
               </div>
             </div>
             <input type="hidden" id="sku-fil-tipo" value="rede">
           </div>
 
           <!-- Busca de Rede -->
-          <div id="sku-fil-rede-wrap" class="cad-filtro-campo" style="min-width:200px">
-            <span>Rede / Categoria</span>
+          <div id="sku-fil-rede-wrap" class="pg-side-sec">
+            <div class="pg-side-lbl">Rede / Categoria</div>
             <div style="position:relative">
               <input id="sku-fil-rede-txt" type="text" placeholder="Buscar rede..." autocomplete="off"
                 oninput="skuFilFiltrarRede(this.value)"
                 onblur="setTimeout(function(){var d=document.getElementById('sku-fil-rede-drop');if(d)d.style.display='none';},200)"
-                style="font-size:12.5px;padding:6px 8px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#1e293b;width:100%;outline:none;box-sizing:border-box">
+                style="font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;width:100%;outline:none;box-sizing:border-box">
               <div id="sku-fil-rede-drop" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 3px);background:#fff;border-radius:9px;z-index:9999;max-height:160px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.22)"></div>
             </div>
           </div>
 
           <!-- Busca de Cliente -->
-          <div id="sku-fil-cli-wrap" class="cad-filtro-campo" style="display:none;min-width:200px">
-            <span>Cliente</span>
+          <div id="sku-fil-cli-wrap" class="pg-side-sec" style="display:none">
+            <div class="pg-side-lbl">Cliente</div>
             <div style="position:relative">
               <input id="sku-fil-cli-txt" type="text" placeholder="Buscar cliente..." autocomplete="off"
                 oninput="skuFilFiltrarCli(this.value)"
                 onblur="setTimeout(function(){var d=document.getElementById('sku-fil-cli-drop');if(d)d.style.display='none';},200)"
-                style="font-size:12.5px;padding:6px 8px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#1e293b;width:100%;outline:none;box-sizing:border-box">
+                style="font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;width:100%;outline:none;box-sizing:border-box">
               <div id="sku-fil-cli-drop" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 3px);background:#fff;border-radius:9px;z-index:9999;max-height:160px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.22)"></div>
             </div>
           </div>
 
           <!-- ID oculto do filtro selecionado -->
           <input type="hidden" id="sku-fil-cli-id" value="">
-          <div class="cad-filtro-campo" style="min-width:260px">
-            <span>Forma de compra</span>
-            <div class="cad-chip-row">
-              <button id="sku-f-all" onclick="skuSetForma('')"    class="cad-chip on">Todas</button>
-              <button id="sku-f-kg"  onclick="skuSetForma('KG')"  class="cad-chip">KG</button>
-              <button id="sku-f-cx"  onclick="skuSetForma('CX')"  class="cad-chip">CX</button>
-              <button id="sku-f-und" onclick="skuSetForma('UND')" class="cad-chip">UN</button>
-              <button id="sku-f-pc"  onclick="skuSetForma('PC')"  class="cad-chip">PC</button>
+          <div class="pg-side-sec">
+            <div class="pg-side-lbl">Forma de compra</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+              <button id="sku-f-all" onclick="skuSetForma('')"    class="pg-chip on" style="grid-column:1/-1;justify-content:center">Todas</button>
+              <button id="sku-f-kg"  onclick="skuSetForma('KG')"  class="pg-chip" style="justify-content:center">KG</button>
+              <button id="sku-f-cx"  onclick="skuSetForma('CX')"  class="pg-chip" style="justify-content:center">CX</button>
+              <button id="sku-f-und" onclick="skuSetForma('UND')" class="pg-chip" style="justify-content:center">UN</button>
+              <button id="sku-f-pc"  onclick="skuSetForma('PC')"  class="pg-chip" style="justify-content:center">PC</button>
             </div>
           </div>
+          <div class="pg-side-sec" style="background:rgba(0,0,0,.15)">
+            <div class="pg-stat-row"><span style="color:rgba(255,255,255,.5)">Registros</span><span style="font-weight:700;color:#fff" id="sku-kpi-total">0</span></div>
+          </div>
         </div>
-      </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div id="sku-tbody-header" style="display:flex;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center;gap:4px">
             <span style="flex:1">Fornecedor</span><span style="flex:1">Rede / Cliente</span><span style="flex:1">Produto</span><span style="width:130px;flex-shrink:0">SKU Cliente</span><span style="width:70px;flex-shrink:0">Forma</span><span style="width:80px;flex-shrink:0;text-align:center">Opções</span>
@@ -4398,6 +4335,7 @@
             <div style="display:flex;gap:3px" id="sku-pag-btns"></div>
           </div>
         </div>
+      </div>
       <input type="hidden" id="sku-forma-filtro" value="">
     </div>
 
@@ -13490,15 +13428,6 @@ function pedResolverPrecoNegociado(fornId, prodId, clienteId) {
 
 
 let _prodFiltroAtivo = '';
-// Generica -- abre/fecha a linha retratil "Mais filtros" das telas de Cadastros.
-function cadToggleMaisFiltros(extraId, txtId, chevId) {
-  var box = document.getElementById(extraId);
-  if (!box) return;
-  var abrir = box.style.display === 'none' || !box.style.display;
-  box.style.display = abrir ? 'flex' : 'none';
-  var txt = document.getElementById(txtId); if (txt) txt.textContent = abrir ? 'Menos filtros' : 'Mais filtros';
-  var chev = document.getElementById(chevId); if (chev) chev.className = abrir ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
-}
 function setProdFiltro(val) {
   _prodFiltroAtivo = val;
   const btnT = document.getElementById('prod-filtro-todos');
@@ -13510,37 +13439,10 @@ function setProdFiltro(val) {
   renderProdutoList();
 }
 
-// Popula os selects de Fornecedor/Categoria da barra de filtros na 1a vez que a tela renderiza
-// (idempotente: so preenche se ainda estiver so com a opcao "Todos"/"Todas").
-function _prodListPopularFiltrosSeVazio() {
-  const selForn = document.getElementById('produto-filtro-fornecedor');
-  if (selForn && selForn.options.length <= 1) {
-    const forns = getFornecedores().slice().sort((a,b) => (a.nome_fantasia||a.razao_social||'').localeCompare((b.nome_fantasia||b.razao_social||''),'pt-BR'));
-    selForn.innerHTML = '<option value="">Todos</option>' + forns.map(f => '<option value="' + f.id + '">' + _pedEsc(f.nome_fantasia||f.razao_social||'') + '</option>').join('');
-  }
-  const selCat = document.getElementById('produto-filtro-categoria');
-  if (selCat && selCat.options.length <= 1) {
-    const cats = getCatProdutos().filter(c => !c.pai).slice().sort((a,b) => (a.nome||'').localeCompare((b.nome||''),'pt-BR'));
-    selCat.innerHTML = '<option value="">Todas</option>' + cats.map(c => '<option value="' + c.id + '">' + _pedEsc(c.nome||'') + '</option>').join('');
-  }
-}
-// Cascata: repopula Subcategoria conforme a Categoria escolhida na barra de filtros.
-function _prodListAtualizarSubcategorias() {
-  const catId = document.getElementById('produto-filtro-categoria')?.value || '';
-  const subSel = document.getElementById('produto-filtro-subcategoria');
-  if (!subSel) return;
-  const subs = catId ? getCatProdutos().filter(c => String(c.pai) === String(catId)) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(c => '<option value="' + c.id + '">' + _pedEsc(c.nome||'') + '</option>').join('');
-  renderProdutoList();
-}
 function renderProdutoList() {
-  _prodListPopularFiltrosSeVazio();
   const data  = getProdutos();
   const busca = (document.getElementById('produto-busca')?.value||'').toLowerCase();
   const ordem = document.getElementById('produto-ordem')?.value||'nome';
-  const fFornecedor = document.getElementById('produto-filtro-fornecedor')?.value || '';
-  const fCategoria = document.getElementById('produto-filtro-categoria')?.value || '';
-  const fSubcategoria = document.getElementById('produto-filtro-subcategoria')?.value || '';
   const tbody = document.getElementById('produto-tbody');
   const pag   = document.getElementById('produto-paginacao');
   if (!tbody) return;
@@ -13551,10 +13453,7 @@ function renderProdutoList() {
       || (r.codigo||'').toLowerCase().includes(busca)
       || (r.ean||'').toLowerCase().includes(busca);
     const matchAtivo = !_prodFiltroAtivo || (r.ativo||'Sim') === _prodFiltroAtivo;
-    const matchForn = !fFornecedor || String(r.fornecedor||'') === String(fFornecedor);
-    const matchCat = !fCategoria || String(r.categoria||'') === String(fCategoria);
-    const matchSub = !fSubcategoria || String(r.subcategoria||'') === String(fSubcategoria);
-    return matchBusca && matchAtivo && matchForn && matchCat && matchSub;
+    return matchBusca && matchAtivo;
   });
 
   rows.sort((a,b) => (a[ordem]||'').toLowerCase().localeCompare((b[ordem]||'').toLowerCase(),'pt-BR'));
@@ -16968,17 +16867,17 @@ function skuFilSetTipo(tipo) {
   var hidId   = document.getElementById('sku-fil-cli-id');
 
   if (tipo === 'rede') {
-    if (btnRede) { btnRede.style.border='1.5px solid #272A4A'; btnRede.style.background='#272A4A'; btnRede.style.color='#fff'; }
-    if (btnCli)  { btnCli.style.border='1.5px solid #e2e8f0'; btnCli.style.background='#f8fafc'; btnCli.style.color='#64748b'; }
-    if (ckRede)  { ckRede.style.background='rgba(255,255,255,.25)'; ckRede.style.border='none'; ckRede.textContent='✓'; }
-    if (ckCli)   { ckCli.style.background='transparent'; ckCli.style.border='1.5px solid #cbd5e1'; ckCli.textContent=''; }
+    if (btnRede) { btnRede.style.border='1.5px solid #fff'; btnRede.style.background='#fff'; btnRede.style.color='#272A4A'; }
+    if (btnCli)  { btnCli.style.border='1.5px solid rgba(255,255,255,.15)'; btnCli.style.background='rgba(255,255,255,.06)'; btnCli.style.color='rgba(255,255,255,.4)'; }
+    if (ckRede)  { ckRede.style.background='rgba(39,42,74,.15)'; ckRede.textContent='✓'; }
+    if (ckCli)   { ckCli.style.border='1.5px solid rgba(255,255,255,.25)'; ckCli.textContent=''; }
     if (wRede)   wRede.style.display='';
     if (wCli)    wCli.style.display='none';
   } else {
-    if (btnCli)  { btnCli.style.border='1.5px solid #272A4A'; btnCli.style.background='#272A4A'; btnCli.style.color='#fff'; }
-    if (btnRede) { btnRede.style.border='1.5px solid #e2e8f0'; btnRede.style.background='#f8fafc'; btnRede.style.color='#64748b'; }
-    if (ckCli)   { ckCli.style.background='rgba(255,255,255,.25)'; ckCli.style.border='none'; ckCli.textContent='✓'; }
-    if (ckRede)  { ckRede.style.background='transparent'; ckRede.style.border='1.5px solid #cbd5e1'; ckRede.textContent=''; }
+    if (btnCli)  { btnCli.style.border='1.5px solid #fff'; btnCli.style.background='#fff'; btnCli.style.color='#272A4A'; }
+    if (btnRede) { btnRede.style.border='1.5px solid rgba(255,255,255,.15)'; btnRede.style.background='rgba(255,255,255,.06)'; btnRede.style.color='rgba(255,255,255,.4)'; }
+    if (ckCli)   { ckCli.style.background='rgba(39,42,74,.15)'; ckCli.style.border='none'; ckCli.textContent='✓'; }
+    if (ckRede)  { ckRede.style.background='transparent'; ckRede.style.border='1.5px solid rgba(255,255,255,.25)'; ckRede.textContent=''; }
     if (wCli)    wCli.style.display='';
     if (wRede)   wRede.style.display='none';
   }
