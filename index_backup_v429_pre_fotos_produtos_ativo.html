@@ -9962,7 +9962,7 @@ function fpAbrirSub(id) {
   _fpRender();
 }
 
-function _fpProdutosForn(fornId)       { return getProdutos().filter(function(p){ return p.fornecedor === fornId && (p.ativo||'Sim') !== 'Não'; }); }
+function _fpProdutosForn(fornId)       { return getProdutos().filter(function(p){ return p.fornecedor === fornId; }); }
 function _fpProdutosCat(fornId, catId) { return _fpProdutosForn(fornId).filter(function(p){ return p.categoria == catId; }); }
 function _fpProdutosSub(fornId, catId, subId) {
   const base = _fpProdutosCat(fornId, catId);
@@ -10031,7 +10031,7 @@ function _fpRender() {
     const fornecedoresBusca = getFornecedores();
     const catsProdBusca = getCatProdutos();
     const encontrados = getProdutos().filter(function (p) {
-      return (p.ativo||'Sim') !== 'Não' && ((p.nome || '').toLowerCase().includes(busca) || (p.codigo || '').toLowerCase().includes(busca));
+      return (p.nome || '').toLowerCase().includes(busca) || (p.codigo || '').toLowerCase().includes(busca);
     });
     const comFotoBusca = encontrados.filter(function (p) { return p.foto; }).length;
     if (kT) kT.textContent = encontrados.length;
@@ -10073,7 +10073,7 @@ function _fpRender() {
   if (window._fpNivel === 'forn') {
     if (buscaInput) buscaInput.placeholder = 'Pesquisar fornecedor...';
     const fornecedores = getFornecedores();
-    const produtos = getProdutos().filter(function(p){ return (p.ativo||'Sim') !== 'Não'; });
+    const produtos = getProdutos();
     let comFotoForn = 0;
     fornecedores.forEach(function(f){ if (produtos.some(function(p){ return p.fornecedor === f.id && p.foto; })) comFotoForn++; });
     if (kT) kT.textContent = fornecedores.length;
