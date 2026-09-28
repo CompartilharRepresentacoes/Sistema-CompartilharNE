@@ -3493,7 +3493,7 @@
               <div style="display:flex;gap:14px;align-items:flex-start">
                 <!-- Foto -->
                 <div style="display:flex;flex-direction:column;align-items:center;gap:7px;flex-shrink:0">
-                  <div id="prod-foto-preview" ondragover="_prodFotoDragOver(event)" ondragenter="_prodFotoDragOver(event)" ondragleave="_prodFotoDragLeave(event)" ondrop="_prodFotoDrop(event)" style="width:80px;height:80px;border:2px dashed #93c5fd;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden">
+                  <div id="prod-foto-preview" style="width:80px;height:80px;border:2px dashed #93c5fd;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden">
                     <span id="prod-foto-placeholder"><i class="ti ti-photo" style="font-size:24px;color:#cbd5e1"></i></span>
                     <img id="prod-foto-img" style="display:none;width:100%;height:100%;object-fit:contain">
                   </div>
@@ -13814,12 +13814,7 @@ function _prodImportarExcel(input) {
 }
 
 function previewProdFoto(input) {
-  _prodProcessarFotoArquivo(input.files && input.files[0]);
-}
-// Processa um arquivo de imagem (vindo do <input> ou de um drag-and-drop) e carrega no preview.
-function _prodProcessarFotoArquivo(file) {
-  if (!file) return;
-  if (file.type && file.type.indexOf('image/') !== 0) { alert('Selecione um arquivo de imagem.'); return; }
+  const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = async e => {
     const fotoComprimida = await _comprimirImagem(e.target.result);
@@ -13828,21 +13823,6 @@ function _prodProcessarFotoArquivo(file) {
     document.getElementById('prod-foto-placeholder').style.display='none';
   };
   reader.readAsDataURL(file);
-}
-function _prodFotoDragOver(ev) {
-  ev.preventDefault();
-  var zone = document.getElementById('prod-foto-preview');
-  if (zone) { zone.style.borderColor = '#DE7926'; zone.style.background = '#fff7ed'; }
-}
-function _prodFotoDragLeave(ev) {
-  ev.preventDefault();
-  var zone = document.getElementById('prod-foto-preview');
-  if (zone) { zone.style.borderColor = '#93c5fd'; zone.style.background = '#f8fafc'; }
-}
-function _prodFotoDrop(ev) {
-  ev.preventDefault();
-  _prodFotoDragLeave(ev);
-  _prodProcessarFotoArquivo(ev.dataTransfer.files && ev.dataTransfer.files[0]);
 }
 function removerProdFoto() {
   const img = document.getElementById('prod-foto-img');
