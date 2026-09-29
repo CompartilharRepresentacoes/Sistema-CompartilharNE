@@ -22390,8 +22390,7 @@ function _prRenderRedes() {
 
   var anosExistentes = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId); }).map(function (r) { return r.ano; });
   var anosSet = {};
-  for (var _prA = 2020; _prA <= _prAnoSel + 2; _prA++) { anosSet[_prA] = true; }
-  anosExistentes.concat([_prAnoSel]).forEach(function (a) { anosSet[a] = true; });
+  [_prAnoSel - 1, _prAnoSel, _prAnoSel + 1, _prAnoSel + 2].concat(anosExistentes).forEach(function (a) { anosSet[a] = true; });
   var anosOrdenados = Object.keys(anosSet).map(Number).sort(function (a, b) { return a - b; });
   var anoBarHtml = '<div style="display:flex;justify-content:flex-end;margin-bottom:14px">' +
     '<div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:6px 10px">' +
@@ -22621,9 +22620,12 @@ function _prAbrirCadastrarNegociacao() {
   document.getElementById('pr-sr-titulo').textContent = 'Cadastrar Negociação';
   var redes = getCatClientes().filter(function (c) { return !c.pai; }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
   var redeOpts = '<option value="">Selecione...</option>' + redes.map(function (rd) { return '<option value="' + rd.id + '">' + _prEsc(rd.nome) + '</option>'; }).join('');
+  var anosSet = {};
+  [_prAnoSel - 1, _prAnoSel, _prAnoSel + 1, _prAnoSel + 2].forEach(function (a) { anosSet[a] = true; });
+  var anoOpts = Object.keys(anosSet).map(Number).sort(function (a, b) { return a - b; }).map(function (a) { return '<option value="' + a + '"' + (a === _prAnoSel ? ' selected' : '') + '>' + a + '</option>'; }).join('');
   document.getElementById('pr-sr-corpo').innerHTML =
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px dashed #e2e8f0">' +
-    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Ano</label><input type="number" step="1" min="2020" class="form-input" id="pr-sr-ano-novo" value="' + _prAnoSel + '" style="width:100%"></div>' +
+    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Ano</label><select class="form-input" id="pr-sr-ano-novo" style="width:100%">' + anoOpts + '</select></div>' +
     '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Rede</label><select class="form-input" id="pr-sr-rede-novo" style="width:100%" onchange="_prAoTrocarRedeCadastro()">' + redeOpts + '</select></div>' +
     '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Sub Rede</label><select class="form-input" id="pr-sr-subrede-novo" style="width:100%" disabled><option value="">Selecione a Rede primeiro</option></select></div>' +
     '</div>' +
