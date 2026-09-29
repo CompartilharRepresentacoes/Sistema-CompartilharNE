@@ -22377,7 +22377,7 @@ function _prRenderFabricas() {
 
 // ── Tela 2: Redes de uma Fábrica ──
 function _prCampoResumo(titulo, valor) {
-  return '<div><div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase">' + _prEsc(titulo) + '</div><div style="font-size:14.5px;font-weight:700;color:#1e293b;margin-top:2px">' + _prEsc(valor) + '</div></div>';
+  return '<div><div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase">' + _prEsc(titulo) + '</div><div style="font-size:12.5px;font-weight:700;color:#1e293b;margin-top:2px">' + _prEsc(valor) + '</div></div>';
 }
 
 function _prToggleRedeAccordion(redeId) {
@@ -22469,10 +22469,10 @@ function _prRenderRedes() {
 
     var headerHtml = '<div onclick="_prToggleRedeAccordion(\'' + rede.id + '\')" style="display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid #f1f5f9;cursor:pointer;background:' + (aberta ? '#f8fafc' : '#fff') + '">' +
       '<i class="ti ti-chevron-' + (aberta ? 'down' : 'right') + '" style="font-size:13px;color:' + (aberta ? '#272A4A' : '#94a3b8') + ';margin-right:10px"></i>' +
-      '<span style="flex:1;font-weight:700;color:#1e293b;font-size:16px">' + _prEsc(rede.nome) + '</span>' +
-      '<span style="font-size:14px;color:#64748b;margin-right:24px">' + subsCat.length + ' Sub Rede' + (subsCat.length === 1 ? '' : 's') + '</span>' +
-      '<span style="width:110px;text-align:right;font-size:14.5px;font-weight:700">' + (volFech ? _prFmtKg(volFech) + ' kg' : '—') + '</span>' +
-      '<span style="width:130px;text-align:right;color:#16a34a;font-weight:700;font-size:14.5px">' + (fat ? _prFmtMoeda(fat) : '—') + '</span>' +
+      '<span style="flex:1;font-weight:700;color:#1e293b;font-size:14px">' + _prEsc(rede.nome) + '</span>' +
+      '<span style="font-size:12.5px;color:#64748b;margin-right:24px">' + subsCat.length + ' Sub Rede' + (subsCat.length === 1 ? '' : 's') + '</span>' +
+      '<span style="width:110px;text-align:right;font-size:12.5px;font-weight:700">' + (volFech ? _prFmtKg(volFech) + ' kg' : '—') + '</span>' +
+      '<span style="width:130px;text-align:right;color:#16a34a;font-weight:700;font-size:12.5px">' + (fat ? _prFmtMoeda(fat) : '—') + '</span>' +
       '<i class="ti ti-trash" title="Excluir rede" onclick="event.stopPropagation();_prConfirmarExcluirRede(\'' + rede.id + '\',\'' + _prEsc(rede.nome) + '\')" style="font-size:14px;color:#dc2626;cursor:pointer;margin-left:16px"></i>' +
       '</div>';
 
@@ -22485,10 +22485,10 @@ function _prRenderRedes() {
 
         var subHeader = '<div onclick="_prToggleSubRedeAccordion(\'' + sub.id + '\')" style="display:flex;align-items:center;padding:12px 18px 12px 46px;border-bottom:1px solid #f8fafc;cursor:pointer;background:' + (subAberta ? '#eef1f8' : '#fff') + '">' +
           '<i class="ti ti-chevron-' + (subAberta ? 'down' : 'right') + '" style="font-size:12px;color:' + (subAberta ? '#272A4A' : '#94a3b8') + ';margin-right:10px"></i>' +
-          '<span style="flex:1;font-weight:600;color:#334155;font-size:14.5px">' + _prEsc(sub.nome) + '</span>' +
+          '<span style="flex:1;font-weight:600;color:#334155;font-size:13px">' + _prEsc(sub.nome) + '</span>' +
           (r ? '<span style="margin-right:16px">' + _prBadgeSituacao(r.situacao) + '</span>' : '') +
-          '<span style="width:110px;text-align:right;font-size:13.5px;font-weight:700">' + (r && r.volFechado ? _prFmtKg(r.volFechado) + ' kg' : '—') + '</span>' +
-          '<span style="width:130px;text-align:right;color:#16a34a;font-weight:700;font-size:13.5px">' + (fatSub ? _prFmtMoeda(fatSub) : '—') + '</span>' +
+          '<span style="width:110px;text-align:right;font-size:12px;font-weight:700">' + (r && r.volFechado ? _prFmtKg(r.volFechado) + ' kg' : '—') + '</span>' +
+          '<span style="width:130px;text-align:right;color:#16a34a;font-weight:700;font-size:12px">' + (fatSub ? _prFmtMoeda(fatSub) : '—') + '</span>' +
           (r ? '<i class="ti ti-trash" title="Excluir sub-rede" onclick="event.stopPropagation();_prRemoverSubRede(\'' + r.id + '\')" style="font-size:13px;color:#dc2626;cursor:pointer;margin-left:16px"></i>' : '<span style="width:13px;display:inline-block;margin-left:16px"></span>') +
           '</div>';
 
@@ -22502,7 +22502,7 @@ function _prRenderRedes() {
           } else {
             resumoHtml += '<div style="font-size:12px;color:#94a3b8">Ainda não há negociação cadastrada para "' + _prEsc(sub.nome) + '".</div>';
           }
-          resumoHtml += '<div style="margin-left:auto"><button onclick="_prAbrirModalSubRede(\'' + sub.id + '\')" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer"><i class="ti ti-edit" style="font-size:13px;vertical-align:-2px;margin-right:4px"></i>' + (r ? 'Editar negociação' : 'Cadastrar negociação') + '</button></div>';
+          resumoHtml += '<div style="margin-left:auto"><button onclick="_prAbrirModalSubRede(\'' + sub.id + '\')" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer"><i class="ti ti-edit" style="font-size:12px;vertical-align:-2px;margin-right:4px"></i>' + (r ? 'Editar negociação' : 'Cadastrar negociação') + '</button></div>';
           resumoHtml += '</div>';
 
           subCorpo = '<div style="padding:16px 18px 20px 46px;background:#fbfcff">' + resumoHtml + _prConstruirTabelaLojasHtml(_prFabricaId, rede.id, sub.id) + '</div>';
@@ -22835,14 +22835,14 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
 
   return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
     '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;flex-wrap:wrap;gap:10px">' +
-    '<div style="font-size:15px;font-weight:700;color:#1e293b">Lojas <span style="font-weight:400;color:#94a3b8;font-size:12.5px">(' + clientes.length + ' lojas)</span></div>' +
+    '<div style="font-size:13px;font-weight:700;color:#1e293b">Lojas <span style="font-weight:400;color:#94a3b8;font-size:11px">(' + clientes.length + ' lojas)</span></div>' +
     '<div style="display:flex;gap:8px;align-items:center">' +
     '<div style="position:relative"><i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:#94a3b8"></i>' +
-    '<input type="text" placeholder="Filtrar loja..." oninput="_prFiltrarLojas(this.value)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 10px 6px 28px;font-size:13.5px;width:180px"></div>' +
-    '<button onclick="_prAbrirIncluirLoja()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Incluir Loja</button>' +
+    '<input type="text" placeholder="Filtrar loja..." oninput="_prFiltrarLojas(this.value)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 10px 6px 28px;font-size:12px;width:180px"></div>' +
+    '<button onclick="_prAbrirIncluirLoja()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 13px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap"><i class="ti ti-plus" style="font-size:13px;vertical-align:-2px;margin-right:4px"></i>Incluir Loja</button>' +
     '</div></div>' +
-    '<div style="overflow-x:auto"><table style="width:auto;min-width:1080px;border-collapse:collapse;font-size:13px">' +
-    '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">' +
+    '<div style="overflow-x:auto"><table style="width:auto;min-width:1080px;border-collapse:collapse;font-size:11px">' +
+    '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">' +
     '<th style="padding:7px 9px;text-align:left">Loja (Cliente)</th>' +
     '<th style="padding:7px 9px;text-align:right">' + (_prAnoSel - 1) + '</th>' +
     '<th style="padding:7px 9px;text-align:right">Planejado</th>' +
