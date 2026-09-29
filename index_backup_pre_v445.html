@@ -22229,15 +22229,9 @@ function _prFmtMoedaCompacta(v) {
 }
 
 function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
-  if (!pontos || !pontos.length) {
-    return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:28px 24px;margin-bottom:18px;text-align:center">' +
-      '<div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px">' + _prEsc(titulo) + '</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,.5)">Nenhuma negociação cadastrada ainda — o gráfico aparece assim que houver dados.</div>' +
-      '</div>';
-  }
   var W = 600, H = 150, padTop = 22, padBottom = 8;
-  var maxKg = Math.max.apply(null, [1].concat(pontos.map(function (p) { return p.kg; })));
-  var maxRs = Math.max.apply(null, [1].concat(pontos.map(function (p) { return p.rs; })));
+  var maxKg = Math.max(1, pontos[0].kg, pontos[1].kg);
+  var maxRs = Math.max(1, pontos[0].rs, pontos[1].rs);
   var n = pontos.length;
   function xAt(i) { return n > 1 ? (i / (n - 1)) * W : 0; }
   function yKg(v) { return H - padBottom - (v / maxKg) * (H - padTop - padBottom); }
