@@ -22727,12 +22727,12 @@ function _prAbrirModalLojas(subRedeId) {
 }
 function _prFecharModalLojas() { document.getElementById('modal-pr-lojas').style.display = 'none'; }
 
-function _prCalcLoja(loja, precoFechadoNegociacao) {
+function _prCalcLoja(loja) {
   var pedidos = (loja && loja.pedidos) || [];
   var fatTotal = pedidos.reduce(function (s, p) { return s + (Number(p && p.faturado) || 0); }, 0);
   var fechado = loja ? Number(loja.fechado2026) || 0 : 0;
-  var precoUnit = Number(precoFechadoNegociacao) || 0;
-  return { fatTotal: fatTotal, saldo: fechado - fatTotal, valorTotal: precoUnit * fatTotal };
+  var valorUnit = loja ? Number(loja.valorUnitario) || 0 : 0;
+  return { fatTotal: fatTotal, saldo: fechado - fatTotal, valorTotal: valorUnit * fatTotal };
 }
 
 function _prObterClientesLoja(fornecedorId, redeId, subRedeId, ano) {
@@ -22759,13 +22759,11 @@ function _prObterClientesLoja(fornecedorId, redeId, subRedeId, ano) {
 function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
   var clientes = _prObterClientesLoja(fornecedorId, redeId, subRedeId, _prAnoSel);
   var lojasData = getPlanejamentoReinoLojas();
-  var registroNeg = getPlanejamentoReinoRedes().find(function (r) { return String(r.fornecedorId) === String(fornecedorId) && String(r.categoriaId) === String(redeId) && String(r.subcategoriaId) === String(subRedeId) && r.ano === _prAnoSel; });
-  var precoFechadoNeg = registroNeg ? registroNeg.precoFechado : null;
   var totFatTotal = 0, totValorTotal = 0;
 
   var linhas = clientes.map(function (cl) {
     var loja = lojasData.find(function (x) { return String(x.fornecedorId) === String(fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === _prAnoSel; });
-    var calc = _prCalcLoja(loja, precoFechadoNeg);
+    var calc = _prCalcLoja(loja);
     totFatTotal += calc.fatTotal;
     totValorTotal += calc.valorTotal;
     var pedidos = (loja && loja.pedidos) || [];
@@ -22782,7 +22780,7 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
       pedidosCells +
       '<td style="padding:8px 9px;text-align:right;font-weight:800">' + (calc.fatTotal ? _prFmtKg(calc.fatTotal) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:8px 9px;text-align:right;color:' + (calc.saldo < 0 ? '#dc2626' : '#15803d') + '">' + (loja ? _prFmtKg(calc.saldo) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
-      '<td style="padding:8px 9px;text-align:right">' + (precoFechadoNeg != null ? Number(precoFechadoNeg).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
+      '<td style="padding:8px 9px;text-align:right">' + (loja && loja.valorUnitario != null ? loja.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:8px 9px;text-align:right;color:#DE7926;font-weight:700">' + (calc.valorTotal ? _prFmtMoeda(calc.valorTotal) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:8px 9px;text-align:center"><i class="ti ti-edit" title="Editar" style="font-size:13px;color:#64748b;cursor:pointer;margin-right:12px" onclick="_prAbrirModalEdicaoLoja(\'' + cl.id + '\')"></i><i class="ti ti-trash" title="Remover loja" style="font-size:13px;color:#dc2626;cursor:pointer" onclick="_prConfirmarExcluirLoja(\'' + cl.id + '\',\'' + _prEsc(cl.nome_fantasia || cl.razao_social || '') + '\')"></i></td>' +
       '</tr>';
@@ -22899,14 +22897,9 @@ function _prAbrirModalEdicaoLoja(clienteId) {
   var cl = getClientes().find(function (c) { return String(c.id) === String(clienteId); });
   var loja = getPlanejamentoReinoLojas().find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(clienteId) && x.ano === _prAnoSel; });
   var pedidos = (loja && loja.pedidos) || [];
-  var registroNeg = getPlanejamentoReinoRedes().find(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && String(r.subcategoriaId) === String(_prLojasSubRedeId) && r.ano === _prAnoSel; });
-  var precoAntPrefill = (loja && loja.precoAnoAnterior != null) ? loja.precoAnoAnterior : (registroNeg && registroNeg.preco2025 != null ? registroNeg.preco2025 : null);
   document.getElementById('pr-lje-titulo').textContent = 'Editar loja — ' + (cl ? (cl.nome_fantasia || cl.razao_social) : '');
   var campoNum = function (id, label, val) {
     return '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">' + label + '</label><input type="number" step="0.01" class="form-input" id="' + id + '" value="' + (val == null ? '' : val) + '" style="width:100%"></div>';
-  };
-  var campoMoeda = function (id, label, val) {
-    return '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">' + label + '</label><input type="text" inputmode="decimal" class="form-input" id="' + id + '" value="' + (val != null ? _pedNumParaMascara(val) : '') + '" oninput="_pedMaskPreco(this)" placeholder="0,00" style="width:100%"></div>';
   };
   var pedidosHtml = '';
   for (var i = 0; i < 4; i++) {
@@ -22917,23 +22910,15 @@ function _prAbrirModalEdicaoLoja(clienteId) {
       '</div>';
   }
   document.getElementById('pr-lje-corpo').innerHTML =
-    '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:12px">' +
-    '<div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:8px">Faturamento ' + (_prAnoSel - 1) + '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
-    campoNum('pr-lje-venda2024', 'Kg', loja ? loja.venda2024 : '') +
-    campoMoeda('pr-lje-precoant', 'Preço (R$)', precoAntPrefill) +
-    '</div></div>' +
-    '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:12px">' +
-    '<div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:8px">Faturamento ' + _prAnoSel + '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">' +
+    campoNum('pr-lje-venda2024', (_prAnoSel - 1) + ' (kg)', loja ? loja.venda2024 : '') +
     campoNum('pr-lje-planejado', 'Planejado (kg)', loja ? loja.planejado : '') +
-    campoNum('pr-lje-fechado2026', 'Fechado (kg)', loja ? loja.fechado2026 : '') +
-    '</div></div>' +
-    '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:14px">' +
+    campoNum('pr-lje-fechado2026', 'Fechado ' + _prAnoSel + ' (kg)', loja ? loja.fechado2026 : '') +
+    '</div>' +
     '<div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:8px">Pedidos e Faturamentos (até 4)</div>' +
     pedidosHtml +
-    '</div>' +
-    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">' +
+    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Valor Unitário (R$)</label><input type="text" inputmode="decimal" class="form-input" id="pr-lje-valorunit" value="' + (loja && loja.valorUnitario != null ? _pedNumParaMascara(loja.valorUnitario) : '') + '" oninput="_pedMaskPreco(this)" placeholder="0,00" style="width:100%"></div>' +
+    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">' +
     '<button onclick="_prFecharModalEdicaoLoja()" style="background:#fff;color:#64748b;border:1px solid #cbd5e1;border-radius:7px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>' +
     '<button onclick="_prSalvarLoja()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer">Salvar</button>' +
     '</div>';
@@ -22958,10 +22943,10 @@ function _prSalvarLoja() {
     clienteId: _prLojaEditClienteId,
     ano: _prAnoSel,
     venda2024: num('pr-lje-venda2024'),
-    precoAnoAnterior: moedaLje('pr-lje-precoant'),
     planejado: num('pr-lje-planejado'),
     fechado2026: num('pr-lje-fechado2026'),
     pedidos: pedidos,
+    valorUnitario: moedaLje('pr-lje-valorunit'),
   };
   if (idx >= 0) data[idx] = obj; else data.push(obj);
   setPlanejamentoReinoLojas(data);
