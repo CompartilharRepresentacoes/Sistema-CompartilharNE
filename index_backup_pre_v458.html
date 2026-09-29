@@ -6269,6 +6269,20 @@
       </div>
     </div>
 
+    <!-- Modal Planejamento Reino: Incluir Loja (vinculo so do modulo Reino) -->
+    <div id="modal-pr-incluir-loja" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:10001;align-items:center;justify-content:center;padding:20px">
+      <div style="background:#fff;border-radius:12px;width:100%;max-width:520px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.3)">
+        <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+          <div id="pr-il-titulo" style="font-size:13px;font-weight:600;color:#fff">Incluir Loja</div>
+          <button onclick="_prFecharIncluirLoja()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:11px;cursor:pointer">Fechar &#10005;</button>
+        </div>
+        <div style="padding:16px 18px 10px;flex-shrink:0">
+          <input type="text" id="pr-il-busca" class="form-input" placeholder="Buscar cliente por nome..." oninput="_prBuscarClienteIncluir(this.value)" style="width:100%">
+        </div>
+        <div id="pr-il-lista" style="overflow-y:auto;padding:0 18px 16px;flex:1"></div>
+      </div>
+    </div>
+
     <!-- ═══════ OPERAÇÕES: Dados Representadas ═══════ -->
     <div id="page-dados-representadas" class="app-page">
       <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);border-radius:12px;padding:14px 20px;margin-bottom:12px">
@@ -7643,9 +7657,9 @@ if (firebaseConfigurado) {
 // funcionando exatamente como antes, direto no localStorage — nenhum código existente
 // precisa saber a diferença.
 // ═══════════════════════════════════════════════════
-var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas'];
-var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [], cat_clientes: [], cat_produtos: [], transportadoras: [], tabelas_preco: [], sku_clientes: [], negociacoes_preco: [], devolucoes: [], ocorrencias_entrega: [], bloqueios_produto: [], gruposAcesso: [], comandos_navegacao: [], metas: [], planejamento_reino_redes: [], planejamento_reino_lojas: [] };
-var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false, cat_clientes: false, cat_produtos: false, transportadoras: false, tabelas_preco: false, sku_clientes: false, negociacoes_preco: false, devolucoes: false, ocorrencias_entrega: false, bloqueios_produto: false, gruposAcesso: false, comandos_navegacao: false, metas: false, planejamento_reino_redes: false, planejamento_reino_lojas: false };
+var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas', 'planejamento_reino_vinculos'];
+var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [], cat_clientes: [], cat_produtos: [], transportadoras: [], tabelas_preco: [], sku_clientes: [], negociacoes_preco: [], devolucoes: [], ocorrencias_entrega: [], bloqueios_produto: [], gruposAcesso: [], comandos_navegacao: [], metas: [], planejamento_reino_redes: [], planejamento_reino_lojas: [], planejamento_reino_vinculos: [] };
+var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false, cat_clientes: false, cat_produtos: false, transportadoras: false, tabelas_preco: false, sku_clientes: false, negociacoes_preco: false, devolucoes: false, ocorrencias_entrega: false, bloqueios_produto: false, gruposAcesso: false, comandos_navegacao: false, metas: false, planejamento_reino_redes: false, planejamento_reino_lojas: false, planejamento_reino_vinculos: false };
 var _fsOuvindo  = false;
 var _fsEmpresaCache = null;
 var _fsEmpresaCarregada = false;
@@ -7711,6 +7725,7 @@ function _fsAoAtualizar(nome) {
     metas: ['renderMetaList'],
     planejamento_reino_redes: ['_prRender'],
     planejamento_reino_lojas: ['_prRenderLojasTabela'],
+    planejamento_reino_vinculos: ['_prRender'],
   };
   (mapaRender[nome] || []).forEach(function (fn) {
     if (typeof window[fn] === 'function') {
@@ -22094,6 +22109,8 @@ function getPlanejamentoReinoRedes() { return firebaseConfigurado ? _fsGet('plan
 function setPlanejamentoReinoRedes(data) { if (firebaseConfigurado) { _fsSet('planejamento_reino_redes', data); } else { localStorage.setItem('planejamento_reino_redes', JSON.stringify(data)); } }
 function getPlanejamentoReinoLojas() { return firebaseConfigurado ? _fsGet('planejamento_reino_lojas') : JSON.parse(localStorage.getItem('planejamento_reino_lojas') || '[]'); }
 function setPlanejamentoReinoLojas(data) { if (firebaseConfigurado) { _fsSet('planejamento_reino_lojas', data); } else { localStorage.setItem('planejamento_reino_lojas', JSON.stringify(data)); } }
+function getPlanejamentoReinoVinculos() { return firebaseConfigurado ? _fsGet('planejamento_reino_vinculos') : JSON.parse(localStorage.getItem('planejamento_reino_vinculos') || '[]'); }
+function setPlanejamentoReinoVinculos(data) { if (firebaseConfigurado) { _fsSet('planejamento_reino_vinculos', data); } else { localStorage.setItem('planejamento_reino_vinculos', JSON.stringify(data)); } }
 
 // ═══════════════════════════════════════════════════
 // PLANEJAMENTO REINO — planejamento de fim de ano por Fábrica > Rede >
@@ -22103,7 +22120,7 @@ function setPlanejamentoReinoLojas(data) { if (firebaseConfigurado) { _fsSet('pl
 // categoria/subcategoria. Dados de negociação (planejamento_reino_redes) e
 // de loja (planejamento_reino_lojas) são próprios do módulo, por fábrica.
 // ═══════════════════════════════════════════════════
-var PR_ANO = 2026;
+var _prAnoSel = 2026;
 var _PR_SITUACOES = ['Fechado', 'Apresentado', 'Em negociação'];
 var _PR_SITUACAO_CORES = {
   'Fechado':       { bg: '#f0fdf4', cor: '#15803d' },
@@ -22118,6 +22135,7 @@ var _prLojasSubRedeId = null;
 var _prLojaEditClienteId = null;
 var _prGraficoFabricaId = null; // null = grafico/rank agregam todas as fabricas com reino
 var _prSubRedeId = null; // Sub Rede escolhida no select da tela da fabrica
+var _prIncluirLojaCandidatos = []; // cache dos clientes elegiveis no modal Incluir Loja
 
 function _prEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function _prFmtKg(v) { return (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
@@ -22201,19 +22219,24 @@ function _prPathSuave(pts) {
 // passa a somar mais um ponto aqui automaticamente.
 function _prCalcularEvolucao(fornecedorIdOuNull) {
   var registros = getPlanejamentoReinoRedes().filter(function (r) {
-    return r.ano === PR_ANO && (fornecedorIdOuNull == null || String(r.fornecedorId) === String(fornecedorIdOuNull));
+    return (fornecedorIdOuNull == null || String(r.fornecedorId) === String(fornecedorIdOuNull));
   });
-  var kgAnterior = 0, rsAnterior = 0, kgAtual = 0, rsAtual = 0;
+  if (!registros.length) return [];
+  var porAno = {};
   registros.forEach(function (r) {
-    kgAnterior += Number(r.faturado2025) || 0;
-    rsAnterior += (Number(r.faturado2025) || 0) * (Number(r.preco2025) || 0);
-    kgAtual += Number(r.volFechado) || 0;
-    rsAtual += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0);
+    var key = r.ano;
+    if (!porAno[key]) porAno[key] = { ano: key, kg: 0, rs: 0 };
+    porAno[key].kg += Number(r.volFechado) || 0;
+    porAno[key].rs += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0);
   });
-  return [
-    { ano: PR_ANO - 1, kg: kgAnterior, rs: rsAnterior },
-    { ano: PR_ANO, kg: kgAtual, rs: rsAtual },
-  ];
+  var anos = Object.keys(porAno).map(Number).sort(function (a, b) { return a - b; });
+  var pontos = anos.map(function (a) { return porAno[a]; });
+  var primeiroAno = anos[0];
+  var registrosPrimeiroAno = registros.filter(function (r) { return r.ano === primeiroAno; });
+  var kgAnt = 0, rsAnt = 0;
+  registrosPrimeiroAno.forEach(function (r) { kgAnt += Number(r.faturado2025) || 0; rsAnt += (Number(r.faturado2025) || 0) * (Number(r.preco2025) || 0); });
+  if (kgAnt || rsAnt) pontos.unshift({ ano: primeiroAno - 1, kg: kgAnt, rs: rsAnt });
+  return pontos;
 }
 
 function _prFmtMoedaCompacta(v) {
@@ -22224,9 +22247,15 @@ function _prFmtMoedaCompacta(v) {
 }
 
 function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
+  if (!pontos || !pontos.length) {
+    return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:28px 24px;margin-bottom:18px;text-align:center">' +
+      '<div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px">' + _prEsc(titulo) + '</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,.5)">Nenhuma negociação cadastrada ainda — o gráfico aparece assim que houver dados.</div>' +
+      '</div>';
+  }
   var W = 600, H = 150, padTop = 22, padBottom = 8;
-  var maxKg = Math.max(1, pontos[0].kg, pontos[1].kg);
-  var maxRs = Math.max(1, pontos[0].rs, pontos[1].rs);
+  var maxKg = Math.max.apply(null, [1].concat(pontos.map(function (p) { return p.kg; })));
+  var maxRs = Math.max.apply(null, [1].concat(pontos.map(function (p) { return p.rs; })));
   var n = pontos.length;
   function xAt(i) { return n > 1 ? (i / (n - 1)) * W : 0; }
   function yKg(v) { return H - padBottom - (v / maxKg) * (H - padTop - padBottom); }
@@ -22253,15 +22282,15 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
     '</div>' +
     '<div style="display:flex;gap:16px;margin-top:12px">' +
     '<div style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:3px;background:#a9c2f5;display:inline-block;border-radius:2px"></span><span style="font-size:10px;color:rgba(255,255,255,.6)">Volume (kg)</span></div>' +
-    '<div style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:3px;background:#DE7926;display:inline-block;border-radius:2px"></span><span style="font-size:10px;color:rgba(255,255,255,.6)">Faturamento (R$)</span></div>' +
+    '<div style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:3px;background:#16a34a;display:inline-block;border-radius:2px"></span><span style="font-size:10px;color:rgba(255,255,255,.6)">Faturamento (R$)</span></div>' +
     '</div>' +
     '<svg viewBox="0 0 600 150" style="width:100%;height:150px;margin-top:10px" preserveAspectRatio="none">' +
     '<defs><linearGradient id="prAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4f7fe0" stop-opacity="0.35"/><stop offset="100%" stop-color="#4f7fe0" stop-opacity="0"/></linearGradient></defs>' +
     '<path d="' + dAreaKg + '" fill="url(#prAreaGrad)" stroke="none"/>' +
     '<path d="' + dKg + '" fill="none" stroke="#a9c2f5" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(169,194,245,.7))"/>' +
-    '<path d="' + dRs + '" fill="none" stroke="#DE7926" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(222,121,38,.7))"/>' +
+    '<path d="' + dRs + '" fill="none" stroke="#16a34a" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(22,163,74,.7))"/>' +
     '<circle cx="' + ultimoKg[0] + '" cy="' + ultimoKg[1] + '" r="4.5" fill="#fff" stroke="#a9c2f5" stroke-width="2"/>' +
-    '<circle cx="' + ultimoRs[0] + '" cy="' + ultimoRs[1] + '" r="5" fill="#fff" stroke="#DE7926" stroke-width="2.5"/>' +
+    '<circle cx="' + ultimoRs[0] + '" cy="' + ultimoRs[1] + '" r="5" fill="#fff" stroke="#16a34a" stroke-width="2.5"/>' +
     '</svg>' +
     '<div style="display:grid;grid-template-columns:repeat(' + n + ',1fr);margin-top:2px">' + colunasAnos + '</div>' +
     '</div>';
@@ -22269,7 +22298,7 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
 
 function _prCalcularRankRedes(fornecedorIdOuNull) {
   var registros = getPlanejamentoReinoRedes().filter(function (r) {
-    return r.ano === PR_ANO && (fornecedorIdOuNull == null || String(r.fornecedorId) === String(fornecedorIdOuNull));
+    return (fornecedorIdOuNull == null || String(r.fornecedorId) === String(fornecedorIdOuNull));
   });
   var porRede = {};
   registros.forEach(function (r) {
@@ -22341,14 +22370,14 @@ function _prRenderFabricas() {
     ? _prEsc(fabricaSelecionada.nome_fantasia)
     : 'TODAS AS FÁBRICAS';
   var graficoHtml = _prRenderGraficoEvolucaoHtml('Evolução do Faturamento do Queijo do Reino', chipHtml + ' · por ano', pontos);
-  var rankHtml = _prRenderRankRedesHtml('Rank de Redes — Reino ' + PR_ANO, _prCalcularRankRedes(_prGraficoFabricaId));
+  var rankHtml = _prRenderRankRedesHtml('Rank de Redes — Reino (histórico)', _prCalcularRankRedes(_prGraficoFabricaId));
 
   el.innerHTML = cardsHtml + graficoHtml + rankHtml;
 }
 
 // ── Tela 2: Redes de uma Fábrica ──
 function _prCampoResumo(titulo, valor) {
-  return '<div><div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase">' + _prEsc(titulo) + '</div><div style="font-size:12.5px;font-weight:700;color:#1e293b;margin-top:2px">' + _prEsc(valor) + '</div></div>';
+  return '<div><div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase">' + _prEsc(titulo) + '</div><div style="font-size:14.5px;font-weight:700;color:#1e293b;margin-top:2px">' + _prEsc(valor) + '</div></div>';
 }
 
 function _prToggleRedeAccordion(redeId) {
@@ -22363,41 +22392,88 @@ function _prToggleSubRedeAccordion(subRedeId) {
 
 function _prRenderRedes() {
   var el = document.getElementById('pr-conteudo');
-  var redes = getCatClientes().filter(function (c) { return !c.pai; }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && r.ano === PR_ANO; });
+  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && r.ano === _prAnoSel; });
 
-  var somaProjetado = 0, somaFechadoKg = 0, somaFaturado2025 = 0, somaFaturamento2026 = 0;
+  var somaProjetado = 0, somaFechadoKg = 0, somaFaturamento2026 = 0;
   var qtdFechadas = 0, qtdApresentadas = 0, qtdNegociacao = 0;
   registros.forEach(function (r) {
     somaProjetado += Number(r.volProjetado) || 0;
     somaFechadoKg += Number(r.volFechado) || 0;
-    somaFaturado2025 += Number(r.faturado2025) || 0;
     somaFaturamento2026 += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0);
     if (r.situacao === 'Fechado') qtdFechadas++;
     else if (r.situacao === 'Apresentado') qtdApresentadas++;
     else if (r.situacao === 'Em negociação') qtdNegociacao++;
   });
 
-  var kpisHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:18px">' +
-    _prKpiCard('Volume Projetado', somaProjetado, null) +
-    _prKpiCard('Volume Fechado', somaFechadoKg, somaFaturamento2026) +
-    _prKpiCard('Faturado ' + (PR_ANO - 1), somaFaturado2025, null) +
-    _prKpiCardTexto('Sub Redes negociando', registros.length, qtdFechadas + ' fechadas &#183; ' + qtdApresentadas + ' apresentadas &#183; ' + qtdNegociacao + ' em negociação') +
+  var somaFaturadoAnoKg = 0, somaFaturadoAnoRs = 0;
+  var lojasAtendidasSet = {};
+  var todasLojasAno = getPlanejamentoReinoLojas().filter(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && x.ano === _prAnoSel; });
+  registros.forEach(function (r) {
+    var clientesSub = _prObterClientesLoja(_prFabricaId, r.categoriaId, r.subcategoriaId, _prAnoSel);
+    clientesSub.forEach(function (cl) {
+      var lojaReg = todasLojasAno.find(function (x) { return String(x.clienteId) === String(cl.id); });
+      var calcAno = _prCalcLoja(lojaReg, r.precoFechado);
+      somaFaturadoAnoKg += calcAno.fatTotal;
+      somaFaturadoAnoRs += calcAno.valorTotal;
+      if (calcAno.fatTotal > 0) lojasAtendidasSet[String(cl.id)] = true;
+    });
+  });
+  var qtdLojasAtendidas = Object.keys(lojasAtendidasSet).length;
+
+  var anosExistentes = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId); }).map(function (r) { return r.ano; });
+  var anosSet = {};
+  for (var _prA = 2020; _prA <= _prAnoSel + 2; _prA++) { anosSet[_prA] = true; }
+  anosExistentes.concat([_prAnoSel]).forEach(function (a) { anosSet[a] = true; });
+  var anosOrdenados = Object.keys(anosSet).map(Number).sort(function (a, b) { return a - b; });
+  var anoBarHtml = '<div style="display:flex;justify-content:flex-end;margin-bottom:14px">' +
+    '<div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:6px 10px">' +
+    '<span style="font-size:11px;color:#94a3b8;font-weight:600">Ano:</span>' +
+    '<select onchange="_prSelecionarAno(this.value)" style="border:none;background:transparent;font-weight:800;font-size:13px;color:#272A4A;cursor:pointer">' +
+    anosOrdenados.map(function (a) { return '<option value="' + a + '"' + (a === _prAnoSel ? ' selected' : '') + '>' + a + '</option>'; }).join('') +
+    '</select></div></div>';
+
+  function _prKpiCardPadrao(titulo, valorHtml, subHtml, accent, valorColor) {
+    return '<div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid ' + accent + '">' +
+      '<div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">' + _prEsc(titulo) + '</div>' +
+      '<div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:' + (valorColor || '#272A4A') + '">' + valorHtml + '</div>' +
+      (subHtml ? '<div style="font-size:10.5px;color:#94a3b8;margin-top:2px">' + subHtml + '</div>' : '') +
+      '</div>';
+  }
+
+  var kpisHtml = '<div class="ped-kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px">' +
+    _prKpiCardPadrao('Volume Projetado', _prFmtKg(somaProjetado) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>', null, '#1c2f66') +
+    _prKpiCardPadrao('Volume Fechado', _prFmtKg(somaFechadoKg) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>', (somaFaturamento2026 ? _prFmtMoeda(somaFaturamento2026) : '—'), '#2c4488') +
+    _prKpiCardPadrao('Faturado ' + _prAnoSel, (somaFaturadoAnoRs ? _prFmtMoeda(somaFaturadoAnoRs) : '—'), (somaFaturadoAnoKg ? _prFmtKg(somaFaturadoAnoKg) + ' kg' : '—'), '#3d5aa8', '#16a34a') +
+    _prKpiCardPadrao('Total de Lojas Atendidas', qtdLojasAtendidas, registros.length + ' sub-redes negociando', '#5b78c9') +
     '</div>';
 
+  var cadastrarBtnHtml = '<div style="display:flex;justify-content:flex-end;margin-bottom:18px">' +
+    '<button onclick="_prAbrirCadastrarNegociacao()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:12.5px;font-weight:700;cursor:pointer">' +
+    '<i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:6px"></i>Cadastrar Negociação</button>' +
+    '</div>';
+
+  var redesComNegociacao = {};
+  registros.forEach(function (r) { redesComNegociacao[String(r.categoriaId)] = true; });
+  var redes = getCatClientes().filter(function (c) { return !c.pai && redesComNegociacao[String(c.id)]; })
+    .sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
+
   var linhasHtml = redes.map(function (rede) {
-    var subsCat = getCatClientes().filter(function (c) { return String(c.pai) === String(rede.id); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
     var subsReg = registros.filter(function (r) { return String(r.categoriaId) === String(rede.id); });
+    var subsRegIds = {};
+    subsReg.forEach(function (r) { subsRegIds[String(r.subcategoriaId)] = true; });
+    var subsCat = getCatClientes().filter(function (c) { return String(c.pai) === String(rede.id) && subsRegIds[String(c.id)]; })
+      .sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
     var volFech = 0, fat = 0;
     subsReg.forEach(function (r) { volFech += Number(r.volFechado) || 0; fat += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0); });
     var aberta = String(_prRedeId) === String(rede.id);
 
     var headerHtml = '<div onclick="_prToggleRedeAccordion(\'' + rede.id + '\')" style="display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid #f1f5f9;cursor:pointer;background:' + (aberta ? '#f8fafc' : '#fff') + '">' +
       '<i class="ti ti-chevron-' + (aberta ? 'down' : 'right') + '" style="font-size:13px;color:' + (aberta ? '#272A4A' : '#94a3b8') + ';margin-right:10px"></i>' +
-      '<span style="flex:1;font-weight:700;color:#1e293b;font-size:14px">' + _prEsc(rede.nome) + '</span>' +
-      '<span style="font-size:12.5px;color:#64748b;margin-right:24px">' + subsCat.length + ' Sub Rede' + (subsCat.length === 1 ? '' : 's') + '</span>' +
-      '<span style="width:110px;text-align:right;font-size:12.5px;font-weight:700">' + (volFech ? _prFmtKg(volFech) + ' kg' : '—') + '</span>' +
-      '<span style="width:130px;text-align:right;color:#DE7926;font-weight:700;font-size:12.5px">' + (fat ? _prFmtMoeda(fat) : '—') + '</span>' +
+      '<span style="flex:1;font-weight:700;color:#1e293b;font-size:16px">' + _prEsc(rede.nome) + '</span>' +
+      '<span style="font-size:14px;color:#64748b;margin-right:24px">' + subsCat.length + ' Sub Rede' + (subsCat.length === 1 ? '' : 's') + '</span>' +
+      '<span style="width:110px;text-align:right;font-size:14.5px;font-weight:700">' + (volFech ? _prFmtKg(volFech) + ' kg' : '—') + '</span>' +
+      '<span style="width:130px;text-align:right;color:#16a34a;font-weight:700;font-size:14.5px">' + (fat ? _prFmtMoeda(fat) : '—') + '</span>' +
+      '<i class="ti ti-trash" title="Excluir rede" onclick="event.stopPropagation();_prConfirmarExcluirRede(\'' + rede.id + '\',\'' + _prEsc(rede.nome) + '\')" style="font-size:14px;color:#dc2626;cursor:pointer;margin-left:16px"></i>' +
       '</div>';
 
     var corpoHtml = '';
@@ -22409,10 +22485,11 @@ function _prRenderRedes() {
 
         var subHeader = '<div onclick="_prToggleSubRedeAccordion(\'' + sub.id + '\')" style="display:flex;align-items:center;padding:12px 18px 12px 46px;border-bottom:1px solid #f8fafc;cursor:pointer;background:' + (subAberta ? '#eef1f8' : '#fff') + '">' +
           '<i class="ti ti-chevron-' + (subAberta ? 'down' : 'right') + '" style="font-size:12px;color:' + (subAberta ? '#272A4A' : '#94a3b8') + ';margin-right:10px"></i>' +
-          '<span style="flex:1;font-weight:600;color:#334155;font-size:13px">' + _prEsc(sub.nome) + '</span>' +
+          '<span style="flex:1;font-weight:600;color:#334155;font-size:14.5px">' + _prEsc(sub.nome) + '</span>' +
           (r ? '<span style="margin-right:16px">' + _prBadgeSituacao(r.situacao) + '</span>' : '') +
-          '<span style="width:110px;text-align:right;font-size:12px;font-weight:700">' + (r && r.volFechado ? _prFmtKg(r.volFechado) + ' kg' : '—') + '</span>' +
-          '<span style="width:130px;text-align:right;color:#DE7926;font-weight:700;font-size:12px">' + (fatSub ? _prFmtMoeda(fatSub) : '—') + '</span>' +
+          '<span style="width:110px;text-align:right;font-size:13.5px;font-weight:700">' + (r && r.volFechado ? _prFmtKg(r.volFechado) + ' kg' : '—') + '</span>' +
+          '<span style="width:130px;text-align:right;color:#16a34a;font-weight:700;font-size:13.5px">' + (fatSub ? _prFmtMoeda(fatSub) : '—') + '</span>' +
+          (r ? '<i class="ti ti-trash" title="Excluir sub-rede" onclick="event.stopPropagation();_prRemoverSubRede(\'' + r.id + '\')" style="font-size:13px;color:#dc2626;cursor:pointer;margin-left:16px"></i>' : '<span style="width:13px;display:inline-block;margin-left:16px"></span>') +
           '</div>';
 
         var subCorpo = '';
@@ -22425,15 +22502,10 @@ function _prRenderRedes() {
           } else {
             resumoHtml += '<div style="font-size:12px;color:#94a3b8">Ainda não há negociação cadastrada para "' + _prEsc(sub.nome) + '".</div>';
           }
-          resumoHtml += '<div style="margin-left:auto"><button onclick="_prAbrirModalSubRede(\'' + sub.id + '\')" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer"><i class="ti ti-edit" style="font-size:12px;vertical-align:-2px;margin-right:4px"></i>' + (r ? 'Editar negociação' : 'Cadastrar negociação') + '</button></div>';
+          resumoHtml += '<div style="margin-left:auto"><button onclick="_prAbrirModalSubRede(\'' + sub.id + '\')" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer"><i class="ti ti-edit" style="font-size:13px;vertical-align:-2px;margin-right:4px"></i>' + (r ? 'Editar negociação' : 'Cadastrar negociação') + '</button></div>';
           resumoHtml += '</div>';
 
-          var acoesHtml = '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px">' +
-            '<button onclick="_prExportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Exportar Excel</button>' +
-            '<button onclick="_prImportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Importar Excel</button>' +
-            '</div>';
-
-          subCorpo = '<div style="padding:16px 18px 20px 46px;background:#fbfcff">' + resumoHtml + acoesHtml + _prConstruirTabelaLojasHtml(_prFabricaId, rede.id, sub.id) + '</div>';
+          subCorpo = '<div style="padding:16px 18px 20px 46px;background:#fbfcff">' + resumoHtml + _prConstruirTabelaLojasHtml(_prFabricaId, rede.id, sub.id) + '</div>';
         }
         return subHeader + subCorpo;
       }).join('');
@@ -22441,21 +22513,23 @@ function _prRenderRedes() {
     return headerHtml + corpoHtml;
   }).join('');
 
-  el.innerHTML = kpisHtml + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
-    (linhasHtml || '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma Rede cadastrada em Cadastros › Categoria de Cliente.</div>') +
+  el.innerHTML = anoBarHtml + kpisHtml + cadastrarBtnHtml + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
+    (linhasHtml || '<div style="padding:28px;text-align:center;color:#94a3b8;font-size:12.5px">Nenhuma negociação cadastrada ainda para o ano ' + _prAnoSel + '.<br>Clique em "Cadastrar Negociação" acima para começar.</div>') +
     '</div>';
+}
+
+function _prSelecionarAno(anoStr) {
+  _prAnoSel = Number(anoStr);
+  _prRedeId = null;
+  _prSubRedeId = null;
+  _prRenderRedes();
 }
 
 // ── Tela 3: Sub Redes de uma Rede (colunas da aba GERAL) ──
 function _prRenderSubRedes() {
   var el = document.getElementById('pr-conteudo');
   var subs = getCatClientes().filter(function (c) { return String(c.pai) === String(_prRedeId); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && r.ano === PR_ANO; });
-
-  var acoesHtml = '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px">' +
-    '<button onclick="_prExportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:600;cursor:pointer">Exportar Excel</button>' +
-    '<button onclick="_prImportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:600;cursor:pointer">Importar Excel</button>' +
-    '</div>';
+  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && r.ano === _prAnoSel; });
 
   function c(v, casas) { return (v === undefined || v === null || v === '') ? '<span style="color:#cbd5e1">—</span>' : (typeof v === 'number' ? v.toLocaleString('pt-BR', { minimumFractionDigits: casas || 0, maximumFractionDigits: casas || 2 }) : _prEsc(v)); }
 
@@ -22478,7 +22552,7 @@ function _prRenderSubRedes() {
       '<td style="padding:9px 10px;text-align:right">' + (r && r.precoCampanha != null ? _prFmtMoeda(r.precoCampanha) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:9px 10px;text-align:right;font-weight:700">' + (r && r.precoFechado != null ? _prFmtMoeda(r.precoFechado) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:9px 10px;text-align:right">' + (r && r.investimento ? _prFmtMoeda(r.investimento) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
-      '<td style="padding:9px 10px;text-align:right;font-weight:800;color:#DE7926">' + (fat26 ? _prFmtMoeda(fat26) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
+      '<td style="padding:9px 10px;text-align:right;font-weight:800;color:#16a34a">' + (fat26 ? _prFmtMoeda(fat26) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:9px 10px;text-align:right' + (percAumento != null && percAumento < 0 ? ';color:#dc2626' : '') + '">' + (percAumento != null ? percAumento.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%' : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:9px 10px;text-align:center">' + _prBadgeSituacao(r ? r.situacao : null) + '</td>' +
       '<td style="padding:9px 10px;text-align:center;white-space:nowrap">' +
@@ -22489,24 +22563,24 @@ function _prRenderSubRedes() {
       '</tr>';
   }).join('');
 
-  el.innerHTML = acoesHtml + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow-x:auto">' +
+  el.innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow-x:auto">' +
     '<table style="width:auto;min-width:1450px;border-collapse:collapse;font-size:11.5px">' +
     '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">' +
     '<th style="padding:8px 10px;text-align:left;position:sticky;left:0;background:#f8fafc">Sub Rede</th>' +
     '<th style="padding:8px 10px;text-align:right">% Contrato</th>' +
     '<th style="padding:8px 10px;text-align:left">Nome Tabela Cliente</th>' +
-    '<th style="padding:8px 10px;text-align:right">Faturado ' + (PR_ANO - 1) + '</th>' +
-    '<th style="padding:8px 10px;text-align:right">Preço ' + (PR_ANO - 1) + '</th>' +
+    '<th style="padding:8px 10px;text-align:right">Faturado ' + (_prAnoSel - 1) + '</th>' +
+    '<th style="padding:8px 10px;text-align:right">Preço ' + (_prAnoSel - 1) + '</th>' +
     '<th style="padding:8px 10px;text-align:right">Último Preço</th>' +
     '<th style="padding:8px 10px;text-align:right">Vol. Projetado</th>' +
     '<th style="padding:8px 10px;text-align:right">Vol. Apresentado</th>' +
     '<th style="padding:8px 10px;text-align:right">Vol. Fechado</th>' +
-    '<th style="padding:8px 10px;text-align:right">Preço Tabela ' + PR_ANO + '</th>' +
+    '<th style="padding:8px 10px;text-align:right">Preço Tabela ' + _prAnoSel + '</th>' +
     '<th style="padding:8px 10px;text-align:right">Preço Apresentado</th>' +
     '<th style="padding:8px 10px;text-align:right">Preço Campanha</th>' +
     '<th style="padding:8px 10px;text-align:right">Preço Fechado</th>' +
     '<th style="padding:8px 10px;text-align:right">Investimento</th>' +
-    '<th style="padding:8px 10px;text-align:right">Faturamento ' + PR_ANO + '</th>' +
+    '<th style="padding:8px 10px;text-align:right">Faturamento ' + _prAnoSel + '</th>' +
     '<th style="padding:8px 10px;text-align:right">% Aumento</th>' +
     '<th style="padding:8px 10px;text-align:center">Situação</th>' +
     '<th style="padding:8px 10px;text-align:center">Ações</th>' +
@@ -22516,65 +22590,107 @@ function _prRenderSubRedes() {
 }
 
 // ── Modal: editar/criar negociação de uma Sub Rede ──
-function _prAbrirModalSubRede(subRedeId) {
-  var registros = getPlanejamentoReinoRedes();
-  var r = registros.find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.categoriaId) === String(_prRedeId) && String(x.subcategoriaId) === String(subRedeId) && x.ano === PR_ANO; });
-  var sub = getCatClientes().find(function (c) { return String(c.id) === String(subRedeId); });
-  _prSubRedeEditId = r ? r.id : null;
-  document.getElementById('pr-sr-titulo').textContent = (r ? 'Editar' : 'Nova') + ' negociação — ' + (sub ? sub.nome : '');
+function _prCamposNegociacaoHtml(r, ano) {
   var campoNum = function (id, label, val) {
     return '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">' + label + '</label><input type="number" step="0.01" class="form-input" id="' + id + '" value="' + (val == null ? '' : val) + '" style="width:100%"></div>';
   };
+  var campoMoeda = function (id, label, val) {
+    return '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">' + label + '</label><input type="text" inputmode="decimal" class="form-input" id="' + id + '" value="' + (val == null ? '' : _pedNumParaMascara(val)) + '" oninput="_pedMaskPreco(this)" placeholder="0,00" style="width:100%"></div>';
+  };
   var situacaoOpts = _PR_SITUACOES.map(function (s) { return '<option value="' + s + '"' + (r && r.situacao === s ? ' selected' : '') + '>' + s + '</option>'; }).join('');
-  document.getElementById('pr-sr-corpo').innerHTML =
-    '<input type="hidden" id="pr-sr-subredeid" value="' + subRedeId + '">' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
     campoNum('pr-sr-perccontrato', '% Contrato', r ? r.percContrato : '') +
     '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Nome Tabela Cliente</label><input class="form-input" id="pr-sr-nometabela" value="' + _prEsc(r ? r.nomeTabela : '') + '" style="width:100%" placeholder="Nome da tabela no sistema do cliente"></div>' +
-    campoNum('pr-sr-faturado2025', 'Faturado ' + (PR_ANO - 1) + ' (kg)', r ? r.faturado2025 : '') +
-    campoNum('pr-sr-preco2025', 'Preço ' + (PR_ANO - 1) + ' (R$)', r ? r.preco2025 : '') +
-    campoNum('pr-sr-ultimopreco', 'Último Preço (R$)', r ? r.ultimoPreco : '') +
+    campoNum('pr-sr-faturado2025', 'Faturado ' + (ano - 1) + ' (kg)', r ? r.faturado2025 : '') +
+    campoMoeda('pr-sr-preco2025', 'Preço ' + (ano - 1) + ' (R$)', r ? r.preco2025 : '') +
+    campoMoeda('pr-sr-ultimopreco', 'Último Preço (R$)', r ? r.ultimoPreco : '') +
     campoNum('pr-sr-volprojetado', 'Volume Projetado (kg)', r ? r.volProjetado : '') +
     campoNum('pr-sr-volapresentado', 'Volume Apresentado (kg)', r ? r.volApresentado : '') +
     campoNum('pr-sr-volfechado', 'Volume Fechado (kg)', r ? r.volFechado : '') +
-    campoNum('pr-sr-precotabela2026', 'Preço Tabela ' + PR_ANO + ' (R$)', r ? r.precoTabela2026 : '') +
-    campoNum('pr-sr-precoapresentado', 'Preço Apresentado (R$)', r ? r.precoApresentado : '') +
-    campoNum('pr-sr-precocampanha', 'Preço Campanha (R$)', r ? r.precoCampanha : '') +
-    campoNum('pr-sr-precofechado', 'Preço Fechado (R$)', r ? r.precoFechado : '') +
-    campoNum('pr-sr-investimento', 'Investimento (R$)', r ? r.investimento : '') +
+    campoMoeda('pr-sr-precotabela2026', 'Preço Tabela ' + ano + ' (R$)', r ? r.precoTabela2026 : '') +
+    campoMoeda('pr-sr-precoapresentado', 'Preço Apresentado (R$)', r ? r.precoApresentado : '') +
+    campoMoeda('pr-sr-precocampanha', 'Preço Campanha (R$)', r ? r.precoCampanha : '') +
+    campoMoeda('pr-sr-precofechado', 'Preço Fechado (R$)', r ? r.precoFechado : '') +
+    campoMoeda('pr-sr-investimento', 'Investimento (R$)', r ? r.investimento : '') +
     '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Situação</label><select class="form-input" id="pr-sr-situacao" style="width:100%">' + situacaoOpts + '</select></div>' +
-    '</div>' +
+    '</div>';
+}
+
+function _prColetarCamposNegociacao() {
+  var num = function (id) { var v = document.getElementById(id).value; return v === '' ? null : Number(v); };
+  var moeda = function (id) { var v = document.getElementById(id).value; return v === '' ? null : _pedParseMoeda(v); };
+  return {
+    percContrato: num('pr-sr-perccontrato'),
+    nomeTabela: document.getElementById('pr-sr-nometabela').value.trim(),
+    faturado2025: num('pr-sr-faturado2025'),
+    preco2025: moeda('pr-sr-preco2025'),
+    ultimoPreco: moeda('pr-sr-ultimopreco'),
+    volProjetado: num('pr-sr-volprojetado'),
+    volApresentado: num('pr-sr-volapresentado'),
+    volFechado: num('pr-sr-volfechado'),
+    precoTabela2026: moeda('pr-sr-precotabela2026'),
+    precoApresentado: moeda('pr-sr-precoapresentado'),
+    precoCampanha: moeda('pr-sr-precocampanha'),
+    precoFechado: moeda('pr-sr-precofechado'),
+    investimento: moeda('pr-sr-investimento'),
+    situacao: document.getElementById('pr-sr-situacao').value,
+  };
+}
+
+function _prAbrirModalSubRede(subRedeId) {
+  var registros = getPlanejamentoReinoRedes();
+  var r = registros.find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.categoriaId) === String(_prRedeId) && String(x.subcategoriaId) === String(subRedeId) && x.ano === _prAnoSel; });
+  var sub = getCatClientes().find(function (c) { return String(c.id) === String(subRedeId); });
+  _prSubRedeEditId = r ? r.id : null;
+  document.getElementById('pr-sr-titulo').textContent = (r ? 'Editar' : 'Nova') + ' negociação — ' + (sub ? sub.nome : '');
+  document.getElementById('pr-sr-corpo').innerHTML =
+    '<input type="hidden" id="pr-sr-subredeid" value="' + subRedeId + '">' +
+    _prCamposNegociacaoHtml(r, _prAnoSel) +
     '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">' +
     '<button onclick="_prFecharModalSubRede()" style="background:#fff;color:#64748b;border:1px solid #cbd5e1;border-radius:7px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>' +
     '<button onclick="_prSalvarSubRede()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer">Salvar</button>' +
     '</div>';
   document.getElementById('modal-pr-subrede').style.display = 'flex';
 }
+
+function _prAbrirCadastrarNegociacao() {
+  _prSubRedeEditId = null;
+  document.getElementById('pr-sr-titulo').textContent = 'Cadastrar Negociação';
+  var redes = getCatClientes().filter(function (c) { return !c.pai; }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
+  var redeOpts = '<option value="">Selecione...</option>' + redes.map(function (rd) { return '<option value="' + rd.id + '">' + _prEsc(rd.nome) + '</option>'; }).join('');
+  document.getElementById('pr-sr-corpo').innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px dashed #e2e8f0">' +
+    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Ano</label><input type="number" step="1" min="2020" class="form-input" id="pr-sr-ano-novo" value="' + _prAnoSel + '" style="width:100%"></div>' +
+    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Rede</label><select class="form-input" id="pr-sr-rede-novo" style="width:100%" onchange="_prAoTrocarRedeCadastro()">' + redeOpts + '</select></div>' +
+    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Sub Rede</label><select class="form-input" id="pr-sr-subrede-novo" style="width:100%" disabled><option value="">Selecione a Rede primeiro</option></select></div>' +
+    '</div>' +
+    '<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:10px">Dados da negociação</div>' +
+    _prCamposNegociacaoHtml(null, _prAnoSel) +
+    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">' +
+    '<button onclick="_prFecharModalSubRede()" style="background:#fff;color:#64748b;border:1px solid #cbd5e1;border-radius:7px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>' +
+    '<button onclick="_prSalvarNovaNegociacao()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer">Salvar Negociação</button>' +
+    '</div>';
+  document.getElementById('modal-pr-subrede').style.display = 'flex';
+}
+
+function _prAoTrocarRedeCadastro() {
+  var redeId = document.getElementById('pr-sr-rede-novo').value;
+  var sel = document.getElementById('pr-sr-subrede-novo');
+  if (!redeId) { sel.disabled = true; sel.innerHTML = '<option value="">Selecione a Rede primeiro</option>'; return; }
+  var subs = getCatClientes().filter(function (c) { return String(c.pai) === String(redeId); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
+  sel.disabled = false;
+  sel.innerHTML = '<option value="">Selecione...</option>' + subs.map(function (s) { return '<option value="' + s.id + '">' + _prEsc(s.nome) + '</option>'; }).join('');
+}
 function _prFecharModalSubRede() { document.getElementById('modal-pr-subrede').style.display = 'none'; }
 function _prSalvarSubRede() {
   var subRedeId = document.getElementById('pr-sr-subredeid').value;
-  var num = function (id) { var v = document.getElementById(id).value; return v === '' ? null : Number(v); };
-  var obj = {
+  var obj = Object.assign({
     id: _prSubRedeEditId || ('pr' + Date.now()),
     fornecedorId: _prFabricaId,
     categoriaId: _prRedeId,
     subcategoriaId: subRedeId,
-    ano: PR_ANO,
-    percContrato: num('pr-sr-perccontrato'),
-    nomeTabela: document.getElementById('pr-sr-nometabela').value.trim(),
-    faturado2025: num('pr-sr-faturado2025'),
-    preco2025: num('pr-sr-preco2025'),
-    ultimoPreco: num('pr-sr-ultimopreco'),
-    volProjetado: num('pr-sr-volprojetado'),
-    volApresentado: num('pr-sr-volapresentado'),
-    volFechado: num('pr-sr-volfechado'),
-    precoTabela2026: num('pr-sr-precotabela2026'),
-    precoApresentado: num('pr-sr-precoapresentado'),
-    precoCampanha: num('pr-sr-precocampanha'),
-    precoFechado: num('pr-sr-precofechado'),
-    investimento: num('pr-sr-investimento'),
-    situacao: document.getElementById('pr-sr-situacao').value,
-  };
+    ano: _prAnoSel,
+  }, _prColetarCamposNegociacao());
   var data = getPlanejamentoReinoRedes();
   if (_prSubRedeEditId) {
     var idx = data.findIndex(function (x) { return x.id === _prSubRedeEditId; });
@@ -22586,9 +22702,42 @@ function _prSalvarSubRede() {
   _prFecharModalSubRede();
   _prRender();
 }
+
+function _prSalvarNovaNegociacao() {
+  var redeId = document.getElementById('pr-sr-rede-novo').value;
+  var subRedeId = document.getElementById('pr-sr-subrede-novo').value;
+  var ano = Number(document.getElementById('pr-sr-ano-novo').value);
+  if (!redeId || !subRedeId) { alert('Selecione a Rede e a Sub Rede.'); return; }
+  var existente = getPlanejamentoReinoRedes().find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.categoriaId) === String(redeId) && String(x.subcategoriaId) === String(subRedeId) && x.ano === ano; });
+  if (existente) { alert('Já existe uma negociação cadastrada para essa Rede/Sub Rede nesse ano. Abra pelo painel abaixo para editar.'); return; }
+  var obj = Object.assign({
+    id: 'pr' + Date.now(),
+    fornecedorId: _prFabricaId,
+    categoriaId: redeId,
+    subcategoriaId: subRedeId,
+    ano: ano,
+  }, _prColetarCamposNegociacao());
+  var data = getPlanejamentoReinoRedes();
+  data.push(obj);
+  setPlanejamentoReinoRedes(data);
+  _prFecharModalSubRede();
+  _prAnoSel = ano;
+  _prRedeId = redeId;
+  _prSubRedeId = subRedeId;
+  _prRender();
+}
 function _prRemoverSubRede(id) {
   if (!confirm('Remover esta negociação? Os dados de lojas já preenchidos não serão apagados.')) return;
   setPlanejamentoReinoRedes(getPlanejamentoReinoRedes().filter(function (x) { return x.id !== id; }));
+  _prRender();
+}
+
+function _prConfirmarExcluirRede(redeId, redeNome) {
+  if (!confirm('Excluir TODAS as negociações da rede "' + redeNome + '" (todas as sub-redes) no ano ' + _prAnoSel + '? Os dados de lojas já preenchidos não serão apagados.')) return;
+  setPlanejamentoReinoRedes(getPlanejamentoReinoRedes().filter(function (x) {
+    return !(String(x.fornecedorId) === String(_prFabricaId) && String(x.categoriaId) === String(redeId) && x.ano === _prAnoSel);
+  }));
+  if (String(_prRedeId) === String(redeId)) { _prRedeId = null; _prSubRedeId = null; }
   _prRender();
 }
 
@@ -22602,32 +22751,71 @@ function _prAbrirModalLojas(subRedeId) {
 }
 function _prFecharModalLojas() { document.getElementById('modal-pr-lojas').style.display = 'none'; }
 
-function _prCalcLoja(loja) {
+function _prCalcLoja(loja, precoFechadoNegociacao) {
   var pedidos = (loja && loja.pedidos) || [];
-  var fatTotal = pedidos.reduce(function (s, p) { return s + (Number(p && p.faturado) || 0); }, 0);
+  var fatTotal = pedidos.reduce(function (s, p) { return s + (Number(p && p.faturado) || 0) + (Number(p && p.saldoFaturado) || 0); }, 0);
   var fechado = loja ? Number(loja.fechado2026) || 0 : 0;
-  var valorUnit = loja ? Number(loja.valorUnitario) || 0 : 0;
-  return { fatTotal: fatTotal, saldo: fechado - fatTotal, valorTotal: valorUnit * fatTotal };
+  var precoUnit = Number(precoFechadoNegociacao) || 0;
+  return { fatTotal: fatTotal, saldo: fechado - fatTotal, valorTotal: precoUnit * fatTotal };
+}
+
+function _prObterClientesLoja(fornecedorId, redeId, subRedeId, ano) {
+  var vinculos = getPlanejamentoReinoVinculos().filter(function (v) {
+    return String(v.fornecedorId) === String(fornecedorId) && String(v.categoriaId) === String(redeId) && String(v.subcategoriaId) === String(subRedeId) && v.ano === ano;
+  });
+  var excluidos = {}, incluidos = {};
+  vinculos.forEach(function (v) {
+    if (v.tipo === 'excluido') excluidos[String(v.clienteId)] = true;
+    else if (v.tipo === 'incluido') incluidos[String(v.clienteId)] = true;
+  });
+  var ativos = getClientes().filter(function (cl) { return (cl.ativo || 'Sim') !== 'Não'; });
+  var porId = {};
+  ativos.forEach(function (cl) {
+    var pertenceGlobal = String(cl.categoria) === String(redeId) && String(cl.subcategoria) === String(subRedeId);
+    if ((pertenceGlobal && !excluidos[String(cl.id)]) || (incluidos[String(cl.id)] && !pertenceGlobal)) {
+      porId[String(cl.id)] = cl;
+    }
+  });
+  return Object.keys(porId).map(function (id) { return porId[id]; })
+    .sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
 }
 
 function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
-  var clientes = getClientes().filter(function (cl) { return String(cl.categoria) === String(redeId) && String(cl.subcategoria) === String(subRedeId) && (cl.ativo || 'Sim') !== 'Não'; })
-    .sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
+  var clientes = _prObterClientesLoja(fornecedorId, redeId, subRedeId, _prAnoSel);
   var lojasData = getPlanejamentoReinoLojas();
-  var totFatTotal = 0, totValorTotal = 0;
+  var registroNeg = getPlanejamentoReinoRedes().find(function (r) { return String(r.fornecedorId) === String(fornecedorId) && String(r.categoriaId) === String(redeId) && String(r.subcategoriaId) === String(subRedeId) && r.ano === _prAnoSel; });
+  var precoFechadoNeg = registroNeg ? registroNeg.precoFechado : null;
+  var totFatTotal = 0, totValorTotal = 0, totPlanejado = 0, totFechado = 0, totSaldo = 0;
+  var totPed = [0, 0, 0, 0], totFat = [0, 0, 0, 0];
+
+  // v456: só mostra as colunas de Pedido/Faturado que já têm algum lançamento em alguma loja desta sub-rede
+  var pedAtivo = [false, false, false, false];
+  clientes.forEach(function (cl) {
+    var lojaChk = lojasData.find(function (x) { return String(x.fornecedorId) === String(fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === _prAnoSel; });
+    var pedidosChk = (lojaChk && lojaChk.pedidos) || [];
+    for (var k = 0; k < 4; k++) {
+      var pChk = pedidosChk[k];
+      if (pChk && (pChk.qtd != null || pChk.faturado != null || pChk.saldoQtd != null || pChk.saldoFaturado != null)) pedAtivo[k] = true;
+    }
+  });
+  var pedIdx = [0, 1, 2, 3].filter(function (i) { return pedAtivo[i]; });
 
   var linhas = clientes.map(function (cl) {
-    var loja = lojasData.find(function (x) { return String(x.fornecedorId) === String(fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === PR_ANO; });
-    var calc = _prCalcLoja(loja);
+    var loja = lojasData.find(function (x) { return String(x.fornecedorId) === String(fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === _prAnoSel; });
+    var calc = _prCalcLoja(loja, precoFechadoNeg);
     totFatTotal += calc.fatTotal;
     totValorTotal += calc.valorTotal;
+    totPlanejado += Number(loja && loja.planejado) || 0;
+    totFechado += Number(loja && loja.fechado2026) || 0;
+    if (loja) totSaldo += calc.saldo;
     var pedidos = (loja && loja.pedidos) || [];
-    var pedidosCells = '';
-    for (var i = 0; i < 4; i++) {
+    var pedidosCells = pedIdx.map(function (i) {
       var p = pedidos[i];
-      pedidosCells += '<td style="padding:8px 9px;text-align:right">' + (p && (p.qtd != null || p.faturado != null) ? ((p.qtd != null ? p.qtd : '—') + ' / ' + (p.faturado != null ? p.faturado : '—')) : '<span style="color:#cbd5e1">—</span>') + '</td>';
-    }
-    return '<tr style="border-bottom:1px solid #f8fafc">' +
+      if (p && p.qtd != null) totPed[i] += Number(p.qtd) || 0;
+      if (p && p.faturado != null) totFat[i] += Number(p.faturado) || 0;
+      return '<td style="padding:8px 9px;text-align:right">' + (p && (p.qtd != null || p.faturado != null) ? ((p.qtd != null ? p.qtd : '—') + ' / ' + (p.faturado != null ? p.faturado : '—')) : '<span style="color:#cbd5e1">—</span>') + '</td>';
+    }).join('');
+    return '<tr class="pr-loja-linha" data-loja-nome="' + (cl.nome_fantasia || cl.razao_social || '').toLowerCase() + '" style="border-bottom:1px solid #f8fafc">' +
       '<td style="padding:8px 9px;font-weight:600">' + _prEsc(cl.nome_fantasia || cl.razao_social || '—') + '</td>' +
       '<td style="padding:8px 9px;text-align:right">' + (loja && loja.venda2024 != null ? loja.venda2024 : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:8px 9px;text-align:right">' + (loja && loja.planejado != null ? loja.planejado : '<span style="color:#cbd5e1">—</span>') + '</td>' +
@@ -22635,73 +22823,179 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
       pedidosCells +
       '<td style="padding:8px 9px;text-align:right;font-weight:800">' + (calc.fatTotal ? _prFmtKg(calc.fatTotal) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:8px 9px;text-align:right;color:' + (calc.saldo < 0 ? '#dc2626' : '#15803d') + '">' + (loja ? _prFmtKg(calc.saldo) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
-      '<td style="padding:8px 9px;text-align:right">' + (loja && loja.valorUnitario != null ? loja.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
-      '<td style="padding:8px 9px;text-align:right;color:#DE7926;font-weight:700">' + (calc.valorTotal ? _prFmtMoeda(calc.valorTotal) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
-      '<td style="padding:8px 9px;text-align:center"><i class="ti ti-edit" title="Editar" style="font-size:13px;color:#64748b;cursor:pointer" onclick="_prAbrirModalEdicaoLoja(\'' + cl.id + '\')"></i></td>' +
+      '<td style="padding:8px 9px;text-align:right">' + (precoFechadoNeg != null ? Number(precoFechadoNeg).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
+      '<td style="padding:8px 9px;text-align:right;color:#16a34a;font-weight:700">' + (calc.valorTotal ? _prFmtMoeda(calc.valorTotal) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
+      '<td style="padding:8px 9px;text-align:center"><i class="ti ti-edit" title="Editar" style="font-size:13px;color:#64748b;cursor:pointer;margin-right:12px" onclick="_prAbrirModalEdicaoLoja(\'' + cl.id + '\')"></i><i class="ti ti-trash" title="Remover loja" style="font-size:13px;color:#dc2626;cursor:pointer" onclick="_prConfirmarExcluirLoja(\'' + cl.id + '\',\'' + _prEsc(cl.nome_fantasia || cl.razao_social || '') + '\')"></i></td>' +
       '</tr>';
   }).join('');
 
+  var numCols = 8 + pedIdx.length;
+  var pedHeaderCells = pedIdx.map(function (i) { return '<th style="padding:7px 9px;text-align:right">' + (i + 1) + 'º Ped./Fat.</th>'; }).join('');
+  var pedFooterCells = pedIdx.map(function (i) { return '<td style="padding:8px 9px;text-align:right">' + ((totPed[i] || totFat[i]) ? (_prFmtKg(totPed[i]) + ' / ' + _prFmtKg(totFat[i])) : '—') + '</td>'; }).join('');
+
   return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
-    '<div style="padding:14px 18px 10px;font-size:13px;font-weight:700;color:#1e293b">Lojas <span style="font-weight:400;color:#94a3b8;font-size:11px">(' + clientes.length + ' lojas)</span></div>' +
-    '<div style="overflow-x:auto"><table style="width:auto;min-width:1080px;border-collapse:collapse;font-size:11px">' +
-    '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;flex-wrap:wrap;gap:10px">' +
+    '<div style="font-size:15px;font-weight:700;color:#1e293b">Lojas <span style="font-weight:400;color:#94a3b8;font-size:12.5px">(' + clientes.length + ' lojas)</span></div>' +
+    '<div style="display:flex;gap:8px;align-items:center">' +
+    '<div style="position:relative"><i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:#94a3b8"></i>' +
+    '<input type="text" placeholder="Filtrar loja..." oninput="_prFiltrarLojas(this.value)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 10px 6px 28px;font-size:13.5px;width:180px"></div>' +
+    '<button onclick="_prAbrirIncluirLoja()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Incluir Loja</button>' +
+    '</div></div>' +
+    '<div style="overflow-x:auto"><table style="width:auto;min-width:1080px;border-collapse:collapse;font-size:13px">' +
+    '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">' +
     '<th style="padding:7px 9px;text-align:left">Loja (Cliente)</th>' +
-    '<th style="padding:7px 9px;text-align:right">' + (PR_ANO - 2) + '</th>' +
+    '<th style="padding:7px 9px;text-align:right">' + (_prAnoSel - 1) + '</th>' +
     '<th style="padding:7px 9px;text-align:right">Planejado</th>' +
-    '<th style="padding:7px 9px;text-align:right">Fechado ' + PR_ANO + '</th>' +
-    '<th style="padding:7px 9px;text-align:right">1º Ped./Fat.</th>' +
-    '<th style="padding:7px 9px;text-align:right">2º Ped./Fat.</th>' +
-    '<th style="padding:7px 9px;text-align:right">3º Ped./Fat.</th>' +
-    '<th style="padding:7px 9px;text-align:right">4º Ped./Fat.</th>' +
+    '<th style="padding:7px 9px;text-align:right">Fechado ' + _prAnoSel + '</th>' +
+    pedHeaderCells +
     '<th style="padding:7px 9px;text-align:right">Fat. Total</th>' +
     '<th style="padding:7px 9px;text-align:right">Saldo</th>' +
     '<th style="padding:7px 9px;text-align:right">Vlr. Unit.</th>' +
     '<th style="padding:7px 9px;text-align:right">Valor Total</th>' +
-    '<th style="padding:7px 9px;text-align:center">Editar</th>' +
+    '<th style="padding:7px 9px;text-align:center">Ação</th>' +
     '</tr></thead><tbody>' +
-    (linhas || '<tr><td colspan="13" style="padding:20px;text-align:center;color:#94a3b8">Nenhum Cliente ativo cadastrado nessa Sub Rede (Cadastros › Clientes).</td></tr>') +
+    (linhas || '<tr><td colspan="' + numCols + '" style="padding:20px;text-align:center;color:#94a3b8">Nenhuma loja vinculada a essa Sub Rede ainda. Use "Incluir Loja" acima.</td></tr>') +
     '</tbody><tfoot><tr style="background:#1e293b;color:#fff;font-weight:700">' +
-    '<td style="padding:8px 9px" colspan="8">TOTAL (' + clientes.length + ' lojas)</td>' +
+    '<td style="padding:8px 9px" colspan="2">TOTAL (' + clientes.length + ' lojas)</td>' +
+    '<td style="padding:8px 9px;text-align:right">' + (totPlanejado ? _prFmtKg(totPlanejado) : '—') + '</td>' +
+    '<td style="padding:8px 9px;text-align:right">' + (totFechado ? _prFmtKg(totFechado) : '—') + '</td>' +
+    pedFooterCells +
     '<td style="padding:8px 9px;text-align:right">' + _prFmtKg(totFatTotal) + '</td>' +
-    '<td></td><td></td>' +
-    '<td style="padding:8px 9px;text-align:right;color:#ffd7a8">' + _prFmtMoeda(totValorTotal) + '</td>' +
+    '<td style="padding:8px 9px;text-align:right;color:' + (totSaldo < 0 ? '#f87171' : '#a7f3d0') + '">' + (totFatTotal || totFechado ? _prFmtKg(totSaldo) : '—') + '</td>' +
+    '<td></td>' +
+    '<td style="padding:8px 9px;text-align:right;color:#86efac">' + _prFmtMoeda(totValorTotal) + '</td>' +
     '</tr></tfoot></table></div></div>';
+}
+
+function _prFiltrarLojas(valor) {
+  var termo = (valor || '').toLowerCase();
+  var linhas = document.querySelectorAll('.pr-loja-linha');
+  linhas.forEach(function (tr) {
+    var nome = (tr.getAttribute('data-loja-nome') || '');
+    tr.style.display = nome.indexOf(termo) >= 0 ? '' : 'none';
+  });
+}
+
+function _prAbrirIncluirLoja() {
+  document.getElementById('pr-il-busca').value = '';
+  var jaNaLista = {};
+  _prObterClientesLoja(_prFabricaId, _prRedeId, _prSubRedeId, _prAnoSel).forEach(function (cl) { jaNaLista[String(cl.id)] = true; });
+  _prIncluirLojaCandidatos = getClientes().filter(function (cl) {
+    return (cl.ativo || 'Sim') !== 'Não' && !jaNaLista[String(cl.id)] &&
+      String(cl.categoria) === String(_prRedeId) && String(cl.subcategoria) === String(_prSubRedeId);
+  })
+    .sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
+  _prRenderListaIncluirLoja(_prIncluirLojaCandidatos);
+  document.getElementById('modal-pr-incluir-loja').style.display = 'flex';
+}
+function _prFecharIncluirLoja() { document.getElementById('modal-pr-incluir-loja').style.display = 'none'; }
+
+function _prRenderListaIncluirLoja(lista) {
+  var el = document.getElementById('pr-il-lista');
+  if (!lista.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhum cliente encontrado.</div>'; return; }
+  el.innerHTML = '<div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">' +
+    lista.map(function (c) {
+      return '<div style="padding:9px 12px;border-bottom:1px solid #f1f5f9;font-size:12px;display:flex;justify-content:space-between;align-items:center">' +
+        '<span>' + _prEsc(c.nome_fantasia || c.razao_social || '—') + '</span>' +
+        '<button onclick="_prIncluirLojaConfirmar(\'' + c.id + '\')" style="background:#272A4A;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer">Incluir</button>' +
+        '</div>';
+    }).join('') + '</div>';
+}
+
+function _prBuscarClienteIncluir(valor) {
+  var termo = (valor || '').toLowerCase();
+  var filtrados = _prIncluirLojaCandidatos.filter(function (c) { return (c.nome_fantasia || c.razao_social || '').toLowerCase().indexOf(termo) >= 0; });
+  _prRenderListaIncluirLoja(filtrados);
+}
+
+function _prIncluirLojaConfirmar(clienteId) {
+  var data = getPlanejamentoReinoVinculos().filter(function (v) {
+    return !(String(v.fornecedorId) === String(_prFabricaId) && String(v.categoriaId) === String(_prRedeId) && String(v.subcategoriaId) === String(_prSubRedeId) && String(v.clienteId) === String(clienteId) && v.ano === _prAnoSel);
+  });
+  var cl = getClientes().find(function (c) { return String(c.id) === String(clienteId); });
+  var pertenceGlobal = cl && String(cl.categoria) === String(_prRedeId) && String(cl.subcategoria) === String(_prSubRedeId);
+  if (!pertenceGlobal) {
+    data.push({ id: 'prv' + Date.now(), fornecedorId: _prFabricaId, categoriaId: _prRedeId, subcategoriaId: _prSubRedeId, clienteId: clienteId, ano: _prAnoSel, tipo: 'incluido' });
+  }
+  setPlanejamentoReinoVinculos(data);
+  _prFecharIncluirLoja();
+  _prRender();
+}
+
+function _prConfirmarExcluirLoja(clienteId, nomeLoja) {
+  if (!confirm('Remover "' + nomeLoja + '" desta Rede/Sub Rede (ano ' + _prAnoSel + ')?\n\nOs dados de planejamento dela nesta fábrica serão apagados. O cadastro do Cliente (Rede/Sub Rede geral) não é alterado.')) return;
+  var data = getPlanejamentoReinoVinculos().filter(function (v) {
+    return !(String(v.fornecedorId) === String(_prFabricaId) && String(v.categoriaId) === String(_prRedeId) && String(v.subcategoriaId) === String(_prSubRedeId) && String(v.clienteId) === String(clienteId) && v.ano === _prAnoSel && v.tipo === 'incluido');
+  });
+  data.push({ id: 'prv' + Date.now(), fornecedorId: _prFabricaId, categoriaId: _prRedeId, subcategoriaId: _prSubRedeId, clienteId: clienteId, ano: _prAnoSel, tipo: 'excluido' });
+  setPlanejamentoReinoVinculos(data);
+  var lojas = getPlanejamentoReinoLojas().filter(function (x) {
+    return !(String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(clienteId) && x.ano === _prAnoSel);
+  });
+  setPlanejamentoReinoLojas(lojas);
+  _prRender();
 }
 
 function _prRenderLojasTabela() {
   var corpo = document.getElementById('pr-lj-corpo');
   if (!corpo) return;
-  corpo.innerHTML = _prConstruirTabelaLojasHtml(_prFabricaId, _prRedeId, _prLojasSubRedeId);
+  corpo.innerHTML = _prConstruirTabelaLojasHtml(_prFabricaId, _prRedeId, _prSubRedeId);
 }
 
 // ── Modal: editar uma Loja ──
 function _prAbrirModalEdicaoLoja(clienteId) {
   _prLojaEditClienteId = clienteId;
   var cl = getClientes().find(function (c) { return String(c.id) === String(clienteId); });
-  var loja = getPlanejamentoReinoLojas().find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(clienteId) && x.ano === PR_ANO; });
+  var loja = getPlanejamentoReinoLojas().find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(clienteId) && x.ano === _prAnoSel; });
   var pedidos = (loja && loja.pedidos) || [];
+  var registroNeg = getPlanejamentoReinoRedes().find(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && String(r.subcategoriaId) === String(_prSubRedeId) && r.ano === _prAnoSel; });
+  var precoAntPrefill = (loja && loja.precoAnoAnterior != null) ? loja.precoAnoAnterior : (registroNeg && registroNeg.preco2025 != null ? registroNeg.preco2025 : null);
   document.getElementById('pr-lje-titulo').textContent = 'Editar loja — ' + (cl ? (cl.nome_fantasia || cl.razao_social) : '');
   var campoNum = function (id, label, val) {
     return '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">' + label + '</label><input type="number" step="0.01" class="form-input" id="' + id + '" value="' + (val == null ? '' : val) + '" style="width:100%"></div>';
   };
+  var campoMoeda = function (id, label, val) {
+    return '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">' + label + '</label><input type="text" inputmode="decimal" class="form-input" id="' + id + '" value="' + (val != null ? _pedNumParaMascara(val) : '') + '" oninput="_pedMaskPreco(this)" placeholder="0,00" style="width:100%"></div>';
+  };
   var pedidosHtml = '';
   for (var i = 0; i < 4; i++) {
     var p = pedidos[i] || {};
-    pedidosHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">' +
+    var temSaldo = (p.saldoQtd != null || p.saldoFaturado != null);
+    pedidosHtml += '<div style="border-bottom:1px solid #f1f5f9;padding-bottom:8px;margin-bottom:8px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+      '<span style="font-size:10.5px;font-weight:600;color:#3b82f6">' + (i + 1) + 'º Pedido</span>' +
+      '<label style="display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#64748b;cursor:pointer">' +
+      '<input type="checkbox" id="pr-lje-ped' + i + '-temsaldo" ' + (temSaldo ? 'checked' : '') + ' onchange="document.getElementById(\'pr-lje-ped' + i + '-saldo-wrap\').style.display=this.checked?\'grid\':\'none\'" style="width:12px;height:12px">Teve saldo?' +
+      '</label>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
       campoNum('pr-lje-ped' + i + '-qtd', (i + 1) + 'º Pedido (kg)', p.qtd) +
       campoNum('pr-lje-ped' + i + '-fat', (i + 1) + 'º Faturado (kg)', p.faturado) +
+      '</div>' +
+      '<div id="pr-lje-ped' + i + '-saldo-wrap" style="display:' + (temSaldo ? 'grid' : 'none') + ';grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;padding:8px 10px;background:#fffbeb;border:1px solid #fbbf24;border-radius:7px">' +
+      campoNum('pr-lje-ped' + i + '-saldoqtd', 'Saldo ' + (i + 1) + 'º Pedido (kg)', p.saldoQtd) +
+      campoNum('pr-lje-ped' + i + '-saldofat', 'Faturado Saldo ' + (i + 1) + 'º Pedido (kg)', p.saldoFaturado) +
+      '</div>' +
       '</div>';
   }
   document.getElementById('pr-lje-corpo').innerHTML =
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">' +
-    campoNum('pr-lje-venda2024', (PR_ANO - 2) + ' (kg)', loja ? loja.venda2024 : '') +
+    '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:12px">' +
+    '<div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:8px">Faturamento ' + (_prAnoSel - 1) + '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+    campoNum('pr-lje-venda2024', 'Kg', loja ? loja.venda2024 : '') +
+    campoMoeda('pr-lje-precoant', 'Preço (R$)', precoAntPrefill) +
+    '</div></div>' +
+    '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:12px">' +
+    '<div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:8px">Faturamento ' + _prAnoSel + '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
     campoNum('pr-lje-planejado', 'Planejado (kg)', loja ? loja.planejado : '') +
-    campoNum('pr-lje-fechado2026', 'Fechado ' + PR_ANO + ' (kg)', loja ? loja.fechado2026 : '') +
-    '</div>' +
+    campoNum('pr-lje-fechado2026', 'Fechado (kg)', loja ? loja.fechado2026 : '') +
+    '</div></div>' +
+    '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:14px">' +
     '<div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:8px">Pedidos e Faturamentos (até 4)</div>' +
     pedidosHtml +
-    campoNum('pr-lje-valorunit', 'Valor Unitário (R$)', loja ? loja.valorUnitario : '') +
-    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">' +
+    '</div>' +
+    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">' +
     '<button onclick="_prFecharModalEdicaoLoja()" style="background:#fff;color:#64748b;border:1px solid #cbd5e1;border-radius:7px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>' +
     '<button onclick="_prSalvarLoja()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer">Salvar</button>' +
     '</div>';
@@ -22710,30 +23004,35 @@ function _prAbrirModalEdicaoLoja(clienteId) {
 function _prFecharModalEdicaoLoja() { document.getElementById('modal-pr-loja-edit').style.display = 'none'; }
 function _prSalvarLoja() {
   var num = function (id) { var v = document.getElementById(id).value; return v === '' ? null : Number(v); };
+  var moedaLje = function (id) { var v = document.getElementById(id).value; return v === '' ? null : _pedParseMoeda(v); };
   var pedidos = [];
   for (var i = 0; i < 4; i++) {
     var qtd = num('pr-lje-ped' + i + '-qtd'), fat = num('pr-lje-ped' + i + '-fat');
-    if (qtd != null || fat != null) pedidos.push({ qtd: qtd, faturado: fat });
+    var temSaldoEl = document.getElementById('pr-lje-ped' + i + '-temsaldo');
+    var temSaldo = !!(temSaldoEl && temSaldoEl.checked);
+    var saldoQtd = temSaldo ? num('pr-lje-ped' + i + '-saldoqtd') : null;
+    var saldoFat = temSaldo ? num('pr-lje-ped' + i + '-saldofat') : null;
+    if (qtd != null || fat != null || saldoQtd != null || saldoFat != null) pedidos.push({ qtd: qtd, faturado: fat, saldoQtd: saldoQtd, saldoFaturado: saldoFat });
   }
   var data = getPlanejamentoReinoLojas();
-  var idx = data.findIndex(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(_prLojaEditClienteId) && x.ano === PR_ANO; });
+  var idx = data.findIndex(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(_prLojaEditClienteId) && x.ano === _prAnoSel; });
   var obj = {
     id: idx >= 0 ? data[idx].id : ('prl' + Date.now()),
     fornecedorId: _prFabricaId,
     categoriaId: _prRedeId,
-    subcategoriaId: _prLojasSubRedeId,
+    subcategoriaId: _prSubRedeId,
     clienteId: _prLojaEditClienteId,
-    ano: PR_ANO,
+    ano: _prAnoSel,
     venda2024: num('pr-lje-venda2024'),
+    precoAnoAnterior: moedaLje('pr-lje-precoant'),
     planejado: num('pr-lje-planejado'),
     fechado2026: num('pr-lje-fechado2026'),
     pedidos: pedidos,
-    valorUnitario: num('pr-lje-valorunit'),
   };
   if (idx >= 0) data[idx] = obj; else data.push(obj);
   setPlanejamentoReinoLojas(data);
   _prFecharModalEdicaoLoja();
-  _prRenderLojasTabela();
+  _prRender();
 }
 
 // ── Exportar / Importar Excel ──
@@ -22742,11 +23041,11 @@ function _prExportarExcel() {
   var forn = getFornecedores().find(function (f) { return String(f.id) === String(_prFabricaId); });
   var rede = getCatClientes().find(function (c) { return String(c.id) === String(_prRedeId); });
   var subs = getCatClientes().filter(function (c) { return String(c.pai) === String(_prRedeId); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && r.ano === PR_ANO; });
+  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && r.ano === _prAnoSel; });
 
   var wb = new ExcelJS.Workbook();
   var ws = wb.addWorksheet('Planejamento Reino', { views: [{ showGridLines: false }] });
-  var cols = ['Sub Rede', '% Contrato', 'Nome Tabela Cliente', 'Faturado ' + (PR_ANO - 1), 'Preço ' + (PR_ANO - 1), 'Último Preço', 'Vol. Projetado', 'Vol. Apresentado', 'Vol. Fechado', 'Preço Tabela ' + PR_ANO, 'Preço Apresentado', 'Preço Campanha', 'Preço Fechado', 'Investimento', 'Faturamento ' + PR_ANO, '% Aumento', 'Situação'];
+  var cols = ['Sub Rede', '% Contrato', 'Nome Tabela Cliente', 'Faturado ' + (_prAnoSel - 1), 'Preço ' + (_prAnoSel - 1), 'Último Preço', 'Vol. Projetado', 'Vol. Apresentado', 'Vol. Fechado', 'Preço Tabela ' + _prAnoSel, 'Preço Apresentado', 'Preço Campanha', 'Preço Fechado', 'Investimento', 'Faturamento ' + _prAnoSel, '% Aumento', 'Situação'];
   ws.columns = cols.map(function (cc) { return { header: cc, width: 18 }; });
 
   var linhaTitulo = ws.addRow(['Planejamento Reino — ' + (forn ? forn.nome_fantasia : '') + ' — ' + (rede ? rede.nome : '')]);
@@ -25764,7 +26063,7 @@ function renderBackupPage() {
 // buscar do Firestore quando firebaseConfigurado é true) para pegar os dados reais que
 // ainda estão só aqui. Usa .set() por id, então rodar de novo não duplica nada.
 // ═══════════════════════════════════════════════════
-var _fsColecoesMigrar = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas'];
+var _fsColecoesMigrar = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas', 'planejamento_reino_vinculos'];
 async function migrarDadosParaFirestore() {
   var msg = document.getElementById('backup-fs-msg');
   var btn = document.getElementById('btn-migrar-firestore');

@@ -22358,7 +22358,7 @@ function _prRenderFabricas() {
         : '<div style="width:52px;height:52px;background:' + grad + ';border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0">' + inicial + '</div>';
       return '<div onclick="_prSelecionarFabricaGrafico(\'' + f.id + '\')" style="background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 2px ' + (selecionada ? '14px rgba(39,42,74,.1)' : '12px rgba(39,42,74,.08)') + ';cursor:pointer;border:' + (selecionada ? '2px solid #272A4A' : '1px solid #f1f5f9') + '">' +
         '<div style="display:flex;align-items:center;gap:14px">' + logoHtml + '<div style="font-size:15px;font-weight:700;color:#1e293b">' + _prEsc(f.nome_fantasia) + '</div></div>' +
-        (selecionada ? '<div style="text-align:center;font-size:10px;font-weight:700;color:#272A4A;background:#eef1f8;border-radius:6px;padding:6px 0;margin-top:14px">Selecionada no gráfico</div>' : '<div style="height:32px;margin-top:14px"></div>') +
+        '<div style="height:32px;margin-top:14px"></div>' +
         '<button onclick="event.stopPropagation();_prAbrirFabrica(\'' + f.id + '\')" style="width:100%;margin-top:10px;background:' + (selecionada ? '#272A4A' : '#fff') + ';color:' + (selecionada ? '#fff' : '#272A4A') + ';border:' + (selecionada ? 'none' : '1px solid #cbd5e1') + ';border-radius:7px;padding:9px 0;font-size:11.5px;font-weight:700;cursor:pointer">Ver Planejamento &#8250;</button>' +
         '</div>';
     }).join('') + '</div>' +
