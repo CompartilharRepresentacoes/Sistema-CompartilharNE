@@ -22351,13 +22351,13 @@ function _prCampoResumo(titulo, valor) {
   return '<div><div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase">' + _prEsc(titulo) + '</div><div style="font-size:12.5px;font-weight:700;color:#1e293b;margin-top:2px">' + _prEsc(valor) + '</div></div>';
 }
 
-function _prSelecionarRedeInline(redeId) {
-  _prRedeId = redeId || null;
+function _prToggleRedeAccordion(redeId) {
+  _prRedeId = (String(_prRedeId) === String(redeId)) ? null : redeId;
   _prSubRedeId = null;
   _prRenderRedes();
 }
-function _prSelecionarSubRedeInline(subRedeId) {
-  _prSubRedeId = subRedeId || null;
+function _prToggleSubRedeAccordion(subRedeId) {
+  _prSubRedeId = (String(_prSubRedeId) === String(subRedeId)) ? null : subRedeId;
   _prRenderRedes();
 }
 
@@ -22385,43 +22385,65 @@ function _prRenderRedes() {
     _prKpiCardTexto('Sub Redes negociando', registros.length, qtdFechadas + ' fechadas &#183; ' + qtdApresentadas + ' apresentadas &#183; ' + qtdNegociacao + ' em negociação') +
     '</div>';
 
-  var subsDaRede = _prRedeId ? getCatClientes().filter(function (c) { return String(c.pai) === String(_prRedeId); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); }) : [];
-  var opcoesRede = '<option value="">Selecione a Rede...</option>' + redes.map(function (r) { return '<option value="' + r.id + '"' + (String(_prRedeId) === String(r.id) ? ' selected' : '') + '>' + _prEsc(r.nome) + '</option>'; }).join('');
-  var opcoesSub = '<option value="">Selecione a Sub Rede...</option>' + subsDaRede.map(function (s) { return '<option value="' + s.id + '"' + (String(_prSubRedeId) === String(s.id) ? ' selected' : '') + '>' + _prEsc(s.nome) + '</option>'; }).join('');
+  var linhasHtml = redes.map(function (rede) {
+    var subsCat = getCatClientes().filter(function (c) { return String(c.pai) === String(rede.id); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
+    var subsReg = registros.filter(function (r) { return String(r.categoriaId) === String(rede.id); });
+    var volFech = 0, fat = 0;
+    subsReg.forEach(function (r) { volFech += Number(r.volFechado) || 0; fat += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0); });
+    var aberta = String(_prRedeId) === String(rede.id);
 
-  var seletorHtml = '<div style="background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 2px 12px rgba(39,42,74,.07);margin-bottom:18px">' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">' +
-    '<div style="font-size:12.5px;font-weight:700;color:#1e293b">Selecione a Rede e a Sub Rede para preencher as lojas</div>' +
-    (_prRedeId ? ('<div style="display:flex;gap:8px">' +
-      '<button onclick="_prExportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Exportar Excel</button>' +
-      '<button onclick="_prImportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Importar Excel</button>' +
-      '</div>') : '') +
-    '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' +
-    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Rede</label><select class="form-input" style="width:100%" onchange="_prSelecionarRedeInline(this.value)">' + opcoesRede + '</select></div>' +
-    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Sub Rede</label><select class="form-input" style="width:100%" onchange="_prSelecionarSubRedeInline(this.value)"' + (!_prRedeId ? ' disabled' : '') + '>' + opcoesSub + '</select></div>' +
-    '</div>' +
-    '</div>';
+    var headerHtml = '<div onclick="_prToggleRedeAccordion(\'' + rede.id + '\')" style="display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid #f1f5f9;cursor:pointer;background:' + (aberta ? '#f8fafc' : '#fff') + '">' +
+      '<i class="ti ti-chevron-' + (aberta ? 'down' : 'right') + '" style="font-size:13px;color:' + (aberta ? '#272A4A' : '#94a3b8') + ';margin-right:10px"></i>' +
+      '<span style="flex:1;font-weight:700;color:#1e293b;font-size:14px">' + _prEsc(rede.nome) + '</span>' +
+      '<span style="font-size:12.5px;color:#64748b;margin-right:24px">' + subsCat.length + ' Sub Rede' + (subsCat.length === 1 ? '' : 's') + '</span>' +
+      '<span style="width:110px;text-align:right;font-size:12.5px;font-weight:700">' + (volFech ? _prFmtKg(volFech) + ' kg' : '—') + '</span>' +
+      '<span style="width:130px;text-align:right;color:#DE7926;font-weight:700;font-size:12.5px">' + (fat ? _prFmtMoeda(fat) : '—') + '</span>' +
+      '</div>';
 
-  var extraHtml = '';
-  if (_prSubRedeId) {
-    var subRedeObj = getCatClientes().find(function (c) { return String(c.id) === String(_prSubRedeId); });
-    var registro = registros.find(function (r) { return String(r.subcategoriaId) === String(_prSubRedeId); });
-    extraHtml += '<div style="background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 2px 12px rgba(39,42,74,.07);margin-bottom:18px;display:flex;align-items:center;gap:22px;flex-wrap:wrap">';
-    if (registro) {
-      extraHtml += _prCampoResumo('Nome Tabela Cliente', registro.nomeTabela || '—') +
-        _prCampoResumo('Preço Fechado', registro.precoFechado != null ? _prFmtMoeda(registro.precoFechado) : '—') +
-        _prCampoResumo('% Contrato', registro.percContrato != null ? registro.percContrato + '%' : '—') +
-        '<div><div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase">Situação</div><div style="margin-top:2px">' + _prBadgeSituacao(registro.situacao) + '</div></div>';
-    } else {
-      extraHtml += '<div style="font-size:12px;color:#94a3b8">Ainda não há negociação cadastrada para "' + _prEsc(subRedeObj ? subRedeObj.nome : '') + '".</div>';
+    var corpoHtml = '';
+    if (aberta) {
+      corpoHtml = subsCat.map(function (sub) {
+        var r = subsReg.find(function (x) { return String(x.subcategoriaId) === String(sub.id); });
+        var subAberta = String(_prSubRedeId) === String(sub.id);
+        var fatSub = r ? (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0) : 0;
+
+        var subHeader = '<div onclick="_prToggleSubRedeAccordion(\'' + sub.id + '\')" style="display:flex;align-items:center;padding:12px 18px 12px 46px;border-bottom:1px solid #f8fafc;cursor:pointer;background:' + (subAberta ? '#eef1f8' : '#fff') + '">' +
+          '<i class="ti ti-chevron-' + (subAberta ? 'down' : 'right') + '" style="font-size:12px;color:' + (subAberta ? '#272A4A' : '#94a3b8') + ';margin-right:10px"></i>' +
+          '<span style="flex:1;font-weight:600;color:#334155;font-size:13px">' + _prEsc(sub.nome) + '</span>' +
+          (r ? '<span style="margin-right:16px">' + _prBadgeSituacao(r.situacao) + '</span>' : '') +
+          '<span style="width:110px;text-align:right;font-size:12px;font-weight:700">' + (r && r.volFechado ? _prFmtKg(r.volFechado) + ' kg' : '—') + '</span>' +
+          '<span style="width:130px;text-align:right;color:#DE7926;font-weight:700;font-size:12px">' + (fatSub ? _prFmtMoeda(fatSub) : '—') + '</span>' +
+          '</div>';
+
+        var subCorpo = '';
+        if (subAberta) {
+          var resumoHtml = '<div style="background:#fff;border-radius:10px;padding:12px 16px;box-shadow:0 1px 4px rgba(15,23,42,.06);display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:14px">';
+          if (r) {
+            resumoHtml += _prCampoResumo('Nome Tabela Cliente', r.nomeTabela || '—') +
+              _prCampoResumo('Preço Fechado', r.precoFechado != null ? _prFmtMoeda(r.precoFechado) : '—') +
+              _prCampoResumo('% Contrato', r.percContrato != null ? r.percContrato + '%' : '—');
+          } else {
+            resumoHtml += '<div style="font-size:12px;color:#94a3b8">Ainda não há negociação cadastrada para "' + _prEsc(sub.nome) + '".</div>';
+          }
+          resumoHtml += '<div style="margin-left:auto"><button onclick="_prAbrirModalSubRede(\'' + sub.id + '\')" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:600;cursor:pointer"><i class="ti ti-edit" style="font-size:12px;vertical-align:-2px;margin-right:4px"></i>' + (r ? 'Editar negociação' : 'Cadastrar negociação') + '</button></div>';
+          resumoHtml += '</div>';
+
+          var acoesHtml = '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px">' +
+            '<button onclick="_prExportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Exportar Excel</button>' +
+            '<button onclick="_prImportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Importar Excel</button>' +
+            '</div>';
+
+          subCorpo = '<div style="padding:16px 18px 20px 46px;background:#fbfcff">' + resumoHtml + acoesHtml + _prConstruirTabelaLojasHtml(_prFabricaId, rede.id, sub.id) + '</div>';
+        }
+        return subHeader + subCorpo;
+      }).join('');
     }
-    extraHtml += '<div style="margin-left:auto"><button onclick="_prAbrirModalSubRede(\'' + _prSubRedeId + '\')" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:600;cursor:pointer"><i class="ti ti-edit" style="font-size:13px;vertical-align:-2px;margin-right:4px"></i>' + (registro ? 'Editar negociação' : 'Cadastrar negociação') + '</button></div>';
-    extraHtml += '</div>';
-    extraHtml += '<div id="pr-lojas-inline">' + _prConstruirTabelaLojasHtml(_prFabricaId, _prRedeId, _prSubRedeId) + '</div>';
-  }
+    return headerHtml + corpoHtml;
+  }).join('');
 
-  el.innerHTML = kpisHtml + seletorHtml + extraHtml;
+  el.innerHTML = kpisHtml + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
+    (linhasHtml || '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma Rede cadastrada em Cadastros › Categoria de Cliente.</div>') +
+    '</div>';
 }
 
 // ── Tela 3: Sub Redes de uma Rede (colunas da aba GERAL) ──
