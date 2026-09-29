@@ -22761,17 +22761,23 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
   var lojasData = getPlanejamentoReinoLojas();
   var registroNeg = getPlanejamentoReinoRedes().find(function (r) { return String(r.fornecedorId) === String(fornecedorId) && String(r.categoriaId) === String(redeId) && String(r.subcategoriaId) === String(subRedeId) && r.ano === _prAnoSel; });
   var precoFechadoNeg = registroNeg ? registroNeg.precoFechado : null;
-  var totFatTotal = 0, totValorTotal = 0;
+  var totFatTotal = 0, totValorTotal = 0, totPlanejado = 0, totFechado = 0, totSaldo = 0;
+  var totPed = [0, 0, 0, 0], totFat = [0, 0, 0, 0];
 
   var linhas = clientes.map(function (cl) {
     var loja = lojasData.find(function (x) { return String(x.fornecedorId) === String(fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === _prAnoSel; });
     var calc = _prCalcLoja(loja, precoFechadoNeg);
     totFatTotal += calc.fatTotal;
     totValorTotal += calc.valorTotal;
+    totPlanejado += Number(loja && loja.planejado) || 0;
+    totFechado += Number(loja && loja.fechado2026) || 0;
+    if (loja) totSaldo += calc.saldo;
     var pedidos = (loja && loja.pedidos) || [];
     var pedidosCells = '';
     for (var i = 0; i < 4; i++) {
       var p = pedidos[i];
+      if (p && p.qtd != null) totPed[i] += Number(p.qtd) || 0;
+      if (p && p.faturado != null) totFat[i] += Number(p.faturado) || 0;
       pedidosCells += '<td style="padding:8px 9px;text-align:right">' + (p && (p.qtd != null || p.faturado != null) ? ((p.qtd != null ? p.qtd : '—') + ' / ' + (p.faturado != null ? p.faturado : '—')) : '<span style="color:#cbd5e1">—</span>') + '</td>';
     }
     return '<tr class="pr-loja-linha" data-loja-nome="' + (cl.nome_fantasia || cl.razao_social || '').toLowerCase() + '" style="border-bottom:1px solid #f8fafc">' +
@@ -22814,9 +22820,13 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
     '</tr></thead><tbody>' +
     (linhas || '<tr><td colspan="13" style="padding:20px;text-align:center;color:#94a3b8">Nenhuma loja vinculada a essa Sub Rede ainda. Use "Incluir Loja" acima.</td></tr>') +
     '</tbody><tfoot><tr style="background:#1e293b;color:#fff;font-weight:700">' +
-    '<td style="padding:8px 9px" colspan="8">TOTAL (' + clientes.length + ' lojas)</td>' +
+    '<td style="padding:8px 9px" colspan="2">TOTAL (' + clientes.length + ' lojas)</td>' +
+    '<td style="padding:8px 9px;text-align:right">' + (totPlanejado ? _prFmtKg(totPlanejado) : '—') + '</td>' +
+    '<td style="padding:8px 9px;text-align:right">' + (totFechado ? _prFmtKg(totFechado) : '—') + '</td>' +
+    totPed.map(function (v, i) { return '<td style="padding:8px 9px;text-align:right">' + ((v || totFat[i]) ? (_prFmtKg(v) + ' / ' + _prFmtKg(totFat[i])) : '—') + '</td>'; }).join('') +
     '<td style="padding:8px 9px;text-align:right">' + _prFmtKg(totFatTotal) + '</td>' +
-    '<td></td><td></td>' +
+    '<td style="padding:8px 9px;text-align:right;color:' + (totSaldo < 0 ? '#f87171' : '#a7f3d0') + '">' + (totFatTotal || totFechado ? _prFmtKg(totSaldo) : '—') + '</td>' +
+    '<td></td>' +
     '<td style="padding:8px 9px;text-align:right;color:#ffd7a8">' + _prFmtMoeda(totValorTotal) + '</td>' +
     '</tr></tfoot></table></div></div>';
 }
@@ -22834,7 +22844,10 @@ function _prAbrirIncluirLoja() {
   document.getElementById('pr-il-busca').value = '';
   var jaNaLista = {};
   _prObterClientesLoja(_prFabricaId, _prRedeId, _prSubRedeId, _prAnoSel).forEach(function (cl) { jaNaLista[String(cl.id)] = true; });
-  _prIncluirLojaCandidatos = getClientes().filter(function (cl) { return (cl.ativo || 'Sim') !== 'Não' && !jaNaLista[String(cl.id)]; })
+  _prIncluirLojaCandidatos = getClientes().filter(function (cl) {
+    return (cl.ativo || 'Sim') !== 'Não' && !jaNaLista[String(cl.id)] &&
+      String(cl.categoria) === String(_prRedeId) && String(cl.subcategoria) === String(_prSubRedeId);
+  })
     .sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
   _prRenderListaIncluirLoja(_prIncluirLojaCandidatos);
   document.getElementById('modal-pr-incluir-loja').style.display = 'flex';
