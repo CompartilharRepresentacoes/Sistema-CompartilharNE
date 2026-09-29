@@ -22833,7 +22833,7 @@ function _prFiltrarLojas(valor) {
 function _prAbrirIncluirLoja() {
   document.getElementById('pr-il-busca').value = '';
   var jaNaLista = {};
-  _prObterClientesLoja(_prFabricaId, _prRedeId, _prSubRedeId, _prAnoSel).forEach(function (cl) { jaNaLista[String(cl.id)] = true; });
+  _prObterClientesLoja(_prFabricaId, _prRedeId, _prLojasSubRedeId, _prAnoSel).forEach(function (cl) { jaNaLista[String(cl.id)] = true; });
   _prIncluirLojaCandidatos = getClientes().filter(function (cl) { return (cl.ativo || 'Sim') !== 'Não' && !jaNaLista[String(cl.id)]; })
     .sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
   _prRenderListaIncluirLoja(_prIncluirLojaCandidatos);
@@ -22861,12 +22861,12 @@ function _prBuscarClienteIncluir(valor) {
 
 function _prIncluirLojaConfirmar(clienteId) {
   var data = getPlanejamentoReinoVinculos().filter(function (v) {
-    return !(String(v.fornecedorId) === String(_prFabricaId) && String(v.categoriaId) === String(_prRedeId) && String(v.subcategoriaId) === String(_prSubRedeId) && String(v.clienteId) === String(clienteId) && v.ano === _prAnoSel);
+    return !(String(v.fornecedorId) === String(_prFabricaId) && String(v.categoriaId) === String(_prRedeId) && String(v.subcategoriaId) === String(_prLojasSubRedeId) && String(v.clienteId) === String(clienteId) && v.ano === _prAnoSel);
   });
   var cl = getClientes().find(function (c) { return String(c.id) === String(clienteId); });
-  var pertenceGlobal = cl && String(cl.categoria) === String(_prRedeId) && String(cl.subcategoria) === String(_prSubRedeId);
+  var pertenceGlobal = cl && String(cl.categoria) === String(_prRedeId) && String(cl.subcategoria) === String(_prLojasSubRedeId);
   if (!pertenceGlobal) {
-    data.push({ id: 'prv' + Date.now(), fornecedorId: _prFabricaId, categoriaId: _prRedeId, subcategoriaId: _prSubRedeId, clienteId: clienteId, ano: _prAnoSel, tipo: 'incluido' });
+    data.push({ id: 'prv' + Date.now(), fornecedorId: _prFabricaId, categoriaId: _prRedeId, subcategoriaId: _prLojasSubRedeId, clienteId: clienteId, ano: _prAnoSel, tipo: 'incluido' });
   }
   setPlanejamentoReinoVinculos(data);
   _prFecharIncluirLoja();
@@ -22876,9 +22876,9 @@ function _prIncluirLojaConfirmar(clienteId) {
 function _prConfirmarExcluirLoja(clienteId, nomeLoja) {
   if (!confirm('Remover "' + nomeLoja + '" desta Rede/Sub Rede (ano ' + _prAnoSel + ')?\n\nOs dados de planejamento dela nesta fábrica serão apagados. O cadastro do Cliente (Rede/Sub Rede geral) não é alterado.')) return;
   var data = getPlanejamentoReinoVinculos().filter(function (v) {
-    return !(String(v.fornecedorId) === String(_prFabricaId) && String(v.categoriaId) === String(_prRedeId) && String(v.subcategoriaId) === String(_prSubRedeId) && String(v.clienteId) === String(clienteId) && v.ano === _prAnoSel && v.tipo === 'incluido');
+    return !(String(v.fornecedorId) === String(_prFabricaId) && String(v.categoriaId) === String(_prRedeId) && String(v.subcategoriaId) === String(_prLojasSubRedeId) && String(v.clienteId) === String(clienteId) && v.ano === _prAnoSel && v.tipo === 'incluido');
   });
-  data.push({ id: 'prv' + Date.now(), fornecedorId: _prFabricaId, categoriaId: _prRedeId, subcategoriaId: _prSubRedeId, clienteId: clienteId, ano: _prAnoSel, tipo: 'excluido' });
+  data.push({ id: 'prv' + Date.now(), fornecedorId: _prFabricaId, categoriaId: _prRedeId, subcategoriaId: _prLojasSubRedeId, clienteId: clienteId, ano: _prAnoSel, tipo: 'excluido' });
   setPlanejamentoReinoVinculos(data);
   var lojas = getPlanejamentoReinoLojas().filter(function (x) {
     return !(String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(clienteId) && x.ano === _prAnoSel);
@@ -22890,7 +22890,7 @@ function _prConfirmarExcluirLoja(clienteId, nomeLoja) {
 function _prRenderLojasTabela() {
   var corpo = document.getElementById('pr-lj-corpo');
   if (!corpo) return;
-  corpo.innerHTML = _prConstruirTabelaLojasHtml(_prFabricaId, _prRedeId, _prSubRedeId);
+  corpo.innerHTML = _prConstruirTabelaLojasHtml(_prFabricaId, _prRedeId, _prLojasSubRedeId);
 }
 
 // ── Modal: editar uma Loja ──
@@ -22899,7 +22899,7 @@ function _prAbrirModalEdicaoLoja(clienteId) {
   var cl = getClientes().find(function (c) { return String(c.id) === String(clienteId); });
   var loja = getPlanejamentoReinoLojas().find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(clienteId) && x.ano === _prAnoSel; });
   var pedidos = (loja && loja.pedidos) || [];
-  var registroNeg = getPlanejamentoReinoRedes().find(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && String(r.subcategoriaId) === String(_prSubRedeId) && r.ano === _prAnoSel; });
+  var registroNeg = getPlanejamentoReinoRedes().find(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && String(r.subcategoriaId) === String(_prLojasSubRedeId) && r.ano === _prAnoSel; });
   var precoAntPrefill = (loja && loja.precoAnoAnterior != null) ? loja.precoAnoAnterior : (registroNeg && registroNeg.preco2025 != null ? registroNeg.preco2025 : null);
   document.getElementById('pr-lje-titulo').textContent = 'Editar loja — ' + (cl ? (cl.nome_fantasia || cl.razao_social) : '');
   var campoNum = function (id, label, val) {
@@ -22954,7 +22954,7 @@ function _prSalvarLoja() {
     id: idx >= 0 ? data[idx].id : ('prl' + Date.now()),
     fornecedorId: _prFabricaId,
     categoriaId: _prRedeId,
-    subcategoriaId: _prSubRedeId,
+    subcategoriaId: _prLojasSubRedeId,
     clienteId: _prLojaEditClienteId,
     ano: _prAnoSel,
     venda2024: num('pr-lje-venda2024'),
@@ -22966,7 +22966,7 @@ function _prSalvarLoja() {
   if (idx >= 0) data[idx] = obj; else data.push(obj);
   setPlanejamentoReinoLojas(data);
   _prFecharModalEdicaoLoja();
-  _prRender();
+  _prRenderLojasTabela();
 }
 
 // ── Exportar / Importar Excel ──
