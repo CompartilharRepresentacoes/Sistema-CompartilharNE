@@ -22103,7 +22103,7 @@ function setPlanejamentoReinoLojas(data) { if (firebaseConfigurado) { _fsSet('pl
 // categoria/subcategoria. Dados de negociação (planejamento_reino_redes) e
 // de loja (planejamento_reino_lojas) são próprios do módulo, por fábrica.
 // ═══════════════════════════════════════════════════
-var _prAnoSel = 2026;
+var PR_ANO = 2026;
 var _PR_SITUACOES = ['Fechado', 'Apresentado', 'Em negociação'];
 var _PR_SITUACAO_CORES = {
   'Fechado':       { bg: '#f0fdf4', cor: '#15803d' },
@@ -22201,24 +22201,19 @@ function _prPathSuave(pts) {
 // passa a somar mais um ponto aqui automaticamente.
 function _prCalcularEvolucao(fornecedorIdOuNull) {
   var registros = getPlanejamentoReinoRedes().filter(function (r) {
-    return (fornecedorIdOuNull == null || String(r.fornecedorId) === String(fornecedorIdOuNull));
+    return r.ano === PR_ANO && (fornecedorIdOuNull == null || String(r.fornecedorId) === String(fornecedorIdOuNull));
   });
-  if (!registros.length) return [];
-  var porAno = {};
+  var kgAnterior = 0, rsAnterior = 0, kgAtual = 0, rsAtual = 0;
   registros.forEach(function (r) {
-    var key = r.ano;
-    if (!porAno[key]) porAno[key] = { ano: key, kg: 0, rs: 0 };
-    porAno[key].kg += Number(r.volFechado) || 0;
-    porAno[key].rs += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0);
+    kgAnterior += Number(r.faturado2025) || 0;
+    rsAnterior += (Number(r.faturado2025) || 0) * (Number(r.preco2025) || 0);
+    kgAtual += Number(r.volFechado) || 0;
+    rsAtual += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0);
   });
-  var anos = Object.keys(porAno).map(Number).sort(function (a, b) { return a - b; });
-  var pontos = anos.map(function (a) { return porAno[a]; });
-  var primeiroAno = anos[0];
-  var registrosPrimeiroAno = registros.filter(function (r) { return r.ano === primeiroAno; });
-  var kgAnt = 0, rsAnt = 0;
-  registrosPrimeiroAno.forEach(function (r) { kgAnt += Number(r.faturado2025) || 0; rsAnt += (Number(r.faturado2025) || 0) * (Number(r.preco2025) || 0); });
-  if (kgAnt || rsAnt) pontos.unshift({ ano: primeiroAno - 1, kg: kgAnt, rs: rsAnt });
-  return pontos;
+  return [
+    { ano: PR_ANO - 1, kg: kgAnterior, rs: rsAnterior },
+    { ano: PR_ANO, kg: kgAtual, rs: rsAtual },
+  ];
 }
 
 function _prFmtMoedaCompacta(v) {
@@ -22274,7 +22269,7 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
 
 function _prCalcularRankRedes(fornecedorIdOuNull) {
   var registros = getPlanejamentoReinoRedes().filter(function (r) {
-    return (fornecedorIdOuNull == null || String(r.fornecedorId) === String(fornecedorIdOuNull));
+    return r.ano === PR_ANO && (fornecedorIdOuNull == null || String(r.fornecedorId) === String(fornecedorIdOuNull));
   });
   var porRede = {};
   registros.forEach(function (r) {
@@ -22346,7 +22341,7 @@ function _prRenderFabricas() {
     ? _prEsc(fabricaSelecionada.nome_fantasia)
     : 'TODAS AS FÁBRICAS';
   var graficoHtml = _prRenderGraficoEvolucaoHtml('Evolução do Faturamento do Queijo do Reino', chipHtml + ' · por ano', pontos);
-  var rankHtml = _prRenderRankRedesHtml('Rank de Redes — Reino (histórico)', _prCalcularRankRedes(_prGraficoFabricaId));
+  var rankHtml = _prRenderRankRedesHtml('Rank de Redes — Reino ' + PR_ANO, _prCalcularRankRedes(_prGraficoFabricaId));
 
   el.innerHTML = cardsHtml + graficoHtml + rankHtml;
 }
@@ -22368,7 +22363,8 @@ function _prToggleSubRedeAccordion(subRedeId) {
 
 function _prRenderRedes() {
   var el = document.getElementById('pr-conteudo');
-  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && r.ano === _prAnoSel; });
+  var redes = getCatClientes().filter(function (c) { return !c.pai; }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
+  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && r.ano === PR_ANO; });
 
   var somaProjetado = 0, somaFechadoKg = 0, somaFaturado2025 = 0, somaFaturamento2026 = 0;
   var qtdFechadas = 0, qtdApresentadas = 0, qtdNegociacao = 0;
@@ -22382,39 +22378,16 @@ function _prRenderRedes() {
     else if (r.situacao === 'Em negociação') qtdNegociacao++;
   });
 
-  var anosExistentes = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId); }).map(function (r) { return r.ano; });
-  var anosSet = {};
-  [_prAnoSel - 1, _prAnoSel, _prAnoSel + 1, _prAnoSel + 2].concat(anosExistentes).forEach(function (a) { anosSet[a] = true; });
-  var anosOrdenados = Object.keys(anosSet).map(Number).sort(function (a, b) { return a - b; });
-  var anoBarHtml = '<div style="display:flex;justify-content:flex-end;margin-bottom:14px">' +
-    '<div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:6px 10px">' +
-    '<i class="ti ti-calendar" style="font-size:14px;color:#94a3b8"></i>' +
-    '<span style="font-size:11px;color:#94a3b8;font-weight:600">Ano vigente:</span>' +
-    '<select onchange="_prSelecionarAno(this.value)" style="border:none;background:transparent;font-weight:800;font-size:13px;color:#272A4A;cursor:pointer">' +
-    anosOrdenados.map(function (a) { return '<option value="' + a + '"' + (a === _prAnoSel ? ' selected' : '') + '>' + a + '</option>'; }).join('') +
-    '</select></div></div>';
-
-  var kpisHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px">' +
+  var kpisHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:18px">' +
     _prKpiCard('Volume Projetado', somaProjetado, null) +
     _prKpiCard('Volume Fechado', somaFechadoKg, somaFaturamento2026) +
-    _prKpiCard('Faturado ' + (_prAnoSel - 1), somaFaturado2025, null) +
+    _prKpiCard('Faturado ' + (PR_ANO - 1), somaFaturado2025, null) +
     _prKpiCardTexto('Sub Redes negociando', registros.length, qtdFechadas + ' fechadas &#183; ' + qtdApresentadas + ' apresentadas &#183; ' + qtdNegociacao + ' em negociação') +
     '</div>';
 
-  var cadastrarBtnHtml = '<button onclick="_prAbrirCadastrarNegociacao()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:12.5px;font-weight:700;cursor:pointer;margin-bottom:18px">' +
-    '<i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:6px"></i>Cadastrar Negociação</button>';
-
-  var redesComNegociacao = {};
-  registros.forEach(function (r) { redesComNegociacao[String(r.categoriaId)] = true; });
-  var redes = getCatClientes().filter(function (c) { return !c.pai && redesComNegociacao[String(c.id)]; })
-    .sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-
   var linhasHtml = redes.map(function (rede) {
+    var subsCat = getCatClientes().filter(function (c) { return String(c.pai) === String(rede.id); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
     var subsReg = registros.filter(function (r) { return String(r.categoriaId) === String(rede.id); });
-    var subsRegIds = {};
-    subsReg.forEach(function (r) { subsRegIds[String(r.subcategoriaId)] = true; });
-    var subsCat = getCatClientes().filter(function (c) { return String(c.pai) === String(rede.id) && subsRegIds[String(c.id)]; })
-      .sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
     var volFech = 0, fat = 0;
     subsReg.forEach(function (r) { volFech += Number(r.volFechado) || 0; fat += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0); });
     var aberta = String(_prRedeId) === String(rede.id);
@@ -22468,23 +22441,16 @@ function _prRenderRedes() {
     return headerHtml + corpoHtml;
   }).join('');
 
-  el.innerHTML = anoBarHtml + kpisHtml + cadastrarBtnHtml + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
-    (linhasHtml || '<div style="padding:28px;text-align:center;color:#94a3b8;font-size:12.5px">Nenhuma negociação cadastrada ainda para o ano ' + _prAnoSel + '.<br>Clique em "Cadastrar Negociação" acima para começar.</div>') +
+  el.innerHTML = kpisHtml + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
+    (linhasHtml || '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma Rede cadastrada em Cadastros › Categoria de Cliente.</div>') +
     '</div>';
-}
-
-function _prSelecionarAno(anoStr) {
-  _prAnoSel = Number(anoStr);
-  _prRedeId = null;
-  _prSubRedeId = null;
-  _prRenderRedes();
 }
 
 // ── Tela 3: Sub Redes de uma Rede (colunas da aba GERAL) ──
 function _prRenderSubRedes() {
   var el = document.getElementById('pr-conteudo');
   var subs = getCatClientes().filter(function (c) { return String(c.pai) === String(_prRedeId); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && r.ano === _prAnoSel; });
+  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && r.ano === PR_ANO; });
 
   var acoesHtml = '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px">' +
     '<button onclick="_prExportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:600;cursor:pointer">Exportar Excel</button>' +
@@ -22529,18 +22495,18 @@ function _prRenderSubRedes() {
     '<th style="padding:8px 10px;text-align:left;position:sticky;left:0;background:#f8fafc">Sub Rede</th>' +
     '<th style="padding:8px 10px;text-align:right">% Contrato</th>' +
     '<th style="padding:8px 10px;text-align:left">Nome Tabela Cliente</th>' +
-    '<th style="padding:8px 10px;text-align:right">Faturado ' + (_prAnoSel - 1) + '</th>' +
-    '<th style="padding:8px 10px;text-align:right">Preço ' + (_prAnoSel - 1) + '</th>' +
+    '<th style="padding:8px 10px;text-align:right">Faturado ' + (PR_ANO - 1) + '</th>' +
+    '<th style="padding:8px 10px;text-align:right">Preço ' + (PR_ANO - 1) + '</th>' +
     '<th style="padding:8px 10px;text-align:right">Último Preço</th>' +
     '<th style="padding:8px 10px;text-align:right">Vol. Projetado</th>' +
     '<th style="padding:8px 10px;text-align:right">Vol. Apresentado</th>' +
     '<th style="padding:8px 10px;text-align:right">Vol. Fechado</th>' +
-    '<th style="padding:8px 10px;text-align:right">Preço Tabela ' + _prAnoSel + '</th>' +
+    '<th style="padding:8px 10px;text-align:right">Preço Tabela ' + PR_ANO + '</th>' +
     '<th style="padding:8px 10px;text-align:right">Preço Apresentado</th>' +
     '<th style="padding:8px 10px;text-align:right">Preço Campanha</th>' +
     '<th style="padding:8px 10px;text-align:right">Preço Fechado</th>' +
     '<th style="padding:8px 10px;text-align:right">Investimento</th>' +
-    '<th style="padding:8px 10px;text-align:right">Faturamento ' + _prAnoSel + '</th>' +
+    '<th style="padding:8px 10px;text-align:right">Faturamento ' + PR_ANO + '</th>' +
     '<th style="padding:8px 10px;text-align:right">% Aumento</th>' +
     '<th style="padding:8px 10px;text-align:center">Situação</th>' +
     '<th style="padding:8px 10px;text-align:center">Ações</th>' +
@@ -22550,32 +22516,50 @@ function _prRenderSubRedes() {
 }
 
 // ── Modal: editar/criar negociação de uma Sub Rede ──
-function _prCamposNegociacaoHtml(r, ano) {
+function _prAbrirModalSubRede(subRedeId) {
+  var registros = getPlanejamentoReinoRedes();
+  var r = registros.find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.categoriaId) === String(_prRedeId) && String(x.subcategoriaId) === String(subRedeId) && x.ano === PR_ANO; });
+  var sub = getCatClientes().find(function (c) { return String(c.id) === String(subRedeId); });
+  _prSubRedeEditId = r ? r.id : null;
+  document.getElementById('pr-sr-titulo').textContent = (r ? 'Editar' : 'Nova') + ' negociação — ' + (sub ? sub.nome : '');
   var campoNum = function (id, label, val) {
     return '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">' + label + '</label><input type="number" step="0.01" class="form-input" id="' + id + '" value="' + (val == null ? '' : val) + '" style="width:100%"></div>';
   };
   var situacaoOpts = _PR_SITUACOES.map(function (s) { return '<option value="' + s + '"' + (r && r.situacao === s ? ' selected' : '') + '>' + s + '</option>'; }).join('');
-  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+  document.getElementById('pr-sr-corpo').innerHTML =
+    '<input type="hidden" id="pr-sr-subredeid" value="' + subRedeId + '">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
     campoNum('pr-sr-perccontrato', '% Contrato', r ? r.percContrato : '') +
     '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Nome Tabela Cliente</label><input class="form-input" id="pr-sr-nometabela" value="' + _prEsc(r ? r.nomeTabela : '') + '" style="width:100%" placeholder="Nome da tabela no sistema do cliente"></div>' +
-    campoNum('pr-sr-faturado2025', 'Faturado ' + (ano - 1) + ' (kg)', r ? r.faturado2025 : '') +
-    campoNum('pr-sr-preco2025', 'Preço ' + (ano - 1) + ' (R$)', r ? r.preco2025 : '') +
+    campoNum('pr-sr-faturado2025', 'Faturado ' + (PR_ANO - 1) + ' (kg)', r ? r.faturado2025 : '') +
+    campoNum('pr-sr-preco2025', 'Preço ' + (PR_ANO - 1) + ' (R$)', r ? r.preco2025 : '') +
     campoNum('pr-sr-ultimopreco', 'Último Preço (R$)', r ? r.ultimoPreco : '') +
     campoNum('pr-sr-volprojetado', 'Volume Projetado (kg)', r ? r.volProjetado : '') +
     campoNum('pr-sr-volapresentado', 'Volume Apresentado (kg)', r ? r.volApresentado : '') +
     campoNum('pr-sr-volfechado', 'Volume Fechado (kg)', r ? r.volFechado : '') +
-    campoNum('pr-sr-precotabela2026', 'Preço Tabela ' + ano + ' (R$)', r ? r.precoTabela2026 : '') +
+    campoNum('pr-sr-precotabela2026', 'Preço Tabela ' + PR_ANO + ' (R$)', r ? r.precoTabela2026 : '') +
     campoNum('pr-sr-precoapresentado', 'Preço Apresentado (R$)', r ? r.precoApresentado : '') +
     campoNum('pr-sr-precocampanha', 'Preço Campanha (R$)', r ? r.precoCampanha : '') +
     campoNum('pr-sr-precofechado', 'Preço Fechado (R$)', r ? r.precoFechado : '') +
     campoNum('pr-sr-investimento', 'Investimento (R$)', r ? r.investimento : '') +
     '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Situação</label><select class="form-input" id="pr-sr-situacao" style="width:100%">' + situacaoOpts + '</select></div>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">' +
+    '<button onclick="_prFecharModalSubRede()" style="background:#fff;color:#64748b;border:1px solid #cbd5e1;border-radius:7px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>' +
+    '<button onclick="_prSalvarSubRede()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer">Salvar</button>' +
     '</div>';
+  document.getElementById('modal-pr-subrede').style.display = 'flex';
 }
-
-function _prColetarCamposNegociacao() {
+function _prFecharModalSubRede() { document.getElementById('modal-pr-subrede').style.display = 'none'; }
+function _prSalvarSubRede() {
+  var subRedeId = document.getElementById('pr-sr-subredeid').value;
   var num = function (id) { var v = document.getElementById(id).value; return v === '' ? null : Number(v); };
-  return {
+  var obj = {
+    id: _prSubRedeEditId || ('pr' + Date.now()),
+    fornecedorId: _prFabricaId,
+    categoriaId: _prRedeId,
+    subcategoriaId: subRedeId,
+    ano: PR_ANO,
     percContrato: num('pr-sr-perccontrato'),
     nomeTabela: document.getElementById('pr-sr-nometabela').value.trim(),
     faturado2025: num('pr-sr-faturado2025'),
@@ -22591,65 +22575,6 @@ function _prColetarCamposNegociacao() {
     investimento: num('pr-sr-investimento'),
     situacao: document.getElementById('pr-sr-situacao').value,
   };
-}
-
-function _prAbrirModalSubRede(subRedeId) {
-  var registros = getPlanejamentoReinoRedes();
-  var r = registros.find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.categoriaId) === String(_prRedeId) && String(x.subcategoriaId) === String(subRedeId) && x.ano === _prAnoSel; });
-  var sub = getCatClientes().find(function (c) { return String(c.id) === String(subRedeId); });
-  _prSubRedeEditId = r ? r.id : null;
-  document.getElementById('pr-sr-titulo').textContent = (r ? 'Editar' : 'Nova') + ' negociação — ' + (sub ? sub.nome : '');
-  document.getElementById('pr-sr-corpo').innerHTML =
-    '<input type="hidden" id="pr-sr-subredeid" value="' + subRedeId + '">' +
-    _prCamposNegociacaoHtml(r, _prAnoSel) +
-    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">' +
-    '<button onclick="_prFecharModalSubRede()" style="background:#fff;color:#64748b;border:1px solid #cbd5e1;border-radius:7px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>' +
-    '<button onclick="_prSalvarSubRede()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer">Salvar</button>' +
-    '</div>';
-  document.getElementById('modal-pr-subrede').style.display = 'flex';
-}
-
-function _prAbrirCadastrarNegociacao() {
-  _prSubRedeEditId = null;
-  document.getElementById('pr-sr-titulo').textContent = 'Cadastrar Negociação';
-  var redes = getCatClientes().filter(function (c) { return !c.pai; }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-  var redeOpts = '<option value="">Selecione...</option>' + redes.map(function (rd) { return '<option value="' + rd.id + '">' + _prEsc(rd.nome) + '</option>'; }).join('');
-  var anosSet = {};
-  [_prAnoSel - 1, _prAnoSel, _prAnoSel + 1, _prAnoSel + 2].forEach(function (a) { anosSet[a] = true; });
-  var anoOpts = Object.keys(anosSet).map(Number).sort(function (a, b) { return a - b; }).map(function (a) { return '<option value="' + a + '"' + (a === _prAnoSel ? ' selected' : '') + '>' + a + '</option>'; }).join('');
-  document.getElementById('pr-sr-corpo').innerHTML =
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px dashed #e2e8f0">' +
-    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Ano</label><select class="form-input" id="pr-sr-ano-novo" style="width:100%">' + anoOpts + '</select></div>' +
-    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Rede</label><select class="form-input" id="pr-sr-rede-novo" style="width:100%" onchange="_prAoTrocarRedeCadastro()">' + redeOpts + '</select></div>' +
-    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Sub Rede</label><select class="form-input" id="pr-sr-subrede-novo" style="width:100%" disabled><option value="">Selecione a Rede primeiro</option></select></div>' +
-    '</div>' +
-    '<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:10px">Dados da negociação</div>' +
-    _prCamposNegociacaoHtml(null, _prAnoSel) +
-    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">' +
-    '<button onclick="_prFecharModalSubRede()" style="background:#fff;color:#64748b;border:1px solid #cbd5e1;border-radius:7px;padding:8px 16px;font-size:12px;cursor:pointer">Cancelar</button>' +
-    '<button onclick="_prSalvarNovaNegociacao()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer">Salvar Negociação</button>' +
-    '</div>';
-  document.getElementById('modal-pr-subrede').style.display = 'flex';
-}
-
-function _prAoTrocarRedeCadastro() {
-  var redeId = document.getElementById('pr-sr-rede-novo').value;
-  var sel = document.getElementById('pr-sr-subrede-novo');
-  if (!redeId) { sel.disabled = true; sel.innerHTML = '<option value="">Selecione a Rede primeiro</option>'; return; }
-  var subs = getCatClientes().filter(function (c) { return String(c.pai) === String(redeId); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-  sel.disabled = false;
-  sel.innerHTML = '<option value="">Selecione...</option>' + subs.map(function (s) { return '<option value="' + s.id + '">' + _prEsc(s.nome) + '</option>'; }).join('');
-}
-function _prFecharModalSubRede() { document.getElementById('modal-pr-subrede').style.display = 'none'; }
-function _prSalvarSubRede() {
-  var subRedeId = document.getElementById('pr-sr-subredeid').value;
-  var obj = Object.assign({
-    id: _prSubRedeEditId || ('pr' + Date.now()),
-    fornecedorId: _prFabricaId,
-    categoriaId: _prRedeId,
-    subcategoriaId: subRedeId,
-    ano: _prAnoSel,
-  }, _prColetarCamposNegociacao());
   var data = getPlanejamentoReinoRedes();
   if (_prSubRedeEditId) {
     var idx = data.findIndex(function (x) { return x.id === _prSubRedeEditId; });
@@ -22659,30 +22584,6 @@ function _prSalvarSubRede() {
   }
   setPlanejamentoReinoRedes(data);
   _prFecharModalSubRede();
-  _prRender();
-}
-
-function _prSalvarNovaNegociacao() {
-  var redeId = document.getElementById('pr-sr-rede-novo').value;
-  var subRedeId = document.getElementById('pr-sr-subrede-novo').value;
-  var ano = Number(document.getElementById('pr-sr-ano-novo').value);
-  if (!redeId || !subRedeId) { alert('Selecione a Rede e a Sub Rede.'); return; }
-  var existente = getPlanejamentoReinoRedes().find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.categoriaId) === String(redeId) && String(x.subcategoriaId) === String(subRedeId) && x.ano === ano; });
-  if (existente) { alert('Já existe uma negociação cadastrada para essa Rede/Sub Rede nesse ano. Abra pelo painel abaixo para editar.'); return; }
-  var obj = Object.assign({
-    id: 'pr' + Date.now(),
-    fornecedorId: _prFabricaId,
-    categoriaId: redeId,
-    subcategoriaId: subRedeId,
-    ano: ano,
-  }, _prColetarCamposNegociacao());
-  var data = getPlanejamentoReinoRedes();
-  data.push(obj);
-  setPlanejamentoReinoRedes(data);
-  _prFecharModalSubRede();
-  _prAnoSel = ano;
-  _prRedeId = redeId;
-  _prSubRedeId = subRedeId;
   _prRender();
 }
 function _prRemoverSubRede(id) {
@@ -22716,7 +22617,7 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
   var totFatTotal = 0, totValorTotal = 0;
 
   var linhas = clientes.map(function (cl) {
-    var loja = lojasData.find(function (x) { return String(x.fornecedorId) === String(fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === _prAnoSel; });
+    var loja = lojasData.find(function (x) { return String(x.fornecedorId) === String(fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === PR_ANO; });
     var calc = _prCalcLoja(loja);
     totFatTotal += calc.fatTotal;
     totValorTotal += calc.valorTotal;
@@ -22745,9 +22646,9 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
     '<div style="overflow-x:auto"><table style="width:auto;min-width:1080px;border-collapse:collapse;font-size:11px">' +
     '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">' +
     '<th style="padding:7px 9px;text-align:left">Loja (Cliente)</th>' +
-    '<th style="padding:7px 9px;text-align:right">' + (_prAnoSel - 2) + '</th>' +
+    '<th style="padding:7px 9px;text-align:right">' + (PR_ANO - 2) + '</th>' +
     '<th style="padding:7px 9px;text-align:right">Planejado</th>' +
-    '<th style="padding:7px 9px;text-align:right">Fechado ' + _prAnoSel + '</th>' +
+    '<th style="padding:7px 9px;text-align:right">Fechado ' + PR_ANO + '</th>' +
     '<th style="padding:7px 9px;text-align:right">1º Ped./Fat.</th>' +
     '<th style="padding:7px 9px;text-align:right">2º Ped./Fat.</th>' +
     '<th style="padding:7px 9px;text-align:right">3º Ped./Fat.</th>' +
@@ -22777,7 +22678,7 @@ function _prRenderLojasTabela() {
 function _prAbrirModalEdicaoLoja(clienteId) {
   _prLojaEditClienteId = clienteId;
   var cl = getClientes().find(function (c) { return String(c.id) === String(clienteId); });
-  var loja = getPlanejamentoReinoLojas().find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(clienteId) && x.ano === _prAnoSel; });
+  var loja = getPlanejamentoReinoLojas().find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(clienteId) && x.ano === PR_ANO; });
   var pedidos = (loja && loja.pedidos) || [];
   document.getElementById('pr-lje-titulo').textContent = 'Editar loja — ' + (cl ? (cl.nome_fantasia || cl.razao_social) : '');
   var campoNum = function (id, label, val) {
@@ -22793,9 +22694,9 @@ function _prAbrirModalEdicaoLoja(clienteId) {
   }
   document.getElementById('pr-lje-corpo').innerHTML =
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">' +
-    campoNum('pr-lje-venda2024', (_prAnoSel - 2) + ' (kg)', loja ? loja.venda2024 : '') +
+    campoNum('pr-lje-venda2024', (PR_ANO - 2) + ' (kg)', loja ? loja.venda2024 : '') +
     campoNum('pr-lje-planejado', 'Planejado (kg)', loja ? loja.planejado : '') +
-    campoNum('pr-lje-fechado2026', 'Fechado ' + _prAnoSel + ' (kg)', loja ? loja.fechado2026 : '') +
+    campoNum('pr-lje-fechado2026', 'Fechado ' + PR_ANO + ' (kg)', loja ? loja.fechado2026 : '') +
     '</div>' +
     '<div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:8px">Pedidos e Faturamentos (até 4)</div>' +
     pedidosHtml +
@@ -22815,14 +22716,14 @@ function _prSalvarLoja() {
     if (qtd != null || fat != null) pedidos.push({ qtd: qtd, faturado: fat });
   }
   var data = getPlanejamentoReinoLojas();
-  var idx = data.findIndex(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(_prLojaEditClienteId) && x.ano === _prAnoSel; });
+  var idx = data.findIndex(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(_prLojaEditClienteId) && x.ano === PR_ANO; });
   var obj = {
     id: idx >= 0 ? data[idx].id : ('prl' + Date.now()),
     fornecedorId: _prFabricaId,
     categoriaId: _prRedeId,
     subcategoriaId: _prLojasSubRedeId,
     clienteId: _prLojaEditClienteId,
-    ano: _prAnoSel,
+    ano: PR_ANO,
     venda2024: num('pr-lje-venda2024'),
     planejado: num('pr-lje-planejado'),
     fechado2026: num('pr-lje-fechado2026'),
@@ -22841,11 +22742,11 @@ function _prExportarExcel() {
   var forn = getFornecedores().find(function (f) { return String(f.id) === String(_prFabricaId); });
   var rede = getCatClientes().find(function (c) { return String(c.id) === String(_prRedeId); });
   var subs = getCatClientes().filter(function (c) { return String(c.pai) === String(_prRedeId); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && r.ano === _prAnoSel; });
+  var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && String(r.categoriaId) === String(_prRedeId) && r.ano === PR_ANO; });
 
   var wb = new ExcelJS.Workbook();
   var ws = wb.addWorksheet('Planejamento Reino', { views: [{ showGridLines: false }] });
-  var cols = ['Sub Rede', '% Contrato', 'Nome Tabela Cliente', 'Faturado ' + (_prAnoSel - 1), 'Preço ' + (_prAnoSel - 1), 'Último Preço', 'Vol. Projetado', 'Vol. Apresentado', 'Vol. Fechado', 'Preço Tabela ' + _prAnoSel, 'Preço Apresentado', 'Preço Campanha', 'Preço Fechado', 'Investimento', 'Faturamento ' + _prAnoSel, '% Aumento', 'Situação'];
+  var cols = ['Sub Rede', '% Contrato', 'Nome Tabela Cliente', 'Faturado ' + (PR_ANO - 1), 'Preço ' + (PR_ANO - 1), 'Último Preço', 'Vol. Projetado', 'Vol. Apresentado', 'Vol. Fechado', 'Preço Tabela ' + PR_ANO, 'Preço Apresentado', 'Preço Campanha', 'Preço Fechado', 'Investimento', 'Faturamento ' + PR_ANO, '% Aumento', 'Situação'];
   ws.columns = cols.map(function (cc) { return { header: cc, width: 18 }; });
 
   var linhaTitulo = ws.addRow(['Planejamento Reino — ' + (forn ? forn.nome_fantasia : '') + ' — ' + (rede ? rede.nome : '')]);
