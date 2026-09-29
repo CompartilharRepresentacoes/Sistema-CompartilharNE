@@ -22117,7 +22117,6 @@ var _prSubRedeEditId = null;
 var _prLojasSubRedeId = null;
 var _prLojaEditClienteId = null;
 var _prGraficoFabricaId = null; // null = grafico/rank agregam todas as fabricas com reino
-var _prSubRedeId = null; // Sub Rede escolhida no select da tela da fabrica
 
 function _prEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function _prFmtKg(v) { return (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
@@ -22163,7 +22162,7 @@ function _prAtualizarBreadcrumb() {
 }
 function _prIrFabricas() { _prNivel = 'fabricas'; _prFabricaId = null; _prRedeId = null; _prRender(); }
 function _prIrRedes() { _prNivel = 'redes'; _prRedeId = null; _prRender(); }
-function _prAbrirFabrica(fornId) { _prFabricaId = fornId; _prRedeId = null; _prSubRedeId = null; _prNivel = 'redes'; _prRender(); }
+function _prAbrirFabrica(fornId) { _prFabricaId = fornId; _prRedeId = null; _prNivel = 'redes'; _prRender(); }
 function _prAbrirRede(redeId) { _prRedeId = redeId; _prNivel = 'subredes'; _prRender(); }
 
 function _prKpiCard(titulo, kg, rs) {
@@ -22347,22 +22346,9 @@ function _prRenderFabricas() {
 }
 
 // ── Tela 2: Redes de uma Fábrica ──
-function _prCampoResumo(titulo, valor) {
-  return '<div><div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase">' + _prEsc(titulo) + '</div><div style="font-size:12.5px;font-weight:700;color:#1e293b;margin-top:2px">' + _prEsc(valor) + '</div></div>';
-}
-
-function _prSelecionarRedeInline(redeId) {
-  _prRedeId = redeId || null;
-  _prSubRedeId = null;
-  _prRenderRedes();
-}
-function _prSelecionarSubRedeInline(subRedeId) {
-  _prSubRedeId = subRedeId || null;
-  _prRenderRedes();
-}
-
 function _prRenderRedes() {
   var el = document.getElementById('pr-conteudo');
+  var forn = getFornecedores().find(function (f) { return String(f.id) === String(_prFabricaId); });
   var redes = getCatClientes().filter(function (c) { return !c.pai; }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
   var registros = getPlanejamentoReinoRedes().filter(function (r) { return String(r.fornecedorId) === String(_prFabricaId) && r.ano === PR_ANO; });
 
@@ -22385,43 +22371,31 @@ function _prRenderRedes() {
     _prKpiCardTexto('Sub Redes negociando', registros.length, qtdFechadas + ' fechadas &#183; ' + qtdApresentadas + ' apresentadas &#183; ' + qtdNegociacao + ' em negociação') +
     '</div>';
 
-  var subsDaRede = _prRedeId ? getCatClientes().filter(function (c) { return String(c.pai) === String(_prRedeId); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); }) : [];
-  var opcoesRede = '<option value="">Selecione a Rede...</option>' + redes.map(function (r) { return '<option value="' + r.id + '"' + (String(_prRedeId) === String(r.id) ? ' selected' : '') + '>' + _prEsc(r.nome) + '</option>'; }).join('');
-  var opcoesSub = '<option value="">Selecione a Sub Rede...</option>' + subsDaRede.map(function (s) { return '<option value="' + s.id + '"' + (String(_prSubRedeId) === String(s.id) ? ' selected' : '') + '>' + _prEsc(s.nome) + '</option>'; }).join('');
+  var graficoHtml = _prRenderGraficoEvolucaoHtml('Evolução do Faturamento do Queijo do Reino', (forn ? forn.nome_fantasia : '') + ' · por ano', _prCalcularEvolucao(_prFabricaId));
+  var rankHtml = _prRenderRankRedesHtml('Rank de Redes — ' + (forn ? forn.nome_fantasia : '') + ' ' + PR_ANO, _prCalcularRankRedes(_prFabricaId));
 
-  var seletorHtml = '<div style="background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 2px 12px rgba(39,42,74,.07);margin-bottom:18px">' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">' +
-    '<div style="font-size:12.5px;font-weight:700;color:#1e293b">Selecione a Rede e a Sub Rede para preencher as lojas</div>' +
-    (_prRedeId ? ('<div style="display:flex;gap:8px">' +
-      '<button onclick="_prExportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Exportar Excel</button>' +
-      '<button onclick="_prImportarExcel()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Importar Excel</button>' +
-      '</div>') : '') +
-    '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' +
-    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Rede</label><select class="form-input" style="width:100%" onchange="_prSelecionarRedeInline(this.value)">' + opcoesRede + '</select></div>' +
-    '<div><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Sub Rede</label><select class="form-input" style="width:100%" onchange="_prSelecionarSubRedeInline(this.value)"' + (!_prRedeId ? ' disabled' : '') + '>' + opcoesSub + '</select></div>' +
-    '</div>' +
+  var cardsRedesHtml = redes.map(function (rede) {
+    var subs = registros.filter(function (r) { return String(r.categoriaId) === String(rede.id); });
+    var volProj = 0, volFech = 0, fat26 = 0;
+    subs.forEach(function (r) { volProj += Number(r.volProjetado) || 0; volFech += Number(r.volFechado) || 0; fat26 += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0); });
+    return '<div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 12px rgba(39,42,74,.07)">' +
+      '<div style="display:flex;align-items:center">' +
+      '<span style="flex:1;font-weight:700;color:#1e293b;font-size:14px">' + _prEsc(rede.nome) + '</span>' +
+      '<span style="width:120px;text-align:right;font-size:12.5px">' + (volProj ? _prFmtKg(volProj) + ' kg proj.' : '—') + '</span>' +
+      '<span style="width:120px;text-align:right;font-size:12.5px;font-weight:700">' + (volFech ? _prFmtKg(volFech) + ' kg fech.' : '—') + '</span>' +
+      '<span style="width:130px;text-align:right;color:#DE7926;font-weight:700;font-size:12.5px">' + (fat26 ? _prFmtMoeda(fat26) : '—') + '</span>' +
+      '<span style="width:90px;text-align:center;color:#64748b;font-size:12px">' + subs.length + ' Sub Redes</span>' +
+      '</div>' +
+      '<div style="margin-top:12px;text-align:right">' +
+      '<button onclick="_prAbrirRede(\'' + rede.id + '\')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 18px;font-size:11.5px;font-weight:700;cursor:pointer;letter-spacing:.03em">DETALHAMENTO &#8250;</button>' +
+      '</div>' +
+      '</div>';
+  }).join('');
+
+  el.innerHTML = kpisHtml + graficoHtml + rankHtml +
+    '<div style="display:flex;flex-direction:column;gap:10px">' +
+    (cardsRedesHtml || '<div style="background:#fff;border-radius:12px;padding:20px;text-align:center;color:#94a3b8;font-size:12px;box-shadow:0 2px 12px rgba(39,42,74,.06)">Nenhuma Rede cadastrada em Cadastros › Categoria de Cliente.</div>') +
     '</div>';
-
-  var extraHtml = '';
-  if (_prSubRedeId) {
-    var subRedeObj = getCatClientes().find(function (c) { return String(c.id) === String(_prSubRedeId); });
-    var registro = registros.find(function (r) { return String(r.subcategoriaId) === String(_prSubRedeId); });
-    extraHtml += '<div style="background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 2px 12px rgba(39,42,74,.07);margin-bottom:18px;display:flex;align-items:center;gap:22px;flex-wrap:wrap">';
-    if (registro) {
-      extraHtml += _prCampoResumo('Nome Tabela Cliente', registro.nomeTabela || '—') +
-        _prCampoResumo('Preço Fechado', registro.precoFechado != null ? _prFmtMoeda(registro.precoFechado) : '—') +
-        _prCampoResumo('% Contrato', registro.percContrato != null ? registro.percContrato + '%' : '—') +
-        '<div><div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase">Situação</div><div style="margin-top:2px">' + _prBadgeSituacao(registro.situacao) + '</div></div>';
-    } else {
-      extraHtml += '<div style="font-size:12px;color:#94a3b8">Ainda não há negociação cadastrada para "' + _prEsc(subRedeObj ? subRedeObj.nome : '') + '".</div>';
-    }
-    extraHtml += '<div style="margin-left:auto"><button onclick="_prAbrirModalSubRede(\'' + _prSubRedeId + '\')" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:600;cursor:pointer"><i class="ti ti-edit" style="font-size:13px;vertical-align:-2px;margin-right:4px"></i>' + (registro ? 'Editar negociação' : 'Cadastrar negociação') + '</button></div>';
-    extraHtml += '</div>';
-    extraHtml += '<div id="pr-lojas-inline">' + _prConstruirTabelaLojasHtml(_prFabricaId, _prRedeId, _prSubRedeId) + '</div>';
-  }
-
-  el.innerHTML = kpisHtml + seletorHtml + extraHtml;
 }
 
 // ── Tela 3: Sub Redes de uma Rede (colunas da aba GERAL) ──
@@ -22562,12 +22536,12 @@ function _prSalvarSubRede() {
   }
   setPlanejamentoReinoRedes(data);
   _prFecharModalSubRede();
-  _prRender();
+  _prRenderSubRedes();
 }
 function _prRemoverSubRede(id) {
   if (!confirm('Remover esta negociação? Os dados de lojas já preenchidos não serão apagados.')) return;
   setPlanejamentoReinoRedes(getPlanejamentoReinoRedes().filter(function (x) { return x.id !== id; }));
-  _prRender();
+  _prRenderSubRedes();
 }
 
 // ── Modal: Lojas de uma Sub Rede ──
@@ -22588,14 +22562,16 @@ function _prCalcLoja(loja) {
   return { fatTotal: fatTotal, saldo: fechado - fatTotal, valorTotal: valorUnit * fatTotal };
 }
 
-function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
-  var clientes = getClientes().filter(function (cl) { return String(cl.categoria) === String(redeId) && String(cl.subcategoria) === String(subRedeId) && (cl.ativo || 'Sim') !== 'Não'; })
+function _prRenderLojasTabela() {
+  var corpo = document.getElementById('pr-lj-corpo');
+  if (!corpo) return;
+  var clientes = getClientes().filter(function (cl) { return String(cl.categoria) === String(_prRedeId) && String(cl.subcategoria) === String(_prLojasSubRedeId) && (cl.ativo || 'Sim') !== 'Não'; })
     .sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
   var lojasData = getPlanejamentoReinoLojas();
   var totFatTotal = 0, totValorTotal = 0;
 
   var linhas = clientes.map(function (cl) {
-    var loja = lojasData.find(function (x) { return String(x.fornecedorId) === String(fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === PR_ANO; });
+    var loja = lojasData.find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(cl.id) && x.ano === PR_ANO; });
     var calc = _prCalcLoja(loja);
     totFatTotal += calc.fatTotal;
     totValorTotal += calc.valorTotal;
@@ -22619,10 +22595,8 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
       '</tr>';
   }).join('');
 
-  return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
-    '<div style="padding:14px 18px 10px;font-size:13px;font-weight:700;color:#1e293b">Lojas <span style="font-weight:400;color:#94a3b8;font-size:11px">(' + clientes.length + ' lojas)</span></div>' +
-    '<div style="overflow-x:auto"><table style="width:auto;min-width:1080px;border-collapse:collapse;font-size:11px">' +
-    '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">' +
+  corpo.innerHTML = '<table style="width:auto;min-width:1080px;border-collapse:collapse;font-size:11px">' +
+    '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;position:sticky;top:0">' +
     '<th style="padding:7px 9px;text-align:left">Loja (Cliente)</th>' +
     '<th style="padding:7px 9px;text-align:right">' + (PR_ANO - 2) + '</th>' +
     '<th style="padding:7px 9px;text-align:right">Planejado</th>' +
@@ -22643,13 +22617,7 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
     '<td style="padding:8px 9px;text-align:right">' + _prFmtKg(totFatTotal) + '</td>' +
     '<td></td><td></td>' +
     '<td style="padding:8px 9px;text-align:right;color:#ffd7a8">' + _prFmtMoeda(totValorTotal) + '</td>' +
-    '</tr></tfoot></table></div></div>';
-}
-
-function _prRenderLojasTabela() {
-  var corpo = document.getElementById('pr-lj-corpo');
-  if (!corpo) return;
-  corpo.innerHTML = _prConstruirTabelaLojasHtml(_prFabricaId, _prRedeId, _prLojasSubRedeId);
+    '</tr></tfoot></table>';
 }
 
 // ── Modal: editar uma Loja ──
