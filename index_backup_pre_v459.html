@@ -22136,7 +22136,6 @@ var _prLojaEditClienteId = null;
 var _prGraficoFabricaId = null; // null = grafico/rank agregam todas as fabricas com reino
 var _prSubRedeId = null; // Sub Rede escolhida no select da tela da fabrica
 var _prIncluirLojaCandidatos = []; // cache dos clientes elegiveis no modal Incluir Loja
-var _prPontosEvolucaoAtual = []; // cache dos pontos do grafico de Evolucao, p/ o hover trocar as 4 metricas
 
 function _prEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function _prFmtKg(v) { return (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
@@ -22219,41 +22218,24 @@ function _prPathSuave(pts) {
 // antigos ainda — cada novo ciclo de Reino que for cadastrado no futuro (ano=2027, 2028...)
 // passa a somar mais um ponto aqui automaticamente.
 function _prCalcularEvolucao(fornecedorIdOuNull) {
-  var todosRegistros = getPlanejamentoReinoRedes().filter(function (r) {
+  var registros = getPlanejamentoReinoRedes().filter(function (r) {
     return (fornecedorIdOuNull == null || String(r.fornecedorId) === String(fornecedorIdOuNull));
   });
-  if (!todosRegistros.length) return [];
-  var todasLojas = getPlanejamentoReinoLojas();
-  var anos = [];
-  var anosSet = {};
-  todosRegistros.forEach(function (r) { if (!anosSet[r.ano]) { anosSet[r.ano] = true; anos.push(r.ano); } });
-  anos.sort(function (a, b) { return a - b; });
-
-  // v459: kg/rs passam a ser o Faturado REAL (lojas/pedidos), não mais o Volume Fechado
-  // negociado - mesma lógica já usada no KPI "Faturado {ano}" da Tela 2 (v454), agora
-  // generalizada por ano (histórico) e opcionalmente por várias fábricas (quando null).
-  var pontos = anos.map(function (ano) {
-    var registrosAno = todosRegistros.filter(function (r) { return r.ano === ano; });
-    var kg = 0, rs = 0;
-    var lojasSet = {};
-    registrosAno.forEach(function (r) {
-      var clientesSub = _prObterClientesLoja(r.fornecedorId, r.categoriaId, r.subcategoriaId, ano);
-      clientesSub.forEach(function (cl) {
-        var lojaReg = todasLojas.find(function (x) { return String(x.fornecedorId) === String(r.fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === ano; });
-        var calc = _prCalcLoja(lojaReg, r.precoFechado);
-        kg += calc.fatTotal;
-        rs += calc.valorTotal;
-        if (calc.fatTotal > 0) lojasSet[String(r.fornecedorId) + '|' + String(cl.id)] = true;
-      });
-    });
-    return { ano: ano, kg: kg, rs: rs, lojas: Object.keys(lojasSet).length };
+  if (!registros.length) return [];
+  var porAno = {};
+  registros.forEach(function (r) {
+    var key = r.ano;
+    if (!porAno[key]) porAno[key] = { ano: key, kg: 0, rs: 0 };
+    porAno[key].kg += Number(r.volFechado) || 0;
+    porAno[key].rs += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0);
   });
-
+  var anos = Object.keys(porAno).map(Number).sort(function (a, b) { return a - b; });
+  var pontos = anos.map(function (a) { return porAno[a]; });
   var primeiroAno = anos[0];
-  var registrosPrimeiroAno = todosRegistros.filter(function (r) { return r.ano === primeiroAno; });
+  var registrosPrimeiroAno = registros.filter(function (r) { return r.ano === primeiroAno; });
   var kgAnt = 0, rsAnt = 0;
   registrosPrimeiroAno.forEach(function (r) { kgAnt += Number(r.faturado2025) || 0; rsAnt += (Number(r.faturado2025) || 0) * (Number(r.preco2025) || 0); });
-  if (kgAnt || rsAnt) pontos.unshift({ ano: primeiroAno - 1, kg: kgAnt, rs: rsAnt, lojas: null });
+  if (kgAnt || rsAnt) pontos.unshift({ ano: primeiroAno - 1, kg: kgAnt, rs: rsAnt });
   return pontos;
 }
 
@@ -22264,66 +22246,53 @@ function _prFmtMoedaCompacta(v) {
   return _prFmtMoeda(n);
 }
 
-function _prStatsEvolucaoHtml(p) {
-  var ticket = (p.lojas ? p.rs / p.lojas : null);
-  function bloco(rotulo, valor) {
-    return '<div style="background:#20234a;padding:14px 16px"><div style="font-size:9.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">' + rotulo + '</div><div style="font-size:18px;font-weight:800;color:#fff">' + valor + '</div></div>';
-  }
-  return bloco('Total em Kg', _prFmtKg(p.kg) + ' kg') +
-    bloco('Total em R$', _prFmtMoeda(p.rs)) +
-    bloco('Ticket Médio', ticket != null ? _prFmtMoeda(ticket) : '—') +
-    bloco('Total de Lojas', p.lojas != null ? p.lojas : '—');
-}
-
-function _prMostrarStatsAnoEvolucao(i) {
-  var p = _prPontosEvolucaoAtual && _prPontosEvolucaoAtual[i];
-  if (!p) return;
-  var el = document.getElementById('pr-stats-evolucao');
-  if (el) el.innerHTML = _prStatsEvolucaoHtml(p);
-}
-
 function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
   if (!pontos || !pontos.length) {
-    _prPontosEvolucaoAtual = [];
     return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:28px 24px;margin-bottom:18px;text-align:center">' +
       '<div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px">' + _prEsc(titulo) + '</div>' +
       '<div style="font-size:11px;color:rgba(255,255,255,.5)">Nenhuma negociação cadastrada ainda — o gráfico aparece assim que houver dados.</div>' +
       '</div>';
   }
-  _prPontosEvolucaoAtual = pontos;
   var W = 600, H = 150, padTop = 22, padBottom = 8;
   var maxKg = Math.max.apply(null, [1].concat(pontos.map(function (p) { return p.kg; })));
+  var maxRs = Math.max.apply(null, [1].concat(pontos.map(function (p) { return p.rs; })));
   var n = pontos.length;
   function xAt(i) { return n > 1 ? (i / (n - 1)) * W : 0; }
   function yKg(v) { return H - padBottom - (v / maxKg) * (H - padTop - padBottom); }
+  function yRs(v) { return H - padBottom - (v / maxRs) * (H - padTop - padBottom); }
   var ptsKg = pontos.map(function (p, i) { return [xAt(i), yKg(p.kg)]; });
+  var ptsRs = pontos.map(function (p, i) { return [xAt(i), yRs(p.rs)]; });
   var dKg = _prPathSuave(ptsKg);
+  var dRs = _prPathSuave(ptsRs);
   var dAreaKg = dKg + ' L ' + W + ',' + H + ' L 0,' + H + ' Z';
-  var idxInicial = n - 1;
-
-  var pontosCirculo = ptsKg.map(function (pt, i) {
-    var ultimo = i === idxInicial;
-    return '<circle cx="' + pt[0] + '" cy="' + pt[1] + '" r="' + (ultimo ? 6 : 4) + '" fill="' + (ultimo ? '#fff' : '#16a34a') + '" stroke="#16a34a" stroke-width="' + (ultimo ? 3 : 0) + '" style="cursor:pointer" onmouseover="_prMostrarStatsAnoEvolucao(' + i + ')"></circle>';
-  }).join('');
+  var ultimoKg = ptsKg[n - 1], ultimoRs = ptsRs[n - 1];
 
   var colunasAnos = pontos.map(function (p, i) {
-    var atual = i === idxInicial;
-    return '<div style="text-align:center;cursor:pointer" onmouseover="_prMostrarStatsAnoEvolucao(' + i + ')">' +
-      '<div style="font-size:' + (atual ? '11px' : '10px') + ';color:' + (atual ? '#fff' : 'rgba(255,255,255,.5)') + ';font-weight:' + (atual ? '800' : '400') + '">' + p.ano + '</div>' +
+    var atual = i === n - 1;
+    return '<div style="text-align:center">' +
+      '<div style="font-size:' + (atual ? '10.5px' : '10px') + ';color:' + (atual ? '#fff' : '#a9c2f5') + ';font-weight:' + (atual ? '800' : '600') + '">' + _prFmtKg(p.kg) + ' kg</div>' +
+      '<div style="font-size:9.5px;color:' + (atual ? '#fff' : 'rgba(255,255,255,.45)') + ';font-weight:' + (atual ? '700' : '400') + '">' + _prFmtMoedaCompacta(p.rs) + '</div>' +
+      '<div style="font-size:' + (atual ? '10px' : '9.5px') + ';color:' + (atual ? '#fff' : 'rgba(255,255,255,.5)') + ';font-weight:' + (atual ? '700' : '400') + ';margin-top:3px">' + p.ano + '</div>' +
       '</div>';
   }).join('');
 
   return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:20px 24px;margin-bottom:18px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
     '<div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:2px">' + _prEsc(titulo) + '</div><div style="font-size:10.5px;color:rgba(255,255,255,.45)">' + _prEsc(subtitulo) + '</div></div>' +
-    '<div style="display:flex;align-items:center;gap:6px;margin-top:12px"><span style="width:14px;height:3px;background:#16a34a;display:inline-block;border-radius:2px"></span><span style="font-size:10px;color:rgba(255,255,255,.6)">Volume Faturado (kg)</span></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:16px;margin-top:12px">' +
+    '<div style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:3px;background:#a9c2f5;display:inline-block;border-radius:2px"></span><span style="font-size:10px;color:rgba(255,255,255,.6)">Volume (kg)</span></div>' +
+    '<div style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:3px;background:#16a34a;display:inline-block;border-radius:2px"></span><span style="font-size:10px;color:rgba(255,255,255,.6)">Faturamento (R$)</span></div>' +
+    '</div>' +
     '<svg viewBox="0 0 600 150" style="width:100%;height:150px;margin-top:10px" preserveAspectRatio="none">' +
-    '<defs><linearGradient id="prAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.35"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0"/></linearGradient></defs>' +
+    '<defs><linearGradient id="prAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4f7fe0" stop-opacity="0.35"/><stop offset="100%" stop-color="#4f7fe0" stop-opacity="0"/></linearGradient></defs>' +
     '<path d="' + dAreaKg + '" fill="url(#prAreaGrad)" stroke="none"/>' +
-    '<path d="' + dKg + '" fill="none" stroke="#16a34a" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(22,163,74,.6))"/>' +
-    pontosCirculo +
+    '<path d="' + dKg + '" fill="none" stroke="#a9c2f5" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(169,194,245,.7))"/>' +
+    '<path d="' + dRs + '" fill="none" stroke="#16a34a" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(22,163,74,.7))"/>' +
+    '<circle cx="' + ultimoKg[0] + '" cy="' + ultimoKg[1] + '" r="4.5" fill="#fff" stroke="#a9c2f5" stroke-width="2"/>' +
+    '<circle cx="' + ultimoRs[0] + '" cy="' + ultimoRs[1] + '" r="5" fill="#fff" stroke="#16a34a" stroke-width="2.5"/>' +
     '</svg>' +
     '<div style="display:grid;grid-template-columns:repeat(' + n + ',1fr);margin-top:2px">' + colunasAnos + '</div>' +
-    '<div id="pr-stats-evolucao" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-top:16px">' + _prStatsEvolucaoHtml(pontos[idxInicial]) + '</div>' +
     '</div>';
 }
 
@@ -22379,7 +22348,7 @@ function _prRenderFabricas() {
     return;
   }
 
-  var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;margin-bottom:6px">' +
+  var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px;margin-bottom:6px">' +
     fornecedores.map(function (f, i) {
       var inicial = (f.nome_fantasia || '?')[0].toUpperCase();
       var grad = _FORN_GRADIENTS[i % _FORN_GRADIENTS.length];
@@ -22388,8 +22357,9 @@ function _prRenderFabricas() {
         ? '<div style="width:52px;height:52px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #e2e8f0"><img src="' + f.foto + '" style="width:100%;height:100%;object-fit:contain;display:block" alt=""></div>'
         : '<div style="width:52px;height:52px;background:' + grad + ';border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0">' + inicial + '</div>';
       return '<div onclick="_prSelecionarFabricaGrafico(\'' + f.id + '\')" style="background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 2px ' + (selecionada ? '14px rgba(39,42,74,.1)' : '12px rgba(39,42,74,.08)') + ';cursor:pointer;border:' + (selecionada ? '2px solid #272A4A' : '1px solid #f1f5f9') + '">' +
-        '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">' + logoHtml + '<div style="font-size:15px;font-weight:700;color:#1e293b">' + _prEsc(f.nome_fantasia) + '</div></div>' +
-        '<button onclick="event.stopPropagation();_prAbrirFabrica(\'' + f.id + '\')" style="width:100%;background:' + (selecionada ? '#272A4A' : '#fff') + ';color:' + (selecionada ? '#fff' : '#272A4A') + ';border:' + (selecionada ? 'none' : '1px solid #cbd5e1') + ';border-radius:7px;padding:9px 0;font-size:11.5px;font-weight:700;cursor:pointer">Ver Planejamento &#8250;</button>' +
+        '<div style="display:flex;align-items:center;gap:14px">' + logoHtml + '<div style="font-size:15px;font-weight:700;color:#1e293b">' + _prEsc(f.nome_fantasia) + '</div></div>' +
+        '<div style="height:32px;margin-top:14px"></div>' +
+        '<button onclick="event.stopPropagation();_prAbrirFabrica(\'' + f.id + '\')" style="width:100%;margin-top:10px;background:' + (selecionada ? '#272A4A' : '#fff') + ';color:' + (selecionada ? '#fff' : '#272A4A') + ';border:' + (selecionada ? 'none' : '1px solid #cbd5e1') + ';border-radius:7px;padding:9px 0;font-size:11.5px;font-weight:700;cursor:pointer">Ver Planejamento &#8250;</button>' +
         '</div>';
     }).join('') + '</div>' +
     '<div style="font-size:10.5px;color:#94a3b8;margin:8px 0 20px 2px">Clique no card (fora do botão) pra ver só o faturamento daquela fábrica no gráfico abaixo. O botão "Ver Planejamento" abre as Redes/Sub Redes.</div>';
