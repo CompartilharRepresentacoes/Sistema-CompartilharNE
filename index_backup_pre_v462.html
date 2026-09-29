@@ -22484,28 +22484,6 @@ function _prRenderRedes() {
       '</div>';
   }
 
-  // v462: par label+valor empilhado, usado nos cabecalhos de Rede/Sub Rede pra
-  // mostrar Fechado (negociado) e Faturado (real) lado a lado, em Kg e R$.
-  function _prMetricaPar(label, valor, cor, largura, tamFonte) {
-    return '<div style="width:' + (largura || 100) + 'px;text-align:right;margin-right:16px">' +
-      '<div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.03em;font-weight:700;white-space:nowrap">' + label + '</div>' +
-      '<div style="font-size:' + (tamFonte || 13.5) + 'px;font-weight:700;color:' + (cor || '#1e293b') + ';white-space:nowrap">' + valor + '</div>' +
-      '</div>';
-  }
-
-  // v462: Faturado REAL (soma dos pedidos ja lancados nas lojas, igual ao KPI
-  // "Faturado {ano}" e ao grafico de Evolucao) de uma Rede/Sub Rede especifica.
-  function _prFaturadoRealSubRede(categoriaId, subcategoriaId, precoFechado) {
-    var clientesSub = _prObterClientesLoja(_prFabricaId, categoriaId, subcategoriaId, _prAnoSel);
-    var kg = 0, rs = 0;
-    clientesSub.forEach(function (cl) {
-      var lojaReg = todasLojasAno.find(function (x) { return String(x.clienteId) === String(cl.id); });
-      var calc = _prCalcLoja(lojaReg, precoFechado);
-      kg += calc.fatTotal; rs += calc.valorTotal;
-    });
-    return { kg: kg, rs: rs, lojas: clientesSub.length };
-  }
-
   var kpisHtml = '<div class="ped-kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px">' +
     _prKpiCardPadrao('Volume Projetado', _prFmtKg(somaProjetado) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>', null, '#1c2f66') +
     _prKpiCardPadrao('Volume Fechado', _prFmtKg(somaFechadoKg) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>', (somaFaturamento2026 ? _prFmtMoeda(somaFaturamento2026) : '—'), '#2c4488') +
@@ -22534,23 +22512,16 @@ function _prRenderRedes() {
     if (!subsCat.length && subsRegIds['']) {
       subsCat = [{ id: '', nome: rede.nome, pai: rede.id }];
     }
-    var volFech = 0, fat = 0, fatRealKg = 0, fatRealRs = 0;
-    subsReg.forEach(function (r) {
-      volFech += Number(r.volFechado) || 0;
-      fat += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0);
-      var real = _prFaturadoRealSubRede(r.categoriaId, r.subcategoriaId, r.precoFechado);
-      fatRealKg += real.kg; fatRealRs += real.rs;
-    });
+    var volFech = 0, fat = 0;
+    subsReg.forEach(function (r) { volFech += Number(r.volFechado) || 0; fat += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0); });
     var aberta = String(_prRedeId) === String(rede.id);
 
     var headerHtml = '<div onclick="_prToggleRedeAccordion(\'' + rede.id + '\')" style="display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid #f1f5f9;cursor:pointer;background:' + (aberta ? '#f8fafc' : '#fff') + '">' +
       '<i class="ti ti-chevron-' + (aberta ? 'down' : 'right') + '" style="font-size:13px;color:' + (aberta ? '#272A4A' : '#94a3b8') + ';margin-right:10px"></i>' +
       '<span style="flex:1;font-weight:700;color:#1e293b;font-size:16px">' + _prEsc(rede.nome) + '</span>' +
-      '<span style="font-size:14px;color:#64748b;margin-right:20px">' + subsCat.length + ' Sub Rede' + (subsCat.length === 1 ? '' : 's') + '</span>' +
-      _prMetricaPar('Fechado Kg', volFech ? _prFmtKg(volFech) + ' kg' : '—', '#1e293b', 100, 14.5) +
-      _prMetricaPar('Faturado Kg', fatRealKg ? _prFmtKg(fatRealKg) + ' kg' : '—', '#3b82f6', 100, 14.5) +
-      _prMetricaPar('Fechado R$', fat ? _prFmtMoeda(fat) : '—', '#1e293b', 120, 14.5) +
-      _prMetricaPar('Faturado R$', fatRealRs ? _prFmtMoeda(fatRealRs) : '—', '#16a34a', 120, 14.5) +
+      '<span style="font-size:14px;color:#64748b;margin-right:24px">' + subsCat.length + ' Sub Rede' + (subsCat.length === 1 ? '' : 's') + '</span>' +
+      '<span style="width:110px;text-align:right;font-size:14.5px;font-weight:700">' + (volFech ? _prFmtKg(volFech) + ' kg' : '—') + '</span>' +
+      '<span style="width:130px;text-align:right;color:#16a34a;font-weight:700;font-size:14.5px">' + (fat ? _prFmtMoeda(fat) : '—') + '</span>' +
       '<i class="ti ti-trash" title="Excluir rede" onclick="event.stopPropagation();_prConfirmarExcluirRede(\'' + rede.id + '\',\'' + _prEsc(rede.nome) + '\')" style="font-size:14px;color:#dc2626;cursor:pointer;margin-left:16px"></i>' +
       '</div>';
 
@@ -22560,16 +22531,13 @@ function _prRenderRedes() {
         var r = subsReg.find(function (x) { return String(x.subcategoriaId) === String(sub.id); });
         var subAberta = String(_prSubRedeId) === String(sub.id);
         var fatSub = r ? (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0) : 0;
-        var subReal = _prFaturadoRealSubRede(rede.id, sub.id, r ? r.precoFechado : null);
-        var lojaCountTxt = subReal.lojas ? ' <span style="color:#94a3b8;font-weight:500;font-size:12.5px">(' + subReal.lojas + (subReal.lojas === 1 ? ' loja' : ' lojas') + ')</span>' : '';
 
         var subHeader = '<div onclick="_prToggleSubRedeAccordion(\'' + sub.id + '\')" style="display:flex;align-items:center;padding:12px 18px 12px 46px;border-bottom:1px solid #f8fafc;cursor:pointer;background:' + (subAberta ? '#eef1f8' : '#fff') + '">' +
           '<i class="ti ti-chevron-' + (subAberta ? 'down' : 'right') + '" style="font-size:12px;color:' + (subAberta ? '#272A4A' : '#94a3b8') + ';margin-right:10px"></i>' +
-          '<span style="flex:1;font-weight:600;color:#334155;font-size:14.5px">' + _prEsc(sub.nome) + lojaCountTxt + '</span>' +
-          _prMetricaPar('Fechado Kg', r && r.volFechado ? _prFmtKg(r.volFechado) + ' kg' : '—', '#1e293b', 90, 13) +
-          _prMetricaPar('Faturado Kg', subReal.kg ? _prFmtKg(subReal.kg) + ' kg' : '—', '#3b82f6', 90, 13) +
-          _prMetricaPar('Fechado R$', fatSub ? _prFmtMoeda(fatSub) : '—', '#1e293b', 110, 13) +
-          _prMetricaPar('Faturado R$', subReal.rs ? _prFmtMoeda(subReal.rs) : '—', '#16a34a', 110, 13) +
+          '<span style="flex:1;font-weight:600;color:#334155;font-size:14.5px">' + _prEsc(sub.nome) + '</span>' +
+          (r ? '<span style="margin-right:16px">' + _prBadgeSituacao(r.situacao) + '</span>' : '') +
+          '<span style="width:110px;text-align:right;font-size:13.5px;font-weight:700">' + (r && r.volFechado ? _prFmtKg(r.volFechado) + ' kg' : '—') + '</span>' +
+          '<span style="width:130px;text-align:right;color:#16a34a;font-weight:700;font-size:13.5px">' + (fatSub ? _prFmtMoeda(fatSub) : '—') + '</span>' +
           (r ? '<i class="ti ti-trash" title="Excluir sub-rede" onclick="event.stopPropagation();_prRemoverSubRede(\'' + r.id + '\')" style="font-size:13px;color:#dc2626;cursor:pointer;margin-left:16px"></i>' : '<span style="width:13px;display:inline-block;margin-left:16px"></span>') +
           '</div>';
 
