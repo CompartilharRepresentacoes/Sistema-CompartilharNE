@@ -22303,7 +22303,7 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
 
   var pontosCirculo = ptsKg.map(function (pt, i) {
     var ultimo = i === idxInicial;
-    return '<circle cx="' + pt[0] + '" cy="' + pt[1] + '" r="' + (ultimo ? 6 : 4) + '" fill="' + (ultimo ? '#fff' : '#3b82f6') + '" stroke="#3b82f6" stroke-width="' + (ultimo ? 3 : 0) + '" style="cursor:pointer" onmouseover="_prMostrarStatsAnoEvolucao(' + i + ')"></circle>';
+    return '<circle cx="' + pt[0] + '" cy="' + pt[1] + '" r="' + (ultimo ? 6 : 4) + '" fill="' + (ultimo ? '#fff' : '#16a34a') + '" stroke="#16a34a" stroke-width="' + (ultimo ? 3 : 0) + '" style="cursor:pointer" onmouseover="_prMostrarStatsAnoEvolucao(' + i + ')"></circle>';
   }).join('');
 
   var colunasAnos = pontos.map(function (p, i) {
@@ -22315,11 +22315,11 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
 
   return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:20px 24px;margin-bottom:18px">' +
     '<div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:2px">' + _prEsc(titulo) + '</div><div style="font-size:10.5px;color:rgba(255,255,255,.45)">' + _prEsc(subtitulo) + '</div></div>' +
-    '<div style="display:flex;align-items:center;gap:6px;margin-top:12px"><span style="width:14px;height:3px;background:#3b82f6;display:inline-block;border-radius:2px"></span><span style="font-size:10px;color:rgba(255,255,255,.6)">Volume Faturado (kg)</span></div>' +
+    '<div style="display:flex;align-items:center;gap:6px;margin-top:12px"><span style="width:14px;height:3px;background:#16a34a;display:inline-block;border-radius:2px"></span><span style="font-size:10px;color:rgba(255,255,255,.6)">Volume Faturado (kg)</span></div>' +
     '<svg viewBox="0 0 600 150" style="width:100%;height:150px;margin-top:10px" preserveAspectRatio="none">' +
-    '<defs><linearGradient id="prAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.35"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>' +
+    '<defs><linearGradient id="prAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.35"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0"/></linearGradient></defs>' +
     '<path d="' + dAreaKg + '" fill="url(#prAreaGrad)" stroke="none"/>' +
-    '<path d="' + dKg + '" fill="none" stroke="#3b82f6" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(59,130,246,.6))"/>' +
+    '<path d="' + dKg + '" fill="none" stroke="#16a34a" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(22,163,74,.6))"/>' +
     pontosCirculo +
     '</svg>' +
     '<div style="display:grid;grid-template-columns:repeat(' + n + ',1fr);margin-top:2px">' + colunasAnos + '</div>' +
@@ -22331,31 +22331,18 @@ function _prCalcularRankRedes(fornecedorIdOuNull) {
   var registros = getPlanejamentoReinoRedes().filter(function (r) {
     return (fornecedorIdOuNull == null || String(r.fornecedorId) === String(fornecedorIdOuNull));
   });
-  var todasLojas = getPlanejamentoReinoLojas();
   var porRede = {};
-  var lojasPorRede = {};
   registros.forEach(function (r) {
     var key = String(r.categoriaId);
     if (!porRede[key]) porRede[key] = { redeId: r.categoriaId, volFechado: 0, faturamento: 0 };
     porRede[key].volFechado += Number(r.volFechado) || 0;
     porRede[key].faturamento += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0);
-
-    // v460: conta lojas com faturamento real (fatTotal>0) nesta rede - dedupe por fornecedor+cliente
-    // entre sub-redes/anos diferentes, mesma lógica de _prCalcularEvolucao.
-    if (!lojasPorRede[key]) lojasPorRede[key] = {};
-    var clientesSub = _prObterClientesLoja(r.fornecedorId, r.categoriaId, r.subcategoriaId, r.ano);
-    clientesSub.forEach(function (cl) {
-      var lojaReg = todasLojas.find(function (x) { return String(x.fornecedorId) === String(r.fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === r.ano; });
-      var calc = _prCalcLoja(lojaReg, r.precoFechado);
-      if (calc.fatTotal > 0) lojasPorRede[key][String(r.fornecedorId) + '|' + String(cl.id)] = true;
-    });
   });
   var cats = getCatClientes();
   return Object.keys(porRede).map(function (key) {
     var item = porRede[key];
     var rede = cats.find(function (c) { return String(c.id) === key; });
     item.nome = rede ? rede.nome : '—';
-    item.lojas = Object.keys(lojasPorRede[key] || {}).length;
     return item;
   }).filter(function (item) { return item.faturamento > 0 || item.volFechado > 0; })
     .sort(function (a, b) { return b.faturamento - a.faturamento; });
@@ -22367,14 +22354,13 @@ function _prRenderRankRedesHtml(titulo, itens) {
     return '<div style="display:flex;align-items:center;padding:10px 18px;border-bottom:1px solid #f8fafc">' +
       '<span style="width:30px;font-weight:800;color:' + (pos === 1 ? '#DE7926' : '#94a3b8') + '">' + pos + '&#186;</span>' +
       '<span style="flex:1;font-weight:700;color:#1e293b">' + _prEsc(item.nome) + '</span>' +
-      '<span style="width:90px;text-align:right">' + item.lojas + '</span>' +
       '<span style="width:110px;text-align:right">' + _prFmtKg(item.volFechado) + ' kg</span>' +
       '<span style="width:130px;text-align:right;font-weight:700;color:#272A4A">' + _prFmtMoeda(item.faturamento) + '</span>' +
       '</div>';
   }).join('');
   return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden;margin-bottom:18px">' +
     '<div style="padding:14px 18px 10px;font-size:13px;font-weight:700;color:#1e293b">' + _prEsc(titulo) + '</div>' +
-    '<div style="display:flex;padding:8px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase"><span style="width:30px">#</span><span style="flex:1">Rede</span><span style="width:90px;text-align:right">Lojas</span><span style="width:110px;text-align:right">Vol. Fechado</span><span style="width:130px;text-align:right">Faturamento</span></div>' +
+    '<div style="display:flex;padding:8px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase"><span style="width:30px">#</span><span style="flex:1">Rede</span><span style="width:110px;text-align:right">Vol. Fechado</span><span style="width:130px;text-align:right">Faturamento</span></div>' +
     (linhas || '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma negociação fechada ainda.</div>') +
     '</div>';
 }
@@ -22507,11 +22493,6 @@ function _prRenderRedes() {
     subsReg.forEach(function (r) { subsRegIds[String(r.subcategoriaId)] = true; });
     var subsCat = getCatClientes().filter(function (c) { return String(c.pai) === String(rede.id) && subsRegIds[String(c.id)]; })
       .sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-    // v461: Rede sem NENHUMA Sub Rede cadastrada (ex.: Nordestão) - trata a própria Rede
-    // como uma "sub-rede" única (subcategoriaId vazio), pra negociação/Lojas aparecerem.
-    if (!subsCat.length && subsRegIds['']) {
-      subsCat = [{ id: '', nome: rede.nome, pai: rede.id }];
-    }
     var volFech = 0, fat = 0;
     subsReg.forEach(function (r) { volFech += Number(r.volFechado) || 0; fat += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0); });
     var aberta = String(_prRedeId) === String(rede.id);
@@ -22727,13 +22708,6 @@ function _prAoTrocarRedeCadastro() {
   var sel = document.getElementById('pr-sr-subrede-novo');
   if (!redeId) { sel.disabled = true; sel.innerHTML = '<option value="">Selecione a Rede primeiro</option>'; return; }
   var subs = getCatClientes().filter(function (c) { return String(c.pai) === String(redeId); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-  if (!subs.length) {
-    // v461: Rede sem nenhuma Sub Rede cadastrada (ex.: Nordestão) - a negociação é feita
-    // direto na Rede, mesmo padrão já usado no cadastro de Cliente (atualizarSubcatCliente).
-    sel.disabled = true;
-    sel.innerHTML = '<option value="">-- Nenhuma sub rede --</option>';
-    return;
-  }
   sel.disabled = false;
   sel.innerHTML = '<option value="">Selecione...</option>' + subs.map(function (s) { return '<option value="' + s.id + '">' + _prEsc(s.nome) + '</option>'; }).join('');
 }
@@ -22763,10 +22737,7 @@ function _prSalvarNovaNegociacao() {
   var redeId = document.getElementById('pr-sr-rede-novo').value;
   var subRedeId = document.getElementById('pr-sr-subrede-novo').value;
   var ano = Number(document.getElementById('pr-sr-ano-novo').value);
-  // v461: só exige Sub Rede quando a Rede realmente tem alguma cadastrada (senão a negociação
-  // é feita direto na Rede, com subcategoriaId vazio - mesmo padrão do cadastro de Cliente).
-  var temSubRedes = getCatClientes().some(function (c) { return String(c.pai) === String(redeId); });
-  if (!redeId || (temSubRedes && !subRedeId)) { alert('Selecione a Rede' + (temSubRedes ? ' e a Sub Rede.' : '.')); return; }
+  if (!redeId || !subRedeId) { alert('Selecione a Rede e a Sub Rede.'); return; }
   var existente = getPlanejamentoReinoRedes().find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.categoriaId) === String(redeId) && String(x.subcategoriaId) === String(subRedeId) && x.ano === ano; });
   if (existente) { alert('Já existe uma negociação cadastrada para essa Rede/Sub Rede nesse ano. Abra pelo painel abaixo para editar.'); return; }
   var obj = Object.assign({

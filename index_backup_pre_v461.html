@@ -22507,11 +22507,6 @@ function _prRenderRedes() {
     subsReg.forEach(function (r) { subsRegIds[String(r.subcategoriaId)] = true; });
     var subsCat = getCatClientes().filter(function (c) { return String(c.pai) === String(rede.id) && subsRegIds[String(c.id)]; })
       .sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-    // v461: Rede sem NENHUMA Sub Rede cadastrada (ex.: Nordestão) - trata a própria Rede
-    // como uma "sub-rede" única (subcategoriaId vazio), pra negociação/Lojas aparecerem.
-    if (!subsCat.length && subsRegIds['']) {
-      subsCat = [{ id: '', nome: rede.nome, pai: rede.id }];
-    }
     var volFech = 0, fat = 0;
     subsReg.forEach(function (r) { volFech += Number(r.volFechado) || 0; fat += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0); });
     var aberta = String(_prRedeId) === String(rede.id);
@@ -22727,13 +22722,6 @@ function _prAoTrocarRedeCadastro() {
   var sel = document.getElementById('pr-sr-subrede-novo');
   if (!redeId) { sel.disabled = true; sel.innerHTML = '<option value="">Selecione a Rede primeiro</option>'; return; }
   var subs = getCatClientes().filter(function (c) { return String(c.pai) === String(redeId); }).sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
-  if (!subs.length) {
-    // v461: Rede sem nenhuma Sub Rede cadastrada (ex.: Nordestão) - a negociação é feita
-    // direto na Rede, mesmo padrão já usado no cadastro de Cliente (atualizarSubcatCliente).
-    sel.disabled = true;
-    sel.innerHTML = '<option value="">-- Nenhuma sub rede --</option>';
-    return;
-  }
   sel.disabled = false;
   sel.innerHTML = '<option value="">Selecione...</option>' + subs.map(function (s) { return '<option value="' + s.id + '">' + _prEsc(s.nome) + '</option>'; }).join('');
 }
@@ -22763,10 +22751,7 @@ function _prSalvarNovaNegociacao() {
   var redeId = document.getElementById('pr-sr-rede-novo').value;
   var subRedeId = document.getElementById('pr-sr-subrede-novo').value;
   var ano = Number(document.getElementById('pr-sr-ano-novo').value);
-  // v461: só exige Sub Rede quando a Rede realmente tem alguma cadastrada (senão a negociação
-  // é feita direto na Rede, com subcategoriaId vazio - mesmo padrão do cadastro de Cliente).
-  var temSubRedes = getCatClientes().some(function (c) { return String(c.pai) === String(redeId); });
-  if (!redeId || (temSubRedes && !subRedeId)) { alert('Selecione a Rede' + (temSubRedes ? ' e a Sub Rede.' : '.')); return; }
+  if (!redeId || !subRedeId) { alert('Selecione a Rede e a Sub Rede.'); return; }
   var existente = getPlanejamentoReinoRedes().find(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.categoriaId) === String(redeId) && String(x.subcategoriaId) === String(subRedeId) && x.ano === ano; });
   if (existente) { alert('Já existe uma negociação cadastrada para essa Rede/Sub Rede nesse ano. Abra pelo painel abaixo para editar.'); return; }
   var obj = Object.assign({
