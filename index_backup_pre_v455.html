@@ -22473,7 +22473,6 @@ function _prRenderRedes() {
       '<span style="font-size:12.5px;color:#64748b;margin-right:24px">' + subsCat.length + ' Sub Rede' + (subsCat.length === 1 ? '' : 's') + '</span>' +
       '<span style="width:110px;text-align:right;font-size:12.5px;font-weight:700">' + (volFech ? _prFmtKg(volFech) + ' kg' : '—') + '</span>' +
       '<span style="width:130px;text-align:right;color:#16a34a;font-weight:700;font-size:12.5px">' + (fat ? _prFmtMoeda(fat) : '—') + '</span>' +
-      '<i class="ti ti-trash" title="Excluir rede" onclick="event.stopPropagation();_prConfirmarExcluirRede(\'' + rede.id + '\',\'' + _prEsc(rede.nome) + '\')" style="font-size:14px;color:#dc2626;cursor:pointer;margin-left:16px"></i>' +
       '</div>';
 
     var corpoHtml = '';
@@ -22489,7 +22488,6 @@ function _prRenderRedes() {
           (r ? '<span style="margin-right:16px">' + _prBadgeSituacao(r.situacao) + '</span>' : '') +
           '<span style="width:110px;text-align:right;font-size:12px;font-weight:700">' + (r && r.volFechado ? _prFmtKg(r.volFechado) + ' kg' : '—') + '</span>' +
           '<span style="width:130px;text-align:right;color:#16a34a;font-weight:700;font-size:12px">' + (fatSub ? _prFmtMoeda(fatSub) : '—') + '</span>' +
-          (r ? '<i class="ti ti-trash" title="Excluir sub-rede" onclick="event.stopPropagation();_prRemoverSubRede(\'' + r.id + '\')" style="font-size:13px;color:#dc2626;cursor:pointer;margin-left:16px"></i>' : '<span style="width:13px;display:inline-block;margin-left:16px"></span>') +
           '</div>';
 
         var subCorpo = '';
@@ -22732,15 +22730,6 @@ function _prRemoverSubRede(id) {
   _prRender();
 }
 
-function _prConfirmarExcluirRede(redeId, redeNome) {
-  if (!confirm('Excluir TODAS as negociações da rede "' + redeNome + '" (todas as sub-redes) no ano ' + _prAnoSel + '? Os dados de lojas já preenchidos não serão apagados.')) return;
-  setPlanejamentoReinoRedes(getPlanejamentoReinoRedes().filter(function (x) {
-    return !(String(x.fornecedorId) === String(_prFabricaId) && String(x.categoriaId) === String(redeId) && x.ano === _prAnoSel);
-  }));
-  if (String(_prRedeId) === String(redeId)) { _prRedeId = null; _prSubRedeId = null; }
-  _prRender();
-}
-
 // ── Modal: Lojas de uma Sub Rede ──
 function _prAbrirModalLojas(subRedeId) {
   _prLojasSubRedeId = subRedeId;
@@ -22753,7 +22742,7 @@ function _prFecharModalLojas() { document.getElementById('modal-pr-lojas').style
 
 function _prCalcLoja(loja, precoFechadoNegociacao) {
   var pedidos = (loja && loja.pedidos) || [];
-  var fatTotal = pedidos.reduce(function (s, p) { return s + (Number(p && p.faturado) || 0) + (Number(p && p.saldoFaturado) || 0); }, 0);
+  var fatTotal = pedidos.reduce(function (s, p) { return s + (Number(p && p.faturado) || 0); }, 0);
   var fechado = loja ? Number(loja.fechado2026) || 0 : 0;
   var precoUnit = Number(precoFechadoNegociacao) || 0;
   return { fatTotal: fatTotal, saldo: fechado - fatTotal, valorTotal: precoUnit * fatTotal };
@@ -22788,18 +22777,6 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
   var totFatTotal = 0, totValorTotal = 0, totPlanejado = 0, totFechado = 0, totSaldo = 0;
   var totPed = [0, 0, 0, 0], totFat = [0, 0, 0, 0];
 
-  // v456: só mostra as colunas de Pedido/Faturado que já têm algum lançamento em alguma loja desta sub-rede
-  var pedAtivo = [false, false, false, false];
-  clientes.forEach(function (cl) {
-    var lojaChk = lojasData.find(function (x) { return String(x.fornecedorId) === String(fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === _prAnoSel; });
-    var pedidosChk = (lojaChk && lojaChk.pedidos) || [];
-    for (var k = 0; k < 4; k++) {
-      var pChk = pedidosChk[k];
-      if (pChk && (pChk.qtd != null || pChk.faturado != null || pChk.saldoQtd != null || pChk.saldoFaturado != null)) pedAtivo[k] = true;
-    }
-  });
-  var pedIdx = [0, 1, 2, 3].filter(function (i) { return pedAtivo[i]; });
-
   var linhas = clientes.map(function (cl) {
     var loja = lojasData.find(function (x) { return String(x.fornecedorId) === String(fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === _prAnoSel; });
     var calc = _prCalcLoja(loja, precoFechadoNeg);
@@ -22809,12 +22786,13 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
     totFechado += Number(loja && loja.fechado2026) || 0;
     if (loja) totSaldo += calc.saldo;
     var pedidos = (loja && loja.pedidos) || [];
-    var pedidosCells = pedIdx.map(function (i) {
+    var pedidosCells = '';
+    for (var i = 0; i < 4; i++) {
       var p = pedidos[i];
       if (p && p.qtd != null) totPed[i] += Number(p.qtd) || 0;
       if (p && p.faturado != null) totFat[i] += Number(p.faturado) || 0;
-      return '<td style="padding:8px 9px;text-align:right">' + (p && (p.qtd != null || p.faturado != null) ? ((p.qtd != null ? p.qtd : '—') + ' / ' + (p.faturado != null ? p.faturado : '—')) : '<span style="color:#cbd5e1">—</span>') + '</td>';
-    }).join('');
+      pedidosCells += '<td style="padding:8px 9px;text-align:right">' + (p && (p.qtd != null || p.faturado != null) ? ((p.qtd != null ? p.qtd : '—') + ' / ' + (p.faturado != null ? p.faturado : '—')) : '<span style="color:#cbd5e1">—</span>') + '</td>';
+    }
     return '<tr class="pr-loja-linha" data-loja-nome="' + (cl.nome_fantasia || cl.razao_social || '').toLowerCase() + '" style="border-bottom:1px solid #f8fafc">' +
       '<td style="padding:8px 9px;font-weight:600">' + _prEsc(cl.nome_fantasia || cl.razao_social || '—') + '</td>' +
       '<td style="padding:8px 9px;text-align:right">' + (loja && loja.venda2024 != null ? loja.venda2024 : '<span style="color:#cbd5e1">—</span>') + '</td>' +
@@ -22828,10 +22806,6 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
       '<td style="padding:8px 9px;text-align:center"><i class="ti ti-edit" title="Editar" style="font-size:13px;color:#64748b;cursor:pointer;margin-right:12px" onclick="_prAbrirModalEdicaoLoja(\'' + cl.id + '\')"></i><i class="ti ti-trash" title="Remover loja" style="font-size:13px;color:#dc2626;cursor:pointer" onclick="_prConfirmarExcluirLoja(\'' + cl.id + '\',\'' + _prEsc(cl.nome_fantasia || cl.razao_social || '') + '\')"></i></td>' +
       '</tr>';
   }).join('');
-
-  var numCols = 8 + pedIdx.length;
-  var pedHeaderCells = pedIdx.map(function (i) { return '<th style="padding:7px 9px;text-align:right">' + (i + 1) + 'º Ped./Fat.</th>'; }).join('');
-  var pedFooterCells = pedIdx.map(function (i) { return '<td style="padding:8px 9px;text-align:right">' + ((totPed[i] || totFat[i]) ? (_prFmtKg(totPed[i]) + ' / ' + _prFmtKg(totFat[i])) : '—') + '</td>'; }).join('');
 
   return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
     '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;flex-wrap:wrap;gap:10px">' +
@@ -22847,19 +22821,22 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
     '<th style="padding:7px 9px;text-align:right">' + (_prAnoSel - 1) + '</th>' +
     '<th style="padding:7px 9px;text-align:right">Planejado</th>' +
     '<th style="padding:7px 9px;text-align:right">Fechado ' + _prAnoSel + '</th>' +
-    pedHeaderCells +
+    '<th style="padding:7px 9px;text-align:right">1º Ped./Fat.</th>' +
+    '<th style="padding:7px 9px;text-align:right">2º Ped./Fat.</th>' +
+    '<th style="padding:7px 9px;text-align:right">3º Ped./Fat.</th>' +
+    '<th style="padding:7px 9px;text-align:right">4º Ped./Fat.</th>' +
     '<th style="padding:7px 9px;text-align:right">Fat. Total</th>' +
     '<th style="padding:7px 9px;text-align:right">Saldo</th>' +
     '<th style="padding:7px 9px;text-align:right">Vlr. Unit.</th>' +
     '<th style="padding:7px 9px;text-align:right">Valor Total</th>' +
     '<th style="padding:7px 9px;text-align:center">Ação</th>' +
     '</tr></thead><tbody>' +
-    (linhas || '<tr><td colspan="' + numCols + '" style="padding:20px;text-align:center;color:#94a3b8">Nenhuma loja vinculada a essa Sub Rede ainda. Use "Incluir Loja" acima.</td></tr>') +
+    (linhas || '<tr><td colspan="13" style="padding:20px;text-align:center;color:#94a3b8">Nenhuma loja vinculada a essa Sub Rede ainda. Use "Incluir Loja" acima.</td></tr>') +
     '</tbody><tfoot><tr style="background:#1e293b;color:#fff;font-weight:700">' +
     '<td style="padding:8px 9px" colspan="2">TOTAL (' + clientes.length + ' lojas)</td>' +
     '<td style="padding:8px 9px;text-align:right">' + (totPlanejado ? _prFmtKg(totPlanejado) : '—') + '</td>' +
     '<td style="padding:8px 9px;text-align:right">' + (totFechado ? _prFmtKg(totFechado) : '—') + '</td>' +
-    pedFooterCells +
+    totPed.map(function (v, i) { return '<td style="padding:8px 9px;text-align:right">' + ((v || totFat[i]) ? (_prFmtKg(v) + ' / ' + _prFmtKg(totFat[i])) : '—') + '</td>'; }).join('') +
     '<td style="padding:8px 9px;text-align:right">' + _prFmtKg(totFatTotal) + '</td>' +
     '<td style="padding:8px 9px;text-align:right;color:' + (totSaldo < 0 ? '#f87171' : '#a7f3d0') + '">' + (totFatTotal || totFechado ? _prFmtKg(totSaldo) : '—') + '</td>' +
     '<td></td>' +
@@ -22960,22 +22937,9 @@ function _prAbrirModalEdicaoLoja(clienteId) {
   var pedidosHtml = '';
   for (var i = 0; i < 4; i++) {
     var p = pedidos[i] || {};
-    var temSaldo = (p.saldoQtd != null || p.saldoFaturado != null);
-    pedidosHtml += '<div style="border-bottom:1px solid #f1f5f9;padding-bottom:8px;margin-bottom:8px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
-      '<span style="font-size:10.5px;font-weight:600;color:#3b82f6">' + (i + 1) + 'º Pedido</span>' +
-      '<label style="display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#64748b;cursor:pointer">' +
-      '<input type="checkbox" id="pr-lje-ped' + i + '-temsaldo" ' + (temSaldo ? 'checked' : '') + ' onchange="document.getElementById(\'pr-lje-ped' + i + '-saldo-wrap\').style.display=this.checked?\'grid\':\'none\'" style="width:12px;height:12px">Teve saldo?' +
-      '</label>' +
-      '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+    pedidosHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">' +
       campoNum('pr-lje-ped' + i + '-qtd', (i + 1) + 'º Pedido (kg)', p.qtd) +
       campoNum('pr-lje-ped' + i + '-fat', (i + 1) + 'º Faturado (kg)', p.faturado) +
-      '</div>' +
-      '<div id="pr-lje-ped' + i + '-saldo-wrap" style="display:' + (temSaldo ? 'grid' : 'none') + ';grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;padding:8px 10px;background:#fffbeb;border:1px solid #fbbf24;border-radius:7px">' +
-      campoNum('pr-lje-ped' + i + '-saldoqtd', 'Saldo ' + (i + 1) + 'º Pedido (kg)', p.saldoQtd) +
-      campoNum('pr-lje-ped' + i + '-saldofat', 'Faturado Saldo ' + (i + 1) + 'º Pedido (kg)', p.saldoFaturado) +
-      '</div>' +
       '</div>';
   }
   document.getElementById('pr-lje-corpo').innerHTML =
@@ -23008,11 +22972,7 @@ function _prSalvarLoja() {
   var pedidos = [];
   for (var i = 0; i < 4; i++) {
     var qtd = num('pr-lje-ped' + i + '-qtd'), fat = num('pr-lje-ped' + i + '-fat');
-    var temSaldoEl = document.getElementById('pr-lje-ped' + i + '-temsaldo');
-    var temSaldo = !!(temSaldoEl && temSaldoEl.checked);
-    var saldoQtd = temSaldo ? num('pr-lje-ped' + i + '-saldoqtd') : null;
-    var saldoFat = temSaldo ? num('pr-lje-ped' + i + '-saldofat') : null;
-    if (qtd != null || fat != null || saldoQtd != null || saldoFat != null) pedidos.push({ qtd: qtd, faturado: fat, saldoQtd: saldoQtd, saldoFaturado: saldoFat });
+    if (qtd != null || fat != null) pedidos.push({ qtd: qtd, faturado: fat });
   }
   var data = getPlanejamentoReinoLojas();
   var idx = data.findIndex(function (x) { return String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(_prLojaEditClienteId) && x.ano === _prAnoSel; });
