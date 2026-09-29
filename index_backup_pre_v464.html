@@ -2227,16 +2227,9 @@
                     </div>
                     <div>
                       <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Planejamento Reino</label>
-                      <select class="form-input" id="forn-reino" onchange="_fornToggleReinoDestaque()" style="width:100%">
+                      <select class="form-input" id="forn-reino" style="width:100%">
                         <option value="Não">Não</option>
                         <option value="Sim">Sim</option>
-                      </select>
-                    </div>
-                    <div id="forn-reino-destaque-wrap" style="display:none">
-                      <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Destaque nos cards do Reino</label>
-                      <select class="form-input" id="forn-reino-destaque" style="width:100%">
-                        <option value="rs">Valor (R$)</option>
-                        <option value="kg">Peso (Kg)</option>
                       </select>
                     </div>
                   </div>
@@ -9145,8 +9138,6 @@ function openFornecedorForm(params) {
   setV('forn-pais',        r.pais||'BRASIL');
   setV('forn-ativo',       r.ativo||'Sim');
   setV('forn-reino',       r.reino||'Não');
-  setV('forn-reino-destaque', r.reino_destaque||'rs');
-  _fornToggleReinoDestaque();
 
   // Estado e cidade
   const estadoEl = document.getElementById('forn-estado');
@@ -9175,13 +9166,6 @@ function openFornecedorForm(params) {
   document.getElementById('forn-msg').textContent = '';
   var fornAutoriaEl = document.getElementById('forn-autoria-info');
   if (fornAutoriaEl) fornAutoriaEl.innerHTML = isEdit ? _appRenderAutoriaHtml(r) : '';
-}
-
-function _fornToggleReinoDestaque() {
-  var reinoEl = document.getElementById('forn-reino');
-  var wrap = document.getElementById('forn-reino-destaque-wrap');
-  if (!reinoEl || !wrap) return;
-  wrap.style.display = (reinoEl.value === 'Sim') ? 'block' : 'none';
 }
 
 function gerarCodigoForn() {
@@ -9229,7 +9213,6 @@ function salvarFornecedor() {
     pais:         document.getElementById('forn-pais').value.trim(),
     ativo:        document.getElementById('forn-ativo').value,
     reino:        document.getElementById('forn-reino').value,
-    reino_destaque: document.getElementById('forn-reino-destaque') ? document.getElementById('forn-reino-destaque').value : 'rs',
     foto:         foto,
   };
 
@@ -22542,24 +22525,10 @@ function _prRenderRedes() {
     return { kg: kg, rs: rs, lojas: clientesSub.length };
   }
 
-  // v464: fábricas com destaque="kg" mostram o card "Faturado" com o kg grande e o
-  // R$ pequeno embaixo (em vez do padrão R$ grande/kg pequeno) - configurável por
-  // fábrica no cadastro de Fornecedor, já que nem toda fábrica vende primariamente
-  // por valor (algumas o Marcos acompanha mais de perto pelo peso).
-  var _prFornecedorAtual = getFornecedores().find(function (f) { return String(f.id) === String(_prFabricaId); });
-  var _prDestaqueKg = !!(_prFornecedorAtual && _prFornecedorAtual.reino_destaque === 'kg');
-  var faturadoValorHtml = _prDestaqueKg
-    ? (somaFaturadoAnoKg ? _prFmtKg(somaFaturadoAnoKg) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>' : '—')
-    : (somaFaturadoAnoRs ? _prFmtMoeda(somaFaturadoAnoRs) : '—');
-  var faturadoSubHtml = _prDestaqueKg
-    ? (somaFaturadoAnoRs ? _prFmtMoeda(somaFaturadoAnoRs) : '—')
-    : (somaFaturadoAnoKg ? _prFmtKg(somaFaturadoAnoKg) + ' kg' : '—');
-  var faturadoCor = _prDestaqueKg ? '#272A4A' : '#16a34a';
-
   var kpisHtml = '<div class="ped-kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px">' +
     _prKpiCardPadrao('Volume Projetado', _prFmtKg(somaProjetado) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>', null, '#1c2f66') +
     _prKpiCardPadrao('Volume Fechado', _prFmtKg(somaFechadoKg) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>', (somaFaturamento2026 ? _prFmtMoeda(somaFaturamento2026) : '—'), '#2c4488') +
-    _prKpiCardPadrao('Faturado ' + _prAnoSel, faturadoValorHtml, faturadoSubHtml, '#3d5aa8', faturadoCor) +
+    _prKpiCardPadrao('Faturado ' + _prAnoSel, (somaFaturadoAnoRs ? _prFmtMoeda(somaFaturadoAnoRs) : '—'), (somaFaturadoAnoKg ? _prFmtKg(somaFaturadoAnoKg) + ' kg' : '—'), '#3d5aa8', '#16a34a') +
     _prKpiCardPadrao('Total de Lojas Atendidas', qtdLojasAtendidas, registros.length + ' sub-redes negociando', '#5b78c9') +
     '</div>';
 
