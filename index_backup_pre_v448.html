@@ -6269,20 +6269,6 @@
       </div>
     </div>
 
-    <!-- Modal Planejamento Reino: Incluir Loja (vinculo so do modulo Reino) -->
-    <div id="modal-pr-incluir-loja" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:10001;align-items:center;justify-content:center;padding:20px">
-      <div style="background:#fff;border-radius:12px;width:100%;max-width:520px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.3)">
-        <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-          <div id="pr-il-titulo" style="font-size:13px;font-weight:600;color:#fff">Incluir Loja</div>
-          <button onclick="_prFecharIncluirLoja()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:11px;cursor:pointer">Fechar &#10005;</button>
-        </div>
-        <div style="padding:16px 18px 10px;flex-shrink:0">
-          <input type="text" id="pr-il-busca" class="form-input" placeholder="Buscar cliente por nome..." oninput="_prBuscarClienteIncluir(this.value)" style="width:100%">
-        </div>
-        <div id="pr-il-lista" style="overflow-y:auto;padding:0 18px 16px;flex:1"></div>
-      </div>
-    </div>
-
     <!-- ═══════ OPERAÇÕES: Dados Representadas ═══════ -->
     <div id="page-dados-representadas" class="app-page">
       <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);border-radius:12px;padding:14px 20px;margin-bottom:12px">
@@ -7657,9 +7643,9 @@ if (firebaseConfigurado) {
 // funcionando exatamente como antes, direto no localStorage — nenhum código existente
 // precisa saber a diferença.
 // ═══════════════════════════════════════════════════
-var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas', 'planejamento_reino_vinculos'];
-var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [], cat_clientes: [], cat_produtos: [], transportadoras: [], tabelas_preco: [], sku_clientes: [], negociacoes_preco: [], devolucoes: [], ocorrencias_entrega: [], bloqueios_produto: [], gruposAcesso: [], comandos_navegacao: [], metas: [], planejamento_reino_redes: [], planejamento_reino_lojas: [], planejamento_reino_vinculos: [] };
-var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false, cat_clientes: false, cat_produtos: false, transportadoras: false, tabelas_preco: false, sku_clientes: false, negociacoes_preco: false, devolucoes: false, ocorrencias_entrega: false, bloqueios_produto: false, gruposAcesso: false, comandos_navegacao: false, metas: false, planejamento_reino_redes: false, planejamento_reino_lojas: false, planejamento_reino_vinculos: false };
+var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas'];
+var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [], cat_clientes: [], cat_produtos: [], transportadoras: [], tabelas_preco: [], sku_clientes: [], negociacoes_preco: [], devolucoes: [], ocorrencias_entrega: [], bloqueios_produto: [], gruposAcesso: [], comandos_navegacao: [], metas: [], planejamento_reino_redes: [], planejamento_reino_lojas: [] };
+var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false, cat_clientes: false, cat_produtos: false, transportadoras: false, tabelas_preco: false, sku_clientes: false, negociacoes_preco: false, devolucoes: false, ocorrencias_entrega: false, bloqueios_produto: false, gruposAcesso: false, comandos_navegacao: false, metas: false, planejamento_reino_redes: false, planejamento_reino_lojas: false };
 var _fsOuvindo  = false;
 var _fsEmpresaCache = null;
 var _fsEmpresaCarregada = false;
@@ -7725,7 +7711,6 @@ function _fsAoAtualizar(nome) {
     metas: ['renderMetaList'],
     planejamento_reino_redes: ['_prRender'],
     planejamento_reino_lojas: ['_prRenderLojasTabela'],
-    planejamento_reino_vinculos: ['_prRender'],
   };
   (mapaRender[nome] || []).forEach(function (fn) {
     if (typeof window[fn] === 'function') {
@@ -22109,8 +22094,6 @@ function getPlanejamentoReinoRedes() { return firebaseConfigurado ? _fsGet('plan
 function setPlanejamentoReinoRedes(data) { if (firebaseConfigurado) { _fsSet('planejamento_reino_redes', data); } else { localStorage.setItem('planejamento_reino_redes', JSON.stringify(data)); } }
 function getPlanejamentoReinoLojas() { return firebaseConfigurado ? _fsGet('planejamento_reino_lojas') : JSON.parse(localStorage.getItem('planejamento_reino_lojas') || '[]'); }
 function setPlanejamentoReinoLojas(data) { if (firebaseConfigurado) { _fsSet('planejamento_reino_lojas', data); } else { localStorage.setItem('planejamento_reino_lojas', JSON.stringify(data)); } }
-function getPlanejamentoReinoVinculos() { return firebaseConfigurado ? _fsGet('planejamento_reino_vinculos') : JSON.parse(localStorage.getItem('planejamento_reino_vinculos') || '[]'); }
-function setPlanejamentoReinoVinculos(data) { if (firebaseConfigurado) { _fsSet('planejamento_reino_vinculos', data); } else { localStorage.setItem('planejamento_reino_vinculos', JSON.stringify(data)); } }
 
 // ═══════════════════════════════════════════════════
 // PLANEJAMENTO REINO — planejamento de fim de ano por Fábrica > Rede >
@@ -22135,7 +22118,6 @@ var _prLojasSubRedeId = null;
 var _prLojaEditClienteId = null;
 var _prGraficoFabricaId = null; // null = grafico/rank agregam todas as fabricas com reino
 var _prSubRedeId = null; // Sub Rede escolhida no select da tela da fabrica
-var _prIncluirLojaCandidatos = []; // cache dos clientes elegiveis no modal Incluir Loja
 
 function _prEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function _prFmtKg(v) { return (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
@@ -22735,29 +22717,9 @@ function _prCalcLoja(loja) {
   return { fatTotal: fatTotal, saldo: fechado - fatTotal, valorTotal: valorUnit * fatTotal };
 }
 
-function _prObterClientesLoja(fornecedorId, redeId, subRedeId, ano) {
-  var vinculos = getPlanejamentoReinoVinculos().filter(function (v) {
-    return String(v.fornecedorId) === String(fornecedorId) && String(v.categoriaId) === String(redeId) && String(v.subcategoriaId) === String(subRedeId) && v.ano === ano;
-  });
-  var excluidos = {}, incluidos = {};
-  vinculos.forEach(function (v) {
-    if (v.tipo === 'excluido') excluidos[String(v.clienteId)] = true;
-    else if (v.tipo === 'incluido') incluidos[String(v.clienteId)] = true;
-  });
-  var ativos = getClientes().filter(function (cl) { return (cl.ativo || 'Sim') !== 'Não'; });
-  var porId = {};
-  ativos.forEach(function (cl) {
-    var pertenceGlobal = String(cl.categoria) === String(redeId) && String(cl.subcategoria) === String(subRedeId);
-    if ((pertenceGlobal && !excluidos[String(cl.id)]) || (incluidos[String(cl.id)] && !pertenceGlobal)) {
-      porId[String(cl.id)] = cl;
-    }
-  });
-  return Object.keys(porId).map(function (id) { return porId[id]; })
-    .sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
-}
-
 function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
-  var clientes = _prObterClientesLoja(fornecedorId, redeId, subRedeId, _prAnoSel);
+  var clientes = getClientes().filter(function (cl) { return String(cl.categoria) === String(redeId) && String(cl.subcategoria) === String(subRedeId) && (cl.ativo || 'Sim') !== 'Não'; })
+    .sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
   var lojasData = getPlanejamentoReinoLojas();
   var totFatTotal = 0, totValorTotal = 0;
 
@@ -22772,7 +22734,7 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
       var p = pedidos[i];
       pedidosCells += '<td style="padding:8px 9px;text-align:right">' + (p && (p.qtd != null || p.faturado != null) ? ((p.qtd != null ? p.qtd : '—') + ' / ' + (p.faturado != null ? p.faturado : '—')) : '<span style="color:#cbd5e1">—</span>') + '</td>';
     }
-    return '<tr class="pr-loja-linha" data-loja-nome="' + (cl.nome_fantasia || cl.razao_social || '').toLowerCase() + '" style="border-bottom:1px solid #f8fafc">' +
+    return '<tr style="border-bottom:1px solid #f8fafc">' +
       '<td style="padding:8px 9px;font-weight:600">' + _prEsc(cl.nome_fantasia || cl.razao_social || '—') + '</td>' +
       '<td style="padding:8px 9px;text-align:right">' + (loja && loja.venda2024 != null ? loja.venda2024 : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:8px 9px;text-align:right">' + (loja && loja.planejado != null ? loja.planejado : '<span style="color:#cbd5e1">—</span>') + '</td>' +
@@ -22782,18 +22744,12 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
       '<td style="padding:8px 9px;text-align:right;color:' + (calc.saldo < 0 ? '#dc2626' : '#15803d') + '">' + (loja ? _prFmtKg(calc.saldo) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:8px 9px;text-align:right">' + (loja && loja.valorUnitario != null ? loja.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:8px 9px;text-align:right;color:#DE7926;font-weight:700">' + (calc.valorTotal ? _prFmtMoeda(calc.valorTotal) : '<span style="color:#cbd5e1">—</span>') + '</td>' +
-      '<td style="padding:8px 9px;text-align:center"><i class="ti ti-edit" title="Editar" style="font-size:13px;color:#64748b;cursor:pointer;margin-right:12px" onclick="_prAbrirModalEdicaoLoja(\'' + cl.id + '\')"></i><i class="ti ti-trash" title="Remover loja" style="font-size:13px;color:#dc2626;cursor:pointer" onclick="_prConfirmarExcluirLoja(\'' + cl.id + '\',\'' + _prEsc(cl.nome_fantasia || cl.razao_social || '') + '\')"></i></td>' +
+      '<td style="padding:8px 9px;text-align:center"><i class="ti ti-edit" title="Editar" style="font-size:13px;color:#64748b;cursor:pointer" onclick="_prAbrirModalEdicaoLoja(\'' + cl.id + '\')"></i></td>' +
       '</tr>';
   }).join('');
 
   return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;flex-wrap:wrap;gap:10px">' +
-    '<div style="font-size:13px;font-weight:700;color:#1e293b">Lojas <span style="font-weight:400;color:#94a3b8;font-size:11px">(' + clientes.length + ' lojas)</span></div>' +
-    '<div style="display:flex;gap:8px;align-items:center">' +
-    '<div style="position:relative"><i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:#94a3b8"></i>' +
-    '<input type="text" placeholder="Filtrar loja..." oninput="_prFiltrarLojas(this.value)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 10px 6px 28px;font-size:12px;width:180px"></div>' +
-    '<button onclick="_prAbrirIncluirLoja()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 13px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap"><i class="ti ti-plus" style="font-size:13px;vertical-align:-2px;margin-right:4px"></i>Incluir Loja</button>' +
-    '</div></div>' +
+    '<div style="padding:14px 18px 10px;font-size:13px;font-weight:700;color:#1e293b">Lojas <span style="font-weight:400;color:#94a3b8;font-size:11px">(' + clientes.length + ' lojas)</span></div>' +
     '<div style="overflow-x:auto"><table style="width:auto;min-width:1080px;border-collapse:collapse;font-size:11px">' +
     '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">' +
     '<th style="padding:7px 9px;text-align:left">Loja (Cliente)</th>' +
@@ -22808,81 +22764,15 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
     '<th style="padding:7px 9px;text-align:right">Saldo</th>' +
     '<th style="padding:7px 9px;text-align:right">Vlr. Unit.</th>' +
     '<th style="padding:7px 9px;text-align:right">Valor Total</th>' +
-    '<th style="padding:7px 9px;text-align:center">Ação</th>' +
+    '<th style="padding:7px 9px;text-align:center">Editar</th>' +
     '</tr></thead><tbody>' +
-    (linhas || '<tr><td colspan="13" style="padding:20px;text-align:center;color:#94a3b8">Nenhuma loja vinculada a essa Sub Rede ainda. Use "Incluir Loja" acima.</td></tr>') +
+    (linhas || '<tr><td colspan="13" style="padding:20px;text-align:center;color:#94a3b8">Nenhum Cliente ativo cadastrado nessa Sub Rede (Cadastros › Clientes).</td></tr>') +
     '</tbody><tfoot><tr style="background:#1e293b;color:#fff;font-weight:700">' +
     '<td style="padding:8px 9px" colspan="8">TOTAL (' + clientes.length + ' lojas)</td>' +
     '<td style="padding:8px 9px;text-align:right">' + _prFmtKg(totFatTotal) + '</td>' +
     '<td></td><td></td>' +
     '<td style="padding:8px 9px;text-align:right;color:#ffd7a8">' + _prFmtMoeda(totValorTotal) + '</td>' +
     '</tr></tfoot></table></div></div>';
-}
-
-function _prFiltrarLojas(valor) {
-  var termo = (valor || '').toLowerCase();
-  var linhas = document.querySelectorAll('.pr-loja-linha');
-  linhas.forEach(function (tr) {
-    var nome = (tr.getAttribute('data-loja-nome') || '');
-    tr.style.display = nome.indexOf(termo) >= 0 ? '' : 'none';
-  });
-}
-
-function _prAbrirIncluirLoja() {
-  document.getElementById('pr-il-busca').value = '';
-  var jaNaLista = {};
-  _prObterClientesLoja(_prFabricaId, _prRedeId, _prLojasSubRedeId, _prAnoSel).forEach(function (cl) { jaNaLista[String(cl.id)] = true; });
-  _prIncluirLojaCandidatos = getClientes().filter(function (cl) { return (cl.ativo || 'Sim') !== 'Não' && !jaNaLista[String(cl.id)]; })
-    .sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
-  _prRenderListaIncluirLoja(_prIncluirLojaCandidatos);
-  document.getElementById('modal-pr-incluir-loja').style.display = 'flex';
-}
-function _prFecharIncluirLoja() { document.getElementById('modal-pr-incluir-loja').style.display = 'none'; }
-
-function _prRenderListaIncluirLoja(lista) {
-  var el = document.getElementById('pr-il-lista');
-  if (!lista.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhum cliente encontrado.</div>'; return; }
-  el.innerHTML = '<div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">' +
-    lista.map(function (c) {
-      return '<div style="padding:9px 12px;border-bottom:1px solid #f1f5f9;font-size:12px;display:flex;justify-content:space-between;align-items:center">' +
-        '<span>' + _prEsc(c.nome_fantasia || c.razao_social || '—') + '</span>' +
-        '<button onclick="_prIncluirLojaConfirmar(\'' + c.id + '\')" style="background:#272A4A;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer">Incluir</button>' +
-        '</div>';
-    }).join('') + '</div>';
-}
-
-function _prBuscarClienteIncluir(valor) {
-  var termo = (valor || '').toLowerCase();
-  var filtrados = _prIncluirLojaCandidatos.filter(function (c) { return (c.nome_fantasia || c.razao_social || '').toLowerCase().indexOf(termo) >= 0; });
-  _prRenderListaIncluirLoja(filtrados);
-}
-
-function _prIncluirLojaConfirmar(clienteId) {
-  var data = getPlanejamentoReinoVinculos().filter(function (v) {
-    return !(String(v.fornecedorId) === String(_prFabricaId) && String(v.categoriaId) === String(_prRedeId) && String(v.subcategoriaId) === String(_prLojasSubRedeId) && String(v.clienteId) === String(clienteId) && v.ano === _prAnoSel);
-  });
-  var cl = getClientes().find(function (c) { return String(c.id) === String(clienteId); });
-  var pertenceGlobal = cl && String(cl.categoria) === String(_prRedeId) && String(cl.subcategoria) === String(_prLojasSubRedeId);
-  if (!pertenceGlobal) {
-    data.push({ id: 'prv' + Date.now(), fornecedorId: _prFabricaId, categoriaId: _prRedeId, subcategoriaId: _prLojasSubRedeId, clienteId: clienteId, ano: _prAnoSel, tipo: 'incluido' });
-  }
-  setPlanejamentoReinoVinculos(data);
-  _prFecharIncluirLoja();
-  _prRender();
-}
-
-function _prConfirmarExcluirLoja(clienteId, nomeLoja) {
-  if (!confirm('Remover "' + nomeLoja + '" desta Rede/Sub Rede (ano ' + _prAnoSel + ')?\n\nOs dados de planejamento dela nesta fábrica serão apagados. O cadastro do Cliente (Rede/Sub Rede geral) não é alterado.')) return;
-  var data = getPlanejamentoReinoVinculos().filter(function (v) {
-    return !(String(v.fornecedorId) === String(_prFabricaId) && String(v.categoriaId) === String(_prRedeId) && String(v.subcategoriaId) === String(_prLojasSubRedeId) && String(v.clienteId) === String(clienteId) && v.ano === _prAnoSel && v.tipo === 'incluido');
-  });
-  data.push({ id: 'prv' + Date.now(), fornecedorId: _prFabricaId, categoriaId: _prRedeId, subcategoriaId: _prLojasSubRedeId, clienteId: clienteId, ano: _prAnoSel, tipo: 'excluido' });
-  setPlanejamentoReinoVinculos(data);
-  var lojas = getPlanejamentoReinoLojas().filter(function (x) {
-    return !(String(x.fornecedorId) === String(_prFabricaId) && String(x.clienteId) === String(clienteId) && x.ano === _prAnoSel);
-  });
-  setPlanejamentoReinoLojas(lojas);
-  _prRender();
 }
 
 function _prRenderLojasTabela() {
@@ -25982,7 +25872,7 @@ function renderBackupPage() {
 // buscar do Firestore quando firebaseConfigurado é true) para pegar os dados reais que
 // ainda estão só aqui. Usa .set() por id, então rodar de novo não duplica nada.
 // ═══════════════════════════════════════════════════
-var _fsColecoesMigrar = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas', 'planejamento_reino_vinculos'];
+var _fsColecoesMigrar = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas'];
 async function migrarDadosParaFirestore() {
   var msg = document.getElementById('backup-fs-msg');
   var btn = document.getElementById('btn-migrar-firestore');
