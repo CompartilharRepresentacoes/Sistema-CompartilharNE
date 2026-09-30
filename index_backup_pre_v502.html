@@ -457,6 +457,7 @@
       #page-pedido-list #ped-filtros-geral .ped-limpar-btn,
       #page-pedido-list #ped-filtros-geral .ped-imprimir-btn { width:100% !important; justify-content:center !important; margin:0 !important; }
       #page-pedido-list #ped-filtros-geral .ped-spacer { display:none !important; }
+      #page-pedido-list #ped-filtros-geral .ped-imprimir-btn { order:21 !important; }
       #page-pedido-list .ped-header-row { display:none !important; }
       #page-pedido-list .ped-r-pedido::before { content:'Pedido nº '; color:#94a3b8; }
       #page-pedido-list .ped-r-forn::before { content:'Forn: '; color:#94a3b8; }
@@ -4647,8 +4648,6 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input id="ped-busca" oninput="renderPedidoList()" placeholder="Cliente, fornecedor ou numero do pedido..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
         </div>
-        <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('ped-geral')">Mais filtros <span>&#9662;</span></div>
-        <div id="ped-geral-filtros-extra" class="ped-filtros-extra" style="display:contents">
         <div class="ped-divider" style="width:1px;height:22px;background:#e2e8f0"></div>
         <div class="ped-data-row">
         <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
@@ -4670,9 +4669,7 @@
           <option value="Cancelado">Cancelado</option>
         </select>
         </div>
-        <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
-        </div>
-        <button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+        <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
         <div class="ped-spacer" style="flex:1"></div>
       </div>
       <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
