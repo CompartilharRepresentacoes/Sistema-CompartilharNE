@@ -16007,13 +16007,13 @@ function dashInit() {
           <div class="dvg-carddark" style="padding:14px 16px;display:flex;flex-direction:column;justify-content:center">
             <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;text-align:center">Distribuição por Fábrica</div>
             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
-              <svg id="drillFabSvg" viewBox="0 0 180 180" width="120" height="120" style="display:none">
+              <svg id="drillFabSvg" viewBox="0 0 180 180" width="120" height="120" style="flex-shrink:0">
                 <g id="drillFabG" transform="rotate(-90 90 90)"></g>
                 <text id="drillFabTag" x="90" y="84" text-anchor="middle" class="dvg-donuttag">LÍDER</text>
                 <text id="drillFabPct" x="90" y="106" text-anchor="middle" class="dvg-donutpct">0,00%</text>
                 <text id="drillFabNome" x="90" y="122" text-anchor="middle" class="dvg-donutnome">—</text>
               </svg>
-              <div id="drillFabLegend" style="display:flex;flex-direction:column;gap:1px;width:100%;max-height:120px;overflow:auto"></div>
+              <div id="drillFabLegend" style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:110px;max-height:120px;overflow:auto"></div>
             </div>
           </div>
         </div>
