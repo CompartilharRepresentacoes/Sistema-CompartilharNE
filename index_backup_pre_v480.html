@@ -1589,7 +1589,6 @@
   <div style="width:1px;height:18px;background:#e2e8f0;margin:0 2px"></div>
   <div id="msFabricas" class="multiselect"></div>
   <div id="msVendedores" class="multiselect"></div>
-  <div id="msUf" class="multiselect"></div>
   <div id="msClientes" class="multiselect"></div>
 </div>
 <div class="d-tab-bar" id="dTabBar">
@@ -15100,11 +15099,11 @@ function _dashConstruirDadosAoVivo() {
     var i = VEND.length; if (id != null) vendIdx[id] = i; VEND.push(nome || 'Vendedor não cadastrado'); return i;
   }
 
-  var CLI = [], cliIdx = {}, CLI_INATIVO = [], CLI_UF = [];
-  clientesBase.forEach(function (c) { cliIdx[c.id] = CLI.length; CLI.push(c.nome_fantasia || c.razao_social || ('Cliente ' + c.id)); CLI_INATIVO.push(c.ativo === false); CLI_UF.push((typeof _appUfCliente === 'function' ? _appUfCliente(c) : (c.ent_estado || c.estado)) || ''); });
+  var CLI = [], cliIdx = {}, CLI_INATIVO = [];
+  clientesBase.forEach(function (c) { cliIdx[c.id] = CLI.length; CLI.push(c.nome_fantasia || c.razao_social || ('Cliente ' + c.id)); CLI_INATIVO.push(c.ativo === false); });
   function idxCliente(id, nome) {
     if (id != null && Object.prototype.hasOwnProperty.call(cliIdx, id)) return cliIdx[id];
-    var i = CLI.length; if (id != null) cliIdx[id] = i; CLI.push(nome || 'Cliente não cadastrado'); CLI_INATIVO.push(true); CLI_UF.push(''); return i;
+    var i = CLI.length; if (id != null) cliIdx[id] = i; CLI.push(nome || 'Cliente não cadastrado'); CLI_INATIVO.push(true); return i;
   }
 
   var STATUS = statusValidos.slice();
@@ -15183,7 +15182,6 @@ function _dashConstruirDadosAoVivo() {
     status: STATUS,
     clientes: CLI,
     clientes_inativo: CLI_INATIVO,
-    clientes_uf: CLI_UF,
     pedidos: PED,
     devolucoes: DEVOL,
   };
@@ -15206,14 +15204,11 @@ function dashInit() {
     // =============== DADOS ===============
     const _dashHistorico = window._dashModoHistorico2025 === true;
     const DATA = _dashHistorico ? JSON.parse(document.getElementById('dash-dados').textContent) : _dashConstruirDadosAoVivo();
-    const { vendedores: VEND, fabricas: FAB, fabricas_id: FAB_ID = [], clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, clientes_uf: CLI_UF_RAW, meta: METAINFO, devolucoes: DEVOL_RAW } = DATA;
-    const CLI_UF = CLI_UF_RAW || [];
+    const { vendedores: VEND, fabricas: FAB, fabricas_id: FAB_ID = [], clientes: CLI, status: STATUS, pedidos: PED, clientes_inativo: CLI_INATIVO, meta: METAINFO, devolucoes: DEVOL_RAW } = DATA;
     const DEVOL = DEVOL_RAW || [];
     const ST_FATURADO = STATUS.indexOf('Faturado');
     const ST_FAT_PARC = STATUS.indexOf('Faturado Parcial');
     const ST_OK = new Set([ST_FATURADO, ST_FAT_PARC].filter(x => x >= 0));
-    const UF_LIST = (function(){ const s = new Set(); for (let i=0;i<PED.length;i++){ if (ST_OK.has(PED[i][6])) { const u = CLI_UF[PED[i][1]]; if (u) s.add(u); } } return Array.from(s).sort(); })();
-    const ufIdxOf = {}; UF_LIST.forEach((u,i) => { ufIdxOf[u] = i; });
 
     // Reflete o modo atual no titulo e no botao de alternar
     const _dashTitulo = document.getElementById('dashTituloVisaoGeral');
@@ -15249,7 +15244,6 @@ function dashInit() {
       fabricas: new Set(),
       vendedores: new Set(),
       clientes: new Set(),
-      uf: new Set(),
       aba: (document.querySelector('.dash-root .d-tab-btn.active')?.dataset.tab) || 'home',
       diasRisco: 60,
       fabricaFoco: 0,
@@ -15335,7 +15329,7 @@ function dashInit() {
     // =============== FILTRAR ===============
     function filtraPedidos(opts={}) {
       const ini = opts.dtIni || state.dtIni, fim = opts.dtFim || state.dtFim;
-      const fabSet = state.fabricas, venSet = state.vendedores, cliSet = state.clientes, ufSet = state.uf;
+      const fabSet = state.fabricas, venSet = state.vendedores, cliSet = state.clientes;
       const ignorarStatus = opts.todosStatus === true;
       const ignorarFabrica = opts.ignorarFabrica === true;
       const out = [];
@@ -15345,7 +15339,6 @@ function dashInit() {
         if (p[0] < ini || p[0] > fim) continue;
         if (!ignorarFabrica && fabSet.size && !fabSet.has(p[2])) continue;
         if (venSet.size && !venSet.has(p[3])) continue;
-        if (ufSet.size) { const _ui = ufIdxOf[CLI_UF[p[1]]]; if (_ui === undefined || !ufSet.has(_ui)) continue; }
         if (cliSet.size && !cliSet.has(p[1])) continue;
         if (!ignorarStatus && !ST_OK.has(p[6])) continue;
         out.push(p);
@@ -15355,7 +15348,7 @@ function dashInit() {
 
     function filtraDevolucoes() {
       const ini = state.dtIni, fim = state.dtFim;
-      const fabSet = state.fabricas, venSet = state.vendedores, cliSet = state.clientes, ufSet = state.uf;
+      const fabSet = state.fabricas, venSet = state.vendedores, cliSet = state.clientes;
       const out = [];
       for (let i=0;i<DEVOL.length;i++) {
         const d = DEVOL[i];
@@ -15363,7 +15356,6 @@ function dashInit() {
         if (d[0] < ini || d[0] > fim) continue;
         if (fabSet.size && !fabSet.has(d[2])) continue;
         if (venSet.size && !venSet.has(d[3])) continue;
-        if (ufSet.size) { const _ui = ufIdxOf[CLI_UF[d[1]]]; if (_ui === undefined || !ufSet.has(_ui)) continue; }
         if (cliSet.size && !cliSet.has(d[1])) continue;
         out.push(d);
       }
@@ -16796,7 +16788,7 @@ function dashInit() {
     // =============== RESET / TEMA ===============
     document.getElementById('btnReset').addEventListener('click', () => {
       state.dtIni = periodoMin; state.dtFim = periodoMax;
-      state.fabricas.clear(); state.vendedores.clear(); state.clientes.clear(); state.uf.clear();
+      state.fabricas.clear(); state.vendedores.clear(); state.clientes.clear();
       document.getElementById('dtIni').value = _entctrlDataParaBR(state.dtIni);
       document.getElementById('dtFim').value = _entctrlDataParaBR(state.dtFim);
       buildFiltros(); rerender();
@@ -16822,7 +16814,6 @@ function dashInit() {
     function buildFiltros() {
       buildMultiselect('msFabricas','Fábricas', FAB, state.fabricas);
       buildMultiselect('msVendedores','Vendedores', VEND, state.vendedores);
-      buildMultiselect('msUf','UF', UF_LIST, state.uf);
       buildMultiselect('msClientes','Clientes', CLI, state.clientes);
     }
 
