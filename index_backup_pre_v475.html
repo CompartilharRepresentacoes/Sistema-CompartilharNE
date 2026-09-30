@@ -1515,12 +1515,7 @@
 .dash-root .dvg-scrub-track-wrap{position:relative;height:96px;margin-bottom:6px}
 .dash-root .dvg-gridline{stroke:rgba(255,255,255,.08);stroke-width:1}
 .dash-root .dvg-scrub-endlabels{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
-.dash-root .dvg-scrub-labels{display:flex;margin-top:8px}
-.dash-root .dvg-scrub-labels .dvg-scrub-lbl{flex:1;min-width:0;text-align:center;padding:0 1px}
-.dash-root .dvg-scrub-labels .dvg-scrub-lbl-val{font-size:11px;font-weight:700;color:#e6edfb}
-.dash-root .dvg-scrub-labels .dvg-scrub-lbl-val.last{font-size:12px;font-weight:800;color:#fff}
-.dash-root .dvg-scrub-labels .dvg-scrub-lbl-mes{font-size:9px;color:rgba(255,255,255,.45);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dash-root .dvg-scrub-labels .dvg-scrub-lbl-mes.last{color:rgba(255,255,255,.75);font-weight:700}
+.dash-root .dvg-scrub-ticks{display:flex;justify-content:space-between;font-size:9.5px;color:rgba(255,255,255,.35);padding:0 2px;margin-bottom:2px}
 .dash-root input[type=range].dvg-scrub-range{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:6px;background:rgba(255,255,255,.15);outline:none;margin-top:4px}
 .dash-root input[type=range].dvg-scrub-range::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#4f7fe0;border:3px solid #fff;box-shadow:0 0 8px rgba(79,127,224,.7);cursor:pointer}
 .dash-root input[type=range].dvg-scrub-range::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#4f7fe0;border:3px solid #fff;cursor:pointer}
@@ -1634,20 +1629,24 @@
   </div>
   <div class="dvg-scrub" id="dvgScrubCard">
     <div class="dvg-scrub-top">
-      <div><div class="dvg-rankcard-tit" style="color:#fff">Curva de Positivação Acumulada</div><div class="dvg-scrub-sub">Clientes únicos com pedido faturado, mês a mês</div></div>
-      <div class="dvg-scrub-readout"><div class="dvg-scrub-n" id="dvgScrubVal">0</div><div class="dvg-scrub-d">clientes ativos até <b id="dvgScrubDate" style="color:#fff"></b></div></div>
+      <div><div class="dvg-rankcard-tit" style="color:#fff">Curva de Positivação Acumulada</div><div class="dvg-scrub-sub">Arraste a linha do tempo — clientes únicos com pedido faturado</div></div>
+      <div class="dvg-scrub-readout"><div class="dvg-scrub-n" id="dvgScrubVal">0</div><div class="dvg-scrub-d">clientes ativos até <b id="dvgScrubDate" style="color:#fff"></b></div><div class="dvg-scrub-badge" id="dvgScrubBadge"></div></div>
     </div>
     <div class="dvg-scrub-track-wrap">
       <svg id="dvgScrubSvg" viewBox="0 0 600 96" preserveAspectRatio="none" style="width:100%;height:96px;display:block">
+        <defs><linearGradient id="dvgAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4f7fe0" stop-opacity="0.45"/><stop offset="100%" stop-color="#4f7fe0" stop-opacity="0"/></linearGradient></defs>
         <line class="dvg-gridline" x1="0" y1="8" x2="600" y2="8"></line>
         <line class="dvg-gridline" x1="0" y1="32" x2="600" y2="32"></line>
         <line class="dvg-gridline" x1="0" y1="56" x2="600" y2="56"></line>
         <line class="dvg-gridline" x1="0" y1="80" x2="600" y2="80"></line>
+        <path id="dvgScrubArea" fill="url(#dvgAreaGrad)" stroke="none"></path>
         <path id="dvgScrubLine" fill="none" stroke="#a9c2f5" stroke-width="2.5" style="filter:drop-shadow(0 0 5px rgba(169,194,245,.8))"></path>
-        <g id="dvgScrubDots"></g>
+        <circle id="dvgScrubDot" r="6" fill="#4f7fe0" stroke="#fff" stroke-width="2.5" style="filter:drop-shadow(0 0 6px rgba(79,127,224,.9))"></circle>
       </svg>
     </div>
-    <div class="dvg-scrub-labels" id="dvgScrubLabels"></div>
+    <div class="dvg-scrub-ticks"><span>jan</span><span>mar</span><span>mai</span><span>jul</span><span>set</span><span>nov</span><span>dez</span></div>
+    <input type="range" class="dvg-scrub-range" id="dvgScrubRange" min="0" max="0" value="0" step="1">
+    <div class="dvg-scrub-endlabels"><span id="dvgScrubStart"></span><span id="dvgScrubEnd"></span></div>
   </div>
 </section>
 <section id="tab-vendedores" class="tab-content">
@@ -15711,6 +15710,7 @@ function dashInit() {
       const n = values.length;
       if (!n) return;
       const minV = Math.min.apply(null, values), maxV = Math.max.apply(null, values);
+      const finalV = values[n-1];
       function xy(idx) {
         const x = n>1 ? idx/(n-1)*W : 0;
         const v = values[idx];
@@ -15730,22 +15730,25 @@ function dashInit() {
       }
       const allPts = values.map((_,i)=>xy(i));
       document.getElementById('dvgScrubLine').setAttribute('d', smooth(allPts));
-      const dotsG = document.getElementById('dvgScrubDots');
-      if (dotsG) {
-        dotsG.innerHTML = allPts.map((p,i) => {
-          const isLast = i === n-1;
-          return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (isLast?5:3.5) + '" fill="' + (isLast?'#fff':'#4f7fe0') + '" stroke="' + (isLast?'#4f7fe0':'#fff') + '" stroke-width="' + (isLast?2:1.5) + '"></circle>';
-        }).join('');
+      const linePts = allPts.map(p=>p[0]+','+p[1]).join(' L ');
+      document.getElementById('dvgScrubArea').setAttribute('d', 'M ' + linePts + ' L ' + W + ',' + H + ' L 0,' + H + ' Z');
+      const range = document.getElementById('dvgScrubRange');
+      range.min = 0; range.max = n-1; range.value = n-1;
+      function update(idx) {
+        const p = xy(idx);
+        document.getElementById('dvgScrubDot').setAttribute('cx', p[0]);
+        document.getElementById('dvgScrubDot').setAttribute('cy', p[1]);
+        document.getElementById('dvgScrubVal').textContent = values[idx].toLocaleString('pt-BR');
+        document.getElementById('dvgScrubDate').textContent = labels[idx];
+        const pctAno = finalV ? (values[idx]/finalV*100).toFixed(2).replace('.',',') : '0,00';
+        document.getElementById('dvgScrubBadge').textContent = pctAno + '% do total do período';
+        const pctTrack = n>1 ? (idx/(n-1))*100 : 100;
+        range.style.background = 'linear-gradient(90deg,#4f7fe0 ' + pctTrack + '%, rgba(255,255,255,.15) ' + pctTrack + '%)';
       }
-      const labelsWrap = document.getElementById('dvgScrubLabels');
-      if (labelsWrap) {
-        labelsWrap.innerHTML = values.map((v,i) => {
-          const isLast = i === n-1;
-          return '<div class="dvg-scrub-lbl"><div class="dvg-scrub-lbl-val' + (isLast?' last':'') + '">' + v.toLocaleString('pt-BR') + '</div><div class="dvg-scrub-lbl-mes' + (isLast?' last':'') + '">' + labels[i] + '</div></div>';
-        }).join('');
-      }
-      document.getElementById('dvgScrubVal').textContent = values[n-1].toLocaleString('pt-BR');
-      document.getElementById('dvgScrubDate').textContent = labels[n-1] || '';
+      range.oninput = () => update(parseInt(range.value,10));
+      update(n-1);
+      document.getElementById('dvgScrubStart').textContent = labels[0] || '';
+      document.getElementById('dvgScrubEnd').textContent = labels[n-1] || '';
     }
     let _dvgChartFocus = 'mensal';
     function _dvgSetChartFocus(which) {
