@@ -1605,14 +1605,14 @@
   <div class="dvg-kpis" id="kpis"><div class="dvg-skel dvg-skel-hero"></div><div class="dvg-skel"></div><div class="dvg-skel"></div><div class="dvg-skel"></div><div class="dvg-skel"></div></div>
   <div class="dvg-charts" id="dvgChartsWrap">
     <div class="dvg-carddark" id="dvgCardMensal">
-      <div class="dvg-titrow" id="dvgTitMensal" style="cursor:default"><div class="dvg-tit">Faturamento Mensal<span class="dvg-tit-hint">Somente Faturado e Faturado Parcial &middot; clique numa barra pra travar o mês</span></div></div>
+      <div class="dvg-titrow" id="dvgTitMensal"><div class="dvg-tit">Faturamento Mensal<span class="dvg-tit-hint">Somente Faturado e Faturado Parcial &middot; clique numa barra</span></div><span class="dvg-chev">&#9662;</span></div>
       <div class="dvg-body">
         <div class="dvg-bars" id="dvgBars"></div>
         <div class="dvg-mesdetail" id="dvgMesDetail"><div class="dvg-mesdetail-inner" id="dvgMesDetailInner"></div></div>
       </div>
     </div>
     <div class="dvg-carddark" id="dvgCardFabrica">
-      <div class="dvg-titrow" id="dvgTitFabrica" style="width:100%;cursor:default"><div class="dvg-tit">Participação por Fábrica</div></div>
+      <div class="dvg-titrow" id="dvgTitFabrica" style="width:100%"><div class="dvg-tit">Participação por Fábrica</div><span class="dvg-chev">&#9662;</span></div>
       <div class="dvg-body">
         <div class="dvg-donutrow">
           <svg id="dvgDonutSvg" viewBox="0 0 180 180" width="150" height="150">
@@ -15537,7 +15537,6 @@ function dashInit() {
       }));
     }
     let _dvgMesAberto = null;
-    let _dvgMesTotalResumo = null;
     let _dvgMesesData = [];
     let _dvgMetaMensal = null;
     function _dvgRenderBars() {
@@ -15569,8 +15568,9 @@ function dashInit() {
       }
     }
     function _dvgToggleMes(i) {
+      const det = document.getElementById('dvgMesDetail');
       document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
-      if (_dvgMesAberto === i) { _dvgMesAberto = null; _dvgMostrarTotalMes(); return; }
+      if (_dvgMesAberto === i) { det.classList.remove('open'); _dvgMesAberto = null; return; }
       _dvgMesAberto = i;
       _dvgHoverMes(i);
     }
@@ -15590,20 +15590,9 @@ function dashInit() {
     }
     function _dvgHoverMesFim() {
       if (_dvgMesAberto != null) { _dvgHoverMes(_dvgMesAberto); return; }
-      _dvgMostrarTotalMes();
-    }
-    function _dvgMostrarTotalMes() {
-      document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
       const det = document.getElementById('dvgMesDetail');
-      const inner = document.getElementById('dvgMesDetailInner');
-      if (!det || !inner) return;
-      const r = _dvgMesTotalResumo || { fat:0, peso:0, n:0, ticket:0 };
-      inner.innerHTML =
-        '<div>Faturamento<b>' + fmtBRL(r.fat) + '</b></div>' +
-        '<div>Volume<b>' + fmtNum(r.peso) + ' kg</b></div>' +
-        '<div>Pedidos<b>' + r.n.toLocaleString('pt-BR') + '</b></div>' +
-        '<div>Ticket médio<b>' + fmtBRL(r.ticket) + '</b></div>';
-      det.classList.add('open');
+      document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
+      if (det) det.classList.remove('open');
     }
     const _dvgFabPalette = ['#1c2f66','#2c4488','#3d5aa8','#5b78c9','#7b93d9','#a9c2f5','#c9d9fb','#e3ecfc'];
     function _dvgRenderDonut(porFab, totalFab) {
@@ -15899,9 +15888,7 @@ function dashInit() {
       const metaTotal = sumMetas();
       _dvgMetaMensal = metaTotal ? metaTotal/12 : null;
       _dvgMesesData = meses.map((fat,i)=>({ fat, vol: mesesVol[i], peso: mesesPeso[i], n: mesesN[i] }));
-      _dvgMesTotalResumo = { fat: k.fat, peso: k.pesoKg, n: k.nPedidos, ticket: k.ticket };
       _dvgRenderBars();
-      _dvgMostrarTotalMes();
 
       // Fábricas (donut) — mantém a proporção real de todas as fábricas, mesmo com uma fábrica selecionada no filtro
       const pedsDonutFab = filtraPedidos({ ignorarFabrica: true });
@@ -16853,8 +16840,11 @@ function dashInit() {
       window._dashModoHistorico2025 = !window._dashModoHistorico2025;
       dashInit();
     };
-    // v482: Faturamento Mensal e Participacao por Fabrica ficam sempre visiveis lado a lado
-    // (removido o toggle de foco/colapso que escondia um card enquanto o outro estava aberto).
+    const _dvgTitMensalEl = document.getElementById('dvgTitMensal');
+    if (_dvgTitMensalEl) _dvgTitMensalEl.onclick = () => _dvgSetChartFocus('mensal');
+    const _dvgTitFabricaEl = document.getElementById('dvgTitFabrica');
+    if (_dvgTitFabricaEl) _dvgTitFabricaEl.onclick = () => _dvgSetChartFocus('fabrica');
+    _dvgSetChartFocus('mensal');
     // theme toggle removed
 
     // sidebar mobile removed
