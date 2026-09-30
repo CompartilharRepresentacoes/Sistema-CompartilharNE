@@ -16002,7 +16002,7 @@ function dashInit() {
     function _dvgDrillPanelHtml() {
       return `<div class="dvg-vrank-detail">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Detalhamento: <span id="drillNome"></span></span><button id="drillFechar" style="font-size:11px;color:#0e7490;background:none;border:none;cursor:pointer">Fechar ✕</button></div>
-        <div class="dg11" style="display:grid;grid-template-columns:2.4fr 0.85fr;gap:12px">
+        <div class="dg11" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div><div style="height:220px"><canvas id="drillEvol"></canvas></div></div>
           <div class="dvg-carddark" style="padding:14px 16px;display:flex;flex-direction:column;justify-content:center">
             <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;text-align:center">Distribuição por Fábrica</div>
@@ -16013,7 +16013,7 @@ function dashInit() {
                 <text id="drillFabPct" x="90" y="106" text-anchor="middle" class="dvg-donutpct">0,00%</text>
                 <text id="drillFabNome" x="90" y="122" text-anchor="middle" class="dvg-donutnome">—</text>
               </svg>
-              <div id="drillFabLegend" style="display:flex;flex-direction:column;gap:1px;width:100%"></div>
+              <div id="drillFabLegend" style="display:flex;flex-direction:column;gap:1px;width:100%;max-height:120px;overflow:auto"></div>
             </div>
           </div>
         </div>
