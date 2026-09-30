@@ -48,6 +48,9 @@
       border-color: var(--brand-navy) !important;
       box-shadow: 0 0 0 2px rgba(216,38,33,.18);
     }
+    @media (hover:hover) and (pointer:fine) {
+      .ped-row-hover:hover { background: #cfe3fb; }
+    }
 
     /* ── DARK MODE ── */
     body.dark { background: #18181b; color: #e4e4e7; }
@@ -1476,9 +1479,11 @@
 .dash-root .dvg-risk-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.14);font-size:12.5px}
 .dash-root .dvg-risk-row:last-child{border-bottom:none}
 .dash-root .dvg-abcsum{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.dash-root .dvg-abcsum-item{flex:1;min-width:120px;background:#f8fafc;border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .15s}
-.dash-root .dvg-abcsum-item:hover{background:#eef2ff}
-.dash-root .dvg-abcsum-item.active{background:#dbeafe}
+.dash-root .dvg-abcsum-item{flex:1;min-width:150px;background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 3px 12px rgba(15,23,42,.1);cursor:pointer;transition:box-shadow .15s}
+.dash-root .dvg-abcsum-item:hover{box-shadow:0 3px 16px rgba(15,23,42,.18)}
+.dash-root .dvg-abcsum-item.active{background:#eef4ff}
+.dash-root .dvg-abcsum-top{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.dash-root .dvg-abcsum-icon{width:26px;height:26px;border-radius:8px;background:#eef2fb;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 .dash-root .dvg-devol-row{border-radius:10px;padding:4px}
 .dash-root .dvg-devol-main{display:flex;align-items:center;gap:10px;padding:8px 6px;cursor:pointer;border-radius:10px;transition:background .15s}
 .dash-root .dvg-devol-main:hover{background:#f8fafc}
@@ -1497,8 +1502,9 @@
 .dash-root .dvg-devol-detail-tit{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
 .dash-root .dvg-devol-item{display:flex;justify-content:space-between;font-size:12px;color:#334155;padding:3px 0}
 .dash-root .dvg-devol-item b{color:#1c3f8c}
-.dash-root .dvg-abcsum-item b{display:block;font-size:15px;font-weight:800;color:#1e293b}
-.dash-root .dvg-abcsum-item span{font-size:10.5px;color:#64748b}
+.dash-root .dvg-abcsum-lbl{font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:.03em}
+.dash-root .dvg-abcsum-item b{display:block;font-size:19px;font-weight:800;color:#1e293b}
+.dash-root .dvg-abcsum-item span{font-size:10.5px;color:#94a3b8;margin-top:2px;display:block}
 .dash-root .dvg-scrub{background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:16px;padding:22px 24px;box-shadow:0 4px 16px rgba(0,0,0,.22);color:#fff}
 .dash-root .dvg-scrub-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:14px}
 .dash-root .dvg-scrub-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:3px}
@@ -1509,7 +1515,12 @@
 .dash-root .dvg-scrub-track-wrap{position:relative;height:96px;margin-bottom:6px}
 .dash-root .dvg-gridline{stroke:rgba(255,255,255,.08);stroke-width:1}
 .dash-root .dvg-scrub-endlabels{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
-.dash-root .dvg-scrub-ticks{display:flex;justify-content:space-between;font-size:9.5px;color:rgba(255,255,255,.35);padding:0 2px;margin-bottom:2px}
+.dash-root .dvg-scrub-labels{display:flex;margin-top:8px}
+.dash-root .dvg-scrub-labels .dvg-scrub-lbl{flex:1;min-width:0;text-align:center;padding:0 1px}
+.dash-root .dvg-scrub-labels .dvg-scrub-lbl-val{font-size:11px;font-weight:700;color:#e6edfb}
+.dash-root .dvg-scrub-labels .dvg-scrub-lbl-val.last{font-size:12px;font-weight:800;color:#fff}
+.dash-root .dvg-scrub-labels .dvg-scrub-lbl-mes{font-size:9px;color:rgba(255,255,255,.45);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-root .dvg-scrub-labels .dvg-scrub-lbl-mes.last{color:rgba(255,255,255,.75);font-weight:700}
 .dash-root input[type=range].dvg-scrub-range{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:6px;background:rgba(255,255,255,.15);outline:none;margin-top:4px}
 .dash-root input[type=range].dvg-scrub-range::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#4f7fe0;border:3px solid #fff;box-shadow:0 0 8px rgba(79,127,224,.7);cursor:pointer}
 .dash-root input[type=range].dvg-scrub-range::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#4f7fe0;border:3px solid #fff;cursor:pointer}
@@ -1603,7 +1614,7 @@
       </div>
     </div>
     <div class="dvg-carddark" id="dvgCardFabrica">
-      <div class="dvg-titrow" id="dvgTitFabrica" style="width:100%"><div class="dvg-tit">Participação por Fábrica<span class="dvg-tit-hint">clique p/ filtrar</span></div><span class="dvg-chev">&#9662;</span></div>
+      <div class="dvg-titrow" id="dvgTitFabrica" style="width:100%"><div class="dvg-tit">Participação por Fábrica</div><span class="dvg-chev">&#9662;</span></div>
       <div class="dvg-body">
         <div class="dvg-donutrow">
           <svg id="dvgDonutSvg" viewBox="0 0 180 180" width="150" height="150">
@@ -1614,7 +1625,6 @@
           </svg>
           <div class="dvg-legend" id="dvgFabLegend"></div>
         </div>
-        <button id="dvgBtnLimparFabrica" class="dvg-btnlimpar" type="button" style="display:none;margin-top:10px">limpar seleção</button>
       </div>
     </div>
   </div>
@@ -1624,24 +1634,20 @@
   </div>
   <div class="dvg-scrub" id="dvgScrubCard">
     <div class="dvg-scrub-top">
-      <div><div class="dvg-rankcard-tit" style="color:#fff">Curva de Positivação Acumulada</div><div class="dvg-scrub-sub">Arraste a linha do tempo — clientes únicos com pedido faturado</div></div>
-      <div class="dvg-scrub-readout"><div class="dvg-scrub-n" id="dvgScrubVal">0</div><div class="dvg-scrub-d">clientes ativos até <b id="dvgScrubDate" style="color:#fff"></b></div><div class="dvg-scrub-badge" id="dvgScrubBadge"></div></div>
+      <div><div class="dvg-rankcard-tit" style="color:#fff">Curva de Positivação Acumulada</div><div class="dvg-scrub-sub">Clientes únicos com pedido faturado, mês a mês</div></div>
+      <div class="dvg-scrub-readout"><div class="dvg-scrub-n" id="dvgScrubVal">0</div><div class="dvg-scrub-d">clientes ativos até <b id="dvgScrubDate" style="color:#fff"></b></div></div>
     </div>
     <div class="dvg-scrub-track-wrap">
       <svg id="dvgScrubSvg" viewBox="0 0 600 96" preserveAspectRatio="none" style="width:100%;height:96px;display:block">
-        <defs><linearGradient id="dvgAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4f7fe0" stop-opacity="0.45"/><stop offset="100%" stop-color="#4f7fe0" stop-opacity="0"/></linearGradient></defs>
         <line class="dvg-gridline" x1="0" y1="8" x2="600" y2="8"></line>
         <line class="dvg-gridline" x1="0" y1="32" x2="600" y2="32"></line>
         <line class="dvg-gridline" x1="0" y1="56" x2="600" y2="56"></line>
         <line class="dvg-gridline" x1="0" y1="80" x2="600" y2="80"></line>
-        <path id="dvgScrubArea" fill="url(#dvgAreaGrad)" stroke="none"></path>
         <path id="dvgScrubLine" fill="none" stroke="#a9c2f5" stroke-width="2.5" style="filter:drop-shadow(0 0 5px rgba(169,194,245,.8))"></path>
-        <circle id="dvgScrubDot" r="6" fill="#4f7fe0" stroke="#fff" stroke-width="2.5" style="filter:drop-shadow(0 0 6px rgba(79,127,224,.9))"></circle>
+        <g id="dvgScrubDots"></g>
       </svg>
     </div>
-    <div class="dvg-scrub-ticks"><span>jan</span><span>mar</span><span>mai</span><span>jul</span><span>set</span><span>nov</span><span>dez</span></div>
-    <input type="range" class="dvg-scrub-range" id="dvgScrubRange" min="0" max="0" value="0" step="1">
-    <div class="dvg-scrub-endlabels"><span id="dvgScrubStart"></span><span id="dvgScrubEnd"></span></div>
+    <div class="dvg-scrub-labels" id="dvgScrubLabels"></div>
   </div>
 </section>
 <section id="tab-vendedores" class="tab-content">
@@ -2227,9 +2233,16 @@
                     </div>
                     <div>
                       <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Planejamento Reino</label>
-                      <select class="form-input" id="forn-reino" style="width:100%">
+                      <select class="form-input" id="forn-reino" onchange="_fornToggleReinoDestaque()" style="width:100%">
                         <option value="Não">Não</option>
                         <option value="Sim">Sim</option>
+                      </select>
+                    </div>
+                    <div id="forn-reino-destaque-wrap" style="display:none">
+                      <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Destaque nos cards do Reino</label>
+                      <select class="form-input" id="forn-reino-destaque" style="width:100%">
+                        <option value="rs">Valor (R$)</option>
+                        <option value="kg">Peso (Kg)</option>
                       </select>
                     </div>
                   </div>
@@ -9138,6 +9151,8 @@ function openFornecedorForm(params) {
   setV('forn-pais',        r.pais||'BRASIL');
   setV('forn-ativo',       r.ativo||'Sim');
   setV('forn-reino',       r.reino||'Não');
+  setV('forn-reino-destaque', r.reino_destaque||'rs');
+  _fornToggleReinoDestaque();
 
   // Estado e cidade
   const estadoEl = document.getElementById('forn-estado');
@@ -9166,6 +9181,13 @@ function openFornecedorForm(params) {
   document.getElementById('forn-msg').textContent = '';
   var fornAutoriaEl = document.getElementById('forn-autoria-info');
   if (fornAutoriaEl) fornAutoriaEl.innerHTML = isEdit ? _appRenderAutoriaHtml(r) : '';
+}
+
+function _fornToggleReinoDestaque() {
+  var reinoEl = document.getElementById('forn-reino');
+  var wrap = document.getElementById('forn-reino-destaque-wrap');
+  if (!reinoEl || !wrap) return;
+  wrap.style.display = (reinoEl.value === 'Sim') ? 'block' : 'none';
 }
 
 function gerarCodigoForn() {
@@ -9213,6 +9235,7 @@ function salvarFornecedor() {
     pais:         document.getElementById('forn-pais').value.trim(),
     ativo:        document.getElementById('forn-ativo').value,
     reino:        document.getElementById('forn-reino').value,
+    reino_destaque: document.getElementById('forn-reino-destaque') ? document.getElementById('forn-reino-destaque').value : 'rs',
     foto:         foto,
   };
 
@@ -15567,13 +15590,6 @@ function dashInit() {
       if (det) det.classList.remove('open');
     }
     const _dvgFabPalette = ['#1c2f66','#2c4488','#3d5aa8','#5b78c9','#7b93d9','#a9c2f5','#c9d9fb','#e3ecfc'];
-    function _dvgToggleFabrica(i) {
-      // seleção única: clicar troca pra essa fábrica; clicar na já selecionada limpa (mostra todas de novo)
-      const jaEraSoEssa = state.fabricas.size === 1 && state.fabricas.has(i);
-      state.fabricas.clear();
-      if (!jaEraSoEssa) state.fabricas.add(i);
-      buildFiltros(); rerender();
-    }
     function _dvgRenderDonut(porFab, totalFab) {
       const svg = document.getElementById('dvgDonutSvg');
       if (!svg) return;
@@ -15647,7 +15663,6 @@ function dashInit() {
         hit.setAttribute('stroke-dasharray', len + ' ' + (C-len));
         hit.setAttribute('stroke-dashoffset', -offset);
         hit.style.cursor = 'pointer';
-        hit.addEventListener('click', () => _dvgToggleFabrica(f.i));
         hit.addEventListener('mouseenter', () => mostrarPreview(rank));
         g.appendChild(hit);
         offset += len + gap;
@@ -15661,14 +15676,11 @@ function dashInit() {
         row.innerHTML = '<span class="dvg-leg-dot" style="background:' + cor + '"></span>' +
           '<span class="dvg-leg-nome">' + escapeHtml(f.nome) + '</span>' +
           '<span class="dvg-leg-pct">' + pct.toFixed(2).replace('.',',') + '%</span>';
-        row.onclick = () => _dvgToggleFabrica(f.i);
         row.addEventListener('mouseenter', () => mostrarPreview(rank));
         legWrap.appendChild(row);
       });
       const donutWrap = svg.closest('.dvg-donutrow');
       if (donutWrap) donutWrap.onmouseleave = mostrarSelecionado;
-      const btnLimpar = document.getElementById('dvgBtnLimparFabrica');
-      if (btnLimpar) btnLimpar.style.display = selecionadas.size ? 'inline-block' : 'none';
       mostrarSelecionado();
     }
     const _dvgMedalhas = [
@@ -15699,7 +15711,6 @@ function dashInit() {
       const n = values.length;
       if (!n) return;
       const minV = Math.min.apply(null, values), maxV = Math.max.apply(null, values);
-      const finalV = values[n-1];
       function xy(idx) {
         const x = n>1 ? idx/(n-1)*W : 0;
         const v = values[idx];
@@ -15719,25 +15730,22 @@ function dashInit() {
       }
       const allPts = values.map((_,i)=>xy(i));
       document.getElementById('dvgScrubLine').setAttribute('d', smooth(allPts));
-      const linePts = allPts.map(p=>p[0]+','+p[1]).join(' L ');
-      document.getElementById('dvgScrubArea').setAttribute('d', 'M ' + linePts + ' L ' + W + ',' + H + ' L 0,' + H + ' Z');
-      const range = document.getElementById('dvgScrubRange');
-      range.min = 0; range.max = n-1; range.value = n-1;
-      function update(idx) {
-        const p = xy(idx);
-        document.getElementById('dvgScrubDot').setAttribute('cx', p[0]);
-        document.getElementById('dvgScrubDot').setAttribute('cy', p[1]);
-        document.getElementById('dvgScrubVal').textContent = values[idx].toLocaleString('pt-BR');
-        document.getElementById('dvgScrubDate').textContent = labels[idx];
-        const pctAno = finalV ? (values[idx]/finalV*100).toFixed(2).replace('.',',') : '0,00';
-        document.getElementById('dvgScrubBadge').textContent = pctAno + '% do total do período';
-        const pctTrack = n>1 ? (idx/(n-1))*100 : 100;
-        range.style.background = 'linear-gradient(90deg,#4f7fe0 ' + pctTrack + '%, rgba(255,255,255,.15) ' + pctTrack + '%)';
+      const dotsG = document.getElementById('dvgScrubDots');
+      if (dotsG) {
+        dotsG.innerHTML = allPts.map((p,i) => {
+          const isLast = i === n-1;
+          return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (isLast?5:3.5) + '" fill="' + (isLast?'#fff':'#4f7fe0') + '" stroke="' + (isLast?'#4f7fe0':'#fff') + '" stroke-width="' + (isLast?2:1.5) + '"></circle>';
+        }).join('');
       }
-      range.oninput = () => update(parseInt(range.value,10));
-      update(n-1);
-      document.getElementById('dvgScrubStart').textContent = labels[0] || '';
-      document.getElementById('dvgScrubEnd').textContent = labels[n-1] || '';
+      const labelsWrap = document.getElementById('dvgScrubLabels');
+      if (labelsWrap) {
+        labelsWrap.innerHTML = values.map((v,i) => {
+          const isLast = i === n-1;
+          return '<div class="dvg-scrub-lbl"><div class="dvg-scrub-lbl-val' + (isLast?' last':'') + '">' + v.toLocaleString('pt-BR') + '</div><div class="dvg-scrub-lbl-mes' + (isLast?' last':'') + '">' + labels[i] + '</div></div>';
+        }).join('');
+      }
+      document.getElementById('dvgScrubVal').textContent = values[n-1].toLocaleString('pt-BR');
+      document.getElementById('dvgScrubDate').textContent = labels[n-1] || '';
     }
     let _dvgChartFocus = 'mensal';
     function _dvgSetChartFocus(which) {
@@ -15881,17 +15889,20 @@ function dashInit() {
       const totalFab = porFab.reduce((a,b)=>a+b,0);
       _dvgRenderDonut(porFab, totalFab);
 
-      // Positivação acumulada
-      const cliPorDia = new Map();
+      // Positivação acumulada (por mês, nao por dia - Marcos pediu granularidade mensal)
+      const cliPorMes = new Map();
       for (const p of peds) {
-        const arr = cliPorDia.get(p[0]) || new Set();
-        arr.add(p[1]); cliPorDia.set(p[0], arr);
+        const chaveMes = p[0].slice(0,7);
+        const arr = cliPorMes.get(chaveMes) || new Set();
+        arr.add(p[1]); cliPorMes.set(chaveMes, arr);
       }
-      const datasOrd = [...cliPorDia.keys()].sort();
+      const mesesOrd = [...cliPorMes.keys()].sort();
       const acumSet = new Set(); const acumX=[]; const acumY=[];
-      for (const d of datasOrd) {
-        for (const c of cliPorDia.get(d)) acumSet.add(c);
-        acumX.push(fmtDate(d)); acumY.push(acumSet.size);
+      for (const ym of mesesOrd) {
+        for (const c of cliPorMes.get(ym)) acumSet.add(c);
+        const [anoYm, mesYm] = ym.split('-');
+        acumX.push(monthLabels[parseInt(mesYm,10)-1] + '/' + anoYm);
+        acumY.push(acumSet.size);
       }
       _dvgRenderScrub(acumX, acumY);
 
@@ -16470,7 +16481,7 @@ function dashInit() {
           const r = _dvgResumoAbc[k];
           const pct = total ? fmtPct(r.fat/total) : '—';
           const ativo = _dvgCliClasseFiltro === k;
-          return `<div class="dvg-abcsum-item${ativo?' active':''}" data-classe="${k}" style="border-left:4px solid ${_dvgAbcCores[k]}"><b id="dvgAbcN${k}">0 clientes</b><span>Classe ${k} &middot; ${pct} do faturamento</span></div>`;
+          return `<div class="dvg-abcsum-item${ativo?' active':''}" data-classe="${k}" style="border-bottom:3px solid ${_dvgAbcCores[k]}"><div class="dvg-abcsum-top"><div class="dvg-abcsum-icon" style="color:${_dvgAbcCores[k]}"><i class="ti ti-chart-pie"></i></div><div class="dvg-abcsum-lbl">CLASSE ${k}</div></div><b id="dvgAbcN${k}">0 clientes</b><span>${pct} do faturamento</span></div>`;
         }).join('');
         _dvgAbcSumEl.querySelectorAll('.dvg-abcsum-item').forEach(el => { el.onclick = () => _dvgToggleClasseFiltro(el.dataset.classe); });
         ['A','B','C'].forEach(k => _dvgAnimarNumero(document.getElementById('dvgAbcN'+k), _dvgResumoAbc[k].n, v => Math.round(v).toLocaleString('pt-BR') + ' clientes'));
@@ -16791,7 +16802,6 @@ function dashInit() {
       window._dashModoHistorico2025 = !window._dashModoHistorico2025;
       dashInit();
     };
-    document.getElementById('dvgBtnLimparFabrica')?.addEventListener('click', () => { state.fabricas.clear(); buildFiltros(); rerender(); });
     const _dvgTitMensalEl = document.getElementById('dvgTitMensal');
     if (_dvgTitMensalEl) _dvgTitMensalEl.onclick = () => _dvgSetChartFocus('mensal');
     const _dvgTitFabricaEl = document.getElementById('dvgTitFabrica');
@@ -17775,7 +17785,7 @@ function renderVendaSimples() {
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
     var cor = statusCores[p.status] || { bg:'#f1f5f9', cor:'#64748b' };
     var statusHtml = '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>';
-    return '<div class="mc-row" style="display:grid;grid-template-columns:85px 90px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
+    return '<div class="mc-row ped-row-hover" style="display:grid;grid-template-columns:85px 90px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
       + '<div class="mc-meta ped-r-data" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
       + '<div class="mc-meta ped-r-pedido" style="font-size:12.5px;color:#475569;white-space:normal;word-break:break-all;line-height:1.25">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary" style="font-size:13px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word;line-height:1.3">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
@@ -17854,8 +17864,7 @@ function renderPedidoList() {
     const statusHtml = '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>';
     const fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
     const podeExcluir = p.status === 'Cancelado';
-    return '<div class="mc-row" style="display:grid;grid-template-columns:85px 90px 2fr 1fr 0.8fr 100px 100px 110px 292px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9;transition:background .12s"'
-      + ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">'
+    return '<div class="mc-row ped-row-hover" style="display:grid;grid-template-columns:85px 90px 2fr 1fr 0.8fr 100px 100px 110px 292px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9;transition:background .12s">'
       + '<div class="mc-meta ped-r-data" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
       + '<div class="mc-meta ped-r-pedido" style="font-size:12.5px;color:#475569;white-space:normal;word-break:break-all;line-height:1.25;padding-right:6px">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary" style="font-size:13px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word;line-height:1.3;padding-right:8px">' + (p.revenda ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:#eff6ff;color:#1d4ed8;margin-right:6px;vertical-align:middle"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="devolucoes" style="font-size:9px"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Revenda</span>' : '') + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
@@ -20731,7 +20740,7 @@ function renderVendasSimplesNfs() {
       var dataFmt = f.data ? f.data.split('-').reverse().join('/') : '—';
       var transp = f.transportadoraId ? transpMap[f.transportadoraId] : null;
       var transportadoraNome = transp ? (transp.nome_fantasia || transp.razao_social || '') : (f.transportadoraNome || '');
-      return '<div class="mc-row" style="display:grid;grid-template-columns:100px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
+      return '<div class="mc-row ped-row-hover" style="display:grid;grid-template-columns:100px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
         + '<div class="mc-meta ped-r-pedido" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
         + '<div class="mc-primary" style="font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
         + '<div class="mc-meta ped-r-cidade" style="font-size:12px;color:#64748b">' + _pedEsc(cli ? (cli.cidade || '—') : '—') + '</div>'
@@ -22264,22 +22273,36 @@ function _prFmtMoedaCompacta(v) {
   return _prFmtMoeda(n);
 }
 
-function _prStatsEvolucaoHtml(p) {
+// v463: seta de tendencia (verde pra cima / vermelha pra baixo) + percentual,
+// comparando o valor do ano atual com o do ano anterior no mesmo grafico.
+function _prSetaTendencia(atual, anterior) {
+  if (atual == null || anterior == null || anterior === 0) return '';
+  var pct = ((atual - anterior) / Math.abs(anterior)) * 100;
+  var up = pct >= 0;
+  var cor = up ? '#4ade80' : '#f87171';
+  var icone = up ? 'ti-arrow-up-right' : 'ti-arrow-down-right';
+  var txt = Math.abs(pct).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+  return '<span style="font-size:11.5px;font-weight:700;color:' + cor + ';display:inline-flex;align-items:center;gap:2px;white-space:nowrap"><i class="ti ' + icone + '" style="font-size:12px"></i>' + txt + '</span>';
+}
+
+function _prStatsEvolucaoHtml(p, pAnt) {
   var ticket = (p.lojas ? p.rs / p.lojas : null);
-  function bloco(rotulo, valor) {
-    return '<div style="background:#20234a;padding:14px 16px"><div style="font-size:9.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">' + rotulo + '</div><div style="font-size:18px;font-weight:800;color:#fff">' + valor + '</div></div>';
+  var ticketAnt = (pAnt && pAnt.lojas ? pAnt.rs / pAnt.lojas : null);
+  function bloco(rotulo, valor, tendenciaHtml) {
+    return '<div style="background:#20234a;padding:14px 16px"><div style="font-size:9.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">' + rotulo + '</div><div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap"><div style="font-size:18px;font-weight:800;color:#fff">' + valor + '</div>' + (tendenciaHtml || '') + '</div></div>';
   }
-  return bloco('Total em Kg', _prFmtKg(p.kg) + ' kg') +
-    bloco('Total em R$', _prFmtMoeda(p.rs)) +
-    bloco('Ticket Médio', ticket != null ? _prFmtMoeda(ticket) : '—') +
-    bloco('Total de Lojas', p.lojas != null ? p.lojas : '—');
+  return bloco('Total em Kg', _prFmtKg(p.kg) + ' kg', _prSetaTendencia(p.kg, pAnt ? pAnt.kg : null)) +
+    bloco('Total em R$', _prFmtMoeda(p.rs), _prSetaTendencia(p.rs, pAnt ? pAnt.rs : null)) +
+    bloco('Ticket Médio', ticket != null ? _prFmtMoeda(ticket) : '—', _prSetaTendencia(ticket, ticketAnt)) +
+    bloco('Total de Lojas', p.lojas != null ? p.lojas : '—', _prSetaTendencia(p.lojas, pAnt ? pAnt.lojas : null));
 }
 
 function _prMostrarStatsAnoEvolucao(i) {
   var p = _prPontosEvolucaoAtual && _prPontosEvolucaoAtual[i];
   if (!p) return;
+  var pAnt = _prPontosEvolucaoAtual[i - 1];
   var el = document.getElementById('pr-stats-evolucao');
-  if (el) el.innerHTML = _prStatsEvolucaoHtml(p);
+  if (el) el.innerHTML = _prStatsEvolucaoHtml(p, pAnt);
 }
 
 function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
@@ -22323,7 +22346,7 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
     pontosCirculo +
     '</svg>' +
     '<div style="display:grid;grid-template-columns:repeat(' + n + ',1fr);margin-top:2px">' + colunasAnos + '</div>' +
-    '<div id="pr-stats-evolucao" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-top:16px">' + _prStatsEvolucaoHtml(pontos[idxInicial]) + '</div>' +
+    '<div id="pr-stats-evolucao" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-top:16px">' + _prStatsEvolucaoHtml(pontos[idxInicial], pontos[idxInicial - 1]) + '</div>' +
     '</div>';
 }
 
@@ -22336,7 +22359,7 @@ function _prCalcularRankRedes(fornecedorIdOuNull) {
   var lojasPorRede = {};
   registros.forEach(function (r) {
     var key = String(r.categoriaId);
-    if (!porRede[key]) porRede[key] = { redeId: r.categoriaId, volFechado: 0, faturamento: 0 };
+    if (!porRede[key]) porRede[key] = { redeId: r.categoriaId, volFechado: 0, faturamento: 0, fatKg: 0, fatRs: 0 };
     porRede[key].volFechado += Number(r.volFechado) || 0;
     porRede[key].faturamento += (Number(r.volFechado) || 0) * (Number(r.precoFechado) || 0);
 
@@ -22347,6 +22370,9 @@ function _prCalcularRankRedes(fornecedorIdOuNull) {
     clientesSub.forEach(function (cl) {
       var lojaReg = todasLojas.find(function (x) { return String(x.fornecedorId) === String(r.fornecedorId) && String(x.clienteId) === String(cl.id) && x.ano === r.ano; });
       var calc = _prCalcLoja(lojaReg, r.precoFechado);
+      // v463: soma tambem o Faturado REAL (kg/R$) da rede, alem da contagem de lojas atendidas.
+      porRede[key].fatKg += calc.fatTotal;
+      porRede[key].fatRs += calc.valorTotal;
       if (calc.fatTotal > 0) lojasPorRede[key][String(r.fornecedorId) + '|' + String(cl.id)] = true;
     });
   });
@@ -22364,17 +22390,19 @@ function _prCalcularRankRedes(fornecedorIdOuNull) {
 function _prRenderRankRedesHtml(titulo, itens) {
   var linhas = itens.slice(0, 8).map(function (item, i) {
     var pos = i + 1;
-    return '<div style="display:flex;align-items:center;padding:10px 18px;border-bottom:1px solid #f8fafc">' +
-      '<span style="width:30px;font-weight:800;color:' + (pos === 1 ? '#DE7926' : '#94a3b8') + '">' + pos + '&#186;</span>' +
-      '<span style="flex:1;font-weight:700;color:#1e293b">' + _prEsc(item.nome) + '</span>' +
-      '<span style="width:90px;text-align:right">' + item.lojas + '</span>' +
-      '<span style="width:110px;text-align:right">' + _prFmtKg(item.volFechado) + ' kg</span>' +
-      '<span style="width:130px;text-align:right;font-weight:700;color:#272A4A">' + _prFmtMoeda(item.faturamento) + '</span>' +
+    return '<div style="display:flex;align-items:center;padding:10px 18px;border-bottom:1px solid #f8fafc;gap:6px;white-space:nowrap">' +
+      '<span style="width:20px;flex:none;font-weight:800;color:' + (pos === 1 ? '#DE7926' : '#94a3b8') + '">' + pos + '&#186;</span>' +
+      '<span style="flex:1;min-width:60px;font-weight:700;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _prEsc(item.nome) + '</span>' +
+      '<span style="width:42px;flex:none;text-align:right">' + item.lojas + '</span>' +
+      '<span style="width:82px;flex:none;text-align:right">' + _prFmtKg(item.volFechado) + ' kg</span>' +
+      '<span style="width:82px;flex:none;text-align:right;color:#1d4ed8;font-weight:700">' + (item.fatKg ? _prFmtKg(item.fatKg) + ' kg' : '—') + '</span>' +
+      '<span style="width:98px;flex:none;text-align:right;font-weight:700;color:#272A4A;font-size:12px">' + _prFmtMoeda(item.faturamento) + '</span>' +
+      '<span style="width:98px;flex:none;text-align:right;color:#15803d;font-weight:700;font-size:12px">' + (item.fatRs ? _prFmtMoeda(item.fatRs) : '—') + '</span>' +
       '</div>';
   }).join('');
-  return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden;margin-bottom:18px">' +
-    '<div style="padding:14px 18px 10px;font-size:13px;font-weight:700;color:#1e293b">' + _prEsc(titulo) + '</div>' +
-    '<div style="display:flex;padding:8px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase"><span style="width:30px">#</span><span style="flex:1">Rede</span><span style="width:90px;text-align:right">Lojas</span><span style="width:110px;text-align:right">Vol. Fechado</span><span style="width:130px;text-align:right">Faturamento</span></div>' +
+  return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow-x:auto;margin-bottom:18px">' +
+    '<div style="padding:14px 18px 10px;font-size:13px;font-weight:700;color:#1e293b;min-width:560px">' + _prEsc(titulo) + '</div>' +
+    '<div style="display:flex;padding:8px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;gap:6px;white-space:nowrap;min-width:560px"><span style="width:20px;flex:none">#</span><span style="flex:1;min-width:60px">Rede</span><span style="width:42px;flex:none;text-align:right">Lojas</span><span style="width:82px;flex:none;text-align:right">Fechado kg</span><span style="width:82px;flex:none;text-align:right;color:#1d4ed8">Faturado kg</span><span style="width:98px;flex:none;text-align:right">Fechado R$</span><span style="width:98px;flex:none;text-align:right;color:#15803d">Faturado R$</span></div>' +
     (linhas || '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma negociação fechada ainda.</div>') +
     '</div>';
 }
@@ -22393,17 +22421,20 @@ function _prRenderFabricas() {
     return;
   }
 
+  var _PR_KPI_ACCENTS = ['#1c2f66', '#3d5aa8', '#5b78c9', '#7b93d9'];
   var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;margin-bottom:6px">' +
     fornecedores.map(function (f, i) {
-      var inicial = (f.nome_fantasia || '?')[0].toUpperCase();
-      var grad = _FORN_GRADIENTS[i % _FORN_GRADIENTS.length];
+      var accent = _PR_KPI_ACCENTS[i % _PR_KPI_ACCENTS.length];
       var selecionada = _prGraficoFabricaId === f.id;
-      var logoHtml = f.foto
-        ? '<div style="width:52px;height:52px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #e2e8f0"><img src="' + f.foto + '" style="width:100%;height:100%;object-fit:contain;display:block" alt=""></div>'
-        : '<div style="width:52px;height:52px;background:' + grad + ';border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0">' + inicial + '</div>';
-      return '<div onclick="_prSelecionarFabricaGrafico(\'' + f.id + '\')" style="background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 2px ' + (selecionada ? '14px rgba(39,42,74,.1)' : '12px rgba(39,42,74,.08)') + ';cursor:pointer;border:' + (selecionada ? '2px solid #272A4A' : '1px solid #f1f5f9') + '">' +
-        '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">' + logoHtml + '<div style="font-size:15px;font-weight:700;color:#1e293b">' + _prEsc(f.nome_fantasia) + '</div></div>' +
-        '<button onclick="event.stopPropagation();_prAbrirFabrica(\'' + f.id + '\')" style="width:100%;background:' + (selecionada ? '#272A4A' : '#fff') + ';color:' + (selecionada ? '#fff' : '#272A4A') + ';border:' + (selecionada ? 'none' : '1px solid #cbd5e1') + ';border-radius:7px;padding:9px 0;font-size:11.5px;font-weight:700;cursor:pointer">Ver Planejamento &#8250;</button>' +
+      var corDestaque = selecionada ? '#272A4A' : accent;
+      return '<div onclick="_prSelecionarFabricaGrafico(\'' + f.id + '\')" style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:' + (selecionada ? '0 3px 14px rgba(39,42,74,.18)' : '0 3px 12px rgba(15,23,42,.1)') + ';border-bottom:3px solid ' + corDestaque + ';cursor:pointer">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">' +
+        '<div style="display:flex;align-items:center;gap:8px;min-width:0">' +
+        '<div style="width:26px;height:26px;border-radius:8px;background:#eef2fb;display:flex;align-items:center;justify-content:center;font-size:15px;color:' + corDestaque + ';flex-shrink:0"><i class="ti ti-building-factory-2"></i></div>' +
+        '<div style="font-size:13px;font-weight:700;color:#1e293b;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _prEsc(f.nome_fantasia) + '</div>' +
+        '</div>' +
+        '<button onclick="event.stopPropagation();_prAbrirFabrica(\'' + f.id + '\')" style="background:' + (selecionada ? '#272A4A' : '#fff') + ';color:' + (selecionada ? '#fff' : '#272A4A') + ';border:' + (selecionada ? 'none' : '1px solid #cbd5e1') + ';border-radius:7px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">Ver Planejamento &#8250;</button>' +
+        '</div>' +
         '</div>';
     }).join('') + '</div>' +
     '<div style="font-size:10.5px;color:#94a3b8;margin:8px 0 20px 2px">Clique no card (fora do botão) pra ver só o faturamento daquela fábrica no gráfico abaixo. O botão "Ver Planejamento" abre as Redes/Sub Redes.</div>';
@@ -22506,10 +22537,24 @@ function _prRenderRedes() {
     return { kg: kg, rs: rs, lojas: clientesSub.length };
   }
 
+  // v464: fábricas com destaque="kg" mostram o card "Faturado" com o kg grande e o
+  // R$ pequeno embaixo (em vez do padrão R$ grande/kg pequeno) - configurável por
+  // fábrica no cadastro de Fornecedor, já que nem toda fábrica vende primariamente
+  // por valor (algumas o Marcos acompanha mais de perto pelo peso).
+  var _prFornecedorAtual = getFornecedores().find(function (f) { return String(f.id) === String(_prFabricaId); });
+  var _prDestaqueKg = !!(_prFornecedorAtual && _prFornecedorAtual.reino_destaque === 'kg');
+  var faturadoValorHtml = _prDestaqueKg
+    ? (somaFaturadoAnoKg ? _prFmtKg(somaFaturadoAnoKg) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>' : '—')
+    : (somaFaturadoAnoRs ? _prFmtMoeda(somaFaturadoAnoRs) : '—');
+  var faturadoSubHtml = _prDestaqueKg
+    ? (somaFaturadoAnoRs ? _prFmtMoeda(somaFaturadoAnoRs) : '—')
+    : (somaFaturadoAnoKg ? _prFmtKg(somaFaturadoAnoKg) + ' kg' : '—');
+  var faturadoCor = _prDestaqueKg ? '#272A4A' : '#16a34a';
+
   var kpisHtml = '<div class="ped-kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px">' +
     _prKpiCardPadrao('Volume Projetado', _prFmtKg(somaProjetado) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>', null, '#1c2f66') +
     _prKpiCardPadrao('Volume Fechado', _prFmtKg(somaFechadoKg) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>', (somaFaturamento2026 ? _prFmtMoeda(somaFaturamento2026) : '—'), '#2c4488') +
-    _prKpiCardPadrao('Faturado ' + _prAnoSel, (somaFaturadoAnoRs ? _prFmtMoeda(somaFaturadoAnoRs) : '—'), (somaFaturadoAnoKg ? _prFmtKg(somaFaturadoAnoKg) + ' kg' : '—'), '#3d5aa8', '#16a34a') +
+    _prKpiCardPadrao('Faturado ' + _prAnoSel, faturadoValorHtml, faturadoSubHtml, '#3d5aa8', faturadoCor) +
     _prKpiCardPadrao('Total de Lojas Atendidas', qtdLojasAtendidas, registros.length + ' sub-redes negociando', '#5b78c9') +
     '</div>';
 
@@ -22909,6 +22954,7 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
     return '<tr class="pr-loja-linha" data-loja-nome="' + (cl.nome_fantasia || cl.razao_social || '').toLowerCase() + '" style="border-bottom:1px solid #f8fafc">' +
       '<td style="padding:8px 9px;font-weight:600">' + _prEsc(cl.nome_fantasia || cl.razao_social || '—') + '</td>' +
       '<td style="padding:8px 9px;text-align:right">' + (loja && loja.venda2024 != null ? loja.venda2024 : '<span style="color:#cbd5e1">—</span>') + '</td>' +
+      '<td style="padding:8px 9px;text-align:right">' + (function () { var pa = (loja && loja.precoAnoAnterior != null) ? loja.precoAnoAnterior : (registroNeg && registroNeg.preco2025 != null ? registroNeg.preco2025 : null); return pa != null ? Number(pa).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '<span style="color:#cbd5e1">—</span>'; })() + '</td>' +
       '<td style="padding:8px 9px;text-align:right">' + (loja && loja.planejado != null ? loja.planejado : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       '<td style="padding:8px 9px;text-align:right;font-weight:700">' + (loja && loja.fechado2026 != null ? loja.fechado2026 : '<span style="color:#cbd5e1">—</span>') + '</td>' +
       pedidosCells +
@@ -22920,7 +22966,7 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
       '</tr>';
   }).join('');
 
-  var numCols = 8 + pedIdx.length;
+  var numCols = 9 + pedIdx.length;
   var pedHeaderCells = pedIdx.map(function (i) { return '<th style="padding:7px 9px;text-align:right">' + (i + 1) + 'º Ped./Fat.</th>'; }).join('');
   var pedFooterCells = pedIdx.map(function (i) { return '<td style="padding:8px 9px;text-align:right">' + ((totPed[i] || totFat[i]) ? (_prFmtKg(totPed[i]) + ' / ' + _prFmtKg(totFat[i])) : '—') + '</td>'; }).join('');
 
@@ -22935,7 +22981,8 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
     '<div style="overflow-x:auto"><table style="width:auto;min-width:1080px;border-collapse:collapse;font-size:13px">' +
     '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">' +
     '<th style="padding:7px 9px;text-align:left">Loja (Cliente)</th>' +
-    '<th style="padding:7px 9px;text-align:right">' + (_prAnoSel - 1) + '</th>' +
+    '<th style="padding:7px 9px;text-align:right">Faturamento ' + (_prAnoSel - 1) + '</th>' +
+    '<th style="padding:7px 9px;text-align:right">Preço ' + (_prAnoSel - 1) + '</th>' +
     '<th style="padding:7px 9px;text-align:right">Planejado</th>' +
     '<th style="padding:7px 9px;text-align:right">Fechado ' + _prAnoSel + '</th>' +
     pedHeaderCells +
@@ -22947,7 +22994,7 @@ function _prConstruirTabelaLojasHtml(fornecedorId, redeId, subRedeId) {
     '</tr></thead><tbody>' +
     (linhas || '<tr><td colspan="' + numCols + '" style="padding:20px;text-align:center;color:#94a3b8">Nenhuma loja vinculada a essa Sub Rede ainda. Use "Incluir Loja" acima.</td></tr>') +
     '</tbody><tfoot><tr style="background:#1e293b;color:#fff;font-weight:700">' +
-    '<td style="padding:8px 9px" colspan="2">TOTAL (' + clientes.length + ' lojas)</td>' +
+    '<td style="padding:8px 9px" colspan="3">TOTAL (' + clientes.length + ' lojas)</td>' +
     '<td style="padding:8px 9px;text-align:right">' + (totPlanejado ? _prFmtKg(totPlanejado) : '—') + '</td>' +
     '<td style="padding:8px 9px;text-align:right">' + (totFechado ? _prFmtKg(totFechado) : '—') + '</td>' +
     pedFooterCells +
