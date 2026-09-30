@@ -596,7 +596,6 @@
 
       /* Visao Geral redesenhada (hero + kpis + donut + ranks + scrub): mobile */
       .dash-root .dvg-kpis { grid-template-columns: 1fr !important; }
-      .dash-root .dvg-cli-kpis { grid-template-columns: 1fr 1fr !important; }
       .dash-root .dvg-hero { grid-row: auto !important; grid-column: 1 / -1 !important; }
       .dash-root .dvg-hero-val { font-size: 26px !important; }
       .dash-root .dvg-charts { grid-template-columns: 1fr !important; }
@@ -1368,7 +1367,6 @@
 .dash-root .dvg-greet-txt{font-size:14px;font-weight:700;color:#1e293b}
 .dash-root .dvg-greet-txt span{font-weight:400;color:#64748b;font-size:11px;margin-left:8px}
 .dash-root .dvg-kpis{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
-.dash-root .dvg-cli-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
 .dash-root .dvg-hero{background:linear-gradient(135deg,#14162c 0%,#272A4A 55%,#40446e 100%);border-radius:16px;padding:22px 26px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 22px rgba(0,0,0,.22)}
 .dash-root .dvg-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .dash-root .dvg-hero-lbl{font-size:13px;opacity:.85;font-weight:600}
@@ -1656,7 +1654,6 @@
   </div>
 </section>
 <section id="tab-clientes" class="tab-content">
-  <div class="dvg-cli-kpis" id="dvgCliKpis"></div>
   <div class="dvg-scrub" id="dvgCliScrubCard" style="margin-bottom:12px">
     <div class="dvg-scrub-top">
       <div>
@@ -16553,34 +16550,6 @@ function dashInit() {
         `<div class="dvg-risk-list" style="text-align:center;padding:16px 0;font-size:12.5px">Nenhum cliente acima de ${dias} dias sem comprar. &#9989;</div>` :
         `<div class="dvg-risk-list">${risco.slice(0,40).map(c=>`<div class="dvg-risk-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0"><b>${escapeHtml(c.nome)}</b><br><span style="opacity:.75;font-size:10.5px">${fmtBRL(c.fat)} no período &middot; última: ${c.ult?fmtDate(c.ult):'—'}</span></span><span style="font-weight:800;white-space:nowrap;flex-shrink:0">${c.dias}d</span></div>`).join('')}</div>` +
         (risco.length>40?`<div style="font-size:11px;opacity:.8;margin-top:6px;text-align:center">…e mais ${risco.length-40}.</div>`:'');
-
-      // KPIs de Clientes (Ativos / Positivados / Em Risco / Novos no periodo) - topo da aba
-      const _dvgCliVisivelFiltro = (ci) => {
-        if (state.clientes.size && !state.clientes.has(ci)) return false;
-        if (state.uf.size) { const _ui = ufIdxOf[CLI_UF[ci]]; if (_ui === undefined || !state.uf.has(_ui)) return false; }
-        return true;
-      };
-      let _dvgKpiCliAtivos = 0;
-      for (let _i=0;_i<CLI.length;_i++) { if (!CLI_INATIVO[_i] && _dvgCliVisivelFiltro(_i)) _dvgKpiCliAtivos++; }
-      const _dvgKpiPositivados = arr.filter(c => !c.inativo).length;
-      const _dvgKpiPositivadosPct = _dvgKpiCliAtivos ? fmtPct(_dvgKpiPositivados/_dvgKpiCliAtivos) : '—';
-      const _dvgPedsHistorico = filtraPedidos({ dtIni:'0001-01-01', todosStatus:false });
-      const _dvgPrimeiraCompra = new Map();
-      _dvgPedsHistorico.forEach(p => { const _atual = _dvgPrimeiraCompra.get(p[1]); if (!_atual || p[0] < _atual) _dvgPrimeiraCompra.set(p[1], p[0]); });
-      const _dvgKpiNovos = arr.filter(c => !c.inativo && (_dvgPrimeiraCompra.get(c.ci)||'') >= state.dtIni).length;
-      const _dvgCliKpisEl = document.getElementById('dvgCliKpis');
-      if (_dvgCliKpisEl) {
-        _dvgCliKpisEl.innerHTML = [
-          { icon:'ti-users', cor:'#0e2f6e', lbl:'CLIENTES ATIVOS', id:'dvgCliKpiAtivos', sub:'na base de cadastro' },
-          { icon:'ti-user-check', cor:'#1c2f66', lbl:'POSITIVADOS', id:'dvgCliKpiPositivados', sub:_dvgKpiPositivadosPct+' dos ativos compraram' },
-          { icon:'ti-alert-triangle', cor:'#3d5aa8', lbl:'CLIENTES EM RISCO', id:'dvgCliKpiRisco', sub:dias+'+ dias sem comprar' },
-          { icon:'ti-user-plus', cor:'#185fa5', lbl:'NOVOS NO PERÍODO', id:'dvgCliKpiNovos', sub:'1ª compra dentro do período' },
-        ].map(k => `<div class="dvg-kpi" style="border-bottom:3px solid ${k.cor}"><div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:${k.cor}"><i class="ti ${k.icon}"></i></div><div class="dvg-kpi-lbl">${k.lbl}</div></div></div><div class="dvg-kpi-val" id="${k.id}">0</div><div class="dvg-kpi-sub">${k.sub}</div></div>`).join('');
-        _dvgAnimarNumero(document.getElementById('dvgCliKpiAtivos'), _dvgKpiCliAtivos, v => Math.round(v).toLocaleString('pt-BR'));
-        _dvgAnimarNumero(document.getElementById('dvgCliKpiPositivados'), _dvgKpiPositivados, v => Math.round(v).toLocaleString('pt-BR'));
-        _dvgAnimarNumero(document.getElementById('dvgCliKpiRisco'), risco.length, v => Math.round(v).toLocaleString('pt-BR'));
-        _dvgAnimarNumero(document.getElementById('dvgCliKpiNovos'), _dvgKpiNovos, v => Math.round(v).toLocaleString('pt-BR'));
-      }
 
       // Tabela completa (paginada: 25/50/75/100/Todos)
       _dvgClientesArr = arrAbc; _dvgClientesTotal = totalAbc; _dvgClientesDias = dias;
