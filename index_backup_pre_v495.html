@@ -16703,7 +16703,7 @@ function dashInit() {
           ${kpiCard('Ticket médio', _dvgFmtBRLAbrev(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:_dvgFmtBRLAbrev}, fmtBRL(ticket))}
           ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${fmtBRL(metaF)}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null)}
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-[2.4fr_0.85fr] gap-4 mt-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
           <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">Evolução Mensal</h3>
             <div style="height:240px;"><canvas id="fabMensal"></canvas></div>
           </div>
@@ -16737,31 +16737,13 @@ function dashInit() {
       _dvgAnimarNumero(document.getElementById('fabKpiTicket'), ticket, _dvgFmtBRLAbrev);
       if (atinge != null) _dvgAnimarNumero(document.getElementById('fabKpiMeta'), atinge, fmtPct);
       // Mensal (linha com brilho, mesmo padrão do drill-down de Vendedores)
-      const _dvgFabMensalOpts = chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false });
-      _dvgFabMensalOpts.scales.y.display = false;
-      _dvgFabMensalOpts.scales.x.offset = true;
-      _dvgFabMensalOpts.layout = { padding: { top: 22 } };
       window._dashRegChart(document.getElementById('fabMensal'), {
         type:'line', data:{ labels:monthLabels, datasets:[{ data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.15)', fill:true, tension:.35, pointRadius:2.5, pointBackgroundColor:'#4f7fe0', pointBorderColor:'#4f7fe0', pointHoverRadius:6, pointHoverBackgroundColor:'#a9c2f5', pointHoverBorderColor:'#fff', pointHoverBorderWidth:2, borderWidth:2.5 }] },
-        options: _dvgFabMensalOpts,
+        options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false }),
         plugins: [{
           id: 'dvgFabLineGlow',
           beforeDatasetsDraw(chart) { chart.ctx.save(); chart.ctx.shadowColor = 'rgba(79,127,224,.85)'; chart.ctx.shadowBlur = 8; },
           afterDatasetsDraw(chart) { chart.ctx.restore(); }
-        }, {
-          id: 'dvgFabMensalValores',
-          afterDatasetsDraw(chart) {
-            const { ctx } = chart;
-            const meta = chart.getDatasetMeta(0);
-            const vals = chart.data.datasets[0].data;
-            ctx.save();
-            ctx.fillStyle = '#fff';
-            ctx.font = '700 10.5px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            meta.data.forEach((pt, i) => { ctx.fillText(fmtBRLk(vals[i]), pt.x, pt.y - 6); });
-            ctx.restore();
-          }
         }]
       });
       // Vendedor (lista com barra, no mesmo estilo do Ranking de Vendedores)
