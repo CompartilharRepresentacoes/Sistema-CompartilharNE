@@ -1606,7 +1606,7 @@
       </div>
     </div>
     <div class="dvg-carddark" id="dvgCardFabrica">
-      <div class="dvg-titrow" id="dvgTitFabrica" style="width:100%"><div class="dvg-tit">Participação por Fábrica</div><span class="dvg-chev">&#9662;</span></div>
+      <div class="dvg-titrow" id="dvgTitFabrica" style="width:100%"><div class="dvg-tit">Participação por Fábrica<span class="dvg-tit-hint">clique p/ filtrar</span></div><span class="dvg-chev">&#9662;</span></div>
       <div class="dvg-body">
         <div class="dvg-donutrow">
           <svg id="dvgDonutSvg" viewBox="0 0 180 180" width="150" height="150">
@@ -1617,6 +1617,7 @@
           </svg>
           <div class="dvg-legend" id="dvgFabLegend"></div>
         </div>
+        <button id="dvgBtnLimparFabrica" class="dvg-btnlimpar" type="button" style="display:none;margin-top:10px">limpar seleção</button>
       </div>
     </div>
   </div>
@@ -15586,6 +15587,13 @@ function dashInit() {
       if (det) det.classList.remove('open');
     }
     const _dvgFabPalette = ['#1c2f66','#2c4488','#3d5aa8','#5b78c9','#7b93d9','#a9c2f5','#c9d9fb','#e3ecfc'];
+    function _dvgToggleFabrica(i) {
+      // seleção única: clicar troca pra essa fábrica; clicar na já selecionada limpa (mostra todas de novo)
+      const jaEraSoEssa = state.fabricas.size === 1 && state.fabricas.has(i);
+      state.fabricas.clear();
+      if (!jaEraSoEssa) state.fabricas.add(i);
+      buildFiltros(); rerender();
+    }
     function _dvgRenderDonut(porFab, totalFab) {
       const svg = document.getElementById('dvgDonutSvg');
       if (!svg) return;
@@ -15659,6 +15667,7 @@ function dashInit() {
         hit.setAttribute('stroke-dasharray', len + ' ' + (C-len));
         hit.setAttribute('stroke-dashoffset', -offset);
         hit.style.cursor = 'pointer';
+        hit.addEventListener('click', () => _dvgToggleFabrica(f.i));
         hit.addEventListener('mouseenter', () => mostrarPreview(rank));
         g.appendChild(hit);
         offset += len + gap;
@@ -15672,11 +15681,14 @@ function dashInit() {
         row.innerHTML = '<span class="dvg-leg-dot" style="background:' + cor + '"></span>' +
           '<span class="dvg-leg-nome">' + escapeHtml(f.nome) + '</span>' +
           '<span class="dvg-leg-pct">' + pct.toFixed(2).replace('.',',') + '%</span>';
+        row.onclick = () => _dvgToggleFabrica(f.i);
         row.addEventListener('mouseenter', () => mostrarPreview(rank));
         legWrap.appendChild(row);
       });
       const donutWrap = svg.closest('.dvg-donutrow');
       if (donutWrap) donutWrap.onmouseleave = mostrarSelecionado;
+      const btnLimpar = document.getElementById('dvgBtnLimparFabrica');
+      if (btnLimpar) btnLimpar.style.display = selecionadas.size ? 'inline-block' : 'none';
       mostrarSelecionado();
     }
     const _dvgMedalhas = [
@@ -16799,6 +16811,7 @@ function dashInit() {
       window._dashModoHistorico2025 = !window._dashModoHistorico2025;
       dashInit();
     };
+    document.getElementById('dvgBtnLimparFabrica')?.addEventListener('click', () => { state.fabricas.clear(); buildFiltros(); rerender(); });
     const _dvgTitMensalEl = document.getElementById('dvgTitMensal');
     if (_dvgTitMensalEl) _dvgTitMensalEl.onclick = () => _dvgSetChartFocus('mensal');
     const _dvgTitFabricaEl = document.getElementById('dvgTitFabrica');
