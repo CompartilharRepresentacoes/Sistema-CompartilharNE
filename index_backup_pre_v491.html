@@ -16234,30 +16234,13 @@ function dashInit() {
       const meses = Array(12).fill(0);
       for (const p of peds) meses[parseInt(p[0].slice(5,7),10)-1] += p[5];
       if (drillEvol) drillEvol.destroy();
-      const _dvgDrillEvolOpts = chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk });
-      _dvgDrillEvolOpts.scales.y.display = false;
-      _dvgDrillEvolOpts.layout = { padding: { top: 22 } };
       drillEvol = window._dashRegChart(document.getElementById('drillEvol'), {
         type:'line', data:{ labels:monthLabels, datasets:[{ label:'Faturamento Mensal', data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.12)', fill:true, tension:.3 }]},
-        options: _dvgDrillEvolOpts,
+        options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk }),
         plugins: [{
           id: 'dvgLineGlow',
           beforeDatasetsDraw(chart) { chart.ctx.save(); chart.ctx.shadowColor = 'rgba(79,127,224,.85)'; chart.ctx.shadowBlur = 8; },
           afterDatasetsDraw(chart) { chart.ctx.restore(); }
-        }, {
-          id: 'dvgDrillEvolValores',
-          afterDatasetsDraw(chart) {
-            const { ctx } = chart;
-            const meta = chart.getDatasetMeta(0);
-            const vals = chart.data.datasets[0].data;
-            ctx.save();
-            ctx.fillStyle = '#1e293b';
-            ctx.font = '700 10.5px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            meta.data.forEach((pt, i) => { ctx.fillText(fmtBRLk(vals[i]), pt.x, pt.y - 6); });
-            ctx.restore();
-          }
         }]
       });
       // Por fábrica
