@@ -15692,7 +15692,7 @@ function dashInit() {
       wrap.innerHTML = items.map((it, i) => {
         const cores = _dvgMedalhas[i] || _dvgMedalhas[_dvgMedalhas.length-1];
         const pct = max ? (it.val/max*100) : 0;
-        return '<div class="dvg-rrow"><span class="dvg-rpos" style="background:#1c2f66;color:#fff">'+(i+1)+'</span>' +
+        return '<div class="dvg-rrow"><span class="dvg-rpos" style="background:'+cores[0]+';color:'+cores[1]+'">'+(i+1)+'</span>' +
           '<span class="dvg-rnome">'+escapeHtml(it.nome)+'</span>' +
           '<span class="dvg-rval">'+fmtBRL(it.val)+'</span></div>' +
           '<div class="dvg-rtrk"><i style="width:'+pct+'%;background:'+cores[2]+';box-shadow:0 0 8px '+cores[3]+',0 0 2px '+cores[3]+'"></i></div>';
@@ -16461,24 +16461,22 @@ function dashInit() {
       for (const p of peds) { let a = ag.get(p[1]); if (!a) { a={fat:0,n:0,ult:'',fabs:new Set()}; ag.set(p[1],a);} a.fat+=p[5]; a.n++; if (p[0]>a.ult) a.ult=p[0]; a.fabs.add(p[2]); }
       const total = [...ag.values()].reduce((s,a)=>s+a.fat,0);
       const arr = [...ag.entries()].map(([ci,a])=>({ci, nome:CLI[ci], inativo:CLI_INATIVO[ci], ...a})).sort((a,b)=>b.fat-a.fat);
-      // classificar ABC (desconsidera clientes inativos - Marcos pediu p/ nao distorcer a curva)
-      const arrAbc = arr.filter(c => !c.inativo);
-      const totalAbc = arrAbc.reduce((s,c)=>s+c.fat,0);
+      // classificar ABC
       let acc=0;
-      arrAbc.forEach(c => { acc += c.fat; c.acumPct = totalAbc? acc/totalAbc : 0; c.classe = c.acumPct<=0.8?'A':c.acumPct<=0.95?'B':'C'; });
+      arr.forEach(c => { acc += c.fat; c.acumPct = total? acc/total : 0; c.classe = c.acumPct<=0.8?'A':c.acumPct<=0.95?'B':'C'; });
       // último dia da janela
       const fimDt = parseDate(state.dtFim);
       arr.forEach(c => c.dias = c.ult ? daysBetween(parseDate(c.ult), fimDt) : 999);
 
       // Resumo ABC (contagem e % de faturamento por classe)
       const _dvgResumoAbc = { A:{n:0,fat:0}, B:{n:0,fat:0}, C:{n:0,fat:0} };
-      arrAbc.forEach(c => { _dvgResumoAbc[c.classe].n++; _dvgResumoAbc[c.classe].fat += c.fat; });
+      arr.forEach(c => { _dvgResumoAbc[c.classe].n++; _dvgResumoAbc[c.classe].fat += c.fat; });
       const _dvgAbcSumEl = document.getElementById('dvgAbcSum');
       if (_dvgAbcSumEl) {
         const _dvgAbcCores = { A:'#0e2f6e', B:'#3d5aa8', C:'#94a3b8' };
         _dvgAbcSumEl.innerHTML = ['A','B','C'].map(k => {
           const r = _dvgResumoAbc[k];
-          const pct = totalAbc ? fmtPct(r.fat/totalAbc) : '—';
+          const pct = total ? fmtPct(r.fat/total) : '—';
           const ativo = _dvgCliClasseFiltro === k;
           return `<div class="dvg-abcsum-item${ativo?' active':''}" data-classe="${k}" style="border-bottom:3px solid ${_dvgAbcCores[k]}"><div class="dvg-abcsum-top"><div class="dvg-abcsum-icon" style="color:${_dvgAbcCores[k]}"><i class="ti ti-chart-pie"></i></div><div class="dvg-abcsum-lbl">CLASSE ${k}</div></div><b id="dvgAbcN${k}">0 clientes</b><span>${pct} do faturamento</span></div>`;
         }).join('');
@@ -16544,7 +16542,7 @@ function dashInit() {
         (risco.length>40?`<div style="font-size:11px;opacity:.8;margin-top:6px;text-align:center">…e mais ${risco.length-40}.</div>`:'');
 
       // Tabela completa (paginada: 25/50/75/100/Todos)
-      _dvgClientesArr = arrAbc; _dvgClientesTotal = totalAbc; _dvgClientesDias = dias;
+      _dvgClientesArr = arr; _dvgClientesTotal = total; _dvgClientesDias = dias;
       _dvgRenderClientesTabela();
 
       // Accordion Curva ABC <-> Risco de inatividade (mesmo padrão da Visão Geral)

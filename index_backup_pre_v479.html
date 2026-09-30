@@ -15692,7 +15692,7 @@ function dashInit() {
       wrap.innerHTML = items.map((it, i) => {
         const cores = _dvgMedalhas[i] || _dvgMedalhas[_dvgMedalhas.length-1];
         const pct = max ? (it.val/max*100) : 0;
-        return '<div class="dvg-rrow"><span class="dvg-rpos" style="background:#1c2f66;color:#fff">'+(i+1)+'</span>' +
+        return '<div class="dvg-rrow"><span class="dvg-rpos" style="background:'+cores[0]+';color:'+cores[1]+'">'+(i+1)+'</span>' +
           '<span class="dvg-rnome">'+escapeHtml(it.nome)+'</span>' +
           '<span class="dvg-rval">'+fmtBRL(it.val)+'</span></div>' +
           '<div class="dvg-rtrk"><i style="width:'+pct+'%;background:'+cores[2]+';box-shadow:0 0 8px '+cores[3]+',0 0 2px '+cores[3]+'"></i></div>';
