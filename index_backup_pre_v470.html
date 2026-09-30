@@ -22429,20 +22429,14 @@ function _prRenderFabricas() {
     return;
   }
 
-  var _PR_KPI_ACCENTS = ['#1c2f66', '#3d5aa8', '#5b78c9', '#7b93d9'];
   var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;margin-bottom:6px">' +
     fornecedores.map(function (f, i) {
-      var accent = _PR_KPI_ACCENTS[i % _PR_KPI_ACCENTS.length];
+      var inicial = (f.nome_fantasia || '?')[0].toUpperCase();
+      var grad = _FORN_GRADIENTS[i % _FORN_GRADIENTS.length];
       var selecionada = _prGraficoFabricaId === f.id;
-      var corDestaque = selecionada ? '#272A4A' : accent;
-      return '<div onclick="_prSelecionarFabricaGrafico(\'' + f.id + '\')" style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:' + (selecionada ? '0 3px 14px rgba(39,42,74,.18)' : '0 3px 12px rgba(15,23,42,.1)') + ';border-bottom:3px solid ' + corDestaque + ';cursor:pointer">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">' +
-        '<div style="display:flex;align-items:center;gap:8px;min-width:0">' +
-        '<div style="width:26px;height:26px;border-radius:8px;background:#eef2fb;display:flex;align-items:center;justify-content:center;font-size:15px;color:' + corDestaque + ';flex-shrink:0"><i class="ti ti-building-factory-2"></i></div>' +
-        '<div style="font-size:13px;font-weight:700;color:#1e293b;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _prEsc(f.nome_fantasia) + '</div>' +
-        '</div>' +
-        '<button onclick="event.stopPropagation();_prAbrirFabrica(\'' + f.id + '\')" style="background:' + (selecionada ? '#272A4A' : '#fff') + ';color:' + (selecionada ? '#fff' : '#272A4A') + ';border:' + (selecionada ? 'none' : '1px solid #cbd5e1') + ';border-radius:7px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">Ver Planejamento &#8250;</button>' +
-        '</div>' +
+      return '<div onclick="_prSelecionarFabricaGrafico(\'' + f.id + '\')" style="background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 2px ' + (selecionada ? '14px rgba(39,42,74,.1)' : '12px rgba(39,42,74,.08)') + ';cursor:pointer;border:' + (selecionada ? '2px solid #272A4A' : '1px solid #f1f5f9') + '">' +
+        '<div style="font-size:15px;font-weight:700;color:#1e293b;text-transform:uppercase;margin-bottom:14px">' + _prEsc(f.nome_fantasia) + '</div>' +
+        '<button onclick="event.stopPropagation();_prAbrirFabrica(\'' + f.id + '\')" style="width:100%;background:' + (selecionada ? '#272A4A' : '#fff') + ';color:' + (selecionada ? '#fff' : '#272A4A') + ';border:' + (selecionada ? 'none' : '1px solid #cbd5e1') + ';border-radius:7px;padding:9px 0;font-size:11.5px;font-weight:700;cursor:pointer">Ver Planejamento &#8250;</button>' +
         '</div>';
     }).join('') + '</div>' +
     '<div style="font-size:10.5px;color:#94a3b8;margin:8px 0 20px 2px">Clique no card (fora do botão) pra ver só o faturamento daquela fábrica no gráfico abaixo. O botão "Ver Planejamento" abre as Redes/Sub Redes.</div>';
