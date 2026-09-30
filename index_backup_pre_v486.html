@@ -1398,10 +1398,7 @@
 .dash-root .dvg-skel-row{height:14px;border-radius:7px;margin-bottom:14px;background:linear-gradient(90deg,#eef1f6 25%,#e2e8f0 37%,#eef1f6 63%);background-size:400% 100%;animation:dvgSkelShimmer 1.4s ease infinite}
 @keyframes dvgSkelShimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
 .dash-root .dvg-kpi-val-exact{font-size:9.5px;color:#94a3b8;margin-top:-2px}
-.dash-root .dvg-charts{display:grid;grid-template-columns:2.4fr 0.85fr;gap:14px;margin-bottom:14px;align-items:stretch;transition:grid-template-columns .35s ease}
-.dash-root #dvgCardFabrica{display:flex;flex-direction:column}
-.dash-root #dvgCardFabrica .dvg-body{flex:1;display:flex;align-items:center}
-.dash-root #dvgCardFabrica .dvg-donutrow{width:100%}
+.dash-root .dvg-charts{display:grid;grid-template-columns:2.4fr 0.85fr;gap:14px;margin-bottom:14px;align-items:start;transition:grid-template-columns .35s ease}
 .dash-root .dvg-charts.dvg-focus-fabrica{grid-template-columns:0.85fr 2.4fr}
 .dash-root .dvg-carddark{background:#101a3d;border-radius:14px;padding:18px 20px;box-shadow:0 4px 16px rgba(15,23,42,.2);transition:opacity .25s ease}
 .dash-root .dvg-titrow{display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:6px}
@@ -15759,9 +15756,10 @@ function dashInit() {
       const dotsG = document.getElementById('dvgScrubDots');
       if (dotsG) {
         dotsG.innerHTML = allPts.map((p,i) => {
-          const dot = '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.5" fill="#4f7fe0" stroke="#fff" stroke-width="1.5"></circle>';
-          const valTxt = '<text x="' + p[0] + '" y="' + (p[1] - 9) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e6edfb">' + values[i].toLocaleString('pt-BR') + '</text>';
-          const mesTxt = '<text x="' + p[0] + '" y="' + (H-4) + '" text-anchor="middle" font-size="9.5" font-weight="400" fill="rgba(255,255,255,.5)">' + shortLabels[i] + '</text>';
+          const isLast = i === n-1;
+          const dot = '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (isLast?5:3.5) + '" fill="' + (isLast?'#fff':'#4f7fe0') + '" stroke="' + (isLast?'#4f7fe0':'#fff') + '" stroke-width="' + (isLast?2:1.5) + '"></circle>';
+          const valTxt = '<text x="' + p[0] + '" y="' + (p[1] - (isLast?11:9)) + '" text-anchor="middle" font-size="' + (isLast?12:10.5) + '" font-weight="' + (isLast?800:700) + '" fill="' + (isLast?'#fff':'#e6edfb') + '">' + values[i].toLocaleString('pt-BR') + '</text>';
+          const mesTxt = '<text x="' + p[0] + '" y="' + (H-4) + '" text-anchor="middle" font-size="9.5" font-weight="' + (isLast?700:400) + '" fill="' + (isLast?'rgba(255,255,255,.75)':'rgba(255,255,255,.5)') + '">' + shortLabels[i] + '</text>';
           return dot + valTxt + mesTxt;
         }).join('');
       }
