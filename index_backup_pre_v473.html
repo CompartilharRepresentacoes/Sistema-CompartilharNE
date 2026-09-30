@@ -15889,20 +15889,17 @@ function dashInit() {
       const totalFab = porFab.reduce((a,b)=>a+b,0);
       _dvgRenderDonut(porFab, totalFab);
 
-      // Positivação acumulada (por mês, nao por dia - Marcos pediu granularidade mensal)
-      const cliPorMes = new Map();
+      // Positivação acumulada
+      const cliPorDia = new Map();
       for (const p of peds) {
-        const chaveMes = p[0].slice(0,7);
-        const arr = cliPorMes.get(chaveMes) || new Set();
-        arr.add(p[1]); cliPorMes.set(chaveMes, arr);
+        const arr = cliPorDia.get(p[0]) || new Set();
+        arr.add(p[1]); cliPorDia.set(p[0], arr);
       }
-      const mesesOrd = [...cliPorMes.keys()].sort();
+      const datasOrd = [...cliPorDia.keys()].sort();
       const acumSet = new Set(); const acumX=[]; const acumY=[];
-      for (const ym of mesesOrd) {
-        for (const c of cliPorMes.get(ym)) acumSet.add(c);
-        const [anoYm, mesYm] = ym.split('-');
-        acumX.push(monthLabels[parseInt(mesYm,10)-1] + '/' + anoYm);
-        acumY.push(acumSet.size);
+      for (const d of datasOrd) {
+        for (const c of cliPorDia.get(d)) acumSet.add(c);
+        acumX.push(fmtDate(d)); acumY.push(acumSet.size);
       }
       _dvgRenderScrub(acumX, acumY);
 
