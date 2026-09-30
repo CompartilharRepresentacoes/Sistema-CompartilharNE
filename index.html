@@ -3717,7 +3717,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div>
             <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.01em">Cat&#225;logos</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">PDFs salvos só neste aparelho</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">PDFs publicados no site, visíveis para todos</div>
           </div>
           <div style="display:flex;gap:7px;align-items:center">
             <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
@@ -7673,9 +7673,9 @@ if (firebaseConfigurado) {
 // funcionando exatamente como antes, direto no localStorage — nenhum código existente
 // precisa saber a diferença.
 // ═══════════════════════════════════════════════════
-var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas', 'planejamento_reino_vinculos'];
-var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [], cat_clientes: [], cat_produtos: [], transportadoras: [], tabelas_preco: [], sku_clientes: [], negociacoes_preco: [], devolucoes: [], ocorrencias_entrega: [], bloqueios_produto: [], gruposAcesso: [], comandos_navegacao: [], metas: [], planejamento_reino_redes: [], planejamento_reino_lojas: [], planejamento_reino_vinculos: [] };
-var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false, cat_clientes: false, cat_produtos: false, transportadoras: false, tabelas_preco: false, sku_clientes: false, negociacoes_preco: false, devolucoes: false, ocorrencias_entrega: false, bloqueios_produto: false, gruposAcesso: false, comandos_navegacao: false, metas: false, planejamento_reino_redes: false, planejamento_reino_lojas: false, planejamento_reino_vinculos: false };
+var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas', 'planejamento_reino_vinculos', 'catalogos'];
+var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [], cat_clientes: [], cat_produtos: [], transportadoras: [], tabelas_preco: [], sku_clientes: [], negociacoes_preco: [], devolucoes: [], ocorrencias_entrega: [], bloqueios_produto: [], gruposAcesso: [], comandos_navegacao: [], metas: [], planejamento_reino_redes: [], planejamento_reino_lojas: [], planejamento_reino_vinculos: [], catalogos: [] };
+var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false, cat_clientes: false, cat_produtos: false, transportadoras: false, tabelas_preco: false, sku_clientes: false, negociacoes_preco: false, devolucoes: false, ocorrencias_entrega: false, bloqueios_produto: false, gruposAcesso: false, comandos_navegacao: false, metas: false, planejamento_reino_redes: false, planejamento_reino_lojas: false, planejamento_reino_vinculos: false, catalogos: false };
 var _fsOuvindo  = false;
 var _fsEmpresaCache = null;
 var _fsEmpresaCarregada = false;
@@ -7742,6 +7742,7 @@ function _fsAoAtualizar(nome) {
     planejamento_reino_redes: ['_prRender'],
     planejamento_reino_lojas: ['_prRenderLojasTabela'],
     planejamento_reino_vinculos: ['_prRender'],
+    catalogos: ['renderCatalogoList'],
   };
   (mapaRender[nome] || []).forEach(function (fn) {
     if (typeof window[fn] === 'function') {
@@ -9699,44 +9700,25 @@ async function carregarCidadesEmp() {
 }
 
 // ═══════════════════════════════════════════════════
-// CATÁLOGOS  (IndexedDB — sem limite de 10 MB)
+// CATÁLOGOS  (metadado no Firestore, sincronizado para todos; o PDF em si fica em
+// catalogos/<slug>.pdf, publicado junto do index.html pelo atualizar_github.bat)
 // ═══════════════════════════════════════════════════
-async function _catalogDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('compartilharne_catalogs', 1);
-    req.onupgradeneeded = e => {
-      if (!e.target.result.objectStoreNames.contains('catalogs'))
-        e.target.result.createObjectStore('catalogs', { keyPath: 'fornecedor_id' });
-    };
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror   = () => reject(req.error);
-  });
+function _catSlug(s) {
+  return String(s || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'catalogo';
 }
-async function getCatalogos() {
-  try {
-    const db = await _catalogDB();
-    return new Promise(resolve => {
-      const req = db.transaction('catalogs','readonly').objectStore('catalogs').getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror   = () => resolve([]);
-    });
-  } catch(e) { return []; }
-}
+function getCatalogos() { return firebaseConfigurado ? _fsGet('catalogos') : JSON.parse(localStorage.getItem('catalogos') || '[]'); }
+function setCatalogos(data) { if (firebaseConfigurado) { _fsSet('catalogos', data); } else { localStorage.setItem('catalogos', JSON.stringify(data)); } }
 async function _saveCatalogEntry(entry) {
-  const db = await _catalogDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('catalogs','readwrite');
-    tx.objectStore('catalogs').put(entry);
-    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
-  });
+  const atual = getCatalogos().filter(c => c.fornecedor_id !== entry.fornecedor_id);
+  atual.push(entry);
+  setCatalogos(atual);
 }
 async function _deleteCatalogEntry(fornId) {
-  const db = await _catalogDB();
-  return new Promise(resolve => {
-    const tx = db.transaction('catalogs','readwrite');
-    tx.objectStore('catalogs').delete(fornId);
-    tx.oncomplete = resolve; tx.onerror = resolve;
-  });
+  setCatalogos(getCatalogos().filter(c => c.fornecedor_id !== fornId));
 }
 
 async function renderCatalogoList() {
@@ -9806,17 +9788,23 @@ async function renderCatalogoList() {
 
 async function uploadCatalogo(fornId, input) {
   const file = input.files[0];
+  input.value = '';
   if (!file) return;
   if (file.type !== 'application/pdf') { alert('Selecione um arquivo PDF.'); return; }
-  if (file.size > 150 * 1024 * 1024) { alert('Arquivo muito grande. Limite: 150 MB.'); return; }
-  const reader = new FileReader();
-  reader.onload = async e => {
-    try {
-      await _saveCatalogEntry({ fornecedor_id: fornId, nome: file.name, data: new Date().toLocaleDateString('pt-BR'), pdf: e.target.result });
-      renderCatalogoList();
-    } catch(err) { alert('Erro ao salvar catálogo: ' + (err.message||err)); }
-  };
-  reader.readAsDataURL(file);
+  const forn = getFornecedores().find(f => f.id === fornId);
+  const slug = _catSlug(forn ? forn.nome_fantasia : file.name);
+  const caminho = 'catalogos/' + slug + '.pdf';
+  const ok = confirm(
+    'Este catálogo vai ficar disponível para todo mundo depois de publicado.\n\n' +
+    'Coloque o arquivo "' + file.name + '" na pasta "catalogos" do projeto com o nome:\n' +
+    slug + '.pdf\n\n' +
+    'Depois rode o atualizar_github.bat para publicar.\n\nConfirmar o cadastro agora?'
+  );
+  if (!ok) return;
+  try {
+    await _saveCatalogEntry({ id: fornId, fornecedor_id: fornId, nome: file.name, arquivo: caminho, data: new Date().toLocaleDateString('pt-BR') });
+    renderCatalogoList();
+  } catch(err) { alert('Erro ao salvar catálogo: ' + (err.message||err)); }
 }
 async function removerCatalogo(fornId) {
   if (!confirm('Remover o catálogo deste fornecedor?')) return;
@@ -9824,10 +9812,10 @@ async function removerCatalogo(fornId) {
   renderCatalogoList();
 }
 async function baixarCatalogo(fornId) {
-  const cats = await getCatalogos();
+  const cats = getCatalogos();
   const cat  = cats.find(c => c.fornecedor_id === fornId);
-  if (!cat) return;
-  const a = document.createElement('a'); a.href = cat.pdf; a.download = cat.nome || 'catalogo.pdf'; a.click();
+  if (!cat || !cat.arquivo) return;
+  const a = document.createElement('a'); a.href = cat.arquivo; a.download = cat.nome || 'catalogo.pdf'; a.click();
 }
 
 window._cartilhaPdf = null; window._cartilhaPagAtual = 1; window._cartilhaFornId = null; window._cartilhaAnimating = false; window._cartilhaModo = 'vertical';
@@ -9995,7 +9983,7 @@ async function _flipCartilha(dir, newLeft) {
 }
 
 async function abrirCartilha(fornId) {
-  const cats = await getCatalogos();
+  const cats = getCatalogos();
   const cat  = cats.find(c => c.fornecedor_id === fornId);
   const forn = getFornecedores().find(f => f.id === fornId);
   if (!cat || !forn) return;
@@ -10044,11 +10032,7 @@ async function abrirCartilha(fornId) {
   }
   lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   try {
-    const base64 = cat.pdf.split(',')[1];
-    const bin = atob(base64);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    window._cartilhaPdf = await lib.getDocument({ data: arr }).promise;
+    window._cartilhaPdf = await lib.getDocument({ url: cat.arquivo }).promise;
     if (window._cartilhaModo === 'vertical') {
       await _renderPaginaVertical(1);
     } else {
