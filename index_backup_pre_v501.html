@@ -4611,31 +4611,25 @@
           <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
         </div>
       </div>
-      <input type="file" id="ped-import-file" accept=".xlsx,.xls,.pdf" style="display:none" onchange="importarPedidosArquivo(this)">
-      <!-- Abas de visao (mesmo estilo das abas da pagina Inicio: maiusculas + sublinhado laranja); Importar/Cadastrar ficam na mesma linha, a direita -->
-      <div id="ped-abas-desktop" style="display:flex;align-items:center;gap:10px;border-bottom:2px solid #e2e8f0;margin-bottom:14px;background:#f8fafc;border-radius:10px 10px 0 0;padding:4px 4px 0;flex-wrap:wrap">
-        <div style="display:flex;gap:2px;flex-wrap:wrap;flex:1">
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
+        <button onclick="pedAbrirEscolhaImportar()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
+        <input type="file" id="ped-import-file" accept=".xlsx,.xls,.pdf" style="display:none" onchange="importarPedidosArquivo(this)">
+        <button onclick="showPage('page-pedido-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
+      </div>
+      <!-- Abas de visao (mesmo estilo das abas da pagina Inicio: maiusculas + sublinhado laranja) -->
+      <div id="ped-abas-desktop" style="display:flex;gap:2px;border-bottom:2px solid #e2e8f0;margin-bottom:14px;background:#f8fafc;border-radius:10px 10px 0 0;padding:4px 4px 0;flex-wrap:wrap">
         <button id="ped-aba-geral" onclick="pedSetAba('geral')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#fff;color:#272A4A;border:none;border-bottom:2px solid #DE7926;margin-bottom:-2px;border-radius:8px 8px 0 0;box-shadow:0 -1px 4px rgba(15,23,42,.06);cursor:pointer;white-space:nowrap;transition:all .15s">Visão Geral</button>
         <button id="ped-aba-completas" onclick="pedSetAba('completas')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Completas</button>
         <button id="ped-aba-simples" onclick="pedSetAba('simples')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Venda Simples</button>
         <button id="ped-aba-completas-fat" onclick="pedSetAba('completas-fat')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Completas Faturadas</button>
         <button id="ped-aba-simples-nf" onclick="pedSetAba('simples-nf')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Simples NFs</button>
         <button id="ped-aba-nao-fat" onclick="pedSetAba('nao-fat')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Não Faturadas</button>
-        </div>
-        <div style="display:flex;gap:7px;align-items:center;flex-shrink:0;margin-bottom:6px">
-          <button onclick="pedAbrirEscolhaImportar()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
-          <button onclick="showPage('page-pedido-form',{})" style="background:#fff;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">&#10133; Cadastrar</button>
-        </div>
       </div>
-      <!-- Abas (mobile): so a aba atual + Importar/Cadastrar (so icone) + botao de 3 pontos, tudo fixo no mesmo canto -->
+      <!-- Abas (mobile): so a aba atual + botao de 3 pontos que abre as outras -->
       <div id="ped-abas-mobile" style="display:none;position:relative;margin-bottom:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:#f8fafc;border-radius:10px;padding:4px">
+        <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:10px;padding:4px">
           <div id="ped-abas-mobile-atual" style="background:#fff;color:#272A4A;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:7px 12px;border-radius:8px;border-bottom:2px solid #DE7926">Visão Geral</div>
-          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-            <button onclick="pedAbrirEscolhaImportar()" title="Importar" style="width:30px;height:30px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;color:#272A4A;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg></button>
-            <button onclick="showPage('page-pedido-form',{})" title="Cadastrar" style="width:30px;height:30px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;color:#272A4A;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0">&#10133;</button>
-            <button onclick="_pedToggleAbasMenu()" title="Outras visões" style="width:26px;height:30px;border:none;background:transparent;color:#64748b;font-size:18px;font-weight:700;cursor:pointer;flex-shrink:0;padding:0">&#8942;</button>
-          </div>
+          <button onclick="_pedToggleAbasMenu()" title="Outras visões" style="width:30px;height:30px;border:none;background:transparent;color:#64748b;font-size:18px;font-weight:700;cursor:pointer">&#8942;</button>
         </div>
         <div id="ped-abas-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,.14);overflow:hidden;z-index:20;min-width:230px"></div>
       </div>
