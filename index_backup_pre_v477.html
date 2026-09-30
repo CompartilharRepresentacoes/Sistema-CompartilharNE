@@ -1632,12 +1632,12 @@
       <div><div class="dvg-rankcard-tit" style="color:#fff">Curva de Positivação Acumulada <span id="dvgScrubAno" style="color:rgba(255,255,255,.55);font-weight:400"></span></div><div class="dvg-scrub-sub">Clientes únicos com pedido faturado, mês a mês</div></div>
       <div class="dvg-scrub-readout"><div class="dvg-scrub-n" id="dvgScrubVal">0</div><div class="dvg-scrub-d">clientes ativos até <b id="dvgScrubDate" style="color:#fff"></b></div></div>
     </div>
-    <div class="dvg-scrub-track-wrap" style="height:124px">
-      <svg id="dvgScrubSvg" viewBox="0 0 600 124" preserveAspectRatio="none" style="width:100%;height:124px;display:block">
-        <line class="dvg-gridline" x1="0" y1="27" x2="600" y2="27"></line>
-        <line class="dvg-gridline" x1="0" y1="45" x2="600" y2="45"></line>
-        <line class="dvg-gridline" x1="0" y1="63" x2="600" y2="63"></line>
-        <line class="dvg-gridline" x1="0" y1="81" x2="600" y2="81"></line>
+    <div class="dvg-scrub-track-wrap" style="height:112px">
+      <svg id="dvgScrubSvg" viewBox="0 0 600 112" preserveAspectRatio="none" style="width:100%;height:112px;display:block">
+        <line class="dvg-gridline" x1="0" y1="15" x2="600" y2="15"></line>
+        <line class="dvg-gridline" x1="0" y1="35" x2="600" y2="35"></line>
+        <line class="dvg-gridline" x1="0" y1="54" x2="600" y2="54"></line>
+        <line class="dvg-gridline" x1="0" y1="74" x2="600" y2="74"></line>
         <path id="dvgScrubLine" fill="none" stroke="#a9c2f5" stroke-width="2.5" style="filter:drop-shadow(0 0 5px rgba(169,194,245,.8))"></path>
         <g id="dvgScrubDots"></g>
       </svg>
@@ -15701,7 +15701,7 @@ function dashInit() {
     function _dvgRenderScrub(labels, values) {
       const card = document.getElementById('dvgScrubCard');
       if (!card) return;
-      const W = 600, H = 124, xPad = 20, topPad = 26, botPad = 18;
+      const W = 600, H = 112, xPad = 20, topPad = 14, botPad = 18;
       const n = values.length;
       if (!n) return;
       const minV = Math.min.apply(null, values), maxV = Math.max.apply(null, values);
