@@ -603,7 +603,8 @@
       .dash-root .dvg-charts.dvg-focus-fabrica { grid-template-columns: 1fr !important; }
       .dash-root .dvg-ranks { grid-template-columns: 1fr !important; }
       .dash-root .dvg-rankcard { min-width: 0 !important; overflow: hidden !important; }
-      /* v485: fix do donut Fabrica virou universal (base .dvg-donutrow), nao precisa mais so no mobile */
+      .dash-root .dvg-donutrow svg { width: 100px !important; height: 100px !important; }
+      .dash-root .dvg-legend { min-width: 0 !important; }
       .dash-root .dvg-scrub-top { flex-direction: column; }
       .dash-root .dvg-scrub-readout { text-align: left !important; }
 
@@ -1422,12 +1423,12 @@
 .dash-root .dvg-mesdetail-inner{background:rgba(255,255,255,.06);border-radius:10px;padding:12px 16px;display:flex;gap:22px;flex-wrap:wrap}
 .dash-root .dvg-mesdetail-inner div{font-size:11px;color:rgba(255,255,255,.55)}
 .dash-root .dvg-mesdetail-inner b{display:block;font-size:15px;color:#fff;margin-top:2px;font-weight:800}
-.dash-root .dvg-donutrow{display:flex;align-items:center;gap:12px;flex-wrap:nowrap}
+.dash-root .dvg-donutrow{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .dash-root .dvg-donutrow svg{flex-shrink:0;overflow:visible}
 .dash-root .dvg-donuttag{font-size:9px;font-weight:700;fill:rgba(255,255,255,.5);letter-spacing:.06em}
 .dash-root .dvg-donutpct{font-size:19px;font-weight:800;fill:#fff}
 .dash-root .dvg-donutnome{font-size:10px;fill:rgba(255,255,255,.55)}
-.dash-root .dvg-legend{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.dash-root .dvg-legend{flex:1;min-width:130px;display:flex;flex-direction:column;gap:4px}
 .dash-root .dvg-leg-row{display:flex;align-items:center;gap:8px;cursor:pointer;padding:5px 8px;border-radius:8px;transition:background .15s}
 .dash-root .dvg-leg-row:hover{background:rgba(255,255,255,.06)}
 .dash-root .dvg-leg-row.active{background:rgba(255,255,255,.1)}
@@ -1615,7 +1616,7 @@
       <div class="dvg-titrow" id="dvgTitFabrica" style="width:100%;cursor:default"><div class="dvg-tit">Participação por Fábrica</div></div>
       <div class="dvg-body">
         <div class="dvg-donutrow">
-          <svg id="dvgDonutSvg" viewBox="0 0 180 180" width="110" height="110">
+          <svg id="dvgDonutSvg" viewBox="0 0 180 180" width="150" height="150">
             <g id="dvgDonutG" transform="rotate(-90 90 90)"></g>
             <text id="dvgDonutTag" x="90" y="84" text-anchor="middle" class="dvg-donuttag">LÍDER</text>
             <text id="dvgDonutPct" x="90" y="106" text-anchor="middle" class="dvg-donutpct">0,00%</text>
