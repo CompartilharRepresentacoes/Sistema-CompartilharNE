@@ -48,9 +48,6 @@
       border-color: var(--brand-navy) !important;
       box-shadow: 0 0 0 2px rgba(216,38,33,.18);
     }
-    @media (hover:hover) and (pointer:fine) {
-      .ped-row-hover:hover { background: #cfe3fb; }
-    }
 
     /* ── DARK MODE ── */
     body.dark { background: #18181b; color: #e4e4e7; }
@@ -17795,7 +17792,7 @@ function renderVendaSimples() {
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
     var cor = statusCores[p.status] || { bg:'#f1f5f9', cor:'#64748b' };
     var statusHtml = '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>';
-    return '<div class="mc-row ped-row-hover" style="display:grid;grid-template-columns:85px 90px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
+    return '<div class="mc-row" style="display:grid;grid-template-columns:85px 90px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
       + '<div class="mc-meta ped-r-data" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
       + '<div class="mc-meta ped-r-pedido" style="font-size:12.5px;color:#475569;white-space:normal;word-break:break-all;line-height:1.25">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary" style="font-size:13px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word;line-height:1.3">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
@@ -17874,7 +17871,8 @@ function renderPedidoList() {
     const statusHtml = '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>';
     const fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
     const podeExcluir = p.status === 'Cancelado';
-    return '<div class="mc-row ped-row-hover" style="display:grid;grid-template-columns:85px 90px 2fr 1fr 0.8fr 100px 100px 110px 292px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9;transition:background .12s">'
+    return '<div class="mc-row" style="display:grid;grid-template-columns:85px 90px 2fr 1fr 0.8fr 100px 100px 110px 292px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9;transition:background .12s"'
+      + ' onmouseover="this.style.background=\'#f8fbff\'" onmouseout="this.style.background=\'\'">'
       + '<div class="mc-meta ped-r-data" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
       + '<div class="mc-meta ped-r-pedido" style="font-size:12.5px;color:#475569;white-space:normal;word-break:break-all;line-height:1.25;padding-right:6px">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary" style="font-size:13px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word;line-height:1.3;padding-right:8px">' + (p.revenda ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;background:#eff6ff;color:#1d4ed8;margin-right:6px;vertical-align:middle"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="devolucoes" style="font-size:9px"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Revenda</span>' : '') + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
@@ -20750,7 +20748,7 @@ function renderVendasSimplesNfs() {
       var dataFmt = f.data ? f.data.split('-').reverse().join('/') : '—';
       var transp = f.transportadoraId ? transpMap[f.transportadoraId] : null;
       var transportadoraNome = transp ? (transp.nome_fantasia || transp.razao_social || '') : (f.transportadoraNome || '');
-      return '<div class="mc-row ped-row-hover" style="display:grid;grid-template-columns:100px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
+      return '<div class="mc-row" style="display:grid;grid-template-columns:100px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
         + '<div class="mc-meta ped-r-pedido" style="font-size:12px;color:#475569;white-space:normal;word-break:break-all">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
         + '<div class="mc-primary" style="font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
         + '<div class="mc-meta ped-r-cidade" style="font-size:12px;color:#64748b">' + _pedEsc(cli ? (cli.cidade || '—') : '—') + '</div>'
