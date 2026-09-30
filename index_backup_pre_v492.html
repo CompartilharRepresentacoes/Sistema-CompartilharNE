@@ -1576,6 +1576,8 @@
   </div>
   <div style="display:flex;gap:8px">
     <button id="btnToggleFiltros" onclick="document.getElementById('dvgFiltrosBar').classList.toggle('dvg-filtros-aberto')" style="display:none;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer"><i class="ti ti-filter"></i> Filtros</button>
+    <button id="btnHistorico2025" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background=this.dataset.ativo?'#c96a1f':'rgba(255,255,255,.2)'" onmouseout="this.style.background=this.dataset.ativo?'#DE7926':'rgba(255,255,255,.12)'">Ver histórico 2025</button>
+    <button id="btnReset" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">Limpar filtros</button>
   </div>
 </div>
 <!-- Linha de filtros -->
@@ -1595,9 +1597,6 @@
   <div id="msVendedores" class="multiselect"></div>
   <div id="msUf" class="multiselect"></div>
   <div id="msClientes" class="multiselect"></div>
-  <div style="width:1px;height:18px;background:#e2e8f0;margin:0 2px"></div>
-  <button id="btnHistorico2025" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background=this.dataset.ativo?'#c96a1f':'#e2e8f0'" onmouseout="this.style.background=this.dataset.ativo?'#DE7926':'#f1f5f9'">Ver histórico 2025</button>
-  <button id="btnReset" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Limpar filtros</button>
 </div>
 <div class="d-tab-bar" id="dTabBar">
   <div class="d-tab-btn active" data-tab="home">VISÃO GERAL</div>
@@ -15230,9 +15229,8 @@ function dashInit() {
     if (_dashBtnHist) {
       _dashBtnHist.dataset.ativo = _dashHistorico ? '1' : '';
       _dashBtnHist.textContent = _dashHistorico ? 'Voltar para dados atuais' : 'Ver histórico 2025';
-      _dashBtnHist.style.background = _dashHistorico ? '#DE7926' : '#f1f5f9';
-      _dashBtnHist.style.borderColor = _dashHistorico ? '#DE7926' : '#e2e8f0';
-      _dashBtnHist.style.color = _dashHistorico ? '#fff' : '#475569';
+      _dashBtnHist.style.background = _dashHistorico ? '#DE7926' : 'rgba(255,255,255,.12)';
+      _dashBtnHist.style.borderColor = _dashHistorico ? '#DE7926' : 'rgba(255,255,255,.2)';
     }
 
 
