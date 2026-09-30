@@ -9777,6 +9777,7 @@ async function renderCatalogoList() {
       </div>
       <div>
         <div class="mc-secondary mc-hide" style="font-size:12px;font-weight:600;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${arquivo}">${arquivo}</div>
+        ${temCat ? `<div class="mc-hide" style="font-size:10px;color:#94a3b8;margin-top:3px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="agenda" style="font-size:9px"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg> ${dataUpload}</div>` : ''}
       </div>
       <div class="mc-meta" style="font-size:13px;font-weight:600;color:#475569">${temCat ? dataUpload : 'Sem catalogo'}</div>
       <div class="mc-badge mc-hide">${statusHtml}</div>
