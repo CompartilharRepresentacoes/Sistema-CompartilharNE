@@ -9751,8 +9751,8 @@ async function renderCatalogoList() {
     const grad    = _FORN_GRADIENTS[i % _FORN_GRADIENTS.length];
     const inicial = (f.nome_fantasia||'?')[0].toUpperCase();
     const avatarHtml = f.foto
-      ? `<div style="width:60px;height:60px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px"><img src="${f.foto}" style="width:100%;height:100%;object-fit:contain;display:block"></div>`
-      : `<div style="width:60px;height:60px;background:${grad};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;color:#fff;flex-shrink:0">${inicial}</div>`;
+      ? `<div style="width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#fff;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;padding:3px"><img src="${f.foto}" style="width:100%;height:100%;object-fit:contain;display:block"></div>`
+      : `<div style="width:44px;height:44px;background:${grad};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;flex-shrink:0">${inicial}</div>`;
     const temCat     = !!cat;
     const arquivo    = cat ? cat.nome : '—';
     const dataUpload = cat ? cat.data : '—';
