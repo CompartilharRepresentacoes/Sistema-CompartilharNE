@@ -18402,8 +18402,8 @@ function _pimpRender() {
     var imgCell = '';
     if (_pimpModoFotos) {
       imgCell = '<td style="padding:4px 6px;text-align:center">' + (prod && prod.foto
-        ? '<img src="' + prod.foto + '" style="width:48px;height:48px;border-radius:6px;object-fit:cover;display:inline-block">'
-        : '<div style="width:48px;height:48px;border-radius:6px;background:#f1f5f9;display:inline-flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5L6 20"/></svg></div>') + '</td>';
+        ? '<img src="' + prod.foto + '" style="width:32px;height:32px;border-radius:5px;object-fit:cover;display:inline-block">'
+        : '<div style="width:32px;height:32px;border-radius:5px;background:#f1f5f9;display:inline-flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5L6 20"/></svg></div>') + '</td>';
     }
     return '<tr style="border-bottom:1px solid #f1f5f9;' + zebra + '">'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569">' + (i + 1) + '</td>'
@@ -18452,7 +18452,7 @@ function _pimpRender() {
     + '<table style="width:100%;border-collapse:collapse;margin-bottom:8px">'
       + '<thead><tr style="border-bottom:1px solid #e2e8f0">'
         + '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:left">Nº</th>'
-        + (_pimpModoFotos ? '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Foto</th>' : '')
+        + (_pimpModoFotos ? '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Imagem</th>' : '')
         + '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:left">Cód</th>'
         + '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:left">Produto</th>'
         + '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">UN</th>'
