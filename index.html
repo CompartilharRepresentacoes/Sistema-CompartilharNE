@@ -980,6 +980,25 @@
   .cad-filtros-extra{flex-direction:column!important;align-items:stretch!important}
   .cad-filtro-campo select,.cad-filtro-campo input{width:100%!important;min-width:0!important;box-sizing:border-box!important}
 }
+
+/* ===== Financeiro > Comissoes ===== */
+#page-comissoes-list .com-header-row { display:none; }
+.com-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-flex;align-items:center;gap:4px}
+.com-badge.aVencer{background:#fff7ef;color:#DE7926}
+.com-badge.vencido{background:#fef2f2;color:#dc2626}
+.com-badge.recebido{background:#f0fdf4;color:#16a34a}
+.com-btn-mini{background:#272A4A;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:10.5px;font-weight:700;cursor:pointer}
+.com-btn-mini.sec{background:#f1f5f9;color:#475569}
+@media (max-width:767px) {
+  #page-comissoes-list .com-filtros-topo{flex-direction:column!important;align-items:stretch!important}
+  #page-comissoes-list .com-filtros-topo>*{width:100%!important;margin-left:0!important}
+  #page-comissoes-list .com-kpi-grid{grid-template-columns:repeat(2,1fr)!important}
+  #page-comissoes-list .com-row{display:flex!important;flex-wrap:wrap!important;gap:6px 12px!important;padding:12px 14px!important}
+  #page-comissoes-list .com-row>div{width:100%!important}
+  #page-comissoes-list .com-c-fat::before{content:'Faturado: ';color:#94a3b8;font-weight:400}
+  #page-comissoes-list .com-c-com::before{content:'Comissão: ';color:#94a3b8;font-weight:400}
+  #page-comissoes-list .com-c-prev::before{content:'Previsão: ';color:#94a3b8;font-weight:400}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <!-- jsPDF + html2canvas (geracao de PDF do Pedido na impressao) -->
@@ -1238,6 +1257,14 @@
       <div class="sb-flyout">
         <div class="sb-flyout-title">Relatórios</div>
         <a href="#" onclick="showPage('page-relatorios');return false">Relatórios</a>
+      </div>
+    </div>
+
+    <div class="sb-item" id="sb-financeiro" title="Financeiro">
+      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="financeiro"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2.5 0 0 1 2.5-1.5h.5a2 2 0 1 1 0 4h-1a2 2 0 1 0 0 4h.5a2.5 2.5 0 0 0 2.5-1.5"/></svg><span class="sb-label">Financeiro</span>
+      <div class="sb-flyout">
+        <div class="sb-flyout-title">Financeiro</div>
+        <a href="#" onclick="showPage('page-comissoes-list');return false">Comissões</a>
       </div>
     </div>
 
@@ -2400,6 +2427,30 @@
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- ── Comissão ── -->
+            <div style="margin-top:4px;padding-top:16px;border-top:1px solid #f1f5f9">
+              <div style="font-size:12px;font-weight:700;color:#272A4A;margin-bottom:10px">Comissão</div>
+              <div style="margin-bottom:12px">
+                <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Forma de pagamento</label>
+                <select class="form-input" id="forn-comissao-forma" onchange="_finToggleFormaPagForn()" style="width:100%">
+                  <option value="fechamento_mes">Fechamento do mês</option>
+                  <option value="periodo_corte">Período (dia de corte)</option>
+                  <option value="liquidez_nf">Liquidez da NF</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap">
+                <div id="forn-comissao-corte-wrap" style="flex:1;min-width:160px;display:none">
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Dia de corte do período</label>
+                  <input type="number" min="1" max="31" class="form-input" id="forn-comissao-dia-corte" value="26" style="width:100%">
+                </div>
+                <div style="flex:1;min-width:160px">
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px" id="forn-comissao-prazo-lbl">Paga em (dias após o fechamento)</label>
+                  <input type="number" min="0" class="form-input" id="forn-comissao-prazo-dias" value="10" style="width:100%">
+                </div>
+              </div>
+              <div style="font-size:10.5px;color:#94a3b8;margin-top:8px;line-height:1.5" id="forn-comissao-nota">Comissão do mês inteiro é paga de uma vez, após o fechamento do mês de faturamento.</div>
             </div>
 
             <!-- ── Botões ── -->
@@ -7699,6 +7750,73 @@
   </div>
 </div>
 
+<div id="page-comissoes-list" class="app-page" style="display:none">
+  <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);border-radius:12px;padding:14px 20px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.01em">Comissões a Receber</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">Previsão de recebimento por período, conforme a forma de pagamento de cada fábrica</div>
+      </div>
+      <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
+    </div>
+  </div>
+
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+    <div class="com-filtros-topo" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="font-size:11px;font-weight:600;color:#64748b">Período</span>
+      <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="com-data-de" oninput="_entctrlMaskData(this);renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+      <span style="color:#94a3b8;font-size:13px">&#8594;</span>
+      <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="com-data-ate" oninput="_entctrlMaskData(this);renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+      <span style="font-size:11px;font-weight:600;color:#64748b;margin-left:6px">Fábrica</span>
+      <select id="com-fornecedor" onchange="renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
+      <span style="font-size:11px;font-weight:600;color:#64748b">Status</span>
+      <select id="com-status" onchange="renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+        <option value="">Todos</option>
+        <option value="a_vencer">A vencer</option>
+        <option value="vencido">Vencido</option>
+        <option value="recebido">Recebido</option>
+      </select>
+      <button onclick="_comLimparFiltros()" style="margin-left:auto;background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+    </div>
+  </div>
+
+  <div class="com-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
+      <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Previsto no Período</div>
+      <div style="font-size:19px;font-weight:800;color:#272A4A" id="com-kpi-previsto">R$ 0,00</div>
+    </div>
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #DE7926">
+      <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">A Vencer</div>
+      <div style="font-size:19px;font-weight:800;color:#272A4A" id="com-kpi-vencer">R$ 0,00</div>
+    </div>
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #dc2626">
+      <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Vencido</div>
+      <div style="font-size:19px;font-weight:800;color:#272A4A" id="com-kpi-vencido">R$ 0,00</div>
+    </div>
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #16a34a">
+      <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Já Recebido</div>
+      <div style="font-size:19px;font-weight:800;color:#272A4A" id="com-kpi-recebido">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
+    <div class="com-header-row" style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+      <span>Fábrica</span><span>Faturado no Período</span><span>Comissão</span><span>Previsão</span><span>Status</span><span></span>
+    </div>
+    <div id="com-tbody" style="min-height:60px"></div>
+  </div>
+</div>
+
+<div id="modal-com-detalhe" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:50;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:640px;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:700;color:#272A4A" id="com-detalhe-tit">Detalhe</div>
+      <button onclick="document.getElementById('modal-com-detalhe').style.display='none'" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer">&times;</button>
+    </div>
+    <div id="com-detalhe-body"></div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════
 // FIREBASE CONFIG
@@ -8400,6 +8518,7 @@ const PAGE_META = {
   'page-grupo-form':        { sb: 'sb-gerenciar', title: 'Gerenciar › Usuários' },
   'page-permissoes-form':   { sb: 'sb-gerenciar', title: 'Gerenciar › Permissões' },
   'page-relatorios':        { sb: 'sb-relatorios', title: 'Relatórios' },
+  'page-comissoes-list':    { sb: 'sb-financeiro', title: 'Financeiro › Comissões' },
   'page-apresentacoes':     { sb: 'sb-marketing', title: 'Marketing › Apresentações' },
   'page-sugestao-pedido':   { sb: 'sb-pedidos',   title: 'Pedidos › Sugestão de Pedido' },
   'page-bloqueios-pedidos': { sb: 'sb-pedidos',   title: 'Pedidos › Restrições de Pedidos' },
@@ -8506,6 +8625,7 @@ function showPage(pageId, params) {
   if (pageId === 'page-bloqueios-pedidos') { _bloqPopularFiltros(); renderBloqueios(); }
   if (pageId === 'page-dados-representadas') _drPopularFiltros();
   if (pageId === 'page-planejamento-reino') _prAoAbrir();
+  if (pageId === 'page-comissoes-list') { _comPopularFiltros(); renderComissoes(); }
   if (pageId === 'page-backup')          renderBackupPage();
   if (pageId === 'page-comando-list')    renderComandoList();
   if (pageId === 'page-comando-form')    openComandoForm(params || {});
@@ -9221,6 +9341,10 @@ function openFornecedorForm(params) {
   setV('forn-ativo',       r.ativo||'Sim');
   setV('forn-reino',       r.reino||'Não');
   setV('forn-reino-destaque', r.reino_destaque||'rs');
+  setV('forn-comissao-forma', r.comissaoFormaPagamento||'fechamento_mes');
+  setV('forn-comissao-dia-corte', r.comissaoDiaCorte||26);
+  setV('forn-comissao-prazo-dias', (r.comissaoPrazoDias!=null ? r.comissaoPrazoDias : 10));
+  _finToggleFormaPagForn();
   _fornToggleReinoDestaque();
 
   // Estado e cidade
@@ -9305,6 +9429,9 @@ function salvarFornecedor() {
     ativo:        document.getElementById('forn-ativo').value,
     reino:        document.getElementById('forn-reino').value,
     reino_destaque: document.getElementById('forn-reino-destaque') ? document.getElementById('forn-reino-destaque').value : 'rs',
+    comissaoFormaPagamento: document.getElementById('forn-comissao-forma') ? document.getElementById('forn-comissao-forma').value : 'fechamento_mes',
+    comissaoDiaCorte:  parseInt((document.getElementById('forn-comissao-dia-corte')||{}).value) || 26,
+    comissaoPrazoDias: parseInt((document.getElementById('forn-comissao-prazo-dias')||{}).value) || 0,
     foto:         foto,
   };
 
@@ -20607,7 +20734,8 @@ function pedSalvarFatura() {
     id: 'f' + Date.now() + Math.random().toString(36).slice(2,7),
     numDuplicata: numDup, data: dataFat, valor: valorFinal,
     transportadoraId: transpId, transportadoraNome: transpNome,
-    status: 'Enviado', origem: 'manual', itens: itensFatura
+    status: 'Enviado', origem: 'manual', itens: itensFatura,
+    dataLiquidezReal: '', comissaoRecebidaEm: ''
   });
   _pfatAtualizarStatusPedido(data[idx]);
   setPedidos(data);
@@ -20774,7 +20902,8 @@ function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
     id: 'f' + Date.now() + Math.random().toString(36).slice(2,7),
     numDuplicata: dados.nNF || nomeArquivo, data: dados.data, valor: valorFatura,
     transportadoraId: dados.transportadoraId || '', transportadoraNome: dados.transportadoraNome || '',
-    status: 'Enviado', origem: 'xml', itens: itensFatura
+    status: 'Enviado', origem: 'xml', itens: itensFatura,
+    dataLiquidezReal: '', comissaoRecebidaEm: ''
   });
   _pfatAtualizarStatusPedido(pedido);
   setPedidos(data);
@@ -30403,6 +30532,270 @@ function _drGerar() {
     msg.style.color = '#dc2626';
     msg.textContent = 'Erro ao gerar o Excel: ' + (err && err.message ? err.message : err);
   });
+}
+
+// ═══════════════════════════════════════════════════
+// FINANCEIRO > COMISSOES
+// ═══════════════════════════════════════════════════
+var _comUltimaLista = [];
+
+function _finDate(iso) {
+  if (!iso) return null;
+  var p = String(iso).split('-');
+  if (p.length < 3) return null;
+  return new Date(parseInt(p[0],10), parseInt(p[1],10)-1, parseInt(p[2],10), 12, 0, 0);
+}
+function _finIso(d) {
+  var y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+dd;
+}
+function _finBr(iso) {
+  if (!iso) return '';
+  var p = String(iso).split('-');
+  return p.length<3 ? iso : (p[2]+'/'+p[1]+'/'+p[0]);
+}
+function _finAddDias(iso, n) {
+  var d = _finDate(iso); if (!d) return iso;
+  d.setDate(d.getDate() + (parseInt(n,10)||0));
+  return _finIso(d);
+}
+function _finUltimoDiaDoMesNum(ano, mes) { return new Date(ano, mes+1, 0).getDate(); }
+function _finUltimoDiaMes(iso) {
+  var d = _finDate(iso); if (!d) return iso;
+  var fim = new Date(d.getFullYear(), d.getMonth()+1, 0, 12,0,0);
+  return _finIso(fim);
+}
+// Proximo dia de corte na/apos a data da fatura (ex.: corte=26: fatura em 10/10 -> corte 26/10; fatura em 27/10 -> corte 26/11)
+function _finProximoCorte(iso, diaCorte) {
+  var d = _finDate(iso); if (!d) return iso;
+  var dia = parseInt(diaCorte,10) || 26;
+  var diaEsteMes = Math.min(dia, _finUltimoDiaDoMesNum(d.getFullYear(), d.getMonth()));
+  var corteEsteMes = new Date(d.getFullYear(), d.getMonth(), diaEsteMes, 12,0,0);
+  if (d.getDate() <= dia) return _finIso(corteEsteMes);
+  var diaProxMes = Math.min(dia, _finUltimoDiaDoMesNum(d.getFullYear(), d.getMonth()+1));
+  var corteProxMes = new Date(d.getFullYear(), d.getMonth()+1, diaProxMes, 12,0,0);
+  return _finIso(corteProxMes);
+}
+// Soma, item a item, preco faturado x comissao% do item no pedido original (comissao e' um snapshot
+// gravado no pedido.itens[] no momento da digitacao -- ver _pedItens.push em pedAdicionarItem).
+function _finValorComissaoFatura(fatura, pedido) {
+  var total = 0;
+  (fatura.itens || []).forEach(function(fi) {
+    var itPed = (pedido.itens || []).find(function(x){ return x.prodId === fi.prodId; });
+    var comStr = itPed ? itPed.comissao : '';
+    var comPct = parseFloat(String(comStr||'0').replace(',', '.')) || 0;
+    total += (fi.qtd||0) * (fi.precoFat||0) * (comPct/100);
+  });
+  return total;
+}
+// Determina data-base/previsao/status de uma fatura, segundo a regra de pagamento da fabrica
+function _finInfoComissaoFatura(fatura, fornecedor) {
+  var forma = (fornecedor && fornecedor.comissaoFormaPagamento) || 'fechamento_mes';
+  var prazo = (fornecedor && fornecedor.comissaoPrazoDias != null) ? fornecedor.comissaoPrazoDias : 10;
+  var hoje = _finIso(new Date());
+  if (forma === 'liquidez_nf') {
+    if (fatura.dataLiquidezReal) return { previsao: fatura.dataLiquidezReal, status: 'recebido', estimado: false };
+    var previstaLiq = _finAddDias(fatura.data, prazo);
+    return { previsao: previstaLiq, status: (hoje > previstaLiq ? 'vencido' : 'a_vencer'), estimado: true };
+  }
+  if (fatura.comissaoRecebidaEm) return { previsao: fatura.comissaoRecebidaEm, status: 'recebido', estimado: false };
+  var dataBase = (forma === 'periodo_corte')
+    ? _finProximoCorte(fatura.data, (fornecedor && fornecedor.comissaoDiaCorte) || 26)
+    : _finUltimoDiaMes(fatura.data);
+  var previsao = _finAddDias(dataBase, prazo);
+  return { previsao: previsao, status: (hoje > previsao ? 'vencido' : 'a_vencer'), estimado: false };
+}
+function _finFormaLabel(forma) {
+  if (forma === 'periodo_corte') return 'Per\u00edodo (corte)';
+  if (forma === 'liquidez_nf') return 'Liquidez da NF';
+  return 'Fechamento do m\u00eas';
+}
+function _finStatusBadge(status) {
+  if (status === 'vencido') return '<span class="com-badge vencido">&#9679; Vencido</span>';
+  if (status === 'recebido') return '<span class="com-badge recebido">&#9679; Recebido</span>';
+  return '<span class="com-badge aVencer">&#9679; A vencer</span>';
+}
+function _finMoeda(v) { return 'R$ ' + (v||0).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+
+function _finToggleFormaPagForn() {
+  var el = document.getElementById('forn-comissao-forma');
+  if (!el) return;
+  var forma = el.value;
+  var corteWrap = document.getElementById('forn-comissao-corte-wrap');
+  var prazoLbl = document.getElementById('forn-comissao-prazo-lbl');
+  var nota = document.getElementById('forn-comissao-nota');
+  if (corteWrap) corteWrap.style.display = (forma === 'periodo_corte') ? 'block' : 'none';
+  if (forma === 'fechamento_mes') {
+    if (prazoLbl) prazoLbl.textContent = 'Paga em (dias ap\u00f3s o fechamento)';
+    if (nota) nota.textContent = 'Comiss\u00e3o do m\u00eas inteiro \u00e9 paga de uma vez, ap\u00f3s o fechamento do m\u00eas de faturamento.';
+  } else if (forma === 'periodo_corte') {
+    if (prazoLbl) prazoLbl.textContent = 'Paga em (dias ap\u00f3s o corte)';
+    if (nota) nota.textContent = 'Fecha com os pedidos faturados entre um dia de corte e o pr\u00f3ximo \u2014 ex.: dia de corte 26 fecha pedidos faturados de 26 do m\u00eas anterior a 26 do m\u00eas atual.';
+  } else {
+    if (prazoLbl) prazoLbl.textContent = 'Prazo estimado de liquidez (dias)';
+    if (nota) nota.textContent = 'S\u00f3 \u00e9 paga quando o cliente final quitar a NF. O prazo acima \u00e9 usado como previs\u00e3o at\u00e9 voc\u00ea confirmar a data real.';
+  }
+}
+
+function _finListaComissoes(deIso, ateIso, fornecedorIdFiltro, statusFiltro) {
+  var pedidos = getPedidos();
+  var fornecedores = getFornecedores();
+  var porForn = {};
+  pedidos.forEach(function(pedido){
+    if (fornecedorIdFiltro && pedido.fornecedorId !== fornecedorIdFiltro) return;
+    (pedido.faturas || []).forEach(function(fatura){
+      if (fatura.status === 'Cancelado') return;
+      if (deIso && fatura.data < deIso) return;
+      if (ateIso && fatura.data > ateIso) return;
+      var forn = fornecedores.find(function(f){ return f.id === pedido.fornecedorId; });
+      if (!forn) return;
+      var valor = _finValorComissaoFatura(fatura, pedido);
+      if (valor <= 0) return;
+      var info = _finInfoComissaoFatura(fatura, forn);
+      if (statusFiltro && info.status !== statusFiltro) return;
+      var faturado = (fatura.itens||[]).reduce(function(s,it){ return s + (it.qtd||0)*(it.precoFat||0); }, 0);
+      if (!porForn[forn.id]) {
+        porForn[forn.id] = {
+          fornecedorId: forn.id, fornecedorNome: forn.nome_fantasia, foto: forn.foto||'',
+          forma: forn.comissaoFormaPagamento||'fechamento_mes',
+          faturado: 0, comissao: 0, previsao: null,
+          faturasPendentes: 0, faturasVencidas: 0, faturasRecebidas: 0, faturasDetalhe: []
+        };
+      }
+      var g = porForn[forn.id];
+      g.faturado += faturado;
+      g.comissao += valor;
+      if (!g.previsao || info.previsao < g.previsao) g.previsao = info.previsao;
+      if (info.status === 'a_vencer') g.faturasPendentes++;
+      if (info.status === 'vencido') g.faturasVencidas++;
+      if (info.status === 'recebido') g.faturasRecebidas++;
+      g.faturasDetalhe.push({
+        pedidoId: pedido.id, numPedido: pedido.numPedidoCliente||pedido.lancamento||'',
+        faturaId: fatura.id, numDuplicata: fatura.numDuplicata, data: fatura.data,
+        faturado: faturado, comissao: valor, previsao: info.previsao, status: info.status, estimado: info.estimado
+      });
+    });
+  });
+  var lista = Object.keys(porForn).map(function(k){
+    var g = porForn[k];
+    g.status = g.faturasVencidas > 0 ? 'vencido' : (g.faturasPendentes > 0 ? 'a_vencer' : 'recebido');
+    return g;
+  });
+  lista.sort(function(a,b){ return b.comissao - a.comissao; });
+  return lista;
+}
+
+function _comPopularFiltros() {
+  var sel = document.getElementById('com-fornecedor');
+  if (sel) {
+    var atual = sel.value;
+    sel.innerHTML = '<option value="">Todas</option>' + getFornecedores().filter(function(f){ return (f.ativo||'Sim')==='Sim'; }).map(function(f){ return '<option value="'+f.id+'">'+(f.nome_fantasia||'')+'</option>'; }).join('');
+    sel.value = atual || '';
+  }
+  var deEl = document.getElementById('com-data-de');
+  var ateEl = document.getElementById('com-data-ate');
+  if (deEl && !deEl.value) {
+    var hoje = new Date();
+    var ini = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    deEl.value = _finBr(_finIso(ini));
+    ateEl.value = _finBr(_finIso(hoje));
+  }
+}
+function _comLimparFiltros() {
+  document.getElementById('com-fornecedor').value = '';
+  document.getElementById('com-status').value = '';
+  var hoje = new Date();
+  var ini = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  document.getElementById('com-data-de').value = _finBr(_finIso(ini));
+  document.getElementById('com-data-ate').value = _finBr(_finIso(hoje));
+  renderComissoes();
+}
+function _comRenderRow(g) {
+  var sigla = (g.fornecedorNome||'').substring(0,2).toUpperCase();
+  var logoHtml = g.foto
+    ? '<img src="'+g.foto+'" style="width:24px;height:24px;border-radius:5px;object-fit:cover;flex-shrink:0">'
+    : '<div style="width:24px;height:24px;border-radius:5px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:9px;color:#94a3b8;font-weight:700;flex-shrink:0">'+sigla+'</div>';
+  var previsaoTxt = _finBr(g.previsao) + (g.status !== 'recebido' && g.forma === 'liquidez_nf' ? ' <span style="color:#94a3b8;font-size:10px">(estimado)</span>' : '');
+  var acao = (g.status !== 'recebido')
+    ? '<button class="com-btn-mini sec" onclick="_comAbrirDetalhe(\''+g.fornecedorId+'\')">'+(g.forma==='liquidez_nf'?'Confirmar NF paga':'Marcar recebido')+'</button>'
+    : '<button class="com-btn-mini sec" onclick="_comAbrirDetalhe(\''+g.fornecedorId+'\')">Detalhar</button>';
+  return '<div class="com-row" style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr 110px;padding:10px 14px;border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px">'
+    + '<div class="com-c-forn"><div style="display:flex;align-items:center;gap:8px;font-weight:700;color:#272A4A">'+logoHtml+'<span>'+g.fornecedorNome+'</span></div><span style="font-size:9.5px;color:#64748b;background:#f1f5f9;border-radius:5px;padding:2px 6px;margin-top:3px;display:inline-block">'+_finFormaLabel(g.forma)+'</span></div>'
+    + '<div class="com-c-fat">'+_finMoeda(g.faturado)+'</div>'
+    + '<div class="com-c-com" style="font-weight:700">'+_finMoeda(g.comissao)+'</div>'
+    + '<div class="com-c-prev">'+previsaoTxt+'</div>'
+    + '<div class="com-c-status">'+_finStatusBadge(g.status)+'</div>'
+    + '<div class="com-c-acao">'+acao+'</div>'
+    + '</div>';
+}
+function renderComissoes() {
+  var deRaw = (document.getElementById('com-data-de')||{}).value || '';
+  var ateRaw = (document.getElementById('com-data-ate')||{}).value || '';
+  var deIso = deRaw ? _entctrlParseDataBR(deRaw) : '';
+  var ateIso = ateRaw ? _entctrlParseDataBR(ateRaw) : '';
+  var fornFiltro = (document.getElementById('com-fornecedor')||{}).value || '';
+  var statusFiltro = (document.getElementById('com-status')||{}).value || '';
+  var lista = _finListaComissoes(deIso, ateIso, fornFiltro, statusFiltro);
+  _comUltimaLista = lista;
+
+  var totalPrevisto = 0, totalVencer = 0, totalVencido = 0, totalRecebido = 0;
+  lista.forEach(function(g){
+    totalPrevisto += g.comissao;
+    if (g.status === 'a_vencer') totalVencer += g.comissao;
+    if (g.status === 'vencido') totalVencido += g.comissao;
+    if (g.status === 'recebido') totalRecebido += g.comissao;
+  });
+  document.getElementById('com-kpi-previsto').textContent = _finMoeda(totalPrevisto);
+  document.getElementById('com-kpi-vencer').textContent = _finMoeda(totalVencer);
+  document.getElementById('com-kpi-vencido').textContent = _finMoeda(totalVencido);
+  document.getElementById('com-kpi-recebido').textContent = _finMoeda(totalRecebido);
+
+  document.getElementById('com-tbody').innerHTML = lista.length
+    ? lista.map(_comRenderRow).join('')
+    : '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma comiss\u00e3o encontrada no per\u00edodo.</div>';
+}
+function _comRenderDetalheRow(g, d) {
+  var acaoHtml;
+  if (d.status === 'recebido') {
+    acaoHtml = '<span class="com-badge recebido">&#9679; Recebido em ' + _finBr(d.previsao) + '</span>';
+  } else if (g.forma === 'liquidez_nf') {
+    acaoHtml = '<input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="com-conf-'+d.faturaId+'" style="border:1px solid #e2e8f0;border-radius:6px;padding:5px 7px;font-size:11.5px;width:88px" oninput="_entctrlMaskData(this)">'
+      + ' <button class="com-btn-mini" onclick="_comConfirmarFatura(\''+d.pedidoId+'\',\''+d.faturaId+'\',\'liquidez_nf\',\''+g.fornecedorId+'\')">Confirmar</button>';
+  } else {
+    acaoHtml = '<button class="com-btn-mini" onclick="_comConfirmarFatura(\''+d.pedidoId+'\',\''+d.faturaId+'\',\'outra\',\''+g.fornecedorId+'\')">Marcar recebido</button>';
+  }
+  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;font-size:12px">'
+    + '<div><div style="font-weight:700;color:#272A4A">Pedido n\u00ba '+(d.numPedido||'\u2014')+' \u00b7 NF '+(d.numDuplicata||'\u2014')+'</div>'
+    + '<div style="font-size:10.5px;color:#94a3b8">Faturado em '+_finBr(d.data)+' \u00b7 '+_finMoeda(d.faturado)+' \u00b7 Comiss\u00e3o '+_finMoeda(d.comissao)+'</div></div>'
+    + '<div>'+acaoHtml+'</div>'
+    + '</div>';
+}
+function _comAbrirDetalhe(fornecedorId) {
+  var g = (_comUltimaLista||[]).find(function(x){ return x.fornecedorId === fornecedorId; });
+  if (!g) return;
+  document.getElementById('com-detalhe-tit').textContent = g.fornecedorNome + ' \u2014 Faturas no per\u00edodo';
+  document.getElementById('com-detalhe-body').innerHTML = g.faturasDetalhe.map(function(d){ return _comRenderDetalheRow(g, d); }).join('');
+  document.getElementById('modal-com-detalhe').style.display = 'flex';
+}
+function _comConfirmarFatura(pedidoId, faturaId, forma, fornecedorId) {
+  var data = getPedidos();
+  var idxP = data.findIndex(function(p){ return p.id === pedidoId; });
+  if (idxP < 0) return;
+  var fatura = (data[idxP].faturas||[]).find(function(f){ return f.id === faturaId; });
+  if (!fatura) return;
+  var hojeIso = _finIso(new Date());
+  if (forma === 'liquidez_nf') {
+    var inputEl = document.getElementById('com-conf-'+faturaId);
+    var raw = inputEl ? inputEl.value : '';
+    var iso = raw ? _entctrlParseDataBR(raw) : hojeIso;
+    if (raw && !iso) { alert('Data inv\u00e1lida. Use o formato dd/mm/aaaa.'); return; }
+    fatura.dataLiquidezReal = iso || hojeIso;
+  } else {
+    fatura.comissaoRecebidaEm = hojeIso;
+  }
+  setPedidos(data);
+  renderComissoes();
+  _comAbrirDetalhe(fornecedorId);
 }
 
 </script>

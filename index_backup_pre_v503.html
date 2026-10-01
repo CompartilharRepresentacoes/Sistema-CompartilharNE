@@ -457,7 +457,6 @@
       #page-pedido-list #ped-filtros-geral .ped-limpar-btn,
       #page-pedido-list #ped-filtros-geral .ped-imprimir-btn { width:100% !important; justify-content:center !important; margin:0 !important; }
       #page-pedido-list #ped-filtros-geral .ped-spacer { display:none !important; }
-      #page-pedido-list #ped-filtros-geral .ped-imprimir-btn { order:21 !important; }
       #page-pedido-list .ped-header-row { display:none !important; }
       #page-pedido-list .ped-r-pedido::before { content:'Pedido nº '; color:#94a3b8; }
       #page-pedido-list .ped-r-forn::before { content:'Forn: '; color:#94a3b8; }
@@ -596,13 +595,14 @@
 
       /* Visao Geral redesenhada (hero + kpis + donut + ranks + scrub): mobile */
       .dash-root .dvg-kpis { grid-template-columns: 1fr !important; }
+      .dash-root .dvg-cli-kpis { grid-template-columns: 1fr 1fr !important; }
       .dash-root .dvg-hero { grid-row: auto !important; grid-column: 1 / -1 !important; }
       .dash-root .dvg-hero-val { font-size: 26px !important; }
       .dash-root .dvg-charts { grid-template-columns: 1fr !important; }
       .dash-root .dvg-charts.dvg-focus-fabrica { grid-template-columns: 1fr !important; }
       .dash-root .dvg-ranks { grid-template-columns: 1fr !important; }
       .dash-root .dvg-rankcard { min-width: 0 !important; overflow: hidden !important; }
-      .dash-root .dvg-donutrow { flex-direction: column; align-items: flex-start; }
+      /* v485: fix do donut Fabrica virou universal (base .dvg-donutrow), nao precisa mais so no mobile */
       .dash-root .dvg-scrub-top { flex-direction: column; }
       .dash-root .dvg-scrub-readout { text-align: left !important; }
 
@@ -1367,6 +1367,7 @@
 .dash-root .dvg-greet-txt{font-size:14px;font-weight:700;color:#1e293b}
 .dash-root .dvg-greet-txt span{font-weight:400;color:#64748b;font-size:11px;margin-left:8px}
 .dash-root .dvg-kpis{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.dash-root .dvg-cli-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
 .dash-root .dvg-hero{background:linear-gradient(135deg,#14162c 0%,#272A4A 55%,#40446e 100%);border-radius:16px;padding:22px 26px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 22px rgba(0,0,0,.22)}
 .dash-root .dvg-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .dash-root .dvg-hero-lbl{font-size:13px;opacity:.85;font-weight:600}
@@ -1396,7 +1397,10 @@
 .dash-root .dvg-skel-row{height:14px;border-radius:7px;margin-bottom:14px;background:linear-gradient(90deg,#eef1f6 25%,#e2e8f0 37%,#eef1f6 63%);background-size:400% 100%;animation:dvgSkelShimmer 1.4s ease infinite}
 @keyframes dvgSkelShimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
 .dash-root .dvg-kpi-val-exact{font-size:9.5px;color:#94a3b8;margin-top:-2px}
-.dash-root .dvg-charts{display:grid;grid-template-columns:2.4fr 0.85fr;gap:14px;margin-bottom:14px;align-items:start;transition:grid-template-columns .35s ease}
+.dash-root .dvg-charts{display:grid;grid-template-columns:2.4fr 0.85fr;gap:14px;margin-bottom:14px;align-items:stretch;transition:grid-template-columns .35s ease}
+.dash-root #dvgCardFabrica{display:flex;flex-direction:column}
+.dash-root #dvgCardFabrica .dvg-body{flex:1;display:flex;align-items:center}
+.dash-root #dvgCardFabrica .dvg-donutrow{width:100%}
 .dash-root .dvg-charts.dvg-focus-fabrica{grid-template-columns:0.85fr 2.4fr}
 .dash-root .dvg-carddark{background:#101a3d;border-radius:14px;padding:18px 20px;box-shadow:0 4px 16px rgba(15,23,42,.2);transition:opacity .25s ease}
 .dash-root .dvg-titrow{display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:6px}
@@ -1420,12 +1424,13 @@
 .dash-root .dvg-mesdetail-inner{background:rgba(255,255,255,.06);border-radius:10px;padding:12px 16px;display:flex;gap:22px;flex-wrap:wrap}
 .dash-root .dvg-mesdetail-inner div{font-size:11px;color:rgba(255,255,255,.55)}
 .dash-root .dvg-mesdetail-inner b{display:block;font-size:15px;color:#fff;margin-top:2px;font-weight:800}
-.dash-root .dvg-donutrow{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.dash-root .dvg-donutrow svg{flex-shrink:0;overflow:visible}
+.dash-root .dvg-donutrow{display:flex;align-items:center;gap:12px;flex-wrap:nowrap}
+.dash-root .dvg-donutrow svg{display:none}
+.dash-root #dvgCardFabrica .dvg-legend{width:100%}
 .dash-root .dvg-donuttag{font-size:9px;font-weight:700;fill:rgba(255,255,255,.5);letter-spacing:.06em}
 .dash-root .dvg-donutpct{font-size:19px;font-weight:800;fill:#fff}
 .dash-root .dvg-donutnome{font-size:10px;fill:rgba(255,255,255,.55)}
-.dash-root .dvg-legend{flex:1;min-width:130px;display:flex;flex-direction:column;gap:4px}
+.dash-root .dvg-legend{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .dash-root .dvg-leg-row{display:flex;align-items:center;gap:8px;cursor:pointer;padding:5px 8px;border-radius:8px;transition:background .15s}
 .dash-root .dvg-leg-row:hover{background:rgba(255,255,255,.06)}
 .dash-root .dvg-leg-row.active{background:rgba(255,255,255,.1)}
@@ -1570,8 +1575,6 @@
   </div>
   <div style="display:flex;gap:8px">
     <button id="btnToggleFiltros" onclick="document.getElementById('dvgFiltrosBar').classList.toggle('dvg-filtros-aberto')" style="display:none;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer"><i class="ti ti-filter"></i> Filtros</button>
-    <button id="btnHistorico2025" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background=this.dataset.ativo?'#c96a1f':'rgba(255,255,255,.2)'" onmouseout="this.style.background=this.dataset.ativo?'#DE7926':'rgba(255,255,255,.12)'">Ver histórico 2025</button>
-    <button id="btnReset" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">Limpar filtros</button>
   </div>
 </div>
 <!-- Linha de filtros -->
@@ -1591,6 +1594,9 @@
   <div id="msVendedores" class="multiselect"></div>
   <div id="msUf" class="multiselect"></div>
   <div id="msClientes" class="multiselect"></div>
+  <div style="width:1px;height:18px;background:#e2e8f0;margin:0 2px"></div>
+  <button id="btnHistorico2025" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background=this.dataset.ativo?'#c96a1f':'#e2e8f0'" onmouseout="this.style.background=this.dataset.ativo?'#DE7926':'#f1f5f9'">Ver histórico 2025</button>
+  <button id="btnReset" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Limpar filtros</button>
 </div>
 <div class="d-tab-bar" id="dTabBar">
   <div class="d-tab-btn active" data-tab="home">VISÃO GERAL</div>
@@ -1603,17 +1609,17 @@
   <div class="dvg-kpis" id="kpis"><div class="dvg-skel dvg-skel-hero"></div><div class="dvg-skel"></div><div class="dvg-skel"></div><div class="dvg-skel"></div><div class="dvg-skel"></div></div>
   <div class="dvg-charts" id="dvgChartsWrap">
     <div class="dvg-carddark" id="dvgCardMensal">
-      <div class="dvg-titrow" id="dvgTitMensal"><div class="dvg-tit">Faturamento Mensal<span class="dvg-tit-hint">Somente Faturado e Faturado Parcial &middot; clique numa barra</span></div><span class="dvg-chev">&#9662;</span></div>
+      <div class="dvg-titrow" id="dvgTitMensal" style="cursor:default"><div class="dvg-tit">Faturamento Mensal<span class="dvg-tit-hint">Somente Faturado e Faturado Parcial &middot; clique numa barra pra travar o mês</span></div></div>
       <div class="dvg-body">
         <div class="dvg-bars" id="dvgBars"></div>
         <div class="dvg-mesdetail" id="dvgMesDetail"><div class="dvg-mesdetail-inner" id="dvgMesDetailInner"></div></div>
       </div>
     </div>
     <div class="dvg-carddark" id="dvgCardFabrica">
-      <div class="dvg-titrow" id="dvgTitFabrica" style="width:100%"><div class="dvg-tit">Participação por Fábrica</div><span class="dvg-chev">&#9662;</span></div>
+      <div class="dvg-titrow" id="dvgTitFabrica" style="width:100%;cursor:default"><div class="dvg-tit">Participação por Fábrica</div></div>
       <div class="dvg-body">
         <div class="dvg-donutrow">
-          <svg id="dvgDonutSvg" viewBox="0 0 180 180" width="150" height="150">
+          <svg id="dvgDonutSvg" viewBox="0 0 180 180" width="110" height="110">
             <g id="dvgDonutG" transform="rotate(-90 90 90)"></g>
             <text id="dvgDonutTag" x="90" y="84" text-anchor="middle" class="dvg-donuttag">LÍDER</text>
             <text id="dvgDonutPct" x="90" y="106" text-anchor="middle" class="dvg-donutpct">0,00%</text>
@@ -1639,7 +1645,7 @@
         <line class="dvg-gridline" x1="0" y1="45" x2="600" y2="45"></line>
         <line class="dvg-gridline" x1="0" y1="63" x2="600" y2="63"></line>
         <line class="dvg-gridline" x1="0" y1="81" x2="600" y2="81"></line>
-        <path id="dvgScrubLine" fill="none" stroke="#a9c2f5" stroke-width="2.5" style="filter:drop-shadow(0 0 5px rgba(169,194,245,.8))"></path>
+        <path id="dvgScrubLine" fill="none" stroke="#a9c2f5" stroke-width="2.5"></path>
         <g id="dvgScrubDots"></g>
       </svg>
     </div>
@@ -1654,6 +1660,7 @@
   </div>
 </section>
 <section id="tab-clientes" class="tab-content">
+  <div class="dvg-cli-kpis" id="dvgCliKpis"></div>
   <div class="dvg-scrub" id="dvgCliScrubCard" style="margin-bottom:12px">
     <div class="dvg-scrub-top">
       <div>
@@ -3709,7 +3716,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div>
             <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.01em">Cat&#225;logos</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">PDFs salvos só neste aparelho</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">PDFs publicados no site, visíveis para todos</div>
           </div>
           <div style="display:flex;gap:7px;align-items:center">
             <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
@@ -4603,26 +4610,31 @@
           <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
         </div>
       </div>
-      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
-        <button onclick="pedAbrirEscolhaImportar()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
-        <input type="file" id="ped-import-file" accept=".xlsx,.xls,.pdf" style="display:none" onchange="importarPedidosArquivo(this)">
-        <button onclick="relatorioPedidos()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="graficos" style="font-size:10px"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="5" width="4" height="15.5" rx="1"/><rect x="15" y="9" width="4" height="11.5" rx="1"/></svg> Relatório</button>
-        <button onclick="showPage('page-pedido-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
-      </div>
-      <!-- Abas de visao (mesmo estilo das abas da pagina Inicio: maiusculas + sublinhado laranja) -->
-      <div id="ped-abas-desktop" style="display:flex;gap:2px;border-bottom:2px solid #e2e8f0;margin-bottom:14px;background:#f8fafc;border-radius:10px 10px 0 0;padding:4px 4px 0;flex-wrap:wrap">
+      <input type="file" id="ped-import-file" accept=".xlsx,.xls,.pdf" style="display:none" onchange="importarPedidosArquivo(this)">
+      <!-- Abas de visao (mesmo estilo das abas da pagina Inicio: maiusculas + sublinhado laranja); Importar/Cadastrar ficam na mesma linha, a direita -->
+      <div id="ped-abas-desktop" style="display:flex;align-items:center;gap:10px;border-bottom:2px solid #e2e8f0;margin-bottom:14px;background:#f8fafc;border-radius:10px 10px 0 0;padding:4px 4px 0;flex-wrap:wrap">
+        <div style="display:flex;gap:2px;flex-wrap:wrap;flex:1">
         <button id="ped-aba-geral" onclick="pedSetAba('geral')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#fff;color:#272A4A;border:none;border-bottom:2px solid #DE7926;margin-bottom:-2px;border-radius:8px 8px 0 0;box-shadow:0 -1px 4px rgba(15,23,42,.06);cursor:pointer;white-space:nowrap;transition:all .15s">Visão Geral</button>
         <button id="ped-aba-completas" onclick="pedSetAba('completas')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Completas</button>
         <button id="ped-aba-simples" onclick="pedSetAba('simples')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Venda Simples</button>
         <button id="ped-aba-completas-fat" onclick="pedSetAba('completas-fat')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Completas Faturadas</button>
         <button id="ped-aba-simples-nf" onclick="pedSetAba('simples-nf')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Simples NFs</button>
         <button id="ped-aba-nao-fat" onclick="pedSetAba('nao-fat')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Não Faturadas</button>
+        </div>
+        <div style="display:flex;gap:7px;align-items:center;flex-shrink:0;margin-bottom:6px">
+          <button onclick="pedAbrirEscolhaImportar()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
+          <button onclick="showPage('page-pedido-form',{})" style="background:#fff;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">&#10133; Cadastrar</button>
+        </div>
       </div>
-      <!-- Abas (mobile): so a aba atual + botao de 3 pontos que abre as outras -->
+      <!-- Abas (mobile): so a aba atual + Importar/Cadastrar (so icone) + botao de 3 pontos, tudo fixo no mesmo canto -->
       <div id="ped-abas-mobile" style="display:none;position:relative;margin-bottom:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:10px;padding:4px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:#f8fafc;border-radius:10px;padding:4px">
           <div id="ped-abas-mobile-atual" style="background:#fff;color:#272A4A;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:7px 12px;border-radius:8px;border-bottom:2px solid #DE7926">Visão Geral</div>
-          <button onclick="_pedToggleAbasMenu()" title="Outras visões" style="width:30px;height:30px;border:none;background:transparent;color:#64748b;font-size:18px;font-weight:700;cursor:pointer">&#8942;</button>
+          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+            <button onclick="pedAbrirEscolhaImportar()" title="Importar" style="width:30px;height:30px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;color:#272A4A;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg></button>
+            <button onclick="showPage('page-pedido-form',{})" title="Cadastrar" style="width:30px;height:30px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;color:#272A4A;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0">&#10133;</button>
+            <button onclick="_pedToggleAbasMenu()" title="Outras visões" style="width:26px;height:30px;border:none;background:transparent;color:#64748b;font-size:18px;font-weight:700;cursor:pointer;flex-shrink:0;padding:0">&#8942;</button>
+          </div>
         </div>
         <div id="ped-abas-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,.14);overflow:hidden;z-index:20;min-width:230px"></div>
       </div>
@@ -4635,6 +4647,8 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input id="ped-busca" oninput="renderPedidoList()" placeholder="Cliente, fornecedor ou numero do pedido..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
         </div>
+        <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('ped-geral')">Mais filtros <span>&#9662;</span></div>
+        <div id="ped-geral-filtros-extra" class="ped-filtros-extra" style="display:contents">
         <div class="ped-divider" style="width:1px;height:22px;background:#e2e8f0"></div>
         <div class="ped-data-row">
         <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
@@ -4656,7 +4670,9 @@
           <option value="Cancelado">Cancelado</option>
         </select>
         </div>
-        <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+        <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+        </div>
+        <button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
         <div class="ped-spacer" style="flex:1"></div>
       </div>
       <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5563,6 +5579,49 @@
 
 
     <!-- ═══════ MARKETING: APRESENTAÇÕES ═══════ -->
+    <style>
+    .apr-slide{aspect-ratio:16/9;background:#fff;border:1px solid #dbe3ef;border-radius:10px;box-shadow:0 4px 14px rgba(15,23,42,.10);position:relative;overflow:hidden}
+    .apr-slide .apr-bar{position:absolute;bottom:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#D82621,#DE7926)}
+    .apr-slide .apr-logos{position:absolute;top:14px;right:18px;display:flex;gap:8px;align-items:center}
+    .apr-slide .apr-logo-chip{height:26px;max-width:70px;border-radius:6px;background:#eef2ff;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 6px}
+    .apr-slide .apr-logo-chip img{height:100%;width:auto;object-fit:contain}
+    .apr-capa{background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);color:#fff;height:100%;padding:22px 26px;display:flex;flex-direction:column;justify-content:center}
+    .apr-capa .apr-brand{font-size:13px;font-weight:800;color:#fff}
+    .apr-capa .apr-divider{display:flex;gap:6px;margin:10px 0 14px}
+    .apr-capa .apr-divider i{display:block;height:4px;border-radius:2px}
+    .apr-capa .apr-title{font-size:22px;font-weight:800;line-height:1.2}
+    .apr-capa .apr-periodo{font-size:12px;color:rgba(255,255,255,.65);margin-top:8px}
+    .apr-capa .apr-caplogos{display:flex;gap:10px;margin-top:18px}
+    .apr-capa .apr-caplogo{background:#fff;border-radius:8px;height:44px;min-width:70px;display:flex;align-items:center;justify-content:center;padding:0 10px}
+    .apr-capa .apr-caplogo img{height:32px;width:auto;object-fit:contain;max-width:90px}
+    .apr-body{padding:24px 26px 16px;display:flex;flex-direction:column;height:100%}
+    .apr-body .apr-title2{font-size:17px;font-weight:800;color:#272A4A;margin-bottom:14px}
+    .apr-body .apr-content{flex:1;display:flex;gap:12px;overflow:hidden}
+    .apr-kpi-row{display:flex;gap:10px;width:100%;align-items:stretch}
+    .apr-kpi-card{flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:3px}
+    .apr-kpi-card .apr-kv{font-size:15px;font-weight:800;color:#272A4A}
+    .apr-kpi-card .apr-kl{font-size:9px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+    .apr-kpi-card .apr-kvar{font-size:9px;font-weight:800;margin-top:1px}
+    .apr-chart{flex:1;display:flex;align-items:flex-end;gap:6px;padding:0 4px 14px}
+    .apr-mbar{flex:1;background:linear-gradient(180deg,#f3ab6a,#DE7926);border-radius:3px 3px 0 0;position:relative;min-height:2px}
+    .apr-mbar .apr-mlbl{position:absolute;bottom:-16px;left:0;right:0;text-align:center;font-size:8px;color:#94a3b8}
+    .apr-ranklist{width:100%;display:flex;flex-direction:column;gap:5px;overflow-y:auto}
+    .apr-rankrow{display:flex;align-items:center;gap:8px;font-size:10.5px;background:#f8fafc;border:1px solid #f1f5f9;border-radius:6px;padding:6px 9px}
+    .apr-rankrow .apr-pos{width:16px;height:16px;border-radius:50%;background:#272A4A;color:#fff;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .apr-rankrow .apr-nm{flex:1;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .apr-rankrow .apr-uf{font-size:9px;color:#94a3b8;font-weight:700}
+    .apr-rankrow .apr-vv{font-weight:800;color:#272A4A;flex-shrink:0}
+    .apr-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px;text-align:center;padding:0 20px}
+    .apr-metabar{width:100%;height:16px;background:#f1f5f9;border-radius:8px;overflow:hidden;margin:10px 0}
+    .apr-metabar-fill{height:100%;border-radius:8px}
+    .apr-prodgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow-y:auto}
+    .apr-prodcard{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:4px}
+    .apr-prodcard img{width:100%;height:44px;object-fit:contain}
+    .apr-prodcard .apr-pnome{font-size:9px;font-weight:700;color:#1e293b;line-height:1.2}
+    .apr-obs{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;font-size:11px;color:#1e293b;flex:1;overflow-y:auto;white-space:pre-wrap}
+    .apr-thumb{width:52px;aspect-ratio:16/9;border-radius:4px;border:2px solid transparent;background:#e2e8f0;cursor:pointer;flex-shrink:0}
+    .apr-thumb.on{border-color:#272A4A}
+    </style>
     <div id="page-apresentacoes" class="app-page">
       <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);border-radius:12px;padding:14px 20px;margin-bottom:12px">
         <div style="display:flex;align-items:center;justify-content:space-between">
@@ -5576,15 +5635,15 @@
 
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.05)">
         <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
-        <select id="apres-rede" onchange="_apresAtualizarSubcategorias()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Selecione...</option></select>
+        <select id="apres-rede" onchange="_apresPreviewIdx=0;_apresAtualizarSubcategorias();_apresRenderPreview()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Selecione...</option></select>
         <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
-        <select id="apres-subcategoria" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Todas</option></select>
+        <select id="apres-subcategoria" onchange="_apresPreviewIdx=0;_apresRenderPreview()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Todas</option></select>
         <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
-        <select id="apres-fornecedor" onchange="_apresRenderProdutosNovos()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Selecione...</option></select>
+        <select id="apres-fornecedor" onchange="_apresPreviewIdx=0;_apresRenderProdutosNovos();_apresRenderPreview()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Selecione...</option></select>
         <span style="font-size:11px;font-weight:600;color:#64748b">Período</span>
-        <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="apres-data-de" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;width:90px">
+        <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="apres-data-de" oninput="_entctrlMaskData(this);_apresRenderPreview()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;width:90px">
         <span style="color:#94a3b8;font-size:13px">→</span>
-        <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="apres-data-ate" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;width:90px">
+        <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="apres-data-ate" oninput="_entctrlMaskData(this);_apresRenderPreview()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;width:90px">
         <div style="flex:1"></div>
       </div>
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
@@ -5597,7 +5656,8 @@
           </div>
         </div>
         <div style="font-size:11px;color:#94a3b8;margin-bottom:12px">A capa é sempre incluída. Marque abaixo o que mais deve entrar.</div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:290px 1fr;gap:16px;margin-bottom:14px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:8px;max-height:480px;overflow-y:auto;padding-right:4px">
           <label class="apres-topico" data-id="visao" style="display:flex;gap:10px;align-items:flex-start;border:1px solid #e2e8f0;border-radius:9px;padding:10px 12px;cursor:pointer;background:#f8fafc">
             <input type="checkbox" checked onchange="_apresToggleTopico('visao',this.checked,this)" style="margin-top:2px">
             <div>
@@ -5654,10 +5714,23 @@
               <div style="font-size:11px;color:#64748b">Fotos e dados dos produtos escolhidos abaixo, organizados por categoria</div>
             </div>
           </label>
+          </div>
+          <div style="border:1px solid #e2e8f0;border-radius:12px;padding:14px;background:#f8fafc">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.03em;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block"></span>Prévia do slide</div>
+              <span id="apres-preview-contador" style="font-size:11px;color:#94a3b8;font-weight:600">—</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onclick="_apresPreviewNav(-1)" style="width:34px;height:34px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#272A4A;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(15,23,42,.08)">&#8592;</button>
+              <div id="apres-preview-slide" class="apr-slide" style="flex:1"></div>
+              <button onclick="_apresPreviewNav(1)" style="width:34px;height:34px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#272A4A;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(15,23,42,.08)">&#8594;</button>
+            </div>
+            <div id="apres-preview-thumbs" style="display:flex;gap:6px;margin-top:12px;overflow-x:auto;padding-bottom:2px"></div>
+          </div>
         </div>
         <div style="margin-bottom:14px">
           <div style="font-size:11px;font-weight:600;color:#475569;margin-bottom:5px">Observações (opcional)</div>
-          <textarea id="apres-observacao" rows="2" placeholder="Comentário específico desta visita/apresentação..." style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:12px;font-family:inherit;color:#1e293b;resize:vertical"></textarea>
+          <textarea id="apres-observacao" rows="2" placeholder="Comentário específico desta visita/apresentação..." oninput="_apresRenderPreview()" style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:12px;font-family:inherit;color:#1e293b;resize:vertical"></textarea>
           <div style="font-size:10.5px;color:#94a3b8;margin-top:4px">Se preenchido, entra como último slide da apresentação.</div>
         </div>
         <div style="display:flex;justify-content:flex-end">
@@ -7665,9 +7738,9 @@ if (firebaseConfigurado) {
 // funcionando exatamente como antes, direto no localStorage — nenhum código existente
 // precisa saber a diferença.
 // ═══════════════════════════════════════════════════
-var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas', 'planejamento_reino_vinculos'];
-var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [], cat_clientes: [], cat_produtos: [], transportadoras: [], tabelas_preco: [], sku_clientes: [], negociacoes_preco: [], devolucoes: [], ocorrencias_entrega: [], bloqueios_produto: [], gruposAcesso: [], comandos_navegacao: [], metas: [], planejamento_reino_redes: [], planejamento_reino_lojas: [], planejamento_reino_vinculos: [] };
-var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false, cat_clientes: false, cat_produtos: false, transportadoras: false, tabelas_preco: false, sku_clientes: false, negociacoes_preco: false, devolucoes: false, ocorrencias_entrega: false, bloqueios_produto: false, gruposAcesso: false, comandos_navegacao: false, metas: false, planejamento_reino_redes: false, planejamento_reino_lojas: false, planejamento_reino_vinculos: false };
+var _fsColecoes = ['produtos', 'clientes', 'fornecedores', 'usuarios', 'pedidos', 'cat_clientes', 'cat_produtos', 'transportadoras', 'tabelas_preco', 'sku_clientes', 'negociacoes_preco', 'devolucoes', 'ocorrencias_entrega', 'bloqueios_produto', 'gruposAcesso', 'comandos_navegacao', 'metas', 'planejamento_reino_redes', 'planejamento_reino_lojas', 'planejamento_reino_vinculos', 'catalogos'];
+var _fsCache    = { produtos: [], clientes: [], fornecedores: [], usuarios: [], pedidos: [], cat_clientes: [], cat_produtos: [], transportadoras: [], tabelas_preco: [], sku_clientes: [], negociacoes_preco: [], devolucoes: [], ocorrencias_entrega: [], bloqueios_produto: [], gruposAcesso: [], comandos_navegacao: [], metas: [], planejamento_reino_redes: [], planejamento_reino_lojas: [], planejamento_reino_vinculos: [], catalogos: [] };
+var _fsPronto   = { produtos: false, clientes: false, fornecedores: false, usuarios: false, pedidos: false, cat_clientes: false, cat_produtos: false, transportadoras: false, tabelas_preco: false, sku_clientes: false, negociacoes_preco: false, devolucoes: false, ocorrencias_entrega: false, bloqueios_produto: false, gruposAcesso: false, comandos_navegacao: false, metas: false, planejamento_reino_redes: false, planejamento_reino_lojas: false, planejamento_reino_vinculos: false, catalogos: false };
 var _fsOuvindo  = false;
 var _fsEmpresaCache = null;
 var _fsEmpresaCarregada = false;
@@ -7734,6 +7807,7 @@ function _fsAoAtualizar(nome) {
     planejamento_reino_redes: ['_prRender'],
     planejamento_reino_lojas: ['_prRenderLojasTabela'],
     planejamento_reino_vinculos: ['_prRender'],
+    catalogos: ['renderCatalogoList'],
   };
   (mapaRender[nome] || []).forEach(function (fn) {
     if (typeof window[fn] === 'function') {
@@ -9691,44 +9765,25 @@ async function carregarCidadesEmp() {
 }
 
 // ═══════════════════════════════════════════════════
-// CATÁLOGOS  (IndexedDB — sem limite de 10 MB)
+// CATÁLOGOS  (metadado no Firestore, sincronizado para todos; o PDF em si fica em
+// catalogos/<slug>.pdf, publicado junto do index.html pelo atualizar_github.bat)
 // ═══════════════════════════════════════════════════
-async function _catalogDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('compartilharne_catalogs', 1);
-    req.onupgradeneeded = e => {
-      if (!e.target.result.objectStoreNames.contains('catalogs'))
-        e.target.result.createObjectStore('catalogs', { keyPath: 'fornecedor_id' });
-    };
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror   = () => reject(req.error);
-  });
+function _catSlug(s) {
+  return String(s || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'catalogo';
 }
-async function getCatalogos() {
-  try {
-    const db = await _catalogDB();
-    return new Promise(resolve => {
-      const req = db.transaction('catalogs','readonly').objectStore('catalogs').getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror   = () => resolve([]);
-    });
-  } catch(e) { return []; }
-}
+function getCatalogos() { return firebaseConfigurado ? _fsGet('catalogos') : JSON.parse(localStorage.getItem('catalogos') || '[]'); }
+function setCatalogos(data) { if (firebaseConfigurado) { _fsSet('catalogos', data); } else { localStorage.setItem('catalogos', JSON.stringify(data)); } }
 async function _saveCatalogEntry(entry) {
-  const db = await _catalogDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('catalogs','readwrite');
-    tx.objectStore('catalogs').put(entry);
-    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
-  });
+  const atual = getCatalogos().filter(c => c.fornecedor_id !== entry.fornecedor_id);
+  atual.push(entry);
+  setCatalogos(atual);
 }
 async function _deleteCatalogEntry(fornId) {
-  const db = await _catalogDB();
-  return new Promise(resolve => {
-    const tx = db.transaction('catalogs','readwrite');
-    tx.objectStore('catalogs').delete(fornId);
-    tx.oncomplete = resolve; tx.onerror = resolve;
-  });
+  setCatalogos(getCatalogos().filter(c => c.fornecedor_id !== fornId));
 }
 
 async function renderCatalogoList() {
@@ -9761,8 +9816,8 @@ async function renderCatalogoList() {
     const grad    = _FORN_GRADIENTS[i % _FORN_GRADIENTS.length];
     const inicial = (f.nome_fantasia||'?')[0].toUpperCase();
     const avatarHtml = f.foto
-      ? `<div style="width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#fff;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;padding:3px"><img src="${f.foto}" style="width:100%;height:100%;object-fit:contain;display:block"></div>`
-      : `<div style="width:44px;height:44px;background:${grad};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;flex-shrink:0">${inicial}</div>`;
+      ? `<div style="width:60px;height:60px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px"><img src="${f.foto}" style="width:100%;height:100%;object-fit:contain;display:block"></div>`
+      : `<div style="width:60px;height:60px;background:${grad};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;color:#fff;flex-shrink:0">${inicial}</div>`;
     const temCat     = !!cat;
     const arquivo    = cat ? cat.nome : '—';
     const dataUpload = cat ? cat.data : '—';
@@ -9787,7 +9842,6 @@ async function renderCatalogoList() {
       </div>
       <div>
         <div class="mc-secondary mc-hide" style="font-size:12px;font-weight:600;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${arquivo}">${arquivo}</div>
-        ${temCat ? `<div class="mc-hide" style="font-size:10px;color:#94a3b8;margin-top:3px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="agenda" style="font-size:9px"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg> ${dataUpload}</div>` : ''}
       </div>
       <div class="mc-meta" style="font-size:13px;font-weight:600;color:#475569">${temCat ? dataUpload : 'Sem catalogo'}</div>
       <div class="mc-badge mc-hide">${statusHtml}</div>
@@ -9798,17 +9852,23 @@ async function renderCatalogoList() {
 
 async function uploadCatalogo(fornId, input) {
   const file = input.files[0];
+  input.value = '';
   if (!file) return;
   if (file.type !== 'application/pdf') { alert('Selecione um arquivo PDF.'); return; }
-  if (file.size > 150 * 1024 * 1024) { alert('Arquivo muito grande. Limite: 150 MB.'); return; }
-  const reader = new FileReader();
-  reader.onload = async e => {
-    try {
-      await _saveCatalogEntry({ fornecedor_id: fornId, nome: file.name, data: new Date().toLocaleDateString('pt-BR'), pdf: e.target.result });
-      renderCatalogoList();
-    } catch(err) { alert('Erro ao salvar catálogo: ' + (err.message||err)); }
-  };
-  reader.readAsDataURL(file);
+  const forn = getFornecedores().find(f => f.id === fornId);
+  const slug = _catSlug(forn ? forn.nome_fantasia : file.name);
+  const caminho = 'catalogos/' + slug + '.pdf';
+  const ok = confirm(
+    'Este catálogo vai ficar disponível para todo mundo depois de publicado.\n\n' +
+    'Coloque o arquivo "' + file.name + '" na pasta "catalogos" do projeto com o nome:\n' +
+    slug + '.pdf\n\n' +
+    'Depois rode o atualizar_github.bat para publicar.\n\nConfirmar o cadastro agora?'
+  );
+  if (!ok) return;
+  try {
+    await _saveCatalogEntry({ id: fornId, fornecedor_id: fornId, nome: file.name, arquivo: caminho, data: new Date().toLocaleDateString('pt-BR') });
+    renderCatalogoList();
+  } catch(err) { alert('Erro ao salvar catálogo: ' + (err.message||err)); }
 }
 async function removerCatalogo(fornId) {
   if (!confirm('Remover o catálogo deste fornecedor?')) return;
@@ -9816,10 +9876,10 @@ async function removerCatalogo(fornId) {
   renderCatalogoList();
 }
 async function baixarCatalogo(fornId) {
-  const cats = await getCatalogos();
+  const cats = getCatalogos();
   const cat  = cats.find(c => c.fornecedor_id === fornId);
-  if (!cat) return;
-  const a = document.createElement('a'); a.href = cat.pdf; a.download = cat.nome || 'catalogo.pdf'; a.click();
+  if (!cat || !cat.arquivo) return;
+  const a = document.createElement('a'); a.href = cat.arquivo; a.download = cat.nome || 'catalogo.pdf'; a.click();
 }
 
 window._cartilhaPdf = null; window._cartilhaPagAtual = 1; window._cartilhaFornId = null; window._cartilhaAnimating = false; window._cartilhaModo = 'vertical';
@@ -9987,7 +10047,7 @@ async function _flipCartilha(dir, newLeft) {
 }
 
 async function abrirCartilha(fornId) {
-  const cats = await getCatalogos();
+  const cats = getCatalogos();
   const cat  = cats.find(c => c.fornecedor_id === fornId);
   const forn = getFornecedores().find(f => f.id === fornId);
   if (!cat || !forn) return;
@@ -10036,11 +10096,7 @@ async function abrirCartilha(fornId) {
   }
   lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   try {
-    const base64 = cat.pdf.split(',')[1];
-    const bin = atob(base64);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    window._cartilhaPdf = await lib.getDocument({ data: arr }).promise;
+    window._cartilhaPdf = await lib.getDocument({ url: cat.arquivo }).promise;
     if (window._cartilhaModo === 'vertical') {
       await _renderPaginaVertical(1);
     } else {
@@ -15222,8 +15278,9 @@ function dashInit() {
     if (_dashBtnHist) {
       _dashBtnHist.dataset.ativo = _dashHistorico ? '1' : '';
       _dashBtnHist.textContent = _dashHistorico ? 'Voltar para dados atuais' : 'Ver histórico 2025';
-      _dashBtnHist.style.background = _dashHistorico ? '#DE7926' : 'rgba(255,255,255,.12)';
-      _dashBtnHist.style.borderColor = _dashHistorico ? '#DE7926' : 'rgba(255,255,255,.2)';
+      _dashBtnHist.style.background = _dashHistorico ? '#DE7926' : '#f1f5f9';
+      _dashBtnHist.style.borderColor = _dashHistorico ? '#DE7926' : '#e2e8f0';
+      _dashBtnHist.style.color = _dashHistorico ? '#fff' : '#475569';
     }
 
 
@@ -15534,6 +15591,7 @@ function dashInit() {
       }));
     }
     let _dvgMesAberto = null;
+    let _dvgMesTotalResumo = null;
     let _dvgMesesData = [];
     let _dvgMetaMensal = null;
     function _dvgRenderBars() {
@@ -15565,9 +15623,8 @@ function dashInit() {
       }
     }
     function _dvgToggleMes(i) {
-      const det = document.getElementById('dvgMesDetail');
       document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
-      if (_dvgMesAberto === i) { det.classList.remove('open'); _dvgMesAberto = null; return; }
+      if (_dvgMesAberto === i) { _dvgMesAberto = null; _dvgMostrarTotalMes(); return; }
       _dvgMesAberto = i;
       _dvgHoverMes(i);
     }
@@ -15587,9 +15644,20 @@ function dashInit() {
     }
     function _dvgHoverMesFim() {
       if (_dvgMesAberto != null) { _dvgHoverMes(_dvgMesAberto); return; }
-      const det = document.getElementById('dvgMesDetail');
+      _dvgMostrarTotalMes();
+    }
+    function _dvgMostrarTotalMes() {
       document.querySelectorAll('#dvgBars .dvg-bar').forEach(b => b.classList.remove('active'));
-      if (det) det.classList.remove('open');
+      const det = document.getElementById('dvgMesDetail');
+      const inner = document.getElementById('dvgMesDetailInner');
+      if (!det || !inner) return;
+      const r = _dvgMesTotalResumo || { fat:0, peso:0, n:0, ticket:0 };
+      inner.innerHTML =
+        '<div>Faturamento<b>' + fmtBRL(r.fat) + '</b></div>' +
+        '<div>Volume<b>' + fmtNum(r.peso) + ' kg</b></div>' +
+        '<div>Pedidos<b>' + r.n.toLocaleString('pt-BR') + '</b></div>' +
+        '<div>Ticket médio<b>' + fmtBRL(r.ticket) + '</b></div>';
+      det.classList.add('open');
     }
     const _dvgFabPalette = ['#1c2f66','#2c4488','#3d5aa8','#5b78c9','#7b93d9','#a9c2f5','#c9d9fb','#e3ecfc'];
     function _dvgRenderDonut(porFab, totalFab) {
@@ -15742,10 +15810,9 @@ function dashInit() {
       const dotsG = document.getElementById('dvgScrubDots');
       if (dotsG) {
         dotsG.innerHTML = allPts.map((p,i) => {
-          const isLast = i === n-1;
-          const dot = '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (isLast?5:3.5) + '" fill="' + (isLast?'#fff':'#4f7fe0') + '" stroke="' + (isLast?'#4f7fe0':'#fff') + '" stroke-width="' + (isLast?2:1.5) + '"></circle>';
-          const valTxt = '<text x="' + p[0] + '" y="' + (p[1] - (isLast?11:9)) + '" text-anchor="middle" font-size="' + (isLast?12:10.5) + '" font-weight="' + (isLast?800:700) + '" fill="' + (isLast?'#fff':'#e6edfb') + '">' + values[i].toLocaleString('pt-BR') + '</text>';
-          const mesTxt = '<text x="' + p[0] + '" y="' + (H-4) + '" text-anchor="middle" font-size="9.5" font-weight="' + (isLast?700:400) + '" fill="' + (isLast?'rgba(255,255,255,.75)':'rgba(255,255,255,.5)') + '">' + shortLabels[i] + '</text>';
+          const dot = '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.5" fill="#4f7fe0" stroke="#fff" stroke-width="1.5"></circle>';
+          const valTxt = '<text x="' + p[0] + '" y="' + (p[1] - 9) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e6edfb">' + values[i].toLocaleString('pt-BR') + '</text>';
+          const mesTxt = '<text x="' + p[0] + '" y="' + (H-4) + '" text-anchor="middle" font-size="9.5" font-weight="400" fill="rgba(255,255,255,.5)">' + shortLabels[i] + '</text>';
           return dot + valTxt + mesTxt;
         }).join('');
       }
@@ -15885,7 +15952,9 @@ function dashInit() {
       const metaTotal = sumMetas();
       _dvgMetaMensal = metaTotal ? metaTotal/12 : null;
       _dvgMesesData = meses.map((fat,i)=>({ fat, vol: mesesVol[i], peso: mesesPeso[i], n: mesesN[i] }));
+      _dvgMesTotalResumo = { fat: k.fat, peso: k.pesoKg, n: k.nPedidos, ticket: k.ticket };
       _dvgRenderBars();
+      _dvgMostrarTotalMes();
 
       // Fábricas (donut) — mantém a proporção real de todas as fábricas, mesmo com uma fábrica selecionada no filtro
       const pedsDonutFab = filtraPedidos({ ignorarFabrica: true });
@@ -15983,18 +16052,18 @@ function dashInit() {
     function _dvgDrillPanelHtml() {
       return `<div class="dvg-vrank-detail">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1e293b">Detalhamento: <span id="drillNome"></span></span><button id="drillFechar" style="font-size:11px;color:#0e7490;background:none;border:none;cursor:pointer">Fechar ✕</button></div>
-        <div class="dg11" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="dg11" style="display:grid;grid-template-columns:2.4fr 0.85fr;gap:12px">
           <div><div style="height:220px"><canvas id="drillEvol"></canvas></div></div>
           <div class="dvg-carddark" style="padding:14px 16px;display:flex;flex-direction:column;justify-content:center">
             <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;text-align:center">Distribuição por Fábrica</div>
             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
-              <svg id="drillFabSvg" viewBox="0 0 180 180" width="120" height="120" style="flex-shrink:0">
+              <svg id="drillFabSvg" viewBox="0 0 180 180" width="120" height="120" style="display:none">
                 <g id="drillFabG" transform="rotate(-90 90 90)"></g>
                 <text id="drillFabTag" x="90" y="84" text-anchor="middle" class="dvg-donuttag">LÍDER</text>
                 <text id="drillFabPct" x="90" y="106" text-anchor="middle" class="dvg-donutpct">0,00%</text>
                 <text id="drillFabNome" x="90" y="122" text-anchor="middle" class="dvg-donutnome">—</text>
               </svg>
-              <div id="drillFabLegend" style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:110px;max-height:120px;overflow:auto"></div>
+              <div id="drillFabLegend" style="display:flex;flex-direction:column;gap:1px;width:100%"></div>
             </div>
           </div>
         </div>
@@ -16023,7 +16092,7 @@ function dashInit() {
 
       // Pódio (navy pra 1o lugar, branco com borda azul pra 2o/3o)
       const podio = document.getElementById('podio');
-      const _dvgPodLabels = ['🥇 1º lugar','🥈 2º lugar','🥉 3º lugar'];
+      const _dvgPodLabels = ['<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffd166" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px"><path d="M8 21l4 -1l4 1"/><path d="M12 17l0 4"/><path d="M7 4l10 0"/><path d="M17 4v8a5 5 0 0 1 -10 0v-8"/><path d="M5 9a2 2 0 0 1 -2 -2v-1a1 1 0 0 1 1 -1h2"/><path d="M19 9a2 2 0 0 0 2 -2v-1a1 1 0 0 0 -1 -1h-2"/></svg>1º lugar', '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5c9" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px"><path d="M8 21l4 -1l4 1"/><path d="M12 17l0 4"/><path d="M7 4l10 0"/><path d="M17 4v8a5 5 0 0 1 -10 0v-8"/><path d="M5 9a2 2 0 0 1 -2 -2v-1a1 1 0 0 1 1 -1h2"/><path d="M19 9a2 2 0 0 0 2 -2v-1a1 1 0 0 0 -1 -1h-2"/></svg>2º lugar', '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9935a" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px"><path d="M8 21l4 -1l4 1"/><path d="M12 17l0 4"/><path d="M7 4l10 0"/><path d="M17 4v8a5 5 0 0 1 -10 0v-8"/><path d="M5 9a2 2 0 0 1 -2 -2v-1a1 1 0 0 1 1 -1h2"/><path d="M19 9a2 2 0 0 0 2 -2v-1a1 1 0 0 0 -1 -1h-2"/></svg>3º lugar'];
       const _dvgPodBadge = ['background:rgba(255,255,255,.15);color:#fff','background:#eef2ff;color:#3730a3','background:#eff6ff;color:#1e3a8a'];
       podio.innerHTML = ven.slice(0,3).map((v,i)=>{
         const metaChip = v.atinge!=null ? `<span class="chip ${v.atinge>=1.1?'chip-info':v.atinge>=.95?'chip-good':v.atinge>=.7?'chip-warn':'chip-bad'}">${fmtPct(v.atinge)} da meta</span>` : '';
@@ -16215,13 +16284,32 @@ function dashInit() {
       const meses = Array(12).fill(0);
       for (const p of peds) meses[parseInt(p[0].slice(5,7),10)-1] += p[5];
       if (drillEvol) drillEvol.destroy();
+      const _dvgDrillEvolOpts = chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk });
+      _dvgDrillEvolOpts.scales.y.display = false;
+      _dvgDrillEvolOpts.scales.x.offset = true;
+      _dvgDrillEvolOpts.plugins.legend.align = 'start';
+      _dvgDrillEvolOpts.layout = { padding: { top: 22 } };
       drillEvol = window._dashRegChart(document.getElementById('drillEvol'), {
         type:'line', data:{ labels:monthLabels, datasets:[{ label:'Faturamento Mensal', data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.12)', fill:true, tension:.3 }]},
-        options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk }),
+        options: _dvgDrillEvolOpts,
         plugins: [{
           id: 'dvgLineGlow',
           beforeDatasetsDraw(chart) { chart.ctx.save(); chart.ctx.shadowColor = 'rgba(79,127,224,.85)'; chart.ctx.shadowBlur = 8; },
           afterDatasetsDraw(chart) { chart.ctx.restore(); }
+        }, {
+          id: 'dvgDrillEvolValores',
+          afterDatasetsDraw(chart) {
+            const { ctx } = chart;
+            const meta = chart.getDatasetMeta(0);
+            const vals = chart.data.datasets[0].data;
+            ctx.save();
+            ctx.fillStyle = '#1e293b';
+            ctx.font = '700 12.5px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            meta.data.forEach((pt, i) => { ctx.fillText(fmtBRLk(vals[i]), pt.x, pt.y - 6); });
+            ctx.restore();
+          }
         }]
       });
       // Por fábrica
@@ -16551,6 +16639,34 @@ function dashInit() {
         `<div class="dvg-risk-list">${risco.slice(0,40).map(c=>`<div class="dvg-risk-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0"><b>${escapeHtml(c.nome)}</b><br><span style="opacity:.75;font-size:10.5px">${fmtBRL(c.fat)} no período &middot; última: ${c.ult?fmtDate(c.ult):'—'}</span></span><span style="font-weight:800;white-space:nowrap;flex-shrink:0">${c.dias}d</span></div>`).join('')}</div>` +
         (risco.length>40?`<div style="font-size:11px;opacity:.8;margin-top:6px;text-align:center">…e mais ${risco.length-40}.</div>`:'');
 
+      // KPIs de Clientes (Ativos / Positivados / Em Risco / Novos no periodo) - topo da aba
+      const _dvgCliVisivelFiltro = (ci) => {
+        if (state.clientes.size && !state.clientes.has(ci)) return false;
+        if (state.uf.size) { const _ui = ufIdxOf[CLI_UF[ci]]; if (_ui === undefined || !state.uf.has(_ui)) return false; }
+        return true;
+      };
+      let _dvgKpiCliAtivos = 0;
+      for (let _i=0;_i<CLI.length;_i++) { if (!CLI_INATIVO[_i] && _dvgCliVisivelFiltro(_i)) _dvgKpiCliAtivos++; }
+      const _dvgKpiPositivados = arr.filter(c => !c.inativo).length;
+      const _dvgKpiPositivadosPct = _dvgKpiCliAtivos ? fmtPct(_dvgKpiPositivados/_dvgKpiCliAtivos) : '—';
+      const _dvgPedsHistorico = filtraPedidos({ dtIni:'0001-01-01', todosStatus:false });
+      const _dvgPrimeiraCompra = new Map();
+      _dvgPedsHistorico.forEach(p => { const _atual = _dvgPrimeiraCompra.get(p[1]); if (!_atual || p[0] < _atual) _dvgPrimeiraCompra.set(p[1], p[0]); });
+      const _dvgKpiNovos = arr.filter(c => !c.inativo && (_dvgPrimeiraCompra.get(c.ci)||'') >= state.dtIni).length;
+      const _dvgCliKpisEl = document.getElementById('dvgCliKpis');
+      if (_dvgCliKpisEl) {
+        _dvgCliKpisEl.innerHTML = [
+          { icon:'ti-users', cor:'#0e2f6e', lbl:'CLIENTES ATIVOS', id:'dvgCliKpiAtivos', sub:'na base de cadastro' },
+          { icon:'ti-user-check', cor:'#1c2f66', lbl:'POSITIVADOS', id:'dvgCliKpiPositivados', sub:_dvgKpiPositivadosPct+' dos ativos compraram' },
+          { icon:'ti-alert-triangle', cor:'#3d5aa8', lbl:'CLIENTES EM RISCO', id:'dvgCliKpiRisco', sub:dias+'+ dias sem comprar' },
+          { icon:'ti-user-plus', cor:'#185fa5', lbl:'NOVOS NO PERÍODO', id:'dvgCliKpiNovos', sub:'1ª compra dentro do período' },
+        ].map(k => `<div class="dvg-kpi" style="border-bottom:3px solid ${k.cor}"><div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:${k.cor}"><i class="ti ${k.icon}"></i></div><div class="dvg-kpi-lbl">${k.lbl}</div></div></div><div class="dvg-kpi-val" id="${k.id}">0</div><div class="dvg-kpi-sub">${k.sub}</div></div>`).join('');
+        _dvgAnimarNumero(document.getElementById('dvgCliKpiAtivos'), _dvgKpiCliAtivos, v => Math.round(v).toLocaleString('pt-BR'));
+        _dvgAnimarNumero(document.getElementById('dvgCliKpiPositivados'), _dvgKpiPositivados, v => Math.round(v).toLocaleString('pt-BR'));
+        _dvgAnimarNumero(document.getElementById('dvgCliKpiRisco'), risco.length, v => Math.round(v).toLocaleString('pt-BR'));
+        _dvgAnimarNumero(document.getElementById('dvgCliKpiNovos'), _dvgKpiNovos, v => Math.round(v).toLocaleString('pt-BR'));
+      }
+
       // Tabela completa (paginada: 25/50/75/100/Todos)
       _dvgClientesArr = arrAbc; _dvgClientesTotal = totalAbc; _dvgClientesDias = dias;
       _dvgRenderClientesTabela();
@@ -16635,7 +16751,7 @@ function dashInit() {
           ${kpiCard('Ticket médio', _dvgFmtBRLAbrev(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:_dvgFmtBRLAbrev}, fmtBRL(ticket))}
           ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${fmtBRL(metaF)}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null)}
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <div class="grid grid-cols-1 lg:grid-cols-[2.4fr_0.85fr] gap-4 mt-4">
           <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">Evolução Mensal</h3>
             <div style="height:240px;"><canvas id="fabMensal"></canvas></div>
           </div>
@@ -16669,13 +16785,31 @@ function dashInit() {
       _dvgAnimarNumero(document.getElementById('fabKpiTicket'), ticket, _dvgFmtBRLAbrev);
       if (atinge != null) _dvgAnimarNumero(document.getElementById('fabKpiMeta'), atinge, fmtPct);
       // Mensal (linha com brilho, mesmo padrão do drill-down de Vendedores)
+      const _dvgFabMensalOpts = chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false });
+      _dvgFabMensalOpts.scales.y.display = false;
+      _dvgFabMensalOpts.scales.x.offset = true;
+      _dvgFabMensalOpts.layout = { padding: { top: 22 } };
       window._dashRegChart(document.getElementById('fabMensal'), {
         type:'line', data:{ labels:monthLabels, datasets:[{ data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.15)', fill:true, tension:.35, pointRadius:2.5, pointBackgroundColor:'#4f7fe0', pointBorderColor:'#4f7fe0', pointHoverRadius:6, pointHoverBackgroundColor:'#a9c2f5', pointHoverBorderColor:'#fff', pointHoverBorderWidth:2, borderWidth:2.5 }] },
-        options: chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false }),
+        options: _dvgFabMensalOpts,
         plugins: [{
           id: 'dvgFabLineGlow',
           beforeDatasetsDraw(chart) { chart.ctx.save(); chart.ctx.shadowColor = 'rgba(79,127,224,.85)'; chart.ctx.shadowBlur = 8; },
           afterDatasetsDraw(chart) { chart.ctx.restore(); }
+        }, {
+          id: 'dvgFabMensalValores',
+          afterDatasetsDraw(chart) {
+            const { ctx } = chart;
+            const meta = chart.getDatasetMeta(0);
+            const vals = chart.data.datasets[0].data;
+            ctx.save();
+            ctx.fillStyle = '#fff';
+            ctx.font = '700 10.5px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            meta.data.forEach((pt, i) => { ctx.fillText(fmtBRLk(vals[i]), pt.x, pt.y - 6); });
+            ctx.restore();
+          }
         }]
       });
       // Vendedor (lista com barra, no mesmo estilo do Ranking de Vendedores)
@@ -16809,11 +16943,8 @@ function dashInit() {
       window._dashModoHistorico2025 = !window._dashModoHistorico2025;
       dashInit();
     };
-    const _dvgTitMensalEl = document.getElementById('dvgTitMensal');
-    if (_dvgTitMensalEl) _dvgTitMensalEl.onclick = () => _dvgSetChartFocus('mensal');
-    const _dvgTitFabricaEl = document.getElementById('dvgTitFabrica');
-    if (_dvgTitFabricaEl) _dvgTitFabricaEl.onclick = () => _dvgSetChartFocus('fabrica');
-    _dvgSetChartFocus('mensal');
+    // v482: Faturamento Mensal e Participacao por Fabrica ficam sempre visiveis lado a lado
+    // (removido o toggle de foco/colapso que escondia um card enquanto o outro estava aberto).
     // theme toggle removed
 
     // sidebar mobile removed
@@ -26981,6 +27112,7 @@ function _apresPopularFiltros() {
   _apresAtualizarContadorTopicos();
   _apresRenderProdutosNovos();
   _apresRenderArquivadas();
+  _apresRenderPreview();
 }
 
 function _apresAtualizarSubcategorias() {
@@ -27254,6 +27386,7 @@ function _apresToggleProdutoNovo(id, checked) {
   if (checked) _apresProdutosNovosSelecionados[id] = true;
   else delete _apresProdutosNovosSelecionados[id];
   _apresAtualizarContadorProdutosNovos();
+  _apresRenderPreview();
 }
 
 function _apresMarcarTodosProdutosNovos(v) {
@@ -27266,6 +27399,7 @@ function _apresMarcarTodosProdutosNovos(v) {
     else delete _apresProdutosNovosSelecionados[p.id];
   });
   _apresRenderProdutosNovos();
+  _apresRenderPreview();
 }
 
 function _apresAtualizarContadorProdutosNovos() {
@@ -27308,6 +27442,7 @@ function _apresToggleTopico(id, checked, inputEl) {
     card.style.opacity = checked ? '1' : '.55';
   }
   _apresAtualizarContadorTopicos();
+  _apresRenderPreview();
 }
 
 function _apresMarcarTodosTopicos(v) {
@@ -27320,6 +27455,7 @@ function _apresMarcarTodosTopicos(v) {
     card.style.opacity = v ? '1' : '.55';
   });
   _apresAtualizarContadorTopicos();
+  _apresRenderPreview();
 }
 
 function _apresAtualizarContadorTopicos() {
@@ -27330,6 +27466,179 @@ function _apresAtualizarContadorTopicos() {
   el.textContent = marcados + ' de ' + chaves.length + ' selecionados';
 }
 
+// APRESENTACOES: previa do slide (real, navegavel), usando os mesmos dados calculados
+// para a geracao do pptx (_apresDadosSlides), sem depender de gerar o arquivo.
+var _apresPreviewIdx = 0;
+
+function _apresEscHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function _apresPreviewLogoChip(foto) {
+  return foto ? '<div class="apr-logo-chip"><img src="' + foto + '"></div>' : '';
+}
+
+function _apresPreviewCapaHtml(titulo, periodoTxt, logoRede, logoForn) {
+  return '<div class="apr-capa">'
+    + '<div class="apr-brand">Compartilhar <span style="color:#ff8a8a">vendas</span><span style="color:#cbd5e1;font-weight:400"> | </span><span style="color:#ffc98a">promo</span></div>'
+    + '<div class="apr-divider"><i style="width:60px;background:#D82621"></i><i style="width:30px;background:#DE7926"></i></div>'
+    + '<div class="apr-title">' + _apresEscHtml(titulo) + '</div>'
+    + '<div class="apr-periodo">Período: ' + _apresEscHtml(periodoTxt) + '</div>'
+    + '<div class="apr-caplogos">'
+      + (logoRede ? '<div class="apr-caplogo"><img src="' + logoRede + '"></div>' : '')
+      + (logoForn ? '<div class="apr-caplogo"><img src="' + logoForn + '"></div>' : '')
+    + '</div>'
+    + '</div>';
+}
+
+function _apresPreviewCabecalhoAbre(titulo, logoRede, logoForn) {
+  return '<div class="apr-body"><div class="apr-title2">' + _apresEscHtml(titulo) + '</div>'
+    + '<div class="apr-logos">' + _apresPreviewLogoChip(logoRede) + _apresPreviewLogoChip(logoForn) + '</div>'
+    + '<div class="apr-content">';
+}
+
+function _apresPreviewFecha() { return '</div></div><div class="apr-bar"></div>'; }
+
+function _apresPreviewKpiCard(label, valor, variacao) {
+  return '<div class="apr-kpi-card"><div class="apr-kl">' + _apresEscHtml(label) + '</div><div class="apr-kv">' + _apresEscHtml(valor) + '</div>'
+    + (variacao ? '<div class="apr-kvar" style="color:#' + variacao.cor + '">' + _apresEscHtml(variacao.texto) + '</div>' : '')
+    + '</div>';
+}
+
+function _apresPreviewVisaoHtml(d, dAnterior) {
+  return '<div class="apr-kpi-row">'
+    + _apresPreviewKpiCard('Faturamento', 'R$ ' + d.faturamentoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}), dAnterior ? _apresFormatarVariacao(d.faturamentoTotal, dAnterior.faturamentoTotal) : null)
+    + _apresPreviewKpiCard('Volume', d.pesoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' kg', dAnterior ? _apresFormatarVariacao(d.pesoTotal, dAnterior.pesoTotal) : null)
+    + _apresPreviewKpiCard('Ticket médio', 'R$ ' + d.ticketMedio.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}), dAnterior ? _apresFormatarVariacao(d.ticketMedio, dAnterior.ticketMedio) : null)
+    + _apresPreviewKpiCard('Clientes ativos', String(d.clientesAtivos), dAnterior ? _apresFormatarVariacao(d.clientesAtivos, dAnterior.clientesAtivos) : null)
+    + '</div>';
+}
+
+function _apresPreviewEvolucaoHtml(d) {
+  if (!d.meses.length) return '<div class="apr-empty">Sem faturamento no período selecionado.</div>';
+  var max = 0;
+  d.meses.forEach(function(m){ if (d.porMes[m] > max) max = d.porMes[m]; });
+  if (!max) max = 1;
+  return '<div class="apr-chart">' + d.meses.map(function(m){
+    var v = d.porMes[m];
+    var h = Math.max(4, Math.round(v / max * 100));
+    var lbl = m.split('-').reverse().join('/');
+    return '<div class="apr-mbar" style="height:' + h + '%"><span class="apr-mlbl">' + lbl + '</span></div>';
+  }).join('') + '</div>';
+}
+
+function _apresPreviewTabelaHtml(linhas, numerada) {
+  if (!linhas.length) return '<div class="apr-empty">Sem dados no período selecionado.</div>';
+  return '<div class="apr-ranklist">' + linhas.map(function(cols, i){
+    var meio = cols.slice(1, cols.length - 1).map(function(c){ return '<span class="apr-uf">' + _apresEscHtml(c) + '</span>'; }).join('');
+    return '<div class="apr-rankrow">' + (numerada ? '<span class="apr-pos">' + (i+1) + '</span>' : '')
+      + '<span class="apr-nm">' + _apresEscHtml(cols[0]) + '</span>'
+      + meio
+      + '<span class="apr-vv">' + _apresEscHtml(cols[cols.length-1]) + '</span>'
+      + '</div>';
+  }).join('') + '</div>';
+}
+
+function _apresPreviewMetasHtml(d) {
+  if (!d.metaTotal) return '<div class="apr-empty">Não há meta cadastrada para este fornecedor no período selecionado.</div>';
+  var pct = Math.max(0, Math.min(100, d.pctMeta || 0));
+  var cor = pct >= 100 ? '15803D' : (pct >= 70 ? 'C2410C' : 'DC2626');
+  return '<div style="width:100%">'
+    + '<div class="apr-kpi-row" style="margin-bottom:8px">'
+      + _apresPreviewKpiCard('Meta do período', 'R$ ' + d.metaTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}))
+      + _apresPreviewKpiCard('Realizado nesta rede', 'R$ ' + d.faturamentoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}))
+      + _apresPreviewKpiCard('Atingimento', Math.round(pct) + '%')
+    + '</div>'
+    + '<div class="apr-metabar"><div class="apr-metabar-fill" style="width:' + pct + '%;background:#' + cor + '"></div></div>'
+    + '</div>';
+}
+
+function _apresPreviewEntregasHtml(d) {
+  return '<div class="apr-kpi-row">'
+    + _apresPreviewKpiCard('Prazo médio', d.prazoMedio !== null ? d.prazoMedio.toLocaleString('pt-BR',{maximumFractionDigits:1}) + ' dias' : '—')
+    + _apresPreviewKpiCard('No prazo', d.pctNoPrazo !== null ? Math.round(d.pctNoPrazo) + '%' : '—')
+    + _apresPreviewKpiCard('Devoluções', 'R$ ' + d.devolucoesValor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}))
+    + '</div>';
+}
+
+function _apresPreviewNovosProdutosHtml(fornId) {
+  var ids = Object.keys(_apresProdutosNovosSelecionados);
+  if (!ids.length) return '<div class="apr-empty">Nenhum produto selecionado em "Novos Produtos".</div>';
+  var idsSet = {}; ids.forEach(function(id){ idsSet[id] = true; });
+  var produtos = getProdutos().filter(function(p){ return String(p.fornecedor) === String(fornId) && idsSet[p.id]; });
+  return '<div class="apr-prodgrid">' + produtos.map(function(p){
+    return '<div class="apr-prodcard">' + (p.foto ? '<img src="' + p.foto + '">' : '') + '<div class="apr-pnome">' + (p.codigo ? _apresEscHtml(p.codigo) + ' — ' : '') + _apresEscHtml(p.nome||'') + '</div></div>';
+  }).join('') + '</div>';
+}
+
+function _apresPreviewObsHtml(texto) {
+  return '<div class="apr-obs">' + _apresEscHtml(texto) + '</div>';
+}
+
+function _apresPreviewSlides() {
+  var redeEl = document.getElementById('apres-rede');
+  var fornEl = document.getElementById('apres-fornecedor');
+  var redeId = redeEl ? redeEl.value : '';
+  var fornId = fornEl ? fornEl.value : '';
+  if (!redeId || !fornId) return null;
+  var subEl = document.getElementById('apres-subcategoria');
+  var subId = subEl ? subEl.value : '';
+  var dataDeEl = document.getElementById('apres-data-de');
+  var dataAteEl = document.getElementById('apres-data-ate');
+  var dataDe = dataDeEl ? _entctrlParseDataBR(dataDeEl.value) : '';
+  var dataAte = dataAteEl ? _entctrlParseDataBR(dataAteEl.value) : '';
+  var d = _apresDadosSlides(redeId, subId, fornId, dataDe, dataAte);
+  var periodoAnterior = _apresPeriodoAnterior(dataDe, dataAte);
+  var dAnterior = periodoAnterior ? _apresDadosSlides(redeId, subId, fornId, periodoAnterior.de, periodoAnterior.ate) : null;
+  var periodoTxt = (dataDe ? dataDe.split('-').reverse().join('/') : '—') + ' – ' + (dataAte ? dataAte.split('-').reverse().join('/') : '—');
+  var redeNome = d.rede.nome || 'Rede';
+  var tituloRede = d.sub ? d.sub.nome : redeNome;
+  var fornNome = _cpSemColchetes(d.forn.nome_fantasia || d.forn.razao_social || 'Fornecedor');
+  var logoRede = _apresLogoRedeFonte(d) || '';
+  var logoForn = d.forn.foto || '';
+
+  var slides = [];
+  slides.push({ nome:'Capa', html: _apresPreviewCapaHtml(tituloRede + ' - ' + fornNome, periodoTxt, logoRede, logoForn) });
+
+  if (_apresTopicosSelecionados.visao) slides.push({ nome:'Visão geral', html: _apresPreviewCabecalhoAbre('Visão geral de vendas', logoRede, logoForn) + _apresPreviewVisaoHtml(d, dAnterior) + _apresPreviewFecha() });
+  if (_apresTopicosSelecionados.evolucao) slides.push({ nome:'Evolução mensal', html: _apresPreviewCabecalhoAbre('Evolução mensal do faturamento', logoRede, logoForn) + _apresPreviewEvolucaoHtml(d) + _apresPreviewFecha() });
+  if (_apresTopicosSelecionados.produtos) slides.push({ nome:'Top 5 produtos', html: _apresPreviewCabecalhoAbre('Top 5 produtos', logoRede, logoForn) + _apresPreviewTabelaHtml(d.topProdutos.map(function(p){ return [p.nome, 'R$ ' + p.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})]; }), true) + _apresPreviewFecha() });
+  if (_apresTopicosSelecionados.clientes) slides.push({ nome:'Top 5 clientes', html: _apresPreviewCabecalhoAbre('Top 5 clientes da rede', logoRede, logoForn) + _apresPreviewTabelaHtml(d.topClientes.map(function(c){ return [_cpSemColchetes(c.nome), c.uf || '—', 'R$ ' + c.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})]; }), true) + _apresPreviewFecha() });
+  if (_apresTopicosSelecionados.metas) slides.push({ nome:'Metas', html: _apresPreviewCabecalhoAbre('Metas vs. realizado', logoRede, logoForn) + _apresPreviewMetasHtml(d) + _apresPreviewFecha() });
+  if (_apresTopicosSelecionados.entregas) slides.push({ nome:'Entregas', html: _apresPreviewCabecalhoAbre('Entregas e devoluções', logoRede, logoForn) + _apresPreviewEntregasHtml(d) + _apresPreviewFecha() });
+  if (_apresTopicosSelecionados.novosProdutos) slides.push({ nome:'Novos Produtos', html: _apresPreviewCabecalhoAbre('Novos Produtos', logoRede, logoForn) + _apresPreviewNovosProdutosHtml(fornId) + _apresPreviewFecha() });
+  if (_apresTopicosSelecionados.semVenda) slides.push({ nome:'Sem venda', html: _apresPreviewCabecalhoAbre('Produtos sem venda nesta rede (' + d.produtosSemVenda.length + ')', logoRede, logoForn) + _apresPreviewTabelaHtml(d.produtosSemVenda.map(function(p){ return [p.codigo || '—', p.nome]; }), false) + _apresPreviewFecha() });
+  var obsEl = document.getElementById('apres-observacao');
+  var obs = obsEl ? obsEl.value.trim() : '';
+  if (obs) slides.push({ nome:'Observações', html: _apresPreviewCabecalhoAbre('Observações da visita', logoRede, logoForn) + _apresPreviewObsHtml(obs) + _apresPreviewFecha() });
+
+  return slides;
+}
+
+function _apresRenderPreview() {
+  var painel = document.getElementById('apres-preview-slide');
+  if (!painel) return;
+  var slides;
+  try { slides = _apresPreviewSlides(); } catch (e) { slides = null; }
+  var contador = document.getElementById('apres-preview-contador');
+  var thumbs = document.getElementById('apres-preview-thumbs');
+  if (!slides || !slides.length) {
+    painel.innerHTML = '<div class="apr-empty" style="height:100%">Selecione Rede e Fornecedor acima para ver a prévia dos slides.</div>';
+    if (contador) contador.textContent = '—';
+    if (thumbs) thumbs.innerHTML = '';
+    return;
+  }
+  if (_apresPreviewIdx >= slides.length) _apresPreviewIdx = slides.length - 1;
+  if (_apresPreviewIdx < 0) _apresPreviewIdx = 0;
+  painel.innerHTML = slides[_apresPreviewIdx].html;
+  if (contador) contador.textContent = 'Slide ' + (_apresPreviewIdx+1) + ' de ' + slides.length;
+  if (thumbs) thumbs.innerHTML = slides.map(function(s, i){
+    return '<div class="apr-thumb' + (i === _apresPreviewIdx ? ' on' : '') + '" onclick="_apresPreviewIr(' + i + ')" title="' + _apresEscHtml(s.nome) + '"></div>';
+  }).join('');
+}
+
+function _apresPreviewIr(i) { _apresPreviewIdx = i; _apresRenderPreview(); }
+function _apresPreviewNav(delta) { _apresPreviewIdx += delta; _apresRenderPreview(); }
 
 function _apresCaixaProporcional(img, maxW, maxH) {
   if (!img) return null;
