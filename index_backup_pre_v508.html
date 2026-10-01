@@ -7138,27 +7138,6 @@
 </div>
 
 <!-- ── Modal Imprimir Pedido ── -->
-<div id="modal-pimp-escolha" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:12px;width:100%;max-width:380px;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden">
-    <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700;color:#fff">Como deseja imprimir?</div>
-      </div>
-      <button onclick="_pimpFecharEscolha()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
-    </div>
-    <div style="padding:18px;display:flex;flex-direction:column;gap:10px">
-      <button onclick="_pimpEscolherSimples()" style="display:flex;align-items:center;gap:12px;text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:14px 16px;cursor:pointer">
-        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="font-size:20px;color:#272A4A;flex-shrink:0"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M8 13h8M8 17h5"/></svg>
-        <span style="font-size:12.5px;font-weight:700;color:#1e293b">Pedido Venda Simples</span>
-      </button>
-      <button onclick="_pimpEscolherComFotos()" style="display:flex;align-items:center;gap:12px;text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:14px 16px;cursor:pointer">
-        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="font-size:20px;color:#DE7926;flex-shrink:0"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5L6 20"/></svg>
-        <span style="font-size:12.5px;font-weight:700;color:#1e293b">Pedido Venda + Fotos</span>
-      </button>
-    </div>
-  </div>
-</div>
-
 <div id="modal-ped-impressao" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
   <div id="pimp-inner-box" style="background:#fff;border-radius:12px;width:100%;max-width:860px;max-height:92vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
     <div id="pimp-header-modal" style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
@@ -18293,31 +18272,9 @@ function deletePedido(id) {
 // IMPRIMIR PEDIDO (popup estilo documento + PDF)
 // ═══════════════════════════════════════════════════
 var _pimpPedidoId = '';
-var _pimpModoFotos = false;
 
-// Clicar no icone de impressora de um pedido pergunta antes qual formato (ver
-// _pimpEscolherSimples/_pimpEscolherComFotos) -- so depois abre o popup de
-// impressao de fato (pedAbrirImpressaoDeFato).
 function pedAbrirImpressao(id) {
   _pimpPedidoId = id;
-  var modal = document.getElementById('modal-pimp-escolha');
-  if (modal) modal.style.display = 'flex';
-}
-function _pimpFecharEscolha() {
-  var modal = document.getElementById('modal-pimp-escolha');
-  if (modal) modal.style.display = 'none';
-}
-function _pimpEscolherSimples() {
-  _pimpModoFotos = false;
-  _pimpFecharEscolha();
-  pedAbrirImpressaoDeFato();
-}
-function _pimpEscolherComFotos() {
-  _pimpModoFotos = true;
-  _pimpFecharEscolha();
-  pedAbrirImpressaoDeFato();
-}
-function pedAbrirImpressaoDeFato() {
   _pimpRender();
   var modal = document.getElementById('modal-ped-impressao');
   if (modal) modal.style.display = 'flex';
@@ -18399,15 +18356,8 @@ function _pimpRender() {
     var pesoItem = pesoUnit * (Number(it.quantidade) || 0);
     pesoTotal += pesoItem;
     var zebra = (i % 2 === 1) ? 'background:#f8fafc' : '';
-    var imgCell = '';
-    if (_pimpModoFotos) {
-      imgCell = '<td style="padding:4px 6px;text-align:center">' + (prod && prod.foto
-        ? '<img src="' + prod.foto + '" style="width:32px;height:32px;border-radius:5px;object-fit:cover;display:inline-block">'
-        : '<div style="width:32px;height:32px;border-radius:5px;background:#f1f5f9;display:inline-flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5L6 20"/></svg></div>') + '</td>';
-    }
     return '<tr style="border-bottom:1px solid #f1f5f9;' + zebra + '">'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569">' + (i + 1) + '</td>'
-      + imgCell
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569">' + _pedEsc(it.prodCodigo || '') + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:600">' + _pedEsc(it.prodNome || '') + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:center">' + _pedEsc(it.medida || '') + '</td>'
@@ -18452,7 +18402,6 @@ function _pimpRender() {
     + '<table style="width:100%;border-collapse:collapse;margin-bottom:8px">'
       + '<thead><tr style="border-bottom:1px solid #e2e8f0">'
         + '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:left">Nº</th>'
-        + (_pimpModoFotos ? '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Imagem</th>' : '')
         + '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:left">Cód</th>'
         + '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:left">Produto</th>'
         + '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">UN</th>'
@@ -18461,7 +18410,7 @@ function _pimpRender() {
         + '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor</th>'
         + '<th style="padding:4px 6px;font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Total</th>'
       + '</tr></thead>'
-      + '<tbody>' + (itensHtml || '<tr><td colspan="' + (_pimpModoFotos ? 9 : 8) + '" style="text-align:center;padding:8px;color:#94a3b8;font-size:11.5px">Nenhum item neste pedido.</td></tr>') + '</tbody>'
+      + '<tbody>' + (itensHtml || '<tr><td colspan="8" style="text-align:center;padding:8px;color:#94a3b8;font-size:11.5px">Nenhum item neste pedido.</td></tr>') + '</tbody>'
     + '</table>'
 
     + '<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;border-top:1.5px solid #272A4A;padding-top:6px">'
