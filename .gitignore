@@ -1,0 +1,12 @@
+# Regra de seguranca (07/10/2026): so vai para o site o que estiver liberado aqui.
+# Qualquer arquivo novo na pasta NAO e publicado, a menos que seja liberado abaixo.
+*
+!.gitignore
+!atualizar_github.bat
+!index.html
+!compartilhar logo vetor.svg
+!LOGO*
+!Logo*
+!Granarolo*.jpg
+!catalogos/
+!catalogos/*.pdf
