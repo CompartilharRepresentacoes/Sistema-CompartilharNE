@@ -26533,7 +26533,8 @@ function openUsuarioForm(params) {
   document.getElementById('usu-telefone').value = params.telefone || '';
   document.getElementById('usu-ativo').value = params.ativo || 'Sim';
   document.getElementById('usu-login').value = params.login || '';
-  document.getElementById('usu-senha').value = params.senha || '';
+  document.getElementById('usu-senha').value = '';  // v530: a senha nunca fica gravada no cadastro
+  document.getElementById('usu-senha').placeholder = params.id ? 'Deixe em branco para manter a senha atual' : 'Senha de acesso';
   var ufsAtuais = params.ufs || [];
   document.querySelectorAll('.usu-uf-check').forEach(function(el){ el.checked = ufsAtuais.indexOf(el.value) !== -1; });
   var grupos = getGruposAcesso();
@@ -26556,7 +26557,7 @@ function salvarUsuario() {
   if (!email)   { msg.textContent = 'Informe o e-mail.'; return; }
   if (!grupoId) { msg.textContent = 'Selecione um Grupo de Acesso.'; return; }
   if (!login)   { msg.textContent = 'Informe o login.'; return; }
-  if (!senha)   { msg.textContent = 'Informe a senha.'; return; }
+  if (!senha && !document.getElementById('usu-edit-id').value) { msg.textContent = 'Informe a senha.'; return; }  // v530: ao editar, em branco = manter a atual
   var editId = document.getElementById('usu-edit-id').value;
   var loginDuplicado = getUsuariosSistema().find(function(u){ return u.id !== editId && String(u.login||'').trim().toLowerCase() === login.toLowerCase(); });
   if (loginDuplicado) { msg.textContent = 'Já existe um usuário com este login.'; return; }
@@ -26569,7 +26570,7 @@ function salvarUsuario() {
     telefone: document.getElementById('usu-telefone').value.trim(),
     grupoId: grupoId, grupoNome: grupo ? grupo.nome : '',
     ativo: document.getElementById('usu-ativo').value,
-    login: login, senha: senha,
+    login: login,  // v530: a senha NAO e mais gravada no documento (fica so no Firebase Authentication)
     ufs: ufsSelecionadas,
     permissoes: usuAntigo ? (usuAntigo.permissoes || {}) : {},
     dtCadastro: usuAntigo ? (usuAntigo.dtCadastro || new Date().toISOString()) : new Date().toISOString(),
@@ -26580,8 +26581,9 @@ function salvarUsuario() {
   try {
     var dados = getUsuariosSistema();
     var idx = editId ? dados.findIndex(function(u){ return u.id === editId; }) : -1;
-    var senhaMudou = usuAntigo ? (usuAntigo.senha !== senha) : true;
+    var senhaMudou = usuAntigo ? !!senha : true;  // v530
     if (idx >= 0) dados[idx] = obj; else dados.push(obj);
+    dados.forEach(function (u) { if (u && 'senha' in u) delete u.senha; });  // v530: limpa senhas antigas em texto
     setUsuariosSistema(dados);
     msg.style.color = '#15803d';
     msg.textContent = '✔ Usuário salvo com sucesso!';
@@ -26593,7 +26595,7 @@ function salvarUsuario() {
     // Mantém o acesso real (Firebase Authentication) sincronizado com este cadastro, sem precisar
     // abrir o Firebase Console pra cada pessoa: cria a conta de login (e-mail+senha) daqui mesmo.
     if (firebaseConfigurado) {
-      var _pAuthConta = _fsAuthCriarContaUsuario(email, senha).then(function (r) {
+      var _pAuthConta = (senha ? _fsAuthCriarContaUsuario(email, senha) : Promise.resolve({ semSenha: true })).then(function (r) {  // v530
         if (r && r.jaExistia && usuAntigo && senhaMudou) {
           return _fsAuthEnviarResetSenha(email).then(function () {
             msg.textContent = '✔ Usuário salvo! A senha mudou — enviamos um e-mail para ' + email + ' com um link para definir a senha nova (o acesso já existia).';
