@@ -23,6 +23,7 @@
   <!-- PptxGenJS (geracao de apresentacoes em PowerPoint) - jsDelivr como principal, com fallback automatico para unpkg e cdnjs -->
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs/dist/pptxgen.bundle.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/pptxgenjs/dist/pptxgen.bundle.js';s.onerror=function(){var s2=document.createElement('script');s2.src='https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js';document.head.appendChild(s2);};document.head.appendChild(s);"></script>
   <!-- Firebase SDK -->
+  <script src="supabase.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -8081,31 +8082,48 @@ const FIREBASE_CONFIG = {
   appId:             "1:195548083360:web:2130254064e074f1b785c5"
 };
 
-// Inicializar Firebase (só se a config estiver preenchida)
-let db = null, auth = null;
-const firebaseConfigurado = FIREBASE_CONFIG.apiKey !== "COLE_SUA_API_KEY_AQUI";
-if (firebaseConfigurado) {
-  firebase.initializeApp(FIREBASE_CONFIG);
-  auth = firebase.auth();
-  db   = firebase.firestore();
-  // Redes corporativas com proxy/antivírus às vezes bloqueiam o canal "streaming" (WebChannel)
-  // que o Firestore usa por padrão, mesmo deixando passar chamadas HTTP normais — isso trava
-  // silenciosamente as escritas (o app parece funcionar via cache local, mas nada chega no
-  // servidor). Forçar long polling é a solução recomendada pelo próprio Firebase para esse caso.
-  try {
-    db.settings({ experimentalAutoDetectLongPolling: true, cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED, merge: true });
-  } catch (eSettings) {
-    console.warn('Não foi possível ajustar settings do Firestore:', eSettings);
-  }
-  // v515: cache local (IndexedDB). Com ~7 mil pedidos (24 MB) o login baixava tudo de novo a cada
-  // abertura; com o cache o Firestore so busca o que mudou desde a ultima vez. Se o navegador nao
-  // suportar (ou outra aba bloquear), segue sem cache, como antes.
-  try {
-    db.enablePersistence({ synchronizeTabs: true }).catch(function (ePers) {
-      console.warn('Cache local do Firestore indisponível:', ePers && ePers.code);
+// ===== TESTE SUPABASE (somente leitura): substitui Firebase por Supabase =====
+const SB_URL='https://owiytkwnsrfhmdzkbefm.supabase.co', SB_KEY='sb_publishable_XrbhGPXu_s_WBK1ITiL0ug_eC_NM7wv';
+const SB = supabase.createClient(SB_URL, SB_KEY);
+const firebaseConfigurado = true;
+var _sbRO = function () { return Promise.reject(new Error('Gravação deste cadastro ainda não foi liberada no Supabase (por enquanto gravam: pedidos, clientes, produtos, fornecedores, tabelas de preço, transportadoras, categorias, SKU por cliente, metas, negociações de preço, bloqueios, devoluções e ocorrências). Nada foi salvo.')); };
+var _sbVazio = { docs: [], empty: true, size: 0, exists: false, data: function () { return {}; }, forEach: function () {} };
+var _sbRef = {
+  where: function () { return _sbRef; }, orderBy: function () { return _sbRef; }, limit: function () { return _sbRef; }, doc: function () { return _sbRef; },
+  get: function () { return Promise.resolve(_sbVazio); }, onSnapshot: function () { return function () {}; },
+  set: _sbRO, update: _sbRO, delete: _sbRO, add: _sbRO
+};
+let db = {
+  collection: function () { return _sbRef; }, doc: function () { return _sbRef; },
+  batch: function () { return { set: function () {}, update: function () {}, delete: function () {}, commit: _sbRO }; },
+  runTransaction: _sbRO, settings: function () {}, enablePersistence: function () { return Promise.resolve(); }
+};
+var _sbUser = null;
+let auth = {
+  currentUser: null,
+  setPersistence: function () { return Promise.resolve(); },
+  signInWithEmailAndPassword: async function (email, senha) {
+    var r = await SB.auth.signInWithPassword({ email: email, password: senha });
+    if (r.error) { var e = new Error(r.error.message); e.code = 'auth/invalid-credential'; throw e; }
+    return r.data;
+  },
+  signOut: function () { return SB.auth.signOut().then(function () { setTimeout(function () { location.reload(); }, 50); }); },
+  onAuthStateChanged: function (cb) {
+    SB.auth.onAuthStateChange(function (ev, session) {
+      _sbUid = session && session.user ? session.user.id : null;
+      var u = session && session.user ? { email: session.user.email, displayName: null, getIdToken: function () { return Promise.resolve('sb'); } } : null;
+      auth.currentUser = u;
+      setTimeout(function () { cb(u); }, 0);
     });
-  } catch (ePers2) { /* segue sem cache */ }
-}
+  }
+};
+document.addEventListener('DOMContentLoaded', function () {
+  var b = document.createElement('div');
+  b.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#b45309;color:#fff;font:600 11px system-ui;text-align:center;padding:2px;z-index:999999;pointer-events:none';
+  b.textContent = 'SUPABASE — gravam: pedidos, clientes, produtos, fornecedores, tabelas de preço, transportadoras, categorias, SKU por cliente, metas, negociações, bloqueios, devoluções e ocorrências, usuários e grupos, com fotos e anexos; demais cadastros ainda somente leitura';
+  document.body.appendChild(b);
+});
+
 
 // ═══════════════════════════════════════════════════
 // FIRESTORE — camada de cache (mantém getX()/setX() síncronos como sempre foram,
@@ -8122,7 +8140,7 @@ var _fsEmpresaCache = null;
 var _fsEmpresaCarregada = false;
 
 // v516: pedidos antigos sob demanda. Corte = 1o de janeiro do ano anterior (hoje 2025-01-01).
-var _fsPedidosCorte = ((new Date().getFullYear() - 1) + '-01-01');
+var _fsPedidosCorte = (function () { var h = new Date(), a = h.getFullYear(); return (h.getMonth() < 3 ? a - 1 : a) + '-01-01'; })();
 var _fsHistPedidosCarregado = false;
 var _fsHistPedidosPromise = null;
 var _fsMaxLancGlobal = 0;
@@ -8241,17 +8259,14 @@ function _fsTodasProntas() {
 var _fsFotosProd = {};
 var _fsFotosProdOuvindo = false;
 function _fsOuvirFotosProdutos() {
-  if (!firebaseConfigurado || !db || _fsFotosProdOuvindo) return;
+  if (_fsFotosProdOuvindo) return;
   _fsFotosProdOuvindo = true;
-  db.collection('produto_fotos').onSnapshot(function (snap) {
-    var m = {};
-    snap.docs.forEach(function (d) { var o = d.data(); if (o && o.id && o.foto) m[o.id] = o.foto; });
-    _fsFotosProd = m;
+  SB.rpc('docs_fotos_produtos').then(function (r) {
+    if (r.error) { console.error('Erro ao carregar fotos dos produtos:', r.error); _fsFotosProdOuvindo = false; return; }
+    _fsFotosProd = r.data || {};
     ['renderProdutoList', '_fpRender'].forEach(function (fn) {
       if (typeof window[fn] === 'function') { try { window[fn](); } catch (e) { /* tela fechada */ } }
     });
-  }, function (err) {
-    console.error('Erro ao sincronizar fotos dos produtos:', err);
   });
 }
 
@@ -8274,73 +8289,155 @@ function _fsPedidosChegaram() {
 // essenciais tiverem carregado (os pedidos entram depois, em segundo plano). Chamadas seguintes
 // (ex.: novo login depois de um logout) chamam o callback imediatamente.
 function _fsIniciarOuvintes(aoFicarTudoPronto) {
-  if (!firebaseConfigurado || !db) { if (aoFicarTudoPronto) aoFicarTudoPronto(); return; }
   if (_fsOuvindo) { if (_fsTodasProntas() && aoFicarTudoPronto) aoFicarTudoPronto(); return; }
   _fsOuvindo = true;
-  var chamouCallback = false;
-  var essenciais = _fsColecoes.filter(function (c) { return _fsColecoesTardias.indexOf(c) === -1; });
-
-  function ouvir(nome) {
-    var _fsRef = db.collection(nome);
-    // v516: so os pedidos recentes (desde _fsPedidosCorte); o historico vem sob demanda.
-    if (nome === 'pedidos') _fsRef = _fsRef.where('data', '>=', _fsPedidosCorte);
-    _fsRef.onSnapshot(function (snap) {
-      var _fsArr = snap.docs.map(function (d) { return d.data(); });
-      if (nome === 'pedidos') {
-        // preserva os pedidos antigos ja carregados (o snapshot so traz os recentes)
-        var _fsIdsRec = {};
-        _fsArr.forEach(function (o) { if (o && o.id) _fsIdsRec[o.id] = true; });
-        (_fsCache[nome] || []).forEach(function (o) {
-          if (o && o.id && !_fsIdsRec[o.id] && String(o.data || '') < _fsPedidosCorte) _fsArr.push(o);
-        });
-      }
-      _fsCache[nome] = _fsArr;
-      var jaEstavaPronto = _fsPronto[nome];
-      _fsPronto[nome] = true;
-      if (!jaEstavaPronto) {
-        var btnCarga = document.getElementById('btnEntrar');
-        if (btnCarga && btnCarga.disabled) {
-          var prontas = essenciais.filter(function (c) { return _fsPronto[c]; }).length;
-          btnCarga.textContent = 'Carregando dados… (' + prontas + '/' + essenciais.length + ')';
-        }
-      }
-      if (jaEstavaPronto) _fsAoAtualizar(nome);
-      else if (_fsColecoesTardias.indexOf(nome) !== -1) _fsPedidosChegaram();
-      if (!chamouCallback && _fsTodasProntas()) {
-        chamouCallback = true;
-        if (aoFicarTudoPronto) aoFicarTudoPronto();
-        iniciarTardias();
-      }
-    }, function (err) {
-      console.error('Erro ao sincronizar coleção "' + nome + '" com o Firestore:', err);
-    });
-  }
-
-  function iniciarTardias() {
-    if (_fsColecoesTardias.indexOf('pedidos') !== -1 && !_fsPronto['pedidos']) _fsMostrarAvisoPedidos();
-    _fsColecoesTardias.forEach(ouvir);
+  SB.rpc('docs_cadastros').then(function (r) {
+    if (r.error) { console.error('docs_cadastros', r.error); mostrarErroLogin('Erro ao ler o Supabase: ' + r.error.message); var bt = document.getElementById('btnEntrar'); if (bt) { bt.disabled = false; bt.textContent = 'Entrar'; } _fsOuvindo = false; return; }
+    var c = r.data || {};
+    _fsColecoes.forEach(function (n) { if (n !== 'pedidos') { _fsCache[n] = c[n] || []; _fsPronto[n] = true; } });
+    _fsEmpresaCache = null; _fsEmpresaCarregada = true;
+    if (aoFicarTudoPronto) aoFicarTudoPronto();
+    _fsMostrarAvisoPedidos();
     _fsOuvirFotosProdutos();
-    // v516: maior numero de lancamento de TODOS os pedidos (1 leitura) -- o proximo lancamento nao
-    // pode repetir numero de pedido antigo que nao esta carregado.
-    try {
-      db.collection('pedidos').orderBy('lancamento', 'desc').limit(1).get().then(function (s) {
-        if (s.docs && s.docs[0]) { var n = parseInt(s.docs[0].data().lancamento, 10); if (!isNaN(n)) _fsMaxLancGlobal = n; }
-      }).catch(function (e) { console.warn('Não foi possível ler o maior lançamento:', e); });
-    } catch (eLanc) { /* segue com o maior lancamento local */ }
-  }
-
-  essenciais.forEach(ouvir);
-  db.collection('config_singular').doc('empresa').onSnapshot(function (doc) {
-    _fsEmpresaCache = doc.exists ? doc.data() : null;
-    var jaCarregada = _fsEmpresaCarregada;
-    _fsEmpresaCarregada = true;
-    if (jaCarregada && typeof window.renderEmpresaView === 'function') {
-      try { window.renderEmpresaView(); } catch (e) { /* tela não está aberta agora, ignora */ }
-    }
-  }, function (err) {
-    console.error('Erro ao sincronizar "empresa" com o Firestore:', err);
+    var hoje = new Date(); var fimAno = (hoje.getFullYear() + 1) + '-12-31';
+    // pedidos do ano + pedidos mais antigos que tem fatura dentro do periodo (o Painel conta pela data da fatura)
+    // + versao enxuta do ano anterior (comparacao do Painel), tudo junto antes de mostrar os numeros
+    Promise.all([
+      _sbCarregarPedidos(_fsPedidosCorte, fimAno),
+      SB.rpc('docs_pedidos_fat_apos', { p_corte: _fsPedidosCorte }).then(function (r) { return r.error ? [] : (r.data || []); }),
+      _sbSlimAno(parseInt(_fsPedidosCorte, 10) - 1)
+    ]).then(function (r) {
+      var docs = r[0], ids = {}; docs.forEach(function (o) { ids[o.id] = 1; });
+      r[1].forEach(function (o) { if (!ids[o.id]) docs.push(o); });
+      _fsCache['pedidos'] = docs; _fsPronto['pedidos'] = true; _fsPedidosChegaram();
+    }).catch(function (e) { console.error(e); alert('Erro ao carregar pedidos: ' + e.message); });
+    SB.from('pedidos').select('lancamento').order('lancamento', { ascending: false }).limit(1).then(function (s) {
+      if (s.data && s.data[0]) _fsMaxLancGlobal = parseInt(s.data[0].lancamento, 10) || 0;
+    });
   });
 }
+// carrega pedidos de um intervalo, mes a mes, 3 chamadas em paralelo
+function _sbMeses(ini, fim) {
+  var out = []; var d = new Date(ini + 'T00:00:00Z'); var f = new Date(fim + 'T00:00:00Z');
+  while (d <= f) {
+    var a = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)), b = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0));
+    out.push([a.toISOString().slice(0, 10), b.toISOString().slice(0, 10)]);
+    d = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1));
+  }
+  return out;
+}
+// cache local (IndexedDB) dos meses ja fechados: abrir de novo fica quase instantaneo
+var _sbIDB = null;
+var _sbUid = null; // id do usuario logado: o cache local e separado por usuario
+function _sbDB() {
+  if (_sbIDB) return _sbIDB;
+  _sbIDB = new Promise(function (ok) {
+    try {
+      var rq = indexedDB.open('sbcache3', 1);
+      rq.onupgradeneeded = function () { rq.result.createObjectStore('m'); };
+      rq.onsuccess = function () { ok(rq.result); };
+      rq.onerror = function () { ok(null); };
+    } catch (e) { ok(null); }
+  });
+  return _sbIDB;
+}
+function _sbCacheGet(k) {
+  if (!_sbUid) return Promise.resolve(null);
+  k = _sbUid + '|' + k;
+  return _sbDB().then(function (db) { return new Promise(function (ok) {
+    if (!db) return ok(null);
+    try { var g = db.transaction('m').objectStore('m').get(k); g.onsuccess = function () { ok(g.result || null); }; g.onerror = function () { ok(null); }; } catch (e) { ok(null); }
+  }); });
+}
+function _sbCacheSet(k, v) {
+  if (!_sbUid) return Promise.resolve();
+  k = _sbUid + '|' + k;
+  return _sbDB().then(function (db) { if (!db) return; try { db.transaction('m', 'readwrite').objectStore('m').put(v, k); } catch (e) {} });
+}
+async function _sbCarregarPedidos(ini, fim, cli) {
+  var jan = _sbMeses(ini, fim), res = [], i = 0;
+  var hoje = new Date(); var limite = new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() - 1, 1)).toISOString().slice(0, 10);
+  async function worker() {
+    while (i < jan.length) {
+      var j = jan[i++];
+      var fechado = j[1] < limite; // mes antes do mes passado: nao muda mais
+      var k = j[0] + '|' + (cli || '');
+      var c = fechado ? await _sbCacheGet(k) : null;
+      if (c && c.t && (Date.now() - c.t) < 12 * 3600 * 1000) { Array.prototype.push.apply(res, c.d); continue; }
+      var r = await SB.rpc('docs_pedidos', { p_ini: j[0], p_fim: j[1], p_cli: cli || null });
+      if (r.error) throw new Error(r.error.message);
+      var d = r.data || [];
+      if (fechado) _sbCacheSet(k, { t: Date.now(), d: d });
+      Array.prototype.push.apply(res, d);
+    }
+  }
+  var ws = []; for (var n = 0; n < 6; n++) ws.push(worker());
+  await Promise.all(ws);
+  return res;
+}
+function _sbJuntar(novos) {
+  var atual = _fsCache['pedidos'] || [], ids = {};
+  atual.forEach(function (o) { if (o && o.id) ids[o.id] = true; });
+  var juntos = atual.slice();
+  novos.forEach(function (o) { if (o && o.id && !ids[o.id]) juntos.push(o); });
+  _fsCache['pedidos'] = juntos;
+}
+function _fsCarregarPedidosAno(ano) {
+  if (_fsAnosCarregados[ano] || _fsHistPedidosCarregado) return Promise.resolve(true);
+  if (_fsAnosPromises[ano]) return _fsAnosPromises[ano];
+  _fsAnosPromises[ano] = _sbCarregarPedidos(ano + '-01-01', ano + '-12-31').then(function (d) {
+    _sbJuntar(d); _fsAnosCarregados[ano] = true; delete _fsAnosPromises[ano]; return true;
+  }).catch(function (e) { delete _fsAnosPromises[ano]; console.error('Erro pedidos ' + ano, e); return false; });
+  return _fsAnosPromises[ano];
+}
+function _fsCarregarHistoricoPedidos() {
+  if (_fsHistPedidosCarregado) return Promise.resolve(true);
+  if (_fsHistPedidosPromise) return _fsHistPedidosPromise;
+  var anos = []; for (var a = 2015; a < parseInt(_fsPedidosCorte, 10); a++) anos.push(a);
+  _fsHistPedidosPromise = Promise.all(anos.map(_fsCarregarPedidosAno)).then(function () {
+    _fsHistPedidosCarregado = true; _fsHistPedidosPromise = null; _fsAoAtualizar('pedidos'); return true;
+  });
+  return _fsHistPedidosPromise;
+}
+function _fsCarregarPedidosCliente(clienteId) {
+  if (_fsHistPedidosCarregado || _fsClientesCarregados[clienteId]) return Promise.resolve(true);
+  if (_fsClientesPromises[clienteId]) return _fsClientesPromises[clienteId];
+  _fsClientesPromises[clienteId] = _sbCarregarPedidos('2015-01-01', (_fsPedidosCorte).slice(0, 4) + '-12-31', clienteId).then(function (d) {
+    _sbJuntar(d); _fsClientesCarregados[clienteId] = true; delete _fsClientesPromises[clienteId]; return true;
+  }).catch(function (e) { delete _fsClientesPromises[clienteId]; console.error(e); return false; });
+  return _fsClientesPromises[clienteId];
+}
+
+// ---- Painel: anos antigos em versao enxuta (so o que o Painel usa) ----
+var _sbSlim = {}, _sbSlimP = {};
+function _sbSlimAno(ano) {
+  if (_sbSlim[ano]) return Promise.resolve(true);
+  if (_sbSlimP[ano]) return _sbSlimP[ano];
+  var k = 'slim|' + ano;
+  _sbSlimP[ano] = _sbCacheGet(k).then(function (c) {
+    if (c && c.t && (Date.now() - c.t) < 12 * 3600 * 1000) { _sbSlim[ano] = c.d; return true; }
+    return SB.rpc('dash_linhas', { p_ini: ano + '-01-01', p_fim: ano + '-12-31' }).then(function (r) {
+      if (r.error) throw new Error(r.error.message);
+      _sbSlim[ano] = r.data || []; _sbCacheSet(k, { t: Date.now(), d: _sbSlim[ano] }); return true;
+    });
+  }).catch(function (e) { console.error('slim ' + ano, e); return false; }).then(function (ok) { delete _sbSlimP[ano]; return ok; });
+  return _sbSlimP[ano];
+}
+function _sbAnosAntigos(ini, fim) {
+  var a = parseInt(String(ini).slice(0, 4), 10), b = Math.min(parseInt(String(fim).slice(0, 4), 10), parseInt(_fsPedidosCorte, 10) - 1), o = [];
+  for (var y = a; y <= b; y++) o.push(y); return o;
+}
+function _sbSlimCarregado(ini, fim) { return _sbAnosAntigos(ini, fim).every(function (y) { return !!_sbSlim[y]; }); }
+function _sbCarregarSlim(ini, fim) {
+  return Promise.all(_sbAnosAntigos(ini, fim).map(_sbSlimAno)).then(function (r) { return r.every(Boolean); });
+}
+function _sbSlimTodos() {
+  var ids = {}; (_fsCache['pedidos'] || []).forEach(function (o) { if (o && o.id) ids[o.id] = 1; });
+  var out = [];
+  Object.keys(_sbSlim).forEach(function (y) { _sbSlim[y].forEach(function (o) { if (!ids[o.id]) out.push(o); }); });
+  return out;
+}
+
 
 // Re-renderiza a tela atual quando a coleção muda por causa de outro usuário (ou da
 // confirmação de uma escrita própria) enquanto a tela já estava aberta e carregada.
@@ -8381,21 +8478,8 @@ function _fsAoAtualizar(nome) {
 // telas fazem "var dados = getX(); dados.push(novo); setX(dados);" esperando que "dados" seja
 // independente do que já estava salvo. Sem essa cópia, o item novo entra direto no cache antes
 // da comparação do setX, e o sistema conclui (errado) que "nada mudou".
-var _fsSnap = {}, _fsSnapFor = null;
 function _fsGet(nome) {
-  var c;
-  if (nome === 'pedidos') {
-    // leitura rapida: copia rasa da lista; o texto de cada pedido (snapshot) permite ao _fsSet achar o que mudou
-    var _arr = _fsCache[nome] || [];
-    if (_fsSnapFor !== _arr) {
-      _fsSnap = {};
-      for (var _i = 0; _i < _arr.length; _i++) { var _o = _arr[_i]; if (_o && _o.id) _fsSnap[_o.id] = JSON.stringify(_o); }
-      _fsSnapFor = _arr;
-    }
-    c = _arr.slice();
-  } else {
-    c = JSON.parse(JSON.stringify(_fsCache[nome] || []));
-  }
+  var c = (nome === 'pedidos') ? (_fsCache[nome] || []).slice() : (typeof structuredClone === 'function' ? structuredClone(_fsCache[nome] || []) : JSON.parse(JSON.stringify(_fsCache[nome] || [])));
   // v521: foto do produto vem da colecao produto_fotos (cache em memoria)
   if (nome === 'produtos') c.forEach(function (p) { if (p && p.id && !p.foto && _fsFotosProd[p.id]) p.foto = _fsFotosProd[p.id]; });
   return c;
@@ -8443,8 +8527,8 @@ function _fsResolverEmailPorLogin(login) {
   if (!firebaseConfigurado || !db) return Promise.resolve(null);
   var chave = String(login || '').trim().toLowerCase();
   if (!chave) return Promise.resolve(null);
-  return db.collection('logins_publicos').doc(chave).get().then(function (snap) {
-    return (snap.exists && snap.data().email) ? snap.data().email : null;
+  return SB.rpc('login_para_email', { p_login: chave }).then(function (r) {
+    return (!r.error && r.data) ? r.data : null;
   }).catch(function (err) {
     console.warn('Não foi possível resolver login para e-mail:', err);
     return null;
@@ -8480,14 +8564,164 @@ function _fsBackfillLoginsPublicos() {
 // Compara o array novo com o que já está em cache e só escreve no Firestore os
 // documentos que de fato mudaram (evita reescrever a coleção inteira a cada salvar).
 // Atualiza o cache local imediatamente (otimista), sem esperar a confirmação do servidor.
+
+// ---- Gravacao de pedidos no Supabase (RPC gravar_pedidos; as regras de acesso por perfil valem no banco) ----
+var _sbGravandoPedidos = Promise.resolve();
+function _sbGravarPedidos(arrayNovo) {
+  var antigo = _fsCache['pedidos'] || [];
+  var mapAntigo = {}, idsNovo = {}, alterados = [], apagar = [];
+  antigo.forEach(function (o) { if (o && o.id) mapAntigo[o.id] = o; });
+  (arrayNovo || []).forEach(function (o) {
+    if (!o || !o.id) return;
+    idsNovo[o.id] = true;
+    var old = mapAntigo[o.id];
+    if (!old || JSON.stringify(old) !== JSON.stringify(o)) alterados.push(o);
+  });
+  antigo.forEach(function (o) { if (o && o.id && !idsNovo[o.id]) apagar.push(o.id); });
+  if (!alterados.length && !apagar.length) return;
+  if (apagar.length > 20) {
+    alert('Por segurança, a exclusão de ' + apagar.length + ' pedidos de uma vez foi bloqueada. Nada foi apagado.');
+    return;
+  }
+  _fsCache['pedidos'] = (arrayNovo || []).slice();
+  _fsAoAtualizar('pedidos');
+  function reverter() {
+    alterados.forEach(function (o) {
+      var i = _fsCache['pedidos'].findIndex(function (x) { return x && x.id === o.id; });
+      if (mapAntigo[o.id]) { if (i >= 0) _fsCache['pedidos'][i] = mapAntigo[o.id]; } else if (i >= 0) _fsCache['pedidos'].splice(i, 1);
+    });
+    apagar.forEach(function (id) { if (mapAntigo[id]) _fsCache['pedidos'].push(mapAntigo[id]); });
+    _fsAoAtualizar('pedidos');
+  }
+  var TAM = 100, lotes = [];
+  for (var i = 0; i < alterados.length || (i === 0 && apagar.length); i += TAM) { lotes.push(alterados.slice(i, i + TAM)); if (i + TAM >= alterados.length) break; }
+  _sbGravandoPedidos = _sbGravandoPedidos.then(function () {
+    var seq = Promise.resolve();
+    lotes.forEach(function (lote, n) {
+      seq = seq.then(function () {
+        return SB.rpc('gravar_pedidos', { p_docs: JSON.parse(JSON.stringify(lote)), p_apagar: n === 0 ? apagar : [] }).then(function (r) {
+          if (r.error) throw new Error(r.error.message);
+          (r.data || []).forEach(function (x) {
+            var ob = _fsCache['pedidos'].find(function (o) { return o && o.id === x.id; });
+            if (ob && String(ob.lancamento) !== String(x.lancamento)) ob.lancamento = x.lancamento;
+            if (x.lancamento > _fsMaxLancGlobal) _fsMaxLancGlobal = x.lancamento;
+          });
+        });
+      });
+    });
+    return seq;
+  }).then(function () {
+    console.log('[Supabase] pedidos gravados:', alterados.length, 'alterado(s),', apagar.length, 'apagado(s)');
+    _fsAoAtualizar('pedidos');
+  }).catch(function (err) {
+    console.error('[Supabase] ERRO ao gravar pedidos:', err);
+    reverter();
+    var m = String(err.message || err);
+    if (/row-level security|Sem permissao/i.test(m)) m = 'Você não tem permissão para esta alteração.\n\n(' + m + ')';
+    alert('Não foi possível salvar o pedido: ' + m + '\n\nA alteração NÃO foi salva.');
+  });
+}
+
+
+// ---- Gravacao dos cadastros no Supabase (RPC gravar_cadastros) ----
+var _sbCadGravaveis = { clientes: 50, produtos: 100, fornecedores: 50, tabelas_preco: 3, transportadoras: 50, cat_clientes: 50, cat_produtos: 50, sku_clientes: 100, metas: 100, negociacoes_preco: 50, bloqueios_produto: 50, devolucoes: 20, ocorrencias_entrega: 50, usuarios: 20, gruposAcesso: 20 };
+var _sbCadFila = {};
+var _sbCadRotulo = { clientes: 'cliente', produtos: 'produto', fornecedores: 'fornecedor', tabelas_preco: 'tabela de preço', transportadoras: 'transportadora', cat_clientes: 'categoria de cliente', cat_produtos: 'categoria de produto', sku_clientes: 'SKU por cliente', metas: 'meta', negociacoes_preco: 'negociação de preço', bloqueios_produto: 'bloqueio de produto', devolucoes: 'devolução', ocorrencias_entrega: 'ocorrência de entrega', usuarios: 'usuário', gruposAcesso: 'grupo de acesso' };
+// arquivos (fotos, XML, anexos) ficam na tabela arquivos_dados, fora do documento do cadastro
+function _sbArq(nome, o) {
+  if (!o || !o.id) return null;
+  if (nome === 'produtos') return { colecao: 'produto_fotos', ref: String(o.id), dados: o.foto || '' };
+  if (nome === 'cat_clientes' || nome === 'fornecedores' || nome === 'transportadoras') return { colecao: nome, ref: String(o.id), dados: o.foto || '' };
+  if (nome === 'devolucoes') return { colecao: 'devolucao_xml', ref: String(o.id), dados: (o.xmlAnexo && o.xmlAnexo.dados) || '' };
+  if (nome === 'ocorrencias_entrega') return { colecao: 'ocorrencia_anexos', ref: String(o.id), dados: o.anexoData || '' };
+  return null;
+}
+function _sbSemArq(nome, o) {
+  if (!o) return o;
+  if (['produtos', 'cat_clientes', 'fornecedores', 'transportadoras'].indexOf(nome) !== -1 && 'foto' in o) { var c = Object.assign({}, o); delete c.foto; return c; }
+  if (nome === 'devolucoes' && o.xmlAnexo && 'dados' in o.xmlAnexo) { var c2 = Object.assign({}, o); c2.xmlAnexo = Object.assign({}, o.xmlAnexo); delete c2.xmlAnexo.dados; return c2; }
+  if (nome === 'ocorrencias_entrega' && 'anexoData' in o) { var c3 = Object.assign({}, o); delete c3.anexoData; return c3; }
+  return o;
+}
+function _sbGravarCadastro(nome, arrayNovo) {
+  var antigo = _fsCache[nome] || [];
+  var mapAntigo = {}, idsNovo = {}, alterados = [], apagar = [];
+  antigo.forEach(function (o) { if (o && o.id) mapAntigo[o.id] = o; });
+  var semFoto = (arrayNovo || []).map(function (o) { return _sbSemArq(nome, o); });
+  var arqs = [];
+  (arrayNovo || []).forEach(function (o) {
+    var k = _sbArq(nome, o); if (!k) return;
+    var oldO = mapAntigo[o.id];
+    var atual = nome === 'produtos' ? (_fsFotosProd[o.id] || '') : (oldO ? ((_sbArq(nome, oldO) || {}).dados || '') : '');
+    if ((k.dados || '') !== atual) arqs.push(k);
+  });
+  semFoto.forEach(function (o) {
+    if (!o || !o.id) return;
+    idsNovo[o.id] = true;
+    var old = mapAntigo[o.id];
+    if (!old || JSON.stringify(_sbSemArq(nome, old)) !== JSON.stringify(o)) alterados.push(o);
+  });
+  antigo.forEach(function (o) { if (o && o.id && !idsNovo[o.id]) apagar.push(o.id); });
+  if (!alterados.length && !apagar.length && !arqs.length) return;
+  if (apagar.length > 20) {
+    alert('Por segurança, a exclusão de ' + apagar.length + ' registros de uma vez foi bloqueada. Nada foi apagado.');
+    return;
+  }
+  var _fotosAntes = {};
+  if (nome === 'produtos') arqs.forEach(function (k) { _fotosAntes[k.ref] = _fsFotosProd[k.ref]; if (k.dados) _fsFotosProd[k.ref] = k.dados; else delete _fsFotosProd[k.ref]; });
+  _fsCache[nome] = (nome === 'produtos' ? semFoto : (arrayNovo || [])).slice();
+  _fsAoAtualizar(nome);
+  function reverter() {
+    if (nome === 'produtos') Object.keys(_fotosAntes).forEach(function (k) { if (_fotosAntes[k]) _fsFotosProd[k] = _fotosAntes[k]; else delete _fsFotosProd[k]; });
+    alterados.forEach(function (o) {
+      var i = _fsCache[nome].findIndex(function (x) { return x && x.id === o.id; });
+      if (mapAntigo[o.id]) { if (i >= 0) _fsCache[nome][i] = mapAntigo[o.id]; } else if (i >= 0) _fsCache[nome].splice(i, 1);
+    });
+    apagar.forEach(function (id) { if (mapAntigo[id]) _fsCache[nome].push(mapAntigo[id]); });
+    _fsAoAtualizar(nome);
+  }
+  var TAM = _sbCadGravaveis[nome], lotes = [];
+  for (var i = 0; i < alterados.length || (i === 0 && apagar.length); i += TAM) { lotes.push(alterados.slice(i, i + TAM)); if (i + TAM >= alterados.length) break; }
+  _sbCadFila[nome] = (_sbCadFila[nome] || Promise.resolve()).then(function () {
+    var seq = Promise.resolve();
+    lotes.forEach(function (lote, n) {
+      seq = seq.then(function () {
+        return SB.rpc('gravar_cadastros', { p_colecao: nome, p_docs: JSON.parse(JSON.stringify(lote)), p_apagar: n === 0 ? apagar : [] }).then(function (r) {
+          if (r.error) throw new Error(r.error.message);
+        });
+      });
+    });
+    arqs.forEach(function (k) {
+      seq = seq.then(function () {
+        var p = k.dados ? SB.rpc('gravar_arquivo', { p_colecao: k.colecao, p_ref: k.ref, p_dados: k.dados }) : SB.rpc('apagar_arquivo', { p_colecao: k.colecao, p_ref: k.ref });
+        return p.then(function (r2) { if (r2.error) throw new Error(r2.error.message); });
+      });
+    });
+    apagar.forEach(function (id) {
+      var k = _sbArq(nome, { id: id });
+      if (k) seq = seq.then(function () { return SB.rpc('apagar_arquivo', { p_colecao: k.colecao, p_ref: k.ref }).then(function () {}, function () {}); });
+    });
+    return seq;
+  }).then(function () {
+    console.log('[Supabase] ' + nome + ' gravados:', alterados.length, 'alterado(s),', apagar.length, 'apagado(s)');
+  }).catch(function (err) {
+    console.error('[Supabase] ERRO ao gravar ' + nome + ':', err);
+    reverter();
+    var m = String(err.message || err);
+    if (/row-level security|Sem permissao/i.test(m)) m = 'Você não tem permissão para esta alteração.\n\n(' + m + ')';
+    alert('Não foi possível salvar o ' + (_sbCadRotulo[nome] || nome) + ': ' + m + '\n\nA alteração NÃO foi salva.');
+  });
+}
+
 function _fsSet(nome, arrayNovo) {
   if (!firebaseConfigurado || !db) return;
   if (nome === 'pedidos' && !_fsPronto['pedidos']) {
     alert('Os pedidos ainda estão carregando. Aguarde alguns segundos e tente salvar novamente.');
     return;
   }
+  if (nome === 'pedidos') { _sbGravarPedidos(arrayNovo); return; }
+  if (_sbCadGravaveis[nome]) { _sbGravarCadastro(nome, arrayNovo); return; }
   var antigo = _fsCache[nome] || [];
-  var _snapOk = (nome === 'pedidos' && _fsSnapFor === antigo);
   var mapAntigo = {};
   antigo.forEach(function (o) { if (o && o.id) mapAntigo[o.id] = o; });
   var idsNovo = {};
@@ -8515,17 +8749,14 @@ function _fsSet(nome, arrayNovo) {
       if (!item || !item.id) return;
       idsNovo[item.id] = true;
       var old = mapAntigo[item.id];
-      var _sNovo = JSON.stringify(item);
-      var _sOld = !old ? null : ((_snapOk && _fsSnap[item.id] !== undefined) ? _fsSnap[item.id] : JSON.stringify(old));
-      if (!old || _sOld !== _sNovo) {
-        if (_snapOk) _fsSnap[item.id] = _sNovo;
+      if (!old || JSON.stringify(old) !== JSON.stringify(item)) {
         batch.set(db.collection(nome).doc(String(item.id)), item);
         alguma = true;
         idsParaEnviar.push(item.id);
       }
     });
     antigo.forEach(function (o) {
-      if (o && o.id && !idsNovo[o.id]) { batch.delete(db.collection(nome).doc(String(o.id))); alguma = true; if (_snapOk) delete _fsSnap[o.id]; }
+      if (o && o.id && !idsNovo[o.id]) { batch.delete(db.collection(nome).doc(String(o.id))); alguma = true; }
     });
   } catch (errMontagem) {
     console.error('[Firestore] ERRO AO MONTAR o lote de escrita para "' + nome + '" (provavelmente um campo com valor "undefined" em algum registro):', errMontagem);
@@ -8533,7 +8764,6 @@ function _fsSet(nome, arrayNovo) {
     return;
   }
   _fsCache[nome] = (arrayNovo || []).slice();
-  if (_snapOk) _fsSnapFor = _fsCache[nome];
   console.log('[Firestore] enviando "' + nome + '": ' + idsParaEnviar.length + ' registro(s) alterado(s)', idsParaEnviar);
   if (alguma) {
     batch.commit().then(function () {
@@ -8732,8 +8962,8 @@ async function fazerLogin() {
 
   try {
     const persistence = lembrar
-      ? firebase.auth.Auth.Persistence.LOCAL
-      : firebase.auth.Auth.Persistence.SESSION;
+      ? 'local'
+      : 'session';
     await auth.setPersistence(persistence);
     var emailParaEntrar = usuario;
     if (usuario.indexOf('@') === -1) {
@@ -10437,6 +10667,12 @@ function _catSlug(s) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '') || 'catalogo';
 }
+function _catUrl(a) {
+  a = String(a || '');
+  if (/^(https?:|data:|blob:)/i.test(a)) return a;
+  if (location.protocol === 'file:' || !/github\.io$/i.test(location.hostname)) return 'https://compartilharrepresentacoes.github.io/Sistema-CompartilharNE/' + a.replace(/^\/+/, '');
+  return a;
+}
 function getCatalogos() { return firebaseConfigurado ? _fsGet('catalogos') : JSON.parse(localStorage.getItem('catalogos') || '[]'); }
 function setCatalogos(data) { if (firebaseConfigurado) { _fsSet('catalogos', data); } else { localStorage.setItem('catalogos', JSON.stringify(data)); } }
 async function _saveCatalogEntry(entry) {
@@ -10541,7 +10777,7 @@ async function baixarCatalogo(fornId) {
   const cats = getCatalogos();
   const cat  = cats.find(c => c.fornecedor_id === fornId);
   if (!cat || !cat.arquivo) return;
-  const a = document.createElement('a'); a.href = cat.arquivo; a.download = cat.nome || 'catalogo.pdf'; a.click();
+  const a = document.createElement('a'); a.href = _catUrl(cat.arquivo); a.download = cat.nome || 'catalogo.pdf'; a.click();
 }
 
 window._cartilhaPdf = null; window._cartilhaPagAtual = 1; window._cartilhaFornId = null; window._cartilhaAnimating = false; window._cartilhaModo = 'vertical';
@@ -10776,7 +11012,7 @@ async function abrirCartilha(fornId) {
   }
   lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   try {
-    window._cartilhaPdf = await lib.getDocument({ url: cat.arquivo }).promise;
+    window._cartilhaPdf = await lib.getDocument({ url: _catUrl(cat.arquivo) }).promise;
     if (window._cartilhaModo === 'vertical') {
       await _renderPaginaVertical(1);
     } else {
@@ -12160,6 +12396,7 @@ function salvarCliente() {
   if (!codigo) { alert('Código é obrigatório.'); return; }
   const nome = document.getElementById('cli-nome-fantasia').value.trim();
   if (!nome) { alert('Nome é obrigatório.'); return; }
+  if (!_cliEditId && !(document.getElementById('cli-estado').value || '').trim()) { alert('Estado é obrigatório para cadastrar um cliente novo (sem o Estado o cliente não aparece nas listas de quem tem restrição por UF).'); return; }
   const todos = getClientes();
   const dup = todos.find(r => r.codigo === codigo && r.id !== (_cliEditId||''));
   if (dup) { alert(`Já existe um cliente com o código "${codigo}".`); return; }
@@ -15820,6 +16057,7 @@ function _dashConstruirDadosAoVivo() {
   var vendedoresBase = (typeof getVendedoresAtivos === 'function') ? getVendedoresAtivos() : [];
   var clientesBase = (typeof getClientesVisiveis === 'function') ? getClientesVisiveis() : [];
   var pedidosBase = ((typeof getPedidos === 'function') ? getPedidos() : []) || [];
+  pedidosBase = pedidosBase.concat(_sbSlimTodos());
   var statusValidos = (typeof PED_STATUS !== 'undefined') ? PED_STATUS : ['Pré-Venda','Aguardando Retorno','Enviado','Faturado','Faturado Parcial','Bonificado','Cancelado'];
 
   var FAB = [], FAB_ID = [], fabIdx = {};
@@ -17645,9 +17883,9 @@ function dashInit() {
         var _dIni = state.dtIni, _dFim = state.dtFim;
         var _pi = document.getElementById('periodoInfo');
         var _tick = ++_dashCargaTick;
-        if (state.dtIni < _fsPedidosCorte && !_fsPeriodoCarregado(state.dtIni, state.dtFim)) {
+        if (state.dtIni < _fsPedidosCorte && !_sbSlimCarregado(state.dtIni, state.dtFim)) {
           if (_pi) _pi.textContent = 'Carregando pedidos de ' + _dashAnosTexto(state.dtIni, state.dtFim) + '… (pode levar até 1 minuto)';
-          _fsCarregarPedidosPeriodo(state.dtIni, state.dtFim).then(function (ok) {
+          _sbCarregarSlim(state.dtIni, state.dtFim).then(function (ok) {
             if (_tick !== _dashCargaTick) return;
             if (!ok) { if (_pi) _pi.textContent = 'Não foi possível carregar os pedidos antigos. Tente novamente.'; return; }
             window._dashPeriodoRestaurar = { dtIni: _dIni, dtFim: _dFim };
@@ -17655,10 +17893,10 @@ function dashInit() {
           });
           return;
         }
-        if (_comp.dtIni < _fsPedidosCorte && !_fsPeriodoCarregado(_comp.dtIni, _comp.dtFim)) {
+        if (_comp.dtIni < _fsPedidosCorte && !_sbSlimCarregado(_comp.dtIni, _comp.dtFim)) {
           renderAba(); updatePeriodoInfo();
           if (_pi) _pi.textContent += ' · carregando ' + _dashAnosTexto(_comp.dtIni, _comp.dtFim) + ' para a comparação…';
-          _fsCarregarPedidosPeriodo(_comp.dtIni, _comp.dtFim).then(function (ok) {
+          _sbCarregarSlim(_comp.dtIni, _comp.dtFim).then(function (ok) {
             if (_tick !== _dashCargaTick || !ok) return;
             window._dashPeriodoRestaurar = { dtIni: _dIni, dtFim: _dFim };
             dashInit();
@@ -18522,7 +18760,7 @@ function _sbDefMes(pre) {
   ate.value = p(ult) + '/' + p(h.getMonth() + 1) + '/' + h.getFullYear();
 }
 
-// abas de Pedidos: periodo anterior ao corte -> busca o(s) ano(s) no Firebase e so entao mostra
+// abas de Pedidos: periodo anterior ao corte -> busca o(s) ano(s) no Supabase e so entao mostra
 (function () {
   var abas = { renderVendasCompletas: 'vc', renderVendasCompletasFaturadas: 'vcf', renderVendasSimplesNfs: 'psn', renderNaoFaturados: 'pnf' };
   Object.keys(abas).forEach(function (nome) {
@@ -20996,15 +21234,15 @@ function _pedExtrairCnpjsTexto(texto) {
 // ── Anexos do pedido guardados fora do documento do pedido (v513) ──
 function _pedAnexoNovoId() { return 'anx' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 function _pedAnexoGravarDados(id, pedidoId, dados) {
-  return db.collection('pedido_anexos').doc(id).set({ id: id, pedidoId: pedidoId, dados: dados });
+  return SB.rpc('gravar_arquivo', { p_colecao: 'pedido_anexos', p_ref: id, p_dados: dados, p_pedido: pedidoId }).then(function (r) { if (r.error) throw new Error(r.error.message); });
 }
 // Devolve Promise<dataURL>. Anexos antigos (ainda com 'dados' dentro do pedido) continuam funcionando.
 function _pedAnexoObterDados(a) {
   if (a && a.dados) return Promise.resolve(a.dados);
   if (!a || !a.id || typeof db === 'undefined' || !db) return Promise.reject(new Error('anexo sem conteúdo'));
-  return db.collection('pedido_anexos').doc(a.id).get().then(function(snap){
-    if (!snap.exists) throw new Error('anexo não encontrado');
-    return snap.data().dados;
+  return SB.rpc('obter_arquivo', { p_colecao: 'pedido_anexos', p_ref: a.id }).then(function (r) {
+    if (r.error || !r.data) throw new Error('anexo não encontrado');
+    return r.data;
   });
 }
 // Helper compartilhado: lê o arquivo, (se XML) extrai o valor da nota, confere o CNPJ contra Cliente/Fornecedor do pedido, salva e recalcula o Val. Fat.
@@ -21346,7 +21584,7 @@ function pedRemoverAnexo(i) {
   var idx = data.findIndex(function(x){ return x.id === _pedAnexoPedidoId; });
   if (idx < 0) return;
   var removido = (data[idx].anexos || []).splice(i, 1)[0];
-  if (removido && removido.id && typeof db !== 'undefined' && db) { db.collection('pedido_anexos').doc(removido.id).delete().catch(function(){}); }
+  if (removido && removido.id) { SB.rpc('apagar_arquivo', { p_colecao: 'pedido_anexos', p_ref: removido.id }).then(function () {}, function () {}); }
   _pedAtualizarValorFaturado(data[idx]);
   setPedidos(data);
   _pedRenderAnexos();
@@ -24529,8 +24767,8 @@ function _pedDiagnosticoPreco(fornId, prodId, clienteId) {
   if (!tabComProduto) return 'Nenhuma tabela de preço ativa contém este produto (id ' + prodIdS + ').';
   var vinculado = (tabComProduto.clientes || []).some(function(c){ return String(c.cliId||'').trim() === cliIdS; });
   if (vinculado) return null;
-  var nomes = (tabComProduto.clientes || []).map(function(c){ return c.nome; }).join(', ') || 'nenhum cliente vinculado';
-  return 'Produto encontrado na tabela "' + (tabComProduto.nome||'') + '", mas o cliente selecionado (id ' + cliIdS + ') não bate com os vinculados: ' + nomes + '.';
+  // v11: aviso longo (lista de lojas vinculadas) removido; cada cliente fica na sua tabela
+  return null;
 }
 
 function _pedSetModoUnidItem(modo) {
@@ -26638,7 +26876,7 @@ function openUsuarioForm(params) {
   document.getElementById('usu-ativo').value = params.ativo || 'Sim';
   document.getElementById('usu-login').value = params.login || '';
   document.getElementById('usu-senha').value = '';  // v530: a senha nunca fica gravada no cadastro
-  document.getElementById('usu-senha').placeholder = params.id ? 'Deixe em branco para manter a senha atual' : 'Senha de acesso';
+  document.getElementById('usu-senha').placeholder = params.id ? 'Deixe em branco para manter a senha atual' : 'Não usado: o acesso é criado no painel do Supabase';
   var ufsAtuais = params.ufs || [];
   document.querySelectorAll('.usu-uf-check').forEach(function(el){ el.checked = ufsAtuais.indexOf(el.value) !== -1; });
   var grupos = getGruposAcesso();
@@ -26661,7 +26899,6 @@ function salvarUsuario() {
   if (!email)   { msg.textContent = 'Informe o e-mail.'; return; }
   if (!grupoId) { msg.textContent = 'Selecione um Grupo de Acesso.'; return; }
   if (!login)   { msg.textContent = 'Informe o login.'; return; }
-  if (!senha && !document.getElementById('usu-edit-id').value) { msg.textContent = 'Informe a senha.'; return; }  // v530: ao editar, em branco = manter a atual
   var editId = document.getElementById('usu-edit-id').value;
   var loginDuplicado = getUsuariosSistema().find(function(u){ return u.id !== editId && String(u.login||'').trim().toLowerCase() === login.toLowerCase(); });
   if (loginDuplicado) { msg.textContent = 'Já existe um usuário com este login.'; return; }
@@ -26698,7 +26935,7 @@ function salvarUsuario() {
 
     // Mantém o acesso real (Firebase Authentication) sincronizado com este cadastro, sem precisar
     // abrir o Firebase Console pra cada pessoa: cria a conta de login (e-mail+senha) daqui mesmo.
-    if (firebaseConfigurado) {
+    if (false) {
       var _pAuthConta = (senha ? _fsAuthCriarContaUsuario(email, senha) : Promise.resolve({ semSenha: true })).then(function (r) {  // v530
         if (r && r.jaExistia && usuAntigo && senhaMudou) {
           return _fsAuthEnviarResetSenha(email).then(function () {
@@ -26715,7 +26952,8 @@ function salvarUsuario() {
       var _pLoginPublico = _fsAtualizarLoginPublico(usuAntigo ? usuAntigo.login : null, login, email);
       Promise.all([_pAuthConta, _pLoginPublico]).then(_usuIrParaLista);
     } else {
-      _usuIrParaLista();
+      msg.textContent = '✔ Usuário salvo! O acesso (e-mail e senha) é criado no painel do Supabase, em Authentication > Users, com este mesmo e-mail.';
+      setTimeout(function () { _usuAbaAtiva = 'usuarios'; showPage('page-usuario-list'); }, 3500);
     }
   } catch (err) {
     msg.style.color = '#dc2626';
