@@ -4898,30 +4898,30 @@
         <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
           <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vc-data-de" oninput="_entctrlMaskData(this)" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vc-data-de" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vc-data-ate" oninput="_entctrlMaskData(this)" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vc-data-ate" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
           <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('vc')">Mais filtros <span>&#9662;</span></div>
           <div id="vc-filtros-extra" class="ped-filtros-extra" style="display:contents">
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
-          <input id="vc-fornecedor" oninput="renderVendasCompletas()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
+          <select id="vc-fornecedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
-          <select id="vc-vendedor" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
+          <select id="vc-vendedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
           <select id="vc-categoria" onchange="vcAtualizarSubcategorias();renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
-          <select id="vc-subcategoria" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
+          <select id="vc-subcategoria" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
-          <select id="vc-uf" onchange="renderVendasCompletas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <select id="vc-uf" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
             <option value="">Todas</option>
             <option value="AL">AL</option><option value="BA">BA</option><option value="PB">PB</option>
             <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
-          <input id="vc-cliente" oninput="renderVendasCompletas()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <input onkeydown="if(event.key==='Enter')renderVendasCompletas()" id="vc-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
-          <button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-ok-btn" onclick="renderVendasCompletas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -4956,30 +4956,30 @@
         <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
           <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vcf-data-de" oninput="_entctrlMaskData(this)" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vcf-data-de" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vcf-data-ate" oninput="_entctrlMaskData(this)" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="vcf-data-ate" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
           <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('vcf')">Mais filtros <span>&#9662;</span></div>
           <div id="vcf-filtros-extra" class="ped-filtros-extra" style="display:contents">
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
-          <input id="vcf-fornecedor" oninput="renderVendasCompletasFaturadas()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
+          <select id="vcf-fornecedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
-          <select id="vcf-vendedor" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
+          <select id="vcf-vendedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
           <select id="vcf-categoria" onchange="vcfAtualizarSubcategorias();renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
-          <select id="vcf-subcategoria" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
+          <select id="vcf-subcategoria" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
-          <select id="vcf-uf" onchange="renderVendasCompletasFaturadas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <select id="vcf-uf" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
             <option value="">Todas</option>
             <option value="AL">AL</option><option value="BA">BA</option><option value="PB">PB</option>
             <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
-          <input id="vcf-cliente" oninput="renderVendasCompletasFaturadas()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <input onkeydown="if(event.key==='Enter')renderVendasCompletasFaturadas()" id="vcf-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
-          <button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-ok-btn" onclick="renderVendasCompletasFaturadas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5007,30 +5007,30 @@
         <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
           <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="psn-data-de" oninput="_entctrlMaskData(this)" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="psn-data-de" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="psn-data-ate" oninput="_entctrlMaskData(this)" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="psn-data-ate" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
           <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('psn')">Mais filtros <span>&#9662;</span></div>
           <div id="psn-filtros-extra" class="ped-filtros-extra" style="display:contents">
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
-          <input id="psn-fornecedor" oninput="renderVendasSimplesNfs()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
+          <select id="psn-fornecedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
-          <select id="psn-vendedor" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
+          <select id="psn-vendedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
           <select id="psn-categoria" onchange="psnAtualizarSubcategorias();renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
-          <select id="psn-subcategoria" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
+          <select id="psn-subcategoria" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
-          <select id="psn-uf" onchange="renderVendasSimplesNfs()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <select id="psn-uf" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
             <option value="">Todas</option>
             <option value="AL">AL</option><option value="BA">BA</option><option value="PB">PB</option>
             <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
-          <input id="psn-cliente" oninput="renderVendasSimplesNfs()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <input onkeydown="if(event.key==='Enter')renderVendasSimplesNfs()" id="psn-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
-          <button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-ok-btn" onclick="renderVendasSimplesNfs()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5063,30 +5063,30 @@
         <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
           <div class="ped-data-row">
           <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="pnf-data-de" oninput="_entctrlMaskData(this)" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="pnf-data-de" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           <span style="color:#94a3b8;font-size:13px">→</span>
-          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="pnf-data-ate" oninput="_entctrlMaskData(this)" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="pnf-data-ate" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
           <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('pnf')">Mais filtros <span>&#9662;</span></div>
           <div id="pnf-filtros-extra" class="ped-filtros-extra" style="display:contents">
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
-          <input id="pnf-fornecedor" oninput="renderNaoFaturados()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
+          <select id="pnf-fornecedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
-          <select id="pnf-vendedor" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
+          <select id="pnf-vendedor" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
           <select id="pnf-categoria" onchange="pnfAtualizarSubcategorias();renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
-          <select id="pnf-subcategoria" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
+          <select id="pnf-subcategoria" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
           <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
-          <select id="pnf-uf" onchange="renderNaoFaturados()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+          <select id="pnf-uf" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
             <option value="">Todas</option>
             <option value="AL">AL</option><option value="BA">BA</option><option value="PB">PB</option>
             <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
-          <input id="pnf-cliente" oninput="renderNaoFaturados()" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <input onkeydown="if(event.key==='Enter')renderNaoFaturados()" id="pnf-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
-          <button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-ok-btn" onclick="renderNaoFaturados()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -8381,8 +8381,21 @@ function _fsAoAtualizar(nome) {
 // telas fazem "var dados = getX(); dados.push(novo); setX(dados);" esperando que "dados" seja
 // independente do que já estava salvo. Sem essa cópia, o item novo entra direto no cache antes
 // da comparação do setX, e o sistema conclui (errado) que "nada mudou".
+var _fsSnap = {}, _fsSnapFor = null;
 function _fsGet(nome) {
-  var c = JSON.parse(JSON.stringify(_fsCache[nome] || []));
+  var c;
+  if (nome === 'pedidos') {
+    // leitura rapida: copia rasa da lista; o texto de cada pedido (snapshot) permite ao _fsSet achar o que mudou
+    var _arr = _fsCache[nome] || [];
+    if (_fsSnapFor !== _arr) {
+      _fsSnap = {};
+      for (var _i = 0; _i < _arr.length; _i++) { var _o = _arr[_i]; if (_o && _o.id) _fsSnap[_o.id] = JSON.stringify(_o); }
+      _fsSnapFor = _arr;
+    }
+    c = _arr.slice();
+  } else {
+    c = JSON.parse(JSON.stringify(_fsCache[nome] || []));
+  }
   // v521: foto do produto vem da colecao produto_fotos (cache em memoria)
   if (nome === 'produtos') c.forEach(function (p) { if (p && p.id && !p.foto && _fsFotosProd[p.id]) p.foto = _fsFotosProd[p.id]; });
   return c;
@@ -8474,6 +8487,7 @@ function _fsSet(nome, arrayNovo) {
     return;
   }
   var antigo = _fsCache[nome] || [];
+  var _snapOk = (nome === 'pedidos' && _fsSnapFor === antigo);
   var mapAntigo = {};
   antigo.forEach(function (o) { if (o && o.id) mapAntigo[o.id] = o; });
   var idsNovo = {};
@@ -8501,14 +8515,17 @@ function _fsSet(nome, arrayNovo) {
       if (!item || !item.id) return;
       idsNovo[item.id] = true;
       var old = mapAntigo[item.id];
-      if (!old || JSON.stringify(old) !== JSON.stringify(item)) {
+      var _sNovo = JSON.stringify(item);
+      var _sOld = !old ? null : ((_snapOk && _fsSnap[item.id] !== undefined) ? _fsSnap[item.id] : JSON.stringify(old));
+      if (!old || _sOld !== _sNovo) {
+        if (_snapOk) _fsSnap[item.id] = _sNovo;
         batch.set(db.collection(nome).doc(String(item.id)), item);
         alguma = true;
         idsParaEnviar.push(item.id);
       }
     });
     antigo.forEach(function (o) {
-      if (o && o.id && !idsNovo[o.id]) { batch.delete(db.collection(nome).doc(String(o.id))); alguma = true; }
+      if (o && o.id && !idsNovo[o.id]) { batch.delete(db.collection(nome).doc(String(o.id))); alguma = true; if (_snapOk) delete _fsSnap[o.id]; }
     });
   } catch (errMontagem) {
     console.error('[Firestore] ERRO AO MONTAR o lote de escrita para "' + nome + '" (provavelmente um campo com valor "undefined" em algum registro):', errMontagem);
@@ -8516,6 +8533,7 @@ function _fsSet(nome, arrayNovo) {
     return;
   }
   _fsCache[nome] = (arrayNovo || []).slice();
+  if (_snapOk) _fsSnapFor = _fsCache[nome];
   console.log('[Firestore] enviando "' + nome + '": ' + idsParaEnviar.length + ' registro(s) alterado(s)', idsParaEnviar);
   if (alguma) {
     batch.commit().then(function () {
@@ -18461,6 +18479,92 @@ function _pedFmtMoeda(v) { return 'R$ ' + (Number(v)||0).toLocaleString('pt-BR',
 function _pedFmtQtd(v) { return (Number(v)||0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
 function _pedEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
+// ---- desempenho: formatador de numeros em cache + listas longas desenhadas em lotes ----
+(function () {
+  var orig = Number.prototype.toLocaleString, cache = {};
+  Number.prototype.toLocaleString = function (l, o) {
+    if (l !== 'pt-BR') return orig.apply(this, arguments);
+    var k = o ? JSON.stringify(o) : '';
+    var f = cache[k] || (cache[k] = new Intl.NumberFormat('pt-BR', o));
+    return f.format(this);
+  };
+})();
+var _sbLazyObs = new WeakMap();
+function _sbLazy(el, arr, fn) {
+  var old = _sbLazyObs.get(el); if (old) { old.disconnect(); _sbLazyObs.delete(el); }
+  var LOTE = 40, pos = 0;
+  el.innerHTML = '';
+  function mais() {
+    var sent = el.querySelector(':scope > .sb-sent'); if (sent) sent.remove();
+    var fim = Math.min(pos + LOTE, arr.length), html = '';
+    for (var i = pos; i < fim; i++) html += fn(arr[i], i);
+    el.insertAdjacentHTML('beforeend', html); pos = fim;
+    if (pos < arr.length) {
+      el.insertAdjacentHTML('beforeend', '<div class="sb-sent" style="text-align:center;padding:14px;color:#94a3b8;font-size:12px">Mostrando ' + pos + ' de ' + arr.length + ' — role para ver mais</div>');
+      var s = el.querySelector(':scope > .sb-sent');
+      var ob = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { ob.disconnect(); mais(); } }, { rootMargin: '600px' });
+      _sbLazyObs.set(el, ob); ob.observe(s);
+    }
+  }
+  mais();
+}
+
+
+// abas pesadas de Pedidos: abrem no mes atual; os filtros so valem ao clicar em OK
+var _sbMesInit = {};
+function _sbDefMes(pre) {
+  if (_sbMesInit[pre]) return; _sbMesInit[pre] = true;
+  var de = document.getElementById(pre + '-data-de'), ate = document.getElementById(pre + '-data-ate');
+  if (!de || !ate || de.value || ate.value) return;
+  var h = new Date(), p = function (n) { return String(n).padStart(2, '0'); };
+  var ult = new Date(h.getFullYear(), h.getMonth() + 1, 0).getDate();
+  de.value = '01/' + p(h.getMonth() + 1) + '/' + h.getFullYear();
+  ate.value = p(ult) + '/' + p(h.getMonth() + 1) + '/' + h.getFullYear();
+}
+
+// abas de Pedidos: periodo anterior ao corte -> busca o(s) ano(s) no Firebase e so entao mostra
+(function () {
+  var abas = { renderVendasCompletas: 'vc', renderVendasCompletasFaturadas: 'vcf', renderVendasSimplesNfs: 'psn', renderNaoFaturados: 'pnf' };
+  Object.keys(abas).forEach(function (nome) {
+    var orig = window[nome], pre = abas[nome];
+    if (typeof orig !== 'function') return;
+    window[nome] = function () {
+      var elDe = document.getElementById(pre + '-data-de'), elAte = document.getElementById(pre + '-data-ate');
+      var de = elDe ? _entctrlParseDataBR(elDe.value) : '', ate = elAte ? _entctrlParseDataBR(elAte.value) : '';
+      var self = this, args = arguments;
+      if (de && de < _fsPedidosCorte && !_fsPeriodoCarregado(de, ate || _fsPedidosCorte)) {
+        var anos = _fsAnosDoPeriodo(de, ate || _fsPedidosCorte);
+        var lista = document.getElementById(pre + '-lista') || document.getElementById(pre + '-tbody');
+        if (lista) lista.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;font-size:13px">Carregando pedidos de ' + anos.join(', ') + '\u2026</div>';
+        _fsCarregarPedidosPeriodo(de, ate || _fsPedidosCorte).then(function () { orig.apply(self, args); });
+        return;
+      }
+      return orig.apply(this, arguments);
+    };
+  });
+})();
+
+// abas pesadas de Pedidos: abrem vazias; lista de fabricas; so buscam ao clicar em OK
+var _sbAbaOk = {};
+function _sbInicio(pre) {
+  var sel = document.getElementById(pre + '-fornecedor');
+  if (sel && !sel.dataset.populado) {
+    var fs = (typeof getFornecedores === 'function' ? getFornecedores() : []).slice().sort(function (a, b) { return String(a.nome_fantasia || a.razao_social || '').localeCompare(String(b.nome_fantasia || b.razao_social || ''), 'pt-BR'); });
+    sel.innerHTML = '<option value="">Todas</option>' + fs.map(function (f) { return '<option value="' + _pedEsc(f.id) + '">' + _pedEsc(f.nome_fantasia || f.razao_social || f.codigo || '') + '</option>'; }).join('');
+    sel.dataset.populado = '1';
+  }
+  if (_sbAbaOk[pre]) return;
+  var lista = document.getElementById(pre + '-lista') || document.getElementById(pre + '-tbody');
+  if (lista) lista.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#94a3b8;font-size:13px">Escolha os filtros e clique em <b style="color:#DE7926">OK</b> para ver os pedidos.</div>';
+  var vz = document.getElementById(pre + '-vazio'); if (vz) vz.style.display = 'none';
+}
+(function () {
+  Object.keys({ vc: 1, vcf: 1, psn: 1, pnf: 1 }).forEach(function (pre) {
+    var nome = { vc: 'renderVendasCompletas', vcf: 'renderVendasCompletasFaturadas', psn: 'renderVendasSimplesNfs', pnf: 'renderNaoFaturados' }[pre];
+    var orig = window[nome]; if (typeof orig !== 'function') return;
+    window[nome] = function () { _sbAbaOk[pre] = true; return orig.apply(this, arguments); };
+  });
+})();
 var _pedStatusFiltro = '';
 var _pedOrdCampo = 'data'; // v514: mais recentes primeiro (dtCadastro empatava em lotes importados e mostrava 2015 no topo)
 var _pedOrdDir = 'desc';
@@ -18534,10 +18638,10 @@ function pedSetAba(aba) {
   _pedFecharAbasMenu();
   if (aba === 'geral') renderPedidoList();
   if (aba === 'simples') { _pssPopularFiltros(); renderVendaSimples(); }
-  if (aba === 'nao-fat') { _pnfPopularFiltros(); renderNaoFaturados(); }
-  if (aba === 'simples-nf') { _psnPopularFiltros(); renderVendasSimplesNfs(); }
-  if (aba === 'completas') { _vcPopularFiltros(); renderVendasCompletas(); }
-  if (aba === 'completas-fat') { _vcfPopularFiltros(); renderVendasCompletasFaturadas(); }
+  if (aba === 'nao-fat') { _pnfPopularFiltros(); _sbInicio('pnf'); }
+  if (aba === 'simples-nf') { _psnPopularFiltros(); _sbInicio('psn'); }
+  if (aba === 'completas') { _vcPopularFiltros(); _sbInicio('vc'); }
+  if (aba === 'completas-fat') { _vcfPopularFiltros(); _sbInicio('vcf'); }
 }
 // Menu mobile de "outras visoes": no celular so a aba ativa aparece, junto de um
 // botao de 3 pontos que abre a lista das demais para trocar de visao.
@@ -19265,7 +19369,7 @@ function _pimprelDadosCompletas() {
     var p = r.pedido;
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
-    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (fornF && String(p.fornecedorId||'').toLowerCase() !== fornF) return false;
     if (vendF && p.vendedorId !== vendF) return false;
     var cli = clientesMap[p.clienteId];
     if (ufF && (!cli || cli.estado !== ufF)) return false;
@@ -19312,7 +19416,7 @@ function _pimprelDadosCompletasFat() {
     if (p.status !== 'Faturado' && p.status !== 'Faturado Parcial') return false;
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
-    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (fornF && String(p.fornecedorId||'').toLowerCase() !== fornF) return false;
     if (vendF && p.vendedorId !== vendF) return false;
     var cli = clientesMap[p.clienteId];
     if (ufF && (!cli || cli.estado !== ufF)) return false;
@@ -19358,7 +19462,7 @@ function _pimprelDadosSimplesNf() {
     var p = r.pedido, f = r.fatura;
     if (dataDe && (!f.data || f.data < dataDe)) return false;
     if (dataAte && (!f.data || f.data > dataAte)) return false;
-    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (fornF && String(p.fornecedorId||'').toLowerCase() !== fornF) return false;
     if (vendF && p.vendedorId !== vendF) return false;
     var cli = clientesMap[p.clienteId];
     if (ufF && (!cli || cli.estado !== ufF)) return false;
@@ -19402,7 +19506,7 @@ function _pimprelDadosNaoFat() {
     var p = r.pedido;
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
-    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (fornF && String(p.fornecedorId||'').toLowerCase() !== fornF) return false;
     if (vendF && p.vendedorId !== vendF) return false;
     var cli = clientesMap[p.clienteId];
     if (ufF && (!cli || cli.estado !== ufF)) return false;
@@ -21690,7 +21794,7 @@ function renderVendasSimplesNfs() {
     var p = r.pedido, f = r.fatura;
     if (dataDe && (!f.data || f.data < dataDe)) return false;
     if (dataAte && (!f.data || f.data > dataAte)) return false;
-    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (fornF && String(p.fornecedorId||'').toLowerCase() !== fornF) return false;
     if (vendF && p.vendedorId !== vendF) return false;
     var cli = clientesMap[p.clienteId];
     if (ufF && (!cli || cli.estado !== ufF)) return false;
@@ -21710,7 +21814,7 @@ function renderVendasSimplesNfs() {
   if (!linhas.length) {
     tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhuma NF encontrada com esses filtros.</div>';
   } else {
-    tbody.innerHTML = linhas.map(function(r){
+    _sbLazy(tbody, linhas, function(r){
       var p = r.pedido, f = r.fatura;
       var cli = clientesMap[p.clienteId];
       var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
@@ -21730,7 +21834,7 @@ function renderVendasSimplesNfs() {
         + '<div class="mc-meta ped-r-peso" style="font-size:12px;color:#64748b;text-align:center">' + r.pesoFat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + '</div>'
         + '<div class="mc-meta ped-r-valor" style="font-size:12.5px;font-weight:700;color:#15803d;text-align:right">' + _pedFmtMoeda(f.valor) + '</div>'
         + '</div>';
-    }).join('');
+    });
   }
 
   var totalQtd = linhas.reduce(function(acc, r){ return acc + r.pesoFat; }, 0);
@@ -22128,7 +22232,7 @@ function renderEntregaControle() {
     if (dataDe && (!f.data || f.data < dataDe)) return false;
     if (dataAte && (!f.data || f.data > dataAte)) return false;
     if (fornIdF) { if (p.fornecedorId !== fornIdF) return false; }
-    else if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    else if (fornF && String(p.fornecedorId||'').toLowerCase() !== fornF) return false;
     if (vendF && p.vendedorId !== vendF) return false;
     if (catF && String(cli.categoria||'') !== String(catF)) return false;
     if (subF && String(cli.subcategoria||'') !== String(subF)) return false;
@@ -22157,7 +22261,7 @@ function renderEntregaControle() {
     return;
   }
 
-  tbody.innerHTML = linhas.map(function(r){
+  _sbLazy(tbody, linhas, function(r){
     var p = r.pedido, f = r.fatura, cli = r.cliente || {};
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
     var dataFatFmt = f.data ? f.data.split('-').reverse().join('/') : '—';
@@ -22187,7 +22291,7 @@ function renderEntregaControle() {
       + '<div class="ent-entrega-wrap" style="order:11"><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="' + _entctrlDataParaBR(f.dataEntrega) + '" oninput="_entctrlMaskData(this)" onchange="entctrlSalvarDataEntregaTexto(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:6px;padding:4px 6px;font-size:11px"></div>'
       + '</div>'
       + '</div>';
-  }).join('');
+  });
 }
 
 // ── Vendas Nao Faturadas: pedidos com fatura lancada mas ainda com itens pendentes ──
@@ -22275,7 +22379,7 @@ function renderNaoFaturados() {
     var p = r.pedido;
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
-    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (fornF && String(p.fornecedorId||'').toLowerCase() !== fornF) return false;
     if (vendF && p.vendedorId !== vendF) return false;
     var cli = clientesMap[p.clienteId];
     if (ufF && (!cli || cli.estado !== ufF)) return false;
@@ -22305,7 +22409,7 @@ function renderNaoFaturados() {
   if (kpi) kpi.textContent = lista.length;
   if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; return; }
   vazio.style.display = 'none';
-  cont.innerHTML = lista.map(function(r){
+  _sbLazy(cont, lista, function(r){
     var p = r.pedido;
     var dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
@@ -22340,7 +22444,7 @@ function renderNaoFaturados() {
       + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Não Faturado</div><div style="font-size:14px;font-weight:800;color:#dc2626;margin-top:1px">' + _pedFmtMoeda(valorPendente) + '</div></div>'
       + '</div>'
       + '</div>';
-  }).join('');
+  });
 }
 
 // ── Vendas Completas: todos os pedidos digitados, com todos os itens (verde = faturado, vermelho = nao faturado) ──
@@ -22422,7 +22526,7 @@ function renderVendasCompletas() {
     var p = r.pedido;
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
-    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (fornF && String(p.fornecedorId||'').toLowerCase() !== fornF) return false;
     if (vendF && p.vendedorId !== vendF) return false;
     var cli = clientesMap[p.clienteId];
     if (ufF && (!cli || cli.estado !== ufF)) return false;
@@ -22468,7 +22572,7 @@ function renderVendasCompletas() {
 
   var statusCores = { 'Pré-Venda':{bg:'#f1f5f9',cor:'#64748b'}, 'Aguardando Retorno':{bg:'#fff7ed',cor:'#c2410c'}, 'Enviado':{bg:'#eff6ff',cor:'#1d4ed8'}, 'Faturado':{bg:'#f0fdf4',cor:'#15803d'}, 'Faturado Parcial':{bg:'#fefce8',cor:'#a16207'}, 'Bonificado':{bg:'#ecfeff',cor:'#0e7490'}, 'Cancelado':{bg:'#fff5f5',cor:'#dc2626'} };
 
-  cont.innerHTML = lista.map(function(r){
+  _sbLazy(cont, lista, function(r){
     var p = r.pedido;
     var dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
@@ -22503,7 +22607,7 @@ function renderVendasCompletas() {
       + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Total</div><div style="font-size:14px;font-weight:800;color:#15803d;margin-top:1px">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
       + '</div>'
       + '</div>';
-  }).join('');
+  });
 }
 
 // ── Vendas Completas Faturadas: mesmos filtros de Vendas Completas, restrito a pedidos
@@ -22560,7 +22664,7 @@ function renderVendasCompletasFaturadas() {
     if (p.status !== 'Faturado' && p.status !== 'Faturado Parcial') return false;
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
-    if (fornF && (p.fornecedorNome||'').toLowerCase().indexOf(fornF) === -1) return false;
+    if (fornF && String(p.fornecedorId||'').toLowerCase() !== fornF) return false;
     if (vendF && p.vendedorId !== vendF) return false;
     var cli = clientesMap[p.clienteId];
     if (ufF && (!cli || cli.estado !== ufF)) return false;
@@ -22587,7 +22691,7 @@ function renderVendasCompletasFaturadas() {
 
   var statusCores = { 'Faturado':{bg:'#f0fdf4',cor:'#15803d'}, 'Faturado Parcial':{bg:'#fefce8',cor:'#a16207'} };
 
-  cont.innerHTML = lista.map(function(r){
+  _sbLazy(cont, lista, function(r){
     var p = r.pedido;
     var dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
@@ -22622,7 +22726,7 @@ function renderVendasCompletasFaturadas() {
       + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Total</div><div style="font-size:14px;font-weight:800;color:#15803d;margin-top:1px">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
       + '</div>'
       + '</div>';
-  }).join('');
+  });
 }
 
 // ── Autocomplete Fornecedor ──
