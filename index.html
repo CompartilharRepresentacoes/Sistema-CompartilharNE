@@ -22429,7 +22429,7 @@ function _entimpArquivoSelecionado(input) {
       document.getElementById('entimp-nome-arquivo').textContent = file.name;
 
       var colNfGuess   = _entimpDetectarColuna(_entimpHeader, ['nota fiscal','notafiscal','numero da nf','numero nf','nf','documento']);
-      var colDataGuess = _entimpDetectarColuna(_entimpHeader, ['data de entrega','data entrega','dataentrega','entregue em','data']);
+      var colDataGuess = _entimpDetectarColuna(_entimpHeader, ['data da entrega','data de entrega','data entrega','dataentrega','entregue em','entrega']);
 
       var selNf = document.getElementById('entimp-col-nf');
       var selData = document.getElementById('entimp-col-data');
