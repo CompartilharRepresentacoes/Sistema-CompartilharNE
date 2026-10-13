@@ -1643,7 +1643,8 @@
   <span style="color:#94a3b8;font-size:13px">→</span>
   <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="dtFim" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:4px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
   <div style="width:1px;height:18px;background:#e2e8f0;margin:0 2px"></div>
-  <button class="qbtn active" data-r="ytd">Ano</button>
+  <button class="qbtn active" data-r="mes">Mês</button>
+  <button class="qbtn" data-r="ytd">Ano</button>
   <button class="qbtn" data-r="q1">T1</button>
   <button class="qbtn" data-r="q2">T2</button>
   <button class="qbtn" data-r="q3">T3</button>
@@ -16307,7 +16308,7 @@ function dashInit() {
     const _dashRest = window._dashPeriodoRestaurar || null;
     window._dashPeriodoRestaurar = null;
     const state = {
-      dtIni: (_dashRest && _dashRest.dtIni) || periodoMin,
+      dtIni: (_dashRest && _dashRest.dtIni) || (periodoMax.slice(0,8) + '01'),
       dtFim: (_dashRest && _dashRest.dtFim) || periodoMax,
       fabricas: new Set(),
       vendedores: new Set(),
@@ -17994,7 +17995,8 @@ function dashInit() {
       b.classList.add('active');
       const r = b.dataset.r;
       const ano = periodoMin.slice(0,4);
-      if (r==='ytd') { state.dtIni = periodoMin; state.dtFim = periodoMax; }
+      if (r==='mes') { state.dtIni = periodoMax.slice(0,8) + '01'; state.dtFim = periodoMax; }
+      else if (r==='ytd') { state.dtIni = periodoMin; state.dtFim = periodoMax; }
       else if (r==='q1') { state.dtIni = `${ano}-01-01`; state.dtFim = `${ano}-03-31`; }
       else if (r==='q2') { state.dtIni = `${ano}-04-01`; state.dtFim = `${ano}-06-30`; }
       else if (r==='q3') { state.dtIni = `${ano}-07-01`; state.dtFim = `${ano}-09-30`; }
@@ -18006,7 +18008,8 @@ function dashInit() {
 
     // =============== RESET / TEMA ===============
     document.getElementById('btnReset').addEventListener('click', () => {
-      state.dtIni = periodoMin; state.dtFim = periodoMax;
+      state.dtIni = periodoMax.slice(0,8) + '01'; state.dtFim = periodoMax;
+      document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(x => x.classList.toggle('active', x.dataset.r === 'mes'));
       state.fabricas.clear(); state.vendedores.clear(); state.clientes.clear(); state.uf.clear();
       document.getElementById('dtIni').value = _entctrlDataParaBR(state.dtIni);
       document.getElementById('dtFim').value = _entctrlDataParaBR(state.dtFim);
@@ -18035,6 +18038,7 @@ function dashInit() {
     }
 
     // =============== INIT ===============
+    if (_dashRest) document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(x => x.classList.remove('active'));
     document.getElementById('dtIni').value = _entctrlDataParaBR(state.dtIni);
     document.getElementById('dtFim').value = _entctrlDataParaBR(state.dtFim);
 
