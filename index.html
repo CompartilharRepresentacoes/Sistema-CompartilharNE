@@ -9027,6 +9027,76 @@ function _ufFiltrosAtualizar() {
   } catch (eUf) { console.warn('Não foi possível montar os filtros de UF:', eUf); }
 }
 
+// ═══ Permissões por página: esconde menus e bloqueia telas que o usuário não pode ver ═══
+// As permissões vêm do banco (usuario_permissoes.pode_ver); admin vê tudo. O banco continua
+// sendo a barreira real (RLS); aqui só se limpa o menu e se evita abrir telas sem acesso.
+var _appPermVer = null;   // null = ainda não carregou (não bloqueia); objeto {chave:true}
+var _appEhAdmin = false;
+var _PAGINA_CHAVE = [
+  [/^page-home$/, 'inicio'], [/^page-pedido-/, 'pedidos'], [/^page-sugestao-pedido$/, 'sugestao_pedido'],
+  [/^page-bloqueios-pedidos$/, 'bloqueios_pedidos'], [/^page-consulta-preco$/, 'consulta_preco'],
+  [/^page-negpreco-/, 'negociacao_preco'], [/^page-tabpreco-/, 'tabela_preco'],
+  [/^page-dados-representadas$/, 'dados_representadas'], [/^page-devolucao-/, 'devolucoes'],
+  [/^page-planejamento-reino$/, 'planejamento_reino'], [/^page-entrega-controle$/, 'controle_entrega'],
+  [/^page-ocorrencias$/, 'ocorrencias'], [/^page-revenda-/, 'revenda'], [/^page-catalogo-/, 'catalogos'],
+  [/^page-fotos-produtos$/, 'fotos_produtos'], [/^page-relatorios$/, 'relatorios'],
+  [/^page-cat-cliente-/, 'cat_cliente'], [/^page-cliente-/, 'clientes'], [/^page-sku-clientes-/, 'sku_clientes'],
+  [/^page-cat-produto-/, 'cat_produto'], [/^page-produto-/, 'produtos'], [/^page-fornecedor-/, 'fornecedores'],
+  [/^page-meta-/, 'meta'], [/^page-transp-/, 'transportadoras'], [/^page-backup$/, 'backup'],
+  [/^page-empresa-/, 'empresa'], [/^page-permissoes-form$/, 'permissoes'],
+  [/^page-(usuario-|grupo-)/, 'usuarios']
+];
+function _appPaginaPermitida(pageId) {
+  if (_appPermVer === null || _appEhAdmin) return true;
+  for (var i = 0; i < _PAGINA_CHAVE.length; i++) {
+    if (_PAGINA_CHAVE[i][0].test(pageId)) return !!_appPermVer[_PAGINA_CHAVE[i][1]];
+  }
+  return false; // telas sem chave de permissão (comissões, apresentações, comandos): só administrador
+}
+function _appAplicarMenuPermissoes() {
+  var sb = document.querySelector('.sb-item') ? document.querySelector('.sb-item').parentNode : null;
+  var itens = document.querySelectorAll('.sb-item');
+  function pid(el) { var m = /showPage\('([^']+)'/.exec(el.getAttribute('onclick') || ''); return m ? m[1] : null; }
+  document.querySelectorAll('.sb-flyout a, .sb-flyout .fly-col').forEach(function (el) { el.style.display = ''; });
+  itens.forEach(function (it) { it.style.display = ''; });
+  if (_appPermVer === null || _appEhAdmin) return;
+  document.querySelectorAll('.sb-flyout a').forEach(function (a) {
+    var p = pid(a); if (p && !_appPaginaPermitida(p)) a.style.display = 'none';
+  });
+  document.querySelectorAll('.sb-flyout .fly-col').forEach(function (col) {
+    var vis = [].some.call(col.querySelectorAll('a'), function (a) { return a.style.display !== 'none'; });
+    if (!vis) col.style.display = 'none';
+  });
+  itens.forEach(function (it) {
+    var fly = it.querySelector('.sb-flyout');
+    var p = pid(it);
+    if (fly) {
+      var vis = [].some.call(fly.querySelectorAll('a'), function (a) { return a.style.display !== 'none'; });
+      if (!vis) it.style.display = 'none';
+    } else if (p && !_appPaginaPermitida(p)) {
+      it.style.display = 'none';
+    }
+  });
+}
+function _appCarregarPermissoes() {
+  try {
+    if (typeof SB === 'undefined') return;
+    Promise.all([
+      SB.rpc('app_admin'),
+      SB.from('usuario_permissoes').select('pagina_chave,pode_ver')
+    ]).then(function (r) {
+      if (r[0].error || r[1].error) { console.warn('Permissões não carregadas:', r[0].error || r[1].error); return; }
+      _appEhAdmin = r[0].data === true;
+      var o = {};
+      (r[1].data || []).forEach(function (x) { if (x.pode_ver) o[x.pagina_chave] = true; });
+      _appPermVer = o;
+      _appAplicarMenuPermissoes();
+      var atual = document.querySelector('.app-page[style*="block"]');
+      if (atual && !_appPaginaPermitida(atual.id)) showPage('page-home');
+    }).catch(function (e) { console.warn('Permissões não carregadas:', e); });
+  } catch (e) { console.warn('Permissões não carregadas:', e); }
+}
+
 function entrarNoApp(user) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('mainApp').style.display = 'block';
@@ -9051,6 +9121,8 @@ function entrarNoApp(user) {
   // preso naquele retrato vazio ate clicar manualmente em "Inicio". Rodar de novo aqui garante
   // que assim que o login termina (dados do Firestore ja carregados) o dashboard ja nasce certo.
   dashInit();
+  _appPermVer = null; _appEhAdmin = false; _appAplicarMenuPermissoes();
+  _appCarregarPermissoes();
 }
 
 // ═══ Autoria e histórico de alterações (usado por Pedidos, Devoluções, etc.) ═══
@@ -9288,6 +9360,7 @@ const PAGE_META = {
   'page-comando-form':      { sb: 'sb-gerenciar', title: 'Gerenciar › Comandos de Navegação' },
 };
 function showPage(pageId, params) {
+  if (!_appPaginaPermitida(pageId)) { alert('Você não tem permissão para acessar esta tela.'); return; }
   document.querySelectorAll('.app-page').forEach(p => p.style.display = 'none');
   const page = document.getElementById(pageId);
   if (page) page.style.display = 'block';
