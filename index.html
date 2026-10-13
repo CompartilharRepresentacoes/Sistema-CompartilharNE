@@ -8363,7 +8363,7 @@ async function _sbCarregarPedidos(ini, fim, cli) {
     while (i < jan.length) {
       var j = jan[i++];
       var fechado = j[1] < limite; // mes antes do mes passado: nao muda mais
-      var k = j[0] + '|' + (cli || '');
+      var k = 'c2|' + j[0] + '|' + (cli || '');
       var c = fechado ? await _sbCacheGet(k) : null;
       if (c && c.t && (Date.now() - c.t) < 12 * 3600 * 1000) { Array.prototype.push.apply(res, c.d); continue; }
       var r = await SB.rpc('docs_pedidos', { p_ini: j[0], p_fim: j[1], p_cli: cli || null });
