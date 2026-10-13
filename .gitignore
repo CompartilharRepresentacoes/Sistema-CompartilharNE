@@ -10,3 +10,5 @@
 !Granarolo*.jpg
 !catalogos/
 !catalogos/*.pdf
+
+!supabase.js
