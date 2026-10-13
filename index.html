@@ -17819,8 +17819,26 @@ function dashInit() {
       for (const p of peds) { let a=agV.get(p[3]); if(!a){a={fat:0,n:0};agV.set(p[3],a);} a.fat+=p[5]; a.n++; }
       const arrV = [...agV.entries()].map(([vi,a])=>({nome:VEND[vi], ...a})).sort((a,b)=>b.fat-a.fat);
       // meta da fábrica
-      const metaF = metas.fabrica && metas.fabrica[FAB[fi]] ? Number(metas.fabrica[FAB[fi]]) : null;
-      const atinge = metaF ? fat/metaF : null;
+      // v526: a meta vem do cadastro "Metas" (mes MM/AAAA + fornecedor + tipo KG ou R$), somando os meses que o periodo
+      // toca; se nao houver nada la, cai na meta antiga (localStorage) por fabrica.
+      let metaF = null, atinge = null, metaTxt = '';
+      try {
+        const _ini = String(state.dtIni), _fim = String(state.dtFim);
+        const _mk = new Set();
+        let _y = parseInt(_ini.slice(0,4),10), _m = parseInt(_ini.slice(5,7),10);
+        const _yf = parseInt(_fim.slice(0,4),10), _mf = parseInt(_fim.slice(5,7),10);
+        while (_y < _yf || (_y === _yf && _m <= _mf)) { _mk.add(String(_m).padStart(2,'0') + '/' + _y); _m++; if (_m > 12) { _m = 1; _y++; } }
+        const _fid = String(FAB_ID[fi] != null ? FAB_ID[fi] : ''), _fnm = _cpNorm(FAB[fi] || '');
+        const _ms = getMetas().filter(m => _mk.has(m.mes) && ((_fid && String(m.fornecedorId) === _fid) || (_cpNorm(m.fornecedorNome || '') === _fnm) || (_fnm && _cpNorm(m.fornecedorNome || '').indexOf(_fnm) !== -1)));
+        const _rs = _ms.filter(m => m.tipo === 'R$').reduce((t,m) => t + (Number(m.valor)||0), 0);
+        const _kg = _ms.filter(m => m.tipo !== 'R$').reduce((t,m) => t + (Number(m.valor)||0), 0);
+        if (_rs > 0) { metaF = _rs; atinge = fat / _rs; metaTxt = fmtBRL(_rs); }
+        else if (_kg > 0) { const _real = peds.reduce((t,p) => t + (p[7]||0), 0); metaF = _kg; atinge = _real / _kg; metaTxt = fmtNum(_kg) + ' kg'; }
+      } catch (e) { /* cadastro de metas indisponivel neste contexto */ }
+      if (metaF == null) {
+        const _old = metas.fabrica && metas.fabrica[FAB[fi]] ? Number(metas.fabrica[FAB[fi]]) : null;
+        if (_old) { metaF = _old; atinge = fat / _old; metaTxt = fmtBRL(_old); }
+      }
 
       document.getElementById('fabFicha').innerHTML = `
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -17829,7 +17847,7 @@ function dashInit() {
           ${kpiCard('% do total', fmtPct(part), 'brand', 'da Compartilhar no período', null, 2, {id:'fabKpiPart', fmt:fmtPct})}
           ${kpiCard('Clientes', cli.toLocaleString('pt-BR'), 'good', 'ativos no período', null, 3, {id:'fabKpiCli', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
           ${kpiCard('Ticket médio', _dvgFmtBRLAbrev(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:_dvgFmtBRLAbrev}, fmtBRL(ticket))}
-          ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${fmtBRL(metaF)}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null)}
+          ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${metaTxt}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null)}
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-[2.4fr_0.85fr] gap-4 mt-4">
           <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">Evolução Mensal</h3>
