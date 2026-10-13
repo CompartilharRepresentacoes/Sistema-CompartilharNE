@@ -16600,12 +16600,16 @@ function dashInit() {
     let _dvgMesAberto = null;
     let _dvgMesTotalResumo = null;
     let _dvgMesesData = [];
+    let _dvgModo = 'ano';
     let _dvgDezAnterior = null;
     let _dvgMetaMensal = null;
     function _dvgRenderBars() {
       const wrap = document.getElementById('dvgBars');
       if (!wrap) return;
       wrap.innerHTML = '';
+      wrap.style.justifyContent = _dvgMesesData.length < 12 ? 'space-around' : '';
+      const _tit = document.querySelector('#dvgTitMensal .dvg-tit');
+      if (_tit) _tit.innerHTML = (_dvgModo === 'semana' ? 'Faturamento Semanal' : 'Faturamento Mensal') + '<span class="dvg-tit-hint">Somente Faturado e Faturado Parcial &middot; clique numa barra pra travar ' + (_dvgModo === 'semana' ? 'a semana' : 'o mês') + '</span>';
       const maxFat = Math.max(1, ..._dvgMesesData.map(m=>m.fat), (_dvgMetaMensal||0));
       _dvgMesesData.forEach((m,i) => {
         const pct = (m.fat/maxFat*100);
@@ -16617,7 +16621,8 @@ function dashInit() {
         div.setAttribute('data-i', i);
         div.style.background = 'linear-gradient(180deg,' + col + ',#12173f)';
         div.style.height = pct + '%';
-        div.innerHTML = '<span class="dvg-mlabel">' + monthLabels[i].toUpperCase() + '</span>';
+        if (_dvgMesesData.length < 12) { div.style.flex = '0 1 ' + (_dvgMesesData.length <= 3 ? '120px' : '90px'); }
+        div.innerHTML = '<span class="dvg-mlabel" style="white-space:nowrap;left:-20px;right:-20px">' + m.label + '</span>';
         div.onclick = () => _dvgToggleMes(i);
         div.onmouseenter = () => _dvgHoverMes(i);
         wrap.appendChild(div);
@@ -16979,16 +16984,48 @@ function dashInit() {
       }
 
       // Faturamento mensal
-      const meses = Array(12).fill(0);
-      const mesesVol = Array(12).fill(0);
-      const mesesPeso = Array(12).fill(0);
-      const mesesN = Array(12).fill(0);
-      for (const p of peds) { const m = parseInt(p[0].slice(5,7),10)-1; meses[m]+=p[5]; mesesVol[m]+=p[4]; mesesPeso[m]+=(p[7]||0); mesesN[m]++; }
+      // v525: o grafico muda conforme o periodo: 1 mes = semanas; 2 a 3 meses (T1..T4) = os meses do periodo; resto = 12 meses
+      const _gI = String(state.dtIni), _gF = String(state.dtFim);
+      const _gAi = parseInt(_gI.slice(0,4),10), _gMi = parseInt(_gI.slice(5,7),10)-1;
+      const _gAf = parseInt(_gF.slice(0,4),10), _gMf = parseInt(_gF.slice(5,7),10)-1;
+      const _gNMeses = (_gAf - _gAi) * 12 + (_gMf - _gMi) + 1;
+      const _gModo = _gNMeses === 1 ? 'semana' : (_gNMeses <= 3 ? 'tri' : 'ano');
+      const _gBuckets = [];            // { label, fat, vol, peso, n }
+      const _gIdx = new Map();         // chave -> posicao
+      const _gNovo = (key, label) => { _gIdx.set(key, _gBuckets.length); _gBuckets.push({ label, fat:0, vol:0, peso:0, n:0 }); };
+      if (_gModo === 'ano') {
+        for (let m = 0; m < 12; m++) _gNovo(m, monthLabels[m].toUpperCase());
+      } else if (_gModo === 'tri') {
+        for (let k = 0; k < _gNMeses; k++) { const t = _gMi + k; _gNovo((_gAi + Math.floor(t/12)) + '-' + String(t%12+1).padStart(2,'0'), monthLabels[t%12].toUpperCase()); }
+      } else {
+        const nDias = new Date(_gAi, _gMi + 1, 0).getDate();
+        const dd = n => String(n).padStart(2,'0');
+        let sem = 0;
+        for (let d = 1; d <= nDias; d++) {
+          const dow = new Date(_gAi, _gMi, d).getDay();
+          const seg = d - ((dow + 6) % 7);         // dia da segunda-feira dessa semana (pode ser < 1)
+          const key = Math.max(1, seg);
+          if (!_gIdx.has(key)) { sem++; _gNovo(key, ''); _gBuckets[_gBuckets.length-1]._seg = seg; _gBuckets[_gBuckets.length-1]._ini = key; _gBuckets[_gBuckets.length-1]._n = sem; }
+          _gIdx.set('d' + d, _gIdx.get(key));
+          _gBuckets[_gIdx.get(key)]._ult = d;
+        }
+        _gBuckets.forEach(b => { let fim = Math.min(nDias, b._seg + 4); if (fim < b._ini) fim = b._ult; b.label = 'SEM ' + b._n + ' · ' + dd(b._ini) + '–' + dd(fim); });
+      }
+      for (const p of peds) {
+        let pos;
+        if (_gModo === 'ano') pos = parseInt(p[0].slice(5,7),10)-1;
+        else if (_gModo === 'tri') pos = _gIdx.get(p[0].slice(0,7));
+        else pos = (parseInt(p[0].slice(5,7),10)-1 === _gMi && parseInt(p[0].slice(0,4),10) === _gAi) ? _gIdx.get('d' + parseInt(p[0].slice(8,10),10)) : undefined;
+        if (pos === undefined) continue;
+        const b = _gBuckets[pos]; b.fat += p[5]; b.vol += p[4]; b.peso += (p[7]||0); b.n++;
+      }
       const metaTotal = sumMetas();
-      _dvgMetaMensal = metaTotal ? metaTotal/12 : null;
-      _dvgMesesData = meses.map((fat,i)=>({ fat, vol: mesesVol[i], peso: mesesPeso[i], n: mesesN[i] }));
+      _dvgMetaMensal = (metaTotal && _gModo !== 'semana') ? metaTotal/12 : null;
+      _dvgMesesData = _gBuckets;
+      _dvgModo = _gModo; _dvgMesAberto = null;
       // v523: dezembro do ano anterior (base de comparacao de janeiro), respeitando os filtros atuais
       (function () {
+        if (_gModo !== 'ano') { _dvgDezAnterior = null; return; }
         const anoAnt = parseInt(String(state.dtIni).slice(0, 4), 10) - 1;
         const pDez = filtraPedidos({ dtIni: anoAnt + '-12-01', dtFim: anoAnt + '-12-31' });
         let f = 0, pz = 0;
