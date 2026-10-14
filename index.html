@@ -16961,7 +16961,7 @@ function dashInit() {
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66">
             <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#1c2f66"><i class="ti ti-package"></i></div><div class="dvg-kpi-lbl">VOLUME</div></div>${_dvgTrendVol}</div>
-            <div class="dvg-kpi-val" id="dvgKpiVol">0 kg</div><div class="dvg-kpi-sub">${fmtNum(k.vol)} cx no período</div>${_dvgCmpVol}
+            <div class="dvg-kpi-val" id="dvgKpiVol">0 kg</div><div class="dvg-kpi-sub">${fmtBRL(k.fat)} faturado no período</div>${_dvgCmpVol}
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #3d5aa8">
             <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#3d5aa8"><i class="ti ti-target-arrow"></i></div><div class="dvg-kpi-lbl">POSITIVAÇÃO</div></div>${_dvgTrendPos}</div>
@@ -17780,6 +17780,9 @@ function dashInit() {
       const totalGeral = pedsAll.reduce((s,p)=>s+p[5],0);
       const fat = peds.reduce((s,p)=>s+p[5],0);
       const vol = peds.reduce((s,p)=>s+p[4],0);
+      // v28: Nova Mix e São Vicente mostram Kg em destaque (R$ abaixo); as demais, R$ em destaque (Kg abaixo)
+      const _fabKg = peds.reduce((s,p)=>s+(p[7]||0),0);
+      const _fabKgPri = ['novamix','saovicente'].indexOf(_cpNorm(FAB[fi]||'').replace(/\s+/g,'')) !== -1;
       const cli = new Set(peds.map(p=>p[1])).size;
       const n = peds.length;
       const ticket = n? fat/n : 0;
@@ -17845,7 +17848,9 @@ function dashInit() {
       document.getElementById('fabFicha').innerHTML = `
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           ${kpiCard('Faturamento', _dvgFmtBRLAbrev(fat), 'brand', `${n} pedidos`, null, 0, {id:'fabKpiFat', fmt:_dvgFmtBRLAbrev}, fmtBRL(fat))}
-          ${kpiCard('Volume', _dvgFmtAbrev(vol), 'good', 'unidades líquidas', null, 1, {id:'fabKpiVol', fmt:_dvgFmtAbrev}, fmtNum(vol) + ' cx')}
+          ${_fabKgPri
+            ? kpiCard('Volume', Math.round(_fabKg).toLocaleString('pt-BR') + ' kg', 'good', 'peso líquido faturado', null, 1, {id:'fabKpiVol', fmt:v=>Math.round(v).toLocaleString('pt-BR') + ' kg'}, fmtBRL(fat))
+            : kpiCard('Volume', _dvgFmtBRLAbrev(fat), 'good', 'valor faturado', null, 1, {id:'fabKpiVol', fmt:_dvgFmtBRLAbrev}, Math.round(_fabKg).toLocaleString('pt-BR') + ' kg')}
           ${kpiCard('% do total', fmtPct(part), 'brand', 'da Compartilhar no período', null, 2, {id:'fabKpiPart', fmt:fmtPct})}
           ${kpiCard('Clientes', cli.toLocaleString('pt-BR'), 'good', 'ativos no período', null, 3, {id:'fabKpiCli', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
           ${kpiCard('Ticket médio', _dvgFmtBRLAbrev(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:_dvgFmtBRLAbrev}, fmtBRL(ticket))}
@@ -17879,7 +17884,7 @@ function dashInit() {
         </div>
       `;
       _dvgAnimarNumero(document.getElementById('fabKpiFat'), fat, _dvgFmtBRLAbrev);
-      _dvgAnimarNumero(document.getElementById('fabKpiVol'), vol, _dvgFmtAbrev);
+      if (_fabKgPri) _dvgAnimarNumero(document.getElementById('fabKpiVol'), _fabKg, v => Math.round(v).toLocaleString('pt-BR') + ' kg'); else _dvgAnimarNumero(document.getElementById('fabKpiVol'), fat, _dvgFmtBRLAbrev);
       _dvgAnimarNumero(document.getElementById('fabKpiPart'), part, fmtPct);
       _dvgAnimarNumero(document.getElementById('fabKpiCli'), cli, v => Math.round(v).toLocaleString('pt-BR'));
       _dvgAnimarNumero(document.getElementById('fabKpiTicket'), ticket, _dvgFmtBRLAbrev);
@@ -17941,7 +17946,7 @@ function dashInit() {
         FAB[p[2]],
         VEND[p[3]],
         STATUS[p[6]],
-        p[4],
+        p[7]||0,
         p[5],
       ]);
       const container = document.getElementById('gridDados');
@@ -17953,7 +17958,7 @@ function dashInit() {
           { name:'Fábrica' },
           { name:'Vendedor' },
           { name:'Status', formatter: s => gridjs.html(`<span class="chip ${s==='Faturado'||s==='Faturado Parcial'?'chip-good':s==='Cancelado'?'chip-bad':'chip-info'}">${s}</span>`) },
-          { name:'Volume', formatter: v => fmtNum(v) },
+          { name:'Peso (kg)', formatter: v => fmtNum(v) + ' kg' },
           { name:'Valor', formatter: v => fmtBRL(v) },
         ],
         data: rows,
