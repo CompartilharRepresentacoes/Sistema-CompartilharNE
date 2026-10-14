@@ -5768,6 +5768,9 @@
     .apr-obs{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;font-size:11px;color:#1e293b;flex:1;overflow-y:auto;white-space:pre-wrap}
     .apr-thumb{width:52px;aspect-ratio:16/9;border-radius:4px;border:2px solid transparent;background:#e2e8f0;cursor:pointer;flex-shrink:0}
     .apr-thumb.on{border-color:#272A4A}
+    .ap-lb{font-size:11px;font-weight:600;color:#475569;margin-bottom:5px}
+    .ap-in{width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:12px;font-family:inherit;color:#1e293b;background:#fff;box-sizing:border-box}
+    .ap-nav{width:34px;height:34px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#272A4A;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
     </style>
     <div id="page-apresentacoes" class="app-page">
       <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);border-radius:12px;padding:14px 20px;margin-bottom:12px">
@@ -5780,6 +5783,63 @@
         </div>
       </div>
 
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button id="apm-atual" onclick="_apModo('atual')" style="border:1px solid #272A4A;background:#272A4A;color:#fff;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">Cliente atual (rede + fornecedor)</button>
+        <button id="apm-prosp" onclick="_apModo('prosp')" style="border:1px solid #e2e8f0;background:#fff;color:#334155;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">Prospecção · cliente novo</button>
+      </div>
+      <div id="apres-modo-prosp" style="display:none">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div style="font-size:13.5px;font-weight:700;color:#272A4A;margin-bottom:10px">1 · Cliente novo (prospect)</div>
+          <div style="display:grid;grid-template-columns:2fr 1.2fr 1.2fr;gap:10px;margin-bottom:10px">
+            <div><div class="ap-lb">Nome ou CNPJ</div><input id="ap-nome" class="ap-in" placeholder="Ex.: Supermercado Boa Compra ou 00.000.000/0001-00" oninput="_apRender()"></div>
+            <div><div class="ap-lb">Cidade / UF</div><input id="ap-cidade" class="ap-in" placeholder="Ex.: Recife / PE"></div>
+            <div><div class="ap-lb">Vendedor responsável</div><input id="ap-vendedor" class="ap-in" list="ap-vend-list" placeholder="Nome do vendedor" oninput="_apRender()"><datalist id="ap-vend-list"></datalist></div>
+          </div>
+          <div style="margin-bottom:10px"><div class="ap-lb">Tipo de cliente</div><div id="ap-tipos" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button onclick="_apSalvarProspect()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">Salvar em Clientes novos</button>
+            <button onclick="_apLimparForm()" style="background:#fff;color:#475569;border:1px solid #e2e8f0;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer">Limpar</button>
+            <span id="ap-msg-salvo" style="font-size:11.5px;color:#15803d"></span>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+            <div style="font-size:13.5px;font-weight:700;color:#272A4A">2 · Fábricas e produtos que serão apresentados</div>
+            <div style="display:flex;gap:10px;align-items:center"><span id="ap-prod-cont" style="font-size:11px;color:#94a3b8"></span><span onclick="_apMarcarProdutos(true)" style="font-size:11px;color:#272A4A;font-weight:700;cursor:pointer">Todos os produtos</span><span onclick="_apMarcarProdutos(false)" style="font-size:11px;color:#94a3b8;font-weight:700;cursor:pointer">Nenhum</span></div>
+          </div>
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Marque as fábricas; os produtos de cada uma aparecem abaixo para escolher (entram na "Ficha do produto").</div>
+          <div id="ap-forns" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
+          <div id="ap-prods" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div style="font-size:13.5px;font-weight:700;color:#272A4A;margin-bottom:10px">3 · Números e conteúdo</div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+            <span style="font-size:11px;font-weight:600;color:#64748b">Base dos números (faturamento, ticket médio, evolução)</span>
+            <select id="ap-per" onchange="_apRender()" class="ap-in" style="width:auto"><option value="12m">Últimos 12 meses</option><option value="6m">Últimos 6 meses</option><option value="ano">Ano atual</option></select>
+            <span style="font-size:11px;color:#94a3b8">Carteira inteira das fábricas marcadas, em pedidos faturados</span>
+          </div>
+          <div style="margin-bottom:10px"><div class="ap-lb">Condições comerciais (opcional — vira um slide)</div><textarea id="ap-cond" rows="2" class="ap-in" placeholder="Ex.: pedido mínimo, prazo de pagamento, frete, política de troca..." oninput="_apRender()"></textarea></div>
+          <div style="display:grid;grid-template-columns:290px 1fr;gap:16px;align-items:start">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div class="ap-lb" style="margin:0">Slides (sugeridos para o tipo)</div><span id="ap-sl-cont" style="font-size:11px;color:#94a3b8"></span></div><div id="ap-slides-lista" style="display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto"></div></div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:14px;background:#f8fafc">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.03em">Prévia do slide</div><span id="ap-prev-cont" style="font-size:11px;color:#94a3b8;font-weight:600">—</span></div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <button onclick="_apNav(-1)" class="ap-nav">&#8592;</button>
+                <div id="ap-prev" class="apr-slide" style="flex:1"></div>
+                <button onclick="_apNav(1)" class="ap-nav">&#8594;</button>
+              </div>
+              <div id="ap-thumbs" style="display:flex;gap:6px;margin-top:12px;overflow-x:auto;padding-bottom:2px"></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:14px"><span id="ap-msg" style="font-size:12px"></span><button onclick="_apGerarPPT()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">Gerar PowerPoint</button></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><div style="font-size:13.5px;font-weight:700;color:#272A4A">Clientes novos</div><span id="ap-lista-cont" style="font-size:11px;color:#94a3b8"></span></div>
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Prospects salvos neste navegador. "Apresentar" carrega o cliente no formulário acima.</div>
+          <div id="ap-lista"></div>
+        </div>
+      </div>
+      <div id="apres-modo-atual">
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.05)">
         <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
         <select id="apres-rede" onchange="_apresPreviewIdx=0;_apresAtualizarSubcategorias();_apresRenderPreview()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b"><option value="">Selecione...</option></select>
@@ -5906,6 +5966,7 @@
         </div>
       </div>
       <div id="apres-msg" style="font-size:12px;margin-bottom:10px;min-height:16px;text-align:right"></div>
+      </div>
     </div>
 
     <div id="page-sugestao-pedido" class="app-page">
@@ -9463,7 +9524,7 @@ function showPage(pageId, params) {
   if (pageId === 'page-grupo-form')      openGrupoForm(params || {});
   if (pageId === 'page-permissoes-form') openPermissoesForm();
   if (pageId === 'page-relatorios') { document.getElementById('rel-lista-view').style.display = 'block'; document.getElementById('rel-tipo-view').style.display = 'none'; document.getElementById('rel-detalhe-view').style.display = 'none'; _relPopularFiltros(); }
-  if (pageId === 'page-apresentacoes') _apresPopularFiltros();
+  if (pageId === 'page-apresentacoes') { _apresPopularFiltros(); if (document.getElementById('apres-modo-prosp') && document.getElementById('apres-modo-prosp').style.display !== 'none') _apPopular(); }
   if (pageId === 'page-sugestao-pedido') _sugPopularFiltros();
   if (pageId === 'page-bloqueios-pedidos') { _bloqPopularFiltros(); renderBloqueios(); }
   if (pageId === 'page-dados-representadas') _drPopularFiltros();
@@ -29207,6 +29268,296 @@ function gerarApresentacaoPPT() {
     msg.style.color = '#dc2626';
     msg.textContent = 'Erro ao gerar apresentação: ' + (err && err.message ? err.message : err);
   });
+}
+
+// ═══════════════════════════════════════════════════
+// APRESENTAÇÃO DE PROSPECÇÃO (cliente novo) — v34
+// ═══════════════════════════════════════════════════
+var _AP_TIPOS = {
+  varejo:      { nome: 'Varejo / Supermercado', slides: ['quem','fabricas','ficha','numeros','top','porque','pedido','proximos'],
+    porque: ['Mix de marcas reconhecidas para a gôndola e o balcão de frios','Itens de giro para aumentar o ticket da loja','Atendimento próximo: o vendedor acompanha a loja e a reposição','Pedido simples, com acompanhamento até a entrega'] },
+  distribuidor:{ nome: 'Distribuidor', slides: ['quem','fabricas','ficha','numeros','evolucao','top','condicoes','porque','pedido','proximos'],
+    porque: ['Linha de várias fábricas em um único atendimento','Marcas com demanda na região para ampliar seu portfólio','Representação com cobertura no Nordeste','Acompanhamento comercial e de entrega no pós-venda'] },
+  atacado:     { nome: 'Atacado / Atacarejo', slides: ['quem','fabricas','ficha','numeros','evolucao','top','condicoes','porque','pedido','proximos'],
+    porque: ['Produtos de giro para o autosserviço atacadista','Embalagens em caixa para operação de volume','Condições negociadas por volume','Suporte da equipe em ruptura e reposição'] },
+  foodservice: { nome: 'Food Service', slides: ['quem','fabricas','ficha','numeros','porque','pedido','condicoes','proximos'],
+    porque: ['Embalagens pensadas para cozinha e produção','Qualidade consistente de lote para lote','Sugestões de uso para o cardápio','Entrega programada e acompanhamento do pedido'] },
+  padaria:     { nome: 'Padaria / Empório', slides: ['quem','fabricas','ficha','top','porque','pedido','proximos'],
+    porque: ['Queijos e laticínios selecionados para vitrine e produção','Diferencial para atrair o cliente da padaria/empório','Pedidos menores e frequentes, atendidos pelo vendedor','Material de apoio para exposição dos produtos'] }
+};
+var _AP_SLIDES = {
+  quem: 'Quem somos', fabricas: 'Fábricas representadas', ficha: 'Ficha do produto', numeros: 'Nossos números',
+  evolucao: 'Evolução de vendas', top: 'Produtos mais vendidos', condicoes: 'Condições comerciais',
+  porque: 'Por que trabalhar com a gente', pedido: 'Como funciona o pedido', proximos: 'Próximos passos'
+};
+var _AP_ORDEM = ['quem','fabricas','ficha','numeros','evolucao','top','condicoes','porque','pedido','proximos'];
+var _AP_STATUS = ['Novo','Apresentação enviada','Em negociação','Virou cliente','Sem interesse'];
+var _apS = { tipo: 'varejo', forns: {}, prods: {}, slides: {}, idx: 0, prospectId: null };
+
+function getProspects() { try { return JSON.parse(localStorage.getItem('prospects_novos') || '[]'); } catch (e) { return []; } }
+function setProspects(l) { localStorage.setItem('prospects_novos', JSON.stringify(l)); }
+
+function _apModo(m) {
+  var p = m === 'prosp';
+  document.getElementById('apres-modo-prosp').style.display = p ? '' : 'none';
+  document.getElementById('apres-modo-atual').style.display = p ? 'none' : '';
+  var a = document.getElementById('apm-atual'), b = document.getElementById('apm-prosp');
+  a.style.background = p ? '#fff' : '#272A4A'; a.style.color = p ? '#334155' : '#fff'; a.style.borderColor = p ? '#e2e8f0' : '#272A4A';
+  b.style.background = p ? '#272A4A' : '#fff'; b.style.color = p ? '#fff' : '#334155'; b.style.borderColor = p ? '#272A4A' : '#e2e8f0';
+  if (p) _apPopular();
+}
+
+function _apSlidesDoTipo(t) { _apS.slides = {}; (_AP_TIPOS[t].slides || []).forEach(function(s){ _apS.slides[s] = true; }); }
+
+function _apPopular() {
+  if (!document.getElementById('ap-tipos')) return;
+  if (!Object.keys(_apS.slides).length) _apSlidesDoTipo(_apS.tipo);
+  var dl = document.getElementById('ap-vend-list');
+  if (dl) { try { dl.innerHTML = getUsuariosSistema().map(function(u){ return '<option value="' + _apresEscHtml(u.nome || u.login || '') + '">'; }).join(''); } catch (e) {} }
+  _apRenderTipos(); _apRenderForns(); _apRenderProdutos(); _apRenderSlidesLista(); _apRenderLista(); _apRender();
+}
+
+function _apRenderTipos() {
+  document.getElementById('ap-tipos').innerHTML = Object.keys(_AP_TIPOS).map(function(k){
+    var on = _apS.tipo === k;
+    return '<button onclick="_apSetTipo(\'' + k + '\')" style="border:1px solid ' + (on ? '#272A4A' : '#e2e8f0') + ';background:' + (on ? '#272A4A' : '#fff') + ';color:' + (on ? '#fff' : '#334155') + ';border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">' + _apresEscHtml(_AP_TIPOS[k].nome) + '</button>';
+  }).join('');
+}
+function _apSetTipo(k) { _apS.tipo = k; _apSlidesDoTipo(k); _apS.idx = 0; _apRenderTipos(); _apRenderSlidesLista(); _apRender(); }
+
+function _apFornecedoresAtivos() { return getFornecedores().filter(function(f){ return (f.ativo || 'Sim') !== 'Não'; }); }
+function _apFornNome(f) { return _cpSemColchetes(f.nome_fantasia || f.razao_social || ''); }
+
+function _apRenderForns() {
+  document.getElementById('ap-forns').innerHTML = _apFornecedoresAtivos().map(function(f){
+    var on = !!_apS.forns[f.id];
+    return '<label style="display:flex;align-items:center;gap:6px;border:1px solid ' + (on ? '#272A4A' : '#e2e8f0') + ';background:' + (on ? '#eef2ff' : '#fff') + ';border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;color:#1e293b"><input type="checkbox" ' + (on ? 'checked' : '') + ' onchange="_apToggleForn(\'' + f.id + '\',this.checked)">' + _apresEscHtml(_apFornNome(f)) + '</label>';
+  }).join('') || '<span style="font-size:12px;color:#94a3b8">Nenhum fornecedor cadastrado.</span>';
+}
+function _apToggleForn(id, v) {
+  if (v) _apS.forns[id] = true; else { delete _apS.forns[id]; getProdutos().forEach(function(p){ if (String(p.fornecedor) === String(id)) delete _apS.prods[p.id]; }); }
+  _apS.idx = 0; _apRenderForns(); _apRenderProdutos(); _apRender();
+}
+
+function _apProdutosDasFabricas() {
+  return getProdutos().filter(function(p){ return _apS.forns[p.fornecedor] && (p.ativo || 'Sim') !== 'Não'; });
+}
+function _apRenderProdutos() {
+  var box = document.getElementById('ap-prods');
+  var fornIds = Object.keys(_apS.forns);
+  if (!fornIds.length) { box.innerHTML = '<div style="text-align:center;padding:16px;color:#94a3b8;font-size:12px">Marque uma ou mais fábricas acima para ver os produtos.</div>'; _apContProd(); return; }
+  var html = '';
+  fornIds.forEach(function(fid){
+    var f = getFornecedores().find(function(x){ return String(x.id) === String(fid); }) || {};
+    var itens = getProdutos().filter(function(p){ return String(p.fornecedor) === String(fid) && (p.ativo || 'Sim') !== 'Não'; }).sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'','pt-BR'); });
+    html += '<div><div style="font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">' + _apresEscHtml(_apFornNome(f)) + ' (' + itens.length + ')</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">'
+      + itens.map(function(p){ return '<label style="display:flex;align-items:center;gap:8px;border:1px solid #e2e8f0;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:12px"><input type="checkbox" ' + (_apS.prods[p.id] ? 'checked' : '') + ' onchange="_apToggleProd(\'' + p.id + '\',this.checked)"><span>' + (p.codigo ? '<b style="color:#272A4A">' + _apresEscHtml(p.codigo) + '</b> ' : '') + _apresEscHtml(p.nome || '') + '</span></label>'; }).join('')
+      + '</div></div>';
+  });
+  box.innerHTML = html; _apContProd();
+}
+function _apContProd() { var el = document.getElementById('ap-prod-cont'); if (el) { var n = Object.keys(_apS.prods).length; el.textContent = n + ' produto' + (n === 1 ? '' : 's') + ' selecionado' + (n === 1 ? '' : 's'); } }
+function _apToggleProd(id, v) { if (v) _apS.prods[id] = true; else delete _apS.prods[id]; _apContProd(); _apRender(); }
+function _apMarcarProdutos(v) { _apProdutosDasFabricas().forEach(function(p){ if (v) _apS.prods[p.id] = true; else delete _apS.prods[p.id]; }); _apRenderProdutos(); _apRender(); }
+
+function _apRenderSlidesLista() {
+  var sug = {}; (_AP_TIPOS[_apS.tipo].slides || []).forEach(function(s){ sug[s] = true; });
+  document.getElementById('ap-slides-lista').innerHTML = '<div style="font-size:10.5px;color:#94a3b8">A capa sempre entra.</div>' + _AP_ORDEM.map(function(s){
+    var on = !!_apS.slides[s];
+    return '<label style="display:flex;gap:9px;align-items:center;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;cursor:pointer;background:' + (on ? '#f8fafc' : '#fff') + ';opacity:' + (on ? 1 : .6) + '"><input type="checkbox" ' + (on ? 'checked' : '') + ' onchange="_apToggleSlide(\'' + s + '\',this.checked)"><span style="font-size:12px;font-weight:700;color:#1e293b;flex:1">' + _AP_SLIDES[s] + '</span>' + (sug[s] ? '<span style="font-size:9px;font-weight:800;color:#DE7926;background:#FAEEDA;border-radius:4px;padding:1px 5px">SUGERIDO</span>' : '') + '</label>';
+  }).join('');
+  var n = Object.keys(_apS.slides).filter(function(k){ return _apS.slides[k]; }).length;
+  var c = document.getElementById('ap-sl-cont'); if (c) c.textContent = n + ' de ' + _AP_ORDEM.length;
+}
+function _apToggleSlide(s, v) { _apS.slides[s] = v; _apRenderSlidesLista(); _apRender(); }
+
+// ---------- dados ----------
+function _apISO(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function _apPeriodo() {
+  var v = document.getElementById('ap-per') ? document.getElementById('ap-per').value : '12m';
+  var hoje = new Date(), de = new Date(hoje);
+  if (v === 'ano') de = new Date(hoje.getFullYear(), 0, 1);
+  else { var n = v === '6m' ? 5 : 11; de = new Date(hoje.getFullYear(), hoje.getMonth() - n, 1); }
+  return { de: _apISO(de), ate: _apISO(hoje), txt: v === 'ano' ? 'Ano ' + hoje.getFullYear() : (v === '6m' ? 'Últimos 6 meses' : 'Últimos 12 meses') };
+}
+function _apDados() {
+  var per = _apPeriodo();
+  var cliMap = {}; getClientes().forEach(function(c){ cliMap[c.id] = c; });
+  var prodMap = {}; getProdutos().forEach(function(p){ prodMap[p.id] = p; });
+  var fat = 0, peds = {}, clis = {}, porMes = {}, porProd = {};
+  getPedidos().forEach(function(p){
+    if (!_apS.forns[p.fornecedorId]) return;
+    var cli = cliMap[p.clienteId] || {};
+    if (!_appClienteVisivelUF(cli)) return;
+    (p.faturas || []).forEach(function(f){
+      if (f.status === 'Cancelado') return;
+      if (!f.data || f.data < per.de || f.data > per.ate) return;
+      var v = Number(f.valor) || 0; fat += v; peds[p.id] = true; clis[p.clienteId || p.clienteNome] = true;
+      var m = f.data.slice(0,7); porMes[m] = (porMes[m] || 0) + v;
+      (f.itens || []).forEach(function(it){
+        var k = it.prodId || it.prodCodigo; if (!porProd[k]) porProd[k] = { nome: it.prodNome || (prodMap[it.prodId] || {}).nome || '', valor: 0 };
+        porProd[k].valor += (Number(it.qtd) || 0) * (Number(it.precoFat) || 0);
+      });
+    });
+  });
+  var nPed = Object.keys(peds).length;
+  var meses = [], d0 = new Date(per.de + 'T00:00:00'), d1 = new Date(per.ate + 'T00:00:00');
+  for (var d = new Date(d0.getFullYear(), d0.getMonth(), 1); d <= d1; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) meses.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
+  return { per: per, fat: fat, nPed: nPed, ticket: nPed ? fat / nPed : 0, nCli: Object.keys(clis).length, porMes: porMes, meses: meses,
+    top: Object.keys(porProd).map(function(k){ return porProd[k]; }).sort(function(a,b){ return b.valor - a.valor; }).slice(0,5) };
+}
+function _apBRL(v) { return 'R$ ' + (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function _apBRL0(v) { return 'R$ ' + Math.round(Number(v) || 0).toLocaleString('pt-BR'); }
+function _apForm() {
+  var g = function(id){ var e = document.getElementById(id); return e ? e.value.trim() : ''; };
+  return { nome: g('ap-nome'), cidade: g('ap-cidade'), vendedor: g('ap-vendedor'), cond: g('ap-cond') };
+}
+function _apFornsSel() { return _apFornecedoresAtivos().filter(function(f){ return _apS.forns[f.id]; }); }
+function _apFichaPaginas() {
+  var prods = _apProdutosDasFabricas().filter(function(p){ return _apS.prods[p.id]; }), fMap = {};
+  getFornecedores().forEach(function(f){ fMap[f.id] = _apFornNome(f); });
+  var grupos = {}; prods.forEach(function(p){ var k = fMap[p.fornecedor] || ''; (grupos[k] = grupos[k] || []).push(p); });
+  var pags = [];
+  Object.keys(grupos).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); }).forEach(function(forn){
+    var it = grupos[forn].sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'','pt-BR'); }), tot = Math.ceil(it.length / 6);
+    for (var o = 0; o < it.length; o += 6) pags.push({ forn: forn, pag: o/6 + 1, tot: tot, itens: it.slice(o, o + 6) });
+  });
+  return pags;
+}
+function _apInfoProd(p) {
+  var a = []; if (p.ean) a.push('EAN: ' + p.ean); if (p.shelf) a.push('Shelf life: ' + p.shelf); if (p.quant) a.push('Qtd/Cx: ' + p.quant + (p.unidade ? ' ' + p.unidade : '')); if (p.peso) a.push('Peso: ' + p.peso);
+  return a;
+}
+function _apTituloCapa() { var f = _apForm(); return f.nome ? 'Apresentação comercial — ' + f.nome : 'Apresentação comercial'; }
+
+// ---------- prévia ----------
+function _apSlidesPrev() {
+  var f = _apForm(), tipo = _AP_TIPOS[_apS.tipo], d = _apDados(), fs = _apFornsSel(), out = [];
+  out.push({ nome: 'Capa', html: _apresPreviewCapaHtml(_apTituloCapa(), tipo.nome + (f.vendedor ? ' · ' + f.vendedor : ''), '', '') });
+  var H = function(t){ return _apresPreviewCabecalhoAbre(t, '', ''); }, F = _apresPreviewFecha;
+  var on = function(k){ return !!_apS.slides[k]; };
+  if (on('quem')) out.push({ nome: 'Quem somos', html: H('Quem somos') + '<div style="width:100%"><div style="font-size:11px;color:#334155;line-height:1.5;margin-bottom:10px">Representação comercial de alimentos no Nordeste (PE, PB, RN, AL, BA e SE), ligando fábricas e clientes com atendimento próximo.</div><div class="apr-kpi-row">' + _apresPreviewKpiCard('Fábricas', String(fs.length || '—')) + _apresPreviewKpiCard('Clientes atendidos', String(d.nCli)) + _apresPreviewKpiCard('Pedidos faturados', String(d.nPed)) + '</div></div>' + F() });
+  if (on('fabricas')) out.push({ nome: 'Fábricas', html: H('Fábricas representadas') + (fs.length ? '<div class="apr-prodgrid" style="align-content:start;grid-auto-rows:min-content">' + fs.map(function(x){ return '<div class="apr-prodcard">' + (x.foto ? '<img src="' + x.foto + '">' : '') + '<div class="apr-pnome">' + _apresEscHtml(_apFornNome(x)) + '</div></div>'; }).join('') + '</div>' : '<div class="apr-empty">Marque as fábricas no passo 2.</div>') + F() });
+  if (on('ficha')) {
+    var pags = _apFichaPaginas();
+    if (!pags.length) out.push({ nome: 'Ficha do produto', html: H('Ficha do produto') + '<div class="apr-empty">Escolha produtos no passo 2.</div>' + F() });
+    pags.forEach(function(g){ out.push({ nome: 'Ficha ' + g.forn, html: H('Ficha do produto — ' + g.forn + (g.tot > 1 ? ' (' + g.pag + '/' + g.tot + ')' : '')) + '<div class="apr-prodgrid" style="align-content:start;grid-auto-rows:min-content">' + g.itens.map(function(p){ return '<div class="apr-prodcard">' + (p.foto ? '<img src="' + p.foto + '">' : '') + '<div class="apr-pnome">' + (p.codigo ? _apresEscHtml(p.codigo) + ' — ' : '') + _apresEscHtml(p.nome || '') + '</div><div style="font-size:8px;color:#64748b">' + _apresEscHtml(_apInfoProd(p).join(' · ')) + '</div></div>'; }).join('') + '</div>' + F() }); });
+  }
+  if (on('numeros')) out.push({ nome: 'Números', html: H('Nossos números · ' + d.per.txt) + '<div class="apr-kpi-row">' + _apresPreviewKpiCard('Faturamento', _apBRL0(d.fat)) + _apresPreviewKpiCard('Ticket médio por pedido', _apBRL(d.ticket)) + _apresPreviewKpiCard('Pedidos', String(d.nPed)) + _apresPreviewKpiCard('Clientes atendidos', String(d.nCli)) + '</div>' + F() });
+  if (on('evolucao')) { var mx = Math.max.apply(null, d.meses.map(function(m){ return d.porMes[m] || 0; }).concat([1])); out.push({ nome: 'Evolução', html: H('Evolução de vendas · ' + d.per.txt) + '<div class="apr-chart">' + d.meses.map(function(m){ var v = d.porMes[m] || 0; return '<div class="apr-mbar" style="height:' + Math.max(3, Math.round(v / mx * 100)) + '%"><span class="apr-mlbl">' + m.slice(5) + '/' + m.slice(2,4) + '</span></div>'; }).join('') + '</div>' + F() }); }
+  if (on('top')) out.push({ nome: 'Top produtos', html: H('Produtos mais vendidos') + _apresPreviewTabelaHtml(d.top.map(function(p){ return [p.nome, _apBRL0(p.valor)]; }), true) + F() });
+  if (on('condicoes')) out.push({ nome: 'Condições', html: H('Condições comerciais') + (f.cond ? _apresPreviewObsHtml(f.cond) : '<div class="apr-empty">Preencha as condições comerciais no passo 3.</div>') + F() });
+  if (on('porque')) out.push({ nome: 'Por que', html: H('Por que trabalhar com a gente') + '<div class="apr-ranklist">' + tipo.porque.map(function(t){ return '<div class="apr-rankrow"><span class="apr-pos">✓</span><span class="apr-nm" style="white-space:normal">' + _apresEscHtml(t) + '</span></div>'; }).join('') + '</div>' + F() });
+  if (on('pedido')) out.push({ nome: 'Como funciona', html: H('Como funciona o pedido') + '<div class="apr-kpi-row">' + ['Apresentamos o mix e as condições','Cadastro e análise do cliente','Pedido enviado à fábrica','Faturamento e entrega acompanhados'].map(function(t,i){ return _apresPreviewKpiCard('Passo ' + (i+1), t); }).join('') + '</div>' + F() });
+  if (on('proximos')) out.push({ nome: 'Próximos passos', html: H('Próximos passos') + '<div class="apr-ranklist">' + ['Definir os produtos para o primeiro pedido','Enviar documentos para cadastro','Combinar a data da primeira entrega'].map(function(t,i){ return '<div class="apr-rankrow"><span class="apr-pos">' + (i+1) + '</span><span class="apr-nm" style="white-space:normal">' + t + '</span></div>'; }).join('') + '</div>' + (f.vendedor ? '<div style="font-size:11px;color:#475569;margin-top:8px">Seu contato: <b>' + _apresEscHtml(f.vendedor) + '</b></div>' : '') + F() });
+  return out;
+}
+function _apRender() {
+  var painel = document.getElementById('ap-prev'); if (!painel) return;
+  var sl; try { sl = _apSlidesPrev(); } catch (e) { sl = null; console.error(e); }
+  var c = document.getElementById('ap-prev-cont'), th = document.getElementById('ap-thumbs');
+  if (!sl || !sl.length) { painel.innerHTML = '<div class="apr-empty" style="height:100%">Sem prévia.</div>'; return; }
+  if (_apS.idx >= sl.length) _apS.idx = sl.length - 1;
+  if (_apS.idx < 0) _apS.idx = 0;
+  painel.innerHTML = sl[_apS.idx].html;
+  if (c) c.textContent = 'Slide ' + (_apS.idx + 1) + ' de ' + sl.length;
+  if (th) th.innerHTML = sl.map(function(s, i){ return '<div class="apr-thumb' + (i === _apS.idx ? ' on' : '') + '" onclick="_apIr(' + i + ')" title="' + _apresEscHtml(s.nome) + '"></div>'; }).join('');
+}
+function _apIr(i) { _apS.idx = i; _apRender(); }
+function _apNav(d) { _apS.idx += d; _apRender(); }
+
+// ---------- prospects ----------
+function _apSalvarProspect(silencioso) {
+  var f = _apForm(), msg = document.getElementById('ap-msg-salvo');
+  if (!f.nome) { if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Informe o nome ou CNPJ do cliente.'; } return null; }
+  var l = getProspects(), r = l.find(function(x){ return x.id === _apS.prospectId; });
+  if (!r) { r = { id: 'pr' + Date.now(), status: 'Novo', criado: _apISO(new Date()), ultima: '' }; l.push(r); _apS.prospectId = r.id; }
+  r.nome = f.nome; r.cidade = f.cidade; r.vendedor = f.vendedor; r.tipo = _apS.tipo;
+  setProspects(l); _apRenderLista();
+  if (msg && !silencioso) { msg.style.color = '#15803d'; msg.textContent = 'Salvo em Clientes novos.'; }
+  return r;
+}
+function _apLimparForm() { ['ap-nome','ap-cidade','ap-vendedor'].forEach(function(i){ document.getElementById(i).value = ''; }); _apS.prospectId = null; var m = document.getElementById('ap-msg-salvo'); if (m) m.textContent = ''; _apRender(); }
+function _apCarregar(id) {
+  var r = getProspects().find(function(x){ return x.id === id; }); if (!r) return;
+  _apS.prospectId = id; document.getElementById('ap-nome').value = r.nome || ''; document.getElementById('ap-cidade').value = r.cidade || ''; document.getElementById('ap-vendedor').value = r.vendedor || '';
+  if (r.tipo && _AP_TIPOS[r.tipo]) { _apS.tipo = r.tipo; _apSlidesDoTipo(r.tipo); _apRenderTipos(); _apRenderSlidesLista(); }
+  _apRender(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function _apStatus(id, v) { var l = getProspects(); l.forEach(function(x){ if (x.id === id) x.status = v; }); setProspects(l); _apRenderLista(); }
+function _apExcluir(id) { if (!confirm('Excluir este cliente novo da lista?')) return; setProspects(getProspects().filter(function(x){ return x.id !== id; })); if (_apS.prospectId === id) _apS.prospectId = null; _apRenderLista(); }
+function _apRenderLista() {
+  var l = getProspects().slice().reverse(), box = document.getElementById('ap-lista'); if (!box) return;
+  var c = document.getElementById('ap-lista-cont'); if (c) c.textContent = l.length + ' cadastrado' + (l.length === 1 ? '' : 's');
+  if (!l.length) { box.innerHTML = '<div style="text-align:center;padding:16px;color:#94a3b8;font-size:12px">Nenhum cliente novo ainda. Preencha o passo 1 e clique em "Salvar em Clientes novos".</div>'; return; }
+  var td = 'padding:8px 10px;border-top:1px solid #f1f5f9;font-size:12px;color:#1e293b';
+  box.innerHTML = '<table style="width:100%;border-collapse:collapse"><thead><tr style="text-align:left;font-size:10px;color:#94a3b8;text-transform:uppercase"><th style="padding:6px 10px">Nome / CNPJ</th><th style="padding:6px 10px">Tipo</th><th style="padding:6px 10px">Cidade</th><th style="padding:6px 10px">Vendedor</th><th style="padding:6px 10px">Última apres.</th><th style="padding:6px 10px">Status</th><th></th></tr></thead><tbody>' + l.map(function(r){
+    return '<tr><td style="' + td + ';font-weight:700">' + _apresEscHtml(r.nome) + '</td><td style="' + td + '">' + _apresEscHtml((_AP_TIPOS[r.tipo] || {}).nome || '—') + '</td><td style="' + td + '">' + _apresEscHtml(r.cidade || '—') + '</td><td style="' + td + '">' + _apresEscHtml(r.vendedor || '—') + '</td><td style="' + td + '">' + (r.ultima ? r.ultima.split('-').reverse().join('/') : '—') + '</td>'
+      + '<td style="' + td + '"><select onchange="_apStatus(\'' + r.id + '\',this.value)" style="border:1px solid #e2e8f0;border-radius:6px;padding:4px 6px;font-size:11.5px">' + _AP_STATUS.map(function(s){ return '<option' + (s === r.status ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></td>'
+      + '<td style="' + td + ';white-space:nowrap"><button onclick="_apCarregar(\'' + r.id + '\')" style="background:#272A4A;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer">Apresentar</button> <button onclick="_apExcluir(\'' + r.id + '\')" style="background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:6px;padding:5px 9px;font-size:11px;cursor:pointer">Excluir</button></td></tr>';
+  }).join('') + '</tbody></table>';
+}
+
+// ---------- PowerPoint ----------
+function _apGerarPPT() {
+  var msg = document.getElementById('ap-msg'); msg.style.color = '#dc2626';
+  if (typeof PptxGenJS === 'undefined') { msg.textContent = 'Biblioteca de PowerPoint não carregou. Verifique a internet e tente de novo.'; return; }
+  var f = _apForm();
+  if (!f.nome) { msg.textContent = 'Informe o nome ou CNPJ do cliente novo (passo 1).'; return; }
+  if (!Object.keys(_apS.forns).length) { msg.textContent = 'Marque ao menos uma fábrica (passo 2).'; return; }
+  msg.style.color = '#64748b'; msg.textContent = 'Gerando apresentação...';
+  var pr = _apSalvarProspect(true);
+  var fs = _apFornsSel(), pags = _apS.slides.ficha ? _apFichaPaginas() : [], flat = [];
+  pags.forEach(function(g){ g.itens.forEach(function(p){ flat.push(p); }); });
+  Promise.all(fs.map(function(x){ return _apresCarregarImagem(x.foto || ''); }).concat(flat.map(function(p){ return _apresCarregarImagem(p.foto || ''); }))).then(function(imgs){
+    var logos = imgs.slice(0, fs.length); var mapImg = {}; flat.forEach(function(p, i){ mapImg[p.id] = imgs[fs.length + i]; });
+    try {
+      var pptx = _apMontarPptx(f, fs, logos, pags, mapImg);
+      var nome = 'Apresentacao_Prospeccao_' + f.nome.replace(/[^a-zA-Z0-9]+/g, '_').slice(0, 40) + '.pptx';
+      pptx.writeFile({ fileName: nome });
+      if (pr) { var l = getProspects(); l.forEach(function(x){ if (x.id === pr.id) { x.ultima = _apISO(new Date()); if (x.status === 'Novo') x.status = 'Apresentação enviada'; } }); setProspects(l); _apRenderLista(); }
+      msg.style.color = '#15803d'; msg.textContent = 'Apresentação gerada com sucesso!';
+    } catch (err) { msg.style.color = '#dc2626'; msg.textContent = 'Erro ao gerar apresentação: ' + (err && err.message ? err.message : err); }
+  }).catch(function(err){ msg.style.color = '#dc2626'; msg.textContent = 'Erro ao gerar apresentação: ' + (err && err.message ? err.message : err); });
+}
+function _apMontarPptx(f, fs, logos, pags, mapImg) {
+  var pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_16x9';
+  var tipo = _AP_TIPOS[_apS.tipo], d = _apDados(), on = function(k){ return !!_apS.slides[k]; };
+  var s1 = pptx.addSlide(); s1.background = { color: 'FFFFFF' };
+  s1.addShape('roundRect', { x:8.9, y:-1.2, w:2.4, h:2.4, rectRadius:0.32, fill:{ color:'FAEEDA' }, line:{ type:'none' }, rotate:45 });
+  s1.addShape('roundRect', { x:-0.7, y:5.0, w:1.2, h:1.2, rectRadius:0.18, fill:{ color:'272A4A' }, line:{ type:'none' }, rotate:45 });
+  s1.addText('Compartilhar', { x:0.6, y:0.48, w:5, h:0.42, fontSize:18, bold:true, color:'272A4A', fontFace:'Arial' });
+  s1.addText([{ text:'vendas', options:{ color:'D82621', bold:true } }, { text:' | ', options:{ color:'CBD5E1' } }, { text:'promo', options:{ color:'DE7926', bold:true } }], { x:0.6, y:0.9, w:5, h:0.3, fontSize:10, fontFace:'Arial' });
+  s1.addShape('rect', { x:0.6, y:1.65, w:1.2, h:0.06, fill:{ color:'D82621' }, line:{ type:'none' } });
+  s1.addShape('rect', { x:1.85, y:1.65, w:0.6, h:0.06, fill:{ color:'DE7926' }, line:{ type:'none' } });
+  s1.addText('Apresentação comercial', { x:0.6, y:1.85, w:8.8, h:0.6, fontSize:26, bold:true, color:'272A4A', fontFace:'Arial' });
+  s1.addText('Preparada para ' + f.nome, { x:0.6, y:2.5, w:8.8, h:0.5, fontSize:16, color:'334155', fontFace:'Arial' });
+  s1.addText(tipo.nome + (f.cidade ? ' · ' + f.cidade : '') + (f.vendedor ? ' · ' + f.vendedor : ''), { x:0.6, y:3.0, w:8.8, h:0.4, fontSize:12, color:'64748B', fontFace:'Arial' });
+  var xl = 0.6; logos.forEach(function(lg){ if (!lg) return; var b = _apresCaixaProporcional(lg, 1.6, 0.9); s1.addImage({ data: lg.data, x: xl, y: 3.7 + (0.9 - b.h) / 2, w: b.w, h: b.h }); xl += b.w + 0.3; });
+  var C = function(t){ var s = pptx.addSlide(); _apresCabecalho(s, t, null, null); return s; };
+  if (on('quem')) { var s = C('Quem somos');
+    s.addText('Representação comercial de alimentos no Nordeste (PE, PB, RN, AL, BA e SE), ligando fábricas e clientes com atendimento próximo.', { x:0.5, y:1.15, w:9, h:0.9, fontSize:14, color:'334155', fontFace:'Arial', valign:'top' });
+    _apresCards(s, [{ label:'Fábricas representadas', valor: String(fs.length) }, { label:'Clientes atendidos', valor: String(d.nCli) }, { label:'Pedidos faturados', valor: String(d.nPed) }], 2.3); }
+  if (on('fabricas')) { var sf = C('Fábricas representadas'); var cw = 2.8, gx = 0.3;
+    fs.forEach(function(x, i){ var col = i % 3, lin = Math.floor(i / 3), px = 0.5 + col * (cw + gx), py = 1.2 + lin * 1.6;
+      sf.addShape('roundRect', { x:px, y:py, w:cw, h:1.4, fill:{ color:'F8FAFC' }, line:{ color:'E2E8F0', width:0.75 }, rectRadius:0.06 });
+      var lg = logos[i]; if (lg) { var b = _apresCaixaProporcional(lg, cw - 0.5, 0.75); sf.addImage({ data: lg.data, x: px + (cw - b.w) / 2, y: py + 0.12 + (0.75 - b.h) / 2, w: b.w, h: b.h }); }
+      sf.addText(_apFornNome(x), { x:px+0.1, y:py+0.95, w:cw-0.2, h:0.35, fontSize:11, bold:true, color:'1E293B', fontFace:'Arial', align:'center' }); }); }
+  if (on('ficha')) { if (!pags.length) { var se = C('Ficha do produto'); se.addText('Nenhum produto selecionado.', { x:0.5, y:2.2, w:9, h:0.6, fontSize:14, color:'94A3B8', fontFace:'Arial' }); }
+    pags.forEach(function(g){ var sp = C('Ficha do produto — ' + g.forn + (g.tot > 1 ? ' (' + g.pag + '/' + g.tot + ')' : ''));
+      _apresGradeProdutos(sp, g.itens.map(function(p){ return { codigo: p.codigo || '', nome: p.nome || '', ean: p.ean || '', shelf: p.shelf || '', quant: p.quant || '', unidade: p.unidade || '', imagem: mapImg[p.id] }; })); }); }
+  if (on('numeros')) { var sn = C('Nossos números · ' + d.per.txt);
+    _apresCards(sn, [{ label:'Faturamento', valor: _apBRL0(d.fat) }, { label:'Ticket médio por pedido', valor: _apBRL(d.ticket) }, { label:'Pedidos', valor: String(d.nPed) }, { label:'Clientes atendidos', valor: String(d.nCli) }], 1.3); }
+  if (on('evolucao')) { var sv = C('Evolução de vendas · ' + d.per.txt);
+    sv.addChart(pptx.ChartType.bar, [{ name:'Faturamento', labels: d.meses.map(function(m){ return m.slice(5) + '/' + m.slice(2,4); }), values: d.meses.map(function(m){ return Math.round(d.porMes[m] || 0); }) }], { x:0.5, y:1.15, w:9, h:4.2, barColor:'DE7926', showLegend:false, catAxisLabelColor:'64748B', valAxisLabelColor:'64748B' }); }
+  if (on('top')) { var st = C('Produtos mais vendidos'); _apresTabela(st, ['Produto','Valor faturado'], d.top.map(function(p){ return [p.nome, _apBRL0(p.valor)]; })); }
+  if (on('condicoes') && f.cond) { var sc = C('Condições comerciais'); sc.addShape('rect', { x:0.5, y:1.2, w:9, h:3.3, fill:{ color:'F8FAFC' }, line:{ color:'E2E8F0', width:0.75 } }); sc.addText(f.cond, { x:0.8, y:1.45, w:8.4, h:2.8, fontSize:14, color:'1E293B', fontFace:'Arial', valign:'top' }); }
+  if (on('porque')) { var sp2 = C('Por que trabalhar com a gente'); tipo.porque.forEach(function(t, i){ var py = 1.25 + i * 0.95; sp2.addShape('ellipse', { x:0.55, y:py + 0.05, w:0.5, h:0.5, fill:{ color:'272A4A' }, line:{ type:'none' } }); sp2.addText('✓', { x:0.55, y:py + 0.05, w:0.5, h:0.5, align:'center', valign:'middle', fontSize:16, bold:true, color:'FFFFFF', fontFace:'Arial' }); sp2.addText(t, { x:1.3, y:py, w:8.2, h:0.6, fontSize:15, color:'1E293B', fontFace:'Arial', valign:'middle' }); }); }
+  if (on('pedido')) { var sd = C('Como funciona o pedido'); var passos = ['Apresentamos o mix e as condições','Cadastro e análise do cliente','Pedido enviado à fábrica','Faturamento e entrega acompanhados'];
+    passos.forEach(function(t, i){ var px = 0.5 + i * 2.3; sd.addShape('roundRect', { x:px, y:1.5, w:2.1, h:2.2, fill:{ color:'F8FAFC' }, line:{ color:'E2E8F0', width:0.75 }, rectRadius:0.06 }); sd.addText(String(i + 1), { x:px + 0.15, y:1.62, w:0.6, h:0.5, fontSize:24, bold:true, color:'DE7926', fontFace:'Arial' }); sd.addText(t, { x:px + 0.15, y:2.2, w:1.8, h:1.3, fontSize:12.5, color:'1E293B', fontFace:'Arial', valign:'top' }); }); }
+  if (on('proximos')) { var sx = C('Próximos passos'); ['Definir os produtos para o primeiro pedido','Enviar documentos para cadastro','Combinar a data da primeira entrega'].forEach(function(t, i){ var py = 1.3 + i * 0.85; sx.addShape('ellipse', { x:0.55, y:py, w:0.5, h:0.5, fill:{ color:'DE7926' }, line:{ type:'none' } }); sx.addText(String(i + 1), { x:0.55, y:py, w:0.5, h:0.5, align:'center', valign:'middle', fontSize:14, bold:true, color:'FFFFFF', fontFace:'Arial' }); sx.addText(t, { x:1.3, y:py - 0.05, w:8.2, h:0.6, fontSize:15, color:'1E293B', fontFace:'Arial', valign:'middle' }); });
+    if (f.vendedor) sx.addText('Seu contato: ' + f.vendedor, { x:0.5, y:4.2, w:9, h:0.4, fontSize:13, bold:true, color:'272A4A', fontFace:'Arial' }); }
+  return pptx;
 }
 
 function getApresentacoesGeradas() { return JSON.parse(localStorage.getItem('apresentacoesGeradas') || '[]'); }
