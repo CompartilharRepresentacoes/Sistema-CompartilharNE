@@ -1762,7 +1762,7 @@
       <span style="font-size:13px;font-weight:700;color:#1e293b">Rank de Devolução por Cliente</span>
       <span style="font-size:10.5px;color:#94a3b8;background:#f1f4f9;border-radius:20px;padding:3px 9px">sincronizado aos filtros</span>
     </div>
-    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Ordenado pelo % de devolução sobre o faturamento &middot; clique num cliente para ver os itens mais devolvidos</div>
+    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Ordenado pelo % de devolução das vendas do período sobre o faturamento do período &middot; clique num cliente para ver os itens mais devolvidos</div>
     <div id="dvgDevolRank"></div>
   </div>
   <div class="dg21 dvg-cli-grid" id="dvgCliGrid" style="display:grid;gap:12px;margin-bottom:12px">
@@ -16275,6 +16275,16 @@ function _dashConstruirDadosAoVivo() {
     }
   });
 
+  // v40: data da venda de origem de cada devolucao (casa a NF de origem com a fatura do mesmo cliente+fabrica)
+  var _nfOrigemMap = {};
+  pedidosBase.forEach(function (pedido) {
+    var _ci = idxCliente(pedido.clienteId, pedido.clienteNome), _fi = idxFabrica(pedido.fornecedorId, pedido.fornecedorNome);
+    (pedido.faturas || []).forEach(function (fat) {
+      if (fat.status === 'Cancelado' || !fat.numDuplicata) return;
+      var dt = (fat.data || pedido.data || '').slice(0, 10);
+      if (dt) _nfOrigemMap[_ci + '|' + _fi + '|' + String(fat.numDuplicata).trim().replace(/^0+(?=\d)/, '')] = dt;
+    });
+  });
   var devolucoesBase = (typeof getDevolucoes === 'function') ? getDevolucoes() : [];
   var DEVOL = [];
   var _devolProdUn = {}; try { getProdutos().forEach(function (p) { if (p && p.unidade) _devolProdUn[String(p.id)] = String(p.unidade).trim(); }); } catch (e) {}
@@ -16289,7 +16299,8 @@ function _dashConstruirDadosAoVivo() {
       return { n: it.prodNome || it.prodCodigo || 'Produto', q: Number(it.quantidade) || 0, v: Number(it.valorTotal) || 0, u: _pu };
     });
     var valorTotalDev = Number(dev.totalProdutos) || itensSimples.reduce(function (s, it) { return s + it.v; }, 0);
-    DEVOL.push([dataDev, cIdxD, fIdxD, vIdxD, valorTotalDev, itensSimples]);
+    var _dtOrig = _nfOrigemMap[cIdxD + '|' + fIdxD + '|' + String(dev.nfOrigem || '').trim().replace(/^0+(?=\d)/, '')] || '';
+    DEVOL.push([dataDev, cIdxD, fIdxD, vIdxD, valorTotalDev, itensSimples, _dtOrig]);
   });
 
   var hoje = new Date();
@@ -16490,14 +16501,15 @@ function dashInit() {
       return out;
     }
 
-    function filtraDevolucoes() {
+    function filtraDevolucoes(porOrigem) {
       const ini = state.dtIni, fim = state.dtFim;
       const fabSet = state.fabricas, venSet = state.vendedores, cliSet = state.clientes, ufSet = state.uf;
       const out = [];
       for (let i=0;i<DEVOL.length;i++) {
         const d = DEVOL[i];
         // [data, cli, fab, ven, valor, itens]
-        if (d[0] < ini || d[0] > fim) continue;
+        const _dt = porOrigem ? (d[6] || d[0]) : d[0];
+        if (_dt < ini || _dt > fim) continue;
         if (fabSet.size && !fabSet.has(d[2])) continue;
         if (venSet.size && !venSet.has(d[3])) continue;
         if (ufSet.size) { const _ui = ufIdxOf[CLI_UF[d[1]]]; if (_ui === undefined || !ufSet.has(_ui)) continue; }
@@ -16510,7 +16522,7 @@ function dashInit() {
     function _dvgRenderRankDevolucao(arrClientes) {
       const el = document.getElementById('dvgDevolRank');
       if (!el) return;
-      const devs = filtraDevolucoes();
+      const devs = filtraDevolucoes(true); // v40: so devolucao de vendas do proprio periodo
       const fatPorCliente = new Map(arrClientes.map(c => [c.ci, c.fat]));
       const ag = new Map();
       for (const d of devs) {
