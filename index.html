@@ -16644,7 +16644,7 @@ function dashInit() {
       if (_dvgAnimBars) {
         const _bars = [...wrap.querySelectorAll('.dvg-bar')];
         void wrap.offsetHeight;
-        // v31: so dispara quando o grafico esta realmente visivel na tela (se renderizado oculto, espera aparecer)
+        // v31 (reenvio 14/10): so dispara quando o grafico esta realmente visivel na tela (se renderizado oculto, espera aparecer)
         const _go = () => requestAnimationFrame(() => requestAnimationFrame(() => {
           _bars.forEach((el, i) => {
             el.style.transition = 'height 1000ms cubic-bezier(.34,1.56,.64,1) ' + (i * 70) + 'ms, filter .15s';
