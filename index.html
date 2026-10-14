@@ -16613,6 +16613,7 @@ function dashInit() {
     let _dvgModo = 'ano';
     let _dvgDezAnterior = null;
     let _dvgMetaMensal = null;
+    const _dvgAnimBars = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     function _dvgRenderBars() {
       const wrap = document.getElementById('dvgBars');
       if (!wrap) return;
@@ -16630,13 +16631,26 @@ function dashInit() {
         div.className = 'dvg-bar';
         div.setAttribute('data-i', i);
         div.style.background = 'linear-gradient(180deg,' + col + ',#12173f)';
-        div.style.height = pct + '%';
+        // v30: barras sobem com leve "quique" (em onda); respeita prefers-reduced-motion
+        if (_dvgAnimBars) { div.style.height = '0%'; } else { div.style.height = pct + '%'; }
+        div.dataset.h = pct;
         if (_dvgMesesData.length < 12) { div.style.flex = '0 1 ' + (_dvgMesesData.length <= 3 ? '120px' : '90px'); }
         div.innerHTML = '<span class="dvg-mlabel" style="white-space:nowrap;left:-20px;right:-20px">' + m.label + '</span>';
         div.onclick = () => _dvgToggleMes(i);
         div.onmouseenter = () => _dvgHoverMes(i);
         wrap.appendChild(div);
       });
+      if (_dvgAnimBars) {
+        const _bars = [...wrap.querySelectorAll('.dvg-bar')];
+        void wrap.offsetHeight;
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          _bars.forEach((el, i) => {
+            el.style.transition = 'height 1000ms cubic-bezier(.34,1.56,.64,1) ' + (i * 70) + 'ms, filter .15s';
+            el.style.height = el.dataset.h + '%';
+          });
+          setTimeout(() => { _bars.forEach(el => { el.style.transition = ''; }); }, 1100 + _bars.length * 70);
+        }));
+      }
       wrap.onmouseleave = () => _dvgHoverMesFim();
       if (_dvgMetaMensal) {
         const line = document.createElement('div');
