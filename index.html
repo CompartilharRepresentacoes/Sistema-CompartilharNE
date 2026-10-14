@@ -296,6 +296,8 @@
     /* ── Mobile: menu-gaveta ── */
     #btnMobileMenu { display:none; }
     #sidebarBackdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:290; }
+    /* v27: "Mais filtros" do Pedidos so existe no celular; no PC os filtros ja ficam visiveis */
+    #page-pedido-list .ped-mf-toggle { display:none; }
     @media (max-width: 767px) {
       #btnMobileMenu {
         display:flex; align-items:center; justify-content:center;
