@@ -1762,7 +1762,7 @@
       <span style="font-size:13px;font-weight:700;color:#1e293b">Rank de Devolução por Cliente</span>
       <span style="font-size:10.5px;color:#94a3b8;background:#f1f4f9;border-radius:20px;padding:3px 9px">sincronizado aos filtros</span>
     </div>
-    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Faturamento x Devolução no período &middot; clique num cliente para ver os itens mais devolvidos</div>
+    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Ordenado pelo % de devolução sobre o faturamento &middot; clique num cliente para ver os itens mais devolvidos</div>
     <div id="dvgDevolRank"></div>
   </div>
   <div class="dg21 dvg-cli-grid" id="dvgCliGrid" style="display:grid;gap:12px;margin-bottom:12px">
@@ -16525,7 +16525,7 @@ function dashInit() {
         .map(([ci, a]) => ({ ci, nome: CLI[ci], devolvido: a.valor, fat: fatPorCliente.get(ci) || 0, itens: [...a.itens.values()].sort((x,y)=>y.valor-x.valor).slice(0,5) }))
         .filter(c => c.devolvido > 0)
         .map(c => ({ ...c, pct: c.fat ? c.devolvido / c.fat : null }))
-        .sort((a,b) => b.devolvido - a.devolvido);
+        .sort((a,b) => (b.pct == null ? -1 : b.pct) - (a.pct == null ? -1 : a.pct) || b.devolvido - a.devolvido);
 
       if (!rank.length) {
         el.innerHTML = `<div style="text-align:center;padding:16px 0;color:#94a3b8;font-size:12.5px">Nenhuma devolução no período/filtro selecionado.</div>`;
