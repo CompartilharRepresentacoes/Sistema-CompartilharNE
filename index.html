@@ -4920,6 +4920,8 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input onkeydown="if(event.key==='Enter')renderVendasCompletas()" id="vc-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <span style="font-size:11px;font-weight:600;color:#64748b">Produto</span>
+          <input onkeydown="if(event.key==='Enter')renderVendasCompletas()" id="vc-produto" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
           <button class="ped-ok-btn" onclick="renderVendasCompletas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
@@ -4978,6 +4980,8 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input onkeydown="if(event.key==='Enter')renderVendasCompletasFaturadas()" id="vcf-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <span style="font-size:11px;font-weight:600;color:#64748b">Produto</span>
+          <input onkeydown="if(event.key==='Enter')renderVendasCompletasFaturadas()" id="vcf-produto" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
           <button class="ped-ok-btn" onclick="renderVendasCompletasFaturadas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
@@ -5029,6 +5033,8 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input onkeydown="if(event.key==='Enter')renderVendasSimplesNfs()" id="psn-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <span style="font-size:11px;font-weight:600;color:#64748b">Produto</span>
+          <input onkeydown="if(event.key==='Enter')renderVendasSimplesNfs()" id="psn-produto" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
           <button class="ped-ok-btn" onclick="renderVendasSimplesNfs()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
@@ -5085,6 +5091,8 @@
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
           <input onkeydown="if(event.key==='Enter')renderNaoFaturados()" id="pnf-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <span style="font-size:11px;font-weight:600;color:#64748b">Produto</span>
+          <input onkeydown="if(event.key==='Enter')renderNaoFaturados()" id="pnf-produto" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
           <button class="ped-ok-btn" onclick="renderNaoFaturados()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
           <div class="ped-spacer" style="flex:1"></div>
@@ -19762,6 +19770,7 @@ function _pimprelDadosCompletas() {
     }
     return true;
   });
+  lista = _pedFiltraProdVc(lista, 'vc-produto');
   lista = lista.slice().sort(function(a,b){ return (b.pedido.data||'').localeCompare(a.pedido.data||''); });
   var totalReais = lista.reduce(function(acc, r){ return acc + r.valorPedido; }, 0);
   var totalKg = lista.reduce(function(acc, r){ return acc + r.pesoPedido; }, 0);
@@ -19809,6 +19818,7 @@ function _pimprelDadosCompletasFat() {
     }
     return true;
   });
+  lista = _pedFiltraProdVc(lista, 'vcf-produto');
   lista = lista.slice().sort(function(a,b){ return (b.pedido.data||'').localeCompare(a.pedido.data||''); });
   var totalReais = lista.reduce(function(acc, r){ return acc + r.valorPedido; }, 0);
   var totalKg = lista.reduce(function(acc, r){ return acc + r.pesoPedido; }, 0);
@@ -19854,6 +19864,7 @@ function _pimprelDadosSimplesNf() {
     }
     return true;
   });
+  linhas = _pedFiltraProdPsn(linhas, 'psn-produto');
   linhas = linhas.slice().sort(function(a,b){ return (b.fatura.data||'').localeCompare(a.fatura.data||''); });
   var totalReais = linhas.reduce(function(acc, r){ return acc + (Number(r.fatura.valor) || 0); }, 0);
   var totalKg = linhas.reduce(function(acc, r){ return acc + r.pesoFat; }, 0);
@@ -19898,6 +19909,7 @@ function _pimprelDadosNaoFat() {
     }
     return true;
   });
+  lista = _pedFiltraProdPnf(lista, 'pnf-produto');
   lista.forEach(function(r){
     r.pesoPendente = r.pendentes.reduce(function(acc, it){
       var prod = produtosMap[it.prodId];
@@ -22129,7 +22141,7 @@ function psnAtualizarSubcategorias() {
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function psnLimparFiltros() {
-  ['psn-data-de','psn-data-ate','psn-fornecedor','psn-vendedor','psn-categoria','psn-uf','psn-cliente'].forEach(function(id){
+  ['psn-data-de','psn-data-ate','psn-fornecedor','psn-vendedor','psn-categoria','psn-uf','psn-cliente','psn-produto'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
   psnAtualizarSubcategorias();
@@ -22186,6 +22198,7 @@ function renderVendasSimplesNfs() {
     }
     return true;
   });
+  linhas = _pedFiltraProdPsn(linhas, 'psn-produto');
   linhas = linhas.slice().sort(function(a,b){ return (b.fatura.data||'').localeCompare(a.fatura.data||''); });
 
   var kpi = document.getElementById('psn-kpi-total'); if (kpi) kpi.textContent = linhas.length;
@@ -22699,7 +22712,7 @@ function pnfAtualizarSubcategorias() {
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function pnfLimparFiltros() {
-  ['pnf-data-de','pnf-data-ate','pnf-fornecedor','pnf-vendedor','pnf-categoria','pnf-uf','pnf-cliente'].forEach(function(id){
+  ['pnf-data-de','pnf-data-ate','pnf-fornecedor','pnf-vendedor','pnf-categoria','pnf-uf','pnf-cliente','pnf-produto'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
   pnfAtualizarSubcategorias();
@@ -22772,6 +22785,7 @@ function renderNaoFaturados() {
     return true;
   });
 
+  lista = _pedFiltraProdPnf(lista, 'pnf-produto');
   lista.forEach(function(r){
     r.pesoPendente = r.pendentes.reduce(function(acc, it){
       var prod = produtosMap[it.prodId];
@@ -22852,7 +22866,7 @@ function vcAtualizarSubcategorias() {
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function vcLimparFiltros() {
-  ['vc-data-de','vc-data-ate','vc-fornecedor','vc-vendedor','vc-categoria','vc-uf','vc-cliente'].forEach(function(id){
+  ['vc-data-de','vc-data-ate','vc-fornecedor','vc-vendedor','vc-categoria','vc-uf','vc-cliente','vc-produto'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
   vcAtualizarSubcategorias();
@@ -22884,6 +22898,43 @@ function _vcPedidos() {
     lista.push({ pedido: p, itens: linhasItens, pesoPedido: pesoPedido, valorPedido: valorPedido });
   });
   return lista;
+}
+// v29: filtro de Produto (nome ou codigo) nas abas Vendas Completas / Completas Faturadas / Simples NFs / Nao Faturadas
+function _pedProdTermo(id) { var el = document.getElementById(id); return el ? String(el.value || '').trim() : ''; }
+function _pedProdBate(termo, cod, nome) {
+  var t = _cpNorm(termo), tc = termo.toLowerCase().replace(/^0+/, '');
+  var c = String(cod || '').toLowerCase().replace(/^0+/, '');
+  return !!((nome && _cpNorm(String(nome)).indexOf(t) !== -1) || (tc && c && c.indexOf(tc) !== -1));
+}
+function _pedFiltraProdVc(lista, id) {
+  var termo = _pedProdTermo(id); if (!termo) return lista;
+  var out = [];
+  lista.forEach(function(r){
+    var its = r.itens.filter(function(it){ return _pedProdBate(termo, it.prodCodigo, it.prodNome); });
+    if (!its.length) return;
+    out.push({ pedido: r.pedido, itens: its,
+      pesoPedido: its.reduce(function(a,i){ return a + i.pesoTotal; }, 0),
+      valorPedido: its.reduce(function(a,i){ return a + i.valorTotal; }, 0),
+      valorFatItens: its.reduce(function(a,i){ return a + i.precoUnit * i.qtdFaturada; }, 0),
+      _prodFiltro: true });
+  });
+  return out;
+}
+function _pedFiltraProdPnf(lista, id) {
+  var termo = _pedProdTermo(id); if (!termo) return lista;
+  var out = [];
+  lista.forEach(function(r){
+    var pend = r.pendentes.filter(function(it){ return _pedProdBate(termo, it.prodCodigo, it.prodNome); });
+    if (pend.length) out.push(Object.assign({}, r, { pendentes: pend }));
+  });
+  return out;
+}
+function _pedFiltraProdPsn(linhas, id) {
+  var termo = _pedProdTermo(id); if (!termo) return linhas;
+  var pm = {}; getProdutos().forEach(function(pr){ pm[pr.id] = pr; });
+  return linhas.filter(function(r){
+    return (r.fatura.itens || []).some(function(it){ var pr = pm[it.prodId] || {}; return _pedProdBate(termo, it.prodCodigo || pr.codigo, it.prodNome || pr.nome); });
+  });
 }
 function renderVendasCompletas() {
   var cont = document.getElementById('vc-lista');
@@ -22919,6 +22970,7 @@ function renderVendasCompletas() {
     }
     return true;
   });
+  lista = _pedFiltraProdVc(lista, 'vc-produto');
   lista = lista.slice().sort(function(a,b){ return (b.pedido.data||'').localeCompare(a.pedido.data||''); });
 
   var kT = document.getElementById('vc-kpi-total'); if (kT) kT.textContent = lista.length;
@@ -22927,7 +22979,7 @@ function renderVendasCompletas() {
   var kV = document.getElementById('vc-kpi-valor'); if (kV) kV.textContent = _pedFmtMoeda(totalValorGeral);
   var kP = document.getElementById('vc-kpi-peso'); if (kP) kP.textContent = totalPesoGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
-  var totalValorFaturado = lista.reduce(function(acc, r){ return acc + (Number(r.pedido.valorFaturado) || 0); }, 0);
+  var totalValorFaturado = lista.reduce(function(acc, r){ return acc + (r._prodFiltro ? r.valorFatItens : (Number(r.pedido.valorFaturado) || 0)); }, 0);
   var totalValorNaoFaturado = Math.max(0, totalValorGeral - totalValorFaturado);
   var totalPesoFaturado = lista.reduce(function(acc, r){
     return acc + r.itens.reduce(function(acc2, it){
@@ -23016,7 +23068,7 @@ function vcfAtualizarSubcategorias() {
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function vcfLimparFiltros() {
-  ['vcf-data-de','vcf-data-ate','vcf-fornecedor','vcf-vendedor','vcf-categoria','vcf-uf','vcf-cliente'].forEach(function(id){
+  ['vcf-data-de','vcf-data-ate','vcf-fornecedor','vcf-vendedor','vcf-categoria','vcf-uf','vcf-cliente','vcf-produto'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
   vcfAtualizarSubcategorias();
@@ -23057,10 +23109,11 @@ function renderVendasCompletasFaturadas() {
     }
     return true;
   });
+  lista = _pedFiltraProdVc(lista, 'vcf-produto');
   lista = lista.slice().sort(function(a,b){ return (b.pedido.data||'').localeCompare(a.pedido.data||''); });
 
   var kT = document.getElementById('vcf-kpi-total'); if (kT) kT.textContent = lista.length;
-  var totalValorGeral = lista.reduce(function(acc, r){ return acc + (Number(r.pedido.valorFaturado) || 0); }, 0);
+  var totalValorGeral = lista.reduce(function(acc, r){ return acc + (r._prodFiltro ? r.valorFatItens : (Number(r.pedido.valorFaturado) || 0)); }, 0);
   var totalPesoGeral  = lista.reduce(function(acc, r){ return acc + r.pesoPedido; }, 0);
   var kV = document.getElementById('vcf-kpi-valor'); if (kV) kV.textContent = _pedFmtMoeda(totalValorGeral);
   var kP = document.getElementById('vcf-kpi-peso'); if (kP) kP.textContent = totalPesoGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
