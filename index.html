@@ -16948,7 +16948,11 @@ function dashInit() {
     function _dvgRenderScrub(labels, values) {
       const card = document.getElementById('dvgScrubCard');
       if (!card) return;
-      const W = 600, H = 124, xPad = 20, topPad = 26, botPad = 18;
+      const _svgEl = document.getElementById('dvgScrubSvg');
+      const W = (_svgEl && Math.round(_svgEl.getBoundingClientRect().width) >= 300) ? Math.round(_svgEl.getBoundingClientRect().width) : 600;
+      const H = 124, xPad = 20, topPad = 26, botPad = 18;
+      if (_svgEl) _svgEl.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      if (_svgEl) _svgEl.querySelectorAll('.dvg-gridline').forEach(l => l.setAttribute('x2', W));
       const n = values.length;
       if (!n) return;
       const minV = Math.min.apply(null, values), maxV = Math.max.apply(null, values);
@@ -16983,7 +16987,9 @@ function dashInit() {
         dotsG.innerHTML = allPts.map((p,i) => {
           const dot = '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.5" fill="#4f7fe0" stroke="#fff" stroke-width="1.5"></circle>';
           const valTxt = '<text x="' + p[0] + '" y="' + (p[1] - 9) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e6edfb">' + values[i].toLocaleString('pt-BR') + '</text>';
-          const mesTxt = '<text x="' + p[0] + '" y="' + (H-4) + '" text-anchor="middle" font-size="9.5" font-weight="400" fill="rgba(255,255,255,.5)">' + shortLabels[i] + '</text>';
+          const _anc = n > 1 ? (i === 0 ? 'start' : (i === n-1 ? 'end' : 'middle')) : 'middle';
+          const _lx = n > 1 ? (i === 0 ? 3 : (i === n-1 ? W-3 : p[0])) : p[0];
+          const mesTxt = '<text x="' + _lx + '" y="' + (H-4) + '" text-anchor="' + _anc + '" font-size="9.5" font-weight="400" fill="rgba(255,255,255,.5)">' + shortLabels[i] + '</text>';
           return dot + valTxt + mesTxt;
         }).join('');
       }
@@ -17200,7 +17206,7 @@ function dashInit() {
         else if (_gModo === 'tri') pos = _gIdx.get(p[0].slice(0,7));
         else pos = (parseInt(p[0].slice(5,7),10)-1 === _gMi && parseInt(p[0].slice(0,4),10) === _gAi) ? _gIdx.get('d' + parseInt(p[0].slice(8,10),10)) : undefined;
         if (pos === undefined) continue;
-        _pBk[pos].add(p[1]); if (pos > _pUlt) _pUlt = pos;
+        if (CLI_INATIVO[p[1]]) continue; _pBk[pos].add(p[1]); if (pos > _pUlt) _pUlt = pos;
       }
       const _pPrim = _pBk.findIndex(st => st.size > 0);
       const acumSet = new Set(); const acumX=[]; const acumY=[];
