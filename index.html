@@ -1763,6 +1763,9 @@
       <span style="font-size:10.5px;color:#94a3b8;background:#f1f4f9;border-radius:20px;padding:3px 9px">sincronizado aos filtros</span>
     </div>
     <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Ordenado pelo % de devolução das vendas do período sobre o faturamento do período &middot; clique num cliente para ver os itens mais devolvidos</div>
+    <div id="dvgDevolBar" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><span style="font-size:11px;color:#64748b;font-weight:600">Mostrar</span>
+      <button class="dvg-devtop" data-n="10" onclick="_dvgDevolSetTop(10)">Top 10</button><button class="dvg-devtop" data-n="20" onclick="_dvgDevolSetTop(20)">Top 20</button><button class="dvg-devtop" data-n="50" onclick="_dvgDevolSetTop(50)">Top 50</button><button class="dvg-devtop" data-n="0" onclick="_dvgDevolSetTop(0)">Todos</button>
+      <span id="dvgDevolCnt" style="margin-left:auto;font-size:11px;color:#94a3b8"></span></div>
     <div id="dvgDevolRank"></div>
   </div>
   <div class="dg21 dvg-cli-grid" id="dvgCliGrid" style="display:grid;gap:12px;margin-bottom:12px">
@@ -5768,6 +5771,8 @@
     .apr-obs{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;font-size:11px;color:#1e293b;flex:1;overflow-y:auto;white-space:pre-wrap}
     .apr-thumb{width:52px;aspect-ratio:16/9;border-radius:4px;border:2px solid transparent;background:#e2e8f0;cursor:pointer;flex-shrink:0}
     .apr-thumb.on{border-color:#272A4A}
+    .dvg-devtop{border:1px solid #e2e8f0;background:#fff;color:#334155;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer}
+    .dvg-devtop.on{background:#272A4A;border-color:#272A4A;color:#fff}
     .ap-lb{font-size:11px;font-weight:600;color:#475569;margin-bottom:5px}
     .ap-in{width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:12px;font-family:inherit;color:#1e293b;background:#fff;box-sizing:border-box}
     .ap-nav{width:34px;height:34px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;color:#272A4A;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
@@ -16520,7 +16525,16 @@ function dashInit() {
       return out;
     }
 
+    let _dvgDevolTop = 10, _dvgDevolArr = null;
+    try { const _t = sessionStorage.getItem('dvgDevolTop'); if (_t !== null && [0,10,20,50].indexOf(+_t) !== -1) _dvgDevolTop = +_t; } catch (e) {}
+    function _dvgDevolSetTop(n) {
+      _dvgDevolTop = n;
+      try { sessionStorage.setItem('dvgDevolTop', String(n)); } catch (e) {}
+      if (_dvgDevolArr) _dvgRenderRankDevolucao(_dvgDevolArr);
+    }
+    window._dvgDevolSetTop = _dvgDevolSetTop;
     function _dvgRenderRankDevolucao(arrClientes) {
+      _dvgDevolArr = arrClientes;
       const el = document.getElementById('dvgDevolRank');
       if (!el) return;
       // v41: so devolucao de vendas do proprio periodo. Sem NF de origem localizada: se o periodo cobre so pedidos ja carregados, fica de fora (venda anterior); senao usa a data da devolucao
@@ -16552,7 +16566,12 @@ function dashInit() {
       }
 
       const _notaSem = _semOrigem.length ? `<div style="font-size:11px;color:#94a3b8;margin-top:8px">${_semOrigem.length} devolução(ões) (${fmtBRL(_semOrigemVal)}) de vendas anteriores ao período ou sem NF de origem localizada ficaram de fora do rank.</div>` : '';
-      el.innerHTML = rank.map((c,i) => {
+      const _totalRank = rank.length;
+      const rankMostrar = _dvgDevolTop ? rank.slice(0, _dvgDevolTop) : rank;
+      document.querySelectorAll('.dvg-devtop').forEach(b => b.classList.toggle('on', +b.dataset.n === _dvgDevolTop));
+      const _cntEl = document.getElementById('dvgDevolCnt'); if (_cntEl) _cntEl.textContent = 'Mostrando ' + rankMostrar.length + ' de ' + _totalRank + ' cliente' + (_totalRank === 1 ? '' : 's') + ' com devolução';
+      el.style.maxHeight = (_dvgDevolTop === 0 || _dvgDevolTop > 10) ? '560px' : ''; el.style.overflowY = (_dvgDevolTop === 0 || _dvgDevolTop > 10) ? 'auto' : '';
+      el.innerHTML = rankMostrar.map((c,i) => {
         const pctTxt = c.fat ? fmtPct(c.pct) : '—';
         const barPct = c.fat ? Math.min(100, c.pct*100) : 0;
         const itensHtml = c.itens.length
