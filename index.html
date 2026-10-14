@@ -16618,13 +16618,13 @@ function dashInit() {
       const cliFabs = new Map();
       for (const p of peds) {
         fat += p[5]; vol += p[4]; n++; pesoKg += (p[7]||0);
-        cliSet.add(p[1]);
+        if (!CLI_INATIVO[p[1]]) cliSet.add(p[1]); // v46: so cliente ativo no cadastro (igual a aba Clientes)
         let s = cliFabs.get(p[1]); if (!s) { s = new Set(); cliFabs.set(p[1], s); }
         s.add(p[2]);
       }
       const ticket = n ? fat/n : 0;
       const ativos = cliSet.size;
-      let mix = 0; if (ativos) { let acc=0; for (const s of cliFabs.values()) acc += s.size; mix = acc/ativos; }
+      let mix = 0; if (ativos) { let acc=0; for (const [ci, s] of cliFabs.entries()) if (cliSet.has(ci)) acc += s.size; mix = acc/ativos; }
       // carteira = clientes não inativos
       const carteira = CLI_INATIVO.filter(x => !x).length;
       const pos = carteira ? ativos/carteira : 0;
