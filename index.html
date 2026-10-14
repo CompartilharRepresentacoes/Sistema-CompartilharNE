@@ -1762,7 +1762,7 @@
       <span style="font-size:13px;font-weight:700;color:#1e293b">Rank de Devolução por Cliente</span>
       <span style="font-size:10.5px;color:#94a3b8;background:#f1f4f9;border-radius:20px;padding:3px 9px">sincronizado aos filtros</span>
     </div>
-    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Ordenado pelo % de devolução das vendas do período sobre o faturamento do período &middot; clique num cliente para ver os itens mais devolvidos</div>
+    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Somente devoluções por <b>Vencido</b> &middot; ordenado pelo % sobre o faturamento do período &middot; clique num cliente para ver os itens mais devolvidos</div>
     <div id="dvgDevolBar" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><span style="font-size:11px;color:#64748b;font-weight:600">Mostrar</span>
       <button class="dvg-devtop" data-n="10" onclick="_dvgDevolSetTop(10)">Top 10</button><button class="dvg-devtop" data-n="20" onclick="_dvgDevolSetTop(20)">Top 20</button><button class="dvg-devtop" data-n="50" onclick="_dvgDevolSetTop(50)">Top 50</button><button class="dvg-devtop" data-n="0" onclick="_dvgDevolSetTop(0)">Todos</button>
       <span id="dvgDevolCnt" style="margin-left:auto;font-size:11px;color:#94a3b8"></span></div>
@@ -16306,7 +16306,7 @@ function _dashConstruirDadosAoVivo() {
     var valorTotalDev = Number(dev.totalProdutos) || itensSimples.reduce(function (s, it) { return s + it.v; }, 0);
     if (typeof _devStatusDe === 'function' && _devStatusDe(dev) === 'Cancelado') return; // v41: devolucao cancelada nao conta
     var _dtOrig = _nfOrigemMap[cIdxD + '|' + fIdxD + '|' + String(dev.nfOrigem || '').trim().replace(/^0+(?=\d)/, '')] || '';
-    DEVOL.push([dataDev, cIdxD, fIdxD, vIdxD, valorTotalDev, itensSimples, _dtOrig]);
+    DEVOL.push([dataDev, cIdxD, fIdxD, vIdxD, valorTotalDev, itensSimples, _dtOrig, String(dev.motivo || '').trim()]);
   });
 
   var hoje = new Date();
@@ -16533,14 +16533,17 @@ function dashInit() {
       if (_dvgDevolArr) _dvgRenderRankDevolucao(_dvgDevolArr);
     }
     window._dvgDevolSetTop = _dvgDevolSetTop;
+    const _dvgDevolMotivo = 'Vencido'; // fixo: este rank considera so devolucao por vencimento
+    const _dvgNormMot = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     function _dvgRenderRankDevolucao(arrClientes) {
       _dvgDevolArr = arrClientes;
       const el = document.getElementById('dvgDevolRank');
       if (!el) return;
       // v41: so devolucao de vendas do proprio periodo. Sem NF de origem localizada: se o periodo cobre so pedidos ja carregados, fica de fora (venda anterior); senao usa a data da devolucao
       let _minPed = '9999-99-99'; for (let i=0;i<PED.length;i++) if (PED[i][0] < _minPed) _minPed = PED[i][0];
-      const devs = filtraDevolucoes(true).filter(d => d[6] || state.dtIni < _minPed);
-      const _semOrigem = filtraDevolucoes(false).filter(d => !d[6] && state.dtIni >= _minPed);
+      const _okMot = d => !_dvgDevolMotivo || _dvgNormMot(d[7]) === _dvgNormMot(_dvgDevolMotivo);
+      const devs = filtraDevolucoes(true).filter(d => (d[6] || state.dtIni < _minPed) && _okMot(d));
+      const _semOrigem = filtraDevolucoes(false).filter(d => !d[6] && state.dtIni >= _minPed && _okMot(d));
       const _semOrigemVal = _semOrigem.reduce((a,d)=>a+d[4],0);
       const fatPorCliente = new Map(arrClientes.map(c => [c.ci, c.fat]));
       const ag = new Map();
