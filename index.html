@@ -16614,7 +16614,8 @@ function dashInit() {
     let _dvgDezAnterior = null;
     let _dvgMetaMensal = null;
     let _dvgIO = null;
-    const _dvgAnimBars = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    // v32: animacao sempre ativa (o Windows/Chrome do Marcos esta com 'reduzir movimento' ligado e isso desligava as barras)
+    const _dvgAnimBars = true;
     function _dvgRenderBars() {
       const wrap = document.getElementById('dvgBars');
       if (!wrap) return;
