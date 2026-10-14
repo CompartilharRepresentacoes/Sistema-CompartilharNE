@@ -16269,14 +16269,14 @@ function _dashConstruirDadosAoVivo() {
         var peso = _dashPesoItens(fat.itens, 'qtd');
         var data = (fat.data || pedido.data || '').slice(0, 10);
         if (!data) return;
-        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx, peso]);
+        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx, peso, pedido.id]);
       });
     } else {
       var volPed = (pedido.itens || []).reduce(function (s, it) { return s + (Number(it.quantidade) || 0); }, 0);
       var pesoPed = _dashPesoItens(pedido.itens, 'quantidade');
       var dataPed = (pedido.data || '').slice(0, 10);
       if (!dataPed) return;
-      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx, pesoPed]);
+      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx, pesoPed, pedido.id]);
     }
   });
 
@@ -16612,21 +16612,31 @@ function dashInit() {
     }
 
     // =============== KPIs ===============
+    // v47: "pedidos" = pedidos distintos (uma linha de PED e uma NF; pedido com 2+ NFs contava 2x)
+    function _cntP(a, p) { if (!a.ids) a.ids = new Set(); a.ids.add(p[8] != null ? p[8] : p); a.n = a.ids.size; }
     function kpis(peds) {
-      let fat=0, vol=0, n=0, pesoKg=0;
+      let fat=0, vol=0, n=0, pesoKg=0; const _idsP = new Set();
       const cliSet = new Set();
       const cliFabs = new Map();
       for (const p of peds) {
-        fat += p[5]; vol += p[4]; n++; pesoKg += (p[7]||0);
+        fat += p[5]; vol += p[4]; _idsP.add(p[8] != null ? p[8] : p); pesoKg += (p[7]||0);
         if (!CLI_INATIVO[p[1]]) cliSet.add(p[1]); // v46: so cliente ativo no cadastro (igual a aba Clientes)
         let s = cliFabs.get(p[1]); if (!s) { s = new Set(); cliFabs.set(p[1], s); }
         s.add(p[2]);
       }
+      n = _idsP.size;
       const ticket = n ? fat/n : 0;
       const ativos = cliSet.size;
       let mix = 0; if (ativos) { let acc=0; for (const [ci, s] of cliFabs.entries()) if (cliSet.has(ci)) acc += s.size; mix = acc/ativos; }
       // carteira = clientes não inativos
-      const carteira = CLI_INATIVO.filter(x => !x).length;
+      // v47: carteira respeita filtros de UF e de cliente (igual a aba Clientes)
+      let carteira = 0;
+      for (let _i = 0; _i < CLI_INATIVO.length; _i++) {
+        if (CLI_INATIVO[_i]) continue;
+        if (state.clientes.size && !state.clientes.has(_i)) continue;
+        if (state.uf.size) { const _ui = ufIdxOf[CLI_UF[_i]]; if (_ui === undefined || !state.uf.has(_ui)) continue; }
+        carteira++;
+      }
       const pos = carteira ? ativos/carteira : 0;
       return { fat, vol, pesoKg, ticket, ativos, mix, pos, nPedidos: n, carteira };
     }
@@ -17154,7 +17164,7 @@ function dashInit() {
         else if (_gModo === 'tri') pos = _gIdx.get(p[0].slice(0,7));
         else pos = (parseInt(p[0].slice(5,7),10)-1 === _gMi && parseInt(p[0].slice(0,4),10) === _gAi) ? _gIdx.get('d' + parseInt(p[0].slice(8,10),10)) : undefined;
         if (pos === undefined) continue;
-        const b = _gBuckets[pos]; b.fat += p[5]; b.vol += p[4]; b.peso += (p[7]||0); b.n++;
+        const b = _gBuckets[pos]; b.fat += p[5]; b.vol += p[4]; b.peso += (p[7]||0); _cntP(b, p);
       }
       const metaTotal = sumMetas();
       _dvgMetaMensal = (metaTotal && _gModo !== 'semana') ? metaTotal/12 : null;
@@ -17300,13 +17310,17 @@ function dashInit() {
       const ag = new Map(); // ven -> {fat, vol, n, cli:Set, fab:Set, fatMesAtual, fatMesAnt}
       const ano = peds.length ? parseInt(peds[0][0].slice(0,4),10) : (new Date()).getFullYear();
       const ultMes = (() => { let max=''; for (const p of peds) if (p[0]>max) max=p[0]; return max.slice(0,7); })();
+      // v47: mes corrente ainda aberto -> compara com o mesmo intervalo de dias do mes anterior
+      const _hojeIso = new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+      const _mesAberto = ultMes === _hojeIso.slice(0,7);
+      const _diaCorte = parseInt(_hojeIso.slice(8,10),10);
       const antMes = (() => { if (!ultMes) return ''; const [y,m] = ultMes.split('-').map(Number); const dt = new Date(y, m-2, 1); return dt.toISOString().slice(0,7); })();
       for (const p of peds) {
         let a = ag.get(p[3]); if (!a) { a = { fat:0, vol:0, n:0, cli:new Set(), fab:new Set(), fatM:0, fatA:0 }; ag.set(p[3], a); }
-        a.fat += p[5]; a.vol += p[4]; a.n += 1; a.cli.add(p[1]); a.fab.add(p[2]);
+        a.fat += p[5]; a.vol += p[4]; _cntP(a, p); if (!CLI_INATIVO[p[1]]) a.cli.add(p[1]); a.fab.add(p[2]);
         const mes = p[0].slice(0,7);
         if (mes === ultMes) a.fatM += p[5];
-        else if (mes === antMes) a.fatA += p[5];
+        else if (mes === antMes && (!_mesAberto || parseInt(p[0].slice(8,10),10) <= _diaCorte)) a.fatA += p[5];
       }
       const ven = [...ag.entries()].map(([i,a])=>({
         i, nome:VEND[i], fat:a.fat, vol:a.vol, n:a.n, cli:a.cli.size, fab:a.fab.size,
@@ -17544,7 +17558,7 @@ function dashInit() {
       _dvgRenderDrillFabDonut(porF);
       // Tabela carteira (paginada: 25/50/75/100/Todos)
       const ag = new Map();
-      for (const p of peds) { let a = ag.get(p[1]); if (!a) { a={fat:0,n:0,ult:''}; ag.set(p[1],a);} a.fat+=p[5]; a.n++; if (p[0]>a.ult) a.ult=p[0]; }
+      for (const p of peds) { let a = ag.get(p[1]); if (!a) { a={fat:0,n:0,ult:''}; ag.set(p[1],a);} a.fat+=p[5]; _cntP(a, p); if (p[0]>a.ult) a.ult=p[0]; }
       _dvgDrillCarteiraArr = [...ag.entries()].map(([ci,a])=>({nome:CLI[ci], ...a})).sort((a,b)=>b.fat-a.fat);
       document.getElementById('drillTabela').innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
@@ -17780,7 +17794,7 @@ function dashInit() {
     function renderClientes() {
       const peds = filtraPedidos();
       const ag = new Map();
-      for (const p of peds) { let a = ag.get(p[1]); if (!a) { a={fat:0,n:0,ult:'',fabs:new Set()}; ag.set(p[1],a);} a.fat+=p[5]; a.n++; if (p[0]>a.ult) a.ult=p[0]; a.fabs.add(p[2]); }
+      for (const p of peds) { let a = ag.get(p[1]); if (!a) { a={fat:0,n:0,ult:'',fabs:new Set()}; ag.set(p[1],a);} a.fat+=p[5]; _cntP(a, p); if (p[0]>a.ult) a.ult=p[0]; a.fabs.add(p[2]); }
       const total = [...ag.values()].reduce((s,a)=>s+a.fat,0);
       const arr = [...ag.entries()].map(([ci,a])=>({ci, nome:CLI[ci], inativo:CLI_INATIVO[ci], ...a})).sort((a,b)=>b.fat-a.fat);
       // classificar ABC (desconsidera clientes inativos - Marcos pediu p/ nao distorcer a curva)
@@ -17928,7 +17942,7 @@ function dashInit() {
       const _fabKg = peds.reduce((s,p)=>s+(p[7]||0),0);
       const _fabKgPri = ['novamix','saovicente'].indexOf(_cpNorm(FAB[fi]||'').replace(/\s+/g,'')) !== -1;
       const cli = new Set(peds.map(p=>p[1])).size;
-      const n = peds.length;
+      const n = new Set(peds.map(p => p[8] != null ? p[8] : p)).size;
       const ticket = n? fat/n : 0;
       const part = totalGeral? fat/totalGeral : 0;
       // mensal
@@ -17968,7 +17982,7 @@ function dashInit() {
       const _feTitulo = _feModo === 'semana' ? 'Evolução Semanal' : 'Evolução Mensal';
       // top clientes da fábrica
       const agC = new Map();
-      for (const p of peds) { let a=agC.get(p[1]); if(!a){a={fat:0,n:0};agC.set(p[1],a);} a.fat+=p[5]; a.n++; }
+      for (const p of peds) { let a=agC.get(p[1]); if(!a){a={fat:0,n:0};agC.set(p[1],a);} a.fat+=p[5]; _cntP(a, p); }
       const topC = [...agC.entries()].map(([ci,a])=>({nome:CLI[ci], ...a})).sort((a,b)=>b.fat-a.fat).slice(0,10);
       // Produtos mais vendidos da fábrica (Top 10) — PED denormalizado não tem itens/produto,
       // então cruza com getPedidos() real pelo fornecedorId (ou nome, se não cadastrado), respeitando período + status ok.
@@ -17997,7 +18011,7 @@ function dashInit() {
       const topProd = [...agProd.values()].sort((a,b)=>b.valor-a.valor).slice(0,10);
       // por vendedor
       const agV = new Map();
-      for (const p of peds) { let a=agV.get(p[3]); if(!a){a={fat:0,n:0};agV.set(p[3],a);} a.fat+=p[5]; a.n++; }
+      for (const p of peds) { let a=agV.get(p[3]); if(!a){a={fat:0,n:0};agV.set(p[3],a);} a.fat+=p[5]; _cntP(a, p); }
       const arrV = [...agV.entries()].map(([vi,a])=>({nome:VEND[vi], ...a})).sort((a,b)=>b.fat-a.fat);
       // meta da fábrica
       // v526: a meta vem do cadastro "Metas" (mes MM/AAAA + fornecedor + tipo KG ou R$), somando os meses que o periodo
