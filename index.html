@@ -17820,8 +17820,40 @@ function dashInit() {
       const ticket = n? fat/n : 0;
       const part = totalGeral? fat/totalGeral : 0;
       // mensal
-      const meses = Array(12).fill(0);
-      for (const p of peds) meses[parseInt(p[0].slice(5,7),10)-1] += p[5];
+      // v33: mesmo criterio do grafico da Visao Geral: 1 mes = semanas; 2 a 3 meses (T1..T4) = meses do periodo; resto = 12 meses
+      const _feI = String(state.dtIni), _feF = String(state.dtFim);
+      const _feAi = parseInt(_feI.slice(0,4),10), _feMi = parseInt(_feI.slice(5,7),10)-1;
+      const _feAf = parseInt(_feF.slice(0,4),10), _feMf = parseInt(_feF.slice(5,7),10)-1;
+      const _feN = (_feAf - _feAi) * 12 + (_feMf - _feMi) + 1;
+      const _feModo = _feN === 1 ? 'semana' : (_feN <= 3 ? 'tri' : 'ano');
+      const _feLabels = [], meses = [], _feIdx = new Map();
+      if (_feModo === 'ano') {
+        for (let m = 0; m < 12; m++) { _feLabels.push(monthLabels[m]); meses.push(0); }
+      } else if (_feModo === 'tri') {
+        for (let k = 0; k < _feN; k++) { const t = _feMi + k; _feIdx.set((_feAi + Math.floor(t/12)) + '-' + String(t%12+1).padStart(2,'0'), k); _feLabels.push(monthLabels[t%12]); meses.push(0); }
+      } else {
+        const nDias = new Date(_feAi, _feMi + 1, 0).getDate();
+        const dd = n => String(n).padStart(2,'0');
+        const ini = [], seg0 = [], ult = [];
+        for (let d = 1; d <= nDias; d++) {
+          const dow = new Date(_feAi, _feMi, d).getDay();
+          const seg = d - ((dow + 6) % 7);
+          const key = Math.max(1, seg);
+          if (!_feIdx.has(key)) { _feIdx.set(key, meses.length); meses.push(0); ini.push(key); seg0.push(seg); ult.push(d); }
+          _feIdx.set('d' + d, _feIdx.get(key));
+          ult[_feIdx.get(key)] = d;
+        }
+        ini.forEach((i0, k) => { let fim = Math.min(nDias, seg0[k] + 4); if (fim < i0) fim = ult[k]; _feLabels.push('Sem ' + (k+1) + ' · ' + dd(i0) + '–' + dd(fim)); });
+      }
+      for (const p of peds) {
+        let pos;
+        if (_feModo === 'ano') pos = parseInt(p[0].slice(5,7),10)-1;
+        else if (_feModo === 'tri') pos = _feIdx.get(p[0].slice(0,7));
+        else pos = (parseInt(p[0].slice(5,7),10)-1 === _feMi && parseInt(p[0].slice(0,4),10) === _feAi) ? _feIdx.get('d' + parseInt(p[0].slice(8,10),10)) : undefined;
+        if (pos === undefined) continue;
+        meses[pos] += p[5];
+      }
+      const _feTitulo = _feModo === 'semana' ? 'Evolução Semanal' : 'Evolução Mensal';
       // top clientes da fábrica
       const agC = new Map();
       for (const p of peds) { let a=agC.get(p[1]); if(!a){a={fat:0,n:0};agC.set(p[1],a);} a.fat+=p[5]; a.n++; }
@@ -17889,7 +17921,7 @@ function dashInit() {
           ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${metaTxt}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null)}
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-[2.4fr_0.85fr] gap-4 mt-4">
-          <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">Evolução Mensal</h3>
+          <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">${_feTitulo}</h3>
             <div style="height:240px;"><canvas id="fabMensal"></canvas></div>
           </div>
           <div class="d-card"><h3 class="font-semibold text-[15px] mb-2">Distribuição por Vendedor</h3>
@@ -17926,8 +17958,10 @@ function dashInit() {
       _dvgFabMensalOpts.scales.y.display = false;
       _dvgFabMensalOpts.scales.x.offset = true;
       _dvgFabMensalOpts.layout = { padding: { top: 22 } };
+      // v33: linha sobe com quique, ponto a ponto (mesma ideia do grafico de barras da Visao Geral)
+      _dvgFabMensalOpts.animation = { duration: 1000, easing: 'easeOutBack', delay: (c) => (c.type === 'data' && c.mode === 'default') ? c.dataIndex * 70 : 0 };
       window._dashRegChart(document.getElementById('fabMensal'), {
-        type:'line', data:{ labels:monthLabels, datasets:[{ data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.15)', fill:true, tension:.35, pointRadius:2.5, pointBackgroundColor:'#4f7fe0', pointBorderColor:'#4f7fe0', pointHoverRadius:6, pointHoverBackgroundColor:'#a9c2f5', pointHoverBorderColor:'#fff', pointHoverBorderWidth:2, borderWidth:2.5 }] },
+        type:'line', data:{ labels:_feLabels, datasets:[{ data:meses, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.15)', fill:true, tension:.35, pointRadius:2.5, pointBackgroundColor:'#4f7fe0', pointBorderColor:'#4f7fe0', pointHoverRadius:6, pointHoverBackgroundColor:'#a9c2f5', pointHoverBorderColor:'#fff', pointHoverBorderWidth:2, borderWidth:2.5 }] },
         options: _dvgFabMensalOpts,
         plugins: [{
           id: 'dvgFabLineGlow',
