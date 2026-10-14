@@ -17139,19 +17139,28 @@ function dashInit() {
       _dvgRenderDonut(porFab, totalFab);
 
       // Positivação acumulada (por mês, nao por dia - Marcos pediu granularidade mensal)
-      const cliPorMes = new Map();
+      // v36: mesmo criterio do Faturamento Mensal: 1 mes = semanas; 2-3 meses (T1..T4) = os meses; ano = mes a mes
+      const _pBk = _gBuckets.map(() => new Set());
+      let _pUlt = -1;
       for (const p of peds) {
-        const chaveMes = p[0].slice(0,7);
-        const arr = cliPorMes.get(chaveMes) || new Set();
-        arr.add(p[1]); cliPorMes.set(chaveMes, arr);
+        let pos;
+        if (_gModo === 'ano') pos = parseInt(p[0].slice(5,7),10)-1;
+        else if (_gModo === 'tri') pos = _gIdx.get(p[0].slice(0,7));
+        else pos = (parseInt(p[0].slice(5,7),10)-1 === _gMi && parseInt(p[0].slice(0,4),10) === _gAi) ? _gIdx.get('d' + parseInt(p[0].slice(8,10),10)) : undefined;
+        if (pos === undefined) continue;
+        _pBk[pos].add(p[1]); if (pos > _pUlt) _pUlt = pos;
       }
-      const mesesOrd = [...cliPorMes.keys()].sort();
+      const _pPrim = _pBk.findIndex(st => st.size > 0);
       const acumSet = new Set(); const acumX=[]; const acumY=[];
-      for (const ym of mesesOrd) {
-        for (const c of cliPorMes.get(ym)) acumSet.add(c);
-        const [anoYm, mesYm] = ym.split('-');
-        acumX.push(monthLabels[parseInt(mesYm,10)-1] + '/' + anoYm);
-        acumY.push(acumSet.size);
+      if (_pUlt >= 0) {
+        const _pIni = _gModo === 'ano' ? _pPrim : 0;
+        for (let i = _pIni; i <= _pUlt; i++) {
+          for (const c of _pBk[i]) acumSet.add(c);
+          const lb = _gBuckets[i].label;
+          const anoLb = _gModo === 'ano' ? _gAi : (_gModo === 'semana' ? _gAi : _gAi + Math.floor((_gMi + i) / 12));
+          acumX.push(_gModo === 'ano' ? (monthLabels[i] + '/' + _gAi) : (lb + '/' + anoLb));
+          acumY.push(acumSet.size);
+        }
       }
       _dvgRenderScrub(acumX, acumY);
 
