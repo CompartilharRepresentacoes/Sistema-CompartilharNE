@@ -16299,6 +16299,7 @@ function _dashConstruirDadosAoVivo() {
       return { n: it.prodNome || it.prodCodigo || 'Produto', q: Number(it.quantidade) || 0, v: Number(it.valorTotal) || 0, u: _pu };
     });
     var valorTotalDev = Number(dev.totalProdutos) || itensSimples.reduce(function (s, it) { return s + it.v; }, 0);
+    if (typeof _devStatusDe === 'function' && _devStatusDe(dev) === 'Cancelado') return; // v41: devolucao cancelada nao conta
     var _dtOrig = _nfOrigemMap[cIdxD + '|' + fIdxD + '|' + String(dev.nfOrigem || '').trim().replace(/^0+(?=\d)/, '')] || '';
     DEVOL.push([dataDev, cIdxD, fIdxD, vIdxD, valorTotalDev, itensSimples, _dtOrig]);
   });
@@ -16522,7 +16523,11 @@ function dashInit() {
     function _dvgRenderRankDevolucao(arrClientes) {
       const el = document.getElementById('dvgDevolRank');
       if (!el) return;
-      const devs = filtraDevolucoes(true); // v40: so devolucao de vendas do proprio periodo
+      // v41: so devolucao de vendas do proprio periodo. Sem NF de origem localizada: se o periodo cobre so pedidos ja carregados, fica de fora (venda anterior); senao usa a data da devolucao
+      let _minPed = '9999-99-99'; for (let i=0;i<PED.length;i++) if (PED[i][0] < _minPed) _minPed = PED[i][0];
+      const devs = filtraDevolucoes(true).filter(d => d[6] || state.dtIni < _minPed);
+      const _semOrigem = filtraDevolucoes(false).filter(d => !d[6] && state.dtIni >= _minPed);
+      const _semOrigemVal = _semOrigem.reduce((a,d)=>a+d[4],0);
       const fatPorCliente = new Map(arrClientes.map(c => [c.ci, c.fat]));
       const ag = new Map();
       for (const d of devs) {
@@ -16546,6 +16551,7 @@ function dashInit() {
         return;
       }
 
+      const _notaSem = _semOrigem.length ? `<div style="font-size:11px;color:#94a3b8;margin-top:8px">${_semOrigem.length} devolução(ões) (${fmtBRL(_semOrigemVal)}) de vendas anteriores ao período ou sem NF de origem localizada ficaram de fora do rank.</div>` : '';
       el.innerHTML = rank.map((c,i) => {
         const pctTxt = c.fat ? fmtPct(c.pct) : '—';
         const barPct = c.fat ? Math.min(100, c.pct*100) : 0;
@@ -16571,7 +16577,7 @@ function dashInit() {
             ${itensHtml}
           </div>
         </div>`;
-      }).join('');
+      }).join('') + _notaSem;
 
       el.querySelectorAll('.dvg-devol-row').forEach(row => {
         row.querySelector('.dvg-devol-main').addEventListener('click', () => {
