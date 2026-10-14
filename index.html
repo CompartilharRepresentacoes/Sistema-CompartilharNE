@@ -16538,7 +16538,7 @@ function dashInit() {
         const pctTxt = c.fat ? fmtPct(c.pct) : '—';
         const barPct = c.fat ? Math.min(100, c.pct*100) : 0;
         const itensHtml = c.itens.length
-          ? c.itens.map(it => `<div class="dvg-devol-item"><span>${escapeHtml(it.nome)}</span><span>${fmtNum(it.qtd)} ${/^kg$/i.test(it.un||'') ? 'kg' : ((it.un||'').trim() ? escapeHtml(String(it.un).toLowerCase()) : 'un')} &middot; <b>${fmtBRL(it.valor)}</b></span></div>`).join('')
+          ? c.itens.map(it => `<div class="dvg-devol-item"><span>${escapeHtml(it.nome)}</span><span>${(Number(it.qtd)||0).toLocaleString('pt-BR',{minimumFractionDigits:/^kg$/i.test(it.un||'')?2:0,maximumFractionDigits:2})} ${/^kg$/i.test(it.un||'') ? 'kg' : ((it.un||'').trim() ? escapeHtml(String(it.un).toLowerCase()) : 'un')} &middot; <b>${fmtBRL(it.valor)}</b></span></div>`).join('')
           : '<div class="dvg-devol-item" style="opacity:.6">sem itens detalhados</div>';
         return `
         <div class="dvg-devol-row" data-ci="${c.ci}">
