@@ -5809,7 +5809,7 @@
           </div>
           <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Marque as fábricas; os produtos de cada uma aparecem abaixo para escolher (entram na "Ficha do produto").</div>
           <div id="ap-forns" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
-          <div id="ap-prods" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:12px"></div>
+          <input id="ap-busca" class="ap-in" placeholder="Pesquisar produto por código ou nome..." oninput="_apRenderProdutos()" style="margin-bottom:10px"><div id="ap-prods" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:12px"></div>
         </div>
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
           <div style="font-size:13.5px;font-weight:700;color:#272A4A;margin-bottom:10px">3 · Números e conteúdo</div>
@@ -29342,6 +29342,13 @@ function _apToggleForn(id, v) {
 function _apProdutosDasFabricas() {
   return getProdutos().filter(function(p){ return _apS.forns[p.fornecedor] && (p.ativo || 'Sim') !== 'Não'; });
 }
+function _apNorm(t) { return String(t == null ? '' : t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+function _apBuscaOk(p) {
+  var el = document.getElementById('ap-busca'), q = el ? _apNorm(el.value.trim()) : '';
+  if (!q) return true;
+  var alvo = _apNorm((p.codigo || '') + ' ' + (p.nome || ''));
+  return q.split(/\s+/).every(function(w){ return alvo.indexOf(w) !== -1; });
+}
 function _apRenderProdutos() {
   var box = document.getElementById('ap-prods');
   var fornIds = Object.keys(_apS.forns);
@@ -29349,16 +29356,17 @@ function _apRenderProdutos() {
   var html = '';
   fornIds.forEach(function(fid){
     var f = getFornecedores().find(function(x){ return String(x.id) === String(fid); }) || {};
-    var itens = getProdutos().filter(function(p){ return String(p.fornecedor) === String(fid) && (p.ativo || 'Sim') !== 'Não'; }).sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'','pt-BR'); });
+    var itens = getProdutos().filter(function(p){ return String(p.fornecedor) === String(fid) && (p.ativo || 'Sim') !== 'Não' && _apBuscaOk(p); }).sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'','pt-BR'); });
+    if (!itens.length) return;
     html += '<div><div style="font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">' + _apresEscHtml(_apFornNome(f)) + ' (' + itens.length + ')</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">'
       + itens.map(function(p){ return '<label style="display:flex;align-items:center;gap:8px;border:1px solid #e2e8f0;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:12px"><input type="checkbox" ' + (_apS.prods[p.id] ? 'checked' : '') + ' onchange="_apToggleProd(\'' + p.id + '\',this.checked)"><span>' + (p.codigo ? '<b style="color:#272A4A">' + _apresEscHtml(p.codigo) + '</b> ' : '') + _apresEscHtml(p.nome || '') + '</span></label>'; }).join('')
       + '</div></div>';
   });
-  box.innerHTML = html; _apContProd();
+  box.innerHTML = html || '<div style="text-align:center;padding:16px;color:#94a3b8;font-size:12px">Nenhum produto encontrado para a pesquisa.</div>'; _apContProd();
 }
 function _apContProd() { var el = document.getElementById('ap-prod-cont'); if (el) { var n = Object.keys(_apS.prods).length; el.textContent = n + ' produto' + (n === 1 ? '' : 's') + ' selecionado' + (n === 1 ? '' : 's'); } }
 function _apToggleProd(id, v) { if (v) _apS.prods[id] = true; else delete _apS.prods[id]; _apContProd(); _apRender(); }
-function _apMarcarProdutos(v) { _apProdutosDasFabricas().forEach(function(p){ if (v) _apS.prods[p.id] = true; else delete _apS.prods[p.id]; }); _apRenderProdutos(); _apRender(); }
+function _apMarcarProdutos(v) { _apProdutosDasFabricas().filter(_apBuscaOk).forEach(function(p){ if (v) _apS.prods[p.id] = true; else delete _apS.prods[p.id]; }); _apRenderProdutos(); _apRender(); }
 
 function _apRenderSlidesLista() {
   var sug = {}; (_AP_TIPOS[_apS.tipo].slides || []).forEach(function(s){ sug[s] = true; });
