@@ -16277,6 +16277,7 @@ function _dashConstruirDadosAoVivo() {
 
   var devolucoesBase = (typeof getDevolucoes === 'function') ? getDevolucoes() : [];
   var DEVOL = [];
+  var _devolProdUn = {}; try { getProdutos().forEach(function (p) { if (p && p.unidade) _devolProdUn[String(p.id)] = String(p.unidade).trim(); }); } catch (e) {}
   devolucoesBase.forEach(function (dev) {
     var cIdxD = idxCliente(dev.clienteId, dev.clienteNome);
     var fIdxD = idxFabrica(dev.fornecedorId, dev.fornecedorNome);
@@ -16284,7 +16285,8 @@ function _dashConstruirDadosAoVivo() {
     var dataDev = (dev.dataNfEmitida || dev.data || '').slice(0, 10);
     if (!dataDev) return;
     var itensSimples = (dev.itens || []).map(function (it) {
-      return { n: it.prodNome || it.prodCodigo || 'Produto', q: Number(it.quantidade) || 0, v: Number(it.valorTotal) || 0 };
+      var _pu = _devolProdUn[String(it.prodId)] || '';
+      return { n: it.prodNome || it.prodCodigo || 'Produto', q: Number(it.quantidade) || 0, v: Number(it.valorTotal) || 0, u: _pu };
     });
     var valorTotalDev = Number(dev.totalProdutos) || itensSimples.reduce(function (s, it) { return s + it.v; }, 0);
     DEVOL.push([dataDev, cIdxD, fIdxD, vIdxD, valorTotalDev, itensSimples]);
@@ -16517,7 +16519,7 @@ function dashInit() {
         a.valor += d[4];
         for (const it of (d[5] || [])) {
           let acc = a.itens.get(it.n);
-          if (!acc) { acc = { nome: it.n, qtd: 0, valor: 0 }; a.itens.set(it.n, acc); }
+          if (!acc) { acc = { nome: it.n, qtd: 0, valor: 0, un: it.u || '' }; a.itens.set(it.n, acc); }
           acc.qtd += it.q; acc.valor += it.v;
         }
       }
@@ -16536,7 +16538,7 @@ function dashInit() {
         const pctTxt = c.fat ? fmtPct(c.pct) : '—';
         const barPct = c.fat ? Math.min(100, c.pct*100) : 0;
         const itensHtml = c.itens.length
-          ? c.itens.map(it => `<div class="dvg-devol-item"><span>${escapeHtml(it.nome)}</span><span>${fmtNum(it.qtd)} un &middot; <b>${fmtBRL(it.valor)}</b></span></div>`).join('')
+          ? c.itens.map(it => `<div class="dvg-devol-item"><span>${escapeHtml(it.nome)}</span><span>${fmtNum(it.qtd)} ${/^kg$/i.test(it.un||'') ? 'kg' : ((it.un||'').trim() ? escapeHtml(String(it.un).toLowerCase()) : 'un')} &middot; <b>${fmtBRL(it.valor)}</b></span></div>`).join('')
           : '<div class="dvg-devol-item" style="opacity:.6">sem itens detalhados</div>';
         return `
         <div class="dvg-devol-row" data-ci="${c.ci}">
