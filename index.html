@@ -856,6 +856,7 @@
         display:inline-block; background:#eef2ff; color:#3b5bdb; font-weight:700 !important;
         border-radius:20px; padding:2px 9px; font-size:10px !important; margin-bottom:6px;
       }
+      .cli-row-card .cli-c-vend { display:inline-block; margin-left:8px; margin-bottom:6px; font-size:10px !important; }
       .cli-row-card .cli-c-acoes { justify-content:flex-start !important; gap:2px !important; margin-top:4px; }
     }
     /* Topbar breadcrumb */
@@ -3105,8 +3106,8 @@
         </div>
       </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-          <div style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
-            <span>C&#243;digo</span><span>Cliente</span><span>Raz&#227;o Social</span><span>CNPJ</span><span>Cidade / UF</span><span>Rede</span><span style="text-align:center">Op&#231;&#245;es</span>
+          <div style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 130px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+            <span>C&#243;digo</span><span>Cliente</span><span>Raz&#227;o Social</span><span>CNPJ</span><span>Cidade / UF</span><span>Rede</span><span>Vendedor Principal</span><span style="text-align:center">Op&#231;&#245;es</span>
           </div>
           <div id="cliente-tbody"></div>
           <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
@@ -11968,6 +11969,7 @@ function renderClienteList() {
   const vendedores = getVendedoresAtivos();
   const catClientes = getCatClientes();
   const fornecedores_lkp = getFornecedores();
+  const _vendLkp = {}; getUsuariosSistema().forEach(u => { _vendLkp[String(u.id)] = u.nome || ''; });
   tbody.innerHTML = rows.map(r => {
     const cidade = [r.cidade, r.estado].filter(Boolean).join(' · ');
     const vfList = r.vendedores_fornecedor || [];
@@ -11981,7 +11983,7 @@ function renderClienteList() {
           return x.codigo_cliente + '  :  ' + fnome;
         }).join('&#10;')
       : 'Nenhum codigo cadastrado';
-    return `<div class="cli-row-card" style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 110px;padding:11px 16px;align-items:center;border-bottom:1px solid #f8fafc;transition:background .12s"
+    return `<div class="cli-row-card" style="display:grid;grid-template-columns:70px 1fr 1fr 160px 160px 110px 130px 110px;padding:11px 16px;align-items:center;border-bottom:1px solid #f8fafc;transition:background .12s"
         onmouseover="this.style.background='#f8fbff'" onmouseout="this.style.background=''">
       <div class="cli-c-codigo" style="font-size:13px;font-weight:700;color:#272A4A">${r.codigo||'—'}</div>
       <div class="cli-c-nome" style="display:flex;align-items:center;gap:7px;padding-right:8px">
@@ -11992,6 +11994,7 @@ function renderClienteList() {
       <div class="cli-c-doc" style="font-size:11px;color:#64748b">${r.cpf_cnpj||'—'}</div>
       <div class="cli-c-cidade" style="font-size:11px;color:#64748b">${cidade||'—'}</div>
       <div class="cli-c-cat" style="font-size:11px;color:#64748b">${catNome}</div>
+      <div class="cli-c-vend" style="font-size:11px;color:#64748b;padding-right:6px">${_vendLkp[String(r.vendedor_principal)] || '—'}</div>
       <div class="cli-c-acoes" style="display:flex;gap:1px;justify-content:center">
         <button onclick="abrirModalCodCliForn('${r.id}')" title="${tooltipQr}"
           style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:${codigos.length?'#272A4A':'#94a3b8'};display:flex;align-items:center"
