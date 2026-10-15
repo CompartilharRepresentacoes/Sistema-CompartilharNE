@@ -94,6 +94,9 @@
 
     /* ── Mobile footer / slideshow ── */
     @media (max-width: 767px) {
+      #page-devolucao-list .dev-bl{width:auto!important;flex:0 1 44%!important;min-width:0}
+      #page-devolucao-list .dev-bb{flex:1 1 30px!important;min-width:30px}
+      #page-devolucao-list .dev-bv{width:auto!important;flex:none!important;min-width:62px;white-space:nowrap}
       #page-planejamento-reino{overflow-x:hidden}
       #page-planejamento-reino .pr-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
       #page-planejamento-reino .pr-rede-hdr{flex-wrap:wrap;gap:8px 0;padding:12px 14px!important}
@@ -25936,9 +25939,9 @@ function _devKpiCard(rot, valor, varHtml, sub, cor, subDestaque) {
 function _devBarras(titulo, sub, itens, fmt, labW) {
   var max = Math.max.apply(null, [1].concat(itens.map(function (i) { return i.v; })));
   var corpo = itens.length ? itens.map(function (i) {
-    return '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11.5px"><span style="width:' + (labW || 110) + 'px;flex-shrink:0;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(i.n) + '">' + _pedEsc(i.n) + '</span>'
-      + '<div style="flex:1;height:8px;border-radius:5px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;width:' + Math.max(2, (i.v / max) * 100) + '%;background:#3b82f6;border-radius:5px"></div></div>'
-      + '<span style="width:84px;text-align:right;font-weight:700;color:#fff">' + fmt(i.v) + '</span></div>';
+    return '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11.5px"><span class="dev-bl" style="width:' + (labW || 110) + 'px;flex-shrink:0;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(i.n) + '">' + _pedEsc(i.n) + '</span>'
+      + '<div class="dev-bb" style="flex:1;height:8px;border-radius:5px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;width:' + Math.max(2, (i.v / max) * 100) + '%;background:#3b82f6;border-radius:5px"></div></div>'
+      + '<span class="dev-bv" style="width:84px;text-align:right;font-weight:700;color:#fff">' + fmt(i.v) + '</span></div>';
   }).join('') : '<div style="margin-top:14px;font-size:11.5px;color:rgba(255,255,255,.5)">Sem dados no período.</div>';
   return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:18px 22px;color:#fff"><div style="font-size:13px;font-weight:600">' + titulo + '</div><div style="font-size:10.5px;color:rgba(255,255,255,.45)">' + sub + '</div>' + corpo + '</div>';
 }
