@@ -8389,6 +8389,10 @@ function _fsIniciarOuvintes(aoFicarTudoPronto) {
     if (r.error) { console.error('docs_cadastros', r.error); mostrarErroLogin('Erro ao ler o Supabase: ' + r.error.message); var bt = document.getElementById('btnEntrar'); if (bt) { bt.disabled = false; bt.textContent = 'Entrar'; } _fsOuvindo = false; return; }
     var c = r.data || {};
     _fsColecoes.forEach(function (n) { if (n !== 'pedidos') { _fsCache[n] = c[n] || []; _fsPronto[n] = true; } });
+    // v54: Rede sem Sub Rede vem do banco com subcategoriaId nulo; o modulo Reino espera '' (v461)
+    ['planejamento_reino_redes', 'planejamento_reino_lojas', 'planejamento_reino_vinculos'].forEach(function (n) {
+      (_fsCache[n] || []).forEach(function (o) { if (o && (o.subcategoriaId == null || o.subcategoriaId === 'null' || o.subcategoriaId === 'undefined')) o.subcategoriaId = ''; });
+    });
     _fsEmpresaCache = null; _fsEmpresaCarregada = true;
     if (aoFicarTudoPronto) aoFicarTudoPronto();
     _fsMostrarAvisoPedidos();
