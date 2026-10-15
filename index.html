@@ -93,6 +93,35 @@
     #loginLogoWrap { padding: 0 !important; margin-bottom: 10px !important; }
 
     /* ── Mobile footer / slideshow ── */
+    @media (max-width: 767px) {
+      #page-planejamento-reino{overflow-x:hidden}
+      #page-planejamento-reino .pr-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+      #page-planejamento-reino .pr-rede-hdr{flex-wrap:wrap;gap:8px 0;padding:12px 14px!important}
+      #page-planejamento-reino .pr-rede-hdr>span:nth-of-type(1){flex:1 1 50%!important;font-size:15px!important}
+      #page-planejamento-reino .pr-rede-hdr>span:nth-of-type(2){margin-right:0!important;font-size:12px!important}
+      #page-planejamento-reino .pr-rede-hdr>div{width:50%!important;margin-right:0!important;min-width:0!important;text-align:left!important;box-sizing:border-box;padding-right:6px}
+      #page-bloqueios-pedidos .rq-filtros input{box-sizing:border-box}
+      #page-bloqueios-pedidos{overflow-x:hidden}
+      #page-bloqueios-pedidos .rq-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+      #page-bloqueios-pedidos .rq-filtros{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+      #page-bloqueios-pedidos .rq-filtros>*{min-width:0}
+      #page-bloqueios-pedidos .rq-filtros>div:first-child,#page-bloqueios-pedidos .rq-filtros>button{grid-column:1/-1}
+      #page-bloqueios-pedidos .rq-minw{min-width:0!important}
+      #page-bloqueios-pedidos .rq-th{display:none!important}
+      #page-bloqueios-pedidos .rq-row{grid-template-columns:minmax(0,1fr) auto!important;gap:6px 10px!important;padding:12px 14px!important}
+      #page-bloqueios-pedidos .rq-row>span{min-width:0;order:5;grid-column:1/-1}
+      #page-bloqueios-pedidos .rq-row>span:nth-child(1){order:1;grid-column:1;font-weight:700}
+      #page-bloqueios-pedidos .rq-row>span:nth-child(3){order:2;grid-column:2}
+      #page-bloqueios-pedidos .rq-row>span:nth-child(2){order:3}
+      #page-bloqueios-pedidos .rq-row>span:nth-child(4){order:4}
+      #page-bloqueios-pedidos .rq-row>span:nth-child(5){order:5}
+      #page-bloqueios-pedidos .rq-row>span:nth-child(6){order:6;grid-column:1}
+      #page-bloqueios-pedidos .rq-row>span:nth-child(7){order:7;grid-column:2;text-align:right}
+      #page-bloqueios-pedidos .rq-row>span:nth-child(8){order:8;grid-column:1}
+      #page-bloqueios-pedidos .rq-row>span:nth-child(9){order:9;grid-column:2}
+      #bloq-form select,#bloq-form input{max-width:100%}
+      #bloq-form [style*="min-width:260px"],#bloq-form select[style*="min-width"]{min-width:0!important;width:100%}
+    }
     @media (max-width: 767px) { #loginFormFooter { display: none !important; } }
     @media (min-width: 768px) { #loginMobileRepresentadas { display: none !important; } #loginMobileFooter { display: none !important; } }
     #loginMobileRepresentadas { display: none; margin-top: 14px; padding-bottom: 8px; }
@@ -5448,8 +5477,15 @@
         .dev-filtros{display:grid;grid-template-columns:2fr repeat(5,1fr) auto;gap:10px;align-items:end}
         .dev-filtros label{font-size:10.5px;font-weight:600;color:#64748b;display:block;margin-bottom:4px}
         .dev-filtros input,.dev-filtros select{width:100%;padding:7px 8px;border:1px solid #e2e8f0;border-radius:7px;background:#f8fafc;font-size:12px}
-        @media(max-width:900px){.dev-g2,.dev-g2.dev-g2b{grid-template-columns:1fr}#dev-kpis{grid-template-columns:1fr 1fr}.dev-filtros{grid-template-columns:1fr 1fr}}
+        @media(max-width:767px){#page-devolucao-list .dev-th{display:none !important}.dev-filtros>div:first-child,.dev-filtros>div:last-child{grid-column:1/-1}.dev-filtros>div:last-child button{flex:1}}
+        @media(max-width:900px){.dev-g2,.dev-g2.dev-g2b{grid-template-columns:minmax(0,1fr)}#dev-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dev-filtros{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        .dev-g2>*,#dev-kpis>*,.dev-filtros>*,#dev-graficos>*{min-width:0}
+        #dev-graficos{max-width:100%}
+        @media(max-width:767px){#page-devolucao-list{overflow-x:hidden}#dev-graficos>div,#dev-graficos div{max-width:100%;box-sizing:border-box}}
       </style>
+        <div class="dev-mobile-actions" style="display:none;margin-bottom:10px">
+          <button onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:12px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar</button>
+        </div>
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:12px">
         <div class="dev-filtros">
           <div><label>Buscar cliente, NFD, NF origem ou lançamento</label><input id="dev-busca" oninput="renderDevolucaoList()" placeholder="Digite para filtrar..."></div>
@@ -5464,11 +5500,8 @@
       </div>
       <div id="dev-kpis"></div>
       <div id="dev-graficos"></div>
-        <div class="dev-mobile-actions" style="display:none;margin-bottom:10px">
-          <button onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:12px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar</button>
-        </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-          <div style="display:grid;grid-template-columns:75px 95px 1fr 1fr 90px 92px 100px 118px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+          <div class="dev-th" style="display:grid;grid-template-columns:75px 95px 1fr 1fr 90px 92px 100px 118px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
             <span>Data</span><span>NFD</span><span>Cliente</span><span>Fornecedor</span><span>Motivo</span><span>Situação</span><span>Valor</span><span style="text-align:right">Ações</span>
           </div>
           <div id="dev-tbody" style="min-height:60px"></div>
@@ -6099,7 +6132,7 @@
       </div>
 
         <div id="rq-aviso" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px"></div>
-        <div id="rq-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px"></div>
+        <div id="rq-kpis" class="rq-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px"></div>
 
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:14px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
@@ -6165,7 +6198,7 @@
         </div>
 
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:12px">
-          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:end">
+          <div class="rq-filtros" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:end">
             <div><div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Buscar produto, cliente, cidade ou motivo</div><input id="rq-f-busca" oninput="renderBloqueios()" placeholder="Digite para filtrar..." style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%"></div>
             <div><div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Fábrica</div><select id="rq-f-forn" onchange="renderBloqueios()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%"><option value="">Todas</option></select></div>
             <div><div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Tipo</div><select id="rq-f-tipo" onchange="renderBloqueios()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%"><option value="">Todos</option><option value="uf">UF</option><option value="cidade">Cidade</option><option value="rede">Rede</option><option value="loja">Loja</option><option value="cliente">Cliente</option></select></div>
@@ -6176,8 +6209,8 @@
         </div>
 
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow-x:auto">
-          <div style="min-width:980px">
-          <div style="display:grid;grid-template-columns:1fr 1.5fr 80px 1.7fr 1.2fr 110px 100px 56px 70px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;gap:8px">
+          <div class="rq-minw" style="min-width:980px">
+          <div class="rq-th" style="display:grid;grid-template-columns:1fr 1.5fr 80px 1.7fr 1.2fr 110px 100px 56px 70px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;gap:8px">
             <span>Fábrica</span><span>Produto(s)</span><span>Tipo</span><span>Onde vale</span><span>Motivo</span><span>Vigência</span><span>Impacto</span><span>Ativo</span><span></span>
           </div>
           <div id="bloq-lista"></div>
@@ -23910,7 +23943,7 @@ function renderBloqueios() {
     var vigTxt = (!r.vigIni && !r.vigFim) ? 'Sem prazo' : ((r.vigIni ? 'Desde ' + r.vigIni.split('-').reverse().join('/') : '') + (r.vigIni && r.vigFim ? '<br>' : '') + (r.vigFim ? 'Até ' + r.vigFim.split('-').reverse().join('/') : ''));
     if (!vig) vigTxt = '<span style="color:#b45309">' + vigTxt + '<br>(fora da vigência)</span>';
     var nCli = _rqClientesAfetados(r).length;
-    return '<div style="display:grid;grid-template-columns:1fr 1.5fr 80px 1.7fr 1.2fr 110px 100px 56px 70px;gap:8px;padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:12px;color:#1e293b;align-items:start;' + (on ? '' : 'opacity:.55') + '">'
+    return '<div class="rq-row" style="display:grid;grid-template-columns:1fr 1.5fr 80px 1.7fr 1.2fr 110px 100px 56px 70px;gap:8px;padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:12px;color:#1e293b;align-items:start;' + (on ? '' : 'opacity:.55') + '">'
       + '<span>' + _pedEsc(r.fornNome) + '</span><span>' + prodHtml + '</span>'
       + '<span><span style="background:' + cor + '1a;color:' + cor + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px">' + _RQ_NIVEL_LABEL[r.nivel] + '</span></span>'
       + '<span>' + alvoHtml + '</span><span style="color:#64748b;font-size:11px">' + (r.motivo ? _pedEsc(r.motivo) : '—') + '</span>'
@@ -24275,7 +24308,7 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
     pontosCirculo +
     '</svg>' +
     '<div style="position:relative;height:16px;margin-top:2px">' + colunasAnos + '</div>' +
-    '<div id="pr-stats-evolucao" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-top:16px">' + _prStatsEvolucaoHtml(pontos[idxInicial], pontos[idxInicial - 1]) + '</div>' +
+    '<div id="pr-stats-evolucao" class="pr-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-top:16px">' + _prStatsEvolucaoHtml(pontos[idxInicial], pontos[idxInicial - 1]) + '</div>' +
     '</div>';
 }
 
@@ -24517,7 +24550,7 @@ function _prRenderRedes() {
     });
     var aberta = String(_prRedeId) === String(rede.id);
 
-    var headerHtml = '<div onclick="_prToggleRedeAccordion(\'' + rede.id + '\')" style="display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid #f1f5f9;cursor:pointer;background:' + (aberta ? '#f8fafc' : '#fff') + '">' +
+    var headerHtml = '<div class="pr-rede-hdr" onclick="_prToggleRedeAccordion(\'' + rede.id + '\')" style="display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid #f1f5f9;cursor:pointer;background:' + (aberta ? '#f8fafc' : '#fff') + '">' +
       '<i class="ti ti-chevron-' + (aberta ? 'down' : 'right') + '" style="font-size:13px;color:' + (aberta ? '#272A4A' : '#94a3b8') + ';margin-right:10px"></i>' +
       '<span style="flex:1;font-weight:700;color:#1e293b;font-size:16px">' + _prEsc(rede.nome) + '</span>' +
       '<span style="font-size:14px;color:#64748b;margin-right:20px">' + subsCat.length + ' Sub Rede' + (subsCat.length === 1 ? '' : 's') + '</span>' +
