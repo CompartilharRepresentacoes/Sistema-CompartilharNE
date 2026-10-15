@@ -5326,21 +5326,18 @@
       </div>
 
       <!-- Cards -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div style="font-size:22px;font-weight:800;color:#1e293b;line-height:1.2;letter-spacing:-.02em" id="entctrl-kpi-total">0</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Notas Fiscais</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#272A4A"></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Notas Fiscais</div>
+          <div style="font-size:20px;font-weight:800;color:#272A4A" id="entctrl-kpi-total">0</div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div style="font-size:22px;font-weight:800;color:#b45309;line-height:1.2;letter-spacing:-.02em" id="entctrl-kpi-rota">0</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Em Rota</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#DE7926"></div>
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Em Rota</div>
+          <div style="font-size:20px;font-weight:800;color:#b45309" id="entctrl-kpi-rota">0</div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div style="font-size:22px;font-weight:800;color:#15803d;line-height:1.2;letter-spacing:-.02em" id="entctrl-kpi-entregues">0</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Entregues</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#16a34a"></div>
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Entregues</div>
+          <div style="font-size:20px;font-weight:800;color:#16a34a" id="entctrl-kpi-entregues">0</div>
         </div>
       </div>
 
@@ -6208,26 +6205,22 @@
         </div>
       </div>
 
-      <div id="oc-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div id="oc-kpi-total" style="font-size:22px;font-weight:800;color:#272A4A;line-height:1.2;letter-spacing:-.02em">0</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Ocorrências no mês</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#272A4A"></div>
+      <div id="oc-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Ocorrências no mês</div>
+          <div id="oc-kpi-total" style="font-size:20px;font-weight:800;color:#272A4A">0</div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div id="oc-kpi-avarias" style="font-size:22px;font-weight:800;color:#DC2626;line-height:1.2;letter-spacing:-.02em">0</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Avarias</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#DC2626"></div>
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Avarias</div>
+          <div id="oc-kpi-avarias" style="font-size:20px;font-weight:800;color:#DC2626">0</div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div id="oc-kpi-recusas" style="font-size:22px;font-weight:800;color:#C2410C;line-height:1.2;letter-spacing:-.02em">0</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Recusas / devoluções</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#C2410C"></div>
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Recusas / devoluções</div>
+          <div id="oc-kpi-recusas" style="font-size:20px;font-weight:800;color:#C2410C">0</div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div id="oc-kpi-valor" style="font-size:22px;font-weight:800;color:#272A4A;line-height:1.2;letter-spacing:-.02em">R$ 0,00</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em;margin-top:3px">Valor afetado</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#272A4A"></div>
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #5b78c9">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor afetado</div>
+          <div id="oc-kpi-valor" style="font-size:20px;font-weight:800;color:#272A4A">R$ 0,00</div>
         </div>
       </div>
 
@@ -6341,30 +6334,26 @@
         <button onclick="showPage('page-revenda-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Registrar Item</button>
       </div>
 
-      <div id="rev-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Itens Disponíveis</div>
-          <div style="font-size:22px;font-weight:800;color:#1e293b;line-height:1.2;letter-spacing:-.02em" id="rev-kpi-disponiveis">0</div>
-          <div style="font-size:11px;color:#94a3b8">aguardando revenda</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#272A4A"></div>
+      <div id="rev-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Itens Disponíveis</div>
+          <div id="rev-kpi-disponiveis" style="font-size:20px;font-weight:800;color:#272A4A">0</div>
+          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">aguardando revenda</div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Valor em Estoque</div>
-          <div style="font-size:22px;font-weight:800;color:#1e293b;line-height:1.2;letter-spacing:-.02em" id="rev-kpi-valor">R$ 0,00</div>
-          <div style="font-size:11px;color:#94a3b8">custo de referência</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#0e7490"></div>
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor em Estoque</div>
+          <div id="rev-kpi-valor" style="font-size:20px;font-weight:800;color:#272A4A">R$ 0,00</div>
+          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">custo de referência</div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Vencendo em 15 dias</div>
-          <div style="font-size:22px;font-weight:800;color:#b45309;line-height:1.2;letter-spacing:-.02em" id="rev-kpi-vencendo">0</div>
-          <div style="font-size:11px;color:#94a3b8">revenda urgente</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#DE7926"></div>
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Vencendo em 15 dias</div>
+          <div id="rev-kpi-vencendo" style="font-size:20px;font-weight:800;color:#b45309">0</div>
+          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">revenda urgente</div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">Revendidos no Mês</div>
-          <div style="font-size:22px;font-weight:800;color:#15803d;line-height:1.2;letter-spacing:-.02em" id="rev-kpi-revendidos">0</div>
-          <div style="font-size:11px;color:#94a3b8">itens já vendidos</div>
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#16a34a"></div>
+        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #5b78c9">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Revendidos no Mês</div>
+          <div id="rev-kpi-revendidos" style="font-size:20px;font-weight:800;color:#16a34a">0</div>
+          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">itens já vendidos</div>
         </div>
       </div>
 
@@ -24231,7 +24220,7 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
   var W = 600, H = 150, padTop = 22, padBottom = 8;
   var maxKg = Math.max.apply(null, [1].concat(pontos.map(function (p) { return p.kg; })));
   var n = pontos.length;
-  function xAt(i) { return ((i + 0.5) / n) * W; }
+  function xAt(i) { return n > 1 ? 24 + (i / (n - 1)) * (W - 48) : W / 2; }
   function yKg(v) { return H - padBottom - (v / maxKg) * (H - padTop - padBottom); }
   var ptsKg = pontos.map(function (p, i) { return [xAt(i), yKg(p.kg)]; });
   var dKg = _prPathSuave(ptsKg);
@@ -24245,7 +24234,7 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
 
   var colunasAnos = pontos.map(function (p, i) {
     var atual = i === idxInicial;
-    return '<div style="text-align:center;cursor:pointer" onmouseover="_prMostrarStatsAnoEvolucao(' + i + ')">' +
+    return '<div style="position:absolute;left:' + (xAt(i) / W * 100) + '%;transform:translateX(-50%);text-align:center;cursor:pointer" onmouseover="_prMostrarStatsAnoEvolucao(' + i + ')">' +
       '<div style="font-size:' + (atual ? '11px' : '10px') + ';color:' + (atual ? '#fff' : 'rgba(255,255,255,.5)') + ';font-weight:' + (atual ? '800' : '400') + '">' + p.ano + '</div>' +
       '</div>';
   }).join('');
@@ -24259,7 +24248,7 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
     '<path d="' + dKg + '" fill="none" stroke="#3b82f6" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(59,130,246,.6))"/>' +
     pontosCirculo +
     '</svg>' +
-    '<div style="display:grid;grid-template-columns:repeat(' + n + ',1fr);margin-top:2px">' + colunasAnos + '</div>' +
+    '<div style="position:relative;height:16px;margin-top:2px">' + colunasAnos + '</div>' +
     '<div id="pr-stats-evolucao" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-top:16px">' + _prStatsEvolucaoHtml(pontos[idxInicial], pontos[idxInicial - 1]) + '</div>' +
     '</div>';
 }
