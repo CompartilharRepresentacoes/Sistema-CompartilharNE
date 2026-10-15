@@ -5442,7 +5442,6 @@
         </div>
       </div>
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
-        <button onclick="relatorioDevolucoes()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="graficos" style="font-size:10px"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="5" width="4" height="15.5" rx="1"/><rect x="15" y="9" width="4" height="11.5" rx="1"/></svg> Relatório</button>
         <button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Cadastrar</button>
       </div>
       <style>
@@ -5454,8 +5453,6 @@
         .dev-filtros input,.dev-filtros select{width:100%;padding:7px 8px;border:1px solid #e2e8f0;border-radius:7px;background:#f8fafc;font-size:12px}
         @media(max-width:900px){.dev-g2,.dev-g2.dev-g2b{grid-template-columns:1fr}#dev-kpis{grid-template-columns:1fr 1fr}.dev-filtros{grid-template-columns:1fr 1fr}}
       </style>
-      <div id="dev-kpis"></div>
-      <div id="dev-graficos"></div>
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:12px">
         <div class="dev-filtros">
           <div><label>Buscar cliente, NFD, NF origem ou lançamento</label><input id="dev-busca" oninput="renderDevolucaoList()" placeholder="Digite para filtrar..."></div>
@@ -5468,6 +5465,8 @@
         </div>
         <div id="dev-status-chips" style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"></div>
       </div>
+      <div id="dev-kpis"></div>
+      <div id="dev-graficos"></div>
         <div class="dev-mobile-actions" style="display:none;margin-bottom:10px">
           <button onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:12px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar</button>
         </div>
