@@ -24622,6 +24622,7 @@ function _prCalcLoja(loja, precoFechadoNegociacao) {
   return { fatTotal: fatTotal, saldo: fechado - fatTotal, valorTotal: precoUnit * fatTotal };
 }
 
+function _prSubN(x) { return (x == null || x === 'null' || x === 'undefined') ? '' : String(x); }
 function _prObterClientesLoja(fornecedorId, redeId, subRedeId, ano) {
   var vinculos = getPlanejamentoReinoVinculos().filter(function (v) {
     return String(v.fornecedorId) === String(fornecedorId) && String(v.categoriaId) === String(redeId) && String(v.subcategoriaId) === String(subRedeId) && v.ano === ano;
@@ -24634,7 +24635,7 @@ function _prObterClientesLoja(fornecedorId, redeId, subRedeId, ano) {
   var ativos = getClientes().filter(function (cl) { return (cl.ativo || 'Sim') !== 'Não'; });
   var porId = {};
   ativos.forEach(function (cl) {
-    var pertenceGlobal = String(cl.categoria) === String(redeId) && String(cl.subcategoria) === String(subRedeId);
+    var pertenceGlobal = String(cl.categoria) === String(redeId) && _prSubN(cl.subcategoria) === _prSubN(subRedeId);
     if ((pertenceGlobal && !excluidos[String(cl.id)]) || (incluidos[String(cl.id)] && !pertenceGlobal)) {
       porId[String(cl.id)] = cl;
     }
@@ -24747,7 +24748,7 @@ function _prAbrirIncluirLoja() {
   _prObterClientesLoja(_prFabricaId, _prRedeId, _prSubRedeId, _prAnoSel).forEach(function (cl) { jaNaLista[String(cl.id)] = true; });
   _prIncluirLojaCandidatos = getClientes().filter(function (cl) {
     return (cl.ativo || 'Sim') !== 'Não' && !jaNaLista[String(cl.id)] &&
-      String(cl.categoria) === String(_prRedeId) && String(cl.subcategoria) === String(_prSubRedeId);
+      String(cl.categoria) === String(_prRedeId) && _prSubN(cl.subcategoria) === _prSubN(_prSubRedeId);
   })
     .sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
   _prRenderListaIncluirLoja(_prIncluirLojaCandidatos);
@@ -24778,7 +24779,7 @@ function _prIncluirLojaConfirmar(clienteId) {
     return !(String(v.fornecedorId) === String(_prFabricaId) && String(v.categoriaId) === String(_prRedeId) && String(v.subcategoriaId) === String(_prSubRedeId) && String(v.clienteId) === String(clienteId) && v.ano === _prAnoSel);
   });
   var cl = getClientes().find(function (c) { return String(c.id) === String(clienteId); });
-  var pertenceGlobal = cl && String(cl.categoria) === String(_prRedeId) && String(cl.subcategoria) === String(_prSubRedeId);
+  var pertenceGlobal = cl && String(cl.categoria) === String(_prRedeId) && _prSubN(cl.subcategoria) === _prSubN(_prSubRedeId);
   if (!pertenceGlobal) {
     data.push({ id: 'prv' + Date.now(), fornecedorId: _prFabricaId, categoriaId: _prRedeId, subcategoriaId: _prSubRedeId, clienteId: clienteId, ano: _prAnoSel, tipo: 'incluido' });
   }
