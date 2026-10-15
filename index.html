@@ -6085,7 +6085,7 @@
       </div>
 
         <div id="rq-aviso" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px"></div>
-        <div id="rq-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px"></div>
+        <div id="rq-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px"></div>
 
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:14px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
@@ -23832,7 +23832,8 @@ function _rqLimparFiltros() {
   renderBloqueios();
 }
 
-function _rqKpi(t, v, s) { return '<div style="background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 4px rgba(15,23,42,.06)"><div style="font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase">' + t + '</div><div style="font-size:20px;font-weight:800;color:#272A4A;margin-top:3px">' + v + '</div><div style="font-size:10.5px;color:#94a3b8">' + s + '</div></div>'; }
+var _rqKpiCores = ['#1c2f66', '#2c4488', '#3d5aa8', '#5b78c9'], _rqKpiI = 0;
+function _rqKpi(t, v, s) { var cor = _rqKpiCores[(_rqKpiI++) % 4]; return '<div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid ' + cor + '"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">' + t + '</div><div style="font-size:20px;font-weight:800;color:#272A4A">' + v + '</div><div style="font-size:10.5px;color:#94a3b8;margin-top:2px">' + s + '</div></div>'; }
 
 function renderBloqueios() {
   var lista = document.getElementById('bloq-lista'); if (!lista) return;
@@ -23849,6 +23850,7 @@ function renderBloqueios() {
   ativas.forEach(function (r) { (r.produtos || []).forEach(function (p) { prods[r.fornId + '|' + p.id] = true; }); _rqClientesAfetados(r).forEach(function (c) { clis[c.id] = true; }); });
   var venc30 = ativas.filter(function (r) { if (!r.vigFim) return false; var d = (new Date(r.vigFim) - new Date(hoje)) / 86400000; return d >= 0 && d <= 30; }).length;
   var kp = document.getElementById('rq-kpis');
+  _rqKpiI = 0;
   if (kp) kp.innerHTML = _rqKpi('Restrições ativas', ativas.length, (todos.length - ativas.length) + ' pausada(s)/fora da vigência')
     + _rqKpi('Produtos bloqueados', Object.keys(prods).length, 'em ' + Object.keys(ativas.reduce(function (a, r) { a[r.fornId] = 1; return a; }, {})).length + ' fábrica(s)')
     + _rqKpi('Clientes afetados', Object.keys(clis).length, 'de ' + getClientes().filter(function (c) { return (c.ativo || 'Sim') !== 'Não'; }).length + ' ativos')
