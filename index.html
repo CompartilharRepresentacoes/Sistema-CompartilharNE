@@ -11091,7 +11091,7 @@ function _pifCarregarTesseract() {
 
 async function _renderPageToCanvas(pageNum, canvas) {
   const pdf = window._cartilhaPdf; if (!pdf) return;
-  const W = 380, H = 520;
+  const W = window._cPW || 380, H = window._cPH || 520;
   const page = await pdf.getPage(pageNum);
   const vp0  = page.getViewport({ scale: 1 });
   const scale = Math.min(W / vp0.width, H / vp0.height);
@@ -11105,9 +11105,9 @@ async function _renderPageToCanvas(pageNum, canvas) {
   ctx.drawImage(tmp, Math.floor((W - vp.width) / 2), Math.floor((H - vp.height) / 2));
 }
 function _blankCanvas(canvas) {
-  canvas.width = 380; canvas.height = 520;
+  canvas.width = window._cPW || 380; canvas.height = window._cPH || 520;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#e8e8e8'; ctx.fillRect(0, 0, 380, 520);
+  ctx.fillStyle = '#e8e8e8'; ctx.fillRect(0, 0, window._cPW || 380, window._cPH || 520);
 }
 function _updateCartilhaInfo() {
   const pdf = window._cartilhaPdf; if (!pdf) return;
@@ -11204,7 +11204,7 @@ async function _flipCartilha(dir, newLeft) {
   const canvR     = document.getElementById('cartilha-canvas-right');
   if (dir === 'fwd') {
     // Front of flip = current right page; Back = new left page
-    flipFront.width = 380; flipFront.height = 520;
+    flipFront.width = window._cPW || 380; flipFront.height = window._cPH || 520;
     flipFront.getContext('2d').drawImage(canvR, 0, 0);
     if (newLeft <= pdf.numPages) await _renderPageToCanvas(newLeft, flipBack);
     else _blankCanvas(flipBack);
@@ -11212,11 +11212,11 @@ async function _flipCartilha(dir, newLeft) {
     const nrp = newLeft + 1;
     if (nrp <= pdf.numPages) await _renderPageToCanvas(nrp, canvR);
     else _blankCanvas(canvR);
-    flipDiv.style.left = '386px';
+    flipDiv.style.left = ((window._cPW||380)+6)+'px';
     flipDiv.style.transformOrigin = '0 50%';
   } else {
     // Front of flip = current left page; Back = new right page
-    flipFront.width = 380; flipFront.height = 520;
+    flipFront.width = window._cPW || 380; flipFront.height = window._cPH || 520;
     flipFront.getContext('2d').drawImage(canvL, 0, 0);
     const nrp = newLeft + 1;
     if (nrp <= pdf.numPages) await _renderPageToCanvas(nrp, flipBack);
@@ -11225,7 +11225,7 @@ async function _flipCartilha(dir, newLeft) {
     if (newLeft >= 1) await _renderPageToCanvas(newLeft, canvL);
     else _blankCanvas(canvL);
     flipDiv.style.left = '0px';
-    flipDiv.style.transformOrigin = '380px 50%';
+    flipDiv.style.transformOrigin = (window._cPW||380)+'px 50%';
   }
   flipDiv.style.display = 'block';
   flipDiv.classList.remove('cart-fwd','cart-bwd');
@@ -11235,10 +11235,10 @@ async function _flipCartilha(dir, newLeft) {
     setTimeout(() => {
       // After flip: copy back-face content to the "turned" page canvas
       if (dir === 'fwd') {
-        canvL.width = 380; canvL.height = 520;
+        canvL.width = window._cPW || 380; canvL.height = window._cPH || 520;
         canvL.getContext('2d').drawImage(flipBack, 0, 0);
       } else {
-        canvR.width = 380; canvR.height = 520;
+        canvR.width = window._cPW || 380; canvR.height = window._cPH || 520;
         canvR.getContext('2d').drawImage(flipBack, 0, 0);
       }
       flipDiv.style.display = 'none';
@@ -11250,6 +11250,26 @@ async function _flipCartilha(dir, newLeft) {
   });
 }
 
+// v75: o livro se ajusta ao formato do PDF (paisagem = apresentacao/slides, sem faixas brancas)
+function _cartAplicarDim(pw, ph) {
+  window._cPW = pw; window._cPH = ph;
+  var set = function (id, css) { var e = document.getElementById(id); if (e) Object.assign(e.style, css); };
+  set('cartilha-book-wrap', { width: (pw * 2 + 6) + 'px', height: ph + 'px' });
+  set('cartilha-book-pages', { width: (pw * 2 + 6) + 'px', height: ph + 'px' });
+  set('cartilha-page-left', { width: pw + 'px', height: ph + 'px' });
+  set('cartilha-page-right', { width: pw + 'px', height: ph + 'px', left: (pw + 6) + 'px' });
+  set('cartilha-flip-layer', { width: pw + 'px', height: ph + 'px' });
+  var d = document.getElementById('cartilha-page-left'); if (d && d.nextElementSibling) { d.nextElementSibling.style.left = pw + 'px'; d.nextElementSibling.style.height = ph + 'px'; }
+}
+async function _cartAjustarFormato() {
+  try {
+    var pg = await window._cartilhaPdf.getPage(1); var v = pg.getViewport({ scale: 1 });
+    if (v.width > v.height) {
+      var pw = Math.max(260, Math.min(460, Math.floor((window.innerWidth - 190) / 2)));
+      _cartAplicarDim(pw, Math.round(pw * v.height / v.width));
+    } else _cartAplicarDim(380, 520);
+  } catch (e) { _cartAplicarDim(380, 520); }
+}
 async function abrirCartilha(fornId) {
   const cats = getCatalogos();
   const cat  = cats.find(c => c.fornecedor_id === fornId);
@@ -11300,7 +11320,14 @@ async function abrirCartilha(fornId) {
   }
   lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   try {
-    window._cartilhaPdf = await lib.getDocument({ url: _catUrl(cat.arquivo) }).promise;
+    // v75: tenta ate 3 vezes antes de mostrar erro (a 1a tentativa falhava as vezes e a 2a abria)
+    var _catErr = null;
+    for (var _catTent = 0; _catTent < 3; _catTent++) {
+      try { window._cartilhaPdf = await lib.getDocument({ url: _catUrl(cat.arquivo) }).promise; _catErr = null; break; }
+      catch (eTent) { _catErr = eTent; await new Promise(function (r) { setTimeout(r, 700); }); }
+    }
+    if (_catErr) throw _catErr;
+    if (window._cartilhaModo !== 'vertical') await _cartAjustarFormato();
     if (window._cartilhaModo === 'vertical') {
       await _renderPaginaVertical(1);
     } else {
