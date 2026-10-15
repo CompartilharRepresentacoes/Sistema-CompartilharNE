@@ -8444,6 +8444,7 @@ function _fsIniciarOuvintes(aoFicarTudoPronto) {
     _fsMostrarAvisoPedidos();
     _fsOuvirFotosProdutos();
     try { _restrCarregar(); } catch (eRq) { console.warn(eRq); }
+    try { _cmdCarregar(); } catch (eCm) { console.warn(eCm); }
     var hoje = new Date(); var fimAno = (hoje.getFullYear() + 1) + '-12-31';
     // pedidos do ano + pedidos mais antigos que tem fatura dentro do periodo (o Painel conta pela data da fatura)
     // + versao enxuta do ano anterior (comparacao do Painel), tudo junto antes de mostrar os numeros
@@ -27936,8 +27937,45 @@ function _navEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ retur
 function getComandosNavegacao() {
   return firebaseConfigurado ? _fsGet('comandos_navegacao') : JSON.parse(localStorage.getItem('comandos_navegacao') || '[]');
 }
+var _cmdCarregando = false;
+function _cmdCarregar(cb) {
+  if (typeof SB === 'undefined') { if (cb) cb(); return; }
+  if (_cmdCarregando) return;
+  _cmdCarregando = true;
+  SB.from('comandos_navegacao').select('id_legado,frases,pagina,aba,filtro_cliente,filtro_categoria_id,criado_por,criado_em').order('id', { ascending: true }).then(function (r) {
+    _cmdCarregando = false;
+    if (r.error) { console.warn('[comandos] indisponível:', r.error.message); }
+    else {
+      _fsCache['comandos_navegacao'] = (r.data || []).map(function (x) {
+        return { id: x.id_legado, frases: x.frases || [], pagina: x.pagina || '', aba: x.aba || '', filtroCliente: x.filtro_cliente || '', filtroCategoriaId: x.filtro_categoria_id == null ? '' : String(x.filtro_categoria_id), criadoPor: x.criado_por || '', criadoEm: x.criado_em || '' };
+      });
+      _fsPronto['comandos_navegacao'] = true;
+    }
+    if (document.getElementById('nav-comando-tbody')) renderComandoList();
+    if (cb) cb();
+  }, function () { _cmdCarregando = false; if (cb) cb(); });
+}
+function _cmdGravarNoBanco(data) {
+  var antigo = _fsCache['comandos_navegacao'] || [];
+  var mapAnt = {}; antigo.forEach(function (o) { if (o && o.id) mapAnt[o.id] = o; });
+  var ids = {}, docs = [];
+  (data || []).forEach(function (c) {
+    if (!c || !c.id) return; ids[c.id] = true;
+    var o = mapAnt[c.id];
+    if (!o || JSON.stringify([o.frases, o.pagina, o.aba, o.filtroCliente, o.filtroCategoriaId]) !== JSON.stringify([c.frases, c.pagina, c.aba, c.filtroCliente, c.filtroCategoriaId])) {
+      docs.push({ id: c.id, frases: c.frases || [], pagina: c.pagina || '', aba: c.aba || '', filtroCliente: c.filtroCliente || '', filtroCategoriaId: c.filtroCategoriaId || '', criadoPor: c.criadoPor || '' });
+    }
+  });
+  var apagar = antigo.filter(function (o) { return o && o.id && !ids[o.id]; }).map(function (o) { return o.id; });
+  _fsCache['comandos_navegacao'] = (data || []).slice();
+  if (!docs.length && !apagar.length) return;
+  SB.rpc('gravar_comandos', { p_docs: JSON.parse(JSON.stringify(docs)), p_apagar: apagar }).then(function (r) {
+    if (r.error) { alert('Não foi possível gravar o comando no banco: ' + r.error.message); _cmdCarregar(); }
+  }, function (e) { alert('Não foi possível gravar o comando no banco.'); _cmdCarregar(); });
+}
 function setComandosNavegacao(data) {
-  if (firebaseConfigurado) { _fsSet('comandos_navegacao', data); } else { localStorage.setItem('comandos_navegacao', JSON.stringify(data)); }
+  if (firebaseConfigurado && typeof SB !== 'undefined') { _cmdGravarNoBanco(data); }
+  else if (firebaseConfigurado) { _fsSet('comandos_navegacao', data); } else { localStorage.setItem('comandos_navegacao', JSON.stringify(data)); }
 }
 // Páginas que podem ser destino de um comando: exclui formulários de edição de registro específico
 // (que abririam em branco/sem contexto) e as próprias páginas de Comandos. Mantém page-pedido-form
