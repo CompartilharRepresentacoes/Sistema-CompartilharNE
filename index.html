@@ -16023,6 +16023,13 @@ function consultarPreco() {
     _cpResultados.push({ tabela: tab, item, especifica });
   });
   _cpResultados.sort((a, b) => (b.especifica ? 1 : 0) - (a.especifica ? 1 : 0));
+  // v67: so mostra as tabelas que valem para a rede/cliente escolhido; sem nenhuma especifica, cai nas tabelas gerais (sem clientes vinculados)
+  if (_cpResultados.some(r => r.especifica)) {
+    _cpResultados = _cpResultados.filter(r => r.especifica);
+  } else {
+    const gerais = _cpResultados.filter(r => !(r.tabela.clientes || []).length);
+    if (gerais.length) _cpResultados = gerais;
+  }
 
   const el = document.getElementById('cp-resultado');
 
