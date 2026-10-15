@@ -24232,11 +24232,11 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
   var W = 600, H = 150, padTop = 22, padBottom = 8;
   var maxKg = Math.max.apply(null, [1].concat(pontos.map(function (p) { return p.kg; })));
   var n = pontos.length;
-  function xAt(i) { return n > 1 ? (i / (n - 1)) * W : 0; }
+  function xAt(i) { return ((i + 0.5) / n) * W; }
   function yKg(v) { return H - padBottom - (v / maxKg) * (H - padTop - padBottom); }
   var ptsKg = pontos.map(function (p, i) { return [xAt(i), yKg(p.kg)]; });
   var dKg = _prPathSuave(ptsKg);
-  var dAreaKg = dKg + ' L ' + W + ',' + H + ' L 0,' + H + ' Z';
+  var dAreaKg = dKg + ' L ' + xAt(n - 1) + ',' + H + ' L ' + xAt(0) + ',' + H + ' Z';
   var idxInicial = n - 1;
 
   var pontosCirculo = ptsKg.map(function (pt, i) {
@@ -24254,7 +24254,7 @@ function _prRenderGraficoEvolucaoHtml(titulo, subtitulo, pontos) {
   return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:20px 24px;margin-bottom:18px">' +
     '<div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:2px">' + _prEsc(titulo) + '</div><div style="font-size:10.5px;color:rgba(255,255,255,.45)">' + _prEsc(subtitulo) + '</div></div>' +
     '<div style="display:flex;align-items:center;gap:6px;margin-top:12px"><span style="width:14px;height:3px;background:#3b82f6;display:inline-block;border-radius:2px"></span><span style="font-size:10px;color:rgba(255,255,255,.6)">Volume Faturado (kg)</span></div>' +
-    '<svg viewBox="0 0 600 150" style="width:100%;height:150px;margin-top:10px" preserveAspectRatio="none">' +
+    '<svg viewBox="0 0 600 150" style="width:100%;height:150px;margin-top:10px;overflow:visible" preserveAspectRatio="none">' +
     '<defs><linearGradient id="prAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.35"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>' +
     '<path d="' + dAreaKg + '" fill="url(#prAreaGrad)" stroke="none"/>' +
     '<path d="' + dKg + '" fill="none" stroke="#3b82f6" stroke-width="2.5" style="filter:drop-shadow(0 0 4px rgba(59,130,246,.6))"/>' +
