@@ -28391,19 +28391,23 @@ function _relCalcPedidoFaturado(f) {
           if (fat.numDuplicata) nfs[fat.numDuplicata] = true;
         });
       });
-      var falta = Math.max(0, ped - fq);
-      itens.push({ nome: nome, cod: it.prodCodigo || '', kgPed: ped * peso, rsPed: Number(it.valorTotal) || ped * preco, kgFat: fq * peso, rsFat: fv, kgNao: falta * peso, rsNao: falta * preco, nfs: Object.keys(nfs).join(', ') });
+      // v51: faturado "contado" nunca passa do pedido (o que passou vira excedente), para Pedido - Faturado = Nao faturado
+      var fqc = Math.min(fq, ped), falta = ped - fqc;
+      var rsPedI = Number(it.valorTotal) || ped * preco, rsFatI = Math.min(fv, rsPedI);
+      itens.push({ nome: nome, cod: it.prodCodigo || '', kgPed: ped * peso, rsPed: rsPedI, kgFat: fqc * peso, rsFat: rsFatI, kgNao: falta * peso, rsNao: rsPedI - rsFatI, kgExc: (fq - fqc) * peso, rsExc: Math.max(0, fv - rsPedI), nfs: Object.keys(nfs).join(', ') });
     });
     if (fProd && !itens.length) return;
-    var r = { p: p, cli: cli, itens: itens, pedKg: 0, fatKg: 0, naoKg: 0 };
-    itens.forEach(function(i){ r.pedKg += i.kgPed; r.fatKg += i.kgFat; r.naoKg += i.kgNao; });
+    var r = { p: p, cli: cli, itens: itens, pedKg: 0, fatKg: 0, naoKg: 0, excKg: 0, excRs: 0 };
+    itens.forEach(function(i){ r.pedKg += i.kgPed; r.fatKg += i.kgFat; r.naoKg += i.kgNao; r.excKg += i.kgExc; });
     if (fProd) {
       r.pedRs = 0; r.fatRs = 0; r.naoRs = 0;
-      itens.forEach(function(i){ r.pedRs += i.rsPed; r.fatRs += i.rsFat; r.naoRs += i.rsNao; });
+      itens.forEach(function(i){ r.pedRs += i.rsPed; r.fatRs += i.rsFat; r.naoRs += i.rsNao; r.excRs += i.rsExc; });
     } else {
       r.pedRs = Number(p.valorTotal) || itens.reduce(function(a,i){ return a + i.rsPed; }, 0);
-      r.fatRs = fats.reduce(function(a,x){ return a + (Number(x.valor) || 0); }, 0);
-      r.naoRs = Math.max(0, r.pedRs - r.fatRs);
+      var fatReal = fats.reduce(function(a,x){ return a + (Number(x.valor) || 0); }, 0);
+      r.fatRs = Math.min(fatReal, r.pedRs);
+      r.excRs = fatReal - r.fatRs;
+      r.naoRs = r.pedRs - r.fatRs;
     }
     r.pct = r.pedRs ? r.fatRs / r.pedRs : 0;
     r.pctKg = r.pedKg ? r.fatKg / r.pedKg : 0;
@@ -28411,13 +28415,13 @@ function _relCalcPedidoFaturado(f) {
     if (f.status && r.situ !== f.status) return;
     recs.push(r);
   });
-  var T = { n: recs.length, pedKg: 0, pedRs: 0, fatKg: 0, fatRs: 0, naoKg: 0, naoRs: 0 };
-  recs.forEach(function(r){ T.pedKg += r.pedKg; T.pedRs += r.pedRs; T.fatKg += r.fatKg; T.fatRs += r.fatRs; T.naoKg += r.naoKg; T.naoRs += r.naoRs; });
+  var T = { n: recs.length, pedKg: 0, pedRs: 0, fatKg: 0, fatRs: 0, naoKg: 0, naoRs: 0, excKg: 0, excRs: 0 };
+  recs.forEach(function(r){ T.excKg += r.excKg; T.excRs += r.excRs; T.pedKg += r.pedKg; T.pedRs += r.pedRs; T.fatKg += r.fatKg; T.fatRs += r.fatRs; T.naoKg += r.naoKg; T.naoRs += r.naoRs; });
   var pctT = T.pedRs ? T.fatRs / T.pedRs : 0, pctTkg = T.pedKg ? T.fatKg / T.pedKg : 0;
   var fmtP = function(v){ return _relNum(v * 100, 1) + '%'; };
   var kpis = _relKpis([
     { label: 'Pedido', valor: _pedFmtMoeda(T.pedRs), sub: _relNum(T.pedKg) + ' kg · ' + T.n + ' pedidos', cor: '#272A4A' },
-    { label: 'Faturado', valor: _pedFmtMoeda(T.fatRs), sub: _relNum(T.fatKg) + ' kg · ' + fmtP(pctT) + ' do pedido', cor: '#15803d' },
+    { label: 'Faturado', valor: _pedFmtMoeda(T.fatRs), sub: _relNum(T.fatKg) + ' kg · ' + fmtP(pctT) + ' do pedido' + (T.excRs > 0.005 || T.excKg > 0.005 ? '<br>+ ' + _pedFmtMoeda(T.excRs) + ' · ' + _relNum(T.excKg) + ' kg faturados acima do pedido (fora desta conta)' : ''), cor: '#15803d' },
     { label: 'Não faturado', valor: _pedFmtMoeda(T.naoRs), sub: _relNum(T.naoKg) + ' kg · ' + fmtP(T.pedRs ? T.naoRs / T.pedRs : 0) + ' do pedido', cor: T.naoRs > 0 ? '#dc2626' : '#15803d' },
     { label: 'Atendimento', valor: fmtP(pctT), sub: 'R$ · em Kg: ' + fmtP(pctTkg), cor: '#2563eb' }
   ]);
@@ -28508,7 +28512,7 @@ function _relCalcPedidoFaturado(f) {
   T.pct = pctT; T.pctKg = pctTkg; T.situ = sitDe(pctT, T.fatRs);
   var cols = colsIni.concat(numCols);
   var tot = totIni.concat([ _relNum(T.pedKg), _pedFmtMoeda(T.pedRs), _relNum(T.fatKg), _pedFmtMoeda(T.fatRs), _relNum(T.naoKg), _pedFmtMoeda(T.naoRs), fmtP(pctT) + ' · ' + fmtP(pctTkg) + ' kg', '' ]);
-  var nota = '<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Clique numa linha para ver o detalhe. Pedidos cancelados ficam fora. "Não faturado" = o que ainda está pendente no pedido; o Kg usa o peso cadastrado do produto.' + (f.produto ? ' Com filtro de produto, os valores em R$ são calculados item a item.' : '') + '</div>';
+  var nota = '<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Clique numa linha para ver o detalhe. Pedidos cancelados ficam fora. Pedido − Faturado = Não faturado: o que foi faturado além do pedido (preço/quantidade da NF maior que o pedido) não é somado em "Faturado" e aparece à parte no card. "Não faturado" = o que ainda está pendente no pedido; o Kg usa o peso cadastrado do produto.' + (f.produto ? ' Com filtro de produto, os valores em R$ são calculados item a item.' : '') + '</div>';
   return kpis + barra + _relTabela(cols, rows, { totais: tot, detalhes: dets, minWidth: ag === 'pedido' ? 1500 : 1250 }) + nota;
 }
 
