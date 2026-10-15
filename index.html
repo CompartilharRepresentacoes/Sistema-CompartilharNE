@@ -8474,6 +8474,7 @@ function _fsIniciarOuvintes(aoFicarTudoPronto) {
     _fsOuvirFotosProdutos();
     try { _restrCarregar(); } catch (eRq) { console.warn(eRq); }
     try { _cmdCarregar(); } catch (eCm) { console.warn(eCm); }
+    try { _catCarregarSB(); } catch (eCt) { console.warn(eCt); }
     var hoje = new Date(); var fimAno = (hoje.getFullYear() + 1) + '-12-31';
     // pedidos do ano + pedidos mais antigos que tem fatura dentro do periodo (o Painel conta pela data da fatura)
     // + versao enxuta do ano anterior (comparacao do Painel), tudo junto antes de mostrar os numeros
@@ -10922,7 +10923,43 @@ function _catUrl(a) {
   return a;
 }
 function getCatalogos() { return firebaseConfigurado ? _fsGet('catalogos') : JSON.parse(localStorage.getItem('catalogos') || '[]'); }
-function setCatalogos(data) { if (firebaseConfigurado) { _fsSet('catalogos', data); } else { localStorage.setItem('catalogos', JSON.stringify(data)); } }
+// v74: catalogos no Supabase (lista no banco; PDF continua em catalogos/<slug>.pdf no GitHub)
+var _catCarregando = false;
+function _catCarregarSB(cb) {
+  if (typeof SB === 'undefined' || _catCarregando) { if (cb) cb(); return; }
+  _catCarregando = true;
+  SB.from('catalogos').select('nome_arquivo,arquivo_path,data_cadastro,fornecedores(id_legado)').then(function (r) {
+    _catCarregando = false;
+    if (r.error) { console.warn('[catalogos] indisponivel:', r.error.message); }
+    else {
+      _fsCache['catalogos'] = (r.data || []).filter(function (x) { return x.fornecedores && x.fornecedores.id_legado; }).map(function (x) {
+        var fid = String(x.fornecedores.id_legado);
+        var dt = x.data_cadastro ? String(x.data_cadastro).slice(0, 10).split('-').reverse().join('/') : '';
+        return { id: fid, fornecedor_id: fid, nome: x.nome_arquivo || '', arquivo: x.arquivo_path || '', data: dt };
+      });
+      _fsPronto['catalogos'] = true;
+    }
+    if (document.getElementById('catalogo-tbody')) renderCatalogoList();
+    if (cb) cb();
+  }, function () { _catCarregando = false; if (cb) cb(); });
+}
+function _catGravarSB(data) {
+  var antigo = _fsCache['catalogos'] || [];
+  var mapAnt = {}; antigo.forEach(function (o) { if (o && o.id) mapAnt[o.id] = o; });
+  var ids = {}, docs = [];
+  (data || []).forEach(function (c) {
+    if (!c || !c.fornecedor_id) return; ids[c.id] = true;
+    var o = mapAnt[c.id];
+    if (!o || o.nome !== c.nome || o.arquivo !== c.arquivo || o.data !== c.data) docs.push({ fornecedor_id: String(c.fornecedor_id), nome: c.nome || '', arquivo: c.arquivo || '', data: c.data || '' });
+  });
+  var apagar = antigo.filter(function (o) { return o && o.id && !ids[o.id]; }).map(function (o) { return String(o.fornecedor_id); });
+  _fsCache['catalogos'] = (data || []).slice();
+  if (!docs.length && !apagar.length) return;
+  SB.rpc('gravar_catalogos', { p_docs: JSON.parse(JSON.stringify(docs)), p_apagar: apagar }).then(function (r) {
+    if (r.error) { alert('Não foi possível gravar o catálogo no banco: ' + r.error.message); _catCarregarSB(); }
+  }, function () { alert('Não foi possível gravar o catálogo no banco.'); _catCarregarSB(); });
+}
+function setCatalogos(data) { if (firebaseConfigurado && typeof SB !== 'undefined') { _catGravarSB(data); } else if (firebaseConfigurado) { _fsSet('catalogos', data); } else { localStorage.setItem('catalogos', JSON.stringify(data)); } }
 async function _saveCatalogEntry(entry) {
   const atual = getCatalogos().filter(c => c.fornecedor_id !== entry.fornecedor_id);
   atual.push(entry);
@@ -30944,6 +30981,11 @@ function _sugHintCelula(p, valor) {
   return _sugFmtNum(v * cxU) + ' ' + String(p.unidade || 'un').toLowerCase();
 }
 
+// v74: loja/cliente barrado por restricao (rede, loja, UF, cidade...) nao entra em total nem no Excel
+function _sugBloqCel(produtoId, colId) {
+  var f = document.getElementById('sug-fornecedor');
+  return f && f.value ? _bloqVerificar(f.value, produtoId, colId) : null;
+}
 function _sugAtualizarQtd(produtoId, colId, valor, inputEl) {
   var linha = _sugLinhas.filter(function(l){ return l.produtoId === produtoId; })[0];
   if (!linha) return;
@@ -30967,7 +31009,7 @@ function _sugAtualizarQtd(produtoId, colId, valor, inputEl) {
     var cols = _sugColunasAtivas();
     var somaQtd = 0, somaPeso = 0;
     cols.forEach(function(c){
-      var vv = linha.qtds[c.id] || 0;
+      var vv = _sugBloqCel(produtoId, c.id) ? 0 : (linha.qtds[c.id] || 0);
       somaQtd += vv;
       somaPeso += _sugPesoCelula(p, vv);
     });
@@ -30986,7 +31028,7 @@ function _sugAtualizarTotais() {
   var celulas = cols.map(function(c){
     var somaPeso = _sugLinhas.reduce(function(acc, l){
       var p = produtos.find(function(x){ return x.id === l.produtoId; }) || {};
-      return acc + _sugPesoCelula(p, l.qtds[c.id] || 0);
+      return acc + (_sugBloqCel(l.produtoId, c.id) ? 0 : _sugPesoCelula(p, l.qtds[c.id] || 0));
     }, 0);
     pesoGeral += somaPeso;
     return '<td style="padding:8px 6px;text-align:center;font-weight:700;color:#272A4A">' + _sugFmtNum(somaPeso) + ' kg</td>';
@@ -31129,6 +31171,7 @@ function _sugGerarExcel() {
     var totalQtd = 0, totalPeso = 0;
     var valores = [p.codigo || '', p.nome || '', _sugCxLabel(p)];
     cols.forEach(function(c, ci){
+      if (_sugBloqCel(l.produtoId, c.id)) { valores.push('Bloqueado'); return; }
       var q = l.qtds[c.id] || 0;
       valores.push(q);
       totalQtd += q;
