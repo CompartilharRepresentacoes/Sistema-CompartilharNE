@@ -16303,10 +16303,17 @@ function _dashConstruirDadosAoVivo() {
   var STATUS = statusValidos.slice();
   function idxStatus(status) { var i = STATUS.indexOf(status); return i >= 0 ? i : 0; }
 
-  var produtosPesoMap = {};
+  var produtosPesoMap = {}, produtosCxMap = {};
   ((typeof getProdutos === 'function') ? getProdutos() : []).forEach(function (pr) {
     produtosPesoMap[pr.id] = parseFloat(String(pr.peso).replace(',', '.')) || 0;
+    produtosCxMap[pr.id] = parseFloat(String(pr.quant == null ? '' : pr.quant).replace(',', '.')) || 0;
   });
+  function _dashCaixasItens(itens, campoQtd) {
+    return (itens || []).reduce(function (s, it) {
+      var un = produtosCxMap[it.prodId] || 0;
+      return s + (un > 0 ? (Number(it[campoQtd]) || 0) / un : 0);
+    }, 0);
+  }
   function _dashPesoItens(itens, campoQtd) {
     return (itens || []).reduce(function (s, it) {
       var pesoUnit = produtosPesoMap[it.prodId] || 0;
@@ -16327,14 +16334,14 @@ function _dashConstruirDadosAoVivo() {
         var peso = _dashPesoItens(fat.itens, 'qtd');
         var data = (fat.data || pedido.data || '').slice(0, 10);
         if (!data) return;
-        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx, peso, pedido.id]);
+        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx, peso, pedido.id, _dashCaixasItens(fat.itens, 'qtd')]);
       });
     } else {
       var volPed = (pedido.itens || []).reduce(function (s, it) { return s + (Number(it.quantidade) || 0); }, 0);
       var pesoPed = _dashPesoItens(pedido.itens, 'quantidade');
       var dataPed = (pedido.data || '').slice(0, 10);
       if (!dataPed) return;
-      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx, pesoPed, pedido.id]);
+      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx, pesoPed, pedido.id, _dashCaixasItens(pedido.itens, 'quantidade')]);
     }
   });
 
@@ -16673,11 +16680,11 @@ function dashInit() {
     // v47: "pedidos" = pedidos distintos (uma linha de PED e uma NF; pedido com 2+ NFs contava 2x)
     function _cntP(a, p) { if (!a.ids) a.ids = new Set(); a.ids.add(p[8] != null ? p[8] : p); a.n = a.ids.size; }
     function kpis(peds) {
-      let fat=0, vol=0, n=0, pesoKg=0; const _idsP = new Set();
+      let fat=0, vol=0, n=0, pesoKg=0, caixas=0; const _idsP = new Set();
       const cliSet = new Set();
       const cliFabs = new Map();
       for (const p of peds) {
-        fat += p[5]; vol += p[4]; _idsP.add(p[8] != null ? p[8] : p); pesoKg += (p[7]||0);
+        fat += p[5]; vol += p[4]; _idsP.add(p[8] != null ? p[8] : p); pesoKg += (p[7]||0); caixas += (p[9]||0);
         if (!CLI_INATIVO[p[1]]) cliSet.add(p[1]); // v46: so cliente ativo no cadastro (igual a aba Clientes)
         let s = cliFabs.get(p[1]); if (!s) { s = new Set(); cliFabs.set(p[1], s); }
         s.add(p[2]);
@@ -16696,7 +16703,7 @@ function dashInit() {
         carteira++;
       }
       const pos = carteira ? ativos/carteira : 0;
-      return { fat, vol, pesoKg, ticket, ativos, mix, pos, nPedidos: n, carteira };
+      return { fat, vol, pesoKg, caixas, ticket, ativos, mix, pos, nPedidos: n, carteira };
     }
 
     // =============== HOME ===============
@@ -17170,7 +17177,7 @@ function dashInit() {
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #1c2f66">
             <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#1c2f66"><i class="ti ti-package"></i></div><div class="dvg-kpi-lbl">VOLUME</div></div>${_dvgTrendVol}</div>
-            <div class="dvg-kpi-val" id="dvgKpiVol">0 kg</div><div class="dvg-kpi-sub">${fmtBRL(k.fat)} faturado no período</div>${_dvgCmpVol}
+            <div class="dvg-kpi-val" id="dvgKpiVol">0 kg</div><div class="dvg-kpi-sub">${Math.round(k.caixas).toLocaleString('pt-BR')} cx faturadas no período</div>${_dvgCmpVol}
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #3d5aa8">
             <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#3d5aa8"><i class="ti ti-target-arrow"></i></div><div class="dvg-kpi-lbl">POSITIVAÇÃO</div></div>${_dvgTrendPos}</div>
