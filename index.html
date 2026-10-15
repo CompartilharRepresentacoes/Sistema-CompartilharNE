@@ -6078,61 +6078,97 @@
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div>
             <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.01em">Restrições de Pedidos</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">Bloqueia produtos por rede, loja ou cliente</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">Bloqueia produtos por cliente, loja, rede, UF ou cidade</div>
           </div>
           <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
         </div>
       </div>
 
+        <div id="rq-aviso" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px"></div>
+        <div id="rq-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px"></div>
+
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:14px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
-            <div style="font-size:12px;color:#64748b;max-width:560px">Impede o lançamento de um produto para uma rede, loja ou cliente específico — a checagem vale no Pedido e na Sugestão de Pedido.</div>
-            <button onclick="_bloqAlternarForm()" id="bloq-btn-novo" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">+ Novo bloqueio</button>
+            <div style="font-size:12px;color:#64748b;max-width:620px">Impede o lançamento de produtos para um cliente, loja, rede, UF ou cidade — a checagem vale no Pedido e na Sugestão de Pedido. Dá para marcar vários produtos e vários locais de uma vez, liberar exceções e definir vigência.</div>
+            <button onclick="_rqAlternarForm()" id="bloq-btn-novo" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">+ Nova restrição</button>
           </div>
           <div id="bloq-form" style="display:none;border-top:1px solid #e2e8f0;padding-top:14px">
+            <div id="rq-edit-tit" style="display:none;font-size:11.5px;font-weight:700;color:#DE7926;margin-bottom:8px">Editando restrição</div>
             <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px">
               <div>
-                <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Fornecedor</div>
-                <select id="bloq-fornecedor" onchange="_bloqAoTrocarFornecedor()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;min-width:170px"><option value="">Selecione...</option></select>
+                <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Fábrica</div>
+                <select id="bloq-fornecedor" onchange="_rqAoTrocarFornecedor()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;min-width:170px"><option value="">Selecione...</option></select>
               </div>
-              <div style="flex:1;min-width:220px;position:relative">
-                <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Produto</div>
-                <input id="bloq-prod-input" oninput="_bloqProdFiltrar()" onkeydown="_bloqProdKey(event)" onblur="setTimeout(function(){var d=document.getElementById('bloq-prod-drop');if(d)d.style.display='none'},200)" autocomplete="off" placeholder="Buscar produto do fornecedor..." style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%">
-                <input type="hidden" id="bloq-prod-id">
-                <div id="bloq-prod-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:7px;margin-top:2px;max-height:200px;overflow-y:auto;z-index:20;box-shadow:0 4px 16px rgba(15,23,42,.08)"></div>
+              <div style="flex:1;min-width:260px;position:relative">
+                <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Produtos (pode marcar vários)</div>
+                <div id="rq-prod-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px"></div>
+                <input id="rq-prod-in" oninput="_rqFiltrar('prod')" onblur="setTimeout(function(){_rqFecharDd('prod')},200)" autocomplete="off" placeholder="Buscar produto da fábrica (nome ou código)..." style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%">
+                <div id="rq-prod-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:7px;margin-top:2px;max-height:220px;overflow-y:auto;z-index:20;box-shadow:0 4px 16px rgba(15,23,42,.08)"></div>
               </div>
             </div>
-            <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:6px">Nível do bloqueio</div>
-            <div style="display:flex;gap:8px;margin-bottom:12px">
-              <button type="button" id="bloq-nivel-btn-rede" onclick="_bloqSetNivel('rede')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:11.5px;font-weight:700;cursor:pointer">Rede</button>
-              <button type="button" id="bloq-nivel-btn-loja" onclick="_bloqSetNivel('loja')" style="background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;border-radius:7px;padding:7px 16px;font-size:11.5px;cursor:pointer">Loja</button>
-              <button type="button" id="bloq-nivel-btn-cliente" onclick="_bloqSetNivel('cliente')" style="background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;border-radius:7px;padding:7px 16px;font-size:11.5px;cursor:pointer">Cliente específico</button>
+            <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:6px">Onde vale o bloqueio</div>
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" id="rq-niveis">
+              <button type="button" data-n="uf" onclick="_rqSetNivel('uf')">UF</button>
+              <button type="button" data-n="cidade" onclick="_rqSetNivel('cidade')">Cidade</button>
+              <button type="button" data-n="rede" onclick="_rqSetNivel('rede')">Rede</button>
+              <button type="button" data-n="loja" onclick="_rqSetNivel('loja')">Loja</button>
+              <button type="button" data-n="cliente" onclick="_rqSetNivel('cliente')">Cliente específico</button>
             </div>
             <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px">
-              <div style="flex:1;min-width:220px;position:relative">
-                <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px" id="bloq-alvo-label">Rede</div>
-                <input id="bloq-alvo-input" oninput="_bloqAlvoFiltrar()" onkeydown="_bloqAlvoKey(event)" onblur="setTimeout(function(){var d=document.getElementById('bloq-alvo-drop');if(d)d.style.display='none'},200)" autocomplete="off" placeholder="Buscar rede..." style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%">
-                <input type="hidden" id="bloq-alvo-id">
-                <div id="bloq-alvo-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:7px;margin-top:2px;max-height:200px;overflow-y:auto;z-index:20;box-shadow:0 4px 16px rgba(15,23,42,.08)"></div>
+              <div style="flex:1;min-width:260px;position:relative">
+                <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px" id="rq-alvo-label">Cidades (várias)</div>
+                <div id="rq-alvo-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px"></div>
+                <input id="rq-alvo-in" oninput="_rqFiltrar('alvo')" onfocus="_rqFiltrar('alvo')" onblur="setTimeout(function(){_rqFecharDd('alvo')},200)" autocomplete="off" placeholder="Buscar..." style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%">
+                <div id="rq-alvo-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:7px;margin-top:2px;max-height:220px;overflow-y:auto;z-index:20;box-shadow:0 4px 16px rgba(15,23,42,.08)"></div>
               </div>
-              <div style="flex:1;min-width:220px">
+              <div style="flex:1;min-width:260px;position:relative" id="rq-exc-wrap">
+                <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Exceções — clientes liberados mesmo assim (opcional)</div>
+                <div id="rq-exc-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px"></div>
+                <input id="rq-exc-in" oninput="_rqFiltrar('exc')" onblur="setTimeout(function(){_rqFecharDd('exc')},200)" autocomplete="off" placeholder="Buscar cliente..." style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%">
+                <div id="rq-exc-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:7px;margin-top:2px;max-height:220px;overflow-y:auto;z-index:20;box-shadow:0 4px 16px rgba(15,23,42,.08)"></div>
+              </div>
+            </div>
+            <div id="rq-previa" style="background:#fffbeb;border:1px solid #fbbf24;border-radius:9px;padding:9px 12px;font-size:12px;color:#92400e;margin-bottom:12px;display:none"></div>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px">
+              <div style="flex:2;min-width:240px">
                 <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Motivo (opcional)</div>
-                <input id="bloq-motivo" placeholder="Ex: contrato regional não cobre esse item" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%">
+                <input id="bloq-motivo" placeholder="Ex: sem rota de entrega / contrato regional não cobre" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%">
+              </div>
+              <div style="flex:1;min-width:140px">
+                <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Vale a partir de (opcional)</div>
+                <input id="rq-vig-ini" type="date" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;width:100%">
+              </div>
+              <div style="flex:1;min-width:140px">
+                <div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Até (opcional)</div>
+                <input id="rq-vig-fim" type="date" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;width:100%">
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:12px">
-              <button onclick="_bloqSalvar()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 20px;font-size:12px;font-weight:700;cursor:pointer">Salvar bloqueio</button>
+              <button onclick="_rqSalvar()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 20px;font-size:12px;font-weight:700;cursor:pointer">Salvar restrição</button>
               <div id="bloq-msg" style="font-size:12px"></div>
             </div>
           </div>
         </div>
 
-        <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-          <div style="display:grid;grid-template-columns:1.2fr 1.5fr 90px 1.5fr 1.3fr 70px 50px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em">
-            <span>Fornecedor</span><span>Produto</span><span>Nível</span><span>Alvo</span><span>Motivo</span><span>Ativo</span><span></span>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:12px">
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:end">
+            <div><div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Buscar produto, cliente, cidade ou motivo</div><input id="rq-f-busca" oninput="renderBloqueios()" placeholder="Digite para filtrar..." style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%"></div>
+            <div><div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Fábrica</div><select id="rq-f-forn" onchange="renderBloqueios()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%"><option value="">Todas</option></select></div>
+            <div><div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Tipo</div><select id="rq-f-tipo" onchange="renderBloqueios()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%"><option value="">Todos</option><option value="uf">UF</option><option value="cidade">Cidade</option><option value="rede">Rede</option><option value="loja">Loja</option><option value="cliente">Cliente</option></select></div>
+            <div><div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">UF</div><select id="rq-f-uf" onchange="renderBloqueios()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%"><option value="">Todas</option></select></div>
+            <div><div style="font-size:10.5px;font-weight:600;color:#64748b;margin-bottom:4px">Situação</div><select id="rq-f-sit" onchange="renderBloqueios()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;width:100%"><option value="ativas">Ativas</option><option value="pausadas">Pausadas</option><option value="vencidas">Vencidas / futuras</option><option value="todas">Todas</option></select></div>
+            <button onclick="_rqLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow-x:auto">
+          <div style="min-width:980px">
+          <div style="display:grid;grid-template-columns:1fr 1.5fr 80px 1.7fr 1.2fr 110px 100px 56px 70px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;gap:8px">
+            <span>Fábrica</span><span>Produto(s)</span><span>Tipo</span><span>Onde vale</span><span>Motivo</span><span>Vigência</span><span>Impacto</span><span>Ativo</span><span></span>
           </div>
           <div id="bloq-lista"></div>
-          <div id="bloq-vazio" style="display:none;text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum bloqueio cadastrado.</div>
+          <div id="bloq-vazio" style="display:none;text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhuma restrição encontrada.</div>
+          </div>
         </div>
     </div>
 
@@ -8397,6 +8433,7 @@ function _fsIniciarOuvintes(aoFicarTudoPronto) {
     if (aoFicarTudoPronto) aoFicarTudoPronto();
     _fsMostrarAvisoPedidos();
     _fsOuvirFotosProdutos();
+    try { _restrCarregar(); } catch (eRq) { console.warn(eRq); }
     var hoje = new Date(); var fimAno = (hoje.getFullYear() + 1) + '-12-31';
     // pedidos do ano + pedidos mais antigos que tem fatura dentro do periodo (o Painel conta pela data da fatura)
     // + versao enxuta do ano anterior (comparacao do Painel), tudo junto antes de mostrar os numeros
@@ -23542,224 +23579,366 @@ function _pedEnterAvanca(e, idProximo) {
 function getBloqueiosProduto() { return firebaseConfigurado ? _fsGet('bloqueios_produto') : JSON.parse(localStorage.getItem('bloqueios_produto') || '[]'); }
 function setBloqueiosProduto(d) { if (firebaseConfigurado) { _fsSet('bloqueios_produto', d); } else { localStorage.setItem('bloqueios_produto', JSON.stringify(d)); } }
 
-var _bloqNivelAtual = 'rede';
-var _bloqProdItens = [];
-var _bloqAlvoItens = [];
+// ════════ v56 — Restrições de Pedidos (UF, cidade, vários produtos, exceções, vigência) ════════
+var _rqCache = [];          // restrições (docs) carregadas de public.restricoes_pedido
+var _rqOk = null;           // null = ainda não carregou | true | false (tabela não existe)
+var _rqCarregando = false;
+var _rq = { nivel: 'cidade', produtos: [], alvos: [], excecoes: [], editId: null };
+var _rqDd = { prod: [], alvo: [], exc: [] };
+var _RQ_NIVEL_LABEL = { uf: 'UF', cidade: 'Cidade', rede: 'Rede', loja: 'Loja', cliente: 'Cliente' };
+var _RQ_NIVEL_COR = { uf: '#b45309', cidade: '#15803d', rede: '#3730a3', loja: '#075985', cliente: '#9d174d' };
 
-function _bloqPopularFiltros() {
-  var sel = document.getElementById('bloq-fornecedor');
-  if (sel && !sel.dataset.populado) {
-    var forns = getFornecedores();
-    sel.innerHTML = '<option value="">Selecione...</option>' + forns.map(function(f){ return '<option value="' + f.id + '">' + _pedEsc(_cpSemColchetes(f.nome_fantasia || f.razao_social || '')) + '</option>'; }).join('');
-    sel.dataset.populado = '1';
-  }
+function _rqHoje() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function _rqUfDe(c) { return String((c && (c.ent_estado || c.estado)) || '').trim().toUpperCase(); }
+function _rqCidDe(c) { return String((c && (c.ent_estado && c.ent_cidade ? c.ent_cidade : c.cidade)) || '').trim(); }
+function _rqChaveCidade(cid, uf) { return _cpNorm(cid).toUpperCase() + '/' + String(uf || '').toUpperCase(); }
+
+function getRestricoes() { return _rqCache; }
+
+function _restrCarregar(cb) {
+  if (typeof SB === 'undefined') { if (cb) cb(); return; }
+  if (_rqCarregando) return;
+  _rqCarregando = true;
+  SB.from('restricoes_pedido').select('id_legado,dados').then(function (r) {
+    _rqCarregando = false;
+    if (r.error) { _rqOk = false; console.warn('[restricoes] tabela indisponível:', r.error.message); }
+    else { _rqOk = true; _rqCache = (r.data || []).map(function (x) { return x.dados; }).filter(Boolean); }
+    if (document.getElementById('bloq-lista')) renderBloqueios();
+    if (cb) cb();
+  }, function () { _rqCarregando = false; _rqOk = false; if (cb) cb(); });
 }
 
-function _bloqAlternarForm() {
+function _rqGravarNoBanco(docs, apagar) {
+  return SB.rpc('gravar_restricoes', { p_docs: JSON.parse(JSON.stringify(docs || [])), p_apagar: apagar || [] }).then(function (r) {
+    if (r.error) throw new Error(r.error.message);
+  });
+}
+
+function _bloqPopularFiltros() {
+  var forns = getFornecedores();
+  var opts = forns.map(function (f) { return '<option value="' + f.id + '">' + _pedEsc(_cpSemColchetes(f.nome_fantasia || f.razao_social || '')) + '</option>'; }).join('');
+  var sel = document.getElementById('bloq-fornecedor');
+  if (sel && !sel.dataset.populado) { sel.innerHTML = '<option value="">Selecione...</option>' + opts; sel.dataset.populado = '1'; }
+  var sf = document.getElementById('rq-f-forn');
+  if (sf && !sf.dataset.populado) { sf.innerHTML = '<option value="">Todas</option>' + opts; sf.dataset.populado = '1'; }
+  var su = document.getElementById('rq-f-uf');
+  if (su && !su.dataset.populado) {
+    var ufs = {}; getClientes().forEach(function (c) { var u = _rqUfDe(c); if (u) ufs[u] = true; });
+    su.innerHTML = '<option value="">Todas</option>' + Object.keys(ufs).sort().map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('');
+    su.dataset.populado = '1';
+  }
+  _rqPintarNiveis();
+  if (_rqOk === null) _restrCarregar();
+}
+
+function _rqPintarNiveis() {
+  document.querySelectorAll('#rq-niveis button').forEach(function (b) {
+    var on = b.dataset.n === _rq.nivel;
+    b.style.cssText = 'border-radius:7px;padding:7px 16px;font-size:11.5px;cursor:pointer;' + (on ? 'background:#272A4A;color:#fff;border:none;font-weight:700' : 'background:#f8fafc;color:#64748b;border:1px solid #e2e8f0');
+  });
+  var lbl = { uf: 'UFs (várias)', cidade: 'Cidades (várias)', rede: 'Redes (várias)', loja: 'Lojas (várias)', cliente: 'Clientes (vários)' }[_rq.nivel];
+  var el = document.getElementById('rq-alvo-label'); if (el) el.textContent = lbl;
+  var inp = document.getElementById('rq-alvo-in'); if (inp) inp.placeholder = { uf: 'Digite a UF (ex.: BA)...', cidade: 'Buscar cidade dos clientes cadastrados...', rede: 'Buscar rede...', loja: 'Buscar loja...', cliente: 'Buscar cliente por nome, código ou CNPJ...' }[_rq.nivel];
+  var ex = document.getElementById('rq-exc-wrap'); if (ex) ex.style.display = _rq.nivel === 'cliente' ? 'none' : 'block';
+}
+
+function _rqSetNivel(n) { _rq.nivel = n; _rq.alvos = []; _rq.excecoes = []; _rqPintarNiveis(); _rqRenderChips(); _rqPrevia(); }
+
+function _rqAlternarForm() {
   var form = document.getElementById('bloq-form');
   var visivel = form.style.display !== 'none';
   form.style.display = visivel ? 'none' : 'block';
-  document.getElementById('bloq-btn-novo').textContent = visivel ? '+ Novo bloqueio' : 'Fechar';
-  if (!visivel) _bloqLimparForm();
+  document.getElementById('bloq-btn-novo').textContent = visivel ? '+ Nova restrição' : 'Fechar';
+  if (!visivel) _rqLimparForm();
 }
-
-function _bloqLimparForm() {
-  document.getElementById('bloq-prod-input').value = '';
-  document.getElementById('bloq-prod-id').value = '';
-  document.getElementById('bloq-alvo-input').value = '';
-  document.getElementById('bloq-alvo-id').value = '';
-  document.getElementById('bloq-motivo').value = '';
+function _rqLimparForm() {
+  _rq = { nivel: 'cidade', produtos: [], alvos: [], excecoes: [], editId: null };
+  ['rq-prod-in', 'rq-alvo-in', 'rq-exc-in', 'bloq-motivo', 'rq-vig-ini', 'rq-vig-fim'].forEach(function (id) { var e = document.getElementById(id); if (e) e.value = ''; });
   document.getElementById('bloq-msg').textContent = '';
-  _bloqSetNivel('rede');
+  var t = document.getElementById('rq-edit-tit'); if (t) t.style.display = 'none';
+  _rqPintarNiveis(); _rqRenderChips(); _rqPrevia();
 }
+function _rqAoTrocarFornecedor() { _rq.produtos = []; _rqRenderChips(); _rqPrevia(); }
 
-function _bloqAoTrocarFornecedor() {
-  document.getElementById('bloq-prod-input').value = '';
-  document.getElementById('bloq-prod-id').value = '';
+function _rqChipHtml(campo, i, txt, cor) {
+  return '<span style="background:' + cor + '22;color:' + cor + ';border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px">' + _pedEsc(txt) + '<span onclick="_rqRem(\'' + campo + '\',' + i + ')" style="cursor:pointer;font-weight:800">&times;</span></span>';
 }
+function _rqRenderChips() {
+  var p = document.getElementById('rq-prod-chips');
+  if (p) p.innerHTML = _rq.produtos.map(function (x, i) { return _rqChipHtml('prod', i, (x.codigo ? x.codigo + ' ' : '') + x.nome, '#3730a3'); }).join('');
+  var a = document.getElementById('rq-alvo-chips');
+  if (a) a.innerHTML = _rq.alvos.map(function (x, i) { return _rqChipHtml('alvo', i, x.nome, _RQ_NIVEL_COR[_rq.nivel] || '#475569'); }).join('');
+  var e = document.getElementById('rq-exc-chips');
+  if (e) e.innerHTML = _rq.excecoes.map(function (x, i) { return _rqChipHtml('exc', i, x.nome, '#64748b'); }).join('');
+}
+function _rqRem(campo, i) {
+  if (campo === 'prod') _rq.produtos.splice(i, 1); else if (campo === 'alvo') _rq.alvos.splice(i, 1); else _rq.excecoes.splice(i, 1);
+  _rqRenderChips(); _rqPrevia();
+}
+function _rqFecharDd(campo) { var d = document.getElementById('rq-' + campo + '-dd'); if (d) d.style.display = 'none'; }
 
-function _bloqProdFiltrar() {
-  var q = (document.getElementById('bloq-prod-input').value || '').trim();
-  var drop = document.getElementById('bloq-prod-drop');
-  document.getElementById('bloq-prod-id').value = '';
-  if (q.length < 2) { drop.style.display = 'none'; return; }
-  var n = _cpNorm(q);
-  var fornId = document.getElementById('bloq-fornecedor').value;
-  var base = getProdutos();
-  if (fornId) base = base.filter(function(p){ return p.fornecedor === fornId; });
-  _bloqProdItens = base.filter(function(p){ return _cpNorm(p.nome || '').includes(n) || _cpNorm(p.codigo || '').includes(n); }).slice(0, 15);
-  if (!_bloqProdItens.length) { drop.style.display = 'none'; return; }
-  drop.onmousedown = function(e){ e.preventDefault(); };
-  drop.innerHTML = _bloqProdItens.map(function(p, i){
-    return '<div onclick="_bloqProdSel(' + i + ')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">'
-      + (p.codigo ? '<span style="font-weight:700;color:#272A4A;margin-right:8px">' + _pedEsc(p.codigo) + '</span>' : '')
-      + '<span style="color:#334155;flex:1">' + _pedEsc(p.nome || '') + '</span></div>';
-  }).join('');
-  drop.style.display = 'block';
-}
-function _bloqProdKey(e) {
-  if ((e.key === 'Enter' || e.key === 'Tab') && _bloqProdItens.length === 1) { _bloqProdSel(0); if (e.key === 'Enter') e.preventDefault(); }
-}
-function _bloqProdSel(i) {
-  var p = _bloqProdItens[i]; if (!p) return;
-  document.getElementById('bloq-prod-id').value = p.id;
-  document.getElementById('bloq-prod-input').value = (p.codigo ? p.codigo + ' ' : '') + (p.nome || '');
-  document.getElementById('bloq-prod-drop').style.display = 'none';
-}
-
-function _bloqSetNivel(nivel) {
-  _bloqNivelAtual = nivel;
-  ['rede', 'loja', 'cliente'].forEach(function(n){
-    var btn = document.getElementById('bloq-nivel-btn-' + n);
-    if (!btn) return;
-    var ativo = n === nivel;
-    btn.style.background = ativo ? '#272A4A' : '#f8fafc';
-    btn.style.color = ativo ? '#fff' : '#64748b';
-    btn.style.border = ativo ? 'none' : '1px solid #e2e8f0';
-    btn.style.fontWeight = ativo ? '700' : '400';
-  });
-  document.getElementById('bloq-alvo-input').value = '';
-  document.getElementById('bloq-alvo-id').value = '';
-  var label = document.getElementById('bloq-alvo-label');
-  var input = document.getElementById('bloq-alvo-input');
-  if (nivel === 'rede') { label.textContent = 'Rede'; input.placeholder = 'Buscar rede...'; }
-  else if (nivel === 'loja') { label.textContent = 'Loja'; input.placeholder = 'Buscar loja...'; }
-  else { label.textContent = 'Cliente'; input.placeholder = 'Buscar cliente por nome, código ou CNPJ...'; }
-}
-
-function _bloqAlvoFiltrar() {
-  var q = (document.getElementById('bloq-alvo-input').value || '').trim();
-  var drop = document.getElementById('bloq-alvo-drop');
-  document.getElementById('bloq-alvo-id').value = '';
-  if (q.length < 2) { drop.style.display = 'none'; return; }
-  var n = _cpNorm(q);
-  if (_bloqNivelAtual === 'rede') {
-    _bloqAlvoItens = getCatClientes().filter(function(c){ return !c.pai && _cpNorm(c.nome || '').includes(n); })
-      .map(function(c){ return { id: c.id, nome: c.nome || '' }; });
-  } else if (_bloqNivelAtual === 'loja') {
-    var redesMap = {}; getCatClientes().filter(function(c){ return !c.pai; }).forEach(function(c){ redesMap[c.id] = c.nome; });
-    _bloqAlvoItens = getCatClientes().filter(function(c){ return c.pai && _cpNorm(c.nome || '').includes(n); })
-      .map(function(c){ return { id: c.id, nome: c.nome || '', sub: redesMap[c.pai] || '' }; });
+function _rqBuscarItens(campo, q) {
+  var n = _cpNorm(q), qDig = q.replace(/\D/g, '');
+  var tipo = campo === 'prod' ? 'prod' : (campo === 'exc' ? 'cliente' : _rq.nivel);
+  var res = [];
+  if (tipo === 'prod') {
+    var fornId = document.getElementById('bloq-fornecedor').value;
+    var base = getProdutos(); if (fornId) base = base.filter(function (p) { return p.fornecedor === fornId; });
+    res = base.filter(function (p) { return _cpNorm(p.nome || '').includes(n) || _cpNorm(p.codigo || '').includes(n); }).map(function (p) { return { id: p.id, nome: p.nome || '', codigo: p.codigo || '', sub: '' }; });
+  } else if (tipo === 'uf') {
+    var ufs = {}; getClientes().forEach(function (c) { var u = _rqUfDe(c); if (u) ufs[u] = (ufs[u] || 0) + 1; });
+    res = Object.keys(ufs).sort().filter(function (u) { return !q || u.toLowerCase().indexOf(q.toLowerCase()) === 0; }).map(function (u) { return { id: u, nome: u, sub: ufs[u] + ' cliente(s)' }; });
+  } else if (tipo === 'cidade') {
+    var cids = {};
+    getClientes().forEach(function (c) {
+      var cid = _rqCidDe(c), uf = _rqUfDe(c); if (!cid || !uf) return;
+      var k = _rqChaveCidade(cid, uf); if (!cids[k]) cids[k] = { id: k, nome: cid + '/' + uf, n: 0 }; cids[k].n++;
+    });
+    res = Object.keys(cids).map(function (k) { return cids[k]; }).filter(function (x) { return !q || _cpNorm(x.nome).includes(n); })
+      .sort(function (a, b) { return a.nome.localeCompare(b.nome, 'pt-BR'); }).map(function (x) { return { id: x.id, nome: x.nome, sub: x.n + ' cliente(s)' }; });
+  } else if (tipo === 'rede') {
+    res = getCatClientes().filter(function (c) { return !c.pai && _cpNorm(c.nome || '').includes(n); }).map(function (c) { return { id: c.id, nome: c.nome || '', sub: '' }; });
+  } else if (tipo === 'loja') {
+    var redes = {}; getCatClientes().filter(function (c) { return !c.pai; }).forEach(function (c) { redes[c.id] = c.nome; });
+    res = getCatClientes().filter(function (c) { return c.pai && _cpNorm(c.nome || '').includes(n); }).map(function (c) { return { id: c.id, nome: c.nome || '', sub: redes[c.pai] || '' }; });
   } else {
-    var qDigitos = q.replace(/\D/g, '');
-    _bloqAlvoItens = getClientesVisiveis().filter(function(c){
+    res = getClientesVisiveis().filter(function (c) {
       var nome = c.nome_fantasia || c.razao_social || '';
-      var cnpjMatch = qDigitos.length > 0 && String(c.cpf_cnpj || '').replace(/\D/g, '').indexOf(qDigitos) !== -1;
-      return _cpNorm(nome).includes(n) || _cpNorm(c.codigo || '').includes(n) || cnpjMatch;
-    }).map(function(c){ return { id: c.id, nome: c.nome_fantasia || c.razao_social || '' }; });
+      var cnpj = qDig.length > 0 && String(c.cpf_cnpj || '').replace(/\D/g, '').indexOf(qDig) !== -1;
+      return _cpNorm(nome).includes(n) || _cpNorm(c.codigo || '').includes(n) || cnpj;
+    }).map(function (c) { return { id: c.id, nome: c.nome_fantasia || c.razao_social || '', sub: [_rqCidDe(c), _rqUfDe(c)].filter(Boolean).join('/') }; });
   }
-  _bloqAlvoItens = _bloqAlvoItens.slice(0, 15);
-  if (!_bloqAlvoItens.length) { drop.style.display = 'none'; return; }
-  drop.onmousedown = function(e){ e.preventDefault(); };
-  drop.innerHTML = _bloqAlvoItens.map(function(it, i){
-    return '<div onclick="_bloqAlvoSel(' + i + ')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9">'
-      + _pedEsc(it.nome) + (it.sub ? ' <span style="color:#94a3b8;font-size:10.5px">(' + _pedEsc(it.sub) + ')</span>' : '')
-      + '</div>';
+  return res.slice(0, 25);
+}
+function _rqFiltrar(campo) {
+  var inp = document.getElementById('rq-' + campo + '-in'), dd = document.getElementById('rq-' + campo + '-dd');
+  var q = (inp.value || '').trim();
+  var livre = campo === 'alvo' && (_rq.nivel === 'uf' || _rq.nivel === 'cidade');
+  if (q.length < 2 && !livre) { dd.style.display = 'none'; return; }
+  _rqDd[campo] = _rqBuscarItens(campo, q);
+  if (!_rqDd[campo].length) { dd.style.display = 'none'; return; }
+  dd.onmousedown = function (e) { e.preventDefault(); };
+  dd.innerHTML = _rqDd[campo].map(function (it, i) {
+    return '<div onclick="_rqSel(\'' + campo + '\',' + i + ')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;gap:8px">'
+      + '<span>' + (it.codigo ? '<b style="color:#272A4A;margin-right:6px">' + _pedEsc(it.codigo) + '</b>' : '') + _pedEsc(it.nome) + '</span>'
+      + (it.sub ? '<span style="color:#94a3b8;font-size:10.5px;white-space:nowrap">' + _pedEsc(it.sub) + '</span>' : '') + '</div>';
   }).join('');
-  drop.style.display = 'block';
+  dd.style.display = 'block';
 }
-function _bloqAlvoKey(e) {
-  if ((e.key === 'Enter' || e.key === 'Tab') && _bloqAlvoItens.length === 1) { _bloqAlvoSel(0); if (e.key === 'Enter') e.preventDefault(); }
-}
-function _bloqAlvoSel(i) {
-  var it = _bloqAlvoItens[i]; if (!it) return;
-  document.getElementById('bloq-alvo-id').value = it.id;
-  document.getElementById('bloq-alvo-input').value = it.nome;
-  document.getElementById('bloq-alvo-drop').style.display = 'none';
+function _rqSel(campo, i) {
+  var it = _rqDd[campo][i]; if (!it) return;
+  var lista = campo === 'prod' ? _rq.produtos : (campo === 'alvo' ? _rq.alvos : _rq.excecoes);
+  if (!lista.some(function (x) { return String(x.id) === String(it.id); })) lista.push(campo === 'prod' ? { id: it.id, nome: it.nome, codigo: it.codigo } : { id: it.id, nome: it.nome });
+  document.getElementById('rq-' + campo + '-in').value = '';
+  _rqFecharDd(campo); _rqRenderChips(); _rqPrevia();
 }
 
-function _bloqSalvar() {
-  var msg = document.getElementById('bloq-msg');
-  msg.style.color = '#dc2626'; msg.textContent = '';
+// ── casamento restrição × cliente ──
+function _rqCasa(r, cli) {
+  if (!cli) return false;
+  var exc = (r.excecoes || []);
+  if (exc.some(function (e) { return String(e.id) === String(cli.id); })) return false;
+  var ids = (r.alvos || []).map(function (a) { return String(a.id); });
+  switch (r.nivel) {
+    case 'uf': return ids.indexOf(_rqUfDe(cli)) !== -1;
+    case 'cidade': return ids.indexOf(_rqChaveCidade(_rqCidDe(cli), _rqUfDe(cli))) !== -1;
+    case 'rede': return ids.indexOf(String(cli.categoria)) !== -1;
+    case 'loja': return ids.indexOf(String(cli.subcategoria)) !== -1;
+    case 'cliente': return ids.indexOf(String(cli.id)) !== -1;
+  }
+  return false;
+}
+function _rqVigente(r, hoje) {
+  if (r.vigIni && hoje < r.vigIni) return false;
+  if (r.vigFim && hoje > r.vigFim) return false;
+  return true;
+}
+function _rqClientesAfetados(r) {
+  return getClientes().filter(function (c) { return (c.ativo || 'Sim') !== 'Não' && _rqCasa(r, c); });
+}
+function _rqDocDoForm() {
+  return { nivel: _rq.nivel, alvos: _rq.alvos, excecoes: _rq.nivel === 'cliente' ? [] : _rq.excecoes };
+}
+function _rqPrevia() {
+  var el = document.getElementById('rq-previa'); if (!el) return;
+  if (!_rq.alvos.length || !_rq.produtos.length) { el.style.display = 'none'; return; }
+  var n = _rqClientesAfetados(_rqDocDoForm()).length;
+  el.innerHTML = '⚠ Esta restrição vai bloquear <b>' + _rq.produtos.length + ' produto(s)</b> para <b>' + n + ' cliente(s)</b> ativo(s)' + (_rq.excecoes.length ? ' (já descontadas as exceções)' : '') + '.';
+  el.style.display = 'block';
+}
+
+function _rqSalvar() {
+  var msg = document.getElementById('bloq-msg'); msg.style.color = '#dc2626'; msg.textContent = '';
+  if (_rqOk === false) { msg.textContent = 'O banco ainda não tem a tabela de restrições — rode o script SQL (liberar_restricoes_pedido.sql).'; return; }
   var fornId = document.getElementById('bloq-fornecedor').value;
-  if (!fornId) { msg.textContent = 'Selecione o Fornecedor.'; return; }
-  var produtoId = document.getElementById('bloq-prod-id').value;
-  if (!produtoId) { msg.textContent = 'Busque e selecione um Produto.'; return; }
-  var alvoId = document.getElementById('bloq-alvo-id').value;
-  if (!alvoId) { msg.textContent = 'Busque e selecione ' + (_bloqNivelAtual === 'rede' ? 'a Rede' : (_bloqNivelAtual === 'loja' ? 'a Loja' : 'o Cliente')) + '.'; return; }
-
-  var forn = getFornecedores().find(function(f){ return f.id === fornId; });
-  var produto = getProdutos().find(function(p){ return p.id === produtoId; });
-  var alvoNome = document.getElementById('bloq-alvo-input').value;
-  var motivo = document.getElementById('bloq-motivo').value.trim();
-
-  var jaExiste = getBloqueiosProduto().some(function(b){
-    return b.ativo === 'Sim' && String(b.fornId) === String(fornId) && String(b.produtoId) === String(produtoId) && b.nivel === _bloqNivelAtual && String(b.alvoId) === String(alvoId);
-  });
-  if (jaExiste) { msg.textContent = 'Já existe um bloqueio ativo igual a este.'; return; }
-
-  var dados = getBloqueiosProduto();
-  dados.push({
-    id: 'bloq_' + Date.now(),
+  if (!fornId) { msg.textContent = 'Selecione a Fábrica.'; return; }
+  if (!_rq.produtos.length) { msg.textContent = 'Selecione pelo menos um Produto.'; return; }
+  if (!_rq.alvos.length) { msg.textContent = 'Selecione onde vale o bloqueio (' + _RQ_NIVEL_LABEL[_rq.nivel] + ').'; return; }
+  var ini = document.getElementById('rq-vig-ini').value, fim = document.getElementById('rq-vig-fim').value;
+  if (ini && fim && fim < ini) { msg.textContent = 'A data final é anterior à inicial.'; return; }
+  var forn = getFornecedores().find(function (f) { return f.id === fornId; });
+  var antigo = _rq.editId ? _rqCache.find(function (x) { return x.id === _rq.editId; }) : null;
+  var doc = {
+    id: _rq.editId || ('rq_' + Date.now()),
     fornId: fornId, fornNome: forn ? _cpSemColchetes(forn.nome_fantasia || forn.razao_social || '') : '',
-    produtoId: produtoId, produtoCodigo: produto ? produto.codigo : '', produtoNome: produto ? produto.nome : '',
-    nivel: _bloqNivelAtual, alvoId: alvoId, alvoNome: alvoNome,
-    motivo: motivo, ativo: 'Sim', dtCadastro: new Date().toISOString()
+    produtos: _rq.produtos.map(function (p) { return { id: p.id, codigo: p.codigo || '', nome: p.nome || '' }; }),
+    nivel: _rq.nivel,
+    alvos: _rq.alvos.map(function (a) { return { id: String(a.id), nome: a.nome }; }),
+    excecoes: _rq.nivel === 'cliente' ? [] : _rq.excecoes.map(function (a) { return { id: String(a.id), nome: a.nome }; }),
+    motivo: document.getElementById('bloq-motivo').value.trim(),
+    vigIni: ini || '', vigFim: fim || '',
+    ativo: antigo ? antigo.ativo : 'Sim',
+    dtCadastro: antigo ? antigo.dtCadastro : new Date().toISOString()
+  };
+  msg.style.color = '#64748b'; msg.textContent = 'Salvando...';
+  _rqGravarNoBanco([doc]).then(function () {
+    var i = _rqCache.findIndex(function (x) { return x.id === doc.id; });
+    if (i >= 0) _rqCache[i] = doc; else _rqCache.push(doc);
+    _rqAlternarForm(); renderBloqueios();
+  }).catch(function (err) {
+    msg.style.color = '#dc2626'; msg.textContent = 'Não foi possível salvar: ' + err.message;
   });
-  setBloqueiosProduto(dados);
-  _bloqAlternarForm();
+}
+function _rqEditar(id) {
+  var r = _rqCache.find(function (x) { return x.id === id; }); if (!r) return;
+  var form = document.getElementById('bloq-form');
+  if (form.style.display === 'none') { form.style.display = 'block'; document.getElementById('bloq-btn-novo').textContent = 'Fechar'; }
+  _bloqPopularFiltros();
+  _rq = { nivel: r.nivel, produtos: (r.produtos || []).slice(), alvos: (r.alvos || []).slice(), excecoes: (r.excecoes || []).slice(), editId: r.id };
+  document.getElementById('bloq-fornecedor').value = r.fornId;
+  document.getElementById('bloq-motivo').value = r.motivo || '';
+  document.getElementById('rq-vig-ini').value = r.vigIni || '';
+  document.getElementById('rq-vig-fim').value = r.vigFim || '';
+  document.getElementById('bloq-msg').textContent = '';
+  var t = document.getElementById('rq-edit-tit'); if (t) t.style.display = 'block';
+  _rqPintarNiveis(); _rqRenderChips(); _rqPrevia();
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function _rqExcluir(id) {
+  if (!confirm('Excluir esta restrição?')) return;
+  _rqGravarNoBanco([], [id]).then(function () {
+    _rqCache = _rqCache.filter(function (x) { return x.id !== id; }); renderBloqueios();
+  }).catch(function (err) { alert('Não foi possível excluir: ' + err.message); });
+}
+function _rqToggle(id) {
+  var r = _rqCache.find(function (x) { return x.id === id; }); if (!r) return;
+  var novo = Object.assign({}, r, { ativo: r.ativo === 'Não' ? 'Sim' : 'Não' });
+  _rqGravarNoBanco([novo]).then(function () { r.ativo = novo.ativo; renderBloqueios(); })
+    .catch(function (err) { alert('Não foi possível alterar: ' + err.message); });
+}
+function _rqLimparFiltros() {
+  ['rq-f-busca', 'rq-f-forn', 'rq-f-tipo', 'rq-f-uf'].forEach(function (id) { var e = document.getElementById(id); if (e) e.value = ''; });
+  var s = document.getElementById('rq-f-sit'); if (s) s.value = 'ativas';
   renderBloqueios();
 }
 
-function _bloqExcluir(id) {
-  if (!confirm('Excluir este bloqueio?')) return;
-  setBloqueiosProduto(getBloqueiosProduto().filter(function(b){ return b.id !== id; }));
-  renderBloqueios();
-}
-
-function _bloqToggleAtivo(id) {
-  var dados = getBloqueiosProduto();
-  var b = dados.find(function(x){ return x.id === id; });
-  if (!b) return;
-  b.ativo = (b.ativo === 'Sim') ? 'Não' : 'Sim';
-  setBloqueiosProduto(dados);
-  renderBloqueios();
-}
+function _rqKpi(t, v, s) { return '<div style="background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 4px rgba(15,23,42,.06)"><div style="font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase">' + t + '</div><div style="font-size:20px;font-weight:800;color:#272A4A;margin-top:3px">' + v + '</div><div style="font-size:10.5px;color:#94a3b8">' + s + '</div></div>'; }
 
 function renderBloqueios() {
-  var dados = getBloqueiosProduto().slice().sort(function(a, b){ return (b.dtCadastro || '').localeCompare(a.dtCadastro || ''); });
-  var lista = document.getElementById('bloq-lista');
+  var lista = document.getElementById('bloq-lista'); if (!lista) return;
+  var aviso = document.getElementById('rq-aviso');
+  if (_rqOk === null) { _restrCarregar(); }
+  if (aviso) {
+    if (_rqOk === false) { aviso.style.display = 'block'; aviso.innerHTML = '<b>Atenção:</b> a tabela de restrições ainda não existe no banco. Rode o script <b>liberar_restricoes_pedido.sql</b> no Supabase (SQL Editor) para poder cadastrar.'; }
+    else aviso.style.display = 'none';
+  }
+  var hoje = _rqHoje();
+  var todos = _rqCache.slice();
+  var ativas = todos.filter(function (r) { return r.ativo !== 'Não' && _rqVigente(r, hoje); });
+  var prods = {}, clis = {};
+  ativas.forEach(function (r) { (r.produtos || []).forEach(function (p) { prods[r.fornId + '|' + p.id] = true; }); _rqClientesAfetados(r).forEach(function (c) { clis[c.id] = true; }); });
+  var venc30 = ativas.filter(function (r) { if (!r.vigFim) return false; var d = (new Date(r.vigFim) - new Date(hoje)) / 86400000; return d >= 0 && d <= 30; }).length;
+  var kp = document.getElementById('rq-kpis');
+  if (kp) kp.innerHTML = _rqKpi('Restrições ativas', ativas.length, (todos.length - ativas.length) + ' pausada(s)/fora da vigência')
+    + _rqKpi('Produtos bloqueados', Object.keys(prods).length, 'em ' + Object.keys(ativas.reduce(function (a, r) { a[r.fornId] = 1; return a; }, {})).length + ' fábrica(s)')
+    + _rqKpi('Clientes afetados', Object.keys(clis).length, 'de ' + getClientes().filter(function (c) { return (c.ativo || 'Sim') !== 'Não'; }).length + ' ativos')
+    + _rqKpi('Vencem em 30 dias', venc30, 'com data final definida');
+
+  var fb = _cpNorm((document.getElementById('rq-f-busca') || {}).value || ''), ff = (document.getElementById('rq-f-forn') || {}).value || '', ft = (document.getElementById('rq-f-tipo') || {}).value || '', fu = (document.getElementById('rq-f-uf') || {}).value || '', fs = (document.getElementById('rq-f-sit') || {}).value || 'ativas';
+  var rows = todos.filter(function (r) {
+    var vig = _rqVigente(r, hoje), on = r.ativo !== 'Não';
+    if (fs === 'ativas' && !(on && vig)) return false;
+    if (fs === 'pausadas' && on) return false;
+    if (fs === 'vencidas' && !(on && !vig)) return false;
+    if (ff && String(r.fornId) !== String(ff)) return false;
+    if (ft && r.nivel !== ft) return false;
+    if (fu) {
+      var temUf = r.nivel === 'uf' ? (r.alvos || []).some(function (a) { return a.id === fu; })
+        : r.nivel === 'cidade' ? (r.alvos || []).some(function (a) { return a.nome.slice(-2) === fu; })
+        : _rqClientesAfetados(r).some(function (c) { return _rqUfDe(c) === fu; });
+      if (!temUf) return false;
+    }
+    if (fb) {
+      var txt = _cpNorm([r.fornNome, r.motivo].concat((r.produtos || []).map(function (p) { return p.codigo + ' ' + p.nome; })).concat((r.alvos || []).map(function (a) { return a.nome; })).concat((r.excecoes || []).map(function (a) { return a.nome; })).join(' '));
+      if (txt.indexOf(fb) === -1) return false;
+    }
+    return true;
+  }).sort(function (a, b) { return (b.dtCadastro || '').localeCompare(a.dtCadastro || ''); });
   var vazio = document.getElementById('bloq-vazio');
-  if (!lista) return;
-  if (!dados.length) { lista.innerHTML = ''; if (vazio) vazio.style.display = 'block'; return; }
+  if (!rows.length) { lista.innerHTML = ''; if (vazio) vazio.style.display = 'block'; return; }
   if (vazio) vazio.style.display = 'none';
-  var NIVEL_LABEL = { rede: 'Rede', loja: 'Loja', cliente: 'Cliente' };
-  var NIVEL_COR = { rede: '#DE7926', loja: '#272A4A', cliente: '#D82621' };
-  lista.innerHTML = dados.map(function(b){
-    var ativo = b.ativo !== 'Não';
-    var cor = NIVEL_COR[b.nivel] || '#64748b';
-    return '<div style="display:grid;grid-template-columns:1.2fr 1.5fr 90px 1.5fr 1.3fr 70px 50px;padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:12px;color:#1e293b;align-items:center">'
-      + '<span>' + _pedEsc(b.fornNome) + '</span>'
-      + '<span>' + (b.produtoCodigo ? ('[' + _pedEsc(b.produtoCodigo) + '] ') : '') + _pedEsc(b.produtoNome) + '</span>'
-      + '<span><span style="background:' + cor + '1a;color:' + cor + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px">' + (NIVEL_LABEL[b.nivel] || '') + '</span></span>'
-      + '<span>' + _pedEsc(b.alvoNome) + '</span>'
-      + '<span style="color:#64748b;font-size:11px">' + (b.motivo ? _pedEsc(b.motivo) : '—') + '</span>'
-      + '<span onclick="_bloqToggleAtivo(\'' + b.id + '\')" title="Clique para ' + (ativo ? 'desativar' : 'ativar') + '" style="cursor:pointer;width:32px;height:18px;border-radius:9px;background:' + (ativo ? '#15803d' : '#cbd5e1') + ';position:relative;display:block"><span style="position:absolute;' + (ativo ? 'right' : 'left') + ':2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff"></span></span>'
-      + '<span style="text-align:right"><button onclick="_bloqExcluir(\'' + b.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:4px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button></span>'
+  lista.innerHTML = rows.map(function (r) {
+    var on = r.ativo !== 'Não', vig = _rqVigente(r, hoje), cor = _RQ_NIVEL_COR[r.nivel] || '#64748b';
+    var ps = r.produtos || [];
+    var prodHtml = ps.slice(0, 2).map(function (p, i) { return (i ? '<br><span style="color:#64748b;font-size:11px">' : '<b>') + (p.codigo ? '[' + _pedEsc(p.codigo) + '] ' : '') + _pedEsc(p.nome) + (i ? '</span>' : '</b>'); }).join('') + (ps.length > 2 ? '<br><span style="color:#94a3b8;font-size:11px">+ ' + (ps.length - 2) + ' produto(s)</span>' : '');
+    var al = r.alvos || [];
+    var alvoHtml = al.slice(0, 3).map(function (a) { return _pedEsc(a.nome); }).join('<br>') + (al.length > 3 ? '<br><span style="color:#94a3b8;font-size:11px">+ ' + (al.length - 3) + '</span>' : '');
+    if ((r.excecoes || []).length) alvoHtml += '<br><span style="color:#64748b;font-size:11px">Exceção: ' + _pedEsc(r.excecoes.slice(0, 2).map(function (e) { return e.nome; }).join(', ')) + ((r.excecoes.length > 2) ? ' +' + (r.excecoes.length - 2) : '') + '</span>';
+    var vigTxt = (!r.vigIni && !r.vigFim) ? 'Sem prazo' : ((r.vigIni ? 'Desde ' + r.vigIni.split('-').reverse().join('/') : '') + (r.vigIni && r.vigFim ? '<br>' : '') + (r.vigFim ? 'Até ' + r.vigFim.split('-').reverse().join('/') : ''));
+    if (!vig) vigTxt = '<span style="color:#b45309">' + vigTxt + '<br>(fora da vigência)</span>';
+    var nCli = _rqClientesAfetados(r).length;
+    return '<div style="display:grid;grid-template-columns:1fr 1.5fr 80px 1.7fr 1.2fr 110px 100px 56px 70px;gap:8px;padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:12px;color:#1e293b;align-items:start;' + (on ? '' : 'opacity:.55') + '">'
+      + '<span>' + _pedEsc(r.fornNome) + '</span><span>' + prodHtml + '</span>'
+      + '<span><span style="background:' + cor + '1a;color:' + cor + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px">' + _RQ_NIVEL_LABEL[r.nivel] + '</span></span>'
+      + '<span>' + alvoHtml + '</span><span style="color:#64748b;font-size:11px">' + (r.motivo ? _pedEsc(r.motivo) : '—') + '</span>'
+      + '<span style="font-size:11px;color:#64748b">' + vigTxt + '</span>'
+      + '<span style="font-size:11px;color:#64748b"><b style="color:#1e293b">' + nCli + '</b> cliente(s)</span>'
+      + '<span onclick="_rqToggle(\'' + r.id + '\')" title="Clique para ' + (on ? 'pausar' : 'ativar') + '" style="cursor:pointer;width:32px;height:18px;border-radius:9px;background:' + (on ? '#15803d' : '#cbd5e1') + ';position:relative;display:block"><span style="position:absolute;' + (on ? 'right' : 'left') + ':2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff"></span></span>'
+      + '<span style="text-align:right;white-space:nowrap"><button onclick="_rqEditar(\'' + r.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;color:#475569;padding:3px;font-size:14px">&#9998;</button><button onclick="_rqExcluir(\'' + r.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:3px;font-size:14px">&#128465;</button></span>'
       + '</div>';
   }).join('');
 }
 
 function _bloqBuscarAtivos(fornId, produtoId) {
-  return getBloqueiosProduto().filter(function(b){
+  return getBloqueiosProduto().filter(function (b) {
     return b.ativo === 'Sim' && String(b.fornId) === String(fornId) && String(b.produtoId) === String(produtoId);
   });
 }
-function _bloqVerificar(fornId, produtoId, clienteId) {
-  if (!fornId || !produtoId) return null;
-  var ativos = _bloqBuscarAtivos(fornId, produtoId);
-  if (!ativos.length) return null;
-  var porCliente = clienteId ? ativos.filter(function(b){ return b.nivel === 'cliente' && String(b.alvoId) === String(clienteId); })[0] : null;
-  if (porCliente) return porCliente;
-  var cliente = clienteId ? getClientes().find(function(c){ return c.id === clienteId; }) : null;
-  if (cliente) {
-    var porLoja = ativos.filter(function(b){ return b.nivel === 'loja' && String(b.alvoId) === String(cliente.subcategoria); })[0];
-    if (porLoja) return porLoja;
-    var porRede = ativos.filter(function(b){ return b.nivel === 'rede' && String(b.alvoId) === String(cliente.categoria); })[0];
-    if (porRede) return porRede;
+// Restrição nova (v56) que barra este produto para este cliente. Devolve {motivo, nivel,...} ou null.
+function _rqVerificar(fornId, produtoId, cliente) {
+  if (!cliente || !_rqCache.length) return null;
+  var hoje = _rqHoje();
+  for (var i = 0; i < _rqCache.length; i++) {
+    var r = _rqCache[i];
+    if (r.ativo === 'Não' || !_rqVigente(r, hoje) || String(r.fornId) !== String(fornId)) continue;
+    if (!(r.produtos || []).some(function (p) { return String(p.id) === String(produtoId); })) continue;
+    if (!_rqCasa(r, cliente)) continue;
+    var onde = '';
+    if (r.nivel === 'uf') onde = _rqUfDe(cliente);
+    else if (r.nivel === 'cidade') onde = _rqCidDe(cliente) + '/' + _rqUfDe(cliente);
+    else onde = (r.alvos || []).map(function (a) { return a.nome; }).slice(0, 1).join('');
+    var motivo = 'não faturar para ' + _RQ_NIVEL_LABEL[r.nivel] + ' ' + onde + (r.motivo ? ' — ' + r.motivo : '');
+    return { id: r.id, nivel: r.nivel, motivo: motivo };
   }
   return null;
 }
+function _bloqVerificar(fornId, produtoId, clienteId) {
+  if (!fornId || !produtoId) return null;
+  var cliente = clienteId ? getClientes().find(function (c) { return c.id === clienteId; }) : null;
+  var ativos = _bloqBuscarAtivos(fornId, produtoId);
+  if (ativos.length) {
+    var porCliente = clienteId ? ativos.filter(function (b) { return b.nivel === 'cliente' && String(b.alvoId) === String(clienteId); })[0] : null;
+    if (porCliente) return porCliente;
+    if (cliente) {
+      var porLoja = ativos.filter(function (b) { return b.nivel === 'loja' && String(b.alvoId) === String(cliente.subcategoria); })[0];
+      if (porLoja) return porLoja;
+      var porRede = ativos.filter(function (b) { return b.nivel === 'rede' && String(b.alvoId) === String(cliente.categoria); })[0];
+      if (porRede) return porRede;
+    }
+  }
+  return _rqVerificar(fornId, produtoId, cliente);
+}
+
 function _bloqVerificarRedeLoja(fornId, produtoId, redeId, lojaId) {
   if (!fornId || !produtoId) return null;
   var ativos = _bloqBuscarAtivos(fornId, produtoId);
