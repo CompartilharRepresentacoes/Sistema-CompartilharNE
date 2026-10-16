@@ -26257,6 +26257,8 @@ function _emlResolverCliente(forn, d, nf, r) {
     r.erros.push('Cliente ' + d.codCli + ' não encontrado no cadastro (código do cliente na fábrica).' + extra);
   }
   if (cli) {
+    var cx = (cli.codigos_fornecedor || []).filter(function (x) { return String(x.fornecedor_id) === String(forn.id); });
+    r.codSistema = cx.map(function (x) { return x.codigo_cliente; }).join(', ');
     var dono = donos.find(function (o) { return o.cliId === String(cli.id); });
     if (dono) r.dataNfOrigem = dono.data;
     else if (donos.length) r.erros.push('A NF de origem ' + nf + ' pertence a outro cliente (' + nomeDe(donos[0].cliId) + '), não a ' + _cpSemColchetes(cli.nome_fantasia || '') + '. Confira antes de lançar.');
@@ -26312,7 +26314,7 @@ function _emlRender() {
       + (r.ok ? '<input type="checkbox" ' + (r.sel ? 'checked' : '') + ' onchange="_emlRes[' + i + '].sel=this.checked" style="margin-top:3px">' : '<span style="width:13px"></span>')
       + '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700;color:#1e293b">NFD ' + _pedEsc(d.nfd) + ' &middot; ' + _pedEsc(_pimpFmtData(d.dataEmissao)) + ' <span style="background:' + bg + ';color:' + cor + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px">' + st + '</span></div>'
       + '<div style="font-size:11.5px;color:#475569;margin-top:2px">E-mail: <b>' + _pedEsc(d.codCli) + '</b> ' + _pedEsc(d.nomeCli) + '</div>'
-      + '<div style="font-size:11.5px;color:#475569">Sistema: ' + (r.cli ? '<b style="color:#15803d">' + _pedEsc(_cpSemColchetes(r.cli.nome_fantasia || r.cli.razao_social || '')) + '</b>' : '<b style="color:#b91c1c">não encontrado</b>') + (r.forn ? ' &middot; ' + _pedEsc(_cpSemColchetes(r.forn.nome_fantasia || '')) : '') + '</div>'
+      + '<div style="font-size:11.5px;color:#475569">Sistema: ' + (r.cli ? '<b style="color:#15803d">' + _pedEsc(_cpSemColchetes(r.cli.nome_fantasia || r.cli.razao_social || '')) + '</b>' : '<b style="color:#b91c1c">não encontrado</b>') + (r.forn ? ' &middot; ' + _pedEsc(_cpSemColchetes(r.forn.nome_fantasia || '')) : '') + (r.cli ? ' &middot; código cadastrado: <b>' + _pedEsc(r.codSistema || '—') + '</b>' : '') + '</div>'
       + '<div style="font-size:11.5px;color:#64748b;margin-top:4px">NF origem ' + _pedEsc(r.nfOrigem) + (r.dataNfOrigem ? ' (' + _pedEsc(_pimpFmtData(r.dataNfOrigem)) + ')' : ' (data não localizada)') + ' &middot; ' + _pedFmtMoeda(r.total) + '</div>'
       + '<div style="font-size:11px;color:#64748b;margin-top:2px">' + r.itens.map(function (x) { return _pedEsc(x.it.cod) + ' ' + _pedEsc(x.it.desc) + ' &times; ' + x.it.qtd + ' = ' + _pedFmtMoeda(x.it.valor) + (x.p ? '' : ' <b style="color:#b91c1c">(não achei)</b>'); }).join('<br>') + '</div>'
       + (r.erros.length ? '<div style="font-size:11.5px;color:#b91c1c;margin-top:4px">' + r.erros.map(_pedEsc).join('<br>') + '</div>' : '')
