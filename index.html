@@ -25994,31 +25994,49 @@ function _devBarras(titulo, sub, itens, fmt, labW) {
   }).join('') : '<div style="margin-top:14px;font-size:11.5px;color:rgba(255,255,255,.5)">Sem dados no período.</div>';
   return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:18px 22px;color:#fff"><div style="font-size:13px;font-weight:600">' + titulo + '</div><div style="font-size:10.5px;color:rgba(255,255,255,.45)">' + sub + '</div>' + corpo + '</div>';
 }
-// v82: evolucao em tabela com barras, R$ e KG. linhas: [{rot, v, p, kv, kp, parcial, ate}]
+// v84: evolucao explicada em linguagem simples. linhas: [{rot, v, p, kv, kp, parcial, ate}]
+window._devEvModo = window._devEvModo || 'v';
+function _devEvTrocar(m) { window._devEvModo = m; var e = document.getElementById('dev-ev-card'); if (e) e.outerHTML = _devGrafEvolucao(window._devEvLin, window._devEvAno); }
 function _devGrafEvolucao(linhas, anoA) {
-  var max = Math.max.apply(null, [1].concat(linhas.map(function (l) { return Math.max(l.v, l.p); })));
-  function varH(a, b) {
-    if (!b) return '<span style="color:rgba(255,255,255,.35)">—</span>';
-    var pc = ((a - b) / b) * 100; if (Math.abs(pc) < 0.5) return '<span style="color:rgba(255,255,255,.6);font-weight:700">0%</span>';
-    return '<span style="font-weight:700;color:' + (pc > 0 ? '#f87171' : '#4ade80') + '">' + (pc > 0 ? '▲ ' : '▼ ') + Math.abs(pc).toFixed(0) + '%</span>';
+  window._devEvLin = linhas; window._devEvAno = anoA;
+  var kg = window._devEvModo === 'k';
+  var fm = kg ? _devFmtKg : _devFmtK;
+  var gv = function (l) { return kg ? l.kv : l.v; }, gp = function (l) { return kg ? l.kp : l.p; };
+  var max = Math.max.apply(null, [1].concat(linhas.map(function (l) { return Math.max(gv(l), gp(l)); })));
+  var totA = 0, totP = 0; linhas.forEach(function (l) { totA += gv(l); totP += gp(l); });
+  function frase(a, b, ant) {
+    if (!b) return '';
+    var pc = Math.round(Math.abs((a - b) / b) * 100);
+    if (pc < 1) return 'igual a ' + ant;
+    return pc + '% ' + (a < b ? 'a menos' : 'a mais');
   }
-  var td = 'padding:8px 6px;border-top:1px solid rgba(255,255,255,.08);vertical-align:middle;';
-  var ult = linhas.length - 1;
-  var corpo = linhas.map(function (l, i) {
-    var cur = i === ult;
-    return '<tr>'
-      + '<td style="' + td + 'font-weight:' + (cur ? 700 : 400) + ';color:rgba(255,255,255,' + (cur ? '.95' : '.75') + ')">' + l.rot + (l.parcial ? '<div style="font-size:9.5px;font-weight:400;color:rgba(255,255,255,.45)">parcial · até dia ' + l.ate + '</div>' : '') + '</td>'
-      + '<td class="dev-ev-bar" style="' + td + 'width:30%"><div style="height:7px;border-radius:4px;background:rgba(255,255,255,.28);width:' + (l.p ? Math.max(2, l.p / max * 100) : 0) + '%"></div><div style="height:7px;border-radius:4px;background:#3b82f6;margin-top:3px;width:' + (l.v ? Math.max(2, l.v / max * 100) : 0) + '%"></div></td>'
-      + '<td style="' + td + 'text-align:right;white-space:nowrap"><b style="color:#fff">' + _devFmtK(l.v) + '</b><div style="font-size:10.5px;color:rgba(255,255,255,.5)">' + _devFmtK(l.p) + '</div></td>'
-      + '<td style="' + td + 'text-align:right;white-space:nowrap"><b style="color:#fff">' + _devFmtKg(l.kv) + '</b><div style="font-size:10.5px;color:rgba(255,255,255,.5)">' + _devFmtKg(l.kp) + '</div></td>'
-      + '<td style="' + td + 'text-align:right;white-space:nowrap;font-size:11.5px">' + varH(l.v, l.p) + '</td>'
-      + '<td style="' + td + 'text-align:right;white-space:nowrap;font-size:11.5px">' + varH(l.kv, l.kp) + '</td></tr>';
+  function pill(a, b) {
+    if (!b) return '<span style="color:rgba(255,255,255,.4);font-size:11px">sem dados do ano anterior</span>';
+    var pc = Math.round(Math.abs((a - b) / b) * 100), menos = a < b;
+    if (pc < 1) return '<span style="background:rgba(255,255,255,.12);color:#e2e8f0;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap">= igual</span>';
+    return '<span style="background:' + (menos ? 'rgba(74,222,128,.16)' : 'rgba(248,113,113,.18)') + ';color:' + (menos ? '#4ade80' : '#f87171') + ';border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap">' + (menos ? '▼ ' : '▲ ') + pc + '% ' + (menos ? 'a menos' : 'a mais') + '</span>';
+  }
+  var un = kg ? 'em peso (KG)' : 'em valor (R$)';
+  var resumo = totP ? ('No total destes meses, as devoluções ' + un + ' foram <b style="color:' + (totA < totP ? '#4ade80' : '#f87171') + '">' + frase(totA, totP, anoA - 1) + '</b> que no mesmo período de ' + (anoA - 1) + ': ' + fm(totA) + ' contra ' + fm(totP) + '.') : '';
+  var linhasH = linhas.map(function (l) {
+    var a = gv(l), b = gp(l);
+    function barra(cor, val, rot, forte) {
+      return '<div style="display:flex;align-items:center;gap:8px;margin-top:3px"><span style="width:34px;font-size:10.5px;color:rgba(255,255,255,.55);flex-shrink:0">' + rot + '</span>'
+        + '<div style="flex:1;min-width:0"><div style="height:10px;border-radius:5px;background:' + cor + ';width:' + (val ? Math.max(1.5, val / max * 100) : 0) + '%"></div></div>'
+        + '<span style="width:88px;text-align:right;font-size:11.5px;flex-shrink:0;white-space:nowrap;' + (forte ? 'font-weight:700;color:#fff' : 'color:rgba(255,255,255,.6)') + '">' + (val ? fm(val) : 'nada') + '</span></div>';
+    }
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap">'
+      + '<div style="width:62px;flex-shrink:0;font-size:12.5px;font-weight:700;color:#fff">' + l.rot + (l.parcial ? '<div style="font-size:9.5px;font-weight:400;color:rgba(255,255,255,.45)">até dia ' + l.ate + '</div>' : '') + '</div>'
+      + '<div style="flex:1;min-width:220px">' + barra('#3b82f6', a, anoA, true) + barra('rgba(255,255,255,.3)', b, anoA - 1, false) + '</div>'
+      + '<div style="width:128px;text-align:right;flex-shrink:0">' + pill(a, b) + '</div></div>';
   }).join('');
-  var th = 'padding:4px 6px;font-size:10px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.04em;';
-  return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:18px 22px;color:#fff;overflow:hidden">'
-    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px"><div><div style="font-size:13px;font-weight:600">Evolução das Devoluções</div><div style="font-size:10.5px;color:rgba(255,255,255,.45)">Por mês, em R$ e KG · valor grande = ' + anoA + ', valor pequeno = ' + (anoA - 1) + ' · Var. = ' + anoA + ' comparado com o mesmo mês de ' + (anoA - 1) + ' (▼ verde = devolveu menos)</div></div>'
-    + '<div style="display:flex;gap:12px;font-size:11px;color:rgba(255,255,255,.75)"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(255,255,255,.28);margin-right:5px"></i>' + (anoA - 1) + '</span><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3b82f6;margin-right:5px"></i>' + anoA + '</span></div></div>'
-    + '<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:12px"><thead><tr><th style="' + th + 'text-align:left">Mês</th><th class="dev-ev-bar" style="' + th + 'text-align:left"></th><th style="' + th + 'text-align:right">R$</th><th style="' + th + 'text-align:right">KG</th><th style="' + th + 'text-align:right">Var. R$</th><th style="' + th + 'text-align:right">Var. KG</th></tr></thead><tbody>' + corpo + '</tbody></table></div>';
+  var btn = function (m, t) { var on = (window._devEvModo === m); return '<span onclick="_devEvTrocar(\'' + m + '\')" style="cursor:pointer;padding:4px 12px;border-radius:999px;font-size:11.5px;font-weight:' + (on ? 700 : 400) + ';background:' + (on ? '#3b82f6' : 'rgba(255,255,255,.1)') + ';color:#fff">' + t + '</span>'; };
+  return '<div id="dev-ev-card" style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:18px 22px;color:#fff;overflow:hidden">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px"><div><div style="font-size:13px;font-weight:600">Evolução das Devoluções</div><div style="font-size:10.5px;color:rgba(255,255,255,.45)">Quanto foi devolvido em cada mês, comparado com o mesmo mês do ano passado</div></div>'
+    + '<div style="display:flex;gap:6px">' + btn('v', 'Valor (R$)') + btn('k', 'Peso (KG)') + '</div></div>'
+    + (resumo ? '<div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.07);font-size:12px;line-height:1.5;color:rgba(255,255,255,.85)">' + resumo + '</div>' : '')
+    + '<div style="display:flex;gap:14px;margin-top:12px;font-size:10.5px;color:rgba(255,255,255,.6)"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3b82f6;margin-right:5px"></i>' + anoA + ' (este ano)</span><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(255,255,255,.3);margin-right:5px"></i>' + (anoA - 1) + ' (ano passado)</span><span style="margin-left:auto">▼ verde = devolveu menos (bom) · ▲ vermelho = devolveu mais</span></div>'
+    + '<div style="margin-top:6px">' + linhasH + '</div></div>';
 }
 function _devFaturadoPeriodo(ini, fim, fornId, devsRef) {
   var tot = 0;
