@@ -5488,6 +5488,7 @@
       </style>
         <div class="dev-mobile-actions" style="display:none;margin-bottom:10px">
           <button onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:12px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar</button>
+          <button onclick="emlAbrir()" style="width:100%;margin-top:8px;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer">&#9993; Importar e-mails da fábrica</button>
         </div>
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:12px">
         <div class="dev-filtros">
@@ -5497,7 +5498,7 @@
           <div><label>Motivo</label><select id="dev-f-motivo" onchange="_devAoTrocarMotivo()"><option value="">Todos</option></select></div>
           <div><label>UF</label><select id="dev-f-uf" onchange="renderDevolucaoList()"><option value="">Todas</option></select></div>
           <div><label>Vendedor</label><select id="dev-f-vend" onchange="renderDevolucaoList()"><option value="">Todos</option></select></div>
-          <div style="display:flex;gap:8px"><button onclick="_devLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button><button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">&#10133; Cadastrar</button></div>
+          <div style="display:flex;gap:8px"><button onclick="_devLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button><button class="dev-hdr-mobile-hide" onclick="emlAbrir()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap">&#9993; Importar e-mails</button><button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">&#10133; Cadastrar</button></div>
         </div>
         <div id="dev-status-chips" style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"></div>
       </div>
@@ -7281,6 +7282,23 @@
 #cartilha-viewer-outer{min-width:0;flex:1}
 #cartilha-canvas-vertical{max-width:100%;height:auto}
 </style>
+<div id="eml-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9998;align-items:center;justify-content:center;padding:12px;box-sizing:border-box">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#272A4A,#3d4180);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:14px;font-weight:600">Importar e-mails de devolução da fábrica</div><div style="font-size:10.5px;color:rgba(255,255,255,.55)">Cole ou arraste o e-mail &middot; o sistema confere o cliente e lança só o que bater</div></div>
+      <button onclick="emlFechar()" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px">Fechar</button>
+    </div>
+    <div style="padding:14px 18px;overflow:auto">
+      <textarea id="eml-texto" placeholder="Cole aqui o texto do e-mail (pode colar vários de uma vez) ou arraste os e-mails para cá..." ondragover="event.preventDefault()" ondrop="_emlSolto(event)" onpaste="setTimeout(_emlAnalisar,80)" style="width:100%;box-sizing:border-box;height:120px;border:2px dashed #cbd5e1;border-radius:10px;padding:10px;font-size:12px;font-family:inherit;resize:vertical"></textarea>
+      <div style="display:flex;gap:8px;margin:8px 0 12px;align-items:center;flex-wrap:wrap">
+        <button onclick="_emlAnalisar()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">Analisar</button>
+        <button id="eml-btn-lancar" onclick="_emlLancar()" style="display:none;background:#15803d;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">Lançar selecionadas</button>
+        <span id="eml-msg" style="font-size:11.5px;font-weight:600"></span>
+      </div>
+      <div id="eml-resultado"></div>
+    </div>
+  </div>
+</div>
 <div id="modal-cartilha" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:0">
   <div style="width:100%;max-width:960px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
     <div style="display:flex;align-items:center;gap:8px">
@@ -26146,6 +26164,184 @@ function renderDevolucaoList() {
       + '<button onclick="deleteDevolucao(\'' + d.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
       + '</div></div>';
   }).join('');
+}
+
+// ── v77: Importar e-mails de devolucao da fabrica (colar/arrastar) ──
+var _emlRes = [];
+function _emlNum(s) { return parseFloat(String(s || '0').replace(/\./g, '').replace(',', '.')) || 0; }
+function _emlSemZeros(s) { return String(s || '').trim().replace(/^0+(?=\d)/, ''); }
+function _emlIso(br) { var m = String(br || '').match(/(\d{2})\/(\d{2})\/(\d{4})/); return m ? m[3] + '-' + m[2] + '-' + m[1] : ''; }
+// Le o texto de 1 ou varios e-mails e devolve [{codCli, nomeCli, nfd, serie, dataEmissao, itens:[{cod,desc,qtd,valor,nfVenda}], fornTxt}]
+function _emlParse(texto) {
+  var t = String(texto || '').replace(/ /g, ' ').replace(/\r/g, '');
+  var out = [];
+  var re = /Cliente:\s*([0-9A-Za-z\/.\-]+)\s*-\s*([^\n]+)/g, m, marcas = [];
+  while ((m = re.exec(t))) marcas.push({ i: m.index, fim: re.lastIndex, cod: m[1], nome: m[2].trim() });
+  marcas.forEach(function (mk, k) {
+    var ate = k + 1 < marcas.length ? marcas[k + 1].i : t.length;
+    var bloco = t.slice(mk.fim, ate).replace(/\s+/g, ' ');
+    var rr = /(\d{4,10})-(\d{1,4})\s*\/\s*(\d{2}\/\d{2}\/\d{4})\s+(\d+)\s+(.+?)\s+(\d[\d.]*,\d{2,4})\s+(\d[\d.]*,\d{2})\s+(\d+)\s+(\d+)/g, r;
+    var porNfd = {}, ordem = [];
+    while ((r = rr.exec(bloco))) {
+      var chave = r[1] + '-' + r[2];
+      if (!porNfd[chave]) { porNfd[chave] = { codCli: mk.cod, nomeCli: mk.nome, nfd: _emlSemZeros(r[1]), serie: r[2], dataEmissao: _emlIso(r[3]), itens: [] }; ordem.push(chave); }
+      porNfd[chave].itens.push({ cod: _emlSemZeros(r[4]), desc: r[5].trim(), qtd: _emlNum(r[6]), valor: _emlNum(r[7]), nfVenda: _emlSemZeros(r[8]) });
+    }
+    ordem.forEach(function (c) { out.push(porNfd[c]); });
+  });
+  // remove repetidos (mesmo e-mail colado 2x)
+  var vistos = {}; return out.filter(function (d) { var k = d.codCli + '|' + d.nfd + '|' + d.dataEmissao; if (vistos[k]) return false; vistos[k] = true; return true; });
+}
+
+function _emlFornDoTexto(texto) {
+  var n = _cpNorm(texto), fs = getFornecedores();
+  var ach = fs.find(function (f) { var a = _cpNorm(f.nome_fantasia || ''), b = _cpNorm(f.razao_social || ''); return (a && n.indexOf(a) !== -1) || (b && b.length > 5 && n.indexOf(b) !== -1); });
+  if (!ach && /granarolo|allfood/.test(n)) ach = fs.find(function (f) { return /allfood|granarolo/.test(_cpNorm((f.nome_fantasia || '') + ' ' + (f.razao_social || ''))); });
+  return ach || null;
+}
+function _emlCodNorm(c) { var s = String(c || '').trim().toUpperCase(); return [_emlSemZeros(s), _emlSemZeros(s.split('/')[0])]; }
+function _emlAchaCliente(forn, codCli) {
+  if (!forn) return null;
+  var alvo = _emlCodNorm(codCli);
+  return getClientes().find(function (c) {
+    return (c.codigos_fornecedor || []).some(function (x) {
+      if (String(x.fornecedor_id) !== String(forn.id)) return false;
+      var cand = _emlCodNorm(x.codigo_cliente);
+      return cand.some(function (v) { return v && alvo.indexOf(v) !== -1; });
+    });
+  }) || null;
+}
+function _emlAchaProduto(forn, cod) {
+  var vid = _devVinculoSalvo(forn.id, cod);
+  var prods = getProdutos();
+  if (vid) { var pv = prods.find(function (p) { return String(p.id) === String(vid); }); if (pv) return pv; }
+  var c = _emlSemZeros(cod);
+  return prods.find(function (p) { return String(p.fornecedor || '') === String(forn.id) && _emlSemZeros(p.codigo) === c; }) || null;
+}
+function _emlDataNfOrigem(cliId, nf) {
+  var alvo = _cpNorm(nf), ach = null;
+  getPedidos().forEach(function (p) {
+    if (String(p.clienteId) !== String(cliId)) return;
+    (p.faturas || []).forEach(function (f) {
+      if (f.status === 'Cancelado') return;
+      if (_emlSemZeros(_cpNorm(f.numDuplicata || '')) !== _emlSemZeros(alvo)) return;
+      if (!ach || (f.data || '') > (ach.data || '')) ach = f;
+    });
+  });
+  return ach ? String(ach.data || '').slice(0, 10) : '';
+}
+function _emlAnalisar() {
+  var texto = (document.getElementById('eml-texto') || {}).value || '';
+  var el = document.getElementById('eml-resultado'); if (!el) return;
+  var lista = _emlParse(texto);
+  var forn = _emlFornDoTexto(texto);
+  var jaTem = getDevolucoes();
+  _emlRes = lista.map(function (d, i) {
+    var r = { d: d, forn: forn, cli: null, itens: [], motivo: '', erros: [], jaLancada: false, nfOrigem: '', dataNfOrigem: '', total: 0 };
+    if (!forn) r.erros.push('Fábrica não identificada no e-mail');
+    r.cli = _emlAchaCliente(forn, d.codCli);
+    if (forn && !r.cli) r.erros.push('Cliente ' + d.codCli + ' não encontrado no cadastro (código do cliente na fábrica)');
+    d.itens.forEach(function (it) {
+      var p = forn ? _emlAchaProduto(forn, it.cod) : null;
+      if (!p && forn) r.erros.push('Produto ' + it.cod + ' (' + it.desc + ') não encontrado');
+      r.itens.push({ it: it, p: p });
+      r.total += it.valor;
+    });
+    var cont = {}; d.itens.forEach(function (it) { cont[it.nfVenda] = (cont[it.nfVenda] || 0) + 1; });
+    r.nfOrigem = Object.keys(cont).sort(function (a, b) { return cont[b] - cont[a]; })[0] || '';
+    if (r.cli) {
+      r.dataNfOrigem = _emlDataNfOrigem(r.cli.id, r.nfOrigem);
+      r.jaLancada = jaTem.some(function (x) { return String(x.fornecedorId) === String(forn.id) && String(x.clienteId) === String(r.cli.id) && _emlSemZeros(x.nfEmitida) === d.nfd; });
+    }
+    r.ok = !r.erros.length && !r.jaLancada;
+    r.sel = r.ok;
+    return r;
+  });
+  _emlRender();
+}
+function _emlRender() {
+  var el = document.getElementById('eml-resultado'); if (!el) return;
+  if (!_emlRes.length) { el.innerHTML = '<div style="padding:14px;color:#b45309;font-size:12.5px">Não encontrei nenhuma devolução nesse texto. Cole o e-mail inteiro (com a linha "Cliente: ..." e a tabela).</div>'; return; }
+  var prontas = _emlRes.filter(function (r) { return r.ok; }).length;
+  var h = '<div style="font-size:12px;color:#475569;margin:2px 0 8px"><b>' + _emlRes.length + '</b> NFD encontrada(s) &middot; <b style="color:#15803d">' + prontas + '</b> pronta(s) para lançar</div>';
+  h += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><label style="font-size:11.5px;font-weight:600;color:#475569">Motivo (para todas):</label><select id="eml-motivo" style="border:1px solid #cbd5e1;border-radius:7px;padding:6px 8px;font-size:12px"><option value="">Selecione...</option>' + DEV_MOTIVOS.map(function (m) { return '<option>' + m + '</option>'; }).join('') + '</select></div>';
+  h += _emlRes.map(function (r, i) {
+    var cor = r.ok ? '#15803d' : (r.jaLancada ? '#64748b' : '#b91c1c'), bg = r.ok ? '#f0fdf4' : (r.jaLancada ? '#f1f5f9' : '#fef2f2');
+    var st = r.ok ? 'Pronta' : (r.jaLancada ? 'Já lançada' : 'Não lançar');
+    var d = r.d;
+    return '<div style="border:1px solid #e2e8f0;border-left:4px solid ' + cor + ';border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff">'
+      + '<div style="display:flex;gap:10px;align-items:flex-start">'
+      + (r.ok ? '<input type="checkbox" ' + (r.sel ? 'checked' : '') + ' onchange="_emlRes[' + i + '].sel=this.checked" style="margin-top:3px">' : '<span style="width:13px"></span>')
+      + '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700;color:#1e293b">NFD ' + _pedEsc(d.nfd) + ' &middot; ' + _pedEsc(_pimpFmtData(d.dataEmissao)) + ' <span style="background:' + bg + ';color:' + cor + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px">' + st + '</span></div>'
+      + '<div style="font-size:11.5px;color:#475569;margin-top:2px">E-mail: <b>' + _pedEsc(d.codCli) + '</b> ' + _pedEsc(d.nomeCli) + '</div>'
+      + '<div style="font-size:11.5px;color:#475569">Sistema: ' + (r.cli ? '<b style="color:#15803d">' + _pedEsc(_cpSemColchetes(r.cli.nome_fantasia || r.cli.razao_social || '')) + '</b>' : '<b style="color:#b91c1c">não encontrado</b>') + (r.forn ? ' &middot; ' + _pedEsc(_cpSemColchetes(r.forn.nome_fantasia || '')) : '') + '</div>'
+      + '<div style="font-size:11.5px;color:#64748b;margin-top:4px">NF origem ' + _pedEsc(r.nfOrigem) + (r.dataNfOrigem ? ' (' + _pedEsc(_pimpFmtData(r.dataNfOrigem)) + ')' : ' (data não localizada)') + ' &middot; ' + _pedFmtMoeda(r.total) + '</div>'
+      + '<div style="font-size:11px;color:#64748b;margin-top:2px">' + r.itens.map(function (x) { return _pedEsc(x.it.cod) + ' ' + _pedEsc(x.it.desc) + ' &times; ' + x.it.qtd + ' = ' + _pedFmtMoeda(x.it.valor) + (x.p ? '' : ' <b style="color:#b91c1c">(não achei)</b>'); }).join('<br>') + '</div>'
+      + (r.erros.length ? '<div style="font-size:11.5px;color:#b91c1c;margin-top:4px">' + r.erros.map(_pedEsc).join('<br>') + '</div>' : '')
+      + '</div></div></div>';
+  }).join('');
+  el.innerHTML = h;
+  var btn = document.getElementById('eml-btn-lancar'); if (btn) btn.style.display = prontas ? 'inline-flex' : 'none';
+}
+function _emlLancar() {
+  var motivo = (document.getElementById('eml-motivo') || {}).value || '';
+  var msg = document.getElementById('eml-msg');
+  if (!motivo) { msg.style.color = '#dc2626'; msg.textContent = 'Escolha o Motivo antes de lançar.'; return; }
+  var escolhidas = _emlRes.filter(function (r) { return r.ok && r.sel; });
+  if (!escolhidas.length) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhuma devolução selecionada.'; return; }
+  var dados = getDevolucoes(), prox = devProximoLancamento(), hoje = new Date().toISOString().slice(0, 10), agora = new Date().toISOString();
+  escolhidas.forEach(function (r, i) {
+    var vf = (r.cli.vendedores_fornecedor || []).find(function (v) { return String(v.fornId) === String(r.forn.id); }) || {};
+    var itens = r.itens.map(function (x) { var q = x.it.qtd || 0; return { prodId: x.p.id, prodCodigo: x.p.codigo, prodNome: x.p.nome, valor: q ? x.it.valor / q : x.it.valor, quantidade: q, valorTotal: x.it.valor }; });
+    var obj = {
+      id: 'dev' + (Date.now() + i), lancamento: prox + i, data: hoje,
+      fornecedorId: r.forn.id, fornecedorNome: r.forn.nome_fantasia || '',
+      clienteId: r.cli.id, clienteNome: r.cli.nome_fantasia || r.cli.razao_social || '',
+      vendedorId: vf.vendId || '', vendedorNome: vf.vendNome || '',
+      nfEmitida: r.d.nfd, dataNfEmitida: r.d.dataEmissao, nfOrigem: r.nfOrigem, dataNfOrigem: r.dataNfOrigem || '',
+      motivo: motivo, status: 'Aberto', obs: 'Importado do e-mail da fábrica (NFD ' + r.d.nfd + '-' + r.d.serie + ').',
+      itens: itens, totalProdutos: itens.reduce(function (a, it) { return a + it.valorTotal; }, 0), xmlAnexo: null, dtCadastro: agora
+    };
+    try { Object.assign(obj, _appMontarAutoria(null, [])); } catch (e) {}
+    dados.push(obj);
+  });
+  setDevolucoes(dados);
+  msg.style.color = '#15803d'; msg.textContent = escolhidas.length + ' devolução(ões) lançada(s) como "Aberto" — aprove na lista.';
+  _emlRes.forEach(function (r) { if (r.ok && r.sel) { r.ok = false; r.jaLancada = true; r.erros = []; } });
+  _emlRender();
+  if (typeof renderDevolucaoList === 'function') renderDevolucaoList();
+}
+function emlAbrir() {
+  var m = document.getElementById('eml-modal'); if (!m) return;
+  m.style.display = 'flex'; _emlRes = [];
+  document.getElementById('eml-texto').value = ''; document.getElementById('eml-resultado').innerHTML = ''; document.getElementById('eml-msg').textContent = '';
+  var b = document.getElementById('eml-btn-lancar'); if (b) b.style.display = 'none';
+}
+function emlFechar() { var m = document.getElementById('eml-modal'); if (m) m.style.display = 'none'; }
+// arrastar: texto ou arquivos (.eml/.txt/.html/.msg)
+function _emlTextoDeBuffer(buf) {
+  var u8 = new Uint8Array(buf), cand = [];
+  try { cand.push(new TextDecoder('utf-16le').decode(u8)); } catch (e) {}
+  try { cand.push(new TextDecoder('windows-1252').decode(u8)); } catch (e) {}
+  for (var i = 0; i < cand.length; i++) { var t = cand[i].replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' '); if (/Cliente:/.test(t)) return t; }
+  return '';
+}
+function _emlSolto(ev) {
+  ev.preventDefault();
+  var ta = document.getElementById('eml-texto'), arqs = ev.dataTransfer && ev.dataTransfer.files ? Array.prototype.slice.call(ev.dataTransfer.files) : [];
+  var txt = ev.dataTransfer ? (ev.dataTransfer.getData('text/plain') || '') : '';
+  if (txt) { ta.value += (ta.value ? '\n\n' : '') + txt; }
+  var pend = arqs.length, falhas = 0;
+  if (!pend) { _emlAnalisar(); return; }
+  arqs.forEach(function (f) {
+    var rd = new FileReader();
+    rd.onload = function (e) {
+      var t = _emlTextoDeBuffer(e.target.result);
+      if (t) ta.value += (ta.value ? '\n\n' : '') + t; else falhas++;
+      if (--pend === 0) { if (falhas) document.getElementById('eml-msg').textContent = falhas + ' arquivo(s) não puderam ser lidos — abra o e-mail, copie o texto e cole aqui.'; _emlAnalisar(); }
+    };
+    rd.readAsArrayBuffer(f);
+  });
 }
 
 function deleteDevolucao(id) {
