@@ -26201,14 +26201,21 @@ function _emlFornDoTexto(texto) {
   if (!ach && /granarolo|allfood/.test(n)) ach = fs.find(function (f) { return /allfood|granarolo/.test(_cpNorm((f.nome_fantasia || '') + ' ' + (f.razao_social || ''))); });
   return ach || null;
 }
-function _emlCodNorm(c) { var s = String(c || '').trim().toUpperCase(); return [_emlSemZeros(s), _emlSemZeros(s.split('/')[0])]; }
+// v79: o sufixo depois da barra identifica a loja (9954/25 != 9954/32). So aceita casar sem sufixo se um dos lados nao tem barra.
+function _emlCodConfere(codSistema, codEmail) {
+  var a = _emlSemZeros(String(codSistema || '').trim().toUpperCase()), b = _emlSemZeros(String(codEmail || '').trim().toUpperCase());
+  if (!a || !b) return false;
+  if (a === b) return true;
+  var aBase = _emlSemZeros(a.split('/')[0]), bBase = _emlSemZeros(b.split('/')[0]);
+  if (a.indexOf('/') === -1 && a === bBase) return true;
+  if (b.indexOf('/') === -1 && b === aBase) return true;
+  return false;
+}
 function _emlCandidatos(forn, codCli) {
   if (!forn) return [];
-  var alvo = _emlCodNorm(codCli);
   return getClientes().filter(function (c) {
     return (c.codigos_fornecedor || []).some(function (x) {
-      if (String(x.fornecedor_id) !== String(forn.id)) return false;
-      return _emlCodNorm(x.codigo_cliente).some(function (v) { return v && alvo.indexOf(v) !== -1; });
+      return String(x.fornecedor_id) === String(forn.id) && _emlCodConfere(x.codigo_cliente, codCli);
     });
   });
 }
