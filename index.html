@@ -97,6 +97,7 @@
       #page-devolucao-list .dev-bl{width:auto!important;flex:0 1 44%!important;min-width:0}
       #page-devolucao-list .dev-bb{flex:1 1 30px!important;min-width:30px}
       #page-devolucao-list .dev-bv{width:auto!important;flex:none!important;min-width:62px;white-space:nowrap}
+      #page-devolucao-list .dev-ev-bar{display:none}
       #page-planejamento-reino{overflow-x:hidden}
       #page-planejamento-reino .pr-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
       #page-planejamento-reino .pr-rede-hdr{flex-wrap:wrap;gap:8px 0;padding:12px 14px!important}
@@ -25989,31 +25990,34 @@ function _devBarras(titulo, sub, itens, fmt, labW) {
   var corpo = itens.length ? itens.map(function (i) {
     return '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11.5px"><span class="dev-bl" style="width:' + (labW || 110) + 'px;flex-shrink:0;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(i.n) + '">' + _pedEsc(i.n) + '</span>'
       + '<div class="dev-bb" style="flex:1;height:8px;border-radius:5px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;width:' + Math.max(2, (i.v / max) * 100) + '%;background:#3b82f6;border-radius:5px"></div></div>'
-      + '<span class="dev-bv" style="width:84px;text-align:right;font-weight:700;color:#fff">' + fmt(i.v) + '</span></div>';
+      + '<span class="dev-bv" style="width:92px;text-align:right;font-weight:700;color:#fff;line-height:1.25">' + fmt(i.v) + '<br><span style="font-weight:500;font-size:10.5px;color:rgba(255,255,255,.6)">' + _devFmtKg(i.kg) + '</span></span></div>';
   }).join('') : '<div style="margin-top:14px;font-size:11.5px;color:rgba(255,255,255,.5)">Sem dados no período.</div>';
   return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:18px 22px;color:#fff"><div style="font-size:13px;font-weight:600">' + titulo + '</div><div style="font-size:10.5px;color:rgba(255,255,255,.45)">' + sub + '</div>' + corpo + '</div>';
 }
-function _devGrafEvolucao(serieAtual, serieAnt, rotulos, anoA) {
-  var max = Math.max.apply(null, [1].concat(serieAtual, serieAnt));
-  var H = 120;
-  function fmt(v) { return v ? _devFmtK(v).replace('R$ ', '') : '—'; }
-  var cols = serieAtual.map(function (v, i) {
-    var p = serieAnt[i], ult = i === serieAtual.length - 1;
-    var hA = Math.max(v ? 3 : 0, (v / max) * H), hP = Math.max(p ? 3 : 0, (p / max) * H);
-    var varHtml = '<span style="font-size:10px;color:rgba(255,255,255,.35)">—</span>';
-    if (p) { var pc = ((v - p) / p) * 100; varHtml = '<span style="font-size:10.5px;font-weight:700;color:' + (pc > 0 ? '#f87171' : '#4ade80') + '">' + (pc > 0 ? '▲ ' : '▼ ') + Math.abs(pc).toFixed(0) + '%</span>'; }
-    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;min-width:0">'
-      + '<div style="height:' + (H + 18) + 'px;display:flex;align-items:flex-end;justify-content:center;gap:5px;width:100%">'
-        + '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end"><span style="font-size:10px;color:rgba(255,255,255,.55);margin-bottom:3px;white-space:nowrap">' + fmt(p) + '</span><div style="width:20px;height:' + hP + 'px;background:rgba(255,255,255,.28);border-radius:4px 4px 0 0"></div></div>'
-        + '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end"><span style="font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;white-space:nowrap">' + fmt(v) + '</span><div style="width:20px;height:' + hA + 'px;background:#3b82f6;border-radius:4px 4px 0 0"></div></div>'
-      + '</div>'
-      + '<div style="margin-top:6px;font-size:11px;color:rgba(255,255,255,' + (ult ? '.95' : '.6') + ');font-weight:' + (ult ? '700' : '400') + '">' + rotulos[i] + '</div>'
-      + '<div style="margin-top:2px">' + varHtml + '</div></div>';
+// v82: evolucao em tabela com barras, R$ e KG. linhas: [{rot, v, p, kv, kp, parcial, ate}]
+function _devGrafEvolucao(linhas, anoA) {
+  var max = Math.max.apply(null, [1].concat(linhas.map(function (l) { return Math.max(l.v, l.p); })));
+  function varH(a, b) {
+    if (!b) return '<span style="color:rgba(255,255,255,.35)">—</span>';
+    var pc = ((a - b) / b) * 100; if (Math.abs(pc) < 0.5) return '<span style="color:rgba(255,255,255,.6);font-weight:700">0%</span>';
+    return '<span style="font-weight:700;color:' + (pc > 0 ? '#f87171' : '#4ade80') + '">' + (pc > 0 ? '▲ ' : '▼ ') + Math.abs(pc).toFixed(0) + '%</span>';
+  }
+  var td = 'padding:8px 6px;border-top:1px solid rgba(255,255,255,.08);vertical-align:middle;';
+  var ult = linhas.length - 1;
+  var corpo = linhas.map(function (l, i) {
+    var cur = i === ult;
+    return '<tr>'
+      + '<td style="' + td + 'font-weight:' + (cur ? 700 : 400) + ';color:rgba(255,255,255,' + (cur ? '.95' : '.75') + ')">' + l.rot + (l.parcial ? '<div style="font-size:9.5px;font-weight:400;color:rgba(255,255,255,.45)">parcial · até dia ' + l.ate + '</div>' : '') + '</td>'
+      + '<td class="dev-ev-bar" style="' + td + 'width:30%"><div style="height:7px;border-radius:4px;background:rgba(255,255,255,.28);width:' + (l.p ? Math.max(2, l.p / max * 100) : 0) + '%"></div><div style="height:7px;border-radius:4px;background:#3b82f6;margin-top:3px;width:' + (l.v ? Math.max(2, l.v / max * 100) : 0) + '%"></div></td>'
+      + '<td style="' + td + 'text-align:right;white-space:nowrap"><b style="color:#fff">' + _devFmtK(l.v) + '</b><div style="font-size:10.5px;color:rgba(255,255,255,.5)">' + _devFmtK(l.p) + '</div></td>'
+      + '<td style="' + td + 'text-align:right;white-space:nowrap"><b style="color:#fff">' + _devFmtKg(l.kv) + '</b><div style="font-size:10.5px;color:rgba(255,255,255,.5)">' + _devFmtKg(l.kp) + '</div></td>'
+      + '<td style="' + td + 'text-align:right;white-space:nowrap;font-size:11px">' + varH(l.v, l.p) + '<div style="font-size:10.5px">' + varH(l.kv, l.kp) + '</div></td></tr>';
   }).join('');
-  return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:18px 22px;color:#fff">'
-    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px"><div><div style="font-size:13px;font-weight:600">Evolução das Devoluções</div><div style="font-size:10.5px;color:rgba(255,255,255,.45)">Valor devolvido por mês, em R$ · a % compara com o mesmo mês do ano anterior</div></div>'
+  var th = 'padding:4px 6px;font-size:10px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.04em;';
+  return '<div style="background:linear-gradient(135deg,#0c0f28 0%,#12173f 55%,#1c2f66 100%);border-radius:14px;padding:18px 22px;color:#fff;overflow:hidden">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px"><div><div style="font-size:13px;font-weight:600">Evolução das Devoluções</div><div style="font-size:10.5px;color:rgba(255,255,255,.45)">Por mês, em R$ e KG · linha de cima ' + anoA + ', de baixo ' + (anoA - 1) + ' · a % compara com o mesmo mês do ano anterior</div></div>'
     + '<div style="display:flex;gap:12px;font-size:11px;color:rgba(255,255,255,.75)"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(255,255,255,.28);margin-right:5px"></i>' + (anoA - 1) + '</span><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3b82f6;margin-right:5px"></i>' + anoA + '</span></div></div>'
-    + '<div style="display:flex;gap:4px;margin-top:14px">' + cols + '</div></div>';
+    + '<table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:12px"><thead><tr><th style="' + th + 'text-align:left">Mês</th><th class="dev-ev-bar" style="' + th + 'text-align:left"></th><th style="' + th + 'text-align:right">R$</th><th style="' + th + 'text-align:right">KG</th><th style="' + th + 'text-align:right">Variação</th></tr></thead><tbody>' + corpo + '</tbody></table></div>';
 }
 function _devFaturadoPeriodo(ini, fim, fornId, devsRef) {
   var tot = 0;
@@ -26107,7 +26111,7 @@ function renderDevolucaoList() {
   var pesoMap = {}; try { getProdutos().forEach(function (p) { pesoMap[p.id] = parseFloat(String(p.peso == null ? '' : p.peso).replace(',', '.')) || 0; }); } catch (e) {}
   function kgDe(d) { return (d.itens || []).reduce(function (s, it) { return s + (pesoMap[it.prodId] || 0) * (Number(it.quantidade) || 0); }, 0); }
   function valDe(d) { return Number(d.totalProdutos) || 0; }
-  function resumo(lista) { var r = { n: 0, v: 0, kg: 0, abertas: 0, motivo: {}, forn: {}, cli: {} }; lista.forEach(function (d) { if (!valida(d)) return; r.n++; r.v += valDe(d); r.kg += kgDe(d); if (_devStatusDe(d) === 'Aberto') r.abertas++; var m = d.motivo || '—'; r.motivo[m] = (r.motivo[m] || 0) + valDe(d); var f = _cpSemColchetes(d.fornecedorNome || '—'); r.forn[f] = (r.forn[f] || 0) + valDe(d); var c = _cpSemColchetes(d.clienteNome || '—'); r.cli[c] = (r.cli[c] || 0) + valDe(d); }); return r; }
+  function resumo(lista) { var r = { n: 0, v: 0, kg: 0, abertas: 0, motivo: {}, forn: {}, cli: {}, kmotivo: {}, kforn: {}, kcli: {} }; lista.forEach(function (d) { if (!valida(d)) return; r.n++; r.v += valDe(d); r.kg += kgDe(d); if (_devStatusDe(d) === 'Aberto') r.abertas++; var kd = kgDe(d); var m = d.motivo || '—'; r.motivo[m] = (r.motivo[m] || 0) + valDe(d); r.kmotivo[m] = (r.kmotivo[m] || 0) + kd; var f = _cpSemColchetes(d.fornecedorNome || '—'); r.forn[f] = (r.forn[f] || 0) + valDe(d); r.kforn[f] = (r.kforn[f] || 0) + kd; var c = _cpSemColchetes(d.clienteNome || '—'); r.cli[c] = (r.cli[c] || 0) + valDe(d); r.kcli[c] = (r.kcli[c] || 0) + kd; }); return r; }
   var atual = resumo(deBasePer);
   var ant = per ? resumo(deBase.filter(function (d) { return noPeriodo(d, per.aIni, per.aFim); })) : null;
   var fat = per ? _devFaturadoPeriodo(per.ini, per.fim, '', null) : _devFaturadoPeriodo('0000-00-00', '9999-99-99', '', null);
@@ -26123,18 +26127,26 @@ function renderDevolucaoList() {
 
   // evolução: 6 meses terminando no fim do período (ou mês atual)
   var fimRef = per ? per.fimDt : new Date();
-  var serA = [], serP = [], rot = [], meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  var somaMes = {}; deBase.forEach(function (d) { if (!valida(d)) return; var k = String(d.data || '').slice(0, 7); if (k) somaMes[k] = (somaMes[k] || 0) + valDe(d); });
+  var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var somaMes = {}, kgMes = {}; deBase.forEach(function (d) { if (!valida(d)) return; var k = String(d.data || '').slice(0, 7); if (k) { somaMes[k] = (somaMes[k] || 0) + valDe(d); kgMes[k] = (kgMes[k] || 0) + kgDe(d); } });
+  var hoje = new Date(), linhasEv = [];
   for (var i = 5; i >= 0; i--) {
     var dm = new Date(fimRef.getFullYear(), fimRef.getMonth() - i, 1);
     var ym = dm.getFullYear() + '-' + String(dm.getMonth() + 1).padStart(2, '0'), ymA = (dm.getFullYear() - 1) + '-' + String(dm.getMonth() + 1).padStart(2, '0');
-    serA.push(somaMes[ym] || 0); serP.push(somaMes[ymA] || 0); rot.push(meses[dm.getMonth()]);
+    var ln = { rot: meses[dm.getMonth()], v: somaMes[ym] || 0, kv: kgMes[ym] || 0, p: somaMes[ymA] || 0, kp: kgMes[ymA] || 0, parcial: false, ate: 0 };
+    // mes em andamento: compara com o MESMO trecho do mes do ano passado (ate o dia de hoje)
+    if (dm.getFullYear() === hoje.getFullYear() && dm.getMonth() === hoje.getMonth() && hoje.getDate() < new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate()) {
+      ln.parcial = true; ln.ate = hoje.getDate(); ln.p = 0; ln.kp = 0;
+      var lim = ymA + '-' + String(hoje.getDate()).padStart(2, '0');
+      deBase.forEach(function (d) { if (!valida(d)) return; var dt = String(d.data || '').slice(0, 10); if (dt.slice(0, 7) === ymA && dt <= lim) { ln.p += valDe(d); ln.kp += kgDe(d); } });
+    }
+    linhasEv.push(ln);
   }
-  function top(o, k) { return Object.keys(o).map(function (n) { return { n: n, v: o[n] }; }).sort(function (a, b) { return b.v - a.v; }).slice(0, k); }
+  function top(o, k, ok) { return Object.keys(o).map(function (n) { return { n: n, v: o[n], kg: ok ? (ok[n] || 0) : 0 }; }).sort(function (a, b) { return b.v - a.v; }).slice(0, k); }
   var gr = document.getElementById('dev-graficos');
   if (gr) gr.innerHTML =
-    '<div class="dev-g2">' + _devGrafEvolucao(serA, serP, rot, fimRef.getFullYear()) + _devBarras('Por motivo', 'Valor devolvido no período', top(atual.motivo, 6), _devFmtK) + '</div>'
-    + '<div class="dev-g2 dev-g2b">' + _devBarras('Por fábrica', 'Valor devolvido no período', top(atual.forn, 5), _devFmtK, 90) + _devBarras('Clientes que mais devolveram', 'Valor devolvido no período', top(atual.cli, 5), _devFmtK, 300) + '</div>';
+    '<div class="dev-g2">' + _devGrafEvolucao(linhasEv, fimRef.getFullYear()) + _devBarras('Por motivo', 'Valor devolvido no período, em R$ e KG', top(atual.motivo, 6, atual.kmotivo), _devFmtK) + '</div>'
+    + '<div class="dev-g2 dev-g2b">' + _devBarras('Por fábrica', 'Valor devolvido no período, em R$ e KG', top(atual.forn, 5, atual.kforn), _devFmtK, 90) + _devBarras('Clientes que mais devolveram', 'Valor devolvido no período, em R$ e KG', top(atual.cli, 5, atual.kcli), _devFmtK, 300) + '</div>';
 
   const devFiltradas = rows.length;
   rows = _pgAplicar(rows, 'dev-qtd');
