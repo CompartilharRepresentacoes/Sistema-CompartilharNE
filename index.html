@@ -14659,7 +14659,7 @@ function openNegPrecoForm(params) {
     if (codEl)  codEl.value = '';
     if (atvEl)  atvEl.value = 'Sim';
     if (alvoEl) alvoEl.value = 'cliente';
-    if (iniEl)  iniEl.value = new Date().toISOString().slice(0,10);
+    if (iniEl)  { var _h = new Date(); iniEl.value = String(_h.getDate()).padStart(2,'0') + '/' + String(_h.getMonth()+1).padStart(2,'0') + '/' + _h.getFullYear(); }
     if (fimEl)  fimEl.value = '';
     if (titulo) titulo.textContent = 'Nova Negociação de Preço';
   }
