@@ -4441,12 +4441,24 @@
         #page-consulta-preco .cp-inp{display:flex;align-items:center;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;background:#fff}
         #page-consulta-preco .cp-inp span{padding:0 8px;background:#f8fafc;color:#94a3b8;font-size:11px;align-self:stretch;display:flex;align-items:center}
         #page-consulta-preco .cp-inp input{border:0;outline:0;padding:7px 8px;width:100%;text-align:right;font-weight:700;color:#272A4A;font-size:13px;min-width:0;background:#fff}
+        #page-consulta-preco .cp-c{display:grid;grid-template-columns:1fr 1.5fr;background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden;margin-bottom:12px}
+        #page-consulta-preco .cp-c-l{background:linear-gradient(135deg,#0c0f28,#1c2f66);color:#fff;padding:18px 22px}
+        #page-consulta-preco .cp-c-l small{color:rgba(255,255,255,.55);display:block;font-size:10px;letter-spacing:.05em}
+        #page-consulta-preco .cp-c-v{font-size:30px;font-weight:900;margin-top:4px}
+        #page-consulta-preco .cp-c-r{padding:16px 22px;display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+        #page-consulta-preco .cp-c-fin{flex:1;min-width:200px}
+        #page-consulta-preco .cp-c-fin .cp-inp{border:2px solid #DE7926;border-radius:12px}
+        #page-consulta-preco .cp-c-fin .cp-inp span{background:#fff7ed;color:#c2570c;font-weight:800;font-size:15px}
+        #page-consulta-preco .cp-c-fin .cp-inp input{font-size:30px;font-weight:900;color:#c2570c;padding:8px 12px}
+        #page-consulta-preco .cp-lb2{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+        #page-consulta-preco .cp-c-eco{width:100%;font-size:11px;color:#94a3b8}
         #page-consulta-preco .cp-lb{display:none;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px}
         @media(max-width:900px){
           #page-consulta-preco .cp-fg>div,#page-consulta-preco .cp-fg>div.cp-f-forn,#page-consulta-preco .cp-fg>div.cp-f-prod{flex:1 1 100%}
           #page-consulta-preco .cp-fg>div.cp-f-tipo{flex:1 1 40%}
           #page-consulta-preco .cp-fg>div.cp-f-btn{flex:1 1 100%}
           #page-consulta-preco .cp-fg>div.cp-f-btn button{flex:1}
+          #page-consulta-preco .cp-c{grid-template-columns:1fr}
           #page-consulta-preco .cp-th{display:none}
           #page-consulta-preco .cp-tr{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:8px}
           #page-consulta-preco .cp-tr>*{min-width:0}
@@ -16128,14 +16140,15 @@ function consultarPreco() {
   const brl = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const linhas = _cpResultados.map((r, i) => {
     const val = _cpNum(r.item.valor);
-    const badge = r.especifica ? ' <span style="font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#15803d">Específica</span>' : '';
-    return '<div class="cp-tr">'
-      + '<div><div style="font-size:13px;font-weight:700;color:#1e293b">' + _pedEsc(r.tabela.nome || '') + badge + '</div><div style="font-size:10.5px;color:#94a3b8">' + _pedEsc(r.tabela.codigo || '') + '</div></div>'
-      + '<div><div class="cp-lb">Período</div><span style="font-size:12px;color:#64748b">' + _pedEsc(r.item.periodo || '—') + '</span></div>'
-      + '<div><div class="cp-lb">Preço tabela</div><span style="font-size:16px;font-weight:800;color:#15803d">' + brl(val) + '</span></div>'
-      + '<div><div class="cp-lb">Desc. %</div><div class="cp-inp"><input id="cp-p-' + i + '" inputmode="decimal" placeholder="0" oninput="cpSimPct(' + i + ')"><span>%</span></div></div>'
-      + '<div><div class="cp-lb">Preço final</div><div class="cp-inp"><span>R$</span><input id="cp-f-' + i + '" inputmode="decimal" placeholder="' + val.toFixed(2).replace('.', ',') + '" oninput="cpSimPreco(' + i + ')"></div></div>'
-      + '<div id="cp-e-' + i + '" style="color:#94a3b8;font-size:12px"><div class="cp-lb">Economia / un.</div>—</div></div>';
+    const badge = r.especifica ? ' <span style="font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#15803d;vertical-align:middle">Específica</span>' : '';
+    return '<div class="cp-c">'
+      + '<div class="cp-c-l"><small>TABELA</small><b style="font-size:15px">' + _pedEsc(r.tabela.nome || '') + '</b>' + badge
+      + '<small style="margin-top:2px">' + _pedEsc(r.tabela.codigo || '') + (r.item.periodo ? ' · válida até ' + _pedEsc(r.item.periodo) : '') + '</small>'
+      + '<small style="margin-top:12px">PREÇO DA TABELA</small><div class="cp-c-v">' + brl(val) + '</div></div>'
+      + '<div class="cp-c-r">'
+      + '<div style="width:110px"><div class="cp-lb2">Desc. %</div><div class="cp-inp"><input id="cp-p-' + i + '" inputmode="decimal" placeholder="0" oninput="cpSimPct(' + i + ')"><span>%</span></div></div>'
+      + '<div class="cp-c-fin"><div class="cp-lb2" style="color:#c2570c">Preço final</div><div class="cp-inp"><span>R$</span><input id="cp-f-' + i + '" inputmode="decimal" placeholder="' + val.toFixed(2).replace('.', ',') + '" oninput="cpSimPreco(' + i + ')"></div></div>'
+      + '<div id="cp-e-' + i + '" class="cp-c-eco">Economia por unidade: —</div></div></div>';
   }).join('');
 
   const fotoHtml = produto.foto
@@ -16150,9 +16163,7 @@ function consultarPreco() {
     + (hasEspecifica ? '<div class="cp-sep"></div><div><span style="font-size:10.5px;font-weight:700;padding:4px 12px;border-radius:20px;background:#dcfce7;color:#15803d">✓ Possui preço específico</span></div>' : '')
     + '<div style="margin-left:auto"><button class="cp-btn" style="padding:6px 12px;font-size:11px" onclick="cpSimLimpar()">Zerar simulação</button></div>'
     + '</div>'
-    + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
-    + '<div class="cp-th"><span>Tabela</span><span>Período</span><span>Preço tabela</span><span>Desc. %</span><span>Preço final</span><span>Economia / un.</span></div>'
-    + linhas + '</div>';
+    + linhas;
 }
 
 function _cpNum(v) {
@@ -16164,11 +16175,10 @@ function _cpNum(v) {
 function _cpFmtDec(n, d) { return n.toFixed(d).replace('.', ',').replace(/,00$/, '').replace(/(,\d)0$/, '$1'); }
 function _cpSimEco(i) {
   var f = document.getElementById('cp-f-' + i), e = document.getElementById('cp-e-' + i); if (!f || !e) return;
-  var r = _cpResultados[i], base = _cpNum(r.item.valor), lb = '<div class="cp-lb">Economia / un.</div>';
-  if (!String(f.value).trim()) { e.innerHTML = lb + '—'; f.style.color = ''; return; }
-  var d = base - _cpNum(f.value), neg = d < 0;
-  e.innerHTML = lb + '<b style="font-size:13px;color:' + (neg ? '#b91c1c' : '#DE7926') + '">' + (neg ? '+ ' : '- ') + 'R$ ' + Math.abs(d).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</b>';
-  f.style.color = neg ? '#b91c1c' : '#DE7926';
+  var r = _cpResultados[i], base = _cpNum(r.item.valor);
+  if (!String(f.value).trim()) { e.textContent = 'Economia por unidade: —'; return; }
+  var d = base - _cpNum(f.value);
+  e.textContent = (d < 0 ? 'Acréscimo por unidade: R$ ' : 'Economia por unidade: R$ ') + Math.abs(d).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 function cpSimPct(i) {
   var p = document.getElementById('cp-p-' + i), f = document.getElementById('cp-f-' + i); if (!p || !f) return;
