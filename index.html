@@ -26203,7 +26203,8 @@ function _emlFornDoTexto(texto) {
 }
 // v79: o sufixo depois da barra identifica a loja (9954/25 != 9954/32). So aceita casar sem sufixo se um dos lados nao tem barra.
 function _emlCodConfere(codSistema, codEmail) {
-  var a = _emlSemZeros(String(codSistema || '').trim().toUpperCase()), b = _emlSemZeros(String(codEmail || '').trim().toUpperCase());
+  var nz = function (v) { return String(v || '').trim().toUpperCase().replace(/\s*[-\\.]\s*/g, '/').replace(/\s+/g, '').split('/').map(_emlSemZeros).join('/'); };
+  var a = nz(codSistema), b = nz(codEmail);
   if (!a || !b) return false;
   if (a === b) return true;
   var aBase = _emlSemZeros(a.split('/')[0]), bBase = _emlSemZeros(b.split('/')[0]);
@@ -26253,7 +26254,12 @@ function _emlResolverCliente(forn, d, nf, r) {
       else r.erros.push('Mais de um cliente tem o código ' + d.codCli + ' (' + cands.map(function (c) { return _cpSemColchetes(c.nome_fantasia || ''); }).join('; ') + ') — não consegui saber qual é');
     }
   } else {
-    var extra = donos.length ? ' A NF de origem ' + nf + ' está em: ' + nomeDe(donos[0].cliId) + ' — cadastre o código ' + d.codCli + ' nesse cliente.' : '';
+    var extra = '';
+    if (donos.length) {
+      var dc = getClientes().find(function (x) { return String(x.id) === String(donos[0].cliId); });
+      var reg = dc ? (dc.codigos_fornecedor || []).filter(function (x) { return String(x.fornecedor_id) === String(forn.id); }).map(function (x) { return x.codigo_cliente; }).filter(Boolean) : [];
+      extra = ' A NF de origem ' + nf + ' está em: ' + nomeDe(donos[0].cliId) + (reg.length ? ' (que tem cadastrado nesta fábrica: ' + reg.join(', ') + ')' : ' (que NÃO tem código cadastrado nesta fábrica)') + ' — cadastre/corrija o código ' + d.codCli + ' nesse cliente em Cadastros > Clientes.';
+    }
     r.erros.push('Cliente ' + d.codCli + ' não encontrado no cadastro (código do cliente na fábrica).' + extra);
   }
   if (cli) {
