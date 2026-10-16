@@ -4457,7 +4457,7 @@
       </style>
       <div class="cp-fb"><div class="cp-fg">
         <div class="cp-f-forn" style="position:relative"><label>Fornecedor</label>
-          <input id="cp-fabrica-txt" type="text" placeholder="Buscar fornecedor..." autocomplete="off" oninput="cpFiltrarFabrica(this.value)" onkeydown="cpKeyFabrica(event)" onblur="setTimeout(_cpHideDrop,220)">
+          <input id="cp-fabrica-txt" type="text" placeholder="Buscar fornecedor..." autocomplete="off" onfocus="cpFabFocus(this)" onclick="cpFabFocus(this)" oninput="cpFiltrarFabrica(this.value)" onkeydown="cpKeyFabrica(event)" onblur="setTimeout(_cpHideDrop,220)">
           <input type="hidden" id="cp-fabrica">
           <div id="cp-fabrica-drop" style="display:none"></div></div>
         <div class="cp-f-prod" style="position:relative"><label>Produto</label>
@@ -15782,11 +15782,14 @@ function cpSelectCategoriaItem(id, nome) {
 }
 
 /* ── Fornecedor ── */
-function cpFiltrarFabrica(busca) {
-  document.getElementById('cp-fabrica') && (document.getElementById('cp-fabrica').value = '');
-  _cpProdutosCache = [];
+function cpFabFocus(el) {
+  if (document.getElementById('cp-fabrica') && document.getElementById('cp-fabrica').value) { try { el.select(); } catch (e) {} return; }
+  cpFiltrarFabrica(el.value, true);
+}
+function cpFiltrarFabrica(busca, todos) {
+  if (!todos) { document.getElementById('cp-fabrica') && (document.getElementById('cp-fabrica').value = ''); _cpProdutosCache = []; }
   busca = (busca||'').trim();
-  if (busca.length < 2) { _cpHideDrop(); return; }
+  if (busca.length < 2 && !todos) { _cpHideDrop(); return; }
   busca = busca.toLowerCase();
   const itens = getFornecedores().filter(f => {
     if (!busca) return true;
@@ -16135,15 +16138,19 @@ function consultarPreco() {
       + '<div id="cp-e-' + i + '" style="color:#94a3b8;font-size:12px"><div class="cp-lb">Economia / un.</div>—</div></div>';
   }).join('');
 
+  const fotoHtml = produto.foto
+    ? '<img src="' + produto.foto + '" alt="" style="width:56px;height:56px;object-fit:contain;border-radius:8px;border:1px solid #e2e8f0;background:#fff">'
+    : '<div style="width:56px;height:56px;border-radius:8px;border:1px dashed #cbd5e1;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-size:9px;color:#94a3b8;text-align:center;line-height:1.1">sem<br>foto</div>';
   el.innerHTML =
     '<div class="cp-pc">'
     + '<div><i>Produto</i><b style="font-size:14px">' + (codProd ? '<span style="font-size:12px;color:#64748b;margin-right:6px">' + _pedEsc(codProd) + '</span>' : '') + _pedEsc(nomeProd) + '</b></div><div class="cp-sep"></div>'
+    + '<div><i>Foto</i>' + fotoHtml + '</div><div class="cp-sep"></div>'
     + '<div><i>Fornecedor</i><b style="font-size:13px;color:#475569">' + _pedEsc(nomeForn) + '</b></div><div class="cp-sep"></div>'
     + '<div><i>' + tipoLabel + '</i><b style="font-size:13px;color:' + tipoColor + '">' + _pedEsc(tercNome) + '</b></div>'
     + (hasEspecifica ? '<div class="cp-sep"></div><div><span style="font-size:10.5px;font-weight:700;padding:4px 12px;border-radius:20px;background:#dcfce7;color:#15803d">✓ Possui preço específico</span></div>' : '')
+    + '<div style="margin-left:auto"><button class="cp-btn" style="padding:6px 12px;font-size:11px" onclick="cpSimLimpar()">Zerar simulação</button></div>'
     + '</div>'
     + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">'
-    + '<div class="cp-glob">Simular em todas as tabelas: <b style="color:#272A4A">Desconto %</b> <input id="cp-desc-pct" type="text" inputmode="decimal" placeholder="0" oninput="cpSimGlobal(this.value)"> <span>ou digite o preço final em cada linha</span><button class="cp-btn" style="margin-left:auto;padding:5px 10px;font-size:11px" onclick="cpSimLimpar()">Zerar simulação</button></div>'
     + '<div class="cp-th"><span>Tabela</span><span>Período</span><span>Preço tabela</span><span>Desc. %</span><span>Preço final</span><span>Economia / un.</span></div>'
     + linhas + '</div>';
 }
@@ -16185,11 +16192,7 @@ function cpSimPreco(i) {
   p.value = base ? _cpFmtDec((1 - _cpNum(f.value) / base) * 100, 2) : '';
   _cpSimEco(i);
 }
-function cpSimGlobal(v) {
-  _cpResultados.forEach(function (r, i) { var p = document.getElementById('cp-p-' + i); if (p) { p.value = v; cpSimPct(i); } });
-}
 function cpSimLimpar() {
-  var g = document.getElementById('cp-desc-pct'); if (g) g.value = '';
   _cpResultados.forEach(function (r, i) { var p = document.getElementById('cp-p-' + i), f = document.getElementById('cp-f-' + i); if (p) p.value = ''; if (f) f.value = ''; _cpSimEco(i); });
 }
 
@@ -16218,8 +16221,11 @@ function _cpNorm(s) {
 function _cpSemColchetes(s) {
   return String(s||'').replace(/^\[([^\]]*)\]\s*/, '$1 ');
 }
+function _cpDropAberto() { var d = document.getElementById('_cp_global_drop'); return (d && d.style.display !== 'none' && _cpDropItems && _cpDropItems.length && _cpDropItems[0].id) ? _cpDropItems[0] : null; }
 function cpKeyFabrica(event) {
   if (event.key !== 'Enter' && event.key !== 'Tab') return;
+  var hid = document.getElementById('cp-fabrica');
+  if (hid && hid.value) { if (event.key === 'Enter') { event.preventDefault(); _cpFocusNext('cp-produto-txt'); } return; }
   var busca = _cpNorm(document.getElementById('cp-fabrica-txt').value);
   if (!busca) return;
   var forn = getFornecedores().filter(function(f) {
@@ -16228,13 +16234,12 @@ function cpKeyFabrica(event) {
     return cod === busca || nome === busca;
   });
   event.preventDefault();
-  if (forn.length >= 1) {
-    var f = forn[0];
-    cpSelectFabricaItem(f.id, f.nome_fantasia || f.razao_social || f.nome || f.codigo);
-    _cpHideDrop();
-    var tipo = (document.getElementById('cp-tipo') || {}).value;
-    if (tipo === 'cliente') { _cpFocusNext('cp-cli-txt'); } else { _cpFocusNext('cp-cat-txt'); }
-  } else { _cpFieldError('cp-fabrica-txt'); }
+  var f = forn[0], it = _cpDropAberto();
+  if (f) cpSelectFabricaItem(f.id, f.nome_fantasia || f.razao_social || f.nome || f.codigo);
+  else if (it) cpSelectFabricaItem(it.id, it.nome);
+  else { _cpFieldError('cp-fabrica-txt'); return; }
+  _cpHideDrop();
+  _cpFocusNext('cp-produto-txt');
 }
 
 function cpKeyCategoria(event) {
@@ -16263,6 +16268,8 @@ function cpKeyCategoria(event) {
 
 function cpKeyCliente(event) {
   if (event.key !== 'Enter' && event.key !== 'Tab') return;
+  var hid = document.getElementById('cp-terceiro');
+  if (hid && hid.value && document.getElementById('cp-terceiro-type').value === 'cli') { if (event.key === 'Enter') { event.preventDefault(); consultarPreco(); } return; }
   var busca = _cpNorm(document.getElementById('cp-cli-txt').value);
   if (!busca) return;
   var cli = getClientesVisiveis().filter(function(c) {
@@ -16271,17 +16278,26 @@ function cpKeyCliente(event) {
     return cod === busca || nome === busca;
   });
   event.preventDefault();
-  if (cli.length >= 1) {
-    cpSelectClienteItem(cli[0].id, cli[0].nome_fantasia || cli[0].razao_social);
-    _cpHideDrop();
-    _cpFocusNext('cp-produto-txt');
-  } else { _cpFieldError('cp-cli-txt'); }
+  var it = _cpDropAberto();
+  if (cli.length >= 1) cpSelectClienteItem(cli[0].id, cli[0].nome_fantasia || cli[0].razao_social);
+  else if (it) cpSelectClienteItem(it.id, it.nome);
+  else { _cpFieldError('cp-cli-txt'); return; }
+  _cpHideDrop();
+  if (event.key === 'Enter') { consultarPreco(); return; }
+  setTimeout(function(){ var btn = document.querySelector('[onclick="consultarPreco()"]'); if (btn) btn.focus(); }, 30);
 }
 
 function cpKeyProduto(event) {
   if (event.key !== 'Enter' && event.key !== 'Tab') return;
+  var hid = document.getElementById('cp-produto');
+  var jaTem = !!(hid && hid.value);
   var busca = _cpNorm(document.getElementById('cp-produto-txt').value);
-  if (!busca) return;
+  if (!jaTem && !busca) return;
+  var proximo = function () {
+    var tipo = (document.getElementById('cp-tipo') || {}).value;
+    setTimeout(function () { var el = document.getElementById(tipo === 'cliente' ? 'cp-cli-txt' : 'cp-cat-rede-sel'); if (el) el.focus(); }, 30);
+  };
+  if (jaTem) { if (event.key === 'Enter') { event.preventDefault(); consultarPreco(); } return; }
   var cache = _cpProdutosCache.length ? _cpProdutosCache : getProdutos();
   var prod = cache.filter(function(p) {
     var nome = _cpNorm(p.nome||'');
@@ -16289,15 +16305,13 @@ function cpKeyProduto(event) {
     return cod === busca || nome === busca;
   });
   event.preventDefault();
-  if (prod.length >= 1) {
-    cpSelectProdutoItem(prod[0].id, prod[0].nome);
-    _cpHideDrop();
-    if (event.key === 'Enter') { consultarPreco(); return; }
-    // Tab: move foco para botão Consultar
-    if (event.key === 'Tab') {
-      setTimeout(function(){ var btn = document.querySelector('[onclick="consultarPreco()"]'); if(btn) btn.focus(); }, 50);
-    }
-  } else { _cpFieldError('cp-produto-txt'); }
+  var it = _cpDropAberto();
+  if (prod.length >= 1) cpSelectProdutoItem(prod[0].id, prod[0].nome);
+  else if (it) cpSelectProdutoItem(it.id, it.nome);
+  else { _cpFieldError('cp-produto-txt'); return; }
+  _cpHideDrop();
+  if (event.key === 'Enter') { consultarPreco(); return; }
+  proximo();
 }
 
 function cpLimpar() {
