@@ -4417,11 +4417,16 @@
 
       <style>
         #page-consulta-preco .cp-fb{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:12px}
-        #page-consulta-preco .cp-fg{display:grid;grid-template-columns:1.2fr 1.6fr 1fr 1.1fr auto;gap:10px;align-items:end}
+        #page-consulta-preco .cp-fg{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+        #page-consulta-preco .cp-fg>div{flex:1 1 150px;min-width:0}
+        #page-consulta-preco .cp-fg>div.cp-f-forn{flex:0 1 170px}
+        #page-consulta-preco .cp-fg>div.cp-f-prod{flex:2 1 240px}
+        #page-consulta-preco .cp-fg>div.cp-f-tipo{flex:0 0 150px}
+        #page-consulta-preco .cp-fg>div.cp-f-btn{flex:0 0 auto}
         #page-consulta-preco .cp-fg label{font-size:10.5px;font-weight:600;color:#64748b;display:block;margin-bottom:4px}
         #page-consulta-preco .cp-fg input[type=text],#page-consulta-preco .cp-fg select{width:100%;box-sizing:border-box;padding:8px;border:1px solid #e2e8f0;border-radius:7px;background:#f8fafc;font-size:12.5px;color:#1e293b;outline:none}
         #page-consulta-preco .cp-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#f1f5f9;border-radius:8px;padding:3px}
-        #page-consulta-preco .cp-seg span{text-align:center;padding:5px;border-radius:6px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer}
+        #page-consulta-preco .cp-seg span{text-align:center;padding:4px 2px;border-radius:6px;font-size:11.5px;font-weight:600;color:#64748b;cursor:pointer}
         #page-consulta-preco .cp-seg span.on{background:#272A4A;color:#fff}
         #page-consulta-preco .cp-btn{background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:8px 12px;font-size:12px;font-weight:600;color:#272A4A;cursor:pointer}
         #page-consulta-preco .cp-btn.p{background:#272A4A;color:#fff;border-color:#272A4A}
@@ -4438,10 +4443,10 @@
         #page-consulta-preco .cp-inp input{border:0;outline:0;padding:7px 8px;width:100%;text-align:right;font-weight:700;color:#272A4A;font-size:13px;min-width:0;background:#fff}
         #page-consulta-preco .cp-lb{display:none;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px}
         @media(max-width:900px){
-          #page-consulta-preco .cp-fg{grid-template-columns:repeat(2,minmax(0,1fr))}
-          #page-consulta-preco .cp-fg>*{min-width:0}
-          #page-consulta-preco .cp-fg>div:nth-child(1),#page-consulta-preco .cp-fg>div:nth-child(2),#page-consulta-preco .cp-fg>div:last-child{grid-column:1/-1}
-          #page-consulta-preco .cp-fg>div:last-child button{flex:1}
+          #page-consulta-preco .cp-fg>div,#page-consulta-preco .cp-fg>div.cp-f-forn,#page-consulta-preco .cp-fg>div.cp-f-prod{flex:1 1 100%}
+          #page-consulta-preco .cp-fg>div.cp-f-tipo{flex:1 1 40%}
+          #page-consulta-preco .cp-fg>div.cp-f-btn{flex:1 1 100%}
+          #page-consulta-preco .cp-fg>div.cp-f-btn button{flex:1}
           #page-consulta-preco .cp-th{display:none}
           #page-consulta-preco .cp-tr{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:8px}
           #page-consulta-preco .cp-tr>*{min-width:0}
@@ -4451,18 +4456,18 @@
         }
       </style>
       <div class="cp-fb"><div class="cp-fg">
-        <div style="position:relative"><label>Fornecedor</label>
+        <div class="cp-f-forn" style="position:relative"><label>Fornecedor</label>
           <input id="cp-fabrica-txt" type="text" placeholder="Buscar fornecedor..." autocomplete="off" oninput="cpFiltrarFabrica(this.value)" onkeydown="cpKeyFabrica(event)" onblur="setTimeout(_cpHideDrop,220)">
           <input type="hidden" id="cp-fabrica">
           <div id="cp-fabrica-drop" style="display:none"></div></div>
-        <div style="position:relative"><label>Produto</label>
+        <div class="cp-f-prod" style="position:relative"><label>Produto</label>
           <input id="cp-produto-txt" type="text" placeholder="Buscar produto por código ou nome..." autocomplete="off" oninput="cpFiltrarProduto(this.value)" onkeydown="cpKeyProduto(event)" onblur="setTimeout(_cpHideDrop,220)">
           <input type="hidden" id="cp-produto">
           <div id="cp-produto-drop" style="display:none"></div></div>
-        <div><label>Preço por</label>
+        <div class="cp-f-tipo"><label>Preço por</label>
           <div class="cp-seg"><span id="cp-btn-rede" class="on" onclick="cpSetTipo('rede')">Rede</span><span id="cp-btn-cli" onclick="cpSetTipo('cliente')">Cliente</span></div>
           <input type="hidden" id="cp-tipo" value="rede"></div>
-        <div id="cp-cat-wrap" style="display:grid;grid-template-columns:1fr;gap:8px">
+        <div id="cp-cat-wrap" style="display:contents">
           <div><label>Rede</label><select id="cp-cat-rede-sel" onchange="_cpAtualizarSubRede()"><option value="">Selecione...</option></select></div>
           <div id="cp-cat-subrede-wrap" style="display:none"><label>Sub-rede</label><select id="cp-cat-subrede-sel" onchange="_cpAtualizarTerceiroCategoria()"><option value="">Selecione...</option></select></div>
         </div>
@@ -4471,7 +4476,7 @@
           <div id="cp-cli-drop" style="display:none"></div></div>
         <input type="hidden" id="cp-terceiro" value="">
         <input type="hidden" id="cp-terceiro-type" value="cat">
-        <div style="display:flex;gap:8px"><button class="cp-btn" onclick="cpLimpar()">Limpar</button><button class="cp-btn p" onclick="consultarPreco()">Consultar</button></div>
+        <div class="cp-f-btn" style="display:flex;gap:8px"><button class="cp-btn" onclick="cpLimpar()">Limpar</button><button class="cp-btn p" onclick="consultarPreco()">Consultar</button></div>
       </div></div>
 
       <div id="cp-resultado"></div>
@@ -15878,7 +15883,7 @@ function cpSetTipo(val) {
   // 3. Mostrar/esconder painéis diretamente
   const catWrap = document.getElementById('cp-cat-wrap');
   const cliWrap = document.getElementById('cp-cli-wrap');
-  if (catWrap) catWrap.style.display = val === 'rede' ? 'grid' : 'none';
+  if (catWrap) catWrap.style.display = val === 'rede' ? 'contents' : 'none';
   if (cliWrap) cliWrap.style.display = val === 'cliente' ? '' : 'none';
 
   // 4. Reset estado
@@ -16027,7 +16032,7 @@ function cpTipoChange() {
   if (hType) hType.value = tipo === 'rede' ? 'cat' : 'cli';
 
   if (tipo === 'rede') {
-    if (catWrap) catWrap.style.display = 'grid';
+    if (catWrap) catWrap.style.display = 'contents';
     if (cliWrap) cliWrap.style.display = 'none';
     // Reset campo categoria (selects de Rede/Sub-Rede)
     const redeSelReset = document.getElementById('cp-cat-rede-sel');
@@ -16165,8 +16170,16 @@ function cpSimPct(i) {
   f.value = (base * (1 - _cpNum(p.value) / 100)).toFixed(2).replace('.', ',');
   _cpSimEco(i);
 }
+function _cpMaskPreco(el) {
+  var d = String(el.value).replace(/\D/g, '').replace(/^0+/, '');
+  if (!d) { el.value = ''; return; }
+  while (d.length < 3) d = '0' + d;
+  var int = d.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  el.value = int + ',' + d.slice(-2);
+}
 function cpSimPreco(i) {
   var p = document.getElementById('cp-p-' + i), f = document.getElementById('cp-f-' + i); if (!p || !f) return;
+  _cpMaskPreco(f);
   if (!String(f.value).trim()) { p.value = ''; _cpSimEco(i); return; }
   var base = _cpNum(_cpResultados[i].item.valor);
   p.value = base ? _cpFmtDec((1 - _cpNum(f.value) / base) * 100, 2) : '';
