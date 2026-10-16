@@ -1795,7 +1795,7 @@
       <span style="font-size:13px;font-weight:700;color:#1e293b">Rank de Devolução por Cliente</span>
       <span style="font-size:10.5px;color:#94a3b8;background:#f1f4f9;border-radius:20px;padding:3px 9px">sincronizado aos filtros</span>
     </div>
-    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Somente devoluções por <b>Vencido</b> &middot; ordenado pelo % sobre o faturamento do período &middot; clique num cliente para ver os itens mais devolvidos</div>
+    <div style="font-size:11.5px;color:#94a3b8;margin-bottom:10px">Somente devoluções por <b>Vencido</b> &middot; pela data de lançamento da devolução &middot; ordenado pelo % sobre o faturamento do período &middot; clique num cliente para ver os itens mais devolvidos</div>
     <div id="dvgDevolBar" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><span style="font-size:11px;color:#64748b;font-weight:600">Mostrar</span>
       <button class="dvg-devtop" data-n="10" onclick="_dvgDevolSetTop(10)">Top 10</button><button class="dvg-devtop" data-n="20" onclick="_dvgDevolSetTop(20)">Top 20</button><button class="dvg-devtop" data-n="50" onclick="_dvgDevolSetTop(50)">Top 50</button><button class="dvg-devtop" data-n="0" onclick="_dvgDevolSetTop(0)">Todos</button>
       <span id="dvgDevolCnt" style="margin-left:auto;font-size:11px;color:#94a3b8"></span></div>
@@ -16476,7 +16476,7 @@ function _dashConstruirDadosAoVivo() {
     var cIdxD = idxCliente(dev.clienteId, dev.clienteNome);
     var fIdxD = idxFabrica(dev.fornecedorId, dev.fornecedorNome);
     var vIdxD = idxVendedor(dev.vendedorId, dev.vendedorNome);
-    var dataDev = (dev.dataNfEmitida || dev.data || '').slice(0, 10);
+    var dataDev = (dev.data || dev.dataNfEmitida || '').slice(0, 10); // v76: data de LANCAMENTO (regra do abatimento)
     if (!dataDev) return;
     var itensSimples = (dev.itens || []).map(function (it) {
       var _pu = _devolProdUn[String(it.prodId)] || '';
@@ -16721,8 +16721,9 @@ function dashInit() {
       // v41: so devolucao de vendas do proprio periodo. Sem NF de origem localizada: se o periodo cobre so pedidos ja carregados, fica de fora (venda anterior); senao usa a data da devolucao
       let _minPed = '9999-99-99'; for (let i=0;i<PED.length;i++) if (PED[i][0] < _minPed) _minPed = PED[i][0];
       const _okMot = d => !_dvgDevolMotivo || _dvgNormMot(d[7]) === _dvgNormMot(_dvgDevolMotivo);
-      const devs = filtraDevolucoes(true).filter(d => (d[6] || state.dtIni < _minPed) && _okMot(d));
-      const _semOrigem = filtraDevolucoes(false).filter(d => !d[6] && state.dtIni >= _minPed && _okMot(d));
+      // v76: conta pela data de lancamento da NFD (nao pela data da NF de origem)
+      const devs = filtraDevolucoes(false).filter(d => _okMot(d));
+      const _semOrigem = [];
       const _semOrigemVal = _semOrigem.reduce((a,d)=>a+d[4],0);
       const fatPorCliente = new Map(arrClientes.map(c => [c.ci, c.fat]));
       const ag = new Map();
