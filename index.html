@@ -8098,6 +8098,51 @@
           <span style="display:block;font-size:10.5px;color:#64748b;margin-top:2px">Confere as NFs recebidas contra os pedidos e anexa em lote</span>
         </span>
       </button>
+      <button onclick="pwaAbrir()" style="display:flex;align-items:center;gap:12px;text-align:left;background:#fff8f0;border:2px solid #DE7926;border-radius:9px;padding:14px 16px;cursor:pointer">
+        <span style="font-size:20px;flex-shrink:0">&#128172;</span>
+        <span>
+          <span style="display:block;font-size:12.5px;font-weight:700;color:#1e293b">Pedido do WhatsApp <span style="background:#DE7926;color:#fff;border-radius:999px;font-size:9px;padding:2px 7px;margin-left:4px;font-weight:700">NOVO</span></span>
+          <span style="display:block;font-size:10.5px;color:#64748b;margin-top:2px">Cole o print (Ctrl+V) ou o texto da mensagem &mdash; sem salvar arquivo</span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Pedido do WhatsApp: cola print (OCR) ou texto -> confere -> cria pedidos. Ver pwaAbrir/_pwaLer/_pwaConfirmar. -->
+<div id="modal-pwa" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center;padding:10px">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:860px;max-height:90vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
+    <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700;color:#fff">Pedido do WhatsApp</div>
+        <div id="pwa-sub" style="font-size:10.5px;color:rgba(255,255,255,.6)">Cole o print ou o texto da mensagem</div>
+      </div>
+      <button onclick="_pwaFechar()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
+    </div>
+    <div id="pwa-p1" style="padding:16px 20px;overflow-y:auto">
+      <div id="pwa-drop" tabindex="0" style="border:2px dashed #94a3b8;border-radius:12px;background:#f8fafc;padding:22px;text-align:center;color:#64748b;outline:none">
+        <div style="font-size:26px">&#128203;</div>
+        <div style="font-size:14px;font-weight:700;color:#272A4A">Aperte Ctrl+V aqui para colar o print</div>
+        <div style="font-size:11px;margin-top:3px">ou arraste a imagem &middot; ou <a href="#" onclick="document.getElementById('pwa-file').click();return false" style="color:#DE7926;font-weight:700">escolha um arquivo</a> &middot; ou cole o texto copiado na caixa abaixo</div>
+        <div id="pwa-ocr" style="display:none;margin-top:10px;font-size:12px;color:#b45309;font-weight:600"></div>
+      </div>
+      <input type="file" id="pwa-file" accept="image/*" style="display:none" onchange="_pwaArquivo(this.files[0]);this.value=''">
+      <textarea id="pwa-texto" placeholder="Texto do pedido (ex.: PEDIDO CF ROSA E SILVA - 05.359.030/0020-75 ... 100KG QUEIJO PROVOLONE YEMA R$ 55,00kg). Se colar um print, o texto lido aparece aqui e pode ser corrigido." style="width:100%;height:110px;margin-top:10px;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font:12.5px system-ui;box-sizing:border-box"></textarea>
+      <div id="pwa-erro1" style="display:none;font-size:11.5px;color:#D82621;margin-top:8px"></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px">
+        <button onclick="_pwaFechar()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer">Cancelar</button>
+        <button onclick="_pwaLer()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">Ler pedido &rarr;</button>
+      </div>
+    </div>
+    <div id="pwa-p2" style="display:none;flex-direction:column;min-height:0;flex:1">
+      <div id="pwa-cards" style="padding:12px 20px;overflow-y:auto;flex:1"></div>
+      <div style="padding:12px 20px;border-top:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="pwa-resumo" style="font-size:12px;color:#64748b"></span>
+        <div style="display:flex;gap:10px">
+          <button onclick="_pwaVoltar()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer">&larr; Voltar</button>
+          <button id="pwa-btn-criar" onclick="_pwaConfirmar()" style="background:#16a34a;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">Criar pedidos</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -34334,6 +34379,337 @@ function _pifConfirmar() {
   _pifFecharRevisao();
   if (typeof renderPedidoList === 'function') renderPedidoList();
   alert('Pedido criado com ' + itensLimpos.length + ' item(ns) a partir da foto importada.');
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pedido do WhatsApp (opcao em "Importar"): cola print (OCR Tesseract) ou texto ->
+// _pwaParsear() acha pedidos (cliente por CNPJ) e itens (qtd, unidade, descricao, preco)
+// -> casa produto/fornecedor no cadastro -> tela de conferencia -> cria os Pedidos.
+// ─────────────────────────────────────────────────────────────────────────────
+var _pwaCards = [], _pwaCliRes = {};
+
+function pwaAbrir() {
+  _pinfFecharEscolha();
+  document.getElementById('pwa-texto').value = '';
+  document.getElementById('pwa-erro1').style.display = 'none';
+  document.getElementById('pwa-ocr').style.display = 'none';
+  document.getElementById('pwa-p1').style.display = 'block';
+  document.getElementById('pwa-p2').style.display = 'none';
+  document.getElementById('pwa-sub').textContent = 'Cole o print ou o texto da mensagem';
+  document.getElementById('modal-pwa').style.display = 'flex';
+  setTimeout(function () { var d = document.getElementById('pwa-drop'); if (d) d.focus(); }, 50);
+}
+function _pwaFechar() { document.getElementById('modal-pwa').style.display = 'none'; _pwaCards = []; }
+function _pwaVoltar() {
+  document.getElementById('pwa-p2').style.display = 'none';
+  document.getElementById('pwa-p1').style.display = 'block';
+  document.getElementById('pwa-sub').textContent = 'Cole o print ou o texto da mensagem';
+}
+
+// Ctrl+V (print ou texto) e arrastar/soltar
+document.addEventListener('paste', function (e) {
+  var modal = document.getElementById('modal-pwa');
+  if (!modal || modal.style.display !== 'flex' || document.getElementById('pwa-p1').style.display === 'none') return;
+  var items = (e.clipboardData && e.clipboardData.items) || [];
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type && items[i].type.indexOf('image') === 0) {
+      e.preventDefault();
+      _pwaArquivo(items[i].getAsFile());
+      return;
+    }
+  }
+  var txt = e.clipboardData && e.clipboardData.getData('text');
+  if (txt && document.activeElement !== document.getElementById('pwa-texto')) {
+    e.preventDefault();
+    var ta = document.getElementById('pwa-texto');
+    ta.value = (ta.value ? ta.value + '\n' : '') + txt;
+  }
+});
+document.addEventListener('dragover', function (e) { var m = document.getElementById('modal-pwa'); if (m && m.style.display === 'flex') e.preventDefault(); });
+document.addEventListener('drop', function (e) {
+  var m = document.getElementById('modal-pwa');
+  if (!m || m.style.display !== 'flex') return;
+  e.preventDefault();
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f && f.type.indexOf('image') === 0) _pwaArquivo(f);
+});
+
+function _pwaArquivo(file) {
+  if (!file) return;
+  var st = document.getElementById('pwa-ocr');
+  st.style.display = 'block'; st.style.color = '#b45309'; st.textContent = 'Lendo o print... (alguns segundos)';
+  var fr = new FileReader();
+  fr.onload = function (ev) {
+    var img = new Image();
+    img.onload = function () {
+      // amplia prints pequenos: melhora muito a leitura do OCR
+      var esc = img.width < 1400 ? Math.min(3, 1400 / img.width) : 1;
+      var cv = document.createElement('canvas'); cv.width = Math.round(img.width * esc); cv.height = Math.round(img.height * esc);
+      var cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+      _pifCarregarTesseract().then(function (T) { return T.recognize(cv.toDataURL('image/png'), 'por'); }).then(function (r) {
+        var t = (r && r.data && r.data.text) || '';
+        var ta = document.getElementById('pwa-texto');
+        ta.value = (ta.value ? ta.value + '\n' : '') + t.trim();
+        st.textContent = 'Print lido. O texto está na caixa abaixo (pode corrigir) — confira na próxima tela.';
+        st.style.color = '#15803d';
+        _pwaLer();
+      }).catch(function (err) {
+        st.style.color = '#D82621'; st.textContent = 'Não consegui ler o print (' + (err && err.message ? err.message : 'erro') + '). Cole o texto copiado da conversa.';
+      });
+    };
+    img.src = ev.target.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+function _pwaDig(s) { return String(s || '').replace(/\D/g, ''); }
+function _pwaNum(s) { s = String(s || '').trim(); if (s.indexOf(',') > -1) s = s.replace(/\./g, '').replace(',', '.'); var n = parseFloat(s); return isNaN(n) ? 0 : n; }
+function _pwaUn(u) {
+  u = String(u || '').toUpperCase();
+  if (/^KG/.test(u)) return 'KG';
+  if (/^CX|^CAIXA/.test(u)) return 'CX';
+  return 'UN';
+}
+
+// Texto -> [{nome, cnpj, itens:[{textoLido, desc, qtd, unidade, preco}]}]
+function _pwaParsear(texto) {
+  var reCnpj = /(\d{2})\.?(\d{3})\.?(\d{3})\/?(\d{4})-?(\d{2})/;
+  var reA = /^\W*?(\d+(?:[.,]\d+)?)\s*(kgs?|un|unid\w*|cx|caixas?|pct|pc)\b\.?\s*(.*)$/i;
+  var reB = /^(.*?)\s+(\d+(?:[.,]\d+)?)\s*(kgs?|un|unid\w*|cx|caixas?|pct|pc)\b\.?\s*(.*)$/i;
+  var rePreco = /(?:R\$\s*)?(\d{1,3}(?:\.\d{3})+,\d{2}|\d+[.,]\d{1,2})\s*(?:\/\s*)?(?:kg|un|cx)?\s*$/i;
+  var peds = [], atual = null;
+  String(texto || '').split(/\r?\n/).forEach(function (bruta) {
+    var l = bruta.replace(/\s+/g, ' ').trim();
+    if (!l || /encaminhada/i.test(l)) return;
+    l = l.replace(/\s*\b\d{1,2}:\d{2}\s*$/, '').trim();
+    if (!l || /^\d{1,2}:\d{2}$/.test(l)) return;
+    var mA = reA.exec(l), mB = mA ? null : reB.exec(l);
+    var cn = reCnpj.exec(l);
+    var ehCab = /^\W*(pedido|ped\b)/i.test(l) || (cn && !mA);
+    if (ehCab) {
+      var nome = l.replace(/^\W*(pedido|ped\.?)\s*(cf|n[º°o]?\.?)?\s*[-:]?\s*/i, '');
+      if (cn) nome = nome.replace(reCnpj, '');
+      nome = nome.replace(/[-–—:\s]+$/, '').replace(/^[-–—:\s]+/, '').replace(/^cf\s+/i, '').trim();
+      atual = { nome: nome, cnpj: cn ? cn.slice(1).join('') : '', itens: [] };
+      peds.push(atual);
+      return;
+    }
+    var qtd, un, desc, resto;
+    if (mA) { qtd = _pwaNum(mA[1]); un = mA[2]; resto = mA[3]; }
+    else if (mB) { qtd = _pwaNum(mB[2]); un = mB[3]; resto = (mB[1] + ' ' + mB[4]).trim(); }
+    else return;
+    if (!qtd) return;
+    var preco = 0, pm = rePreco.exec(resto);
+    if (pm) { preco = _pwaNum(pm[1]); resto = resto.slice(0, pm.index); }
+    desc = resto.replace(/R\$\s*$/i, '').replace(/[-–—:\s]+$/, '').replace(/^[-–—:\s]+/, '').trim();
+    if (!desc) return;
+    if (!atual) { atual = { nome: '', cnpj: '', itens: [] }; peds.push(atual); }
+    atual.itens.push({ textoLido: l, desc: desc, qtd: qtd, unidade: _pwaUn(un), preco: preco });
+  });
+  return peds.filter(function (p) { return p.itens.length; });
+}
+
+function _pwaAcharCliente(p) {
+  var all = getClientesVisiveis();
+  if (p.cnpj) {
+    var m = all.filter(function (c) { return _pwaDig(c.cpf_cnpj) === p.cnpj; });
+    if (m.length) return { c: m[0], via: 'CNPJ' };
+  }
+  var tk = _pifTokenizar(p.nome || '').filter(function (w) { return w !== 'cf' && w !== 'pedido'; });
+  if (tk.length) {
+    var r = all.filter(function (c) {
+      var n = _cpNorm((c.nome_fantasia || '') + ' ' + (c.razao_social || ''));
+      return tk.every(function (w) { return n.indexOf(w) !== -1; });
+    });
+    if (r.length === 1) return { c: r[0], via: 'nome' };
+  }
+  return null;
+}
+
+function _pwaCasarGlobal(desc, prods, fornTok) {
+  var dTok = _pifTokenizar(desc), best = null, bs = 0, bc = 0;
+  prods.forEach(function (p) {
+    var ft = fornTok[p.fornecedor] || {};
+    var d2 = dTok.filter(function (w) { return !ft[w]; });
+    var set = {}; d2.forEach(function (w) { set[w] = 1; });
+    var pt = _pifTokenizar(p.nome || ''); if (!pt.length) return;
+    var com = pt.filter(function (w) { return set[w]; }).length;
+    var sc = com / pt.length + (d2.length < dTok.length ? 0.05 : 0);
+    var min = pt.length > 1 ? 2 : 1;
+    if (com >= min && com / pt.length >= 0.7 && (sc > bs || (sc === bs && com > bc))) { best = p; bs = sc; bc = com; }
+  });
+  return best;
+}
+
+function _pwaLer() {
+  var erro = document.getElementById('pwa-erro1'); erro.style.display = 'none';
+  var peds = _pwaParsear(document.getElementById('pwa-texto').value);
+  if (!peds.length) {
+    erro.textContent = 'Não encontrei nenhum item (quantidade + produto) no texto. Confira se há linhas como "100KG QUEIJO ... R$ 55,00".';
+    erro.style.display = 'block'; return;
+  }
+  var prods = getProdutos().filter(function (p) { return (p.ativo || 'Sim') !== 'Não'; });
+  var fornTok = {};
+  getFornecedores().forEach(function (f) { var o = {}; _pifTokenizar((f.nome_fantasia || '') + ' ' + (f.razao_social || '')).forEach(function (w) { o[w] = 1; }); fornTok[f.id] = o; });
+  _pwaCards = [];
+  peds.forEach(function (pd) {
+    var ach = _pwaAcharCliente(pd);
+    var itens = pd.itens.map(function (it) {
+      var pr = _pwaCasarGlobal(it.desc, prods, fornTok);
+      return { textoLido: it.textoLido, desc: it.desc, qtdLida: it.qtd, unidadeLida: it.unidade, preco: it.preco, produto: pr, produtoId: pr ? pr.id : '' };
+    });
+    var grupos = {}, ordem = [];
+    itens.forEach(function (it) { if (it.produto) { var f = it.produto.fornecedor; if (!grupos[f]) { grupos[f] = []; ordem.push(f); } grupos[f].push(it); } });
+    var sem = itens.filter(function (it) { return !it.produto; });
+    if (!ordem.length) { ordem.push(''); grupos[''] = []; }
+    grupos[ordem[0]] = grupos[ordem[0]].concat(sem);
+    ordem.forEach(function (f) {
+      _pwaCards.push({ nome: pd.nome, cnpj: pd.cnpj, cliente: ach ? ach.c : null, via: ach ? ach.via : '', fornId: f, itens: grupos[f] });
+    });
+  });
+  _pwaCards.forEach(function (cd) { cd.itens.forEach(function (it) { _pwaRecalc(cd, it); }); });
+  document.getElementById('pwa-p1').style.display = 'none';
+  document.getElementById('pwa-p2').style.display = 'flex';
+  document.getElementById('pwa-sub').textContent = 'Confira antes de criar — nada é salvo até clicar em "Criar pedidos"';
+  _pwaRender();
+}
+
+// quantidade final + preco de tabela de um item
+function _pwaRecalc(cd, it) {
+  if (it.produto) {
+    var r = _pifResolverQuantidade({ qtd: it.qtdLida, unidade: it.unidadeLida }, it.produto);
+    it.quantidade = r.quantidade; it.modoUnid = r.modoUnid; it.qtdCaixas = r.qtdCaixas; it.avisos = r.avisos;
+    var pt = null;
+    try { if (cd.cliente && cd.fornId) pt = pedResolverPrecoCliente(cd.fornId, it.produto.id, cd.cliente.id); } catch (e) {}
+    it.precoTab = pt != null ? Number(pt) : null;
+    if (!(it.preco > 0) && it.precoTab) it.preco = it.precoTab;
+  } else {
+    it.quantidade = it.qtdLida; it.modoUnid = 'un'; it.qtdCaixas = null; it.avisos = []; it.precoTab = null;
+  }
+}
+var _pwaBR = function (v) { return 'R$ ' + (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+
+function _pwaRender() {
+  var forns = getFornecedores().slice().sort(function (a, b) { return String(a.nome_fantasia || a.razao_social || '').localeCompare(String(b.nome_fantasia || b.razao_social || ''), 'pt-BR'); });
+  var todos = getProdutos().filter(function (p) { return (p.ativo || 'Sim') !== 'Não'; });
+  var totalGeral = 0;
+  var lbl = 'font-size:9.5px;color:#94a3b8;text-transform:uppercase;font-weight:700;letter-spacing:.06em';
+  var html = _pwaCards.map(function (cd, ci) {
+    var prodsF = todos.filter(function (p) { return p.fornecedor === cd.fornId; }).sort(function (a, b) { return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR'); });
+    var tot = 0;
+    var linhas = cd.itens.map(function (it, ii) {
+      var val = it.produto ? (it.quantidade * (Number(it.preco) || 0)) : 0;
+      tot += val;
+      var opts = '<option value="">— produto não identificado, selecione —</option>' + prodsF.map(function (p) { return '<option value="' + p.id + '"' + (it.produtoId === p.id ? ' selected' : '') + '>' + _pedEsc(p.nome || '') + '</option>'; }).join('');
+      var aviso = '';
+      if (it.produto && it.precoTab != null && it.preco > 0 && Math.abs(it.precoTab - it.preco) > 0.005) aviso += '<div style="font-size:10px;color:#b45309;margin-top:2px">Tabela: ' + _pwaBR(it.precoTab) + '</div>';
+      if (it.produto && it.precoTab == null && !(it.preco > 0)) aviso += '<div style="font-size:10px;color:#b45309;margin-top:2px">sem preço na tabela</div>';
+      (it.avisos || []).forEach(function (a) { aviso += '<div style="font-size:10px;color:#b45309;margin-top:2px">' + _pedEsc(a) + '</div>'; });
+      return '<div style="display:grid;grid-template-columns:minmax(0,2fr) 80px 95px 95px;gap:8px;padding:9px 12px;align-items:start;border-top:1px solid #f1f5f9">'
+        + '<div style="min-width:0"><div style="' + lbl + '">Lido: ' + _pedEsc(it.desc) + '</div>'
+        + '<select onchange="_pwaProd(' + ci + ',' + ii + ',this.value)" style="width:100%;margin-top:3px;padding:6px;border:1px solid ' + (it.produto ? '#e2e8f0' : '#fca5a5') + ';border-radius:6px;font-size:12px;background:#fff">' + opts + '</select></div>'
+        + '<div><div style="' + lbl + '">Qtd (' + _pedEsc(it.unidadeLida.toLowerCase()) + ')</div><input value="' + String(it.qtdLida).replace('.', ',') + '" onchange="_pwaQtd(' + ci + ',' + ii + ',this.value)" style="width:100%;margin-top:3px;padding:6px;border:1px solid #e2e8f0;border-radius:6px;text-align:right;font-weight:700;box-sizing:border-box"></div>'
+        + '<div><div style="' + lbl + '">Preço</div><input value="' + (it.preco > 0 ? it.preco.toFixed(2).replace('.', ',') : '') + '" onchange="_pwaPreco(' + ci + ',' + ii + ',this.value)" style="width:100%;margin-top:3px;padding:6px;border:1px solid #e2e8f0;border-radius:6px;text-align:right;font-weight:700;box-sizing:border-box">' + aviso + '</div>'
+        + '<div style="text-align:right"><div style="' + lbl + '">Total</div><div style="margin-top:8px;font-weight:800;color:#272A4A">' + _pwaBR(val) + '</div></div></div>';
+    }).join('');
+    totalGeral += tot;
+    var cliOk = !!cd.cliente;
+    var cliTxt = cd.cliente ? ((cd.cliente.codigo ? cd.cliente.codigo + ' · ' : '') + (cd.cliente.nome_fantasia || cd.cliente.razao_social || '')) : '';
+    var cnpjFmt = cd.cnpj ? ' · ' + cd.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : '';
+    var fornOpts = '<option value="">— selecione —</option>' + forns.map(function (f) { return '<option value="' + f.id + '"' + (cd.fornId === f.id ? ' selected' : '') + '>' + _pedEsc(f.nome_fantasia || f.razao_social || '') + '</option>'; }).join('');
+    return '<div style="border:1px solid #e5e7eb;border-bottom:3px solid #2c4488;border-radius:10px;margin-bottom:12px">'
+      + '<div style="background:#f8fafc;padding:10px 12px;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;gap:10px;align-items:end;border-radius:10px 10px 0 0">'
+      + '<div style="position:relative"><div style="' + lbl + '">Cliente — lido: ' + _pedEsc((cd.nome || '—') + cnpjFmt) + '</div>'
+      + '<input id="pwa-cli-' + ci + '" value="' + _pedEsc(cliTxt) + '" placeholder="Digite código, nome ou CNPJ do cliente..." oninput="_pwaCliBuscar(' + ci + ')" onfocus="this.select()" autocomplete="off" style="width:100%;margin-top:3px;padding:7px;border:1px solid ' + (cliOk ? '#e2e8f0' : '#fca5a5') + ';border-radius:6px;font-size:12px;box-sizing:border-box;background:#fff">'
+      + '<div id="pwa-cd-' + ci + '" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e2e8f0;border-radius:8px;z-index:50;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.15)"></div></div>'
+      + '<div><div style="' + lbl + '">Fábrica</div><select onchange="_pwaForn(' + ci + ',this.value)" style="width:100%;margin-top:3px;padding:7px;border:1px solid ' + (cd.fornId ? '#e2e8f0' : '#fca5a5') + ';border-radius:6px;font-size:12px;background:#fff">' + fornOpts + '</select></div>'
+      + '<span style="font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap;' + (cliOk ? 'background:#dcfce7;color:#15803d' : 'background:#fef3c7;color:#b45309') + '">' + (cliOk ? '✓ achado por ' + cd.via : 'escolha o cliente') + '</span></div>'
+      + linhas
+      + '<div style="padding:8px 12px;border-top:1px solid #f1f5f9;text-align:right;font-size:12px;color:#64748b">Total do pedido: <b style="color:#272A4A;font-size:14px">' + _pwaBR(tot) + '</b></div></div>';
+  }).join('');
+  document.getElementById('pwa-cards').innerHTML = html;
+  document.getElementById('pwa-resumo').innerHTML = _pwaCards.length + ' pedido(s) · <b>' + _pwaBR(totalGeral) + '</b>';
+  var b = document.getElementById('pwa-btn-criar'); if (b) b.textContent = 'Criar ' + _pwaCards.length + ' pedido' + (_pwaCards.length === 1 ? '' : 's');
+}
+
+function _pwaCliBuscar(ci) {
+  var q = (document.getElementById('pwa-cli-' + ci).value || '').trim();
+  var drop = document.getElementById('pwa-cd-' + ci);
+  if (q.length < 3) { drop.style.display = 'none'; return; }
+  var n = _cpNorm(q), qd = q.replace(/\D/g, '');
+  _pwaCliRes[ci] = getClientesVisiveis().filter(function (c) {
+    var d = _pwaDig(c.cpf_cnpj);
+    return _cpNorm((c.nome_fantasia || '') + ' ' + (c.razao_social || '')).indexOf(n) !== -1 || _cpNorm(c.codigo || '').indexOf(n) !== -1 || (qd.length > 2 && d.indexOf(qd) !== -1);
+  }).slice(0, 15);
+  if (!_pwaCliRes[ci].length) { drop.style.display = 'none'; return; }
+  drop.onmousedown = function (e) { e.preventDefault(); };
+  drop.innerHTML = _pwaCliRes[ci].map(function (c, i) {
+    return '<div onclick="_pwaCliSel(' + ci + ',' + i + ')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9">' + (c.codigo ? '<b style="color:#272A4A;margin-right:8px">' + _pedEsc(c.codigo) + '</b>' : '') + _pedEsc(c.nome_fantasia || c.razao_social || '') + '<span style="color:#94a3b8;font-size:10.5px;margin-left:6px">' + _pedEsc(c.cpf_cnpj || '') + '</span></div>';
+  }).join('');
+  drop.style.display = 'block';
+}
+function _pwaCliSel(ci, i) {
+  var cd = _pwaCards[ci]; cd.cliente = _pwaCliRes[ci][i]; cd.via = 'seleção';
+  cd.itens.forEach(function (it) { _pwaRecalc(cd, it); });
+  _pwaRender();
+}
+function _pwaForn(ci, fid) {
+  var cd = _pwaCards[ci]; cd.fornId = fid;
+  var prodsF = getProdutos().filter(function (p) { return p.fornecedor === fid && (p.ativo || 'Sim') !== 'Não'; });
+  cd.itens.forEach(function (it) {
+    if (!it.produto || it.produto.fornecedor !== fid) { it.produto = _pifCasarProduto(it.desc, prodsF); it.produtoId = it.produto ? it.produto.id : ''; }
+    _pwaRecalc(cd, it);
+  });
+  _pwaRender();
+}
+function _pwaProd(ci, ii, pid) {
+  var cd = _pwaCards[ci], it = cd.itens[ii];
+  it.produto = getProdutos().find(function (p) { return p.id === pid; }) || null; it.produtoId = it.produto ? it.produto.id : '';
+  _pwaRecalc(cd, it); _pwaRender();
+}
+function _pwaQtd(ci, ii, v) { var cd = _pwaCards[ci], it = cd.itens[ii], q = _pwaNum(v); if (q > 0) { it.qtdLida = q; _pwaRecalc(cd, it); } _pwaRender(); }
+function _pwaPreco(ci, ii, v) { _pwaCards[ci].itens[ii].preco = _pwaNum(v); _pwaRender(); }
+
+function _pwaConfirmar() {
+  var erros = [];
+  _pwaCards.forEach(function (cd, ci) {
+    var n = 'Pedido ' + (ci + 1) + (cd.nome ? ' (' + cd.nome + ')' : '');
+    if (!cd.cliente) erros.push(n + ': escolha o cliente.');
+    if (!cd.fornId) erros.push(n + ': escolha a fábrica.');
+    var sem = cd.itens.filter(function (it) { return !it.produto; }).length;
+    if (sem) erros.push(n + ': ' + sem + ' item(ns) sem produto identificado.');
+  });
+  if (erros.length) { alert('Falta resolver antes de criar:\n\n' + erros.join('\n')); return; }
+  if (firebaseConfigurado && !_fsPronto['pedidos']) { alert('Os pedidos ainda estão carregando. Aguarde alguns segundos e tente de novo.'); return; }
+  var dados = getPedidos(), prox = _pedMaxLancamento(dados);
+  var fornecedores = getFornecedores();
+  _pwaCards.forEach(function (cd) {
+    var cliente = cd.cliente, fornecedor = fornecedores.find(function (f) { return f.id === cd.fornId; });
+    prox++;
+    var vendedorId = _cliResolverVendedorPorForn(cliente, fornecedor.id) || '', vendedorNome = '';
+    if (vendedorId) { var vend = getVendedoresAtivos().find(function (v) { return v.id === vendedorId; }); if (vend) vendedorNome = vend.nome || vend.nome_fantasia || ''; }
+    var itens = cd.itens.map(function (it) {
+      var p = it.produto, pu = Number(it.preco) || 0;
+      return { prodId: p.id, prodCodigo: p.codigo || '', prodNome: p.nome || '', medida: p.unidade || '', cx: p.quant || '', comissao: p.comissao || '',
+        quantidade: it.quantidade, precoUnit: pu, desconto: 0, valorTotal: it.quantidade * pu, modoUnid: it.modoUnid, qtdCaixas: it.qtdCaixas };
+    });
+    var obj = {
+      id: 'ped' + Date.now() + '_pwa' + prox, lancamento: prox,
+      fornecedorId: fornecedor.id, fornecedorNome: fornecedor.nome_fantasia || fornecedor.razao_social || '',
+      clienteId: cliente.id, clienteNome: (cliente.codigo ? cliente.codigo + ' ' : '') + (cliente.nome_fantasia || cliente.razao_social || ''),
+      numPedidoCliente: '', numPedidoFornecedor: '', vendedorId: vendedorId, vendedorNome: vendedorNome,
+      data: new Date().toISOString().slice(0, 10), status: 'Pré-Venda', obs: 'Importado do WhatsApp.',
+      itens: itens, valorTotal: itens.reduce(function (a, it) { return a + it.valorTotal; }, 0), dtCadastro: new Date().toISOString()
+    };
+    Object.assign(obj, _appMontarAutoria(null, []));
+    dados.push(obj);
+  });
+  setPedidos(dados);
+  var n = _pwaCards.length;
+  _pwaFechar();
+  if (typeof renderPedidoList === 'function') renderPedidoList();
+  alert(n + ' pedido(s) criado(s) a partir do WhatsApp.');
 }
 
 </script>
