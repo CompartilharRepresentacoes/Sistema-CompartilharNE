@@ -34478,7 +34478,7 @@ function _pwaParsear(texto) {
   var reA = /^\W*?(\d+(?:[.,]\d+)?)\s*(kgs?|un|unid\w*|cx|caixas?|pct|pc)\b\.?\s*(.*)$/i;
   var reB = /^(.*?)\s+(\d+(?:[.,]\d+)?)\s*(kgs?|un|unid\w*|cx|caixas?|pct|pc)\b\.?\s*(.*)$/i;
   var rePreco = /(?:R\$\s*)?(\d{1,3}(?:\.\d{3})+,\d{2}|\d+[.,]\d{1,2})\s*(?:\/\s*)?(?:kg|un|cx)?\s*$/i;
-  var peds = [], atual = null;
+  var peds = [], atual = null, fornHint = '';
   String(texto || '').split(/\r?\n/).forEach(function (bruta) {
     var l = bruta.replace(/\s+/g, ' ').trim();
     if (!l || /encaminhada/i.test(l)) return;
@@ -34491,7 +34491,8 @@ function _pwaParsear(texto) {
       var nome = l.replace(/^\W*(pedido|ped\.?)\s*(cf|n[º°o]?\.?)?\s*[-:]?\s*/i, '');
       if (cn) nome = nome.replace(reCnpj, '');
       nome = nome.replace(/[-–—:\s]+$/, '').replace(/^[-–—:\s]+/, '').replace(/^cf\s+/i, '').trim();
-      atual = { nome: nome, cnpj: cn ? cn.slice(1).join('') : '', itens: [] };
+      if (!cn && nome) { var fh = _pwaFornPorNome(nome); if (fh) { fornHint = fh; atual = null; return; } }
+      atual = { nome: nome, cnpj: cn ? cn.slice(1).join('') : '', itens: [], fornHint: fornHint };
       peds.push(atual);
       return;
     }
@@ -34504,12 +34505,21 @@ function _pwaParsear(texto) {
     if (pm) { preco = _pwaNum(pm[1]); resto = resto.slice(0, pm.index); }
     desc = resto.replace(/R\$\s*$/i, '').replace(/[-–—:\s]+$/, '').replace(/^[-–—:\s]+/, '').trim();
     if (!desc) return;
-    if (!atual) { atual = { nome: '', cnpj: '', itens: [] }; peds.push(atual); }
+    if (!atual) { atual = { nome: '', cnpj: '', itens: [], fornHint: fornHint }; peds.push(atual); }
     atual.itens.push({ textoLido: l, desc: desc, qtd: qtd, unidade: _pwaUn(un), preco: preco });
   });
   return peds.filter(function (p) { return p.itens.length; });
 }
 
+// "ALLFOOD" / "NOVA MIX" etc. -> id da fabrica (so se achar exatamente uma)
+function _pwaFornPorNome(nome) {
+  var tk = _pifTokenizar(nome); if (!tk.length) return '';
+  var r = getFornecedores().filter(function (f) {
+    var n = _cpNorm((f.nome_fantasia || '') + ' ' + (f.razao_social || ''));
+    return tk.every(function (w) { return n.indexOf(w) !== -1; });
+  });
+  return r.length === 1 ? r[0].id : '';
+}
 function _pwaAcharCliente(p) {
   var all = getClientesVisiveis();
   if (p.cnpj) {
@@ -34556,17 +34566,22 @@ function _pwaLer() {
   peds.forEach(function (pd) {
     var ach = _pwaAcharCliente(pd);
     var itens = pd.itens.map(function (it) {
-      var pr = _pwaCasarGlobal(it.desc, prods, fornTok), sug = false;
+      var pool = pd.fornHint ? prods.filter(function (p) { return p.fornecedor === pd.fornHint; }) : null;
+      var pr = (pool && _pwaCasarGlobal(it.desc, pool, fornTok)) || _pwaCasarGlobal(it.desc, prods, fornTok), sug = false;
       if (!pr) {
-        var c = _pwaSugerir(it.desc, prods, fornTok);
-        if (c.length && c[0].score >= 0.5 && (c.length === 1 || c[0].score > c[1].score)) { pr = c[0].p; sug = true; }
+        [pool, prods].some(function (pl) {
+          if (!pl) return false;
+          var c = _pwaSugerir(it.desc, pl, fornTok);
+          if (c.length && c[0].score >= 0.5) { pr = c[0].p; sug = true; return true; }
+          return false;
+        });
       }
       return { textoLido: it.textoLido, desc: it.desc, qtdLida: it.qtd, unidadeLida: it.unidade, preco: it.preco, produto: pr, produtoId: pr ? pr.id : '', sugerido: sug };
     });
     var grupos = {}, ordem = [];
     itens.forEach(function (it) { if (it.produto) { var f = it.produto.fornecedor; if (!grupos[f]) { grupos[f] = []; ordem.push(f); } grupos[f].push(it); } });
     var sem = itens.filter(function (it) { return !it.produto; });
-    if (!ordem.length) { ordem.push(''); grupos[''] = []; }
+    if (!ordem.length) { ordem.push(pd.fornHint || ''); grupos[ordem[0]] = []; }
     grupos[ordem[0]] = grupos[ordem[0]].concat(sem);
     ordem.forEach(function (f) {
       _pwaCards.push({ nome: pd.nome, cnpj: pd.cnpj, cliente: ach ? ach.c : null, via: ach ? ach.via : '', fornId: f, itens: grupos[f] });
@@ -34670,11 +34685,13 @@ function _pwaSugerir(desc, prods, fornTok) {
   prods.forEach(function (p) {
     var sig = dTok.filter(function (w) { if (_pwaStop[w]) return false; for (var k in fornTok) { if (fornTok[k][w]) return false; } return true; });
     if (!sig.length) return;
-    var hay = _cpNorm((p.nome || '') + ' ' + (p.codigo || ''));
+    var hay = _cpNorm((p.nome || '') + ' ' + (p.codigo || '')).replace(/\bqj\b/g, 'queijo');
     var com = sig.filter(function (w) { return hay.indexOf(w) !== -1; }).length;
-    if (com) out.push({ p: p, score: com / sig.length, com: com });
+    var pt = _pifTokenizar(hay), set = {}; dTok.forEach(function (w) { set[w] = 1; });
+    var cov = pt.length ? pt.filter(function (w) { return set[w]; }).length / pt.length : 0;
+    if (com) out.push({ p: p, score: com / sig.length, com: com, cov: cov });
   });
-  out.sort(function (a, b) { return b.score - a.score || b.com - a.com; });
+  out.sort(function (a, b) { return b.score - a.score || b.com - a.com || b.cov - a.cov; });
   return out;
 }
 function _pwaProdBuscar(ci, ii, digitando) {
@@ -34695,9 +34712,10 @@ function _pwaProdBuscar(ci, ii, digitando) {
     var fornTok = {}; getFornecedores().forEach(function (f) { var o = {}; _pifTokenizar((f.nome_fantasia || '') + ' ' + (f.razao_social || '')).forEach(function (w) { o[w] = 1; }); fornTok[f.id] = o; });
     lista = _pwaSugerir(it.desc, todos, fornTok).map(function (x) { return x.p; });
   }
+  if (!lista.length && !q && cd.fornId) lista = todos.filter(function (p) { return p.fornecedor === cd.fornId; }).sort(function (a, b) { return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR'); });
   lista = lista.slice(0, 20);
   _pwaPrRes[ci + '_' + ii] = lista;
-  if (!lista.length) { drop.innerHTML = '<div style="padding:10px 12px;font-size:11.5px;color:#94a3b8">Nenhum produto encontrado. Tente outra palavra (ex.: provolone).</div>'; drop.style.display = 'block'; return; }
+  if (!lista.length) { drop.innerHTML = '<div style="padding:10px 12px;font-size:11.5px;color:#94a3b8">Nenhum produto encontrado' + (q ? ' para "' + _pedEsc(q) + '"' : '') + '. O cadastro tem ' + todos.length + ' produtos ativos' + (cd.fornId ? ' (' + todos.filter(function (p) { return p.fornecedor === cd.fornId; }).length + ' de ' + _pedEsc(_pwaFornNome(cd.fornId)) + ')' : '') + '. Tente outra palavra.</div>'; drop.style.display = 'block'; return; }
   drop.onmousedown = function (e) { e.preventDefault(); };
   drop.innerHTML = lista.map(function (p, i) {
     return '<div onclick="_pwaProdSel(' + ci + ',' + ii + ',' + i + ')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9">' + (p.codigo ? '<b style="color:#272A4A;margin-right:8px">' + _pedEsc(p.codigo) + '</b>' : '') + _pedEsc(p.nome || '') + '<span style="color:#94a3b8;font-size:10.5px;margin-left:6px">' + _pedEsc(_pwaFornNome(p.fornecedor)) + '</span></div>';
