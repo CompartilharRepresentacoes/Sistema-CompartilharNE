@@ -195,7 +195,8 @@
       align-items: center; justify-content: center; background: rgba(255,255,255,.1);
       border: none; border-radius: 8px; color: #fff; cursor: pointer; z-index: 5; font-size: 16px;
     }
-    #appMainArea { flex: 1; margin-left: 76px; display: flex; flex-direction: column; min-width: 0; }
+    #appMainArea { flex: 1; margin-left: 76px; display: flex; flex-direction: column; min-width: 0; background: linear-gradient(180deg,#bcd2fb 0,#d3e2fd 40%,#e4eeff 100%); background-attachment: fixed; }
+    @media print { #appMainArea { background: #fff !important; } }
     #appTopbar {
       background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 20px;
       height: 56px; display: flex; align-items: center; gap: 0;
