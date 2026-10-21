@@ -6044,10 +6044,7 @@
               <button id="sug-btn-cliente" type="button" onclick="_sugSetEscopo('cliente')" style="padding:7px 16px;border:none;background:#f8fafc;color:#64748b;font-size:11.5px;font-weight:700;cursor:pointer">Cliente específico</button>
             </div>
           </div>
-        </div>
-
-        <div id="sug-bloco-rede">
-          <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:10px">
+          <div id="sug-filtros-rede" style="display:contents">
             <div>
               <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Rede</div>
               <select id="sug-rede" onchange="_sugAtualizarSubRede()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:200px"><option value="">Selecione...</option></select>
@@ -6057,22 +6054,28 @@
               <select id="sug-subrede" onchange="_sugAtualizarLojas()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:200px"><option value="">Selecione...</option></select>
             </div>
           </div>
+          <div id="sug-bloco-cliente" style="display:none;position:relative;min-width:300px;flex:1 1 300px;max-width:420px">
+          <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Cliente</div>
+          <input type="hidden" id="sug-cliente-id">
+          <input id="sug-cliente-input" class="form-input" placeholder="Código, nome ou CNPJ (4+ letras)..." oninput="_sugClienteFiltrar()" onkeydown="_sugClienteKey(event)" onblur="setTimeout(function(){var d=document.getElementById('sug-cliente-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
+          <div id="sug-cliente-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:7px;margin-top:2px;max-height:220px;overflow-y:auto;z-index:20;box-shadow:0 4px 16px rgba(15,23,42,.08)"></div>
+        </div>
+        </div>
+
+        <div id="sug-bloco-rede">
           <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:6px">Lojas</div>
           <div onclick="_sugToggleLojasPanel()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;max-width:360px">
             <span id="sug-lojas-contador" style="font-size:12.5px;color:#1e293b;font-weight:600">Selecione uma rede</span>
             <svg id="sug-lojas-chevron" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .15s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div id="sug-lojas-painel" style="display:none;margin-top:8px;padding:10px;border:1px solid #f1f5f9;border-radius:7px">
-            <label style="font-size:12.5px;display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:8px;font-weight:600"><input type="checkbox" id="sug-todas-lojas" onchange="_sugToggleTodasLojas(this.checked)"> Todas as lojas</label>
-            <div id="sug-lojas-lista" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px;padding-left:2px;color:#94a3b8;font-size:12px">Selecione uma rede para ver as lojas.</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+              <input id="sug-loja-busca" type="text" placeholder="Buscar loja pelo nome..." oninput="_sugAplicarFiltroLojas()" autocomplete="off" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:240px;flex:1 1 240px;max-width:340px">
+              <div id="sug-loja-ufs" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+            </div>
+            <label style="font-size:12.5px;display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:8px;font-weight:600"><input type="checkbox" id="sug-todas-lojas" onchange="_sugToggleTodasLojas(this.checked)"> <span id="sug-todas-txt">Todas as lojas</span></label>
+            <style>@media(max-width:760px){#sug-lojas-lista{grid-template-columns:1fr !important}}</style><div id="sug-lojas-lista" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px;padding-left:2px;color:#94a3b8;font-size:12px">Selecione uma rede para ver as lojas.</div>
           </div>
-        </div>
-
-        <div id="sug-bloco-cliente" style="display:none;position:relative;max-width:360px">
-          <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Cliente</div>
-          <input type="hidden" id="sug-cliente-id">
-          <input id="sug-cliente-input" class="form-input" placeholder="Código, nome ou CNPJ (4+ letras)..." oninput="_sugClienteFiltrar()" onkeydown="_sugClienteKey(event)" onblur="setTimeout(function(){var d=document.getElementById('sug-cliente-drop');if(d)d.style.display='none'},200)" autocomplete="off" style="width:100%">
-          <div id="sug-cliente-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:7px;margin-top:2px;max-height:220px;overflow-y:auto;z-index:20;box-shadow:0 4px 16px rgba(15,23,42,.08)"></div>
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9">
@@ -31033,6 +31036,8 @@ function _apresMontarPptx(d, logoRede, logoForn, dataDe, dataAte, novosProdutosP
 // ═══════════════════════════════════════════════════
 var _sugEscopo = 'rede';
 var _sugLojasSelecionadas = {};
+var _sugLojasLista = [];
+var _sugUfFiltro = 'Todas';
 var _sugLinhas = [];
 
 function _sugResetar() {
@@ -31051,6 +31056,9 @@ function _sugResetar() {
   if (todas) todas.checked = false;
   var lista = document.getElementById('sug-lojas-lista');
   if (lista) lista.innerHTML = 'Selecione uma rede para ver as lojas.';
+  _sugLojasLista = []; _sugUfFiltro = 'Todas';
+  var bu = document.getElementById('sug-loja-busca'); if (bu) bu.value = '';
+  var cu = document.getElementById('sug-loja-ufs'); if (cu) cu.innerHTML = '';
   _sugAtualizarContadorLojas();
   var cliInput = document.getElementById('sug-cliente-input');
   if (cliInput) cliInput.value = '';
@@ -31089,7 +31097,9 @@ function _sugSetEscopo(v) {
   }
   var blocoRede = document.getElementById('sug-bloco-rede');
   var blocoCli  = document.getElementById('sug-bloco-cliente');
+  var filtrosRede = document.getElementById('sug-filtros-rede');
   if (blocoRede) blocoRede.style.display = v === 'rede' ? 'block' : 'none';
+  if (filtrosRede) filtrosRede.style.display = v === 'rede' ? 'contents' : 'none';
   if (blocoCli) blocoCli.style.display   = v === 'cliente' ? 'block' : 'none';
   _sugRenderTabela();
 }
@@ -31157,6 +31167,8 @@ function _sugAtualizarLojas() {
   var lista = document.getElementById('sug-lojas-lista');
   var todas = document.getElementById('sug-todas-lojas');
   _sugLojasSelecionadas = {};
+  _sugLojasLista = [];
+  var cuf = document.getElementById('sug-loja-ufs'); if (cuf) cuf.innerHTML = '';
   if (!redeId || (temSubRede && !subId)) {
     lista.innerHTML = temSubRede ? 'Selecione uma sub rede para ver as lojas.' : 'Selecione uma rede para ver as lojas.';
     if (todas) todas.checked = false;
@@ -31178,16 +31190,67 @@ function _sugAtualizarLojas() {
     return na.localeCompare(nb, 'pt-BR', { sensitivity: 'base' });
   });
   lojas.forEach(function(l){ _sugLojasSelecionadas[l.id] = true; });
-  lista.innerHTML = lojas.map(function(l){
-    return '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#1e293b"><input type="checkbox" id="sug-loja-' + l.id + '" checked onchange="_sugToggleLoja(\'' + l.id + '\',this.checked)"> ' + _pedEsc(_cpSemColchetes(l.nome_fantasia || l.razao_social || '')) + '</label>';
+  _sugLojasLista = lojas.map(function(l){
+    var nome = _cpSemColchetes(l.nome_fantasia || l.razao_social || '');
+    return { id: l.id, nome: nome, busca: nome.toLowerCase(), uf: String(_appUfCliente(l) || '').trim().toUpperCase() };
+  });
+  _sugUfFiltro = 'Todas';
+  var bu = document.getElementById('sug-loja-busca'); if (bu) bu.value = '';
+  lista.innerHTML = _sugLojasLista.map(function(l){
+    return '<label id="sug-lojarow-' + l.id + '" style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#1e293b"><input type="checkbox" id="sug-loja-' + l.id + '" checked onchange="_sugToggleLoja(\'' + l.id + '\',this.checked)"> ' + _pedEsc(l.nome) + (l.uf ? '<span style="margin-left:auto;font-size:10.5px;color:#94a3b8">' + _pedEsc(l.uf) + '</span>' : '') + '</label>';
   }).join('');
-  if (todas) todas.checked = true;
+  _sugAplicarFiltroLojas();
   _sugAtualizarContadorLojas();
   _sugRenderTabela();
 }
 
+// Lojas que passam pelo subfiltro (UF + busca por nome) hoje na tela
+function _sugLojasVisiveis() {
+  var bu = document.getElementById('sug-loja-busca');
+  var t = bu ? bu.value.trim().toLowerCase() : '';
+  return _sugLojasLista.filter(function(l){
+    return (_sugUfFiltro === 'Todas' || l.uf === _sugUfFiltro) && (!t || l.busca.indexOf(t) >= 0);
+  });
+}
+
+function _sugSetUf(uf) { _sugUfFiltro = uf; _sugAplicarFiltroLojas(); }
+
+function _sugAplicarFiltroLojas() {
+  var cont = document.getElementById('sug-loja-ufs');
+  if (cont) {
+    var cont_uf = {};
+    _sugLojasLista.forEach(function(l){ var k = l.uf || 'Sem UF'; cont_uf[k] = (cont_uf[k] || 0) + 1; });
+    var ufs = Object.keys(cont_uf).sort();
+    if (_sugUfFiltro !== 'Todas' && !cont_uf[_sugUfFiltro]) _sugUfFiltro = 'Todas';
+    var chips = [['Todas', _sugLojasLista.length]].concat(ufs.map(function(k){ return [k, cont_uf[k]]; }));
+    cont.innerHTML = ufs.length > 1 ? chips.map(function(c){
+      var on = c[0] === _sugUfFiltro || (c[0] === 'Sem UF' && _sugUfFiltro === '');
+      return '<span onclick="_sugSetUf(\'' + (c[0] === 'Sem UF' ? '' : c[0]) + '\')" style="cursor:pointer;user-select:none;border:1px solid ' + (on ? '#272A4A' : '#e2e8f0') + ';background:' + (on ? '#272A4A' : '#fff') + ';color:' + (on ? '#fff' : '#475569') + ';border-radius:999px;padding:3px 11px;font-size:11.5px;' + (on ? 'font-weight:700' : '') + '">' + c[0] + '<b style="margin-left:5px;opacity:.65;font-weight:600">' + c[1] + '</b></span>';
+    }).join('') : '';
+  }
+  var vis = {};
+  _sugLojasVisiveis().forEach(function(l){ vis[l.id] = true; });
+  _sugLojasLista.forEach(function(l){
+    var row = document.getElementById('sug-lojarow-' + l.id);
+    if (row) row.style.display = vis[l.id] ? 'flex' : 'none';
+  });
+  _sugAtualizarTodasLojas();
+}
+
+function _sugAtualizarTodasLojas() {
+  var v = _sugLojasVisiveis();
+  var todas = document.getElementById('sug-todas-lojas');
+  if (todas) todas.checked = v.length > 0 && v.every(function(l){ return _sugLojasSelecionadas[l.id]; });
+  var txt = document.getElementById('sug-todas-txt');
+  if (txt) {
+    var bu = document.getElementById('sug-loja-busca');
+    var filtrado = _sugUfFiltro !== 'Todas' || (bu && bu.value.trim());
+    txt.textContent = filtrado ? 'Todas as lojas exibidas (' + v.length + ')' : 'Todas as lojas';
+  }
+}
+
 function _sugToggleTodasLojas(checked) {
-  var lojas = _sugLojasAtivasFiltro();
+  var lojas = _sugLojasLista.length ? _sugLojasVisiveis() : _sugLojasAtivasFiltro();
   lojas.forEach(function(l){
     _sugLojasSelecionadas[l.id] = checked;
     var el = document.getElementById('sug-loja-' + l.id);
@@ -31199,10 +31262,7 @@ function _sugToggleTodasLojas(checked) {
 
 function _sugToggleLoja(id, checked) {
   _sugLojasSelecionadas[id] = checked;
-  var lojas = _sugLojasAtivasFiltro();
-  var todasMarcadas = lojas.length > 0 && lojas.every(function(l){ return _sugLojasSelecionadas[l.id]; });
-  var todas = document.getElementById('sug-todas-lojas');
-  if (todas) todas.checked = todasMarcadas;
+  _sugAtualizarTodasLojas();
   _sugAtualizarContadorLojas();
   _sugRenderTabela();
 }
