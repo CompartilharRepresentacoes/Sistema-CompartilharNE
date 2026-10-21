@@ -196,6 +196,27 @@
       border: none; border-radius: 8px; color: #fff; cursor: pointer; z-index: 5; font-size: 16px;
     }
     /* Pedidos: barra de títulos azul + ponto de cor do status ao lado da data */
+    /* v103: barra de titulo azul nas tabelas */
+    [style*="background:#f8fafc"][style*="text-transform:uppercase"],
+    .tabpreco-header-row,
+    .negpreco-header-row,
+    .ped-itens-header,
+    .ent-header-row,
+    .dev-th,
+    .rq-th,
+    .rev-header-row,
+    .com-header-row,
+    .fp-header { background: linear-gradient(90deg,#0b4f6c,#0e6b8c 60%,#0f8aa8) !important; color:#fff !important; border-bottom:0 !important; }
+    [style*="background:#f8fafc"][style*="text-transform:uppercase"] *,
+    .tabpreco-header-row *,
+    .negpreco-header-row *,
+    .ped-itens-header *,
+    .ent-header-row *,
+    .dev-th *,
+    .rq-th *,
+    .rev-header-row *,
+    .com-header-row *,
+    .fp-header * { color:#fff !important; }
     #page-pedido-list .ped-header-row { background: linear-gradient(90deg,#0b4f6c,#0e6b8c 60%,#0f8aa8) !important; color:#fff !important; border-bottom:0 !important; }
     #page-pedido-list .ped-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:0; flex-shrink:0; }
     #page-pedido-list .ped-r-data { white-space:nowrap; }
