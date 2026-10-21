@@ -6692,12 +6692,11 @@
             </div>
             <div id="dr-subrede-ms-drop" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px;width:230px;max-width:80vw;box-shadow:0 4px 16px rgba(15,23,42,.08);z-index:30;max-height:300px;overflow-y:auto"></div>
           </div>
-        </div>
-
-        <div style="border-top:1px solid #f1f5f9;padding-top:10px;margin-bottom:10px;position:relative;max-width:420px">
+          <div style="position:relative;flex:1 1 260px;min-width:240px;max-width:420px">
           <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Cliente específico (opcional)</div>
           <input id="dr-selecao-input" oninput="_drFiltrarSelecao()" onkeydown="_drSelecaoKey(event)" onblur="setTimeout(function(){var d=document.getElementById('dr-selecao-drop');if(d)d.style.display='none'},200)" autocomplete="off" placeholder="Buscar cliente..." style="width:100%;border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;font-size:12px;background:#f8fafc;box-sizing:border-box">
           <div id="dr-selecao-drop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:7px;margin-top:2px;max-height:220px;overflow-y:auto;z-index:20;box-shadow:0 4px 16px rgba(15,23,42,.08)"></div>
+        </div>
         </div>
 
         <div id="dr-selecao-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>
