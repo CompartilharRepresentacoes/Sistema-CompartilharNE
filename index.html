@@ -24101,7 +24101,7 @@ function renderBloqueios() {
   lista.innerHTML = rows.map(function (r) {
     var on = r.ativo !== 'Não', vig = _rqVigente(r, hoje), cor = _RQ_NIVEL_COR[r.nivel] || '#64748b';
     var ps = r.produtos || [];
-    var prodHtml = ps.slice(0, 2).map(function (p, i) { return (i ? '<br><span style="color:#64748b;font-size:11px">' : '<b>') + (p.codigo ? '[' + _pedEsc(p.codigo) + '] ' : '') + _pedEsc(p.nome) + (i ? '</span>' : '</b>'); }).join('') + (ps.length > 2 ? '<br><span style="color:#94a3b8;font-size:11px">+ ' + (ps.length - 2) + ' produto(s)</span>' : '');
+    var prodHtml = ps.slice(0, 2).map(function (p, i) { return (i ? '<br>' : '') + '<b>' + (p.codigo ? '[' + _pedEsc(p.codigo) + '] ' : '') + _pedEsc(p.nome) + '</b>'; }).join('') + (ps.length > 2 ? '<br><span style="color:#94a3b8;font-size:11px">+ ' + (ps.length - 2) + ' produto(s)</span>' : '');
     var al = r.alvos || [];
     var alvoHtml = al.slice(0, 3).map(function (a) { return _pedEsc(a.nome); }).join('<br>') + (al.length > 3 ? '<br><span style="color:#94a3b8;font-size:11px">+ ' + (al.length - 3) + '</span>' : '');
     if ((r.excecoes || []).length) alvoHtml += '<br><span style="color:#64748b;font-size:11px">Exceção: ' + _pedEsc(r.excecoes.slice(0, 2).map(function (e) { return e.nome; }).join(', ')) + ((r.excecoes.length > 2) ? ' +' + (r.excecoes.length - 2) : '') + '</span>';
@@ -24111,7 +24111,7 @@ function renderBloqueios() {
     return '<div class="rq-row" style="display:grid;grid-template-columns:1fr 1.5fr 80px 1.7fr 1.2fr 110px 100px 56px 70px;gap:8px;padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:12px;color:#1e293b;align-items:start;' + (on ? '' : 'opacity:.55') + '">'
       + '<span>' + _pedEsc(r.fornNome) + '</span><span>' + prodHtml + '</span>'
       + '<span><span style="background:' + cor + '1a;color:' + cor + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px">' + _RQ_NIVEL_LABEL[r.nivel] + '</span></span>'
-      + '<span>' + alvoHtml + '</span><span style="color:#64748b;font-size:11px">' + (r.motivo ? _pedEsc(r.motivo) : '—') + '</span>'
+      + '<span>' + alvoHtml + '</span><span style="color:#1e293b;font-size:11px;font-weight:700">' + (r.motivo ? _pedEsc(r.motivo) : '—') + '</span>'
       + '<span style="font-size:11px;color:#64748b">' + vigTxt + '</span>'
       + '<span style="font-size:11px;color:#64748b"><b style="color:#1e293b">' + nCli + '</b> cliente(s)</span>'
       + '<span onclick="_rqToggle(\'' + r.id + '\')" title="Clique para ' + (on ? 'pausar' : 'ativar') + '" style="cursor:pointer;width:32px;height:18px;border-radius:9px;background:' + (on ? '#15803d' : '#cbd5e1') + ';position:relative;display:block"><span style="position:absolute;' + (on ? 'right' : 'left') + ':2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff"></span></span>'
