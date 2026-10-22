@@ -19446,6 +19446,19 @@ function _sbDefMes(pre) {
   });
 })();
 
+
+// v108: abas Completas Faturadas / Simples NFs / Nao Faturadas abrem com a semana anterior (seg-dom) ja preenchida e ja listando (toda vez que a aba e aberta)
+function _sbSemanaAnt(pre) {
+  var de = document.getElementById(pre + '-data-de'), ate = document.getElementById(pre + '-data-ate');
+  if (!de || !ate) return;
+  var h = new Date(), dow = (h.getDay() + 6) % 7; // 0 = segunda
+  var ini = new Date(h.getFullYear(), h.getMonth(), h.getDate() - dow - 7);
+  var fim = new Date(ini.getFullYear(), ini.getMonth(), ini.getDate() + 6);
+  var f = function (d) { return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); };
+  de.value = f(ini); ate.value = f(fim);
+  var nome = { vcf: 'renderVendasCompletasFaturadas', psn: 'renderVendasSimplesNfs', pnf: 'renderNaoFaturados' }[pre];
+  if (typeof window[nome] === 'function') window[nome]();
+}
 // abas pesadas de Pedidos: abrem vazias; lista de fabricas; so buscam ao clicar em OK
 var _sbAbaOk = {};
 function _sbInicio(pre) {
@@ -19541,10 +19554,10 @@ function pedSetAba(aba) {
   _pedFecharAbasMenu();
   if (aba === 'geral') renderPedidoList();
   if (aba === 'simples') { _pssPopularFiltros(); renderVendaSimples(); }
-  if (aba === 'nao-fat') { _pnfPopularFiltros(); _sbInicio('pnf'); }
-  if (aba === 'simples-nf') { _psnPopularFiltros(); _sbInicio('psn'); }
+  if (aba === 'nao-fat') { _pnfPopularFiltros(); _sbInicio('pnf'); _sbSemanaAnt('pnf'); }
+  if (aba === 'simples-nf') { _psnPopularFiltros(); _sbInicio('psn'); _sbSemanaAnt('psn'); }
   if (aba === 'completas') { _vcPopularFiltros(); _sbInicio('vc'); }
-  if (aba === 'completas-fat') { _vcfPopularFiltros(); _sbInicio('vcf'); }
+  if (aba === 'completas-fat') { _vcfPopularFiltros(); _sbInicio('vcf'); _sbSemanaAnt('vcf'); }
 }
 // Menu mobile de "outras visoes": no celular so a aba ativa aparece, junto de um
 // botao de 3 pontos que abre a lista das demais para trocar de visao.
