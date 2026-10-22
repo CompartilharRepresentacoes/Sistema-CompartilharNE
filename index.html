@@ -221,6 +221,20 @@
     input[type=number] { -moz-appearance:textfield; appearance:textfield; }
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; display:none; }
     /* v113: Restricoes de Pedidos - padrao de Pedidos (totais em cartao azul unico, filtros com botao, tabela com faixa de aviso) */
+    /* v137: Comissoes - padrao do sistema */
+    #page-comissoes-list #com-abas { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
+    #page-comissoes-list .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
+    #page-comissoes-list .ng-aba:hover { background:#e8eefa; color:#272A4A; }
+    #page-comissoes-list .ng-aba.ng-aba-on { background:#e3ebff; color:#272A4A; box-shadow:inset 0 -3px 0 #3d4180; }
+    #page-comissoes-list .ng-aba em { font-style:normal; background:#fff; border-radius:999px; padding:1px 8px; margin-left:6px; font-size:10.5px; }
+    #page-comissoes-list #com-kpis { display:grid; grid-template-columns:repeat(4,1fr); background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(20,35,80,.08); margin-bottom:12px; }
+    #page-comissoes-list #com-kpis .cm-c { padding:14px 22px; }
+    #page-comissoes-list #com-kpis .cm-c + .cm-c { border-left:1px solid rgba(255,255,255,.2); }
+    #page-comissoes-list #com-kpis .cm-l { font-size:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:#ffffff; margin-bottom:4px; }
+    #page-comissoes-list #com-kpis .cm-v { font-size:24px; font-weight:800; color:#ffffff; }
+    #page-comissoes-list #com-kpis .cm-v.cm-r { color:#fca5a5; }
+    #page-comissoes-list #com-kpis .cm-v.cm-g { color:#86efac; }
+    @media (max-width:900px) { #page-comissoes-list #com-abas { overflow-x:auto; } #page-comissoes-list #com-kpis { grid-template-columns:1fr 1fr; } #page-comissoes-list #com-kpis .cm-c:nth-child(odd) { border-left:0; } #page-comissoes-list #com-kpis .cm-c:nth-child(even) { border-left:1px solid rgba(255,255,255,.2); } #page-comissoes-list #com-kpis .cm-c:nth-child(n+3) { border-top:1px solid rgba(255,255,255,.2); } }
     /* v135: Catalogos e Fotos Produtos - cartao azul unico de totais */
     .kpi-azul3 { display:grid; grid-template-columns:repeat(3,1fr); background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(20,35,80,.08); margin-bottom:12px; }
     .kpi-azul3 .ped-kpi-card { padding:14px 22px !important; background:transparent !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
@@ -7317,11 +7331,24 @@
   <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);border-radius:12px;padding:14px 20px;margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div>
-        <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.01em">Comissões a Receber</div>
+        <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.01em">Comissões</div>
         <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">Previsão de recebimento por período, conforme a forma de pagamento de cada fábrica</div>
       </div>
       <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
     </div>
+  </div>
+
+  <div id="com-abas">
+    <span class="ng-aba ng-aba-on" data-aba="" onclick="_comSetAba('')">Todas<em id="com-aba-n-">0</em></span>
+    <span class="ng-aba" data-aba="a_vencer" onclick="_comSetAba('a_vencer')">A vencer<em id="com-aba-n-a_vencer">0</em></span>
+    <span class="ng-aba" data-aba="vencido" onclick="_comSetAba('vencido')">Vencidas<em id="com-aba-n-vencido">0</em></span>
+    <span class="ng-aba" data-aba="recebido" onclick="_comSetAba('recebido')">Recebidas<em id="com-aba-n-recebido">0</em></span>
+  </div>
+  <div class="com-kpi-grid" id="com-kpis">
+    <div class="cm-c"><div class="cm-l">Previsto no Período</div><div class="cm-v" id="com-kpi-previsto">R$ 0,00</div></div>
+    <div class="cm-c"><div class="cm-l">A Vencer</div><div class="cm-v" id="com-kpi-vencer">R$ 0,00</div></div>
+    <div class="cm-c"><div class="cm-l">Vencido</div><div class="cm-v cm-r" id="com-kpi-vencido">R$ 0,00</div></div>
+    <div class="cm-c"><div class="cm-l">Já Recebido</div><div class="cm-v cm-g" id="com-kpi-recebido">R$ 0,00</div></div>
   </div>
 
   <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)">
@@ -7334,36 +7361,16 @@
       <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="com-data-ate" oninput="_entctrlMaskData(this);renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
       <span style="font-size:11px;font-weight:600;color:#64748b;margin-left:6px">Fábrica</span>
       <select id="com-fornecedor" onchange="renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-      <span style="font-size:11px;font-weight:600;color:#64748b">Status</span>
-      <select id="com-status" onchange="renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+      <select id="com-status" style="display:none" onchange="renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
         <option value="">Todos</option>
         <option value="a_vencer">A vencer</option>
         <option value="vencido">Vencido</option>
         <option value="recebido">Recebido</option>
       </select>
       <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
-        <button onclick="_cpiAbrirModal()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
-        <button onclick="_comLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+        <button onclick="_cpiAbrirModal()" style="background:#ffffff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
+        <button onclick="_comLimparFiltros()" style="background:#eef2f9;color:#1c2f66;border:none;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">Limpar</button>
       </div>
-    </div>
-  </div>
-
-  <div class="com-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-      <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Previsto no Período</div>
-      <div style="font-size:19px;font-weight:800;color:#272A4A" id="com-kpi-previsto">R$ 0,00</div>
-    </div>
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #DE7926">
-      <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">A Vencer</div>
-      <div style="font-size:19px;font-weight:800;color:#272A4A" id="com-kpi-vencer">R$ 0,00</div>
-    </div>
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #dc2626">
-      <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Vencido</div>
-      <div style="font-size:19px;font-weight:800;color:#272A4A" id="com-kpi-vencido">R$ 0,00</div>
-    </div>
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #16a34a">
-      <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Já Recebido</div>
-      <div style="font-size:19px;font-weight:800;color:#272A4A" id="com-kpi-recebido">R$ 0,00</div>
     </div>
   </div>
 
@@ -34044,6 +34051,8 @@ function _comPopularFiltros() {
   }
   _comPopularSelectMes(mesAtualSelecionado);
 }
+var _comAba = '';
+function _comSetAba(a) { document.getElementById('com-status').value = a; renderComissoes(); }
 function _comLimparFiltros() {
   document.getElementById('com-fornecedor').value = '';
   document.getElementById('com-status').value = '';
@@ -34095,6 +34104,10 @@ function renderComissoes() {
   document.getElementById('com-kpi-vencido').textContent = _finMoeda(totalVencido);
   document.getElementById('com-kpi-recebido').textContent = _finMoeda(totalRecebido);
 
+  var _comCont = { '': 0, a_vencer: 0, vencido: 0, recebido: 0 };
+  _finListaComissoes(deIso, ateIso, fornFiltro, '').forEach(function(g){ _comCont['']++; if (_comCont[g.status] != null) _comCont[g.status]++; });
+  Object.keys(_comCont).forEach(function(k){ var e = document.getElementById('com-aba-n-' + k); if (e) e.textContent = _comCont[k]; });
+  document.querySelectorAll('#com-abas .ng-aba').forEach(function(el){ el.classList.toggle('ng-aba-on', (el.getAttribute('data-aba') || '') === statusFiltro); });
   document.getElementById('com-tbody').innerHTML = lista.length
     ? lista.map(_comRenderRow).join('')
     : '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma comiss\u00e3o encontrada no per\u00edodo.</div>';
