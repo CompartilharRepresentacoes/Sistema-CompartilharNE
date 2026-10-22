@@ -225,6 +225,12 @@
     #page-pedido-list .ped-kpi-grid .ped-kpi-val { color:#fff !important; }
     #page-pedido-list .ped-kpi-grid .ped-kpi-val[style*="#16a34a"], #page-pedido-list .ped-kpi-grid .ped-kpi-val[style*="#15803d"] { color:#86efac !important; }
     #page-pedido-list .ped-kpi-grid .ped-kpi-val[style*="#dc2626"] { color:#fca5a5 !important; }
+    /* v107: abas de Pedidos - opcao 4 (largas, divididas igualmente), igual ao Inicio */
+    #page-pedido-list #ped-abas-desktop { background:#fff !important; border-bottom:0 !important; border-radius:14px !important; padding:6px !important; gap:10px !important; box-shadow:0 2px 10px rgba(20,35,80,.10); }
+    #page-pedido-list #ped-abas-desktop > div:first-child { gap:6px !important; flex-wrap:nowrap !important; }
+    #page-pedido-list #ped-abas-desktop button[id^="ped-aba-"] { flex:1 1 auto; text-align:center; padding:11px 12px !important; margin-bottom:0 !important; border:0 !important; border-radius:10px !important; background:#f1f5fb !important; color:#64748b !important; box-shadow:none !important; }
+    #page-pedido-list #ped-abas-desktop button[id^="ped-aba-"]:hover { background:#e8eefa !important; color:#272A4A !important; }
+    #page-pedido-list #ped-abas-desktop button[id^="ped-aba-"].ped-aba-on { background:#e3ebff !important; color:#272A4A !important; box-shadow:inset 0 -3px 0 #3d4180 !important; }
     #page-pedido-list .ped-header-row { background: linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%) !important; color:#fff !important; border-bottom:0 !important; }
     #page-pedido-list .ped-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:0; flex-shrink:0; }
     #page-pedido-list .ped-r-data { white-space:nowrap; }
@@ -4822,7 +4828,7 @@
       <!-- Abas de visao (mesmo estilo das abas da pagina Inicio: maiusculas + sublinhado laranja); Importar/Cadastrar ficam na mesma linha, a direita -->
       <div id="ped-abas-desktop" style="display:flex;align-items:center;gap:10px;border-bottom:2px solid #e2e8f0;margin-bottom:14px;background:#f8fafc;border-radius:10px 10px 0 0;padding:4px 4px 0;flex-wrap:wrap">
         <div style="display:flex;gap:2px;flex-wrap:wrap;flex:1">
-        <button id="ped-aba-geral" onclick="pedSetAba('geral')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#fff;color:#272A4A;border:none;border-bottom:2px solid #DE7926;margin-bottom:-2px;border-radius:8px 8px 0 0;box-shadow:0 -1px 4px rgba(15,23,42,.06);cursor:pointer;white-space:nowrap;transition:all .15s">Visão Geral</button>
+        <button id="ped-aba-geral" class="ped-aba-on" onclick="pedSetAba('geral')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#fff;color:#272A4A;border:none;border-bottom:2px solid #DE7926;margin-bottom:-2px;border-radius:8px 8px 0 0;box-shadow:0 -1px 4px rgba(15,23,42,.06);cursor:pointer;white-space:nowrap;transition:all .15s">Visão Geral</button>
         <button id="ped-aba-completas" onclick="pedSetAba('completas')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Completas</button>
         <button id="ped-aba-simples" onclick="pedSetAba('simples')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Venda Simples</button>
         <button id="ped-aba-completas-fat" onclick="pedSetAba('completas-fat')" style="padding:8px 18px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#94a3b8;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;transition:all .15s">Vendas Completas Faturadas</button>
@@ -19526,6 +19532,7 @@ function pedSetAba(aba) {
       btn.style.background = ativo ? '#fff' : 'transparent';
       btn.style.borderBottomColor = ativo ? '#DE7926' : 'transparent';
       btn.style.boxShadow = ativo ? '0 -1px 4px rgba(15,23,42,.06)' : 'none';
+      btn.classList.toggle('ped-aba-on', ativo);
     }
     if (painel) painel.style.display = ativo ? 'block' : 'none';
   });
