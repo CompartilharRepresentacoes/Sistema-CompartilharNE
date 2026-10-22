@@ -1526,6 +1526,31 @@
 .dash-root .d-tab-btn{flex:1 0 auto;text-align:center;padding:11px 14px;margin-bottom:0;border-bottom:0;border-radius:10px;background:#f1f5fb;color:#64748b}
 .dash-root .d-tab-btn.active{background:#e3ebff;color:#272A4A;box-shadow:inset 0 -3px 0 #3d4180;border-bottom:0}
 .dash-root .d-tab-btn:hover:not(.active){background:#e8eefa;color:#272A4A}
+/* v116: textos em cinza claro passam para preto (nao mexe em botoes/abas inativas, icones, menu lateral, login e textos sobre fundo escuro) */
+[style^="color:#94a3b8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style^="color: #94a3b8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*="; color:#94a3b8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*="; color: #94a3b8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*=";color:#94a3b8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*=";color: #94a3b8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style^="color:#cbd5e1"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style^="color: #cbd5e1"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*="; color:#cbd5e1"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*="; color: #cbd5e1"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*=";color:#cbd5e1"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*=";color: #cbd5e1"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style^="color:#c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style^="color: #c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*="; color:#c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*="; color: #c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*=";color:#c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*=";color: #c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *) { color:#1e293b !important; }
+.kpi-sub, .empty-row td, .cad-kpi-row, .cad-filtro-campo span, .cli-row-card .cli-c-codigo, .mc-row .mc-secondary,
+#page-pedido-list [class*="ped-r-"]::before, #page-entrega-controle .mc-row [class*="ent-"]::before, [class*="cpi-c-"]::before, #page-comissoes-list [class*="com-c-"]::before,
+.dash-root .periodo-info, .dash-root .dvg-kpi-lbl, .dash-root .dvg-metaring-txt span, .dash-root .dvg-devol-rank, .dash-root .dvg-devol-detail-tit, .dash-root .dvg-abcsum-lbl,
+#page-consulta-preco .cp-pc i, #page-consulta-preco .cp-th, #page-consulta-preco .cp-lb2, #page-consulta-preco .cp-lb, #page-consulta-preco .cp-c-eco,
+.apr-mbar .apr-mlbl, .apr-rankrow .apr-uf, .apr-empty,
+#page-pedido-form .ped-dados-toggle, #page-pedido-form .ped-dados-resumo .pdr-lbl, #page-pedido-form .ped-item-mobile .pim-row b { color:#1e293b !important; }
 /* v115: textos de apoio dos cartoes do Inicio em preto (antes cinza claro) */
 .dash-root .dvg-kpi-sub,.dash-root .dvg-kpi-cmp-row,.dash-root .dvg-vrank-sub,.dash-root .dvg-devol-vals,.dash-root .dvg-abcsum-item span{color:#1e293b}
 .dash-root .dvg-greet-txt span{color:#334155}
