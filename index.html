@@ -221,6 +221,16 @@
     input[type=number] { -moz-appearance:textfield; appearance:textfield; }
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; display:none; }
     /* v113: Restricoes de Pedidos - padrao de Pedidos (totais em cartao azul unico, filtros com botao, tabela com faixa de aviso) */
+    /* v131: Planejamento Reino - padrao do sistema (totais em cartao azul unico, filtros com Cadastrar) */
+    #page-planejamento-reino #pr-kpis { background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(20,35,80,.08); margin-bottom:12px; }
+    #page-planejamento-reino #pr-kpis .ped-kpi-card { background:transparent !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; padding:14px 22px !important; }
+    #page-planejamento-reino #pr-kpis .ped-kpi-card + .ped-kpi-card { border-left:1px solid rgba(255,255,255,.2) !important; }
+    #page-planejamento-reino .pr-fbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; background:#fff; border-radius:14px; padding:10px 14px; box-shadow:0 2px 10px rgba(20,35,80,.08); margin-bottom:12px; }
+    #page-planejamento-reino .pr-fbar label { font-size:10px; font-weight:700; color:#1c2f66; text-transform:uppercase; }
+    #page-planejamento-reino .pr-fbar select, #page-planejamento-reino .pr-fbar input { border:1px solid #d9e0ee; border-radius:8px; padding:8px 10px; font-size:12px; background:#f5f8fe; color:#1e293b; }
+    #page-planejamento-reino .pr-fbar .pr-lim { background:#eef2f9; color:#1c2f66; border:0; border-radius:8px; padding:9px 16px; font-weight:700; font-size:12px; cursor:pointer; }
+    #page-planejamento-reino .pr-fbar .pr-cad { background:#DE7926; color:#fff; border:0; border-radius:8px; padding:9px 16px; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; margin-left:auto; }
+    @media (max-width:900px) { #page-planejamento-reino #pr-kpis { grid-template-columns:repeat(2,minmax(0,1fr)) !important; } #page-planejamento-reino #pr-kpis .ped-kpi-card { padding:10px 14px !important; } #page-planejamento-reino #pr-kpis .ped-kpi-card + .ped-kpi-card { border-left:0 !important; } #page-planejamento-reino #pr-kpis .ped-kpi-card:nth-child(even) { border-left:1px solid rgba(255,255,255,.2) !important; } #page-planejamento-reino #pr-kpis .ped-kpi-card:nth-child(n+3) { border-top:1px solid rgba(255,255,255,.2) !important; } .pr-fbar .pr-cad { margin-left:0 !important; width:100%; } }
     /* v127: Devolucoes - padrao do sistema (abas largas, totais em cartao azul unico, filtros abaixo) */
     #page-devolucao-list #dev-status-chips { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
     #page-devolucao-list .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
@@ -24492,6 +24502,9 @@ function setPlanejamentoReinoVinculos(data) { if (firebaseConfigurado) { _fsSet(
 // de loja (planejamento_reino_lojas) são próprios do módulo, por fábrica.
 // ═══════════════════════════════════════════════════
 var _prAnoSel = 2026;
+var _prBusca = '';
+function _prSetBusca(v) { _prBusca = v; _prRenderRedes(); var i = document.getElementById('pr-busca'); if (i) { i.focus(); try { i.setSelectionRange(v.length, v.length); } catch (e) {} } }
+function _prLimparBusca() { _prBusca = ''; _prRenderRedes(); }
 var _PR_SITUACOES = ['Fechado', 'Apresentado', 'Em negociação'];
 var _PR_SITUACAO_CORES = {
   'Fechado':       { bg: '#f0fdf4', cor: '#15803d' },
@@ -24916,22 +24929,33 @@ function _prRenderRedes() {
     : (somaFaturadoAnoKg ? _prFmtKg(somaFaturadoAnoKg) + ' kg' : '—');
   var faturadoCor = _prDestaqueKg ? '#272A4A' : '#16a34a';
 
-  var kpisHtml = '<div class="ped-kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px">' +
+  var kpisHtml = '<div id="pr-kpis" class="pr-kpis-azul" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0">' +
     _prKpiCardPadrao('Volume Projetado', _prFmtKg(somaProjetado) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>', null, '#1c2f66') +
     _prKpiCardPadrao('Volume Fechado', _prFmtKg(somaFechadoKg) + ' <span style="font-size:11px;font-weight:600;color:#94a3b8">kg</span>', (somaFaturamento2026 ? _prFmtMoeda(somaFaturamento2026) : '—'), '#2c4488') +
     _prKpiCardPadrao('Faturado ' + _prAnoSel, faturadoValorHtml, faturadoSubHtml, '#3d5aa8', faturadoCor) +
     _prKpiCardPadrao('Total de Lojas Atendidas', qtdLojasAtendidas, registros.length + ' sub-redes negociando', '#5b78c9') +
     '</div>';
+  kpisHtml = kpisHtml.replace(/color:#94a3b8/g, 'color:#ffffff').replace(/color:#272A4A/g, 'color:#ffffff').replace(/color:#16a34a/g, 'color:#86efac');
 
-  var cadastrarBtnHtml = '<div style="display:flex;justify-content:flex-end;margin-bottom:18px">' +
-    '<button onclick="_prAbrirCadastrarNegociacao()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:12.5px;font-weight:700;cursor:pointer">' +
-    '<i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:6px"></i>Cadastrar Negociação</button>' +
+  var cadastrarBtnHtml = '<div class="pr-fbar">' +
+    '<label>Ano</label><select onchange="_prSelecionarAno(this.value)">' +
+    anosOrdenados.map(function (a) { return '<option value="' + a + '"' + (a === _prAnoSel ? ' selected' : '') + '>' + a + '</option>'; }).join('') + '</select>' +
+    '<input id="pr-busca" value="' + _prEsc(_prBusca) + '" oninput="_prSetBusca(this.value)" placeholder="Buscar rede ou sub-rede" style="flex:1;min-width:200px">' +
+    '<button onclick="_prLimparBusca()" class="pr-lim">Limpar</button>' +
+    '<button onclick="_prAbrirCadastrarNegociacao()" class="pr-cad">➕ Cadastrar Negociação</button>' +
     '</div>';
 
   var redesComNegociacao = {};
   registros.forEach(function (r) { redesComNegociacao[String(r.categoriaId)] = true; });
   var redes = getCatClientes().filter(function (c) { return !c.pai && redesComNegociacao[String(c.id)]; })
     .sort(function (a, b) { return (a.nome || '').localeCompare(b.nome || '', 'pt-BR'); });
+  if (_prBusca) {
+    var _qb = _cpNorm(_prBusca);
+    redes = redes.filter(function (rd) {
+      if (_cpNorm(rd.nome || '').indexOf(_qb) !== -1) return true;
+      return getCatClientes().some(function (c) { return String(c.pai) === String(rd.id) && _cpNorm(c.nome || '').indexOf(_qb) !== -1; });
+    });
+  }
 
   var linhasHtml = redes.map(function (rede) {
     var subsReg = registros.filter(function (r) { return String(r.categoriaId) === String(rede.id); });
@@ -25004,7 +25028,7 @@ function _prRenderRedes() {
     return headerHtml + corpoHtml;
   }).join('');
 
-  el.innerHTML = anoBarHtml + kpisHtml + cadastrarBtnHtml + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
+  el.innerHTML = kpisHtml + cadastrarBtnHtml + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">' +
     (linhasHtml || '<div style="padding:28px;text-align:center;color:#94a3b8;font-size:12.5px">Nenhuma negociação cadastrada ainda para o ano ' + _prAnoSel + '.<br>Clique em "Cadastrar Negociação" acima para começar.</div>') +
     '</div>';
 }
