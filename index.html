@@ -4541,6 +4541,13 @@
         #page-consulta-preco .cp-c-fin .cp-inp input{font-size:30px;font-weight:900;color:#c2570c;padding:8px 12px}
         #page-consulta-preco .cp-lb2{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
         #page-consulta-preco .cp-c-eco{width:100%;font-size:11px;color:#94a3b8}
+        /* v114: campo de desconto maior; preco final menor */
+        #page-consulta-preco .cp-c-desc{width:200px;flex:0 0 200px}
+        #page-consulta-preco .cp-c-desc .cp-inp{border:2px solid #3d4180;border-radius:12px}
+        #page-consulta-preco .cp-c-desc .cp-inp span{font-size:15px;font-weight:800;color:#3d4180;background:#eef2ff}
+        #page-consulta-preco .cp-c-desc .cp-inp input{font-size:30px;font-weight:900;color:#272A4A;padding:8px 12px}
+        #page-consulta-preco .cp-c-fin{flex:0 1 280px;min-width:200px}
+        #page-consulta-preco .cp-c-fin .cp-inp input{font-size:26px}
         #page-consulta-preco .cp-lb{display:none;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px}
         @media(max-width:900px){
           #page-consulta-preco .cp-fg>div,#page-consulta-preco .cp-fg>div.cp-f-forn,#page-consulta-preco .cp-fg>div.cp-f-prod{flex:1 1 100%}
@@ -16335,7 +16342,7 @@ function consultarPreco() {
       + '<small style="margin-top:2px">' + _pedEsc(r.tabela.codigo || '') + (r.item.periodo ? ' · válida até ' + _pedEsc(r.item.periodo) : '') + '</small>'
       + '<small style="margin-top:12px">PREÇO DA TABELA</small><div class="cp-c-v">' + brl(val) + '</div></div>'
       + '<div class="cp-c-r">'
-      + '<div style="width:110px"><div class="cp-lb2">Desc. %</div><div class="cp-inp"><input id="cp-p-' + i + '" inputmode="decimal" placeholder="0" oninput="cpSimPct(' + i + ')"><span>%</span></div></div>'
+      + '<div class="cp-c-desc"><div class="cp-lb2">Desc. %</div><div class="cp-inp"><input id="cp-p-' + i + '" inputmode="decimal" placeholder="0" oninput="cpSimPct(' + i + ')"><span>%</span></div></div>'
       + '<div class="cp-c-fin"><div class="cp-lb2" style="color:#c2570c">Preço final</div><div class="cp-inp"><span>R$</span><input id="cp-f-' + i + '" inputmode="decimal" placeholder="' + val.toFixed(2).replace('.', ',') + '" oninput="cpSimPreco(' + i + ')"></div></div>'
       + '<div id="cp-e-' + i + '" class="cp-c-eco">Economia por unidade: —</div></div></div>';
   }).join('');
