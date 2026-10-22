@@ -24218,9 +24218,21 @@ function _rqVerificar(fornId, produtoId, cliente) {
   }
   return null;
 }
+// v110: getClientes() clona a lista inteira a cada chamada; mapa id->cliente fica em cache enquanto o array do cache for o mesmo
+var _bloqCliRef = null, _bloqCliMap = null;
+function _bloqClienteDe(id) {
+  var ref = (typeof _fsCache !== 'undefined' && _fsCache) ? _fsCache['clientes'] : null;
+  if (!ref) return getClientes().find(function (c) { return c.id === id; }) || null;
+  if (ref !== _bloqCliRef || !_bloqCliMap) {
+    _bloqCliMap = {};
+    ref.forEach(function (c) { _bloqCliMap[c.id] = c; });
+    _bloqCliRef = ref;
+  }
+  return _bloqCliMap[id] || null;
+}
 function _bloqVerificar(fornId, produtoId, clienteId) {
   if (!fornId || !produtoId) return null;
-  var cliente = clienteId ? getClientes().find(function (c) { return c.id === clienteId; }) : null;
+  var cliente = clienteId ? _bloqClienteDe(clienteId) : null;
   var ativos = _bloqBuscarAtivos(fornId, produtoId);
   if (ativos.length) {
     var porCliente = clienteId ? ativos.filter(function (b) { return b.nivel === 'cliente' && String(b.alvoId) === String(clienteId); })[0] : null;
@@ -31498,9 +31510,20 @@ function _sugHintCelula(p, valor) {
 }
 
 // v74: loja/cliente barrado por restricao (rede, loja, UF, cidade...) nao entra em total nem no Excel
+// v110: digitar quantidade ficava lento (cada tecla refazia ~100+ clones da lista de clientes/produtos).
+// Agora a tabela guarda colunas, produtos e bloqueios calculados na ultima montagem (_sugRenderTabela).
+var _sugColsRender = null, _sugProdsRender = null, _sugBloqMemo = {};
+function _sugCols() { return _sugColsRender || _sugColunasAtivas(); }
+function _sugProd(id) {
+  if (_sugProdsRender) return _sugProdsRender[id] || {};
+  return getProdutos().find(function(x){ return x.id === id; }) || {};
+}
 function _sugBloqCel(produtoId, colId) {
   var f = document.getElementById('sug-fornecedor');
-  return f && f.value ? _bloqVerificar(f.value, produtoId, colId) : null;
+  if (!f || !f.value) return null;
+  var k = f.value + '|' + produtoId + '|' + colId;
+  if (!(k in _sugBloqMemo)) _sugBloqMemo[k] = _bloqVerificar(f.value, produtoId, colId);
+  return _sugBloqMemo[k];
 }
 function _sugAtualizarQtd(produtoId, colId, valor, inputEl) {
   var linha = _sugLinhas.filter(function(l){ return l.produtoId === produtoId; })[0];
@@ -31508,7 +31531,7 @@ function _sugAtualizarQtd(produtoId, colId, valor, inputEl) {
   var v = parseFloat(String(valor).replace(',', '.'));
   if (isNaN(v) || v < 0) v = 0;
   linha.qtds[colId] = v;
-  var p = getProdutos().find(function(x){ return x.id === produtoId; }) || {};
+  var p = _sugProd(produtoId);
   var valido = _sugValidarQtd(p, v);
   if (inputEl) {
     inputEl.classList.toggle('sug-inv', !valido);
@@ -31522,7 +31545,7 @@ function _sugAtualizarQtd(produtoId, colId, valor, inputEl) {
   var totQtd = document.getElementById('sug-lin-qtd-' + produtoId);
   var totPeso = document.getElementById('sug-lin-peso-' + produtoId);
   if (totQtd || totPeso) {
-    var cols = _sugColunasAtivas();
+    var cols = _sugCols();
     var somaQtd = 0, somaPeso = 0;
     cols.forEach(function(c){
       var vv = _sugBloqCel(produtoId, c.id) ? 0 : (linha.qtds[c.id] || 0);
@@ -31536,14 +31559,13 @@ function _sugAtualizarQtd(produtoId, colId, valor, inputEl) {
 }
 
 function _sugAtualizarTotais() {
-  var cols = _sugColunasAtivas();
+  var cols = _sugCols();
   var tfoot = document.querySelector('#sug-tabela tfoot');
   if (!tfoot) return;
-  var produtos = getProdutos();
   var pesoGeral = 0;
   var celulas = cols.map(function(c){
     var somaPeso = _sugLinhas.reduce(function(acc, l){
-      var p = produtos.find(function(x){ return x.id === l.produtoId; }) || {};
+      var p = _sugProd(l.produtoId);
       return acc + (_sugBloqCel(l.produtoId, c.id) ? 0 : _sugPesoCelula(p, l.qtds[c.id] || 0));
     }, 0);
     pesoGeral += somaPeso;
@@ -31561,6 +31583,7 @@ function _sugAtualizarTotais() {
 
 function _sugRenderTabela() {
   var cols = _sugColunasAtivas();
+  _sugColsRender = cols; _sugBloqMemo = {}; _sugProdsRender = null;
   var thead = document.querySelector('#sug-tabela thead');
   var tbody = document.querySelector('#sug-tabela tbody');
   var tfoot = document.querySelector('#sug-tabela tfoot');
@@ -31580,6 +31603,7 @@ function _sugRenderTabela() {
   if (vazio) vazio.style.display = 'none';
 
   var produtos = getProdutos();
+  _sugProdsRender = {}; produtos.forEach(function(x){ _sugProdsRender[x.id] = x; });
   thead.innerHTML = '<tr style="border-bottom:1px solid #e2e8f0;color:#1e293b;text-align:left">'
     + '<td style="position:sticky;left:0;background:#fff;padding:6px;min-width:150px;z-index:2">Produto</td>'
     + '<td style="position:sticky;left:150px;background:#fff;padding:6px;min-width:70px;z-index:2;box-shadow:2px 0 4px -2px rgba(0,0,0,.12)">Cx</td>'
@@ -31594,7 +31618,7 @@ function _sugRenderTabela() {
     var somaQtd = 0, somaPeso = 0;
     var celulas = cols.map(function(c){
       var v = l.qtds[c.id] || '';
-      var bloqueio = _bloqVerificar(_sugFornBloq, l.produtoId, c.id);
+      var bloqueio = _sugBloqCel(l.produtoId, c.id);
       if (bloqueio) {
         return '<td style="padding:4px;text-align:center"><input type="text" value="Bloqueado" readonly title="' + _pedEsc(bloqueio.motivo || 'Produto bloqueado para este destino') + '" style="width:64px;height:28px;border:1px solid #fecaca;border-radius:4px;text-align:center;font-size:10px;background:#fef2f2;color:#b91c1c;cursor:not-allowed"></td>';
       }
