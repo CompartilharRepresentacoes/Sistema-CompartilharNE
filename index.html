@@ -2782,6 +2782,35 @@
                 </div>
               </div>
               <div style="font-size:10.5px;color:#94a3b8;margin-top:8px;line-height:1.5" id="forn-comissao-nota">Comissão do mês inteiro é paga de uma vez, após o fechamento do mês de faturamento.</div>
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9">
+                <div style="max-width:220px;margin-bottom:12px">
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Comissão padrão (%)</label>
+                  <input class="form-input" id="forn-comissao-padrao" placeholder="0,00" oninput="_tpFormatComissao(this)" maxlength="6" style="width:100%">
+                  <div style="font-size:10.5px;color:#1c2f66;line-height:1.5;margin-top:4px">Vale para todos os produtos e tabelas, exceto os das listas abaixo.</div>
+                </div>
+                <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Exceções por produto</label>
+                <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:12px">
+                  <div style="display:grid;grid-template-columns:90px 1fr 100px 40px;gap:10px;padding:9px 14px;background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);color:#fff;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase"><span>Código</span><span>Produto</span><span>Comissão</span><span></span></div>
+                  <div id="forn-com-exprod-list"></div>
+                  <div style="display:flex;gap:10px;padding:10px 14px;background:#f8fafc;align-items:flex-end;flex-wrap:wrap">
+                    <div style="flex:1;min-width:200px"><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Código ou nome do produto</label><input class="form-input" id="forn-comexp-prod" placeholder="Ex.: 1003" style="width:100%"></div>
+                    <div style="width:100px"><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Comissão (%)</label><input class="form-input" id="forn-comexp-pct" placeholder="0,00" oninput="_tpFormatComissao(this)" maxlength="6" style="width:100%"></div>
+                    <button type="button" onclick="_fornComAddProd()" style="background:#DE7926;color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap">➕ Adicionar</button>
+                  </div>
+                </div>
+                <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Exceções por tabela de preço</label>
+                <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+                  <div style="display:grid;grid-template-columns:1fr 100px 40px;gap:10px;padding:9px 14px;background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);color:#fff;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase"><span>Tabela</span><span>Comissão</span><span></span></div>
+                  <div id="forn-com-extab-list"></div>
+                  <div style="display:flex;gap:10px;padding:10px 14px;background:#f8fafc;align-items:flex-end;flex-wrap:wrap">
+                    <div style="flex:1;min-width:200px"><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Tabela</label><select class="form-input" id="forn-comext-tab" style="width:100%"></select></div>
+                    <div style="width:100px"><label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Comissão (%)</label><input class="form-input" id="forn-comext-pct" placeholder="0,00" oninput="_tpFormatComissao(this)" maxlength="6" style="width:100%"></div>
+                    <button type="button" onclick="_fornComAddTab()" style="background:#DE7926;color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap">➕ Adicionar</button>
+                  </div>
+                </div>
+                <div id="forn-com-msg" style="font-size:11px;color:#b91c1c;margin-top:8px;min-height:14px"></div>
+                <div style="font-size:10.5px;color:#1c2f66;line-height:1.5;margin-top:4px"><b>Prioridade:</b> negociação de preço, exceção por produto, % preenchido no produto da tabela, exceção por tabela e, por último, o padrão.</div>
+              </div>
             </div>
 
             <!-- ── Botões ── -->
@@ -5570,7 +5599,7 @@
                 <div id="ped-itens-tbody"><div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">Nenhum item adicionado.</div></div>
               </div>
               <div style="display:flex;justify-content:flex-end;padding-top:10px">
-                <div style="font-size:13px;color:#475569">Total do pedido: <span id="ped-total-geral" style="font-size:16px;font-weight:800;color:#272A4A;margin-left:6px">R$ 0,00</span></div>
+                <div style="font-size:13px;color:#475569">Total do pedido: <span id="ped-total-geral" style="font-size:16px;font-weight:800;color:#272A4A;margin-left:6px">R$ 0,00</span><span style="margin-left:18px">Comissão prevista: <span id="ped-comissao-total" style="font-size:14px;font-weight:800;color:#1c2f66;margin-left:4px">R$ 0,00</span></span></div>
               </div>
             </div>
 
@@ -10623,6 +10652,9 @@ function openFornecedorForm(params) {
   setV('forn-comissao-dia-corte', r.comissaoDiaCorte||26);
   setV('forn-comissao-prazo-dias', (r.comissaoPrazoDias!=null ? r.comissaoPrazoDias : 10));
   _finToggleFormaPagForn();
+  setV('forn-comissao-padrao', r.comissaoPadrao||'');
+  _fornComExProd = (r.comissaoExcProd||[]).slice(); _fornComExTab = (r.comissaoExcTab||[]).slice();
+  _fornComPopularTabs(); _fornComRender();
   _fornToggleReinoDestaque();
 
   // Estado e cidade
@@ -10710,6 +10742,9 @@ function salvarFornecedor() {
     comissaoFormaPagamento: document.getElementById('forn-comissao-forma') ? document.getElementById('forn-comissao-forma').value : 'fechamento_mes',
     comissaoDiaCorte:  parseInt((document.getElementById('forn-comissao-dia-corte')||{}).value) || 26,
     comissaoPrazoDias: parseInt((document.getElementById('forn-comissao-prazo-dias')||{}).value) || 0,
+    comissaoPadrao: ((document.getElementById('forn-comissao-padrao')||{}).value || '').trim(),
+    comissaoExcProd: _fornComExProd.slice(),
+    comissaoExcTab: _fornComExTab.slice(),
     foto:         foto,
   };
 
@@ -14294,7 +14329,7 @@ function _tpRenderProdList() {
       + '<span style="color:#64748b">'+(it.codCliente||'—')+'</span>'
       + '<span style="color:#64748b;font-size:11px">'+unidade+'</span>'
       + '<span style="color:#1e293b;font-weight:600">R$ '+it.valor+'</span>'
-      + '<span style="color:#64748b;font-size:11px">'+(it.comissao ? it.comissao+'%' : '—')+'</span>'
+      + (function(){ var _r = _comResolver(_comFornDe(it.fornId), it.prodId, it.comissao, '', (document.getElementById('tabpreco-edit-id')||{}).value || ''); return '<span style="color:#1e293b;font-size:11px;font-weight:700">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'<br>'+_comOrigemTag(_r.origem)+'</span>'; })()
       + '<span style="color:#DE7926;font-size:11px">'+(it.periodo||'—')+'</span>'
       + '<span style="color:#64748b">'+(it.dtCadastro||'—')+'</span>'
       + '<div style="display:flex;gap:4px;justify-content:center">'
@@ -25858,7 +25893,8 @@ function _pedProdSel(i) {
   var achadoTab = pedResolverPrecoCliente(fornId, p.id, cliId);
   var achado = achadoNeg || achadoTab;
   document.getElementById('ped-item-preco').value    = _pedNumParaMascara(achado ? _pedParseMoeda(achado.valor) : 0);
-  document.getElementById('ped-item-comissao').value = (achado && achado.comissao) ? achado.comissao : '—';
+  var _rc = _comResolver(_comFornDe(fornId), p.id, achado ? achado.comissao : '', cliId, null);
+  document.getElementById('ped-item-comissao').value = _rc.pct > 0 ? _comFmtPct(_rc.pct) : '—';
   var itemMsg = document.getElementById('ped-item-msg');
   if (itemMsg) {
     if (achadoNeg) {
@@ -26080,6 +26116,7 @@ function renderPedItens() {
   var total = 0;
   var _pedItensFornId = document.getElementById('ped-forn-id') ? document.getElementById('ped-forn-id').value : '';
   var _pedItensCliId  = document.getElementById('ped-cli-id') ? document.getElementById('ped-cli-id').value : '';
+  var _pedComTotal = 0;
   tbody.innerHTML = _pedItens.map(function(it, i){
     total += Number(it.valorTotal) || 0;
     var acoesCell = '<button onclick="pedAbrirEdicaoItem('+i+')" title="Editar preço, quantidade e desconto" style="background:none;border:none;cursor:pointer;color:#475569;padding:4px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
@@ -26094,7 +26131,7 @@ function renderPedItens() {
       + '<div style="color:#64748b">'+(it.medida!==undefined && it.medida!==''?_pedEsc(it.medida):'—')+'</div>'
       + '<div style="color:#64748b">'+(it.cx!==undefined && it.cx!==''?it.cx:'—')+'</div>'
       + '<div style="color:#64748b">'+_pedFmtMoeda(it.precoUnit)+'</div>'
-      + '<div style="color:#64748b">'+(it.comissao && it.comissao!=='' ? it.comissao+'%' : '—')+'</div>'
+      + (function(){ var _r = _comResolver(_comFornDe(_pedItensFornId), it.prodId, it.comissao, _pedItensCliId, null); _pedComTotal += (Number(it.valorTotal)||0) * _r.pct / 100; return '<div style="color:#1e293b;font-size:11.5px;font-weight:700">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'<br>'+_comOrigemTag(_r.origem)+'</div>'; })()
       + '<div style="color:#64748b">'+(it.desconto||0)+'%</div>'
       + '<div style="color:#64748b" title="'+((it.modoUnid==='cx' && it.qtdCaixas)?(_pedEsc(String(it.qtdCaixas))+' CX × '+_pedEsc(String(it.cx||''))+' = '+it.quantidade+' '+_pedEsc(it.medida||'')):'')+'">'+((it.modoUnid==='cx' && it.qtdCaixas)?(it.qtdCaixas+' CX'):it.quantidade)+'</div>'
       + '<div style="font-weight:700;color:#1e293b">'+_pedFmtMoeda(it.valorTotal)+'</div>'
@@ -26107,6 +26144,7 @@ function renderPedItens() {
       + '</div>';
   }).join('');
   if (totalEl) totalEl.textContent = _pedFmtMoeda(total);
+  var _cEl = document.getElementById('ped-comissao-total'); if (_cEl) _cEl.textContent = _pedFmtMoeda(_pedComTotal);
 }
 
 // Restringe Número Pedido Cliente a letras/números e no máximo 1 ponto (sem ; nem outros símbolos)
@@ -33919,15 +33957,101 @@ function _finProximoCorte(iso, diaCorte) {
   var corteProxMes = new Date(d.getFullYear(), d.getMonth()+1, diaProxMes, 12,0,0);
   return _finIso(corteProxMes);
 }
+// ===== v139: Comissao padrao + excecoes (produto/tabela) na ficha do fornecedor =====
+var _fornComExProd = [], _fornComExTab = [];
+function _comPctNum(v) { return parseFloat(String(v==null?'':v).replace('%','').replace(',', '.')) || 0; }
+function _comFmtPct(n) { return (Math.round(n*100)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function _fornComMsg(t) { var el = document.getElementById('forn-com-msg'); if (el) el.textContent = t || ''; }
+function _fornComPopularTabs() {
+  var sel = document.getElementById('forn-comext-tab'); if (!sel) return;
+  var tabs = _fornEditId ? getTabPrecos().filter(function(t){ return (t.itens||[]).some(function(it){ return String(it.fornId) === String(_fornEditId); }); }) : [];
+  sel.innerHTML = '<option value="">' + (tabs.length ? 'Selecione uma tabela deste fornecedor...' : 'Nenhuma tabela deste fornecedor') + '</option>'
+    + tabs.map(function(t){ return '<option value="' + t.id + '">' + _pedEsc(t.nome||'') + '</option>'; }).join('');
+}
+function _fornComRender() {
+  var lp = document.getElementById('forn-com-exprod-list'), lt = document.getElementById('forn-com-extab-list');
+  var vazio = function(t){ return '<div style="padding:12px;text-align:center;color:#1c2f66;font-size:12px">' + t + '</div>'; };
+  if (lp) lp.innerHTML = _fornComExProd.length ? _fornComExProd.map(function(e,i){
+    return '<div style="display:grid;grid-template-columns:90px 1fr 100px 40px;gap:10px;padding:9px 14px;align-items:center;border-bottom:1px solid #eef2f9;font-size:12.5px"><span>' + _pedEsc(e.prodCodigo||'') + '</span><b style="color:#272A4A">' + _pedEsc(e.prodNome||'') + '</b><span>' + _pedEsc(e.pct) + '%</span><span onclick="_fornComDelProd(' + i + ')" style="color:#b91c1c;font-weight:800;text-align:center;cursor:pointer">&#10005;</span></div>';
+  }).join('') : vazio('Nenhuma exceção por produto.');
+  if (lt) lt.innerHTML = _fornComExTab.length ? _fornComExTab.map(function(e,i){
+    return '<div style="display:grid;grid-template-columns:1fr 100px 40px;gap:10px;padding:9px 14px;align-items:center;border-bottom:1px solid #eef2f9;font-size:12.5px"><b style="color:#272A4A">' + _pedEsc(e.tabNome||'') + '</b><span>' + _pedEsc(e.pct) + '%</span><span onclick="_fornComDelTab(' + i + ')" style="color:#b91c1c;font-weight:800;text-align:center;cursor:pointer">&#10005;</span></div>';
+  }).join('') : vazio('Nenhuma exceção por tabela.');
+}
+function _fornComDelProd(i) { _fornComExProd.splice(i,1); _fornComRender(); }
+function _fornComDelTab(i) { _fornComExTab.splice(i,1); _fornComRender(); }
+function _fornComAddProd() {
+  _fornComMsg('');
+  var q = ((document.getElementById('forn-comexp-prod')||{}).value || '').trim().toLowerCase();
+  var pct = ((document.getElementById('forn-comexp-pct')||{}).value || '').trim();
+  if (!q || !pct) { _fornComMsg('Informe o produto e a comissão.'); return; }
+  var prods = getProdutos().filter(function(p){ return !_fornEditId || String(p.fornecedor) === String(_fornEditId); });
+  var achados = prods.filter(function(p){ return String(p.codigo||'').trim().toLowerCase() === q; });
+  if (!achados.length) achados = prods.filter(function(p){ return String(p.nome||'').toLowerCase().indexOf(q) !== -1; });
+  if (!achados.length) { _fornComMsg('Produto não encontrado neste fornecedor.'); return; }
+  if (achados.length > 1) { _fornComMsg('Mais de um produto encontrado. Digite o código exato.'); return; }
+  var p = achados[0];
+  _fornComExProd = _fornComExProd.filter(function(e){ return e.prodId !== p.id; });
+  _fornComExProd.push({ prodId: p.id, prodCodigo: p.codigo||'', prodNome: p.nome||'', pct: pct });
+  document.getElementById('forn-comexp-prod').value = ''; document.getElementById('forn-comexp-pct').value = '';
+  _fornComRender();
+}
+function _fornComAddTab() {
+  _fornComMsg('');
+  var sel = document.getElementById('forn-comext-tab');
+  var pct = ((document.getElementById('forn-comext-pct')||{}).value || '').trim();
+  if (!sel || !sel.value || !pct) { _fornComMsg('Selecione a tabela e informe a comissão.'); return; }
+  var nome = sel.options[sel.selectedIndex].text;
+  _fornComExTab = _fornComExTab.filter(function(e){ return e.tabId !== sel.value; });
+  _fornComExTab.push({ tabId: sel.value, tabNome: nome, pct: pct });
+  sel.value = ''; document.getElementById('forn-comext-pct').value = '';
+  _fornComRender();
+}
+// Prioridade: negociacao > excecao produto (ficha) > % do item (tabela/pedido) > excecao por tabela (ficha) > padrao.
+function _comResolver(forn, prodId, itemCom, cliId, tabId) {
+  var exP = null;
+  if (forn && forn.comissaoExcProd && forn.comissaoExcProd.length) {
+    exP = forn.comissaoExcProd.find(function(e){ return String(e.prodId) === String(prodId); }) || null;
+    if (exP && cliId) {
+      var neg = pedResolverPrecoNegociado(forn.id, prodId, cliId);
+      if (neg && _comPctNum(neg.comissao) > 0) return { pct: _comPctNum(neg.comissao), origem: 'N' };
+    }
+    if (exP) return { pct: _comPctNum(exP.pct), origem: 'E' };
+  }
+  var it = _comPctNum(itemCom);
+  if (it > 0) return { pct: it, origem: 'I' };
+  if (forn && forn.comissaoExcTab && forn.comissaoExcTab.length) {
+    var tid = tabId;
+    if (!tid && cliId) {
+      var tab = getTabPrecos().find(function(t){
+        return (t.ativo||'Sim') === 'Sim' && (t.clientes||[]).some(function(c){ return String(c.cliId) === String(cliId); })
+          && (t.itens||[]).some(function(x){ return String(x.prodId) === String(prodId) && String(x.fornId) === String(forn.id); });
+      });
+      tid = tab ? tab.id : '';
+    }
+    var exT = tid ? forn.comissaoExcTab.find(function(e){ return String(e.tabId) === String(tid); }) : null;
+    if (exT) return { pct: _comPctNum(exT.pct), origem: 'T' };
+  }
+  var pd = _comPctNum(forn && forn.comissaoPadrao);
+  if (pd > 0) return { pct: pd, origem: 'P' };
+  return { pct: 0, origem: '' };
+}
+function _comOrigemTag(o) {
+  var m = { N:['#fef3c7','#b45309','Negociação'], E:['#fff7ed','#c2410c','Exceção produto'], I:['#f1f5f9','#1c2f66','Tabela'], T:['#eff6ff','#1d4ed8','Exceção tabela'], P:['#eef2ff','#272A4A','Padrão'] }[o];
+  return m ? '<span style="display:inline-block;border-radius:999px;padding:1px 8px;font-size:10px;font-weight:800;background:'+m[0]+';color:'+m[1]+'">'+m[2]+'</span>' : '';
+}
+function _comFornDe(fornId) { return getFornecedores().find(function(f){ return String(f.id) === String(fornId); }) || null; }
 // Soma, item a item, preco faturado x comissao% do item no pedido original (comissao e' um snapshot
 // gravado no pedido.itens[] no momento da digitacao -- ver _pedItens.push em pedAdicionarItem).
-function _finValorComissaoFatura(fatura, pedido) {
+function _finValorComissaoFatura(fatura, pedido, detalhe) {
   var total = 0;
+  var forn = _comFornDe(pedido.fornecedorId);
   (fatura.itens || []).forEach(function(fi) {
     var itPed = (pedido.itens || []).find(function(x){ return x.prodId === fi.prodId; });
-    var comStr = itPed ? itPed.comissao : '';
-    var comPct = parseFloat(String(comStr||'0').replace(',', '.')) || 0;
-    total += (fi.qtd||0) * (fi.precoFat||0) * (comPct/100);
+    var r = _comResolver(forn, fi.prodId, itPed ? itPed.comissao : '', pedido.clienteId, null);
+    var v = (fi.qtd||0) * (fi.precoFat||0) * (r.pct/100);
+    total += v;
+    if (detalhe && r.pct > 0) detalhe.push({ pct: r.pct, origem: r.origem, valor: v });
   });
   return total;
 }
@@ -33992,7 +34116,8 @@ function _finListaComissoes(deIso, ateIso, fornecedorIdFiltro, statusFiltro) {
       if (ateIso && fatura.data > ateIso) return;
       var forn = fornecedores.find(function(f){ return f.id === pedido.fornecedorId; });
       if (!forn) return;
-      var valor = _finValorComissaoFatura(fatura, pedido);
+      var _pcts = [];
+      var valor = _finValorComissaoFatura(fatura, pedido, _pcts);
       if (valor <= 0) return;
       var info = _finInfoComissaoFatura(fatura, forn);
       if (statusFiltro && info.status !== statusFiltro) return;
@@ -34015,7 +34140,7 @@ function _finListaComissoes(deIso, ateIso, fornecedorIdFiltro, statusFiltro) {
       g.faturasDetalhe.push({
         pedidoId: pedido.id, numPedido: pedido.numPedidoCliente||pedido.lancamento||'',
         faturaId: fatura.id, numDuplicata: fatura.numDuplicata, data: fatura.data,
-        faturado: faturado, comissao: valor, previsao: info.previsao, status: info.status, estimado: info.estimado
+        faturado: faturado, comissao: valor, previsao: info.previsao, status: info.status, estimado: info.estimado, pcts: _pcts
       });
     });
   });
@@ -34140,6 +34265,11 @@ function renderComissoes() {
     ? lista.map(_comRenderRow).join('')
     : '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma comiss\u00e3o encontrada no per\u00edodo.</div>';
 }
+function _comPctResumo(pcts) {
+  var m = {}, ordem = [];
+  (pcts||[]).forEach(function(p){ var k = p.origem + '|' + p.pct; if (!m[k]) { m[k] = p; ordem.push(k); } });
+  return ordem.length ? '% aplicado: ' + ordem.map(function(k){ return _comOrigemTag(m[k].origem) + ' ' + _comFmtPct(m[k].pct) + '%'; }).join(' &nbsp;') : '';
+}
 function _comRenderDetalheRow(g, d) {
   var acaoHtml;
   if (d.status === 'recebido') {
@@ -34152,7 +34282,8 @@ function _comRenderDetalheRow(g, d) {
   }
   return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;font-size:12px">'
     + '<div><div style="font-weight:700;color:#272A4A">Pedido n\u00ba '+(d.numPedido||'\u2014')+' \u00b7 NF '+(d.numDuplicata||'\u2014')+'</div>'
-    + '<div style="font-size:10.5px;color:#94a3b8">Faturado em '+_finBr(d.data)+' \u00b7 '+_finMoeda(d.faturado)+' \u00b7 Comiss\u00e3o '+_finMoeda(d.comissao)+'</div></div>'
+    + '<div style="font-size:10.5px;color:#94a3b8">Faturado em '+_finBr(d.data)+' \u00b7 '+_finMoeda(d.faturado)+' \u00b7 Comiss\u00e3o '+_finMoeda(d.comissao)+'</div>'
+    + '<div style="font-size:10.5px;color:#1c2f66;margin-top:3px">'+_comPctResumo(d.pcts)+'</div></div>'
     + '<div>'+acaoHtml+'</div>'
     + '</div>';
 }
