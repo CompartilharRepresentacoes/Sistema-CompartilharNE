@@ -235,6 +235,7 @@
     #page-comissoes-list #com-kpis .cm-v.cm-r { color:#fca5a5; }
     #page-comissoes-list #com-kpis .cm-v.cm-g { color:#86efac; }
     @media (max-width:900px) { #page-comissoes-list #com-abas { overflow-x:auto; } #page-comissoes-list #com-kpis { grid-template-columns:1fr 1fr; } #page-comissoes-list #com-kpis .cm-c:nth-child(odd) { border-left:0; } #page-comissoes-list #com-kpis .cm-c:nth-child(even) { border-left:1px solid rgba(255,255,255,.2); } #page-comissoes-list #com-kpis .cm-c:nth-child(n+3) { border-top:1px solid rgba(255,255,255,.2); } }
+    @media (max-width:768px){ #rel-rows .rl-kpi{grid-template-columns:1fr 1fr!important} #rel-rows .rel-row{grid-template-columns:1fr!important;padding-left:18px!important} }
     /* v135: Catalogos e Fotos Produtos - cartao azul unico de totais */
     .kpi-azul3 { display:grid; grid-template-columns:repeat(3,1fr); background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(20,35,80,.08); margin-bottom:12px; }
     .kpi-azul3 .ped-kpi-card { padding:14px 22px !important; background:transparent !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
@@ -5917,12 +5918,12 @@
           <div style="display:flex;align-items:center;justify-content:space-between">
             <div>
               <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.01em">Relatórios</div>
-              <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">Selecione um tipo de relatório</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">Abra um tipo e escolha o relatório</div>
             </div>
             <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
           </div>
         </div>
-        <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden" id="rel-rows"></div>
+        <div id="rel-rows"></div>
       </div>
 
       <div id="rel-tipo-view" style="display:none">
@@ -29269,22 +29270,53 @@ var RELATORIOS_TIPOS = [
   { id:'gerencial', icon:'ti-chart-line', label:'Gerencial', desc:'Visão de gestão: metas, evolução mensal e saúde da carteira.' }
 ];
 
+var _relAbertos = { operacional:true };
+var _relBusca = '';
+function _relToggleTipo(id){ _relAbertos[id] = !_relAbertos[id]; renderRelatoriosLista(); }
+function _relExpandir(v){ RELATORIOS_TIPOS.forEach(function(t){ _relAbertos[t.id] = v; }); renderRelatoriosLista(); }
+function _relSetBusca(v){ _relBusca = v || ''; renderRelatoriosLista(); var el=document.getElementById('rel-busca'); if(el){ el.focus(); try{ el.setSelectionRange(v.length,v.length); }catch(e){} } }
+function _relLimparBusca(){ _relBusca=''; renderRelatoriosLista(); }
 function renderRelatoriosLista() {
   var cont = document.getElementById('rel-rows');
   if (!cont) return;
-  cont.innerHTML = RELATORIOS_TIPOS.map(function(t, idx){
-    var c = REL_NIVEL_COR[t.id];
-    var qtd = RELATORIOS.filter(function(r){ return r.nivel === t.id; }).length;
-    return '<div class="rel-row" onclick="abrirTipoRelatorio(\'' + t.id + '\')" style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;' + (idx > 0 ? 'border-top:1px solid #f1f5f9' : '') + '">'
-      + '<div style="width:36px;height:36px;border-radius:9px;background:' + c.bg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ' + t.icon + '" style="font-size:15px;color:' + c.cor + '"></i></div>'
-      + '<div style="flex:1;min-width:0">'
-      + '<div style="font-size:13px;font-weight:700;color:#1e293b">' + t.label + '</div>'
-      + '<div style="font-size:11px;color:#94a3b8;margin-top:1px">' + t.desc + '</div>'
-      + '</div>'
-      + '<span style="font-size:10.5px;font-weight:600;color:#94a3b8">' + qtd + ' relatórios</span>'
-      + '<i class="ti ti-chevron-right" style="font-size:13px;color:#cbd5e1"></i>'
-      + '</div>';
+  var q = _relBusca.trim().toLowerCase();
+  var bg = 'linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%)';
+  var cnt = function(n){ return RELATORIOS.filter(function(r){ return r.nivel === n; }).length; };
+  var kpi = '<div class="rl-kpi" style="background:' + bg + ';border-radius:14px;box-shadow:0 2px 10px rgba(20,35,80,.08);margin-bottom:12px;display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden">'
+    + [['Relatórios', RELATORIOS.length],['Operacional', cnt('operacional')],['Analítico', cnt('analitico')],['Gerencial', cnt('gerencial')]].map(function(k,ix){
+        return '<div style="padding:14px 22px;' + (ix ? 'border-left:1px solid rgba(255,255,255,.2)' : '') + '"><div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#ffffff">' + k[0] + '</div><div style="font-size:24px;font-weight:800;margin-top:2px;color:#ffffff">' + k[1] + '</div></div>';
+      }).join('') + '</div>';
+  var btnS = 'background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:8px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap';
+  var fb = '<div style="background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(20,35,80,.08);margin-bottom:12px;padding:10px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">'
+    + '<input id="rel-busca" value="' + _pedEsc(_relBusca) + '" oninput="_relSetBusca(this.value)" placeholder="Buscar relatório..." style="min-width:300px;border:1px solid #d9e0ee;border-radius:8px;padding:8px 10px;font-size:12px;background:#f5f8fe">'
+    + '<button onclick="_relLimparBusca()" style="background:#eef2f9;color:#1c2f66;border:0;border-radius:8px;padding:9px 16px;font-weight:700;font-size:12px;cursor:pointer">Limpar</button>'
+    + '<span style="flex:1"></span>'
+    + '<button onclick="_relExpandir(true)" style="' + btnS + '">Expandir tudo</button>'
+    + '<button onclick="_relExpandir(false)" style="' + btnS + '">Recolher tudo</button></div>';
+  var total = 0;
+  var blocos = RELATORIOS_TIPOS.map(function(t){
+    var lista = RELATORIOS.filter(function(r){
+      return r.nivel === t.id && (!q || (r.titulo + ' ' + r.desc).toLowerCase().indexOf(q) !== -1);
+    });
+    if (q && !lista.length) return '';
+    total += lista.length;
+    var aberto = q ? true : !!_relAbertos[t.id];
+    var h = '<div onclick="_relToggleTipo(\'' + t.id + '\')" style="display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:pointer;background:' + bg + ';color:#ffffff">'
+      + '<span style="display:inline-block;font-size:11px;color:#ffffff;transform:rotate(' + (aberto ? 90 : 0) + 'deg);transition:transform .15s">&#9654;</span>'
+      + '<b style="font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:#ffffff">' + t.label + '</b>'
+      + '<span style="flex:1;font-size:11px;color:#ffffff;opacity:.85">' + t.desc + '</span>'
+      + '<span style="background:#fff;color:#272A4A;border-radius:999px;font-size:11px;font-weight:800;padding:2px 10px">' + lista.length + '</span></div>';
+    if (aberto) {
+      h += lista.map(function(r){
+        return '<div class="rel-row" onclick="abrirRelatorio(\'' + r.id + '\')" style="display:grid;grid-template-columns:2.2fr 3.5fr 90px;gap:12px;align-items:center;padding:11px 18px 11px 46px;border-bottom:1px solid #eef2f9;font-size:12.5px;cursor:pointer;background:#f8fafc">'
+          + '<b style="color:#272A4A">' + _pedEsc(r.titulo) + '</b><span style="color:#1c2f66;font-size:11.5px">' + _pedEsc(r.desc) + '</span>'
+          + '<span style="justify-self:end;font-weight:700;font-size:11.5px;color:#DE7926">Abrir &rsaquo;</span></div>';
+      }).join('');
+    }
+    return h;
   }).join('');
+  if (!total) blocos = '<div style="padding:28px;text-align:center;color:#1c2f66">Nenhum relatório encontrado</div>';
+  cont.innerHTML = kpi + fb + '<div style="background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(20,35,80,.08);overflow:hidden">' + blocos + '</div>';
 }
 
 function abrirTipoRelatorio(nivel) {
@@ -29362,11 +29394,7 @@ function abrirRelatorio(id) {
 }
 function voltarRelatorios() {
   document.getElementById('rel-detalhe-view').style.display = 'none';
-  if (_relTipoAtual) {
-    abrirTipoRelatorio(_relTipoAtual);
-  } else {
-    document.getElementById('rel-lista-view').style.display = 'block';
-  }
+  document.getElementById('rel-lista-view').style.display = 'block';
 }
 function limparFiltrosRelatorio() {
   ['rel-f-data-de','rel-f-data-ate','rel-f-fornecedor','rel-f-vendedor','rel-f-categoria','rel-f-uf','rel-f-cliente','rel-f-transportadora','rel-f-status','rel-f-produto','rel-f-numero'].forEach(function(id){
