@@ -221,6 +221,24 @@
     input[type=number] { -moz-appearance:textfield; appearance:textfield; }
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; display:none; }
     /* v113: Restricoes de Pedidos - padrao de Pedidos (totais em cartao azul unico, filtros com botao, tabela com faixa de aviso) */
+    /* v127: Devolucoes - padrao do sistema (abas largas, totais em cartao azul unico, filtros abaixo) */
+    #page-devolucao-list #dev-status-chips { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
+    #page-devolucao-list .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
+    #page-devolucao-list .ng-aba:hover { background:#e8eefa; color:#272A4A; }
+    #page-devolucao-list .ng-aba.ng-aba-on { background:#e3ebff; color:#272A4A; box-shadow:inset 0 -3px 0 #3d4180; }
+    #page-devolucao-list .ng-aba em { font-style:normal; background:#fff; border-radius:999px; padding:1px 8px; margin-left:6px; font-size:10.5px; }
+    #page-devolucao-list #dev-kpis { gap:0 !important; background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(20,35,80,.08); margin-bottom:12px !important; }
+    #page-devolucao-list #dev-kpis .ped-kpi-card { background:transparent !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; padding:14px 22px !important; }
+    #page-devolucao-list #dev-kpis .ped-kpi-card + .ped-kpi-card { border-left:1px solid rgba(255,255,255,.2) !important; }
+    #page-devolucao-list #dev-kpis .ped-kpi-card span[style*="font-size:20px"] { font-size:24px !important; }
+    #page-devolucao-list .dev-fbox { border:0 !important; box-shadow:0 2px 10px rgba(20,35,80,.08); border-radius:14px !important; }
+    @media (max-width:900px) {
+      #page-devolucao-list #dev-status-chips { overflow-x:auto; }
+      #page-devolucao-list #dev-kpis .ped-kpi-card { padding:10px 14px !important; }
+      #page-devolucao-list #dev-kpis .ped-kpi-card + .ped-kpi-card { border-left:0 !important; }
+      #page-devolucao-list #dev-kpis .ped-kpi-card:nth-child(even) { border-left:1px solid rgba(255,255,255,.2) !important; }
+      #page-devolucao-list #dev-kpis .ped-kpi-card:nth-child(n+3) { border-top:1px solid rgba(255,255,255,.2) !important; }
+    }
     /* v125: Tabela de Preco - mesmo padrao de Negociacao de Preco */
     #page-tabpreco-list #tabpreco-chips { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
     #page-tabpreco-list .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
@@ -5649,7 +5667,9 @@
           <button onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="novo" style="font-size:12px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Cadastrar</button>
           <button onclick="emlAbrir()" style="width:100%;margin-top:8px;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer">&#9993; Importar e-mails da fábrica</button>
         </div>
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:12px">
+      <div id="dev-status-chips"></div>
+      <div id="dev-kpis"></div>
+      <div class="dev-fbox" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:12px">
         <div class="dev-filtros">
           <div><label>Buscar cliente, NFD, NF origem ou lançamento</label><input id="dev-busca" oninput="renderDevolucaoList()" placeholder="Digite para filtrar..."></div>
           <div><label>Período</label><select id="dev-f-periodo" onchange="renderDevolucaoList()"><option value="mes">Este mês</option><option value="mes_ant">Mês anterior</option><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="ano">Este ano</option><option value="tudo">Todo o histórico</option></select></div>
@@ -5657,11 +5677,9 @@
           <div><label>Motivo</label><select id="dev-f-motivo" onchange="_devAoTrocarMotivo()"><option value="">Todos</option></select></div>
           <div><label>UF</label><select id="dev-f-uf" onchange="renderDevolucaoList()"><option value="">Todas</option></select></div>
           <div><label>Vendedor</label><select id="dev-f-vend" onchange="renderDevolucaoList()"><option value="">Todos</option></select></div>
-          <div style="display:flex;gap:8px"><button onclick="_devLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button><button class="dev-hdr-mobile-hide" onclick="emlAbrir()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap">&#9993; Importar e-mails</button><button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">&#10133; Cadastrar</button></div>
+          <div style="display:flex;gap:8px"><button onclick="_devLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button><button class="dev-hdr-mobile-hide" onclick="emlAbrir()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap">&#9993; Importar e-mails</button><button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">&#10133; Cadastrar</button></div>
         </div>
-        <div id="dev-status-chips" style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"></div>
       </div>
-      <div id="dev-kpis"></div>
       <div id="dev-graficos"></div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div class="dev-th" style="display:grid;grid-template-columns:75px 95px 1fr 1fr 90px 92px 100px 118px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
@@ -26275,6 +26293,7 @@ function _devVar(atual, ant, pp) {
   var sobe = dif > 0;
   return '<span style="font-style:normal;font-size:11px;font-weight:700;margin-left:6px;color:' + (sobe ? '#dc2626' : '#16a34a') + '">' + (sobe ? '▲ ' : '▼ ') + Math.abs(dif).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + (pp ? ' p.p.' : '%') + '</span>';
 }
+function _devBranco(h) { return h.replace(/color:#94a3b8/g, 'color:#ffffff').replace(/color:#272A4A/g, 'color:#ffffff').replace(/color:#475569/g, 'color:#ffffff').replace(/color:#16a34a/g, 'color:#86efac').replace(/color:#dc2626/g, 'color:#fca5a5'); }
 function _devKpiCard(rot, valor, varHtml, sub, cor, subDestaque) {
   return '<div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid ' + cor + '">'
     + '<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">' + rot + '</div>'
@@ -26380,7 +26399,7 @@ function _devRenderStatusChips(devs) {
   var itens = [['', 'Todas'], ['Finalizado', 'Finalizadas'], ['Aberto', 'Em aberto'], ['Cancelado', 'Canceladas']];
   el.innerHTML = itens.map(function (it) {
     var on = _devStatusFiltro === it[0];
-    return '<span onclick="_devSetStatusFiltro(\'' + it[0] + '\')" style="border:1px solid ' + (on ? '#272A4A' : '#e2e8f0') + ';background:' + (on ? '#272A4A' : '#fff') + ';color:' + (on ? '#fff' : '#475569') + ';border-radius:999px;padding:4px 12px;font-size:11px;cursor:pointer;font-weight:' + (on ? '700' : '400') + '">' + it[1] + '<b style="margin-left:5px;opacity:.7">' + cont[it[0]] + '</b></span>';
+    return '<span class="ng-aba' + (on ? ' ng-aba-on' : '') + '" onclick="_devSetStatusFiltro(\'' + it[0] + '\')">' + it[1] + '<em>' + cont[it[0]] + '</em></span>';
   }).join('');
 }
 
@@ -26430,11 +26449,11 @@ function renderDevolucaoList() {
   var pct = fat ? (atual.v / fat) * 100 : 0, pctAnt = (ant && fatAnt) ? (ant.v / fatAnt) * 100 : null;
   var motTop = Object.keys(atual.motivo).sort(function (a, b) { return atual.motivo[b] - atual.motivo[a]; })[0];
   var kp = document.getElementById('dev-kpis');
-  if (kp) kp.innerHTML =
+  if (kp) kp.innerHTML = _devBranco(
     _devKpiCard('Devoluções no período', atual.n.toLocaleString('pt-BR'), _devVar(atual.n, ant ? ant.n : null), (ant ? 'vs período anterior · ' : '') + atual.abertas + ' em aberto', '#1c2f66')
     + _devKpiCard('Valor devolvido', _devFmtKg(atual.kg), _devVar(atual.v, ant ? ant.v : null), _pedFmtMoeda(atual.v), '#2c4488', true)
     + _devKpiCard('% sobre faturamento', pct.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%', _devVar(pct, pctAnt, true), _devFmtK(atual.v) + ' de ' + _devFmtK(fat) + ' faturado', '#3d5aa8')
-    + _devKpiCard('Principal motivo', motTop ? _pedEsc(motTop) : '—', '', motTop && atual.v ? Math.round((atual.motivo[motTop] / atual.v) * 100) + '% do valor devolvido' : 'sem devoluções', '#5b78c9');
+    + _devKpiCard('Principal motivo', motTop ? _pedEsc(motTop) : '—', '', motTop && atual.v ? Math.round((atual.motivo[motTop] / atual.v) * 100) + '% do valor devolvido' : 'sem devoluções', '#5b78c9'));
 
   // evolução: 6 meses terminando no fim do período (ou mês atual)
   var fimRef = per ? per.fimDt : new Date();
