@@ -221,6 +221,13 @@
     input[type=number] { -moz-appearance:textfield; appearance:textfield; }
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; display:none; }
     /* v113: Restricoes de Pedidos - padrao de Pedidos (totais em cartao azul unico, filtros com botao, tabela com faixa de aviso) */
+    /* v132: Controle de Entrega - abas largas com os totais, filtros com Importar */
+    #page-entrega-controle #entctrl-abas { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
+    #page-entrega-controle .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
+    #page-entrega-controle .ng-aba:hover { background:#e8eefa; color:#272A4A; }
+    #page-entrega-controle .ng-aba.ng-aba-on { background:#e3ebff; color:#272A4A; box-shadow:inset 0 -3px 0 #3d4180; }
+    #page-entrega-controle .ng-aba em { font-style:normal; background:#fff; border-radius:999px; padding:1px 8px; margin-left:6px; font-size:10.5px; }
+    @media (max-width:900px) { #page-entrega-controle #entctrl-abas { overflow-x:auto; } }
     /* v131: Planejamento Reino - padrao do sistema (totais em cartao azul unico, filtros com Cadastrar) */
     #page-planejamento-reino #pr-kpis { background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(20,35,80,.08); margin-bottom:12px; }
     #page-planejamento-reino #pr-kpis .ped-kpi-card { background:transparent !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; padding:14px 22px !important; }
@@ -5561,25 +5568,12 @@
           <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
         </div>
       </div>
-      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
-        <button onclick="relatorioEntregas()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="graficos" style="font-size:10px"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="5" width="4" height="15.5" rx="1"/><rect x="15" y="9" width="4" height="11.5" rx="1"/></svg> Relatório</button>
-        <button onclick="abrirModalImportEntrega()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar</button>
-      </div>
 
-      <!-- Cards -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Notas Fiscais</div>
-          <div style="font-size:20px;font-weight:800;color:#272A4A" id="entctrl-kpi-total">0</div>
-        </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Em Rota</div>
-          <div style="font-size:20px;font-weight:800;color:#b45309" id="entctrl-kpi-rota">0</div>
-        </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Entregues</div>
-          <div style="font-size:20px;font-weight:800;color:#16a34a" id="entctrl-kpi-entregues">0</div>
-        </div>
+      <!-- Abas -->
+      <div id="entctrl-abas">
+        <span class="ng-aba ng-aba-on" data-aba="" onclick="_entSetAba('')">Todas as NFs<em id="entctrl-kpi-total">0</em></span>
+        <span class="ng-aba" data-aba="rota" onclick="_entSetAba('rota')">NFs em rota<em id="entctrl-kpi-rota">0</em></span>
+        <span class="ng-aba" data-aba="entregue" onclick="_entSetAba('entregue')">NFs entregues<em id="entctrl-kpi-entregues">0</em></span>
       </div>
 
       <!-- Barra de filtros -->
@@ -5595,7 +5589,8 @@
           <span style="color:#94a3b8;font-size:13px">→</span>
           <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="entctrl-data-ate" oninput="_entctrlMaskData(this);renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
-          <button id="entctrl-mais-filtros-btn" onclick="entctrlToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
+          <button onclick="abrirModalImportEntrega()" style="margin-left:auto;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">&#11014; Importar</button>
+          <button id="entctrl-mais-filtros-btn" onclick="entctrlToggleMaisFiltros()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
             <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="filtro" style="font-size:13px"><path d="M3.5 5h17l-6.5 7.5V19l-4 2v-8.5z"/></svg> <span id="entctrl-mais-filtros-txt">Mais filtros</span> <i id="entctrl-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
           </button>
         </div>
@@ -23016,7 +23011,10 @@ function entctrlToggleMaisFiltros() {
   if (txt) txt.textContent = abrir ? 'Menos filtros' : 'Mais filtros';
   if (chev) chev.className = abrir ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
 }
+var _entAba = '';
+function _entSetAba(a) { _entAba = a; renderEntregaControle(); }
 function entctrlLimparFiltros() {
+  _entAba = '';
   ['entctrl-busca','entctrl-data-de','entctrl-data-ate','entctrl-fornecedor','entctrl-fornecedor-id','entctrl-vendedor','entctrl-categoria','entctrl-subcategoria','entctrl-uf','entctrl-transportadora','entctrl-status'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
@@ -23333,6 +23331,13 @@ function renderEntregaControle() {
     if (subF && String(cli.subcategoria||'') !== String(subF)) return false;
     if (ufF && r.uf !== ufF) return false;
     if (transpF && (r.transportadoraNome||'').toLowerCase().indexOf(transpF) === -1) return false;
+    return true;
+  });
+  // v132: contagens das abas ignoram a aba escolhida (ficam estaveis); depois aplica aba + status
+  var _baseAbas = linhas;
+  linhas = _baseAbas.filter(function(r){
+    if (_entAba === 'rota' && r.entregue) return false;
+    if (_entAba === 'entregue' && !r.entregue) return false;
     if (statusF === 'rota' && (r.entregue || r.atrasada)) return false;
     if (statusF === 'atrasada' && !r.atrasada) return false;
     if (statusF === 'entregue' && !r.entregue) return false;
@@ -23340,9 +23345,10 @@ function renderEntregaControle() {
   });
   linhas = linhas.slice().sort(function(a,b){ return (b.fatura.data||'').localeCompare(a.fatura.data||''); });
 
-  var total = linhas.length;
-  var entregues = linhas.filter(function(r){ return r.entregue; }).length;
+  var total = _baseAbas.length;
+  var entregues = _baseAbas.filter(function(r){ return r.entregue; }).length;
   var rota = total - entregues;
+  document.querySelectorAll('#entctrl-abas .ng-aba').forEach(function(el){ el.classList.toggle('ng-aba-on', (el.getAttribute('data-aba') || '') === _entAba); });
   var kT = document.getElementById('entctrl-kpi-total'); if (kT) kT.textContent = total;
   var kR = document.getElementById('entctrl-kpi-rota'); if (kR) kR.textContent = rota;
   var kE = document.getElementById('entctrl-kpi-entregues'); if (kE) kE.textContent = entregues;
