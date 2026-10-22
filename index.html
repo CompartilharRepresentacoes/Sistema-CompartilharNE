@@ -1526,15 +1526,23 @@
 .dash-root .d-tab-btn{flex:1 0 auto;text-align:center;padding:11px 14px;margin-bottom:0;border-bottom:0;border-radius:10px;background:#f1f5fb;color:#64748b}
 .dash-root .d-tab-btn.active{background:#e3ebff;color:#272A4A;box-shadow:inset 0 -3px 0 #3d4180;border-bottom:0}
 .dash-root .d-tab-btn:hover:not(.active){background:#e8eefa;color:#272A4A}
+/* v119: cinza-ardosia (#475569) tambem em azul escuro, mesmas excecoes */
+[style^="color:#475569"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style^="color: #475569"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*="; color:#475569"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*="; color: #475569"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*=";color:#475569"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
+[style*=";color: #475569"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *) { color:#1c2f66 !important; }
+#page-pedido-form .ped-item-mobile .pim-qtd-un, .form-group label, .dash-root th, .ap-lb, .mod-toolbar-right { color:#1c2f66 !important; }
 /* v117: cinza medio (#64748b) tambem em preto, com as mesmas excecoes da v116 */
 [style^="color:#64748b"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
 [style^="color: #64748b"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
 [style*="; color:#64748b"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
 [style*="; color: #64748b"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
 [style*=";color:#64748b"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
-[style*=";color: #64748b"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *) { color:#1e293b !important; }
+[style*=";color: #64748b"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *) { color:#1c2f66 !important; }
 .mc-row .mc-meta, #page-devolucao-form .dev-item-valor, #page-devolucao-form .dev-item-qtd, .kpi-label, .pif-texto-lido,
-.dash-root .d-filter label, .dash-root .dvg-vrank-pos, #page-tabpreco-list .tp-fg label, #page-negpreco-list .ng-fg label, #page-consulta-preco .cp-fg label, .dev-filtros label, .apr-kpi-card .apr-kl { color:#1e293b !important; }
+.dash-root .d-filter label, .dash-root .dvg-vrank-pos, #page-tabpreco-list .tp-fg label, #page-negpreco-list .ng-fg label, #page-consulta-preco .cp-fg label, .dev-filtros label, .apr-kpi-card .apr-kl { color:#1c2f66 !important; }
 /* v116: textos em cinza claro passam para preto (nao mexe em botoes/abas inativas, icones, menu lateral, login e textos sobre fundo escuro) */
 [style^="color:#94a3b8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
 [style^="color: #94a3b8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
@@ -1553,16 +1561,16 @@
 [style*="; color:#c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
 [style*="; color: #c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
 [style*=";color:#c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *),
-[style*=";color: #c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *) { color:#1e293b !important; }
+[style*=";color: #c0ccd8"]:not(button):not(i):not(svg):not([onclick]):not([disabled]):not([style*="cursor:pointer"]):not(button *):not(svg *):not(#appSidebar *):not(#loginScreen *):not(.sb-flyout *) { color:#1c2f66 !important; }
 .kpi-sub, .empty-row td, .cad-kpi-row, .cad-filtro-campo span, .cli-row-card .cli-c-codigo, .mc-row .mc-secondary,
 #page-pedido-list [class*="ped-r-"]::before, #page-entrega-controle .mc-row [class*="ent-"]::before, [class*="cpi-c-"]::before, #page-comissoes-list [class*="com-c-"]::before,
 .dash-root .periodo-info, .dash-root .dvg-kpi-lbl, .dash-root .dvg-metaring-txt span, .dash-root .dvg-devol-rank, .dash-root .dvg-devol-detail-tit, .dash-root .dvg-abcsum-lbl,
 #page-consulta-preco .cp-pc i, #page-consulta-preco .cp-th, #page-consulta-preco .cp-lb2, #page-consulta-preco .cp-lb, #page-consulta-preco .cp-c-eco,
 .apr-mbar .apr-mlbl, .apr-rankrow .apr-uf, .apr-empty,
-#page-pedido-form .ped-dados-toggle, #page-pedido-form .ped-dados-resumo .pdr-lbl, #page-pedido-form .ped-item-mobile .pim-row b { color:#1e293b !important; }
+#page-pedido-form .ped-dados-toggle, #page-pedido-form .ped-dados-resumo .pdr-lbl, #page-pedido-form .ped-item-mobile .pim-row b { color:#1c2f66 !important; }
 /* v115: textos de apoio dos cartoes do Inicio em preto (antes cinza claro) */
-.dash-root .dvg-kpi-sub,.dash-root .dvg-kpi-cmp-row,.dash-root .dvg-vrank-sub,.dash-root .dvg-devol-vals,.dash-root .dvg-abcsum-item span{color:#1e293b}
-.dash-root .dvg-greet-txt span{color:#334155}
+.dash-root .dvg-kpi-sub,.dash-root .dvg-kpi-cmp-row,.dash-root .dvg-vrank-sub,.dash-root .dvg-devol-vals,.dash-root .dvg-abcsum-item span{color:#1c2f66}
+.dash-root .dvg-greet-txt span{color:#1c2f66}
 .dash-root .tab-content{display:none}
 .dash-root .tab-content.active{display:block}
 .dash-root .d-filter{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
