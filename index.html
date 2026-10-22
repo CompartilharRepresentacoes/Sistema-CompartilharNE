@@ -13461,6 +13461,23 @@ function _tpSituacao(r, hoje, em30) {
   return 'ativas';
 }
 
+// v126: fabricas distintas dos itens e data mais proxima de vencer (Periodo dos itens, dd/mm/aaaa)
+function _tpResumo(r, nomeDe, hoje) {
+  var forns = [], vistos = {}, futuras = [], passadas = [];
+  (r.itens || []).forEach(function (it) {
+    var n = it.fornNome && it.fornNome !== '—' ? it.fornNome : (it.fornId ? nomeDe(it.fornId) : '');
+    if (n && !vistos[n]) { vistos[n] = 1; forns.push(n); }
+    var d = _tpParseBR(it.periodo);
+    if (d) (d >= hoje ? futuras : passadas).push(d);
+  });
+  if (!forns.length && r.fornecedor) forns.push(nomeDe(r.fornecedor));
+  forns.sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
+  var prox = null, vencida = false;
+  if (futuras.length) prox = futuras.reduce(function (a, b) { return a < b ? a : b; });
+  else if (passadas.length) { prox = passadas.reduce(function (a, b) { return a > b ? a : b; }); vencida = true; }
+  else { var dv = _negParseDia(r.validade); if (dv) { prox = dv; vencida = dv < hoje; } }
+  return { forns: forns, prox: prox, vencida: vencida };
+}
 function renderTabPrecoList() {
   var data   = getTabPrecos();
   var busca  = ((document.getElementById('tabpreco-busca') || {}).value || '').toLowerCase();
@@ -13544,15 +13561,17 @@ function renderTabPrecoList() {
   tbody.innerHTML = rows.map(function (r) {
     var sit = _tpSituacao(r, hoje, em30);
     var statusBadge = sit === 'inativas' ? badge('#f1f5f9', '#64748b', 'Inativa') : sit === 'vencidas' ? badge('#fee2e2', '#b91c1c', 'Vencida') : sit === 'avencer' ? badge('#fef3c7', '#b45309', 'A vencer') : badge('#dcfce7', '#15803d', 'Ativa');
-    var validade = r.validade ? String(r.validade).slice(0, 10).split('-').reverse().join('/') : '—';
+    var resumo = _tpResumo(r, nomeDe, hoje);
+    var validade = resumo.prox ? ('0' + resumo.prox.getDate()).slice(-2) + '/' + ('0' + (resumo.prox.getMonth() + 1)).slice(-2) + '/' + resumo.prox.getFullYear() : '—';
+    var fornTxt = resumo.forns.length ? resumo.forns.join(', ') : '—';
     var nItens = (r.itens || []).length;
     var atu = r.dtAtualizacao || r.dtCriacao || '—';
     return '<div class="mc-row" style="display:grid;grid-template-columns:2fr 1.2fr 120px 90px 120px 90px 110px;gap:10px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px;transition:background .1s" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
       + '<div style="min-width:0"><div class="mc-primary" style="font-weight:600;color:#1e293b">' + _skuEsc(r.nome || '—') + '</div><div class="mc-secondary" style="font-size:10px;color:#94a3b8;margin-top:1px">' + _skuEsc(r.descricao || 'Tabela geral') + '</div></div>'
-      + '<span class="mc-meta" style="font-size:12px;color:#475569">' + _skuEsc(nomeDe(r.fornecedor)) + '</span>'
+      + '<span class="mc-meta" title="' + _skuEsc(fornTxt) + '" style="font-size:12px;color:#475569;min-width:0;line-height:1.35">' + _skuEsc(fornTxt) + '</span>'
       + '<span class="mc-meta" style="font-size:11px;color:#64748b">' + _skuEsc(String(atu).split(' ')[0]) + '</span>'
       + '<span class="mc-meta" style="font-size:12px;' + (nItens ? 'color:#475569' : 'color:#b45309;font-weight:700') + '">' + nItens + (nItens === 1 ? ' item' : ' itens') + '</span>'
-      + '<span class="mc-meta" style="font-size:12px;color:#475569">' + validade + '</span>'
+      + '<span class="mc-meta" style="font-size:12px;' + (resumo.vencida ? 'color:#b91c1c;font-weight:700' : 'color:#475569') + '">' + validade + '</span>'
       + '<span class="mc-badge">' + statusBadge + '</span>'
       + '<div class="mc-actions" style="display:flex;gap:4px;justify-content:center">'
       + '<button onclick="_tvpAbrir(\'' + r.id + '\')" style="width:26px;height:26px;border-radius:6px;border:1px solid #fde7cf;background:#fff8f0;cursor:pointer;color:#DE7926;font-size:12px;display:flex;align-items:center;justify-content:center" title="Visualizar / Exportar"><i class="ti ti-eye"></i></button>'
