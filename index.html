@@ -221,6 +221,18 @@
     input[type=number] { -moz-appearance:textfield; appearance:textfield; }
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; display:none; }
     /* v113: Restricoes de Pedidos - padrao de Pedidos (totais em cartao azul unico, filtros com botao, tabela com faixa de aviso) */
+    /* v121: Restricoes - produto em uma linha, mais espaco Tipo/Onde vale, textos do cartao azul brancos */
+    #page-bloqueios-pedidos #rq-kpis .ped-kpi-card > div[style][style][style] { color:#fff !important; }
+    #page-bloqueios-pedidos #rq-kpis .ped-kpi-card > div[style][style][style]:nth-child(1),
+    #page-bloqueios-pedidos #rq-kpis .ped-kpi-card > div[style][style][style]:nth-child(3) { color:#fff !important; opacity:.92; }
+    @media (min-width:769px) {
+      #page-bloqueios-pedidos .rq-minw { min-width:1300px !important; }
+      #page-bloqueios-pedidos .rq-th, #page-bloqueios-pedidos .rq-row { grid-template-columns:110px minmax(330px,3fr) 70px minmax(150px,1.5fr) minmax(130px,1.1fr) 110px 100px 56px 70px !important; column-gap:18px !important; }
+      #page-bloqueios-pedidos .rq-row > span:nth-child(2) { white-space:nowrap; }
+      #page-bloqueios-pedidos .rq-row > span:nth-child(2) b { white-space:nowrap; }
+      #page-bloqueios-pedidos .rq-row > span:nth-child(4) { padding-left:10px; }
+      #page-bloqueios-pedidos .rq-th > span:nth-child(4) { padding-left:10px; }
+    }
     #page-bloqueios-pedidos #rq-kpis { gap:0 !important; background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(20,35,80,.08); margin-bottom:12px !important; }
     #page-bloqueios-pedidos #rq-kpis .ped-kpi-card { background:transparent !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; padding:14px 22px !important; }
     #page-bloqueios-pedidos #rq-kpis .ped-kpi-card + .ped-kpi-card { border-left:1px solid rgba(255,255,255,.2) !important; }
@@ -1569,8 +1581,8 @@
 .apr-mbar .apr-mlbl, .apr-rankrow .apr-uf, .apr-empty,
 #page-pedido-form .ped-dados-toggle, #page-pedido-form .ped-dados-resumo .pdr-lbl, #page-pedido-form .ped-item-mobile .pim-row b { color:#1c2f66 !important; }
 /* v115: textos de apoio dos cartoes do Inicio em preto (antes cinza claro) */
-.dash-root .dvg-kpi-sub,.dash-root .dvg-kpi-cmp-row,.dash-root .dvg-vrank-sub,.dash-root .dvg-devol-vals,.dash-root .dvg-abcsum-item span{color:#1c2f66}
-.dash-root .dvg-greet-txt span{color:#1c2f66}
+.dash-root .dvg-kpi-sub,.dash-root .dvg-kpi-cmp-row,.dash-root .dvg-vrank-sub,.dash-root .dvg-devol-vals,.dash-root .dvg-abcsum-item span{color:#1c2f66 !important}
+.dash-root .dvg-greet-txt span{color:#1c2f66 !important}
 .dash-root .tab-content{display:none}
 .dash-root .tab-content.active{display:block}
 .dash-root .d-filter{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
