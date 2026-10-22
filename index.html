@@ -217,6 +217,9 @@
     .rev-header-row *,
     .com-header-row *,
     .fp-header * { color:#fff !important; }
+    /* v112: sem setinhas de subir/descer nos campos numericos de todo o sistema */
+    input[type=number] { -moz-appearance:textfield; appearance:textfield; }
+    input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; display:none; }
     /* v109: Sugestao de Pedido - painel Produtos e quantidades (moldura azul + grade estilo planilha) */
     #sug-painel-prod { padding:0 !important; border:2px solid #3d4180 !important; border-radius:14px !important; box-shadow:0 6px 18px rgba(39,42,74,.22) !important; overflow:hidden; }
     #sug-painel-prod #sug-prod-head { background:#eef2ff; border-bottom:1px solid #d6defc; padding:12px 18px; margin-bottom:0 !important; }
