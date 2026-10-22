@@ -33986,7 +33986,8 @@ function _fornComAddProd() {
   var pct = ((document.getElementById('forn-comexp-pct')||{}).value || '').trim();
   if (!q || !pct) { _fornComMsg('Informe o produto e a comissão.'); return; }
   var prods = getProdutos().filter(function(p){ return !_fornEditId || String(p.fornecedor) === String(_fornEditId); });
-  var achados = prods.filter(function(p){ return String(p.codigo||'').trim().toLowerCase() === q; });
+  var semZeros = function(v){ return String(v||'').trim().toLowerCase().replace(/^0+(?=\d)/, ''); };
+  var achados = prods.filter(function(p){ return semZeros(p.codigo) === semZeros(q); });
   if (!achados.length) achados = prods.filter(function(p){ return String(p.nome||'').toLowerCase().indexOf(q) !== -1; });
   if (!achados.length) { _fornComMsg('Produto não encontrado neste fornecedor.'); return; }
   if (achados.length > 1) { _fornComMsg('Mais de um produto encontrado. Digite o código exato.'); return; }
@@ -34012,7 +34013,7 @@ function _comResolver(forn, prodId, itemCom, cliId, tabId) {
   var exP = null;
   if (forn && forn.comissaoExcProd && forn.comissaoExcProd.length) {
     exP = forn.comissaoExcProd.find(function(e){ return String(e.prodId) === String(prodId); }) || null;
-    if (exP && cliId) {
+    if (exP && cliId && _comColecao('negociacoes_preco').some(function(n){ return String(n.produtoId||'').trim() === String(prodId).trim(); })) {
       var neg = pedResolverPrecoNegociado(forn.id, prodId, cliId);
       if (neg && _comPctNum(neg.comissao) > 0) return { pct: _comPctNum(neg.comissao), origem: 'N' };
     }
@@ -34023,7 +34024,7 @@ function _comResolver(forn, prodId, itemCom, cliId, tabId) {
   if (forn && forn.comissaoExcTab && forn.comissaoExcTab.length) {
     var tid = tabId;
     if (!tid && cliId) {
-      var tab = getTabPrecos().find(function(t){
+      var tab = _comColecao('tabelas_preco').find(function(t){
         return (t.ativo||'Sim') === 'Sim' && (t.clientes||[]).some(function(c){ return String(c.cliId) === String(cliId); })
           && (t.itens||[]).some(function(x){ return String(x.prodId) === String(prodId) && String(x.fornId) === String(forn.id); });
       });
@@ -34040,7 +34041,9 @@ function _comOrigemTag(o) {
   var m = { N:['#fef3c7','#b45309','Negociação'], E:['#fff7ed','#c2410c','Exceção produto'], I:['#f1f5f9','#1c2f66','Tabela'], T:['#eff6ff','#1d4ed8','Exceção tabela'], P:['#eef2ff','#272A4A','Padrão'] }[o];
   return m ? '<span style="display:inline-block;border-radius:999px;padding:1px 8px;font-size:10px;font-weight:800;background:'+m[0]+';color:'+m[1]+'">'+m[2]+'</span>' : '';
 }
-function _comFornDe(fornId) { return getFornecedores().find(function(f){ return String(f.id) === String(fornId); }) || null; }
+// v140: leitura sem clonar a colecao inteira (getFornecedores/getTabPrecos clonam tudo, com fotos, a cada chamada)
+function _comColecao(nome) { return (typeof _fsCache !== 'undefined' && _fsCache && _fsCache[nome]) || []; }
+function _comFornDe(fornId) { return _comColecao('fornecedores').find(function(f){ return String(f.id) === String(fornId); }) || null; }
 // Soma, item a item, preco faturado x comissao% do item no pedido original (comissao e' um snapshot
 // gravado no pedido.itens[] no momento da digitacao -- ver _pedItens.push em pedAdicionarItem).
 function _finValorComissaoFatura(fatura, pedido, detalhe) {
@@ -34106,7 +34109,7 @@ function _finToggleFormaPagForn() {
 
 function _finListaComissoes(deIso, ateIso, fornecedorIdFiltro, statusFiltro) {
   var pedidos = getPedidos();
-  var fornecedores = getFornecedores();
+  var fornecedores = _comColecao('fornecedores');
   var porForn = {};
   pedidos.forEach(function(pedido){
     if (fornecedorIdFiltro && pedido.fornecedorId !== fornecedorIdFiltro) return;
