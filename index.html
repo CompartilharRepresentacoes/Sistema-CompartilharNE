@@ -13585,7 +13585,7 @@ function renderTabPrecoList() {
     var nItens = (r.itens || []).length;
     var atu = r.dtAtualizacao || r.dtCriacao || '—';
     return '<div class="mc-row" style="display:grid;grid-template-columns:2fr 1.2fr 120px 90px 120px 90px 110px;gap:10px;padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px;transition:background .1s" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
-      + '<div style="min-width:0"><div class="mc-primary" style="font-weight:600;color:#1e293b">' + _skuEsc(r.nome || '—') + '</div><div class="mc-secondary" style="font-size:10px;color:#94a3b8;margin-top:1px">' + _skuEsc(r.descricao || 'Tabela geral') + '</div></div>'
+      + '<div style="min-width:0"><div class="mc-primary" style="font-weight:800;font-size:14px;color:#1e293b">' + _skuEsc(r.nome || '—') + '</div><div class="mc-secondary" style="font-size:10px;color:#94a3b8;margin-top:1px">' + _skuEsc(r.descricao || 'Tabela geral') + '</div></div>'
       + '<span class="mc-meta" title="' + _skuEsc(fornTxt) + '" style="font-size:12px;color:#475569;min-width:0;line-height:1.35">' + _skuEsc(fornTxt) + '</span>'
       + '<span class="mc-meta" style="font-size:11px;color:#64748b">' + _skuEsc(String(atu).split(' ')[0]) + '</span>'
       + '<span class="mc-meta" style="font-size:12px;' + (nItens ? 'color:#475569' : 'color:#b45309;font-weight:700') + '">' + nItens + (nItens === 1 ? ' item' : ' itens') + '</span>'
