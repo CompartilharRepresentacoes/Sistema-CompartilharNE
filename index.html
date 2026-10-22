@@ -221,6 +221,19 @@
     input[type=number] { -moz-appearance:textfield; appearance:textfield; }
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; display:none; }
     /* v113: Restricoes de Pedidos - padrao de Pedidos (totais em cartao azul unico, filtros com botao, tabela com faixa de aviso) */
+    /* v134: Revenda - padrao do sistema */
+    #page-revenda-list #rev-abas { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
+    #page-revenda-list .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
+    #page-revenda-list .ng-aba:hover { background:#e8eefa; color:#272A4A; }
+    #page-revenda-list .ng-aba.ng-aba-on { background:#e3ebff; color:#272A4A; box-shadow:inset 0 -3px 0 #3d4180; }
+    #page-revenda-list .ng-aba em { font-style:normal; background:#fff; border-radius:999px; padding:1px 8px; margin-left:6px; font-size:10.5px; }
+    #page-revenda-list #rev-kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(20,35,80,.08); margin-bottom:12px; }
+    #page-revenda-list #rev-kpi-grid .ped-kpi-card { padding:14px 22px; }
+    #page-revenda-list #rev-kpi-grid .ped-kpi-card + .ped-kpi-card { border-left:1px solid rgba(255,255,255,.2); }
+    #page-revenda-list #rev-kpi-grid .rv-kl { font-size:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:#ffffff; margin-bottom:4px; }
+    #page-revenda-list #rev-kpi-grid .rv-kv { font-size:24px; font-weight:800; color:#ffffff; }
+    #page-revenda-list #rev-kpi-grid .rv-ks { font-size:11px; color:#ffffff; margin-top:2px; }
+    @media (max-width:900px) { #page-revenda-list #rev-abas { overflow-x:auto; } #page-revenda-list #rev-kpi-grid { grid-template-columns:1fr 1fr; } #page-revenda-list #rev-kpi-grid .ped-kpi-card:nth-child(odd) { border-left:0; } #page-revenda-list #rev-kpi-grid .ped-kpi-card:nth-child(even) { border-left:1px solid rgba(255,255,255,.2); } #page-revenda-list #rev-kpi-grid .ped-kpi-card:nth-child(n+3) { border-top:1px solid rgba(255,255,255,.2); } }
     /* v133: Ocorrencias - padrao do sistema */
     #page-ocorrencias #oc-abas { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
     #page-ocorrencias .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
@@ -6573,31 +6586,20 @@
           <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
         </div>
       </div>
-      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
-        <button onclick="showPage('page-revenda-form',{})" style="background:#fff;color:#272A4A;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">&#10133; Registrar Item</button>
-      </div>
 
-      <div id="rev-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Itens Disponíveis</div>
-          <div id="rev-kpi-disponiveis" style="font-size:20px;font-weight:800;color:#272A4A">0</div>
-          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">aguardando revenda</div>
-        </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor em Estoque</div>
-          <div id="rev-kpi-valor" style="font-size:20px;font-weight:800;color:#272A4A">R$ 0,00</div>
-          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">custo de referência</div>
-        </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Vencendo em 15 dias</div>
-          <div id="rev-kpi-vencendo" style="font-size:20px;font-weight:800;color:#b45309">0</div>
-          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">revenda urgente</div>
-        </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #5b78c9">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Revendidos no Mês</div>
-          <div id="rev-kpi-revendidos" style="font-size:20px;font-weight:800;color:#16a34a">0</div>
-          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">itens já vendidos</div>
-        </div>
+      <div id="rev-abas">
+        <span class="ng-aba ng-aba-on" data-aba="disp" onclick="_revSetAba('disp')">Disponíveis<em id="rev-aba-n-disp">0</em></span>
+        <span class="ng-aba" data-aba="venc" onclick="_revSetAba('venc')">Vencendo<em id="rev-aba-n-venc">0</em></span>
+        <span class="ng-aba" data-aba="vencido" onclick="_revSetAba('vencido')">Vencidos<em id="rev-aba-n-vencido">0</em></span>
+        <span class="ng-aba" data-aba="revendido" onclick="_revSetAba('revendido')">Revendidos<em id="rev-aba-n-revendido">0</em></span>
+        <span class="ng-aba" data-aba="descartado" onclick="_revSetAba('descartado')">Descartados<em id="rev-aba-n-descartado">0</em></span>
+        <span class="ng-aba" data-aba="todos" onclick="_revSetAba('todos')">Todos<em id="rev-aba-n-todos">0</em></span>
+      </div>
+      <div id="rev-kpi-grid">
+        <div class="ped-kpi-card"><div class="rv-kl">Itens Disponíveis</div><div id="rev-kpi-disponiveis" class="rv-kv">0</div><div class="rv-ks">aguardando revenda</div></div>
+        <div class="ped-kpi-card"><div class="rv-kl">Valor em Estoque</div><div id="rev-kpi-valor" class="rv-kv">R$ 0,00</div><div class="rv-ks">custo de referência</div></div>
+        <div class="ped-kpi-card"><div class="rv-kl">Vencendo em 15 dias</div><div id="rev-kpi-vencendo" class="rv-kv">0</div><div class="rv-ks">revenda urgente</div></div>
+        <div class="ped-kpi-card"><div class="rv-kl">Revendidos no Mês</div><div id="rev-kpi-revendidos" class="rv-kv">0</div><div class="rv-ks">itens já vendidos</div></div>
       </div>
 
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)">
@@ -6606,9 +6608,11 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input id="rev-busca" oninput="renderRevendaList()" placeholder="Produto, cliente ou fornecedor..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           </div>
-          <button id="rev-mais-filtros-btn" onclick="_revToggleMaisFiltros()" style="margin-left:auto;background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
+          <button id="rev-mais-filtros-btn" onclick="_revToggleMaisFiltros()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
             <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="filtro" style="font-size:13px"><path d="M3.5 5h17l-6.5 7.5V19l-4 2v-8.5z"/></svg> <span id="rev-mais-filtros-txt">Mais filtros</span> <i id="rev-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
           </button>
+          <button type="button" onclick="revLimparFiltros()" style="background:#eef2f9;color:#1c2f66;border:none;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">Limpar</button>
+          <button onclick="showPage('page-revenda-form',{})" style="margin-left:auto;background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">➕ Registrar Item</button>
         </div>
         <div id="rev-filtros-extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:10px;flex-wrap:wrap">
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
@@ -27535,7 +27539,19 @@ function _revToggleMaisFiltros() {
   if (txt) txt.textContent = abrir ? 'Menos filtros' : 'Mais filtros';
   if (chev) chev.className = abrir ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
 }
+var _revAba = 'disp';
+function _revSetAba(a) { _revAba = a; renderRevendaList(); }
+function _revAbaOk(st, a) {
+  if (a === 'todos') return true;
+  if (a === 'disp') return st === 'Disponível' || st === 'Vencendo em breve';
+  if (a === 'venc') return st === 'Vencendo em breve';
+  if (a === 'vencido') return st === 'Vencido';
+  if (a === 'revendido') return st === 'Revendido';
+  if (a === 'descartado') return st === 'Descartado';
+  return true;
+}
 function revLimparFiltros() {
+  _revAba = 'disp';
   ['rev-busca','rev-fornecedor'].forEach(function(id){ var el = document.getElementById(id); if (el) el.value = ''; });
   var vf = document.getElementById('rev-validade-filtro'); if (vf) vf.value = '';
   var sf = document.getElementById('rev-status-filtro'); if (sf) sf.value = '';
@@ -27571,6 +27587,9 @@ function renderRevendaList() {
   });
   linhas = linhas.slice().sort(function(a,b){ return (a.item.dtCadastro||'') < (b.item.dtCadastro||'') ? 1 : -1; });
 
+  var _revBase = linhas;
+  ['disp','venc','vencido','revendido','descartado','todos'].forEach(function(k){ var e = document.getElementById('rev-aba-n-' + k); if (e) e.textContent = _revBase.filter(function(l){ return _revAbaOk(l.status, k); }).length; });
+  document.querySelectorAll('#rev-abas .ng-aba').forEach(function(el){ el.classList.toggle('ng-aba-on', el.getAttribute('data-aba') === _revAba); });
   var disponiveis = linhas.filter(function(l){ return l.status === 'Disponível' || l.status === 'Vencendo em breve'; });
   var valorEstoque = disponiveis.reduce(function(acc,l){ return acc + (Number(l.item.valorCusto)||0) * (Number(l.item.quantidadeDisponivel)||0); }, 0);
   var vencendo = linhas.filter(function(l){ return l.status === 'Vencendo em breve'; }).length;
@@ -27584,6 +27603,7 @@ function renderRevendaList() {
   var kVenc = document.getElementById('rev-kpi-vencendo'); if (kVenc) kVenc.textContent = vencendo;
   var kR = document.getElementById('rev-kpi-revendidos'); if (kR) kR.textContent = revendidosMes;
 
+  linhas = linhas.filter(function(l){ return _revAbaOk(l.status, _revAba); });
   var pag = document.getElementById('rev-paginacao');
   var revFiltradas = linhas.length;
   linhas = _pgAplicar(linhas, 'rev-qtd');
