@@ -221,6 +221,11 @@
     input[type=number] { -moz-appearance:textfield; appearance:textfield; }
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; display:none; }
     /* v113: Restricoes de Pedidos - padrao de Pedidos (totais em cartao azul unico, filtros com botao, tabela com faixa de aviso) */
+    /* v135: Catalogos e Fotos Produtos - cartao azul unico de totais */
+    .kpi-azul3 { display:grid; grid-template-columns:repeat(3,1fr); background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(20,35,80,.08); margin-bottom:12px; }
+    .kpi-azul3 .ped-kpi-card { padding:14px 22px !important; background:transparent !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
+    .kpi-azul3 .ped-kpi-card + .ped-kpi-card { border-left:1px solid rgba(255,255,255,.2) !important; }
+    @media (max-width:900px) { .kpi-azul3 { grid-template-columns:1fr; } .kpi-azul3 .ped-kpi-card + .ped-kpi-card { border-left:0; border-top:1px solid rgba(255,255,255,.2); } }
     /* v134: Revenda - padrao do sistema */
     #page-revenda-list #rev-abas { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
     #page-revenda-list .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
@@ -4129,21 +4134,21 @@
           </div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Representadas</div>
-          <div id="catalogo-kpi-total" style="font-size:20px;font-weight:800;color:#272A4A">0</div>
-          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">fábricas cadastradas</div>
+      <div class="kpi-azul3">
+        <div class="ped-kpi-card" >
+          <div style="font-size:10px;color:#ffffff;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Representadas</div>
+          <div id="catalogo-kpi-total" style="font-size:24px;font-weight:800;color:#ffffff">0</div>
+          <div style="font-size:10.5px;color:#ffffff;margin-top:2px">fábricas cadastradas</div>
         </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Com catálogo</div>
-          <div id="catalogo-kpi-com" style="font-size:20px;font-weight:800;color:#16a34a">0</div>
-          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">PDF publicado</div>
+        <div class="ped-kpi-card" >
+          <div style="font-size:10px;color:#ffffff;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Com catálogo</div>
+          <div id="catalogo-kpi-com" style="font-size:24px;font-weight:800;color:#ffffff">0</div>
+          <div style="font-size:10.5px;color:#ffffff;margin-top:2px">PDF publicado</div>
         </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Sem catálogo</div>
-          <div id="catalogo-kpi-sem" style="font-size:20px;font-weight:800;color:#dc2626">0</div>
-          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">aguardando envio</div>
+        <div class="ped-kpi-card" >
+          <div style="font-size:10px;color:#ffffff;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Sem catálogo</div>
+          <div id="catalogo-kpi-sem" style="font-size:24px;font-weight:800;color:#ffffff">0</div>
+          <div style="font-size:10.5px;color:#ffffff;margin-top:2px">aguardando envio</div>
         </div>
       </div>
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)">
@@ -4185,21 +4190,21 @@
           </div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Total</div>
-          <div id="fotos-kpi-total" style="font-size:20px;font-weight:800;color:#272A4A">0</div>
-          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">itens nesta pasta</div>
+      <div class="kpi-azul3">
+        <div class="ped-kpi-card" >
+          <div style="font-size:10px;color:#ffffff;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Total</div>
+          <div id="fotos-kpi-total" style="font-size:24px;font-weight:800;color:#ffffff">0</div>
+          <div style="font-size:10.5px;color:#ffffff;margin-top:2px">itens nesta pasta</div>
         </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Com foto</div>
-          <div id="fotos-kpi-com" style="font-size:20px;font-weight:800;color:#16a34a">0</div>
-          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">foto cadastrada</div>
+        <div class="ped-kpi-card" >
+          <div style="font-size:10px;color:#ffffff;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Com foto</div>
+          <div id="fotos-kpi-com" style="font-size:24px;font-weight:800;color:#ffffff">0</div>
+          <div style="font-size:10.5px;color:#ffffff;margin-top:2px">foto cadastrada</div>
         </div>
-        <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Sem foto</div>
-          <div id="fotos-kpi-sem" style="font-size:20px;font-weight:800;color:#dc2626">0</div>
-          <div style="font-size:10.5px;color:#94a3b8;margin-top:2px">aguardando foto</div>
+        <div class="ped-kpi-card" >
+          <div style="font-size:10px;color:#ffffff;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Sem foto</div>
+          <div id="fotos-kpi-sem" style="font-size:24px;font-weight:800;color:#ffffff">0</div>
+          <div style="font-size:10.5px;color:#ffffff;margin-top:2px">aguardando foto</div>
         </div>
       </div>
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(15,23,42,.04)">
