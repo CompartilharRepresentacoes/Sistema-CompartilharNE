@@ -308,6 +308,10 @@
     .mv-sg button { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.4); color:#fff; } .mv-sg button:hover { background:#DE7926; border-color:#DE7926; color:#fff; }
     .mv-mf { background:#c9d8f5; border-top:0; }
     @media (max-width:900px) { .mv-tot2 { grid-template-columns:1fr 1fr; } }
+
+    /* v151: janela fixa, sem rolar a pagina de tras */
+    html.mv-trava, body.mv-trava { overflow:hidden !important; }
+    .mv-ov { overscroll-behavior:contain; }
     /* v137: Comissoes - padrao do sistema */
     #page-comissoes-list #com-abas { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
     #page-comissoes-list .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
@@ -24851,10 +24855,10 @@ function _mvAbrirModal(id) {
     _mvPopSub('');
     _mvAtuModal(true);
   }
-  document.getElementById('mv-ov').className = 'mv-ov on';
+  document.getElementById('mv-ov').className = 'mv-ov on'; document.documentElement.classList.add('mv-trava'); document.body.classList.add('mv-trava');
   _mvAtuModal();
 }
-function _mvFecharModal() { document.getElementById('mv-ov').className = 'mv-ov'; }
+function _mvFecharModal() { document.getElementById('mv-ov').className = 'mv-ov'; document.documentElement.classList.remove('mv-trava'); document.body.classList.remove('mv-trava'); }
 function _mvPopSub(sel) {
   var r = document.getElementById('mvf-rede').value;
   var subs = _comColecao('cat_clientes').filter(function(c){ return String(c.pai) === String(r); }).sort(function(a,b){ return (a.nome||'').localeCompare(b.nome||'', 'pt-BR'); });
