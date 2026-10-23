@@ -17105,7 +17105,7 @@ function dashInit() {
     const periodoMax = METAINFO.periodo_fim;
     // v517: ao pedir periodo anterior ao corte, o historico e baixado e o painel e refeito
     // preservando o periodo escolhido (_dashPeriodoRestaurar).
-    const _dashRest = window._dashPeriodoRestaurar || null;
+    const _dashRest = window._dashPeriodoRestaurar || window._dashPeriodoUsuario || null;
     window._dashPeriodoRestaurar = null;
     const state = {
       dtIni: (_dashRest && _dashRest.dtIni) || (periodoMax.slice(0,8) + '01'),
@@ -18926,6 +18926,8 @@ function dashInit() {
       var a = _fsAnosDoPeriodo(ini, fim);
       return a.length ? (a.length === 1 ? String(a[0]) : a[0] + ' a ' + a[a.length - 1]) : '';
     }
+    // guarda o periodo escolhido pelo usuario p/ sobreviver aos dashInit() (atualizacao de dados, voltar pra aba/tela)
+    function _dashGuardaPeriodo(r) { window._dashPeriodoUsuario = (r === 'mes') ? null : { dtIni: state.dtIni, dtFim: state.dtFim, r: r }; }
     function rerender() {
       if (!_dashHistorico && firebaseConfigurado) {
         var _comp = _dvgPeriodoComparacao();
@@ -18961,8 +18963,8 @@ function dashInit() {
       const prefixo = _dashHistorico ? 'Histórico 2025 · ' : '';
       document.getElementById('periodoInfo').textContent = `${prefixo}Período: ${fmtDate(state.dtIni)} → ${fmtDate(state.dtFim)}`;
     }
-    document.getElementById('dtIni').onchange = e => { var iso = _entctrlParseDataBR(e.target.value); if (iso) { state.dtIni = iso; rerender(); } else { e.target.value = _entctrlDataParaBR(state.dtIni); } };
-    document.getElementById('dtFim').onchange = e => { var iso = _entctrlParseDataBR(e.target.value); if (iso) { state.dtFim = iso; rerender(); } else { e.target.value = _entctrlDataParaBR(state.dtFim); } };
+    document.getElementById('dtIni').onchange = e => { var iso = _entctrlParseDataBR(e.target.value); if (iso) { state.dtIni = iso; _dashGuardaPeriodo(null); rerender(); } else { e.target.value = _entctrlDataParaBR(state.dtIni); } };
+    document.getElementById('dtFim').onchange = e => { var iso = _entctrlParseDataBR(e.target.value); if (iso) { state.dtFim = iso; _dashGuardaPeriodo(null); rerender(); } else { e.target.value = _entctrlDataParaBR(state.dtFim); } };
     document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(b => b.addEventListener('click', () => {
       document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
@@ -18976,6 +18978,7 @@ function dashInit() {
       else if (r==='q4') { state.dtIni = `${ano}-10-01`; state.dtFim = `${ano}-12-31`; }
       document.getElementById('dtIni').value = _entctrlDataParaBR(state.dtIni);
       document.getElementById('dtFim').value = _entctrlDataParaBR(state.dtFim);
+      _dashGuardaPeriodo(r);
       rerender();
     }));
 
@@ -18986,6 +18989,7 @@ function dashInit() {
       state.fabricas.clear(); state.vendedores.clear(); state.clientes.clear(); state.uf.clear();
       document.getElementById('dtIni').value = _entctrlDataParaBR(state.dtIni);
       document.getElementById('dtFim').value = _entctrlDataParaBR(state.dtFim);
+      window._dashPeriodoUsuario = null;
       buildFiltros(); rerender();
     });
     // onclick (nao addEventListener) de proposito: dashInit() roda de novo toda vez que a
@@ -19011,7 +19015,7 @@ function dashInit() {
     }
 
     // =============== INIT ===============
-    if (_dashRest) document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(x => x.classList.remove('active'));
+    if (_dashRest) document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(x => x.classList.toggle('active', !!_dashRest.r && x.dataset.r === _dashRest.r));
     document.getElementById('dtIni').value = _entctrlDataParaBR(state.dtIni);
     document.getElementById('dtFim').value = _entctrlDataParaBR(state.dtFim);
 
