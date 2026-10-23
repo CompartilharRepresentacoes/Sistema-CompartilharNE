@@ -2059,9 +2059,9 @@
 <!-- Linha de filtros -->
 <div id="dvgFiltrosBar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:9px 14px;margin-bottom:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
   <span style="font-size:11px;font-weight:600;color:#64748b;margin-right:2px">Período</span>
-  <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="dtIni" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:4px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+  <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="dtIni" onfocus="this.select()" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:4px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
   <span style="color:#94a3b8;font-size:13px">→</span>
-  <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="dtFim" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:4px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+  <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="dtFim" onfocus="this.select()" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:4px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
   <div style="width:1px;height:18px;background:#e2e8f0;margin:0 2px"></div>
   <button class="qbtn active" data-r="mes">Mês</button>
   <button class="qbtn" data-r="ytd">Ano</button>
@@ -18963,8 +18963,8 @@ function dashInit() {
       const prefixo = _dashHistorico ? 'Histórico 2025 · ' : '';
       document.getElementById('periodoInfo').textContent = `${prefixo}Período: ${fmtDate(state.dtIni)} → ${fmtDate(state.dtFim)}`;
     }
-    document.getElementById('dtIni').onchange = e => { var iso = _entctrlParseDataBR(e.target.value); if (iso) { state.dtIni = iso; _dashGuardaPeriodo(null); rerender(); } else { e.target.value = _entctrlDataParaBR(state.dtIni); } };
-    document.getElementById('dtFim').onchange = e => { var iso = _entctrlParseDataBR(e.target.value); if (iso) { state.dtFim = iso; _dashGuardaPeriodo(null); rerender(); } else { e.target.value = _entctrlDataParaBR(state.dtFim); } };
+    document.getElementById('dtIni').onchange = e => { var iso = _dashParseDataParcial(e.target.value, state.dtIni); if (iso) { state.dtIni = iso; e.target.value = _entctrlDataParaBR(iso); document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(x => x.classList.remove('active')); _dashGuardaPeriodo(null); rerender(); } else { e.target.value = _entctrlDataParaBR(state.dtIni); } };
+    document.getElementById('dtFim').onchange = e => { var iso = _dashParseDataParcial(e.target.value, state.dtFim); if (iso) { state.dtFim = iso; e.target.value = _entctrlDataParaBR(iso); document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(x => x.classList.remove('active')); _dashGuardaPeriodo(null); rerender(); } else { e.target.value = _entctrlDataParaBR(state.dtFim); } };
     document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(b => b.addEventListener('click', () => {
       document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
@@ -23314,6 +23314,19 @@ function _entctrlMaskData(el) {
   if (mes) out += '/' + mes;
   if (ano) out += '/' + ano;
   el.value = out;
+}
+// aceita data incompleta: "16" -> dia 16 do mes/ano de refIso; "1610" -> 16/10 do ano de refIso; "161026" -> 16/10/2026
+function _dashParseDataParcial(str, refIso) {
+  var d = String(str || '').replace(/\D/g, '');
+  var ref = String(refIso || '').split('-');
+  var ra = ref[0] || String(new Date().getFullYear()), rm = ref[1] || String(new Date().getMonth() + 1).padStart(2, '0');
+  var dia, mes, ano;
+  if (d.length === 1 || d.length === 2) { dia = d.padStart(2, '0'); mes = rm; ano = ra; }
+  else if (d.length === 3 || d.length === 4) { dia = d.slice(0, 2); mes = d.slice(2).padStart(2, '0'); ano = ra; }
+  else if (d.length === 6) { dia = d.slice(0, 2); mes = d.slice(2, 4); ano = '20' + d.slice(4, 6); }
+  else if (d.length === 8) { dia = d.slice(0, 2); mes = d.slice(2, 4); ano = d.slice(4, 8); }
+  else return '';
+  return _entctrlParseDataBR(dia + '/' + mes + '/' + ano);
 }
 function _entctrlParseDataBR(str) {
   if (!str) return '';
