@@ -17873,7 +17873,7 @@ function dashInit() {
           _gIdx.set('d' + d, _gIdx.get(key));
           _gBuckets[_gIdx.get(key)]._ult = d;
         }
-        _gBuckets.forEach(b => { let fim = Math.min(nDias, b._seg + 4); if (fim < b._ini) fim = b._ult; b.label = 'SEM ' + b._n + ' · ' + dd(b._ini) + '–' + dd(fim); });
+        _gBuckets.forEach(b => { let fim = Math.min(nDias, b._seg + 4); if (fim < b._ini) fim = b._ult; b.label = dd(b._ini) + ' - ' + dd(fim); });
       }
       for (const p of peds) {
         let pos;
