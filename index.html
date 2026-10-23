@@ -289,6 +289,25 @@
     .mvd-ctl { margin:4px 0 0; font-size:11.5px; } .mvd-ctl span { font-weight:700; cursor:pointer; }
     .mvd-leg { margin-top:10px; padding:10px 14px; background:#f8fafc; border-radius:12px; font-size:11.5px; line-height:1.7; }
     @media (max-width:900px) { .mv-tot, .mv-fab, .mv-cg { grid-template-columns:1fr 1fr; } .mv-th { display:none; } .mv-grid { grid-template-columns:1fr 1fr; } .mv-r.c4, .mv-r.c3, .mv-r.c5 { grid-template-columns:1fr 1fr; } .mvd-hdr { display:none; } .mvd-vt { grid-template-columns:1fr 70px; } .mvd-vt .mvd-trk { grid-column:1/3; } .mvd-vt .mvd-tx { grid-column:1/3; } }
+
+    /* v150: janela de meta com mais cor (cards do sistema) */
+    .mv-md { background:#dfe8fb; } .mv-mb { background:#dfe8fb; }
+    .mv-mb select, .mv-mb input { background:#fff; border-color:#b9c9ea; }
+    .mv-ttl { font-size:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:#1c2f66; margin:2px 2px 6px; }
+    .mv-tot2 { display:grid; grid-template-columns:repeat(4,1fr); background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%); color:#fff; border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(20,35,80,.08); }
+    .mv-tot2 > div { padding:12px 16px; } .mv-tot2 > div + div { border-left:1px solid rgba(255,255,255,.2); }
+    .mv-tot2 i { display:block; font-style:normal; font-size:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:#fff; }
+    .mv-tot2 b { display:block; font-size:19px; font-weight:800; margin-top:2px; color:#fff; } .mv-tot2 b.m { font-size:12.5px; line-height:1.5; font-weight:700; }
+    .mv-tot2 small { font-size:11px; color:rgba(255,255,255,.8); }
+    .mv-tot2 b.pos { color:#7ef0a6; } .mv-tot2 b.neg { color:#ffa3a3; }
+    .mv-ms { background:#fff; border:1px solid #b9c9ea; border-radius:12px; margin:10px 0 12px; }
+    .mv-ms .mv-trk { background:#dbe4f6; } .mv-ms .mv-trk i { background:#DE7926; }
+    .mv-lin { background:linear-gradient(135deg,#272A4A,#3d4180); border:0; }
+    .mv-mt label, .mv-sg span { color:#fff !important; }
+    .mv-mt input { border:2px solid #DE7926; }
+    .mv-sg button { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.4); color:#fff; } .mv-sg button:hover { background:#DE7926; border-color:#DE7926; color:#fff; }
+    .mv-mf { background:#c9d8f5; border-top:0; }
+    @media (max-width:900px) { .mv-tot2 { grid-template-columns:1fr 1fr; } }
     /* v137: Comissoes - padrao do sistema */
     #page-comissoes-list #com-abas { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
     #page-comissoes-list .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
@@ -24864,12 +24883,15 @@ function _mvAtuModal(trocouForn) {
   var d = 0; _mvMetasVend(mes).forEach(function(x){ if (x.id !== _mvEditId && String(x.fornecedorId) === String(forn) && x.tipo === tipo) d += x.valor; });
   var nomeRede = _mvRedeNome(rede, sub), nomeF = _mvFornNome(forn);
   var mesesTxt = [1, 2, 3].map(function(i, k){ return _MV_MESES[parseInt(_mvMesAdd(mes, -(3 - k)).slice(0, 2), 10) - 1].slice(0, 3) + ' ' + _mvFmt(ref.l3[2 - k], tipo); }).join('<br>');
-  box.innerHTML = '<div class="mv-cmp"><h5>Histórico de ' + _mvEsc(nomeRede) + ' em ' + _mvEsc(nomeF) + ' (todos os vendedores)</h5><div class="mv-cg">' +
+  var vp = ref.ly ? Math.round((ref.m3 / ref.ly - 1) * 100) : null;
+  var vcl = vp === null || vp === 0 ? '' : (vp > 0 ? 'pos' : 'neg');
+  var vtx = vp === null ? '—' : (vp > 0 ? '▲ +' : (vp < 0 ? '▼ ' : '')) + vp + '%';
+  box.innerHTML = '<div class="mv-ttl">Histórico de ' + _mvEsc(nomeRede) + ' em ' + _mvEsc(nomeF) + ' (todos os vendedores)</div><div class="mv-tot2">' +
     '<div><i>Mesmo mês, ano passado</i><b>' + _mvFmt(ref.ly, tipo) + '</b><small>' + _mvMesNome(_mvMesAdd(mes, -12)) + '</small></div>' +
     '<div><i>Média dos 3 meses antes</i><b>' + _mvFmt(ref.m3, tipo) + '</b><small>' + (ref.n < 3 ? 'por mês com venda (' + ref.n + ' de 3)' : 'por mês') + '</small></div>' +
-    '<div><i>Mês a mês</i><b style="font-size:12px;line-height:1.5">' + mesesTxt + '</b></div>' +
-    '<div><i>Variação</i><b>' + (ref.ly ? (ref.m3 >= ref.ly ? '+' : '') + Math.round((ref.m3 / ref.ly - 1) * 100) + '%' : '—') + '</b><small>média x ano passado</small></div></div>' +
-    '<div class="mv-ms">' + (fm ? '<b>Meta da fábrica em ' + _mvMesNome(mes) + ': ' + _mvFmt(fm.valor, tipo) + '</b> · já distribuído ' + _mvFmt(d, tipo) + ' · <b>saldo ' + _mvFmt(fm.valor - d, tipo) + '</b><div class="mv-trk" style="margin-top:6px"><i style="width:' + Math.min(100, fm.valor ? d / fm.valor * 100 : 0) + '%"></i></div>' : 'A fábrica não tem meta em ' + tipo + ' em ' + _mvMesNome(mes) + ', então não há saldo para comparar.') + '</div></div>';
+    '<div><i>Mês a mês</i><b class="m">' + mesesTxt + '</b></div>' +
+    '<div><i>Variação</i><b class="' + vcl + '">' + vtx + '</b><small>média x ano passado</small></div></div>' +
+    '<div class="mv-ms">' + (fm ? '<b>Meta da fábrica em ' + _mvMesNome(mes) + ': ' + _mvFmt(fm.valor, tipo) + '</b> · já distribuído ' + _mvFmt(d, tipo) + ' · <b>saldo ' + _mvFmt(fm.valor - d, tipo) + '</b><div class="mv-trk" style="margin-top:6px"><i style="width:' + Math.min(100, fm.valor ? d / fm.valor * 100 : 0) + '%"></i></div>' : 'A fábrica não tem meta em ' + tipo + ' em ' + _mvMesNome(mes) + ', então não há saldo para comparar.') + '</div>';
 }
 function _mvSug(p) { if (!_mvCur) return; document.getElementById('mvf-val').value = String(Math.round(_mvCur.m3 * (1 + p / 100))).replace('.', ','); }
 function _mvSalvar() {
