@@ -312,6 +312,11 @@
     /* v151: janela fixa, sem rolar a pagina de tras */
     html.mv-trava, body.mv-trava { overflow:hidden !important; }
     .mv-ov { overscroll-behavior:contain; }
+
+    /* v152: aviso de mes sem venda no ano passado */
+    .mv-tot2 b.dim { opacity:.55; }
+    .mv-aviso { display:flex; gap:10px; align-items:center; flex-wrap:wrap; background:#fff8e1; border:1px solid #f3d27a; border-left:6px solid #f59e0b; border-radius:12px; padding:9px 14px; margin:8px 0 0; font-size:12px; color:#5b3a00; }
+    .mv-aviso button { border:1px solid #e0b23c; background:#fff; border-radius:999px; padding:4px 12px; font-size:11.5px; font-weight:700; color:#5b3a00; cursor:pointer; } .mv-aviso button.sel { background:#272A4A; color:#fff; border-color:#272A4A; }
     /* v137: Comissoes - padrao do sistema */
     #page-comissoes-list #com-abas { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
     #page-comissoes-list .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
@@ -24747,14 +24752,14 @@ function _mvSoma(recs, ym, f, tipo) {
 function _mvRef(recs, m) {
   var base = { f: m.fornecedorId, c: m.redeId, s: m.subRedeId };
   var l3 = [1, 2, 3].map(function(i){ return _mvSoma(recs, _mvMesIso(_mvMesAdd(m.mes, -i)), base, m.tipo); });
-  return { ly: _mvSoma(recs, _mvMesIso(_mvMesAdd(m.mes, -12)), base, m.tipo), l3: l3, n: l3.filter(function(x){ return x > 0; }).length, m3: l3.filter(function(x){ return x > 0; }).length ? (l3[0] + l3[1] + l3[2]) / l3.filter(function(x){ return x > 0; }).length : 0 };
+  return { ly: _mvSoma(recs, _mvMesIso(_mvMesAdd(m.mes, -12)), base, m.tipo), lyAnt: _mvSoma(recs, _mvMesIso(_mvMesAdd(m.mes, -13)), base, m.tipo), lySeg: _mvSoma(recs, _mvMesIso(_mvMesAdd(m.mes, -11)), base, m.tipo), l3: l3, n: l3.filter(function(x){ return x > 0; }).length, m3: l3.filter(function(x){ return x > 0; }).length ? (l3[0] + l3[1] + l3[2]) / l3.filter(function(x){ return x > 0; }).length : 0 };
 }
 function _mvRealiz(recs, m) { return _mvSoma(recs, _mvMesIso(m.mes), { v: m.vendedorId, f: m.fornecedorId, c: m.redeId, s: m.subRedeId }, m.tipo); }
 
 // Pedidos de anos antigos ficam em arquivo à parte (versão enxuta): carrega sob demanda e redesenha
 function _mvGarantir(mes, cb) {
   if (typeof _sbCarregarSlim !== 'function' || typeof _sbSlimCarregado !== 'function') return;
-  var ini = _mvMesAdd(mes, -12).slice(3) + '-01-01', fim = mes.slice(3) + '-12-31';
+  var ini = _mvMesAdd(mes, -13).slice(3) + '-01-01', fim = mes.slice(3) + '-12-31';
   if (_sbSlimCarregado(ini, fim)) return;
   _sbCarregarSlim(ini, fim).then(function(ok){ if (ok) cb(); });
 }
@@ -24827,7 +24832,8 @@ function _mvExcluir(id) {
   _mvRender(); _mvRenderDash();
 }
 /* ---------- modal ---------- */
-var _mvEditId = '', _mvCur = null;
+var _mvEditId = '', _mvCur = null, _mvLySel = '';
+function _mvLyEsc(s) { _mvLySel = s; _mvAtuModal(); }
 function _mvAbrirModal(id) {
   _mvEditId = id || '';
   var m = id ? getMetas().find(function(x){ return x.id === id; }) : null;
@@ -24855,7 +24861,7 @@ function _mvAbrirModal(id) {
     _mvPopSub('');
     _mvAtuModal(true);
   }
-  document.getElementById('mv-ov').className = 'mv-ov on'; document.documentElement.classList.add('mv-trava'); document.body.classList.add('mv-trava');
+  _mvLySel = ''; document.getElementById('mv-ov').className = 'mv-ov on'; document.documentElement.classList.add('mv-trava'); document.body.classList.add('mv-trava');
   _mvAtuModal();
 }
 function _mvFecharModal() { document.getElementById('mv-ov').className = 'mv-ov'; document.documentElement.classList.remove('mv-trava'); document.body.classList.remove('mv-trava'); }
@@ -24887,14 +24893,28 @@ function _mvAtuModal(trocouForn) {
   var d = 0; _mvMetasVend(mes).forEach(function(x){ if (x.id !== _mvEditId && String(x.fornecedorId) === String(forn) && x.tipo === tipo) d += x.valor; });
   var nomeRede = _mvRedeNome(rede, sub), nomeF = _mvFornNome(forn);
   var mesesTxt = [1, 2, 3].map(function(i, k){ return _MV_MESES[parseInt(_mvMesAdd(mes, -(3 - k)).slice(0, 2), 10) - 1].slice(0, 3) + ' ' + _mvFmt(ref.l3[2 - k], tipo); }).join('<br>');
-  var vp = ref.ly ? Math.round((ref.m3 / ref.ly - 1) * 100) : null;
+  var nmA = _mvMesNome(_mvMesAdd(mes, -13)), nmS = _mvMesNome(_mvMesAdd(mes, -11)), nmL = _mvMesNome(_mvMesAdd(mes, -12));
+  var curto = function(n){ return n.replace(/^([^\/]{3})[^\/]*/, '$1'); };
+  var refLy = ref.ly, refNm = nmL, aviso = '';
+  if (!ref.ly) {
+    var sel = _mvLySel;
+    if (sel === 'ant' && !ref.lyAnt) sel = ''; if (sel === 'seg' && !ref.lySeg) sel = '';
+    if (!sel) sel = ref.lyAnt ? 'ant' : (ref.lySeg ? 'seg' : '');
+    if (sel) {
+      refLy = sel === 'ant' ? ref.lyAnt : ref.lySeg; refNm = sel === 'ant' ? nmA : nmS;
+      aviso = '<div class="mv-aviso"><span><b>Sem venda em ' + nmL + '.</b> Referência usada: ' + refNm + ' (' + _mvFmt(refLy, tipo) + ').</span>' +
+        (ref.lyAnt ? '<button class="' + (sel === 'ant' ? 'sel' : '') + '" onclick="_mvLyEsc(\'ant\')">' + curto(nmA) + ' · ' + _mvFmt(ref.lyAnt, tipo) + '</button>' : '') +
+        (ref.lySeg ? '<button class="' + (sel === 'seg' ? 'sel' : '') + '" onclick="_mvLyEsc(\'seg\')">' + curto(nmS) + ' · ' + _mvFmt(ref.lySeg, tipo) + '</button>' : '') + '</div>';
+    } else aviso = '<div class="mv-aviso"><span><b>Sem venda em ' + nmL + '</b> nem nos meses vizinhos (' + curto(nmA) + ' e ' + curto(nmS) + '). Não há referência do ano passado.</span></div>';
+  }
+  var vp = refLy ? Math.round((ref.m3 / refLy - 1) * 100) : null;
   var vcl = vp === null || vp === 0 ? '' : (vp > 0 ? 'pos' : 'neg');
   var vtx = vp === null ? '—' : (vp > 0 ? '▲ +' : (vp < 0 ? '▼ ' : '')) + vp + '%';
   box.innerHTML = '<div class="mv-ttl">Histórico de ' + _mvEsc(nomeRede) + ' em ' + _mvEsc(nomeF) + ' (todos os vendedores)</div><div class="mv-tot2">' +
-    '<div><i>Mesmo mês, ano passado</i><b>' + _mvFmt(ref.ly, tipo) + '</b><small>' + _mvMesNome(_mvMesAdd(mes, -12)) + '</small></div>' +
+    '<div><i>Mesmo mês, ano passado</i><b' + (ref.ly ? '' : ' class="dim"') + '>' + _mvFmt(ref.ly, tipo) + '</b><small>' + nmL + '</small></div>' +
     '<div><i>Média dos 3 meses antes</i><b>' + _mvFmt(ref.m3, tipo) + '</b><small>' + (ref.n < 3 ? 'por mês com venda (' + ref.n + ' de 3)' : 'por mês') + '</small></div>' +
     '<div><i>Mês a mês</i><b class="m">' + mesesTxt + '</b></div>' +
-    '<div><i>Variação</i><b class="' + vcl + '">' + vtx + '</b><small>média x ano passado</small></div></div>' +
+    '<div><i>Variação</i><b class="' + vcl + '">' + vtx + '</b><small>média x ' + (ref.ly ? 'ano passado' : refNm) + '</small></div></div>' + aviso +
     '<div class="mv-ms">' + (fm ? '<b>Meta da fábrica em ' + _mvMesNome(mes) + ': ' + _mvFmt(fm.valor, tipo) + '</b> · já distribuído ' + _mvFmt(d, tipo) + ' · <b>saldo ' + _mvFmt(fm.valor - d, tipo) + '</b><div class="mv-trk" style="margin-top:6px"><i style="width:' + Math.min(100, fm.valor ? d / fm.valor * 100 : 0) + '%"></i></div>' : 'A fábrica não tem meta em ' + tipo + ' em ' + _mvMesNome(mes) + ', então não há saldo para comparar.') + '</div>';
 }
 function _mvSug(p) { if (!_mvCur) return; document.getElementById('mvf-val').value = String(Math.round(_mvCur.m3 * (1 + p / 100))).replace('.', ','); }
