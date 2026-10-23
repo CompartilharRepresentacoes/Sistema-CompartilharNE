@@ -24691,7 +24691,7 @@ function _mvRecs() {
   var pesoMap = {}; _comColecao('produtos').forEach(function(p){ pesoMap[p.id] = parseFloat(String(p.peso).replace(',', '.')) || 0; });
   var cliMap = {}; _comColecao('clientes').forEach(function(c){ cliMap[c.id] = c; });
   var out = [];
-  _comColecao('pedidos').forEach(function(pd){
+  _comColecao('pedidos').concat(typeof _sbSlimTodos === 'function' ? _sbSlimTodos() : []).forEach(function(pd){
     if (pd.status !== 'Faturado' && pd.status !== 'Faturado Parcial') return;
     var c = cliMap[pd.clienteId] || {};
     (pd.faturas || []).forEach(function(ft){
@@ -24723,6 +24723,13 @@ function _mvRef(recs, m) {
 }
 function _mvRealiz(recs, m) { return _mvSoma(recs, _mvMesIso(m.mes), { v: m.vendedorId, f: m.fornecedorId, c: m.redeId, s: m.subRedeId }, m.tipo); }
 
+// Pedidos de anos antigos ficam em arquivo à parte (versão enxuta): carrega sob demanda e redesenha
+function _mvGarantir(mes, cb) {
+  if (typeof _sbCarregarSlim !== 'function' || typeof _sbSlimCarregado !== 'function') return;
+  var ini = _mvMesAdd(mes, -12).slice(3) + '-01-01', fim = mes.slice(3) + '-12-31';
+  if (_sbSlimCarregado(ini, fim)) return;
+  _sbCarregarSlim(ini, fim).then(function(ok){ if (ok) cb(); });
+}
 /* ---------- pagina ---------- */
 var _mvRecsCache = null;
 function _mvAoAbrir() { _mvRecsCache = null; _mvPopularFiltros(); _mvRender(); }
@@ -24783,6 +24790,7 @@ function _mvRender() {
     });
   });
   document.getElementById('mv-tbody').innerHTML = h || '<div class="mv-vz">Nenhuma meta de vendedor cadastrada para ' + _mvMesNome(mes) + '. Clique em "+ Adicionar meta".</div>';
+  _mvGarantir(mes, _mvRender);
   document.getElementById('mv-rod').innerHTML = '<span>' + metas.length + ' metas</span><span>Realizado = pedidos faturados do mês, do vendedor, na rede e fábrica da meta</span>';
 }
 function _mvExcluir(id) {
@@ -24837,6 +24845,7 @@ function _mvAtuModal(trocouForn) {
   var forn = document.getElementById('mvf-forn').value, rede = document.getElementById('mvf-rede').value, sub = document.getElementById('mvf-sub').value;
   var okMes = /^\d{2}\/\d{4}$/.test(mes) && parseInt(mes.slice(0, 2), 10) >= 1 && parseInt(mes.slice(0, 2), 10) <= 12;
   var fabs = okMes ? _mvMetasFab(mes).filter(function(x){ return String(x.fornecedorId) === String(forn); }) : [];
+  if (okMes) _mvGarantir(mes, function(){ _mvRecsCache = null; _mvAtuModal(); });
   var tSel = document.getElementById('mvf-tipo');
   if (trocouForn && fabs.length) tSel.value = fabs[0].tipo;
   document.getElementById('mvf-tipo-dica').textContent = fabs.length ? 'Meta da fábrica neste mês: ' + fabs.map(function(x){ return x.tipo; }).join(' e ') : (okMes ? 'Esta fábrica ainda não tem meta no mês (Fornecedores › Meta).' : '');
@@ -24909,6 +24918,7 @@ function _mvRenderDash() {
   var mesAt = _mvMesAtual(); if (!_mvDash.mes) _mvDash.mes = mesAt;
   var mes = _mvDash.mes;
   var recs = _mvRecs();
+  _mvGarantir(mes, _mvRenderDash);
   var todas = _mvMetasVend(mes);
   // selects
   var selM = document.getElementById('mvdMes');
