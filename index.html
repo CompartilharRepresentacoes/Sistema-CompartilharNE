@@ -24914,7 +24914,7 @@ function _mvAtuModal(trocouForn) {
       var outro = sel === 'ant' ? (ref.lySeg ? 'seg' : '') : (ref.lyAnt ? 'ant' : '');
       var nmO = outro === 'ant' ? nmA : nmS;
       tag = '<br><span class="mv-av' + (outro ? ' clk' : '') + '"' + (outro ? ' title="Clique para usar ' + nmO + ' (' + _mvFmt(outro === 'ant' ? ref.lyAnt : ref.lySeg, tipo) + ')" onclick="_mvLyEsc(\'' + outro + '\')"' : '') + '>usando ' + curto(refNm) + (outro ? ' ⇄' : '') + '</span>';
-    } else aviso = '<div class="mv-aviso"><span><b>Sem venda em ' + nmL + '</b> nem nos meses vizinhos (' + curto(nmA) + ' e ' + curto(nmS) + '). Não há referência do ano passado.</span></div>';
+    }
   }
   var vp = refLy ? Math.round((ref.m3 / refLy - 1) * 100) : null;
   var vcl = vp === null || vp === 0 ? '' : (vp > 0 ? 'pos' : 'neg');
