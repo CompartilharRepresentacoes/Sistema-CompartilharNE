@@ -18688,7 +18688,7 @@ function dashInit() {
           _feIdx.set('d' + d, _feIdx.get(key));
           ult[_feIdx.get(key)] = d;
         }
-        ini.forEach((i0, k) => { let fim = Math.min(nDias, seg0[k] + 4); if (fim < i0) fim = ult[k]; _feLabels.push('Sem ' + (k+1) + ' · ' + dd(i0) + '–' + dd(fim)); });
+        ini.forEach((i0, k) => { let fim = Math.min(nDias, seg0[k] + 4); if (fim < i0) fim = ult[k]; _feLabels.push(dd(i0) + ' - ' + dd(fim)); });
       }
       for (const p of peds) {
         let pos;
