@@ -29848,6 +29848,7 @@ var RELATORIOS = [
   { id:'sem-faturar', nivel:'operacional', icon:'ti-clock-pause', titulo:'Pedidos sem faturar há X dias', desc:'Pedidos sem nenhuma NF, com dias parados e valor, por faixa.', campos:['data','fornecedor','vendedor','cliente','uf','categoria','subcategoria','status'] },
   { id:'novos-reativados', nivel:'analitico', icon:'ti-user-plus', titulo:'Clientes novos e reativados', desc:'Clientes que compraram pela primeira vez ou voltaram após 90+ dias.', campos:['data','vendedor','cliente','uf','categoria','subcategoria','status'] },
   { id:'faturamento-liquido', nivel:'gerencial', icon:'ti-receipt-2', titulo:'Faturamento líquido', desc:'Faturado menos devoluções, mês a mês.', campos:['data','fornecedor','vendedor'] },
+  { id:'ranking-transportadoras', nivel:'gerencial', icon:'ti-truck', titulo:'Ranking de transportadoras', desc:'NFs, valor transportado, ticket médio e prazo médio de entrega por transportadora.', campos:['data','fornecedor','transportadora','uf','cliente'] },
   { id:'ranking-fabricas', nivel:'gerencial', icon:'ti-trophy', titulo:'Ranking de fábricas', desc:'Faturamento por fábrica no mês, participação e variação sobre o mês anterior.', campos:['data','vendedor','uf'] },
   { id:'cadastros-incompletos', nivel:'operacional', icon:'ti-clipboard-x', titulo:'Cadastros incompletos', desc:'Clientes e produtos com informação faltando.', campos:['fornecedor','cliente','status'] },
   { id:'ocorrencias-entrega', nivel:'operacional', icon:'ti-alert-circle', titulo:'Ocorrências de entrega', desc:'Ocorrências lançadas por tipo, cliente e transportadora, com valor afetado.', campos:['data','cliente','transportadora','status'] },
@@ -30176,6 +30177,7 @@ function gerarRelatorio() {
   else if (_relAtual === 'novos-reativados') html = _relCalcClientesNovosReativados(f);
   else if (_relAtual === 'faturamento-liquido') html = _relCalcFaturamentoLiquido(f);
   else if (_relAtual === 'ranking-fabricas') html = _relCalcRankingFabricas(f);
+  else if (_relAtual === 'ranking-transportadoras') html = _relCalcRankingTransportadoras(f);
   else if (_relAtual === 'cadastros-incompletos') html = _relCalcCadastrosIncompletos(f);
   else if (_relAtual === 'ocorrencias-entrega') html = _relCalcOcorrencias(f);
   else if (_relAtual === 'restricoes-ativas') html = _relCalcRestricoesAtivas(f);
@@ -31198,6 +31200,31 @@ function _relCalcRankingFabricas(f) {
   var cols = [ { label:'#', width:'40px' }, { label:'Fábrica' }, { label:_relMesRot(ym), width:'130px', right:true }, { label:'% do total', width:'90px', right:true }, { label:_relMesRot(ant), width:'130px', right:true }, { label:'Variação', width:'90px', right:true } ];
   var rows = lista.map(function(x, i){ return [ i + 1, _pedEsc(_cpSemColchetes(x.k)), _pedFmtMoeda(x.a), (ta ? (x.a / ta * 100).toFixed(1).replace('.', ',') : '0,0') + '%', _pedFmtMoeda(x.b), fv(vr(x.a, x.b)) ]; });
   return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Mês de referência: ' + _relMesRot(ym) + (atual ? ' (parcial, até hoje)' : '') + ', comparado ao mês anterior inteiro. Informe "de" nos filtros para outro mês.</div>' + kpis + _relTabela(cols, rows, { totais: [ '', 'TOTAL', _pedFmtMoeda(ta), '100%', _pedFmtMoeda(tb), fv(vr(ta, tb)) ] });
+}
+
+function _relCalcRankingTransportadoras(f) {
+  var G = {}, semT = 0, semTV = 0;
+  _relBaseFaturas(f).forEach(function(l){
+    var x = l.fatura, v = Number(x.valor) || 0;
+    if (!x.transportadoraNome) { semT++; semTV += v; return; }
+    var o = G[x.transportadoraNome] = G[x.transportadoraNome] || { n:0, v:0, ne:0, dias:0, pend:0 };
+    o.n++; o.v += v;
+    var d = x.dataEntrega ? _entctrlDiasDiferenca(x.data, x.dataEntrega) : null;
+    if (d != null && d >= 0 && d < 90) { o.ne++; o.dias += d; } else if (!x.dataEntrega) o.pend++;
+  });
+  var lista = Object.keys(G).map(function(k){ return { k:k, o:G[k] }; }).sort(function(a,b){ return b.o.v - a.o.v; });
+  var tn = 0, tv = 0, tne = 0, td = 0, tp = 0;
+  lista.forEach(function(x){ tn += x.o.n; tv += x.o.v; tne += x.o.ne; td += x.o.dias; tp += x.o.pend; });
+  var fd = function(a, b){ return b ? (a / b).toFixed(1).replace('.', ',') + ' dias' : '—'; };
+  var kpis = _relKpis([
+    { label:'NFs com transportadora', valor: String(tn), cor:'#272A4A' },
+    { label:'Valor transportado', valor: _pedFmtMoeda(tv) },
+    { label:'Prazo médio de entrega', valor: fd(td, tne) },
+    { label:'NFs sem data de entrega', valor: String(tp) }
+  ]);
+  var cols = [ { label:'#', width:'40px' }, { label:'Transportadora' }, { label:'NFs', width:'80px', right:true }, { label:'Valor', width:'130px', right:true }, { label:'% valor', width:'80px', right:true }, { label:'Ticket médio', width:'120px', right:true }, { label:'Prazo médio', width:'110px', right:true }, { label:'Sem entrega', width:'100px', right:true } ];
+  var rows = lista.map(function(x, i){ return [ i + 1, _pedEsc(x.k), x.o.n, _pedFmtMoeda(x.o.v), (tv ? (x.o.v / tv * 100).toFixed(1).replace('.', ',') : '0,0') + '%', _pedFmtMoeda(x.o.n ? x.o.v / x.o.n : 0), fd(x.o.dias, x.o.ne), x.o.pend ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Prazo = data da NF até a data de entrega registrada (somente NFs com entrega informada). NFs sem transportadora lançada: ' + semT + ' (' + _pedFmtMoeda(semTV) + ').</div>' + kpis + _relTabela(cols, rows, { totais: [ '', 'TOTAL', tn, _pedFmtMoeda(tv), '100%', _pedFmtMoeda(tn ? tv / tn : 0), fd(td, tne), tp ] });
 }
 
 // 29 · Cadastros incompletos
