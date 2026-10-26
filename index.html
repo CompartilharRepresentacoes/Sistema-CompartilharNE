@@ -29881,7 +29881,7 @@ var RELATORIOS_TIPOS = [
   { id:'gerencial', icon:'ti-chart-line', label:'Gerencial', desc:'Visão de gestão: metas, evolução mensal e saúde da carteira.' }
 ];
 
-var _relAbertos = { operacional:true };
+var _relAbertos = {};
 var _relBusca = '';
 function _relToggleTipo(id){ _relAbertos[id] = !_relAbertos[id]; renderRelatoriosLista(); }
 function _relExpandir(v){ RELATORIOS_TIPOS.forEach(function(t){ _relAbertos[t.id] = v; }); renderRelatoriosLista(); }
