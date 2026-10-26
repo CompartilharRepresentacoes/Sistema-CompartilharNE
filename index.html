@@ -16679,12 +16679,7 @@ function consultarPreco() {
 
   if (!fornId) { alert('Selecione a fábrica.'); return; }
   if (!prodId) { alert('Selecione o produto.'); return; }
-  if (!tercId) {
-    const msg = tipo === 'rede'
-      ? (document.getElementById('cp-label-terceiro')?.textContent || 'Rede')
-      : 'Cliente';
-    alert(`Selecione ${msg}.`); return;
-  }
+  // v170: rede/cliente é opcional; sem ele, mostra as tabelas de todas as redes
 
   // Resolve quais cliente IDs verificar para "especifica"
   let clienteIds = [];
@@ -16710,13 +16705,8 @@ function consultarPreco() {
     _cpResultados.push({ tabela: tab, item, especifica });
   });
   _cpResultados.sort((a, b) => (b.especifica ? 1 : 0) - (a.especifica ? 1 : 0));
-  // v67: so mostra as tabelas que valem para a rede/cliente escolhido; sem nenhuma especifica, cai nas tabelas gerais (sem clientes vinculados)
-  if (_cpResultados.some(r => r.especifica)) {
-    _cpResultados = _cpResultados.filter(r => r.especifica);
-  } else {
-    const gerais = _cpResultados.filter(r => !(r.tabela.clientes || []).length);
-    if (gerais.length) _cpResultados = gerais;
-  }
+  // v170: com rede/cliente escolhido, mostra so as tabelas vinculadas a ele; sem escolher nenhuma, mostra todas
+  if (tercId) _cpResultados = _cpResultados.filter(r => r.especifica);
 
   const el = document.getElementById('cp-resultado');
 
@@ -16726,7 +16716,7 @@ function consultarPreco() {
         <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="busca" style="font-size:22px;color:#cbd5e1"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg>
       </div>
       <div style="font-size:14px;font-weight:700;color:#94a3b8">Nenhuma tabela encontrada</div>
-      <div style="font-size:12px;color:#cbd5e1">Este produto não possui preço cadastrado em nenhuma tabela ativa.</div>
+      <div style="font-size:12px;color:#cbd5e1">${tercId ? 'Este produto não tem tabela ativa vinculada a ' + _pedEsc(tercNome) + '.' : 'Este produto não possui preço cadastrado em nenhuma tabela ativa.'}</div>
     </div>`;
     return;
   }
