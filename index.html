@@ -29853,7 +29853,9 @@ var RELATORIOS = [
   { id:'cadastros-incompletos', nivel:'operacional', icon:'ti-clipboard-x', titulo:'Cadastros incompletos', desc:'Clientes e produtos com informação faltando.', campos:['fornecedor','cliente','status'] },
   { id:'ocorrencias-entrega', nivel:'operacional', icon:'ti-alert-circle', titulo:'Ocorrências de entrega', desc:'Ocorrências lançadas por tipo, cliente e transportadora, com valor afetado.', campos:['data','cliente','transportadora','status'] },
   { id:'restricoes-ativas', nivel:'operacional', icon:'ti-ban', titulo:'Restrições ativas', desc:'Produtos bloqueados por UF, cliente ou rede, com motivo e vigência.', campos:['fornecedor','uf'] },
-  { id:'tabelas-vencer', nivel:'operacional', icon:'ti-calendar-due', titulo:'Tabelas de preço a vencer', desc:'Itens das tabelas de preço vencidos ou a vencer em até 90 dias.', campos:['data','fornecedor','status'] },
+  { id:'revenda-vencimento', nivel:'operacional', icon:'ti-recycle', titulo:'Revenda: vencimento e itens parados', desc:'Saldo da revenda com validade, dias para vencer e há quanto tempo o item está parado.', campos:['fornecedor','cliente','produto'] },
+  { id:'perdas-validade', nivel:'gerencial', icon:'ti-calendar-off', titulo:'Perdas por validade na revenda', desc:'Valor descartado, vencido sem destino e recuperado em revenda, por fábrica.', campos:['data','fornecedor'] },
+  { id:'tabelas-vencer','revenda-vencimento','perdas-validade', nivel:'operacional', icon:'ti-calendar-due', titulo:'Tabelas de preço a vencer', desc:'Itens das tabelas de preço vencidos ou a vencer em até 90 dias.', campos:['data','fornecedor','status'] },
   { id:'inadimplencia-comissao', nivel:'gerencial', icon:'ti-cash-off', titulo:'Inadimplência de comissão', desc:'Comissões vencidas e não recebidas, por fábrica e tempo de atraso.', campos:['data','fornecedor'] },
   { id:'carteira-regiao', nivel:'analitico', icon:'ti-map-2', titulo:'Carteira por região', desc:'Clientes ativos, inativos e faturado por UF, com detalhe por cidade.', campos:['data','fornecedor','vendedor','uf','categoria','subcategoria'] },
   { id:'mix-cliente', nivel:'analitico', icon:'ti-layout-grid', titulo:'Mix por cliente', desc:'Produtos que cada cliente compra e os que ainda não comprou (oportunidade de mix).', campos:['data','fornecedor','vendedor','uf','categoria','subcategoria','cliente'] },
@@ -30182,6 +30184,8 @@ function gerarRelatorio() {
   else if (_relAtual === 'ocorrencias-entrega') html = _relCalcOcorrencias(f);
   else if (_relAtual === 'restricoes-ativas') html = _relCalcRestricoesAtivas(f);
   else if (_relAtual === 'tabelas-vencer') html = _relCalcTabelasVencer(f);
+  else if (_relAtual === 'revenda-vencimento') html = _relCalcRevendaVencimento(f);
+  else if (_relAtual === 'perdas-validade') html = _relCalcPerdasValidade(f);
   else if (_relAtual === 'inadimplencia-comissao') html = _relCalcInadimplenciaComissao(f);
   else if (_relAtual === 'carteira-regiao') html = _relCalcCarteiraRegiao(f);
   else if (_relAtual === 'mix-cliente') html = _relCalcMixCliente(f);
@@ -30191,7 +30195,7 @@ function gerarRelatorio() {
   else if (_relAtual === 'sazonalidade') html = _relCalcSazonalidade(f);
   else if (_relAtual === 'reino-negociado') html = _relCalcReinoNegociado(f);
   // v528: sem periodo anterior ao corte, o relatorio considera so os pedidos carregados (desde o corte)
-  if (!_fsHistPedidosCarregado && firebaseConfigurado && _relAtual !== 'vencimentos' && _relAtual !== 'devolucoes' && _relAtual !== 'devolucoes-agrup' && _relAtual !== 'comissoes-mes' && _relAtual !== 'cadastros-incompletos' && ['ocorrencias-entrega','restricoes-ativas','tabelas-vencer','inadimplencia-comissao','carteira-regiao','comparativo-anual','sazonalidade','reino-negociado'].indexOf(_relAtual) === -1 && (!f.dataDe || f.dataDe >= _fsPedidosCorte)) {
+  if (!_fsHistPedidosCarregado && firebaseConfigurado && _relAtual !== 'vencimentos' && _relAtual !== 'devolucoes' && _relAtual !== 'devolucoes-agrup' && _relAtual !== 'comissoes-mes' && _relAtual !== 'cadastros-incompletos' && ['ocorrencias-entrega','restricoes-ativas','tabelas-vencer','revenda-vencimento','perdas-validade','inadimplencia-comissao','carteira-regiao','comparativo-anual','sazonalidade','reino-negociado'].indexOf(_relAtual) === -1 && (!f.dataDe || f.dataDe >= _fsPedidosCorte)) {
     var _cc = _fsPedidosCorte.split('-');
     html = '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Considera pedidos desde ' + _cc[2] + '/' + _cc[1] + '/' + _cc[0] + '. Para anos anteriores, informe o período (de) nos filtros.</div>' + html;
   }
@@ -31348,6 +31352,74 @@ function _relCalcTabelasVencer(f) {
   var cols = [ { label:'Tabela' }, { label:'Produto' }, { label:'Fábrica', width:'110px' }, { label:'Preço', width:'90px', right:true }, { label:'Validade', width:'90px' }, { label:'Situação', width:'150px' } ];
   var rows = vis.map(function(x){ return [ _pedEsc(x.tab), _pedEsc(x.prod), _pedEsc(_cpSemColchetes(x.forn)), _pedEsc(String(x.v || '')), _relFmtDataBR(x.d), x.dias < 0 ? '<b style="color:#dc2626">Vencido há ' + (-x.dias) + ' dias</b>' : '<b style="color:#c2410c">Vence em ' + x.dias + ' dias</b>' ]; });
   return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Validade de cada item das tabelas de preço ativas. Itens sem data válida não entram. Sem filtro, lista vencidos e os que vencem em até 90 dias.</div>' + kpis + _relTabela(cols, rows);
+}
+
+// 4 · Revenda: vencimento e itens parados
+function _relCalcRevendaVencimento(f) {
+  var hoje = _relHojeISO(), fq = _cpNorm(f.fornecedor || ''), cq = _cpNorm(f.cliente || ''), pq = _cpNorm(f.produto || '');
+  var lista = [];
+  getRevendaItens().forEach(function(it){
+    if (it.descarte) return;
+    var sal = Number(it.quantidadeDisponivel) || 0; if (sal <= 0) return;
+    if (fq && _cpNorm(it.fornecedorNome || '').indexOf(fq) === -1) return;
+    if (cq && _cpNorm(it.clienteOrigemNome || '').indexOf(cq) === -1) return;
+    if (pq && _cpNorm((it.prodNome || '') + ' ' + (it.prodCodigo || '')).indexOf(pq) === -1) return;
+    var val = (it.validade || '').slice(0, 10);
+    var dv = val ? _relDiasEntre(hoje, val) : null;
+    var ult = (it.dtCadastro || '').slice(0, 10);
+    (it.revendas || []).forEach(function(r){ if ((r.data || '') > ult) ult = r.data; });
+    lista.push({ it:it, sal:sal, val:val, dv:dv, parado: ult ? _relDiasEntre(ult, hoje) : null, valor: sal * (Number(it.valorCusto) || 0) });
+  });
+  lista.sort(function(a,b){ return (a.dv == null ? 99999 : a.dv) - (b.dv == null ? 99999 : b.dv); });
+  var venc = lista.filter(function(x){ return x.dv != null && x.dv < 0; }).length;
+  var v30 = lista.filter(function(x){ return x.dv != null && x.dv >= 0 && x.dv <= 30; }).length;
+  var kpis = _relKpis([
+    { label:'Itens com saldo', valor: String(lista.length), cor:'#272A4A' },
+    { label:'Valor de referência em estoque', valor: _pedFmtMoeda(lista.reduce(function(s,x){ return s + x.valor; }, 0)) },
+    { label:'Vencem em até 30 dias', valor: String(v30), cor:'#c2410c' },
+    { label:'Já vencidos', valor: String(venc), cor: venc ? '#dc2626' : '#15803d' }
+  ]);
+  var cols = [ { label:'Produto' }, { label:'Fábrica', width:'110px' }, { label:'Cliente de origem' }, { label:'Saldo', width:'70px', right:true }, { label:'Validade', width:'90px' }, { label:'Dias p/ vencer', width:'100px', right:true }, { label:'Parado há', width:'90px', right:true }, { label:'Situação', width:'130px' } ];
+  var rows = lista.map(function(x){
+    var sit = x.dv == null ? '—' : (x.dv < 0 ? '<b style="color:#dc2626">Vencido</b>' : (x.dv <= 30 ? '<b style="color:#c2410c">Vence em 30 dias</b>' : '<b style="color:#15803d">No prazo</b>'));
+    return [ _pedEsc(x.it.prodNome || ''), _pedEsc(_cpSemColchetes(x.it.fornecedorNome || '')), _pedEsc(_cpSemColchetes(x.it.clienteOrigemNome || '')), x.sal, x.val ? _relFmtDataBR(x.val) : '—', x.dv == null ? '—' : x.dv, x.parado == null ? '—' : x.parado + ' dias', sit ];
+  });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Itens da Revenda com saldo disponível e sem descarte, ordenados pelo vencimento mais próximo.</div>' + kpis + _relTabela(cols, rows, {});
+}
+
+// 21 · Perdas por validade na revenda
+function _relCalcPerdasValidade(f) {
+  var hoje = _relHojeISO(), fq = _cpNorm(f.fornecedor || ''), G = {};
+  getRevendaItens().forEach(function(it){
+    if (fq && _cpNorm(it.fornecedorNome || '').indexOf(fq) === -1) return;
+    var o = G[it.fornecedorNome || '—'] = G[it.fornecedorNome || '—'] || { n:0, desc:0, venc:0, rec:0 };
+    var custo = Number(it.valorCusto) || 0, sal = Number(it.quantidadeDisponivel) || 0, tem = false;
+    if (it.descarte) {
+      var dd = it.descarte.data || '';
+      if ((!f.dataDe || dd >= f.dataDe) && (!f.dataAte || dd <= f.dataAte)) { o.desc += sal * custo; tem = true; }
+    } else if (sal > 0 && it.validade && it.validade.slice(0, 10) < hoje) {
+      var vd = it.validade.slice(0, 10);
+      if ((!f.dataDe || vd >= f.dataDe) && (!f.dataAte || vd <= f.dataAte)) { o.venc += sal * custo; tem = true; }
+    }
+    (it.revendas || []).forEach(function(r){
+      if ((f.dataDe && (r.data || '') < f.dataDe) || (f.dataAte && (r.data || '') > f.dataAte)) return;
+      o.rec += (Number(r.quantidade) || 0) * (Number(r.precoVenda) || 0); tem = true;
+    });
+    if (tem) o.n++;
+  });
+  var lista = Object.keys(G).map(function(k){ var o = G[k]; return { k:k, o:o, perda: o.desc + o.venc }; }).filter(function(x){ return x.o.n; }).sort(function(a,b){ return b.perda - a.perda; });
+  var td = 0, tv = 0, tr = 0, tn = 0;
+  lista.forEach(function(x){ td += x.o.desc; tv += x.o.venc; tr += x.o.rec; tn += x.o.n; });
+  var pct = (tr + td + tv) ? Math.round(tr / (tr + td + tv) * 100) + '%' : '—';
+  var kpis = _relKpis([
+    { label:'Valor descartado', valor: _pedFmtMoeda(td), cor:'#dc2626' },
+    { label:'Vencido sem destino', valor: _pedFmtMoeda(tv), cor:'#c2410c' },
+    { label:'Recuperado em revenda', valor: _pedFmtMoeda(tr), cor:'#15803d' },
+    { label:'% recuperado', valor: pct }
+  ]);
+  var cols = [ { label:'Fábrica' }, { label:'Itens', width:'70px', right:true }, { label:'Descartado', width:'120px', right:true }, { label:'Vencido s/ destino', width:'130px', right:true }, { label:'Recuperado', width:'120px', right:true }, { label:'Perda total', width:'120px', right:true } ];
+  var rows = lista.map(function(x){ return [ _pedEsc(_cpSemColchetes(x.k)), x.o.n, _pedFmtMoeda(x.o.desc), _pedFmtMoeda(x.o.venc), _pedFmtMoeda(x.o.rec), _pedFmtMoeda(x.perda) ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Perda = saldo descartado ou vencido sem venda × valor de referência. Recuperado = vendas da revenda no período.</div>' + kpis + _relTabela(cols, rows, { totais: [ 'TOTAL', tn, _pedFmtMoeda(td), _pedFmtMoeda(tv), _pedFmtMoeda(tr), _pedFmtMoeda(td + tv) ] });
 }
 
 // 17 · Inadimplência de comissão
