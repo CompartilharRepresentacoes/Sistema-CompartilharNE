@@ -1475,7 +1475,13 @@
 <!-- ════════════════════════════════════════
      TELA DE LOGIN
 ════════════════════════════════════════ -->
-<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-white">
+<!-- v165: tela de carregamento enquanto a sessão salva é confirmada (evita piscar o login ao atualizar) -->
+<div id="splashSessao" style="position:fixed;inset:0;z-index:99999;background:#272A4A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#fff;font-family:inherit">
+  <div style="width:38px;height:38px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:splashGiro .9s linear infinite"></div>
+  <div style="font-size:14px;font-weight:600;letter-spacing:.04em">Carregando…</div>
+</div>
+<style>@keyframes splashGiro{to{transform:rotate(360deg)}}</style>
+<div id="loginScreen" style="display:none" class="min-h-screen flex items-center justify-center p-4 bg-white">
   <div id="loginCard" class="bg-white w-full max-w-sm p-8">
 
     <!-- Painel Esquerdo (desktop) / Logo (mobile) -->
@@ -9728,7 +9734,32 @@ function _appCarregarPermissoes() {
   } catch (e) { console.warn('Permissões não carregadas:', e); }
 }
 
+// v165: tela de carregamento e navegação (voltar do navegador / F5)
+function _splashOcultar() { var el = document.getElementById('splashSessao'); if (el) el.style.display = 'none'; }
+setTimeout(function () { // segurança: se nada decidiu em 12s, mostra o login
+  var sp = document.getElementById('splashSessao');
+  if (sp && sp.style.display !== 'none') { _splashOcultar(); var m = document.getElementById('mainApp'); if (m && m.style.display !== 'block') { var l = document.getElementById('loginScreen'); if (l) l.style.display = 'flex'; } }
+}, 12000);
+var _navPopping = false, _navUltima = null, _navRestaurado = false;
+function _navRegistrar(pageId) {
+  try {
+    if (/-form$/.test(pageId)) return;
+    sessionStorage.setItem('ultimaPagina', pageId);
+    if (_navPopping || _navUltima === pageId) { _navUltima = pageId; return; }
+    _navUltima = pageId;
+    history.pushState({ pg: pageId }, '', '#' + pageId);
+  } catch (e) {}
+}
+window.addEventListener('popstate', function (ev) {
+  var m = document.getElementById('mainApp');
+  if (!m || m.style.display === 'none') return;
+  var pg = (ev.state && ev.state.pg) || 'page-home';
+  _navPopping = true;
+  try { showPage(pg); } catch (e) {}
+  _navPopping = false;
+});
 function entrarNoApp(user) {
+  _splashOcultar();
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('mainApp').style.display = 'block';
   const nome = user.displayName || user.email || 'Usuário';
@@ -9754,6 +9785,20 @@ function entrarNoApp(user) {
   dashInit();
   _appPermVer = null; _appEhAdmin = false; _appAplicarMenuPermissoes();
   _appCarregarPermissoes();
+  if (!_navRestaurado) {
+    _navRestaurado = true;
+    try {
+      var _ult = sessionStorage.getItem('ultimaPagina');
+      if (_ult && _ult !== 'page-home' && PAGE_META[_ult] && !/-form$/.test(_ult) && _appPaginaPermitida(_ult)) {
+        history.replaceState({ pg: 'page-home' }, '', '#page-home');
+        _navUltima = 'page-home';
+        showPage(_ult);
+      } else {
+        history.replaceState({ pg: 'page-home' }, '', '#page-home');
+        _navUltima = 'page-home';
+      }
+    } catch (e) {}
+  }
 }
 
 // ═══ Autoria e histórico de alterações (usado por Pedidos, Devoluções, etc.) ═══
@@ -9930,6 +9975,7 @@ if (firebaseConfigurado && auth) {
       if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('mainApp').style.display = 'none';
+      _splashOcultar();
       var navPainel = document.getElementById('nav-comando-painel');
       if (navPainel) navPainel.style.display = 'none';
     }
@@ -9993,6 +10039,7 @@ const PAGE_META = {
 };
 function showPage(pageId, params) {
   if (!_appPaginaPermitida(pageId)) { alert('Você não tem permissão para acessar esta tela.'); return; }
+  _navRegistrar(pageId);
   document.querySelectorAll('.app-page').forEach(p => p.style.display = 'none');
   const page = document.getElementById(pageId);
   if (page) page.style.display = 'block';
@@ -29792,7 +29839,28 @@ var RELATORIOS = [
   { id:'prazo-entrega', nivel:'analitico', icon:'ti-truck', titulo:'Prazo prometido vs. realizado', desc:'Dias de diferença por UF e transportadora.', campos:['data','uf','fornecedor','vendedor','cliente'] },
   { id:'meta-realizado', nivel:'gerencial', icon:'ti-target', titulo:'Faturamento vs. meta', desc:'Realizado por fornecedor e mês, comparado à meta.', campos:['data','vendedor','fornecedor'] },
   { id:'evolucao-mensal', nivel:'gerencial', icon:'ti-chart-line', titulo:'Evolução mensal consolidada', desc:'Faturamento e peso mês a mês.', campos:['data','fornecedor','vendedor','uf','cliente','categoria','subcategoria'] },
-  { id:'saude-carteira', nivel:'gerencial', icon:'ti-activity', titulo:'Saúde da carteira de clientes', desc:'Ativos vs. inativos e concentração de receita.', campos:['data','categoria','subcategoria','uf','cliente','fornecedor','vendedor'] }
+  { id:'saude-carteira', nivel:'gerencial', icon:'ti-activity', titulo:'Saúde da carteira de clientes', desc:'Ativos vs. inativos e concentração de receita.', campos:['data','categoria','subcategoria','uf','cliente','fornecedor','vendedor'] },
+  { id:'clientes-parados', nivel:'analitico', icon:'ti-user-off', titulo:'Clientes que pararam de comprar', desc:'Clientes sem compra há 30/60/90 dias, com média mensal anterior e valor em risco.', campos:['fornecedor','vendedor','uf','cliente','categoria','subcategoria','status'] },
+  { id:'devolucoes-agrup', nivel:'operacional', icon:'ti-arrow-back-up', titulo:'Devoluções por cliente, produto e fábrica', desc:'Valor devolvido agrupado por cliente, produto, fábrica ou motivo.', campos:['data','fornecedor','cliente','uf','categoria','subcategoria','produto','status','agrupar'] },
+  { id:'painel-mes', nivel:'gerencial', icon:'ti-gauge', titulo:'Painel do mês com projeção', desc:'Faturado do mês, meta por fábrica e projeção de fechamento.', campos:['data','fornecedor','vendedor'] },
+  { id:'divergencias-nf', nivel:'operacional', icon:'ti-alert-triangle', titulo:'Divergências entre pedido e NF', desc:'Pedidos faturados com valor de NF diferente do pedido.', campos:['data','fornecedor','vendedor','cliente','uf','categoria','subcategoria','status'] },
+  { id:'comissoes-mes', nivel:'gerencial', icon:'ti-coin', titulo:'Comissões a receber por fábrica e mês', desc:'Comissão por fábrica em cada mês, com situação (a vencer, vencida, recebida) e NFs.', campos:['data','fornecedor','status'] },
+  { id:'sem-faturar', nivel:'operacional', icon:'ti-clock-pause', titulo:'Pedidos sem faturar há X dias', desc:'Pedidos sem nenhuma NF, com dias parados e valor, por faixa.', campos:['data','fornecedor','vendedor','cliente','uf','categoria','subcategoria','status'] },
+  { id:'novos-reativados', nivel:'analitico', icon:'ti-user-plus', titulo:'Clientes novos e reativados', desc:'Clientes que compraram pela primeira vez ou voltaram após 90+ dias.', campos:['data','vendedor','cliente','uf','categoria','subcategoria','status'] },
+  { id:'faturamento-liquido', nivel:'gerencial', icon:'ti-receipt-2', titulo:'Faturamento líquido', desc:'Faturado menos devoluções, mês a mês.', campos:['data','fornecedor','vendedor'] },
+  { id:'ranking-fabricas', nivel:'gerencial', icon:'ti-trophy', titulo:'Ranking de fábricas', desc:'Faturamento por fábrica no mês, participação e variação sobre o mês anterior.', campos:['data','vendedor','uf'] },
+  { id:'cadastros-incompletos', nivel:'operacional', icon:'ti-clipboard-x', titulo:'Cadastros incompletos', desc:'Clientes e produtos com informação faltando.', campos:['fornecedor','cliente','status'] },
+  { id:'ocorrencias-entrega', nivel:'operacional', icon:'ti-alert-circle', titulo:'Ocorrências de entrega', desc:'Ocorrências lançadas por tipo, cliente e transportadora, com valor afetado.', campos:['data','cliente','transportadora','status'] },
+  { id:'restricoes-ativas', nivel:'operacional', icon:'ti-ban', titulo:'Restrições ativas', desc:'Produtos bloqueados por UF, cliente ou rede, com motivo e vigência.', campos:['fornecedor','uf'] },
+  { id:'tabelas-vencer', nivel:'operacional', icon:'ti-calendar-due', titulo:'Tabelas de preço a vencer', desc:'Itens das tabelas de preço vencidos ou a vencer em até 90 dias.', campos:['data','fornecedor','status'] },
+  { id:'inadimplencia-comissao', nivel:'gerencial', icon:'ti-cash-off', titulo:'Inadimplência de comissão', desc:'Comissões vencidas e não recebidas, por fábrica e tempo de atraso.', campos:['data','fornecedor'] },
+  { id:'carteira-regiao', nivel:'analitico', icon:'ti-map-2', titulo:'Carteira por região', desc:'Clientes ativos, inativos e faturado por UF, com detalhe por cidade.', campos:['data','fornecedor','vendedor','uf','categoria','subcategoria'] },
+  { id:'mix-cliente', nivel:'analitico', icon:'ti-layout-grid', titulo:'Mix por cliente', desc:'Produtos que cada cliente compra e os que ainda não comprou (oportunidade de mix).', campos:['data','fornecedor','vendedor','uf','categoria','subcategoria','cliente'] },
+  { id:'positivacao-vendedor', nivel:'gerencial', icon:'ti-user-check', titulo:'Positivação por vendedor', desc:'Clientes da carteira que compraram no período, % de positivação e ticket por cliente.', campos:['data','vendedor','fornecedor','uf','categoria','subcategoria'] },
+  { id:'vendas-produto', nivel:'analitico', icon:'ti-package', titulo:'Vendas por produto e categoria', desc:'Faturado e quilos por produto, com resumo por categoria.', campos:['data','fornecedor','vendedor','uf','cliente','categoria','subcategoria','produto'] },
+  { id:'comparativo-anual', nivel:'gerencial', icon:'ti-chart-bar', titulo:'Comparativo mês a mês e ano contra ano', desc:'Faturado de cada mês contra o mesmo mês do ano anterior.', campos:['data','fornecedor','vendedor','uf'] },
+  { id:'sazonalidade', nivel:'analitico', icon:'ti-sun', titulo:'Sazonalidade', desc:'Índice sazonal por mês e produtos de pico, pelo histórico disponível.', campos:['fornecedor','categoria','uf','cliente'] },
+  { id:'reino-negociado', nivel:'gerencial', icon:'ti-target-arrow', titulo:'Planejamento Reino: negociado × realizado', desc:'Volume negociado com cada rede contra o realizado, saldo e projeção até o fim do ano.', campos:['data','fornecedor','categoria','subcategoria'] }
 ];
 var REL_NIVEL_COR = { operacional:{bg:'#fff7ed',cor:'#c2410c'}, analitico:{bg:'#eff6ff',cor:'#1d4ed8'}, gerencial:{bg:'#f0fdf4',cor:'#15803d'} };
 var REL_NIVEL_LABEL = { operacional:'Operacional', analitico:'Analítico', gerencial:'Gerencial' };
@@ -29917,9 +29985,32 @@ function abrirRelatorio(id) {
       statusSel.innerHTML = '<option value="">Todas as situações</option><option value="ok">Faturado total</option><option value="par">Faturado parcial</option><option value="nao">Não faturado</option>';
     } else if (id === 'pedidos-parados') {
       statusSel.innerHTML = '<option value="">Todos</option>' + PED_STATUS.filter(function(s){ return s !== 'Faturado' && s !== 'Cancelado'; }).map(function(s){ return '<option value="' + s + '">' + s + '</option>'; }).join('');
+    } else if (id === 'clientes-parados') {
+      statusSel.innerHTML = '<option value="">Todas as faixas (30+ dias)</option><option value="30">30–59 dias</option><option value="60">60–89 dias</option><option value="90">90+ dias</option>';
+    } else if (id === 'devolucoes-agrup') {
+      statusSel.innerHTML = '<option value="">Todos os motivos</option><option>Vencido</option><option>Logística</option><option>Falta</option><option>Qualidade</option><option>Avaria</option>';
+    } else if (id === 'ocorrencias-entrega') {
+      statusSel.innerHTML = '<option value="">Todos os tipos</option>' + (typeof OC_TIPOS !== 'undefined' ? OC_TIPOS : []).map(function(t){ return '<option>' + t + '</option>'; }).join('');
+    } else if (id === 'tabelas-vencer') {
+      statusSel.innerHTML = '<option value="">Vencidos e até 90 dias</option><option value="venc">Só vencidos</option><option value="30">Vencem em 30 dias</option><option value="90">Vencem em 31–90 dias</option>';
+    } else if (id === 'sem-faturar') {
+      statusSel.innerHTML = '<option value="">Todas as faixas</option><option value="7">Até 7 dias</option><option value="30">8 a 30 dias</option><option value="31">31+ dias</option>';
+    } else if (id === 'novos-reativados') {
+      statusSel.innerHTML = '<option value="">Novos e reativados</option><option value="novo">Só novos</option><option value="reativado">Só reativados</option>';
+    } else if (id === 'cadastros-incompletos') {
+      statusSel.innerHTML = '<option value="">Clientes e produtos</option><option value="cli-cat">Cliente sem categoria</option><option value="cli-vend">Cliente sem vendedor</option><option value="prod-foto">Produto sem foto</option><option value="prod-peso">Produto sem peso</option>';
+    } else if (id === 'comissoes-mes') {
+      statusSel.innerHTML = '<option value="">Todas as situações</option><option value="a_vencer">A vencer</option><option value="vencido">Vencida</option><option value="recebido">Recebida</option>';
+    } else if (id === 'divergencias-nf') {
+      statusSel.innerHTML = '<option value="">Tolerância 5%</option><option value="p10">Tolerância 10%</option><option value="r1">Qualquer diferença (&gt; R$ 1)</option>';
     } else {
       statusSel.innerHTML = '<option value="">Todos</option>';
     }
+  }
+  var _agSel = document.getElementById('rel-f-agrupar');
+  if (_agSel) {
+    if (!window._relAgrupOrig) window._relAgrupOrig = _agSel.innerHTML;
+    _agSel.innerHTML = id === 'devolucoes-agrup' ? '<option value="cliente">Cliente</option><option value="produto">Produto</option><option value="fornecedor">Fábrica</option><option value="motivo">Motivo</option>' : window._relAgrupOrig;
   }
   document.getElementById('rel-resultado').innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:50px 20px;text-align:center"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="graficos" style="font-size:22px;color:#cbd5e1;margin-bottom:10px;display:block"><path d="M3.5 20.5h17"/><rect x="5" y="12" width="4" height="8.5" rx="1"/><rect x="10" y="5" width="4" height="15.5" rx="1"/><rect x="15" y="9" width="4" height="11.5" rx="1"/></svg><div style="font-size:12px;color:#94a3b8">Configure os filtros e clique em "Gerar relatório"</div></div>';
   document.getElementById('rel-lista-view').style.display = 'none';
@@ -30052,10 +30143,12 @@ function _relBaseFaturas(f) {
 function gerarRelatorio() {
   var f = _relFiltros();
   // v528: periodo anterior ao corte -> carrega so os anos do periodo e gera de novo
-  if (f.dataDe && f.dataDe < _fsPedidosCorte && !_fsPeriodoCarregado(f.dataDe, f.dataAte || _fsPedidosCorte)) {
+  var _iniCarga = f.dataDe, _histAnos = ({ 'comparativo-anual': 1, 'sazonalidade': 2 })[_relAtual];
+  if (_histAnos && !_iniCarga) _iniCarga = (Number((f.dataAte || _relHojeISO()).slice(0, 4)) - _histAnos) + '-01-01';
+  if (_iniCarga && _iniCarga < _fsPedidosCorte && !_fsPeriodoCarregado(_iniCarga, f.dataAte || _fsPedidosCorte)) {
     var _relIdCarga = _relAtual;
-    document.getElementById('rel-resultado').innerHTML = '<div style="padding:30px;text-align:center;font-size:12px;color:#64748b">Carregando pedidos de ' + f.dataDe.slice(0, 4) + (f.dataAte && f.dataAte.slice(0, 4) !== f.dataDe.slice(0, 4) ? ' a ' + f.dataAte.slice(0, 4) : '') + '…</div>';
-    _fsCarregarPedidosPeriodo(f.dataDe, f.dataAte || _fsPedidosCorte).then(function (ok) {
+    document.getElementById('rel-resultado').innerHTML = '<div style="padding:30px;text-align:center;font-size:12px;color:#64748b">Carregando pedidos de ' + _iniCarga.slice(0, 4) + (f.dataAte && f.dataAte.slice(0, 4) !== _iniCarga.slice(0, 4) ? ' a ' + f.dataAte.slice(0, 4) : '') + '…</div>';
+    _fsCarregarPedidosPeriodo(_iniCarga, f.dataAte || _fsPedidosCorte).then(function (ok) {
       if (ok && _relAtual === _relIdCarga) gerarRelatorio();
       else if (!ok) document.getElementById('rel-resultado').innerHTML = '<div style="padding:30px;text-align:center;font-size:12px;color:#b91c1c">Não foi possível carregar os pedidos antigos. Tente novamente.</div>';
     });
@@ -30074,8 +30167,29 @@ function gerarRelatorio() {
   else if (_relAtual === 'meta-realizado') html = _relCalcMetaRealizado(f);
   else if (_relAtual === 'evolucao-mensal') html = _relCalcEvolucaoMensal(f);
   else if (_relAtual === 'saude-carteira') html = _relCalcSaudeCarteira(f);
+  else if (_relAtual === 'clientes-parados') html = _relCalcClientesParados(f);
+  else if (_relAtual === 'devolucoes-agrup') html = _relCalcDevolucoesAgrupadas(f);
+  else if (_relAtual === 'painel-mes') html = _relCalcPainelMes(f);
+  else if (_relAtual === 'divergencias-nf') html = _relCalcDivergenciasNF(f);
+  else if (_relAtual === 'comissoes-mes') html = _relCalcComissoesMes(f);
+  else if (_relAtual === 'sem-faturar') html = _relCalcPedidosSemFaturar(f);
+  else if (_relAtual === 'novos-reativados') html = _relCalcClientesNovosReativados(f);
+  else if (_relAtual === 'faturamento-liquido') html = _relCalcFaturamentoLiquido(f);
+  else if (_relAtual === 'ranking-fabricas') html = _relCalcRankingFabricas(f);
+  else if (_relAtual === 'cadastros-incompletos') html = _relCalcCadastrosIncompletos(f);
+  else if (_relAtual === 'ocorrencias-entrega') html = _relCalcOcorrencias(f);
+  else if (_relAtual === 'restricoes-ativas') html = _relCalcRestricoesAtivas(f);
+  else if (_relAtual === 'tabelas-vencer') html = _relCalcTabelasVencer(f);
+  else if (_relAtual === 'inadimplencia-comissao') html = _relCalcInadimplenciaComissao(f);
+  else if (_relAtual === 'carteira-regiao') html = _relCalcCarteiraRegiao(f);
+  else if (_relAtual === 'mix-cliente') html = _relCalcMixCliente(f);
+  else if (_relAtual === 'positivacao-vendedor') html = _relCalcPositivacao(f);
+  else if (_relAtual === 'vendas-produto') html = _relCalcVendasProduto(f);
+  else if (_relAtual === 'comparativo-anual') html = _relCalcComparativoAnual(f);
+  else if (_relAtual === 'sazonalidade') html = _relCalcSazonalidade(f);
+  else if (_relAtual === 'reino-negociado') html = _relCalcReinoNegociado(f);
   // v528: sem periodo anterior ao corte, o relatorio considera so os pedidos carregados (desde o corte)
-  if (!_fsHistPedidosCarregado && firebaseConfigurado && _relAtual !== 'vencimentos' && _relAtual !== 'devolucoes' && (!f.dataDe || f.dataDe >= _fsPedidosCorte)) {
+  if (!_fsHistPedidosCarregado && firebaseConfigurado && _relAtual !== 'vencimentos' && _relAtual !== 'devolucoes' && _relAtual !== 'devolucoes-agrup' && _relAtual !== 'comissoes-mes' && _relAtual !== 'cadastros-incompletos' && ['ocorrencias-entrega','restricoes-ativas','tabelas-vencer','inadimplencia-comissao','carteira-regiao','comparativo-anual','sazonalidade','reino-negociado'].indexOf(_relAtual) === -1 && (!f.dataDe || f.dataDe >= _fsPedidosCorte)) {
     var _cc = _fsPedidosCorte.split('-');
     html = '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Considera pedidos desde ' + _cc[2] + '/' + _cc[1] + '/' + _cc[0] + '. Para anos anteriores, informe o período (de) nos filtros.</div>' + html;
   }
@@ -30706,6 +30820,829 @@ function _relCalcSaudeCarteira(f) {
     return [ _pedEsc(_cpSemColchetes(c.nome)), _pedFmtMoeda(c.valor), (total ? (c.valor/total*100).toFixed(1) : '0') + '%' ];
   });
   return kpis + _relTabela(cols, rows, { totais: [ 'TOP 5 (de ' + lista.length + ' clientes)', _pedFmtMoeda(top5Valor), (total ? (top5Valor/total*100).toFixed(1) : '0') + '%' ] });
+}
+
+
+// ── v159: Relatórios 8, 19, 22, 27 (sugeridos) ──
+function _relHojeISO() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function _relDiasEntre(a, b) { return Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5); }
+function _relFmtDataBR(iso) { var p = String(iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : ''; }
+
+// 8 · Clientes que pararam de comprar
+function _relCalcClientesParados(f) {
+  var hoje = _relHojeISO(), mesAtual = hoje.slice(0,7);
+  var f2 = Object.assign({}, f, { dataDe: '', dataAte: '' });
+  var linhas = _relBaseFaturas(f2);
+  var C = {};
+  linhas.forEach(function(l){
+    var key = l.pedido.clienteId || l.pedido.clienteNome; if (!key) return;
+    var c = C[key] = C[key] || { nome: l.cliente.nome_fantasia || l.pedido.clienteNome || '', ult: '', meses: {} };
+    var d = l.fatura.data || ''; if (!d) return;
+    if (d > c.ult) c.ult = d;
+    var m = d.slice(0,7); c.meses[m] = (c.meses[m] || 0) + (Number(l.fatura.valor) || 0);
+  });
+  var lista = Object.keys(C).map(function(k){
+    var c = C[k];
+    var ms = Object.keys(c.meses).filter(function(m){ return m < mesAtual; }).sort().slice(-6);
+    var med = ms.length ? ms.reduce(function(s,m){ return s + c.meses[m]; }, 0) / ms.length : 0;
+    return { nome: c.nome, ult: c.ult, dias: c.ult ? _relDiasEntre(c.ult, hoje) : 0, med: med };
+  }).filter(function(x){ return x.dias >= 30 && x.med > 0; });
+  var faixa = f.status || '';
+  var f30 = lista.filter(function(x){ return x.dias < 60; }), f60 = lista.filter(function(x){ return x.dias >= 60 && x.dias < 90; }), f90 = lista.filter(function(x){ return x.dias >= 90; });
+  var risco = lista.filter(function(x){ return x.dias < 90; }).reduce(function(s,x){ return s + x.med; }, 0);
+  var vis = lista.filter(function(x){
+    if (faixa === '30') return x.dias < 60; if (faixa === '60') return x.dias >= 60 && x.dias < 90; if (faixa === '90') return x.dias >= 90; return true;
+  }).sort(function(a,b){ return b.med - a.med; });
+  var kpis = _relKpis([
+    { label:'Parados 30–59 dias', valor: f30.length, cor:'#c2410c' },
+    { label:'Parados 60–89 dias', valor: f60.length, cor:'#c2410c' },
+    { label:'Parados 90+ dias', valor: f90.length, cor:'#dc2626' },
+    { label:'Média mensal em risco (< 90 dias)', valor: _pedFmtMoeda(risco), cor:'#272A4A' }
+  ]);
+  var cols = [ { label:'Cliente' }, { label:'Última compra', width:'110px' }, { label:'Dias parado', width:'90px', right:true }, { label:'Média mensal anterior', width:'150px', right:true }, { label:'Situação', width:'110px' } ];
+  var rows = vis.map(function(x){
+    var sit = x.dias >= 90 ? '<b style="color:#dc2626">90+ dias</b>' : (x.dias >= 60 ? '<b style="color:#c2410c">60–89 dias</b>' : '<b style="color:#b45309">30–59 dias</b>');
+    return [ _pedEsc(_cpSemColchetes(x.nome)), _relFmtDataBR(x.ult), x.dias, _pedFmtMoeda(x.med), sit ];
+  });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Média mensal = média dos últimos 6 meses com compra (antes do mês atual). Período dos filtros de data é ignorado: considera todo o histórico.</div>' + kpis + _relTabela(cols, rows);
+}
+
+// 19 · Devoluções por cliente / produto / fábrica / motivo
+function _relCalcDevolucoesAgrupadas(f) {
+  var cm = {}; getClientes().forEach(function(c){ cm[c.id] = c; });
+  var devs = getDevolucoes().filter(function(d){
+    if (f.dataDe && d.data < f.dataDe) return false;
+    if (f.dataAte && d.data > f.dataAte) return false;
+    if (f.fornecedor && _cpNorm(d.fornecedorNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return false;
+    if (f.cliente && _cpNorm(d.clienteNome || '').indexOf(_cpNorm(f.cliente)) === -1) return false;
+    if (f.status && d.motivo !== f.status) return false;
+    if (f.uf || f.categoria || f.subcategoria) {
+      var c = cm[d.clienteId] || {};
+      if (f.uf && (c.ent_estado || c.estado || '') !== f.uf) return false;
+      if (f.categoria && String(c.categoria || '') !== String(f.categoria)) return false;
+      if (f.subcategoria && String(c.subcategoria || '') !== String(f.subcategoria)) return false;
+    }
+    return true;
+  });
+  var ag = f.agrupar; if (['cliente','produto','fornecedor','motivo'].indexOf(ag) === -1) ag = 'cliente';
+  var G = {}, total = 0;
+  devs.forEach(function(d){
+    var its = d.itens || [];
+    var vt = Number(d.totalProdutos) || its.reduce(function(s,i){ return s + (Number(i.valorTotal) || 0); }, 0);
+    if (ag === 'produto') {
+      its.forEach(function(i){
+        if (f.produto && _cpNorm((i.prodNome || '') + ' ' + (i.prodCodigo || '')).indexOf(_cpNorm(f.produto)) === -1) return;
+        var k = i.prodNome || i.prodCodigo || 'Produto'; var g = G[k] = G[k] || { v:0, q:0, n:0 };
+        var v = Number(i.valorTotal) || 0; g.v += v; g.q += Number(i.quantidade) || 0; g.n++; total += v;
+      });
+    } else {
+      var k = ag === 'cliente' ? (d.clienteNome || '—') : (ag === 'fornecedor' ? (d.fornecedorNome || '—') : (d.motivo || '—'));
+      var g = G[k] = G[k] || { v:0, q:0, n:0 }; g.v += vt; g.n++; total += vt;
+    }
+  });
+  var lista = Object.keys(G).map(function(k){ return { k:k, v:G[k].v, q:G[k].q, n:G[k].n }; }).sort(function(a,b){ return b.v - a.v; });
+  var porMot = {}; devs.forEach(function(d){ porMot[d.motivo || '—'] = (porMot[d.motivo || '—'] || 0) + 1; });
+  var motTop = Object.keys(porMot).sort(function(a,b){ return porMot[b] - porMot[a]; })[0] || '—';
+  var kpis = _relKpis([
+    { label:'Devoluções', valor: devs.length },
+    { label:'Valor devolvido', valor: _pedFmtMoeda(total), cor:'#dc2626' },
+    { label:'Motivo mais frequente', valor: _pedEsc(motTop) }
+  ]);
+  var rotulo = { cliente:'Cliente', produto:'Produto', fornecedor:'Fábrica', motivo:'Motivo' }[ag];
+  var cols = [ { label: rotulo }, { label: ag === 'produto' ? 'Qtd. devolvida' : 'Devoluções', width:'110px', right:true }, { label:'Valor devolvido', width:'130px', right:true }, { label:'% do total', width:'90px', right:true } ];
+  var rows = lista.map(function(x){ return [ _pedEsc(_cpSemColchetes(x.k)), ag === 'produto' ? x.q.toLocaleString('pt-BR') : x.n, _pedFmtMoeda(x.v), (total ? (x.v / total * 100).toFixed(1) : '0') + '%' ]; });
+  return kpis + _relTabela(cols, rows, { totais: [ 'TOTAL', ag === 'produto' ? '' : devs.length, _pedFmtMoeda(total), '100%' ] });
+}
+
+// 22 · Painel do mês com projeção
+function _relCalcPainelMes(f) {
+  var hoje = _relHojeISO();
+  var ym = (f.dataDe || f.dataAte || hoje).slice(0,7);
+  var ano = Number(ym.slice(0,4)), mes = Number(ym.slice(5,7));
+  var diasMes = new Date(ano, mes, 0).getDate();
+  var atual = ym === hoje.slice(0,7);
+  var decorridos = atual ? Number(hoje.slice(8,10)) : diasMes;
+  var mesBR = ym.slice(5,7) + '/' + ym.slice(0,4);
+  var prodMap = {}; getProdutos().forEach(function(p){ prodMap[p.id] = p; });
+  var F = {};
+  getPedidos().forEach(function(p){
+    if (p.status === 'Cancelado') return;
+    if (f.vendedor && String(p.vendedorId || '') !== String(f.vendedor)) return;
+    if (f.fornecedor && _cpNorm(p.fornecedorNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return;
+    (p.faturas || []).forEach(function(fat){
+      if (fat.status === 'Cancelado' || (fat.data || '').slice(0,7) !== ym) return;
+      var k = p.fornecedorId || p.fornecedorNome; var g = F[k] = F[k] || { nome: p.fornecedorNome || '', rs:0, kg:0 };
+      g.rs += Number(fat.valor) || 0;
+      (fat.itens || []).forEach(function(it){ var pr = prodMap[it.prodId]; var pe = pr ? (parseFloat(String(pr.peso || '0').replace(',', '.')) || 0) : 0; g.kg += pe * (Number(it.qtd) || 0); });
+    });
+  });
+  var metas = _metasFab().filter(function(m){ return m.mes === mesBR; });
+  var linhas = [];
+  Object.keys(F).forEach(function(k){
+    var g = F[k], ms = metas.filter(function(m){ return String(m.fornecedorId) === String(k); });
+    if (!ms.length) linhas.push({ nome:g.nome, tipo:'R$', meta:0, real:g.rs, rs:g.rs });
+    ms.forEach(function(m){ linhas.push({ nome:g.nome, tipo:m.tipo, meta:Number(m.valor)||0, real: m.tipo === 'KG' ? g.kg : g.rs, rs:g.rs }); });
+  });
+  metas.forEach(function(m){ if (!F[m.fornecedorId]) linhas.push({ nome:m.fornecedorNome || '', tipo:m.tipo, meta:Number(m.valor)||0, real:0, rs:0 }); });
+  var totRs = linhas.reduce(function(s,l,i,a){ return s + (a.findIndex(function(x){ return x.nome === l.nome; }) === i ? l.rs : 0); }, 0);
+  var proj = function(v){ return atual ? v / decorridos * diasMes : v; };
+  var metaRs = linhas.filter(function(l){ return l.tipo === 'R$'; }).reduce(function(s,l){ return s + l.meta; }, 0);
+  var realMetaRs = linhas.filter(function(l){ return l.tipo === 'R$' && l.meta; }).reduce(function(s,l){ return s + l.real; }, 0);
+  var kpis = _relKpis([
+    { label:'Faturado em ' + mesBR + (atual ? ' (até hoje)' : ''), valor: _pedFmtMoeda(totRs), cor:'#272A4A' },
+    { label: atual ? 'Projeção do mês' : 'Fechamento do mês', valor: _pedFmtMoeda(proj(totRs)), cor:'#DE7926' },
+    { label: atual ? 'Dias restantes no mês' : 'Dias no mês', valor: atual ? (diasMes - decorridos) : diasMes },
+    { label:'Meta em R$ (soma)', valor: metaRs ? _pedFmtMoeda(metaRs) : '—', sub: metaRs ? ('Realizado ' + (realMetaRs / metaRs * 100).toFixed(0) + '% · projeção ' + (proj(realMetaRs) / metaRs * 100).toFixed(0) + '%') : '' }
+  ]);
+  var cols = [ { label:'Fábrica' }, { label:'Meta', width:'120px', right:true }, { label:'Realizado', width:'120px', right:true }, { label:'% Atingido', width:'90px', right:true }, { label:'Projeção', width:'120px', right:true }, { label:'% Projetado', width:'100px', right:true }, { label:'Progresso', width:'170px' } ];
+  var fmt = function(l, v){ return l.tipo === 'KG' ? v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' kg' : _pedFmtMoeda(v); };
+  linhas.sort(function(a,b){ return b.rs - a.rs; });
+  var rows = linhas.map(function(l){
+    var pr = proj(l.real), pct = l.meta ? l.real / l.meta * 100 : null, pp = l.meta ? pr / l.meta * 100 : null;
+    var cor = function(x){ return x >= 100 ? '#15803d' : (x >= 70 ? '#c2410c' : '#dc2626'); };
+    var barra = l.meta ? '<div style="height:12px;background:#e2e8f0;border-radius:6px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;height:100%;width:' + Math.min(100, pp) + '%;background:#f0a560"></div><div style="position:absolute;left:0;top:0;height:100%;width:' + Math.min(100, pct) + '%;background:#272A4A"></div></div>' : '<span style="color:#94a3b8">sem meta</span>';
+    return [ _pedEsc(_cpSemColchetes(l.nome)), l.meta ? fmt(l, l.meta) : '—', fmt(l, l.real), pct == null ? '—' : '<b style="color:' + cor(pct) + '">' + pct.toFixed(0) + '%</b>', fmt(l, pr), pp == null ? '—' : '<b style="color:' + cor(pp) + '">' + pp.toFixed(0) + '%</b>', barra ];
+  });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Mês de referência: ' + mesBR + ' (informe "de" nos filtros para outro mês). Projeção = realizado ÷ dias decorridos × dias do mês. Barra escura = realizado · clara = projeção.</div>' + kpis + _relTabela(cols, rows);
+}
+
+// 27 · Divergências entre pedido e NF
+function _relCalcDivergenciasNF(f) {
+  var tol = f.status === 'p10' ? { pct:10 } : (f.status === 'r1' ? { rs:1 } : { pct:5 });
+  var cm = {}; getClientes().forEach(function(c){ cm[c.id] = c; });
+  var lista = [];
+  getPedidos().forEach(function(p){
+    if (p.status !== 'Faturado') return;
+    var cli = cm[p.clienteId] || {};
+    if (!_appClienteVisivelUF(cli)) return;
+    if (f.dataDe && p.data < f.dataDe) return;
+    if (f.dataAte && p.data > f.dataAte) return;
+    if (!_relPassaPedCli(f, p, cli)) return;
+    var fats = (p.faturas || []).filter(function(x){ return x.status !== 'Cancelado'; });
+    if (!fats.length) return;
+    var vf = fats.reduce(function(s,x){ return s + (Number(x.valor) || 0); }, 0), vp = Number(p.valorTotal) || 0, d = vf - vp;
+    var lim = tol.pct ? vp * tol.pct / 100 : tol.rs;
+    if (Math.abs(d) <= Math.max(lim, 1)) return;
+    lista.push({ ped: p.numPedidoCliente || p.id, cli: p.clienteNome || '', fab: p.fornecedorNome || '', data: p.data, vp: vp, vf: vf, d: d, nfs: fats.map(function(x){ return x.numDuplicata || ''; }).filter(Boolean).join(', ') });
+  });
+  lista.sort(function(a,b){ return Math.abs(b.d) - Math.abs(a.d); });
+  var maior = lista.filter(function(x){ return x.d > 0; }), menor = lista.filter(function(x){ return x.d < 0; });
+  var soma = function(a){ return a.reduce(function(s,x){ return s + x.d; }, 0); };
+  var kpis = _relKpis([
+    { label:'Pedidos com diferença', valor: lista.length, cor: lista.length ? '#c2410c' : '#15803d' },
+    { label:'NF maior que o pedido', valor: maior.length, sub: _pedFmtMoeda(soma(maior)) },
+    { label:'NF menor que o pedido', valor: menor.length, sub: _pedFmtMoeda(soma(menor)) },
+    { label:'Tolerância', valor: tol.pct ? tol.pct + '%' : 'R$ ' + tol.rs.toFixed(2).replace('.', ',') }
+  ]);
+  var cols = [ { label:'Pedido', width:'120px' }, { label:'Data', width:'80px' }, { label:'Cliente' }, { label:'Fábrica', width:'110px' }, { label:'NFs', width:'110px' }, { label:'Valor pedido', width:'110px', right:true }, { label:'Valor NFs', width:'110px', right:true }, { label:'Diferença', width:'110px', right:true } ];
+  var rows = lista.map(function(x){
+    return [ _pedEsc(String(x.ped)), _relFmtDataBR(x.data), _pedEsc(_cpSemColchetes(x.cli)), _pedEsc(_cpSemColchetes(x.fab)), _pedEsc(x.nfs), _pedFmtMoeda(x.vp), _pedFmtMoeda(x.vf), '<b style="color:' + (x.d > 0 ? '#c2410c' : '#dc2626') + '">' + (x.d > 0 ? '+' : '') + _pedFmtMoeda(x.d) + '</b>' ];
+  });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Considera pedidos com status Faturado cujo total das NFs difere do total do pedido além da tolerância (mínimo R$ 1,00). Filtro de data = data do pedido.</div>' + kpis + _relTabela(cols, rows);
+}
+
+
+// 15 · Comissões a receber por fábrica e mês (v160)
+var _relComDet = {};
+function _relCalcComissoesMes(f) {
+  var hoje = _relHojeISO();
+  var fim = (f.dataAte || hoje).slice(0,7), ini = (f.dataDe || '').slice(0,7);
+  var meses = [];
+  if (!ini) { var d0 = new Date(Number(fim.slice(0,4)), Number(fim.slice(5,7)) - 1 - 5, 1); ini = d0.getFullYear() + '-' + String(d0.getMonth()+1).padStart(2,'0'); }
+  var y = Number(ini.slice(0,4)), m = Number(ini.slice(5,7));
+  while ((y + '-' + String(m).padStart(2,'0')) <= fim && meses.length < 24) { meses.push(y + '-' + String(m).padStart(2,'0')); m++; if (m > 12) { m = 1; y++; } }
+  var forns = {}, totMes = {}, aV = 0, ve = 0, re = 0, tot = 0;
+  _relComDet = {};
+  meses.forEach(function(ym){
+    var ult = new Date(Number(ym.slice(0,4)), Number(ym.slice(5,7)), 0).getDate();
+    _finListaComissoes(ym + '-01', ym + '-' + String(ult).padStart(2,'0'), '', f.status || '').forEach(function(g){
+      if (f.fornecedor && _cpNorm(g.fornecedorNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return;
+      var o = forns[g.fornecedorId] = forns[g.fornecedorId] || { nome: g.fornecedorNome, forma: g.forma, v: {}, st: {}, tot: 0 };
+      o.v[ym] = g.comissao; o.st[ym] = g.status; o.tot += g.comissao;
+      totMes[ym] = (totMes[ym] || 0) + g.comissao; tot += g.comissao;
+      _relComDet[g.fornecedorId + '|' + ym] = g.faturasDetalhe;
+      g.faturasDetalhe.forEach(function(x){ if (x.status === 'recebido') re += x.comissao; else if (x.status === 'vencido') ve += x.comissao; else aV += x.comissao; });
+    });
+  });
+  var lista = Object.keys(forns).map(function(k){ forns[k].id = k; return forns[k]; }).sort(function(a,b){ return b.tot - a.tot; });
+  var NM = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var kpis = _relKpis([
+    { label:'Comissão total no período', valor: _pedFmtMoeda(tot), cor:'#272A4A' },
+    { label:'A vencer', valor: _pedFmtMoeda(aV), cor:'#c2410c' },
+    { label:'Vencida', valor: _pedFmtMoeda(ve), cor:'#dc2626' },
+    { label:'Recebida', valor: _pedFmtMoeda(re), cor:'#15803d' }
+  ]);
+  var cols = [ { label:'Fábrica' }, { label:'Forma', width:'130px' } ].concat(meses.map(function(ym){ return { label: NM[Number(ym.slice(5,7)) - 1] + '/' + ym.slice(2,4), width:'90px', right:true }; })).concat([{ label:'Total', width:'100px', right:true }]);
+  var nf = function(v){ return (Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}); };
+  var cor = { vencido:'#dc2626', a_vencer:'#c2410c', recebido:'#15803d' };
+  var rows = lista.map(function(o){
+    return [ _pedEsc(_cpSemColchetes(o.nome)), _finFormaLabel(o.forma) ].concat(meses.map(function(ym){
+      return o.v[ym] ? '<a href="javascript:void(0)" onclick="_relComAbrir(\'' + o.id + '\',\'' + ym + '\')" style="color:' + cor[o.st[ym]] + ';font-weight:700;text-decoration:none">' + nf(o.v[ym]) + '</a>' : '—';
+    })).concat(['<b>' + nf(o.tot) + '</b>']);
+  });
+  var totais = ['TOTAL', ''].concat(meses.map(function(ym){ return nf(totMes[ym] || 0); })).concat([nf(tot)]);
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Mesmo cálculo do módulo Comissões. Por padrão mostra os últimos 6 meses; use os filtros de data para outro período. Vermelho = vencida · laranja = a vencer · verde = recebida. Clique num valor para ver as NFs. Fábricas sem percentual de comissão cadastrado não aparecem.</div>'
+    + kpis + _relTabela(cols, rows, { totais: totais }) + '<div id="rel-com-det" style="margin-top:12px"></div>';
+}
+function _relComAbrir(fid, ym) {
+  var det = _relComDet[fid + '|' + ym] || [];
+  var cols = [ { label:'NF', width:'110px' }, { label:'Data', width:'90px' }, { label:'Cliente' }, { label:'Faturado', width:'110px', right:true }, { label:'Comissão', width:'100px', right:true }, { label:'Previsão', width:'90px' }, { label:'Situação', width:'90px' } ];
+  var lb = { vencido:'Vencida', a_vencer:'A vencer', recebido:'Recebida' };
+  var rows = det.slice().sort(function(a,b){ return a.data < b.data ? -1 : 1; }).map(function(x){
+    return [ _pedEsc(String(x.numDuplicata || x.numPedido || '')), _relFmtDataBR(x.data), _pedEsc(_cpSemColchetes(x.clienteNome)), _pedFmtMoeda(x.faturado), _pedFmtMoeda(x.comissao), _relFmtDataBR(x.previsao), lb[x.status] || x.status ];
+  });
+  var el = document.getElementById('rel-com-det');
+  if (el) { el.innerHTML = '<div style="font-size:12px;font-weight:700;color:#272A4A;margin-bottom:6px">NFs de ' + ym.slice(5,7) + '/' + ym.slice(0,4) + ' · ' + det.length + ' notas</div>' + _relTabela(cols, rows); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+}
+
+
+// ── v161: Relatórios 1, 7, 18, 23, 29 ──
+function _relListaMeses(f, nPadrao) {
+  var hoje = _relHojeISO(), fim = (f.dataAte || hoje).slice(0,7), ini = (f.dataDe || '').slice(0,7), meses = [];
+  if (!ini) { var d0 = new Date(Number(fim.slice(0,4)), Number(fim.slice(5,7)) - 1 - (nPadrao - 1), 1); ini = d0.getFullYear() + '-' + String(d0.getMonth()+1).padStart(2,'0'); }
+  var y = Number(ini.slice(0,4)), m = Number(ini.slice(5,7));
+  while ((y + '-' + String(m).padStart(2,'0')) <= fim && meses.length < 36) { meses.push(y + '-' + String(m).padStart(2,'0')); m++; if (m > 12) { m = 1; y++; } }
+  return meses;
+}
+var _REL_MES_ABR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function _relMesRot(ym) { return _REL_MES_ABR[Number(ym.slice(5,7)) - 1] + '/' + ym.slice(2,4); }
+
+// 1 · Pedidos sem faturar há X dias
+function _relCalcPedidosSemFaturar(f) {
+  var hoje = _relHojeISO(), cm = {}; getClientes().forEach(function(c){ cm[c.id] = c; });
+  var lista = [];
+  getPedidos().forEach(function(p){
+    if (p.status === 'Cancelado' || p.status === 'Bonificado' || p.status === 'Faturado') return;
+    if ((p.faturas || []).some(function(x){ return x.status !== 'Cancelado'; })) return;
+    var cli = cm[p.clienteId] || {};
+    if (!_appClienteVisivelUF(cli)) return;
+    if (f.dataDe && p.data < f.dataDe) return;
+    if (f.dataAte && p.data > f.dataAte) return;
+    if (!_relPassaPedCli(f, p, cli)) return;
+    var d = _relDiasEntre(p.data, hoje);
+    if (f.status === '7' && d > 7) return;
+    if (f.status === '30' && (d <= 7 || d > 30)) return;
+    if (f.status === '31' && d <= 30) return;
+    lista.push({ ped: p.numPedidoCliente || p.lancamento || p.id, cli: p.clienteNome || '', fab: p.fornecedorNome || '', ven: p.vendedorNome || '', data: p.data, dias: d, st: p.status || '', v: Number(p.valorTotal) || 0 });
+  });
+  lista.sort(function(a,b){ return b.dias - a.dias; });
+  var c7 = lista.filter(function(x){ return x.dias <= 7; }), c30 = lista.filter(function(x){ return x.dias > 7 && x.dias <= 30; }), c31 = lista.filter(function(x){ return x.dias > 30; });
+  var soma = function(a){ return a.reduce(function(s,x){ return s + x.v; }, 0); };
+  var kpis = _relKpis([
+    { label:'0–7 dias', valor: c7.length, sub: _pedFmtMoeda(soma(c7)) },
+    { label:'8–30 dias', valor: c30.length, sub: _pedFmtMoeda(soma(c30)), cor:'#c2410c' },
+    { label:'31+ dias', valor: c31.length, sub: _pedFmtMoeda(soma(c31)), cor:'#dc2626' },
+    { label:'Valor parado', valor: _pedFmtMoeda(soma(lista)), cor:'#272A4A' }
+  ]);
+  var cols = [ { label:'Pedido', width:'120px' }, { label:'Cliente' }, { label:'Fábrica', width:'110px' }, { label:'Vendedor', width:'110px' }, { label:'Data', width:'80px' }, { label:'Dias', width:'60px', right:true }, { label:'Status', width:'110px' }, { label:'Valor', width:'110px', right:true } ];
+  var rows = lista.map(function(x){ return [ _pedEsc(String(x.ped)), _pedEsc(_cpSemColchetes(x.cli)), _pedEsc(_cpSemColchetes(x.fab)), _pedEsc(x.ven), _relFmtDataBR(x.data), '<b style="color:' + (x.dias > 30 ? '#dc2626' : (x.dias > 7 ? '#c2410c' : '#1e293b')) + '">' + x.dias + '</b>', _pedEsc(x.st), _pedFmtMoeda(x.v) ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Pedidos sem nenhuma NF ativa, exceto cancelados, bonificados e já faturados. Dias = hoje menos a data do pedido.</div>' + kpis + _relTabela(cols, rows, { totais: [ 'TOTAL', lista.length + ' pedidos', '', '', '', '', '', _pedFmtMoeda(soma(lista)) ] });
+}
+
+// 7 · Clientes novos e reativados
+function _relCalcClientesNovosReativados(f) {
+  var hoje = _relHojeISO();
+  var ate = f.dataAte || hoje;
+  var de = f.dataDe || (function(){ var d = new Date(ate + 'T12:00:00'); d.setDate(d.getDate() - 30); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })();
+  var cm = {}; getClientes().forEach(function(c){ cm[c.id] = c; });
+  var D = {};
+  getPedidos().forEach(function(p){
+    if (p.status === 'Cancelado' || !p.clienteId) return;
+    (p.faturas || []).forEach(function(x){
+      if (x.status === 'Cancelado' || !x.data) return;
+      var o = D[p.clienteId] = D[p.clienteId] || { datas: [], ped: p };
+      o.datas.push(x.data); o.ped = p;
+    });
+  });
+  var novos = [], reat = [];
+  Object.keys(D).forEach(function(k){
+    var o = D[k], cli = cm[k] || {};
+    if (!_appClienteVisivelUF(cli) || !_relPassaPedCli(f, o.ped, cli)) return;
+    var ds = o.datas.sort(), noPer = ds.filter(function(x){ return x >= de && x <= ate; });
+    if (!noPer.length) return;
+    var ant = ds.filter(function(x){ return x < de; });
+    var nome = cli.nome_fantasia || o.ped.clienteNome || '';
+    if (!ant.length) novos.push({ nome: nome, ant: '', prim: noPer[0], ven: o.ped.vendedorNome || '' });
+    else { var u = ant[ant.length - 1]; if (_relDiasEntre(u, noPer[0]) >= 90) reat.push({ nome: nome, ant: u, prim: noPer[0], ven: o.ped.vendedorNome || '' }); }
+  });
+  var tipo = f.status || '';
+  var linhas = [];
+  if (tipo !== 'reativado') novos.forEach(function(x){ linhas.push(Object.assign({ tipo:'Novo' }, x)); });
+  if (tipo !== 'novo') reat.forEach(function(x){ linhas.push(Object.assign({ tipo:'Reativado' }, x)); });
+  linhas.sort(function(a,b){ return a.prim < b.prim ? 1 : -1; });
+  var kpis = _relKpis([
+    { label:'Clientes novos', valor: novos.length, cor:'#15803d' },
+    { label:'Reativados (90+ dias sem comprar)', valor: reat.length, cor:'#c2410c' },
+    { label:'Período', valor: _relFmtDataBR(de) + ' – ' + _relFmtDataBR(ate) }
+  ]);
+  var cols = [ { label:'Cliente' }, { label:'Tipo', width:'100px' }, { label:'Última compra antes', width:'140px' }, { label:'Primeira compra no período', width:'170px' }, { label:'Vendedor', width:'120px' } ];
+  var rows = linhas.map(function(x){ return [ _pedEsc(_cpSemColchetes(x.nome)), '<b style="color:' + (x.tipo === 'Novo' ? '#15803d' : '#c2410c') + '">' + x.tipo + '</b>', x.ant ? _relFmtDataBR(x.ant) : '—', _relFmtDataBR(x.prim), _pedEsc(x.ven) ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Novo = primeira NF da história no período. Reativado = voltou a comprar depois de 90 dias ou mais sem NF. Padrão: últimos 30 dias.</div>' + kpis + _relTabela(cols, rows);
+}
+
+// 18 · Faturamento líquido
+function _relCalcFaturamentoLiquido(f) {
+  var meses = _relListaMeses(f, 6), F = {}, V = {};
+  _relBaseFaturas(Object.assign({}, f, { dataDe: '', dataAte: '' })).forEach(function(l){ var m = (l.fatura.data || '').slice(0,7); F[m] = (F[m] || 0) + (Number(l.fatura.valor) || 0); });
+  getDevolucoes().forEach(function(d){
+    if (f.fornecedor && _cpNorm(d.fornecedorNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return;
+    if (f.vendedor && String(d.vendedorId || '') !== String(f.vendedor)) return;
+    var m = (d.data || '').slice(0,7);
+    var v = Number(d.totalProdutos) || (d.itens || []).reduce(function(s,i){ return s + (Number(i.valorTotal) || 0); }, 0);
+    V[m] = (V[m] || 0) + v;
+  });
+  var tf = 0, tv = 0;
+  var rows = meses.map(function(m){ var a = F[m] || 0, b = V[m] || 0; tf += a; tv += b; return [ _relMesRot(m), _pedFmtMoeda(a), '<span style="color:#dc2626">' + _pedFmtMoeda(b) + '</span>', '<b>' + _pedFmtMoeda(a - b) + '</b>', (a ? (b / a * 100).toFixed(1).replace('.', ',') : '0,0') + '%' ]; });
+  var kpis = _relKpis([
+    { label:'Faturado', valor: _pedFmtMoeda(tf), cor:'#272A4A' },
+    { label:'Devoluções', valor: _pedFmtMoeda(tv), cor:'#dc2626' },
+    { label:'Faturamento líquido', valor: _pedFmtMoeda(tf - tv), cor:'#15803d' },
+    { label:'% devolvido', valor: (tf ? (tv / tf * 100).toFixed(1).replace('.', ',') : '0,0') + '%' }
+  ]);
+  var cols = [ { label:'Mês', width:'90px' }, { label:'Faturado', right:true }, { label:'Devoluções', right:true }, { label:'Líquido', right:true }, { label:'% devolvido', width:'100px', right:true } ];
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Faturado por data da NF menos devoluções por data da devolução. Padrão: últimos 6 meses.</div>' + kpis + _relTabela(cols, rows, { totais: [ 'TOTAL', _pedFmtMoeda(tf), _pedFmtMoeda(tv), _pedFmtMoeda(tf - tv), (tf ? (tv / tf * 100).toFixed(1).replace('.', ',') : '0,0') + '%' ] });
+}
+
+// 23 · Ranking de fábricas
+function _relCalcRankingFabricas(f) {
+  var hoje = _relHojeISO(), ym = (f.dataDe || f.dataAte || hoje).slice(0,7);
+  var py = Number(ym.slice(0,4)), pm = Number(ym.slice(5,7)) - 1; if (pm < 1) { pm = 12; py--; }
+  var ant = py + '-' + String(pm).padStart(2,'0');
+  var atual = ym === hoje.slice(0,7);
+  var G = {}, cm = {}; getClientes().forEach(function(c){ cm[c.id] = c; });
+  getPedidos().forEach(function(p){
+    if (p.status === 'Cancelado') return;
+    var cli = cm[p.clienteId] || {};
+    if (!_appClienteVisivelUF(cli)) return;
+    var pass = true;
+    if (f.vendedor && String(p.vendedorId || '') !== String(f.vendedor)) pass = false;
+    if (f.uf && (cli.ent_estado || cli.estado || '') !== f.uf) pass = false;
+    if (!pass) return;
+    (p.faturas || []).forEach(function(x){
+      if (x.status === 'Cancelado') return;
+      var m = (x.data || '').slice(0,7); if (m !== ym && m !== ant) return;
+      var k = p.fornecedorNome || '—'; var o = G[k] = G[k] || { a:0, b:0 };
+      if (m === ym) o.a += Number(x.valor) || 0; else o.b += Number(x.valor) || 0;
+    });
+  });
+  var lista = Object.keys(G).map(function(k){ return { k:k, a:G[k].a, b:G[k].b }; }).sort(function(a,b){ return b.a - a.a; });
+  var ta = lista.reduce(function(s,x){ return s + x.a; }, 0), tb = lista.reduce(function(s,x){ return s + x.b; }, 0);
+  var vr = function(a, b){ return b ? ((a - b) / b * 100) : null; };
+  var fv = function(v){ return v == null ? 'novo' : '<b style="color:' + (v >= 0 ? '#15803d' : '#dc2626') + '">' + (v >= 0 ? '+' : '') + v.toFixed(1).replace('.', ',') + '%</b>'; };
+  var kpis = _relKpis([
+    { label:'Faturado em ' + _relMesRot(ym) + (atual ? ' (até hoje)' : ''), valor: _pedFmtMoeda(ta), cor:'#272A4A' },
+    { label:'Faturado em ' + _relMesRot(ant), valor: _pedFmtMoeda(tb) },
+    { label:'Variação', valor: vr(ta, tb) == null ? '—' : (vr(ta, tb) >= 0 ? '+' : '') + vr(ta, tb).toFixed(1).replace('.', ',') + '%', cor: (vr(ta, tb) || 0) >= 0 ? '#15803d' : '#dc2626' },
+    { label:'Líder', valor: lista.length ? _pedEsc(_cpSemColchetes(lista[0].k)) : '—' }
+  ]);
+  var cols = [ { label:'#', width:'40px' }, { label:'Fábrica' }, { label:_relMesRot(ym), width:'130px', right:true }, { label:'% do total', width:'90px', right:true }, { label:_relMesRot(ant), width:'130px', right:true }, { label:'Variação', width:'90px', right:true } ];
+  var rows = lista.map(function(x, i){ return [ i + 1, _pedEsc(_cpSemColchetes(x.k)), _pedFmtMoeda(x.a), (ta ? (x.a / ta * 100).toFixed(1).replace('.', ',') : '0,0') + '%', _pedFmtMoeda(x.b), fv(vr(x.a, x.b)) ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Mês de referência: ' + _relMesRot(ym) + (atual ? ' (parcial, até hoje)' : '') + ', comparado ao mês anterior inteiro. Informe "de" nos filtros para outro mês.</div>' + kpis + _relTabela(cols, rows, { totais: [ '', 'TOTAL', _pedFmtMoeda(ta), '100%', _pedFmtMoeda(tb), fv(vr(ta, tb)) ] });
+}
+
+// 29 · Cadastros incompletos
+function _relCalcCadastrosIncompletos(f) {
+  var chk = f.status || '', linhas = [], cont = {};
+  var add = function(tipo, cod, nome, falta, criado) { linhas.push({ tipo:tipo, cod:cod, nome:nome, falta:falta, criado:criado }); falta.forEach(function(x){ cont[tipo + x] = (cont[tipo + x] || 0) + 1; }); };
+  var q = _cpNorm(f.cliente || '');
+  if (chk === '' || chk.indexOf('cli-') === 0) getClientes().forEach(function(c){
+    if ((c.ativo || 'Sim') === 'Não') return;
+    var nome = c.nome_fantasia || '';
+    if (q && _cpNorm(nome + ' ' + (c.codigo || '')).indexOf(q) === -1) return;
+    var fa = [];
+    if (!c.categoria) fa.push('Categoria');
+    if (!c.vendedor_principal) fa.push('Vendedor');
+    if (!(c.ent_estado || c.estado)) fa.push('UF');
+    if (!(c.ent_cidade || c.cidade)) fa.push('Cidade');
+    if (chk === 'cli-cat') fa = fa.filter(function(x){ return x === 'Categoria'; });
+    if (chk === 'cli-vend') fa = fa.filter(function(x){ return x === 'Vendedor'; });
+    if (fa.length) add('Cliente', c.codigo || '', nome, fa, '');
+  });
+  if (chk === '' || chk.indexOf('prod-') === 0) getProdutos().forEach(function(p){
+    if ((p.ativo || 'Sim') === 'Não') return;
+    if (f.fornecedor && _cpNorm((getFornecedores().find(function(x){ return String(x.id) === String(p.fornecedor); }) || {}).nome_fantasia || '').indexOf(_cpNorm(f.fornecedor)) === -1) return;
+    var nome = p.nome || '';
+    if (q && _cpNorm(nome + ' ' + (p.codigo || '')).indexOf(q) === -1) return;
+    var fa = [];
+    if (!p.foto) fa.push('Foto');
+    if (!p.peso) fa.push('Peso');
+    if (!p.fornecedor) fa.push('Fábrica');
+    if (chk === 'prod-foto') fa = fa.filter(function(x){ return x === 'Foto'; });
+    if (chk === 'prod-peso') fa = fa.filter(function(x){ return x === 'Peso'; });
+    if (fa.length) add('Produto', p.codigo || '', nome, fa, p.criadoEm ? _relFmtDataBR(String(p.criadoEm).slice(0,10)) : '');
+  });
+  var nCli = linhas.filter(function(x){ return x.tipo === 'Cliente'; }).length, nProd = linhas.length - nCli;
+  var kpis = _relKpis([
+    { label:'Clientes incompletos', valor: nCli, cor: nCli ? '#c2410c' : '#15803d' },
+    { label:'Produtos incompletos', valor: nProd, cor: nProd ? '#c2410c' : '#15803d' },
+    { label:'Clientes sem categoria', valor: cont['ClienteCategoria'] || 0 },
+    { label:'Produtos sem foto', valor: cont['ProdutoFoto'] || 0 }
+  ]);
+  var cols = [ { label:'Tipo', width:'80px' }, { label:'Código', width:'90px' }, { label:'Cadastro' }, { label:'Campos faltando', width:'220px' }, { label:'Criado em', width:'100px' } ];
+  var rows = linhas.map(function(x){ return [ x.tipo, _pedEsc(String(x.cod)), _pedEsc(_cpSemColchetes(x.nome)), '<b style="color:#c2410c">' + x.falta.join(', ') + '</b>', x.criado || '—' ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Só cadastros ativos. Clientes: categoria, vendedor, UF e cidade. Produtos: foto, peso e fábrica. Clientes não guardam data de criação.</div>' + kpis + _relTabela(cols, rows);
+}
+
+
+// ── v162: Relatórios 3, 5, 6, 17, 26 ──
+// 3 · Ocorrências de entrega
+function _relCalcOcorrencias(f) {
+  var hoje = _relHojeISO();
+  var lista = getOcorrencias().filter(function(o){
+    if (f.dataDe && (o.data || '') < f.dataDe) return false;
+    if (f.dataAte && (o.data || '') > f.dataAte) return false;
+    if (f.cliente && _cpNorm(o.clienteNome || '').indexOf(_cpNorm(f.cliente)) === -1) return false;
+    if (f.transportadora && _cpNorm(o.transportadoraNome || '').indexOf(_cpNorm(f.transportadora)) === -1) return false;
+    if (f.status && o.tipo !== f.status) return false;
+    return true;
+  }).sort(function(a,b){ return (b.data || '') < (a.data || '') ? -1 : 1; });
+  var porTipo = {}; lista.forEach(function(o){ porTipo[o.tipo || 'Outro'] = (porTipo[o.tipo || 'Outro'] || 0) + 1; });
+  var top = Object.keys(porTipo).sort(function(a,b){ return porTipo[b] - porTipo[a]; })[0] || '—';
+  var valor = lista.reduce(function(s,o){ return s + (Number(o.valor) || 0); }, 0);
+  var kpis = _relKpis([
+    { label:'Ocorrências', valor: lista.length },
+    { label:'Valor afetado', valor: _pedFmtMoeda(valor), cor:'#dc2626' },
+    { label:'Últimos 7 dias', valor: lista.filter(function(o){ return o.data && _relDiasEntre(o.data, hoje) <= 7; }).length, cor:'#c2410c' },
+    { label:'Tipo mais comum', valor: _pedEsc(top) }
+  ]);
+  var cols = [ { label:'Data', width:'80px' }, { label:'NF', width:'90px' }, { label:'Cliente' }, { label:'Transportadora', width:'150px' }, { label:'Tipo', width:'150px' }, { label:'Valor', width:'100px', right:true }, { label:'Dias', width:'50px', right:true }, { label:'Descrição' } ];
+  var rows = lista.map(function(o){ return [ _relFmtDataBR(o.data), _pedEsc(String(o.nfNumero || '')), _pedEsc(_cpSemColchetes(o.clienteNome || '')), _pedEsc(o.transportadoraNome || ''), '<b style="color:' + ((typeof OC_COR !== 'undefined' && OC_COR[o.tipo]) || '#1e293b') + '">' + _pedEsc(o.tipo || '') + '</b>', _pedFmtMoeda(o.valor), o.data ? _relDiasEntre(o.data, hoje) : '', _pedEsc(String(o.descricao || '').slice(0, 80)) ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Ocorrências de entrega lançadas no sistema. O cadastro de ocorrências não tem situação (aberta/resolvida); "Dias" conta desde a data da ocorrência.</div>' + kpis + _relTabela(cols, rows);
+}
+
+// 5 · Restrições ativas
+function _relCalcRestricoesAtivas(f) {
+  var hoje = _relHojeISO();
+  var lista = getRestricoes().filter(function(r){
+    if ((r.ativo || 'Sim') !== 'Sim') return false;
+    if (r.vigIni && r.vigIni > hoje) return false;
+    if (r.vigFim && r.vigFim < hoje) return false;
+    if (f.fornecedor && _cpNorm(r.fornNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return false;
+    if (f.uf && !((r.alvos || []).some(function(a){ return a.nome === f.uf || a.id === f.uf; }))) return false;
+    return true;
+  });
+  var kpis = _relKpis([
+    { label:'Restrições ativas', valor: lista.length, cor: lista.length ? '#c2410c' : '#15803d' },
+    { label:'Produtos bloqueados', valor: lista.reduce(function(s,r){ return s + (r.produtos || []).length; }, 0) },
+    { label:'Com data de fim', valor: lista.filter(function(r){ return r.vigFim; }).length }
+  ]);
+  var nv = { uf:'UF', cliente:'Cliente', rede:'Rede', categoria:'Categoria' };
+  var cols = [ { label:'Fábrica', width:'110px' }, { label:'Nível', width:'80px' }, { label:'Alvo', width:'160px' }, { label:'Produtos' }, { label:'Motivo', width:'200px' }, { label:'Desde', width:'80px' }, { label:'Até', width:'80px' } ];
+  var rows = lista.map(function(r){ return [ _pedEsc(_cpSemColchetes(r.fornNome || '')), _pedEsc(nv[r.nivel] || r.nivel || ''), _pedEsc((r.alvos || []).map(function(a){ return a.nome; }).join(', ')), _pedEsc((r.produtos || []).map(function(p){ return p.nome; }).join('; ')), _pedEsc(r.motivo || ''), _relFmtDataBR(r.vigIni), r.vigFim ? _relFmtDataBR(r.vigFim) : 'sem fim' ]; });
+  return kpis + _relTabela(cols, rows);
+}
+
+// 6 · Tabelas de preço a vencer
+function _relCalcTabelasVencer(f) {
+  var hoje = _relHojeISO(), itens = [];
+  getTabPrecos().forEach(function(t){
+    if (t.ativo === 'Não') return;
+    (t.itens || []).forEach(function(i){
+      var m = String(i.periodo || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/); if (!m) return;
+      var d = m[3] + '-' + m[2] + '-' + m[1]; if (d.slice(0,4) < '2000') return;
+      if (f.fornecedor && _cpNorm(i.fornNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return;
+      if (f.dataDe && d < f.dataDe) return;
+      if (f.dataAte && d > f.dataAte) return;
+      itens.push({ tab: t.nome || '', prod: i.nome || '', forn: i.fornNome || '', d: d, dias: _relDiasEntre(hoje, d), v: i.valor });
+    });
+  });
+  var venc = itens.filter(function(x){ return x.dias < 0; }), a30 = itens.filter(function(x){ return x.dias >= 0 && x.dias <= 30; }), a90 = itens.filter(function(x){ return x.dias > 30 && x.dias <= 90; });
+  var tabsVenc = {}; venc.forEach(function(x){ tabsVenc[x.tab] = 1; });
+  var vis = itens.filter(function(x){
+    if (f.status === 'venc') return x.dias < 0; if (f.status === '30') return x.dias >= 0 && x.dias <= 30; if (f.status === '90') return x.dias > 30 && x.dias <= 90;
+    return f.dataDe || f.dataAte ? true : x.dias <= 90;
+  }).sort(function(a,b){ return a.dias - b.dias; });
+  var kpis = _relKpis([
+    { label:'Vencidos', valor: venc.length, cor:'#dc2626' },
+    { label:'Vencem em 30 dias', valor: a30.length, cor:'#c2410c' },
+    { label:'Vencem em 31–90 dias', valor: a90.length, cor:'#b45309' },
+    { label:'Tabelas com item vencido', valor: Object.keys(tabsVenc).length }
+  ]);
+  var cols = [ { label:'Tabela' }, { label:'Produto' }, { label:'Fábrica', width:'110px' }, { label:'Preço', width:'90px', right:true }, { label:'Validade', width:'90px' }, { label:'Situação', width:'150px' } ];
+  var rows = vis.map(function(x){ return [ _pedEsc(x.tab), _pedEsc(x.prod), _pedEsc(_cpSemColchetes(x.forn)), _pedEsc(String(x.v || '')), _relFmtDataBR(x.d), x.dias < 0 ? '<b style="color:#dc2626">Vencido há ' + (-x.dias) + ' dias</b>' : '<b style="color:#c2410c">Vence em ' + x.dias + ' dias</b>' ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Validade de cada item das tabelas de preço ativas. Itens sem data válida não entram. Sem filtro, lista vencidos e os que vencem em até 90 dias.</div>' + kpis + _relTabela(cols, rows);
+}
+
+// 17 · Inadimplência de comissão
+function _relCalcInadimplenciaComissao(f) {
+  var hoje = _relHojeISO(), meses = _relListaMeses(f, 12), G = {};
+  meses.forEach(function(ym){
+    var ult = new Date(Number(ym.slice(0,4)), Number(ym.slice(5,7)), 0).getDate();
+    _finListaComissoes(ym + '-01', ym + '-' + String(ult).padStart(2,'0'), '', 'vencido').forEach(function(g){
+      if (f.fornecedor && _cpNorm(g.fornecedorNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return;
+      var o = G[g.fornecedorId] = G[g.fornecedorId] || { nome: g.fornecedorNome, b:[0,0,0,0], n:0 };
+      g.faturasDetalhe.forEach(function(x){
+        if (x.status !== 'vencido') return;
+        var d = _relDiasEntre(x.previsao, hoje), i = d <= 30 ? 0 : (d <= 60 ? 1 : (d <= 90 ? 2 : 3));
+        o.b[i] += x.comissao; o.n++;
+      });
+    });
+  });
+  var lista = Object.keys(G).map(function(k){ var o = G[k]; o.tot = o.b[0] + o.b[1] + o.b[2] + o.b[3]; return o; }).sort(function(a,b){ return b.tot - a.tot; });
+  var T = [0,0,0,0], nn = 0; lista.forEach(function(o){ for (var i = 0; i < 4; i++) T[i] += o.b[i]; nn += o.n; });
+  var tot = T[0] + T[1] + T[2] + T[3];
+  var kpis = _relKpis([
+    { label:'Total vencido', valor: _pedFmtMoeda(tot), cor:'#dc2626' },
+    { label:'Mais de 90 dias', valor: _pedFmtMoeda(T[3]), cor:'#dc2626' },
+    { label:'NFs em atraso', valor: nn },
+    { label:'Maior devedora', valor: lista.length ? _pedEsc(_cpSemColchetes(lista[0].nome)) : '—' }
+  ]);
+  var m = function(v){ return v ? _pedFmtMoeda(v) : '—'; };
+  var cols = [ { label:'Fábrica' }, { label:'NFs', width:'60px', right:true }, { label:'1–30 dias', width:'110px', right:true }, { label:'31–60 dias', width:'110px', right:true }, { label:'61–90 dias', width:'110px', right:true }, { label:'90+ dias', width:'110px', right:true }, { label:'Total', width:'120px', right:true } ];
+  var rows = lista.map(function(o){ return [ _pedEsc(_cpSemColchetes(o.nome)), o.n, m(o.b[0]), m(o.b[1]), m(o.b[2]), '<b style="color:#dc2626">' + m(o.b[3]) + '</b>', '<b>' + _pedFmtMoeda(o.tot) + '</b>' ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Comissões vencidas e ainda não baixadas como recebidas, pelo mesmo cálculo do módulo Comissões. Atraso = dias desde a previsão de pagamento. Padrão: últimos 12 meses de faturamento.</div>' + kpis + _relTabela(cols, rows, { totais: [ 'TOTAL', nn, m(T[0]), m(T[1]), m(T[2]), m(T[3]), _pedFmtMoeda(tot) ] });
+}
+
+// 26 · Carteira por região
+var _relRegCidades = {};
+function _relCalcCarteiraRegiao(f) {
+  var hoje = _relHojeISO(), ate = f.dataAte || hoje;
+  var d0 = new Date(ate + 'T12:00:00'); d0.setDate(d0.getDate() - 90);
+  var de = d0.getFullYear() + '-' + String(d0.getMonth()+1).padStart(2,'0') + '-' + String(d0.getDate()).padStart(2,'0');
+  var fat = {}, comp = {};
+  getPedidos().forEach(function(p){
+    if (p.status === 'Cancelado') return;
+    if (f.fornecedor && _cpNorm(p.fornecedorNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return;
+    (p.faturas || []).forEach(function(x){
+      if (x.status === 'Cancelado' || !x.data || x.data < de || x.data > ate) return;
+      fat[p.clienteId] = (fat[p.clienteId] || 0) + (Number(x.valor) || 0); comp[p.clienteId] = 1;
+    });
+  });
+  var U = {}; _relRegCidades = {};
+  getClientes().forEach(function(c){
+    if (!_appClienteVisivelUF(c)) return;
+    var uf = c.ent_estado || c.estado || '—';
+    if (f.uf && uf !== f.uf) return;
+    if (f.categoria && String(c.categoria || '') !== String(f.categoria)) return;
+    if (f.subcategoria && String(c.subcategoria || '') !== String(f.subcategoria)) return;
+    if (f.vendedor && String(c.vendedor_principal || '') !== String(f.vendedor)) return;
+    var ativo = (c.ativo || 'Sim') !== 'Não';
+    var o = U[uf] = U[uf] || { a:0, i:0, c:0, v:0 };
+    if (ativo) { o.a++; if (comp[c.id]) o.c++; } else o.i++;
+    o.v += fat[c.id] || 0;
+    var cid = c.ent_cidade || c.cidade || '—';
+    var cc = (_relRegCidades[uf] = _relRegCidades[uf] || {})[cid] = _relRegCidades[uf][cid] || { a:0, c:0, v:0 };
+    if (ativo) { cc.a++; if (comp[c.id]) cc.c++; } cc.v += fat[c.id] || 0;
+  });
+  var lista = Object.keys(U).map(function(k){ return { uf:k, a:U[k].a, i:U[k].i, c:U[k].c, v:U[k].v }; }).sort(function(a,b){ return b.v - a.v; });
+  var ta = 0, tc = 0, tv = 0, ti = 0; lista.forEach(function(x){ ta += x.a; tc += x.c; tv += x.v; ti += x.i; });
+  var pc = function(c, a){ return a ? Math.round(c / a * 100) : 0; };
+  var kpis = _relKpis([
+    { label:'Clientes ativos', valor: ta },
+    { label:'Compraram em 90 dias', valor: tc, sub: pc(tc, ta) + '% dos ativos', cor:'#15803d' },
+    { label:'Inativos', valor: ti },
+    { label:'Faturado em 90 dias', valor: _pedFmtMoeda(tv), cor:'#272A4A' }
+  ]);
+  var cols = [ { label:'UF', width:'60px' }, { label:'Clientes ativos', width:'110px', right:true }, { label:'Inativos', width:'80px', right:true }, { label:'Compraram em 90 dias', width:'150px', right:true }, { label:'% ativação', width:'90px', right:true }, { label:'Faturado 90 dias', width:'140px', right:true } ];
+  var rows = lista.map(function(x){ var p = pc(x.c, x.a); return [ '<a href="javascript:void(0)" onclick="_relRegAbrir(\'' + x.uf + '\')" style="color:#1d4ed8;font-weight:700;text-decoration:none">' + _pedEsc(x.uf) + '</a>', x.a, x.i, x.c, '<b style="color:' + (p < 50 ? '#dc2626' : '#1e293b') + '">' + p + '%</b>', _pedFmtMoeda(x.v) ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Janela: ' + _relFmtDataBR(de) + ' a ' + _relFmtDataBR(ate) + ' (90 dias até a data final). % ativação = clientes ativos que compraram na janela. Clique na UF para ver as cidades.</div>' + kpis + _relTabela(cols, rows, { totais: [ 'TOTAL', ta, ti, tc, pc(tc, ta) + '%', _pedFmtMoeda(tv) ] }) + '<div id="rel-reg-det" style="margin-top:12px"></div>';
+}
+function _relRegAbrir(uf) {
+  var C = _relRegCidades[uf] || {};
+  var lista = Object.keys(C).map(function(k){ return { c:k, a:C[k].a, n:C[k].c, v:C[k].v }; }).sort(function(a,b){ return b.v - a.v; });
+  var cols = [ { label:'Cidade' }, { label:'Clientes ativos', width:'110px', right:true }, { label:'Compraram em 90 dias', width:'150px', right:true }, { label:'Faturado 90 dias', width:'140px', right:true } ];
+  var rows = lista.map(function(x){ return [ _pedEsc(x.c), x.a, x.n, _pedFmtMoeda(x.v) ]; });
+  var el = document.getElementById('rel-reg-det');
+  if (el) { el.innerHTML = '<div style="font-size:12px;font-weight:700;color:#272A4A;margin-bottom:6px">Cidades de ' + _pedEsc(uf) + '</div>' + _relTabela(cols, rows); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+}
+
+
+// ── v163: Relatórios 9, 10, 11, 12, 25 ──
+function _relDefPeriodo(f, tipo) {
+  var hoje = _relHojeISO(), ate = f.dataAte || hoje, de = f.dataDe || '';
+  if (!de) {
+    if (tipo === '90') { var d0 = new Date(ate + 'T12:00:00'); d0.setDate(d0.getDate() - 90); de = d0.getFullYear() + '-' + String(d0.getMonth()+1).padStart(2,'0') + '-' + String(d0.getDate()).padStart(2,'0'); }
+    else { de = ate.slice(0,7) + '-01'; }
+  }
+  return { de: de, ate: ate };
+}
+function _relPesoProd(pr) { return pr ? (parseFloat(String(pr.peso || '0').replace(',', '.')) || 0) : 0; }
+
+// 9 · Mix por cliente
+var _relMixDet = {};
+function _relCalcMixCliente(f) {
+  var per = _relDefPeriodo(f, '90');
+  var linhas = _relBaseFaturas(Object.assign({}, f, { dataDe: per.de, dataAte: per.ate }));
+  var catalogo = {}, C = {}; _relMixDet = {};
+  linhas.forEach(function(l){
+    var k = l.pedido.clienteId || l.pedido.clienteNome;
+    var o = C[k] = C[k] || { nome: l.cliente.nome_fantasia || l.pedido.clienteNome || '', p: {}, v: 0 };
+    o.v += Number(l.fatura.valor) || 0;
+    (l.fatura.itens || []).forEach(function(i){ var n = i.prodNome || i.prodCodigo || 'Produto'; catalogo[i.prodId || n] = n; o.p[i.prodId || n] = n; });
+  });
+  var nCat = Object.keys(catalogo).length;
+  var lista = Object.keys(C).map(function(k){ var o = C[k]; o.id = k; o.n = Object.keys(o.p).length; _relMixDet[k] = o; return o; }).sort(function(a,b){ return b.v - a.v; });
+  var media = lista.length ? lista.reduce(function(s,o){ return s + o.n; }, 0) / lista.length : 0;
+  var kpis = _relKpis([
+    { label:'Clientes que compraram', valor: lista.length },
+    { label:'Produtos no catálogo vendido', valor: nCat },
+    { label:'Média de produtos por cliente', valor: media.toFixed(1).replace('.', ',') },
+    { label:'Período', valor: _relFmtDataBR(per.de) + ' – ' + _relFmtDataBR(per.ate) }
+  ]);
+  var cols = [ { label:'Cliente' }, { label:'Produtos comprados', width:'130px', right:true }, { label:'% do catálogo', width:'110px', right:true }, { label:'Faturado', width:'130px', right:true } ];
+  var rows = lista.map(function(o){ return [ '<a href="javascript:void(0)" onclick="_relMixAbrir(\'' + String(o.id).replace(/'/g, "\\'") + '\')" style="color:#1d4ed8;font-weight:700;text-decoration:none">' + _pedEsc(_cpSemColchetes(o.nome)) + '</a>', o.n, (nCat ? Math.round(o.n / nCat * 100) : 0) + '%', _pedFmtMoeda(o.v) ]; });
+  window._relMixCatalogo = catalogo;
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Padrão: últimos 90 dias. Catálogo = produtos faturados no período (respeitando os filtros). Clique no cliente para ver o que ele compra e o que ainda não comprou.</div>' + kpis + _relTabela(cols, rows) + '<div id="rel-mix-det" style="margin-top:12px"></div>';
+}
+function _relMixAbrir(id) {
+  var o = _relMixDet[id]; if (!o) return;
+  var cat = window._relMixCatalogo || {};
+  var tem = Object.keys(o.p).map(function(k){ return o.p[k]; }).sort();
+  var falta = Object.keys(cat).filter(function(k){ return !o.p[k]; }).map(function(k){ return cat[k]; }).sort();
+  var n = Math.max(tem.length, falta.length), rows = [];
+  for (var i = 0; i < n; i++) rows.push([ _pedEsc(tem[i] || ''), _pedEsc(falta[i] || '') ]);
+  var el = document.getElementById('rel-mix-det');
+  if (el) { el.innerHTML = '<div style="font-size:12px;font-weight:700;color:#272A4A;margin-bottom:6px">' + _pedEsc(_cpSemColchetes(o.nome)) + ' · compra ' + tem.length + ' · não comprou ' + falta.length + '</div>' + _relTabela([ { label:'Compra (' + tem.length + ')' }, { label:'Ainda não comprou (' + falta.length + ')' } ], rows); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+}
+
+// 10 · Positivação por vendedor
+function _relCalcPositivacao(f) {
+  var per = _relDefPeriodo(f, 'mes');
+  var vend = {}; getVendedoresAtivos().forEach(function(v){ vend[String(v.id)] = v.nome || ''; });
+  var G = {};
+  var get = function(id, nome){ var k = String(id || '—'); return G[k] = G[k] || { nome: nome || vend[k] || 'Sem vendedor', cart: 0, cl: {}, nf: 0, v: 0 }; };
+  getClientes().forEach(function(c){
+    if ((c.ativo || 'Sim') === 'Não' || !_appClienteVisivelUF(c)) return;
+    if (f.uf && (c.ent_estado || c.estado || '') !== f.uf) return;
+    if (f.categoria && String(c.categoria || '') !== String(f.categoria)) return;
+    if (f.subcategoria && String(c.subcategoria || '') !== String(f.subcategoria)) return;
+    if (f.vendedor && String(c.vendedor_principal || '') !== String(f.vendedor)) return;
+    get(c.vendedor_principal).cart++;
+  });
+  _relBaseFaturas(Object.assign({}, f, { dataDe: per.de, dataAte: per.ate })).forEach(function(l){
+    var o = get(l.pedido.vendedorId, l.pedido.vendedorNome);
+    o.cl[l.pedido.clienteId || l.pedido.clienteNome] = 1; o.nf++; o.v += Number(l.fatura.valor) || 0;
+  });
+  var lista = Object.keys(G).map(function(k){ var o = G[k]; o.pos = Object.keys(o.cl).length; return o; }).filter(function(o){ return o.cart || o.pos; }).sort(function(a,b){ return b.v - a.v; });
+  var tc = 0, tp = 0, tv = 0, tn = 0; lista.forEach(function(o){ tc += o.cart; tp += o.pos; tv += o.v; tn += o.nf; });
+  var pc = function(a, b){ return b ? Math.round(a / b * 100) : 0; };
+  var kpis = _relKpis([
+    { label:'Clientes na carteira', valor: tc },
+    { label:'Positivados no período', valor: tp, sub: pc(tp, tc) + '% da carteira', cor:'#15803d' },
+    { label:'Faturado', valor: _pedFmtMoeda(tv), cor:'#272A4A' },
+    { label:'Ticket por cliente', valor: _pedFmtMoeda(tp ? tv / tp : 0) }
+  ]);
+  var cols = [ { label:'Vendedor' }, { label:'Clientes na carteira', width:'130px', right:true }, { label:'Positivados', width:'100px', right:true }, { label:'% positivação', width:'110px', right:true }, { label:'NFs', width:'60px', right:true }, { label:'Faturado', width:'130px', right:true }, { label:'Ticket por cliente', width:'130px', right:true } ];
+  var rows = lista.map(function(o){ var p = pc(o.pos, o.cart); return [ _pedEsc(o.nome), o.cart, o.pos, o.cart ? '<b style="color:' + (p < 25 ? '#dc2626' : '#1e293b') + '">' + p + '%</b>' : '—', o.nf, _pedFmtMoeda(o.v), _pedFmtMoeda(o.pos ? o.v / o.pos : 0) ]; });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Período: ' + _relFmtDataBR(per.de) + ' a ' + _relFmtDataBR(per.ate) + ' (padrão: mês atual). Carteira = vendedor principal do cadastro do cliente; faturado e positivados = vendedor do pedido, então podem não coincidir.</div>' + kpis + _relTabela(cols, rows, { totais: [ 'TOTAL', tc, tp, pc(tp, tc) + '%', tn, _pedFmtMoeda(tv), _pedFmtMoeda(tp ? tv / tp : 0) ] });
+}
+
+// 11 · Vendas por produto e categoria
+function _relCalcVendasProduto(f) {
+  var per = _relDefPeriodo(f, 'mes');
+  var pm = {}; getProdutos().forEach(function(p){ pm[p.id] = p; });
+  var cm = {}; getCatProdutos().forEach(function(c){ cm[c.id] = c.nome; });
+  var fp = _cpNorm(f.produto || ''), P = {}, C = {}, tot = 0, tkg = 0;
+  _relBaseFaturas(Object.assign({}, f, { dataDe: per.de, dataAte: per.ate })).forEach(function(l){
+    (l.fatura.itens || []).forEach(function(i){
+      var pr = pm[i.prodId] || {}, nome = i.prodNome || pr.nome || 'Produto';
+      if (fp && _cpNorm(nome + ' ' + (i.prodCodigo || '')).indexOf(fp) === -1) return;
+      var v = (Number(i.qtd) || 0) * (Number(i.precoFat) || 0), kg = _relPesoProd(pr) * (Number(i.qtd) || 0);
+      var o = P[nome] = P[nome] || { v: 0, kg: 0 }; o.v += v; o.kg += kg;
+      var cat = cm[pr.categoria] || 'Sem categoria'; var c = C[cat] = C[cat] || { v: 0, kg: 0 }; c.v += v; c.kg += kg;
+      tot += v; tkg += kg;
+    });
+  });
+  var lp = Object.keys(P).map(function(k){ return { n:k, v:P[k].v, kg:P[k].kg }; }).sort(function(a,b){ return b.v - a.v; });
+  var lc = Object.keys(C).map(function(k){ return { n:k, v:C[k].v, kg:C[k].kg }; }).sort(function(a,b){ return b.v - a.v; });
+  var sem = C['Sem categoria'] ? C['Sem categoria'].v : 0;
+  var pc = function(v){ return tot ? (v / tot * 100).toFixed(1).replace('.', ',') + '%' : '0%'; };
+  var kg = function(v){ return v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }); };
+  var kpis = _relKpis([
+    { label:'Faturado', valor: _pedFmtMoeda(tot), cor:'#272A4A' },
+    { label:'Quilos', valor: kg(tkg) },
+    { label:'Produtos vendidos', valor: lp.length },
+    { label:'Sem categoria no cadastro', valor: pc(sem), cor: sem ? '#c2410c' : '#15803d' }
+  ]);
+  var t1 = _relTabela([ { label:'Categoria' }, { label:'Kg', width:'100px', right:true }, { label:'Faturado', width:'140px', right:true }, { label:'% do total', width:'90px', right:true } ], lc.map(function(x){ return [ _pedEsc(x.n), kg(x.kg), _pedFmtMoeda(x.v), pc(x.v) ]; }));
+  var t2 = _relTabela([ { label:'Produto' }, { label:'Kg', width:'100px', right:true }, { label:'Faturado', width:'140px', right:true }, { label:'% do total', width:'90px', right:true } ], lp.map(function(x){ return [ _pedEsc(x.n), kg(x.kg), _pedFmtMoeda(x.v), pc(x.v) ]; }), { totais: [ 'TOTAL', kg(tkg), _pedFmtMoeda(tot), '100%' ] });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Período: ' + _relFmtDataBR(per.de) + ' a ' + _relFmtDataBR(per.ate) + ' (padrão: mês atual). Valor = quantidade faturada × preço faturado. "Sem categoria" = produto sem categoria no cadastro (veja o relatório Cadastros incompletos).</div>' + kpis + '<div style="font-weight:700;color:#272A4A;font-size:12px;margin:6px 0">Por categoria</div>' + t1 + '<div style="font-weight:700;color:#272A4A;font-size:12px;margin:12px 0 6px">Por produto</div>' + t2;
+}
+
+// 12 · Comparativo mês a mês e ano contra ano
+function _relCalcComparativoAnual(f) {
+  var hoje = _relHojeISO(), ref = f.dataAte || hoje, ano = Number(ref.slice(0,4)), mesRef = Number(ref.slice(5,7));
+  var T = {};
+  _relBaseFaturas(Object.assign({}, f, { dataDe: '', dataAte: '' })).forEach(function(l){ var m = (l.fatura.data || '').slice(0,7); T[m] = (T[m] || 0) + (Number(l.fatura.valor) || 0); });
+  var mk = function(a, m){ return a + '-' + String(m).padStart(2,'0'); };
+  var N = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var rows = [], ta = 0, tb = 0, melhor = '', mv = 0, ant = null;
+  var vr = function(a, b){ return b ? (a - b) / b * 100 : null; };
+  var fv = function(v){ return v == null ? '—' : '<b style="color:' + (v >= 0 ? '#15803d' : '#dc2626') + '">' + (v >= 0 ? '+' : '') + v.toFixed(1).replace('.', ',') + '%</b>'; };
+  for (var m = 1; m <= mesRef; m++) {
+    var a = T[mk(ano, m)] || 0, b = T[mk(ano - 1, m)] || 0, parcial = (m === mesRef && ref.slice(0,7) === hoje.slice(0,7));
+    ta += a; tb += b; if (a > mv) { mv = a; melhor = N[m-1] + '/' + String(ano).slice(2); }
+    rows.push([ N[m-1] + (parcial ? ' (parcial)' : ''), _pedFmtMoeda(a), _pedFmtMoeda(b), fv(vr(a, b)), ant == null ? '—' : fv(vr(a, ant)) ]);
+    ant = a;
+  }
+  var kpis = _relKpis([
+    { label:'Acumulado ' + ano, valor: _pedFmtMoeda(ta), cor:'#272A4A' },
+    { label:'Acumulado ' + (ano - 1) + ' (mesmos meses)', valor: _pedFmtMoeda(tb) },
+    { label:'Variação', valor: vr(ta, tb) == null ? '—' : (vr(ta, tb) >= 0 ? '+' : '') + vr(ta, tb).toFixed(1).replace('.', ',') + '%', cor: (vr(ta, tb) || 0) >= 0 ? '#15803d' : '#dc2626' },
+    { label:'Melhor mês', valor: melhor || '—' }
+  ]);
+  var cols = [ { label:'Mês' }, { label:String(ano), width:'140px', right:true }, { label:String(ano - 1), width:'140px', right:true }, { label:'Variação anual', width:'110px', right:true }, { label:'vs. mês anterior', width:'120px', right:true } ];
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Faturado por data da NF. Ano de referência = ano da data final do filtro (padrão: ano atual, até o mês atual). O mês corrente é parcial, então a variação dele está subestimada.</div>' + kpis + _relTabela(cols, rows, { totais: [ 'TOTAL', _pedFmtMoeda(ta), _pedFmtMoeda(tb), fv(vr(ta, tb)), '' ] });
+}
+
+// 25 · Sazonalidade
+function _relCalcSazonalidade(f) {
+  var hoje = _relHojeISO(), mAt = hoje.slice(0,7), N = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var T = {}, PR = {}, pm = {}; getProdutos().forEach(function(p){ pm[p.id] = p; });
+  var fc = f.categoria;
+  _relBaseFaturas(Object.assign({}, f, { dataDe: '', dataAte: '', categoria: '' })).forEach(function(l){
+    var m = (l.fatura.data || '').slice(0,7); if (!m || m >= mAt) return;
+    var mes = Number(m.slice(5,7)), ano = m.slice(0,4);
+    (l.fatura.itens || []).forEach(function(i){
+      var pr = pm[i.prodId] || {};
+      if (fc && String(l.cliente.categoria || '') !== String(fc)) return;
+      var v = (Number(i.qtd) || 0) * (Number(i.precoFat) || 0);
+      var o = T[mes] = T[mes] || {}; o[ano] = (o[ano] || 0) + v;
+      var p = PR[mes] = PR[mes] || {}; var n = i.prodNome || pr.nome || 'Produto'; p[n] = (p[n] || 0) + v;
+    });
+  });
+  var anos = {}; Object.keys(T).forEach(function(m){ Object.keys(T[m]).forEach(function(a){ anos[a] = 1; }); });
+  var AN = Object.keys(anos).sort();
+  var med = {}; var soma = 0, cnt = 0;
+  for (var m = 1; m <= 12; m++) { var vs = AN.map(function(a){ return (T[m] || {})[a]; }).filter(function(x){ return x; }); med[m] = vs.length ? vs.reduce(function(s,x){ return s + x; }, 0) / vs.length : 0; if (vs.length) { soma += med[m]; cnt++; } }
+  var media = cnt ? soma / cnt : 0, maxIdx = 0, minIdx = 9999, pico = '', fraco = '';
+  var rows = [];
+  for (var k = 1; k <= 12; k++) {
+    var idx = media ? med[k] / media * 100 : 0;
+    if (med[k] && idx > maxIdx) { maxIdx = idx; pico = N[k-1]; }
+    if (med[k] && idx < minIdx) { minIdx = idx; fraco = N[k-1]; }
+    var tp = PR[k] ? Object.keys(PR[k]).sort(function(a,b){ return PR[k][b] - PR[k][a]; }).slice(0, 2).join('; ') : '';
+    rows.push([ N[k-1] ].concat(AN.map(function(a){ var v = (T[k] || {})[a]; return v ? _pedFmtMoeda(v) : '—'; })).concat([ med[k] ? _pedFmtMoeda(med[k]) : '—', med[k] ? '<b style="color:' + (idx >= 115 ? '#15803d' : (idx <= 85 ? '#dc2626' : '#1e293b')) + '">' + Math.round(idx) + '</b>' : '—', med[k] ? '<div style="height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden"><div style="height:100%;width:' + Math.min(100, idx / 1.6) + '%;background:#272A4A"></div></div>' : '', _pedEsc(tp) ]));
+  }
+  var cols = [ { label:'Mês', width:'60px' } ].concat(AN.map(function(a){ return { label:a, width:'120px', right:true }; })).concat([ { label:'Média', width:'120px', right:true }, { label:'Índice', width:'60px', right:true }, { label:'', width:'110px' }, { label:'Produtos de pico' } ]);
+  var kpis = _relKpis([
+    { label:'Anos analisados', valor: AN.join(', ') || '—' },
+    { label:'Mês mais forte', valor: pico || '—', cor:'#15803d' },
+    { label:'Mês mais fraco', valor: fraco || '—', cor:'#dc2626' },
+    { label:'Meses completos', valor: cnt }
+  ]);
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Índice = média do mês ÷ média geral × 100 (100 = mês típico). Só meses completos entram (o mês atual fica de fora). Com poucos anos de histórico o índice mistura sazonalidade e tendência. Produtos de pico = os 2 de maior faturamento no mês, somando os anos.</div>' + kpis + _relTabela(cols, rows);
+}
+
+
+// ── v164: Relatório 14 · Planejamento Reino negociado x realizado ──
+var _relReinoDet = {};
+function _relCalcReinoNegociado(f) {
+  var hoje = _relHojeISO(), ano = Number((f.dataAte || f.dataDe || hoje).slice(0,4));
+  var cats = {}; getCatClientes().forEach(function(c){ cats[String(c.id)] = c.nome; });
+  var forn = {}; getFornecedores().forEach(function(x){ forn[x.id] = x.nome_fantasia || x.razao_social || ''; });
+  var cm = {}; getClientes().forEach(function(c){ cm[String(c.id)] = c; });
+  var lojasAno = getPlanejamentoReinoLojas().filter(function(x){ return x.ano === ano; });
+  var regs = getPlanejamentoReinoRedes().filter(function(r){
+    if (r.ano !== ano) return false;
+    if (f.fornecedor && _cpNorm(forn[r.fornecedorId] || '').indexOf(_cpNorm(f.fornecedor)) === -1) return false;
+    if (f.categoria && String(r.categoriaId) !== String(f.categoria)) return false;
+    if (f.subcategoria && String(r.subcategoriaId) !== String(f.subcategoria)) return false;
+    return true;
+  });
+  var atual = ano === Number(hoje.slice(0,4));
+  var ini = new Date(ano, 0, 1), dias = atual ? Math.floor((new Date(hoje + 'T12:00:00') - ini) / 864e5) + 1 : 0;
+  var totDias = ((ano % 4 === 0 && ano % 100 !== 0) || ano % 400 === 0) ? 366 : 365;
+  _relReinoDet = {};
+  var lista = regs.map(function(r){
+    var cl = _prObterClientesLoja(r.fornecedorId, r.categoriaId, r.subcategoriaId, ano), kg = 0, rs = 0, at = 0, det = [];
+    cl.forEach(function(c){
+      var lj = lojasAno.find(function(x){ return String(x.clienteId) === String(c.id); });
+      var k = _prCalcLoja(lj, r.precoFechado);
+      kg += k.fatTotal; rs += k.valorTotal; if (k.fatTotal > 0) at++;
+      det.push({ nome: (cm[String(c.id)] || c).nome_fantasia || c.nome_fantasia || '', plan: lj ? (Number(lj.planejado) || 0) : 0, kg: k.fatTotal, rs: k.valorTotal });
+    });
+    var neg = Number(r.volFechado) || 0, preco = Number(r.precoFechado) || 0;
+    var proj = atual ? kg / dias * totDias : kg;
+    _relReinoDet[r.id] = det;
+    return { id: r.id, rede: cats[String(r.subcategoriaId)] || cats[String(r.categoriaId)] || '—', redeMae: cats[String(r.categoriaId)] || '', forn: forn[r.fornecedorId] || '', lojas: cl.length, at: at, neg: neg, kg: kg, rs: rs, negRs: neg * preco, proj: proj };
+  }).sort(function(a,b){ return b.neg - a.neg; });
+  var T = lista.reduce(function(s,x){ s.neg += x.neg; s.kg += x.kg; s.rs += x.rs; s.negRs += x.negRs; s.proj += x.proj; s.l += x.lojas; s.a += x.at; return s; }, { neg:0, kg:0, rs:0, negRs:0, proj:0, l:0, a:0 });
+  var pc = function(a, b){ return b ? Math.round(a / b * 100) : 0; };
+  var cor = function(p){ return p >= 90 ? '#15803d' : (p >= 60 ? '#c2410c' : '#dc2626'); };
+  var nk = function(v){ return Math.round(v).toLocaleString('pt-BR'); };
+  var kpis = _relKpis([
+    { label:'Negociado (kg)', valor: nk(T.neg) },
+    { label:'Realizado (kg)', valor: nk(T.kg), cor:'#272A4A' },
+    { label:'% de cumprimento', valor: pc(T.kg, T.neg) + '%', cor: cor(pc(T.kg, T.neg)) },
+    { label: atual ? 'Projeção até 31/12' : 'Fechamento do ano', valor: nk(T.proj) + ' kg (' + pc(T.proj, T.neg) + '%)' }
+  ]);
+  var cols = [ { label:'Rede' }, { label:'Fábrica', width:'100px' }, { label:'Lojas (com compra)', width:'120px', right:true }, { label:'Negociado kg', width:'100px', right:true }, { label:'Realizado kg', width:'100px', right:true }, { label:'% cumprido', width:'90px', right:true }, { label:'Saldo kg', width:'90px', right:true }, { label:'Projeção kg', width:'100px', right:true }, { label:'% projetado', width:'90px', right:true }, { label:'Progresso', width:'130px' } ];
+  var rows = lista.map(function(x){
+    var p = pc(x.kg, x.neg), pp = pc(x.proj, x.neg);
+    var bar = '<div style="height:12px;background:#e2e8f0;border-radius:6px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;height:100%;width:' + Math.min(100, pp) + '%;background:#f0a560"></div><div style="position:absolute;left:0;top:0;height:100%;width:' + Math.min(100, p) + '%;background:#272A4A"></div></div>';
+    return [ '<a href="javascript:void(0)" onclick="_relReinoAbrir(\'' + x.id + '\',\'' + _pedEsc(x.rede).replace(/'/g, "\\'") + '\')" style="color:#1d4ed8;font-weight:700;text-decoration:none">' + _pedEsc(x.rede) + '</a>', _pedEsc(_cpSemColchetes(x.forn)), x.lojas + ' (' + x.at + ')', nk(x.neg), nk(x.kg), '<b style="color:' + cor(p) + '">' + p + '%</b>', nk(Math.max(0, x.neg - x.kg)), nk(x.proj), '<b style="color:' + cor(pp) + '">' + pp + '%</b>', bar ];
+  });
+  var fim = _relTabela(cols, rows, { totais: [ 'TOTAL', '', T.l + ' (' + T.a + ')', nk(T.neg), nk(T.kg), pc(T.kg, T.neg) + '%', nk(Math.max(0, T.neg - T.kg)), nk(T.proj), pc(T.proj, T.neg) + '%', '' ] });
+  var rs = _relTabela([ { label:'Em R$ (preço fechado × kg)' }, { label:'Negociado', width:'140px', right:true }, { label:'Realizado', width:'140px', right:true }, { label:'Saldo', width:'140px', right:true } ], [ [ 'Total Reino ' + ano, _pedFmtMoeda(T.negRs), _pedFmtMoeda(T.rs), _pedFmtMoeda(Math.max(0, T.negRs - T.rs)) ] ]);
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Ano ' + ano + ' (informe a data final nos filtros para outro ano). Negociado = volume fechado no Planejamento Reino; realizado = pedidos lançados nas lojas da rede. ' + (atual ? 'Projeção = realizado ÷ dias decorridos do ano (' + dias + ') × ' + totDias + '. ' : '') + 'Clique na rede para ver as lojas.</div>' + kpis + fim + '<div style="height:10px"></div>' + rs + '<div id="rel-reino-det" style="margin-top:12px"></div>';
+}
+function _relReinoAbrir(id, nome) {
+  var det = (_relReinoDet[id] || []).slice().sort(function(a,b){ return b.kg - a.kg; });
+  var nk = function(v){ return Math.round(v).toLocaleString('pt-BR'); };
+  var rows = det.map(function(x){ return [ _pedEsc(_cpSemColchetes(x.nome)), nk(x.plan), nk(x.kg), _pedFmtMoeda(x.rs) ]; });
+  var el = document.getElementById('rel-reino-det');
+  if (el) { el.innerHTML = '<div style="font-size:12px;font-weight:700;color:#272A4A;margin-bottom:6px">Lojas · ' + nome + '</div>' + _relTabela([ { label:'Loja' }, { label:'Planejado kg', width:'110px', right:true }, { label:'Faturado kg', width:'110px', right:true }, { label:'Faturado R$', width:'130px', right:true } ], rows); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
 }
 
 // ═══════════════════════════════════════════════════
