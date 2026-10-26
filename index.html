@@ -4785,7 +4785,7 @@
           </div>
           <div id="negpreco-alvo-categoria-wrap" style="display:none">
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Rede</label>
-            <select class="form-input" id="negpreco-rede-id" onchange="_negAtualizarSubcategorias()" style="width:100%"><option value="">-- Selecione --</option></select>
+            <select class="form-input" id="negpreco-rede-id" onchange="_negAtualizarSubcategorias()" style="width:100%"><option value="">-- Não alterar a transportadora --</option></select>
           </div>
           <div id="negpreco-alvo-subcategoria-wrap" style="display:none">
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Sub Rede</label>
@@ -23419,7 +23419,7 @@ function abrirModalImportEntrega() {
   var sel = document.getElementById('entimp-transp');
   if (sel) {
     var transportadoras = getTransportadoras();
-    sel.innerHTML = '<option value="">-- Selecione --</option>' + transportadoras.map(function(t){
+    sel.innerHTML = '<option value="">-- Não alterar a transportadora --</option>' + transportadoras.map(function(t){
       return '<option value="' + t.id + '">' + _pedEsc(_cpSemColchetes(t.nome_fantasia || t.razao_social || '')) + '</option>';
     }).join('');
   }
@@ -23441,7 +23441,7 @@ function fecharModalImportEntrega() {
 function _entimpAbrirSeletorArquivo() {
   var transpId = document.getElementById('entimp-transp').value;
   var msg1 = document.getElementById('entimp-msg1');
-  if (!transpId) { if (msg1) msg1.textContent = 'Selecione a transportadora antes de anexar a planilha.'; return; }
+  // v172: transportadora opcional (vazio = nao altera a transportadora ja lancada nas NFs)
   if (msg1) msg1.textContent = '';
   document.getElementById('entimp-file-input').click();
 }
@@ -23534,25 +23534,30 @@ function _entimpAplicar() {
   var colData = parseInt(document.getElementById('entimp-col-data').value, 10);
   if (isNaN(colNf) || isNaN(colData)) { alert('Selecione as duas colunas antes de aplicar.'); return; }
 
-  var pedidos = getPedidos();
+  // v172: trabalha em copia, para o sistema detectar o que mudou e gravar so esses pedidos
+  var pedidos = JSON.parse(JSON.stringify(getPedidos()));
   var atualizadas = 0;
   var naoEncontradas = [];
   var linhas = _entimpAoa.slice(1);
+  // v172: se a planilha tem coluna Fornecedor, so casa a NF com pedidos dessa fabrica
+  var colForn = -1;
+  (_entimpAoa[0] || []).forEach(function(h, ix){ if (colForn < 0 && _cpNorm(String(h == null ? '' : h)).indexOf('fornecedor') === 0) colForn = ix; });
 
   linhas.forEach(function(row){
     var nfRaw = row[colNf];
+    var fornPlan = colForn >= 0 ? _cpNorm(String(row[colForn] == null ? '' : row[colForn])) : '';
     var nf = _cpNorm(String(nfRaw == null ? '' : nfRaw));
     if (!nf) return;
     var dataIso = _entimpParseData(row[colData]);
     var achouAlguma = false;
     pedidos.forEach(function(p){
+      if (fornPlan && _cpNorm(p.fornecedorNome || '').indexOf(fornPlan) !== 0 && fornPlan.indexOf(_cpNorm(p.fornecedorNome || '')) !== 0) return;
       (p.faturas || []).forEach(function(f){
         if (f.status === 'Cancelado') return;
         if (_cpNorm(f.numDuplicata || '') !== nf) return;
         achouAlguma = true;
         if (dataIso) f.dataEntrega = dataIso;
-        f.transportadoraId = transpId;
-        f.transportadoraNome = transpNome;
+        if (transpId) { f.transportadoraId = transpId; f.transportadoraNome = transpNome; }
       });
     });
     if (achouAlguma) atualizadas++;
