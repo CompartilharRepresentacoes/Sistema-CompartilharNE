@@ -8504,7 +8504,7 @@
         <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:20px;color:#272A4A;flex-shrink:0"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg>
         <span>
           <span style="display:block;font-size:12.5px;font-weight:700;color:#1e293b">Importar Pedido</span>
-          <span style="display:block;font-size:10.5px;color:#64748b;margin-top:2px">Planilha/PDF do pedido de compra (fluxo atual)</span>
+          <span style="display:block;font-size:10.5px;color:#64748b;margin-top:2px">Planilha, PDF ou print/texto do WhatsApp</span>
         </span>
       </button>
       <button onclick="_pinfEscolherImportarXmlNf()" style="display:flex;align-items:center;gap:12px;text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:14px 16px;cursor:pointer">
@@ -8512,13 +8512,6 @@
         <span>
           <span style="display:block;font-size:12.5px;font-weight:700;color:#1e293b">XML / NF</span>
           <span style="display:block;font-size:10.5px;color:#64748b;margin-top:2px">Confere as NFs recebidas contra os pedidos e anexa em lote</span>
-        </span>
-      </button>
-      <button onclick="pwaAbrir()" style="display:flex;align-items:center;gap:12px;text-align:left;background:#fff8f0;border:2px solid #DE7926;border-radius:9px;padding:14px 16px;cursor:pointer">
-        <span style="font-size:20px;flex-shrink:0">&#128172;</span>
-        <span>
-          <span style="display:block;font-size:12.5px;font-weight:700;color:#1e293b">Pedido do WhatsApp <span style="background:#DE7926;color:#fff;border-radius:999px;font-size:9px;padding:2px 7px;margin-left:4px;font-weight:700">NOVO</span></span>
-          <span style="display:block;font-size:10.5px;color:#64748b;margin-top:2px">Cole o print (Ctrl+V) ou o texto da mensagem &mdash; sem salvar arquivo</span>
         </span>
       </button>
     </div>
@@ -8530,24 +8523,40 @@
   <div style="background:#fff;border-radius:12px;width:100%;max-width:860px;max-height:90vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
     <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0">
       <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:700;color:#fff">Pedido do WhatsApp</div>
-        <div id="pwa-sub" style="font-size:10.5px;color:rgba(255,255,255,.6)">Cole o print ou o texto da mensagem</div>
+        <div style="font-size:14px;font-weight:700;color:#fff">Importar Pedido</div>
+        <div id="pwa-sub" style="font-size:10.5px;color:rgba(255,255,255,.6)">Planilha, PDF ou print/texto do WhatsApp</div>
       </div>
       <button onclick="_pwaFechar()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
     </div>
     <div id="pwa-p1" style="padding:16px 20px;overflow-y:auto">
       <div id="pwa-drop" tabindex="0" style="border:2px dashed #94a3b8;border-radius:12px;background:#f8fafc;padding:22px;text-align:center;color:#64748b;outline:none">
-        <div style="font-size:26px">&#128203;</div>
-        <div style="font-size:14px;font-weight:700;color:#272A4A">Aperte Ctrl+V aqui para colar o print</div>
-        <div style="font-size:11px;margin-top:3px">ou arraste a imagem &middot; ou <a href="#" onclick="document.getElementById('pwa-file').click();return false" style="color:#DE7926;font-weight:700">escolha um arquivo</a> &middot; ou cole o texto copiado na caixa abaixo</div>
+        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:26px;color:#272A4A"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg>
+        <div style="font-size:14px;font-weight:700;color:#272A4A">Arraste o arquivo ou <a href="#" onclick="document.getElementById('pwa-file').click();return false" style="color:#DE7926;font-weight:700">clique para escolher</a></div>
+        <div style="font-size:11px;margin-top:3px;color:#1e293b">ou aperte Ctrl+V aqui para colar o print / texto do WhatsApp</div>
+        <div style="font-size:10.5px;margin-top:6px;color:#272A4A">Aceita: Planilha (XLS/XLSX) &middot; PDF &middot; Imagem &middot; Texto</div>
         <div id="pwa-ocr" style="display:none;margin-top:10px;font-size:12px;color:#b45309;font-weight:600"></div>
       </div>
-      <input type="file" id="pwa-file" accept="image/*" style="display:none" onchange="_pwaArquivo(this.files[0]);this.value=''">
+      <input type="file" id="pwa-file" accept=".xlsx,.xls,.pdf,image/*,.jpg,.jpeg,.png" style="display:none" onchange="_pwaArquivoGeral(this.files[0]);this.value=''">
       <textarea id="pwa-texto" placeholder="Texto do pedido (ex.: PEDIDO CF ROSA E SILVA - 05.359.030/0020-75 ... 100KG QUEIJO PROVOLONE YEMA R$ 55,00kg). Se colar um print, o texto lido aparece aqui e pode ser corrigido." style="width:100%;height:110px;margin-top:10px;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font:12.5px system-ui;box-sizing:border-box"></textarea>
+      <div id="pwa-semcnpj" style="display:none;margin-top:12px;border:1px solid #DE7926;background:#fff8f0;border-radius:9px;padding:12px 14px">
+        <div style="font-size:12.5px;font-weight:700;color:#1e293b">Pedido sem CNPJ &mdash; informe o Cliente e o Fornecedor</div>
+        <div style="font-size:10.5px;color:#475569;margin-top:2px">Sem o CNPJ não dá para identificar o cliente nem a fábrica com segurança.</div>
+        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+          <div style="flex:2;min-width:220px;position:relative">
+            <div style="font-size:10px;font-weight:700;color:#272A4A;margin-bottom:3px">CLIENTE</div>
+            <input id="pwa-pre-cli" autocomplete="off" oninput="_pwaPreCliBuscar()" onblur="setTimeout(function(){document.getElementById('pwa-pre-cd').style.display='none'},150)" placeholder="Nome, código ou CNPJ (mín. 3 letras)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:7px;padding:8px;font-size:12px;color:#1e293b">
+            <div id="pwa-pre-cd" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e2e8f0;border-radius:7px;max-height:200px;overflow-y:auto;z-index:5;box-shadow:0 6px 16px rgba(0,0,0,.12)"></div>
+          </div>
+          <div style="flex:1;min-width:160px">
+            <div style="font-size:10px;font-weight:700;color:#272A4A;margin-bottom:3px">FORNECEDOR</div>
+            <select id="pwa-pre-forn" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:7px;padding:8px;font-size:12px;color:#1e293b"></select>
+          </div>
+        </div>
+      </div>
       <div id="pwa-erro1" style="display:none;font-size:11.5px;color:#D82621;margin-top:8px"></div>
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px">
         <button onclick="_pwaFechar()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer">Cancelar</button>
-        <button onclick="_pwaLer()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">Ler pedido &rarr;</button>
+        <button id="pwa-btn-ler" onclick="_pwaLer()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer">Ler pedido &rarr;</button>
       </div>
     </div>
     <div id="pwa-p2" style="display:none;flex-direction:column;min-height:0;flex:1">
@@ -21672,7 +21681,7 @@ function _pinfFecharEscolha() {
 }
 function _pinfEscolherImportarPedido() {
   _pinfFecharEscolha();
-  document.getElementById('ped-import-file').click();
+  pwaAbrir(); // tela unica: planilha/PDF (fluxo de sempre) + print/texto do WhatsApp
 }
 function _pinfEscolherImportarXmlNf() {
   _pinfFecharEscolha();
@@ -36553,7 +36562,8 @@ function pwaAbrir() {
   document.getElementById('pwa-ocr').style.display = 'none';
   document.getElementById('pwa-p1').style.display = 'block';
   document.getElementById('pwa-p2').style.display = 'none';
-  document.getElementById('pwa-sub').textContent = 'Cole o print ou o texto da mensagem';
+  document.getElementById('pwa-sub').textContent = 'Planilha, PDF ou print/texto do WhatsApp';
+  _pwaPreReset();
   document.getElementById('modal-pwa').style.display = 'flex';
   setTimeout(function () { var d = document.getElementById('pwa-drop'); if (d) d.focus(); }, 50);
 }
@@ -36561,7 +36571,7 @@ function _pwaFechar() { document.getElementById('modal-pwa').style.display = 'no
 function _pwaVoltar() {
   document.getElementById('pwa-p2').style.display = 'none';
   document.getElementById('pwa-p1').style.display = 'block';
-  document.getElementById('pwa-sub').textContent = 'Cole o print ou o texto da mensagem';
+  document.getElementById('pwa-sub').textContent = 'Planilha, PDF ou print/texto do WhatsApp';
 }
 
 // Ctrl+V (print ou texto) e arrastar/soltar
@@ -36589,9 +36599,24 @@ document.addEventListener('drop', function (e) {
   if (!m || m.style.display !== 'flex') return;
   e.preventDefault();
   var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-  if (f && f.type.indexOf('image') === 0) _pwaArquivo(f);
+  if (f) _pwaArquivoGeral(f);
 });
 
+// Roteador da tela unica "Importar Pedido": imagem vai para a leitura do print (WhatsApp);
+// PDF/planilha seguem o fluxo de sempre (importarPedidosArquivo), sem alteracao.
+function _pwaArquivoGeral(file) {
+  if (!file) return;
+  var nome = (file.name || '').toLowerCase();
+  if ((file.type && file.type.indexOf('image') === 0) || /\.(jpg|jpeg|png)$/i.test(nome)) { _pwaArquivo(file); return; }
+  if (/\.(pdf|xlsx|xls)$/i.test(nome) || file.type === 'application/pdf') {
+    _pwaFechar();
+    importarPedidosArquivo({ files: [file], value: '' });
+    return;
+  }
+  var er = document.getElementById('pwa-erro1');
+  er.textContent = 'Tipo de arquivo não reconhecido. Use planilha (XLS/XLSX), PDF, imagem ou cole o texto.';
+  er.style.display = 'block';
+}
 function _pwaArquivo(file) {
   if (!file) return;
   var st = document.getElementById('pwa-ocr');
@@ -36721,17 +36746,29 @@ function _pwaLer() {
     erro.textContent = 'Não encontrei nenhum item (quantidade + produto) no texto. Confira se há linhas como "100KG QUEIJO ... R$ 55,00".';
     erro.style.display = 'block'; return;
   }
+  // Sem CNPJ no texto/print: Cliente e Fornecedor precisam ser informados antes da conferencia
+  var semCnpj = peds.filter(function (pd) { return !pd.cnpj; });
+  if (semCnpj.length) {
+    var bloco = document.getElementById('pwa-semcnpj');
+    if (bloco.style.display !== 'block') { _pwaPreMostrar(semCnpj[0]); return; }
+    var fSel = document.getElementById('pwa-pre-forn').value;
+    if (!_pwaPreCli || !fSel) {
+      erro.textContent = 'Informe o Cliente e o Fornecedor para continuar.';
+      erro.style.display = 'block'; return;
+    }
+    semCnpj.forEach(function (pd) { pd.cliInformado = _pwaPreCli; pd.fornHint = fSel; pd.soForn = true; });
+  }
   var prods = getProdutos().filter(function (p) { return (p.ativo || 'Sim') !== 'Não'; });
   var fornTok = {};
   getFornecedores().forEach(function (f) { var o = {}; _pifTokenizar((f.nome_fantasia || '') + ' ' + (f.razao_social || '')).forEach(function (w) { o[w] = 1; }); fornTok[f.id] = o; });
   _pwaCards = [];
   peds.forEach(function (pd) {
-    var ach = _pwaAcharCliente(pd);
+    var ach = pd.cliInformado ? { c: pd.cliInformado, via: 'informado' } : _pwaAcharCliente(pd);
     var itens = pd.itens.map(function (it) {
       var pool = pd.fornHint ? prods.filter(function (p) { return p.fornecedor === pd.fornHint; }) : null;
-      var pr = (pool && _pwaCasarGlobal(it.desc, pool, fornTok)) || _pwaCasarGlobal(it.desc, prods, fornTok), sug = false;
+      var pr = (pool && _pwaCasarGlobal(it.desc, pool, fornTok)) || (pd.soForn ? null : _pwaCasarGlobal(it.desc, prods, fornTok)), sug = false;
       if (!pr) {
-        [pool, prods].some(function (pl) {
+        (pd.soForn ? [pool] : [pool, prods]).some(function (pl) {
           if (!pl) return false;
           var c = _pwaSugerir(it.desc, pl, fornTok);
           if (c.length && c[0].score >= 0.5 && c[0].com >= Math.min(2, c[0].sigN)) { pr = c[0].p; sug = true; return true; }
@@ -36754,6 +36791,50 @@ function _pwaLer() {
   document.getElementById('pwa-p2').style.display = 'flex';
   document.getElementById('pwa-sub').textContent = 'Confira antes de criar — nada é salvo até clicar em "Criar pedidos"';
   _pwaRender();
+}
+
+// -- Cliente + Fornecedor informados quando o pedido nao traz CNPJ --
+var _pwaPreCli = null, _pwaPreRes = [];
+function _pwaPreReset() {
+  _pwaPreCli = null; _pwaPreRes = [];
+  var b = document.getElementById('pwa-semcnpj'); if (b) b.style.display = 'none';
+  var c = document.getElementById('pwa-pre-cli'); if (c) c.value = '';
+  var bt = document.getElementById('pwa-btn-ler'); if (bt) bt.innerHTML = 'Ler pedido &rarr;';
+}
+function _pwaPreMostrar(pd) {
+  var forns = getFornecedores().slice().sort(function (a, b) { return String(a.nome_fantasia || a.razao_social || '').localeCompare(String(b.nome_fantasia || b.razao_social || ''), 'pt-BR'); });
+  var sel = document.getElementById('pwa-pre-forn');
+  sel.innerHTML = '<option value="">— selecione —</option>' + forns.map(function (f) { return '<option value="' + f.id + '">' + _pedEsc(f.nome_fantasia || f.razao_social || '') + '</option>'; }).join('');
+  sel.value = pd.fornHint || '';
+  var ach = _pwaAcharCliente(pd);
+  _pwaPreCli = ach ? ach.c : null;
+  document.getElementById('pwa-pre-cli').value = _pwaPreCli ? (_pwaPreCli.nome_fantasia || _pwaPreCli.razao_social || '') : '';
+  document.getElementById('pwa-semcnpj').style.display = 'block';
+  document.getElementById('pwa-btn-ler').innerHTML = 'Continuar &rarr;';
+  setTimeout(function () { var i = document.getElementById(_pwaPreCli ? 'pwa-pre-forn' : 'pwa-pre-cli'); if (i) i.focus(); }, 50);
+}
+function _pwaPreCliBuscar() {
+  _pwaPreCli = null;
+  var q = (document.getElementById('pwa-pre-cli').value || '').trim();
+  var drop = document.getElementById('pwa-pre-cd');
+  if (q.length < 3) { drop.style.display = 'none'; return; }
+  var n = _cpNorm(q), qd = q.replace(/\D/g, '');
+  _pwaPreRes = getClientesVisiveis().filter(function (c) {
+    var d = _pwaDig(c.cpf_cnpj);
+    return _cpNorm((c.nome_fantasia || '') + ' ' + (c.razao_social || '')).indexOf(n) !== -1 || _cpNorm(c.codigo || '').indexOf(n) !== -1 || (qd.length > 2 && d.indexOf(qd) !== -1);
+  }).slice(0, 15);
+  if (!_pwaPreRes.length) { drop.style.display = 'none'; return; }
+  drop.onmousedown = function (e) { e.preventDefault(); };
+  drop.innerHTML = _pwaPreRes.map(function (c, i) {
+    return '<div onclick="_pwaPreCliSel(' + i + ')" style="padding:8px 12px;cursor:pointer;font-size:12px;color:#1e293b;border-bottom:1px solid #f1f5f9">' + (c.codigo ? '<b style="color:#272A4A;margin-right:8px">' + _pedEsc(c.codigo) + '</b>' : '') + _pedEsc(c.nome_fantasia || c.razao_social || '') + '<span style="color:#475569;font-size:10.5px;margin-left:6px">' + _pedEsc(c.cpf_cnpj || '') + '</span></div>';
+  }).join('');
+  drop.style.display = 'block';
+}
+function _pwaPreCliSel(i) {
+  _pwaPreCli = _pwaPreRes[i];
+  document.getElementById('pwa-pre-cli').value = _pwaPreCli.nome_fantasia || _pwaPreCli.razao_social || '';
+  document.getElementById('pwa-pre-cd').style.display = 'none';
+  document.getElementById('pwa-erro1').style.display = 'none';
 }
 
 // quantidade final + preco de tabela de um item
