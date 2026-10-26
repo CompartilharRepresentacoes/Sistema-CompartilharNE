@@ -9741,6 +9741,7 @@ setTimeout(function () { // segurança: se nada decidiu em 12s, mostra o login
   if (sp && sp.style.display !== 'none') { _splashOcultar(); var m = document.getElementById('mainApp'); if (m && m.style.display !== 'block') { var l = document.getElementById('loginScreen'); if (l) l.style.display = 'flex'; } }
 }, 12000);
 var _navPopping = false, _navUltima = null, _navRestaurado = false;
+var _navHashInicial = (location.hash || '').replace(/^#\/?/, '');
 function _navRegistrar(pageId) {
   try {
     if (/-form$/.test(pageId)) return;
@@ -9753,7 +9754,8 @@ function _navRegistrar(pageId) {
 window.addEventListener('popstate', function (ev) {
   var m = document.getElementById('mainApp');
   if (!m || m.style.display === 'none') return;
-  var pg = (ev.state && ev.state.pg) || 'page-home';
+  var pg = (ev.state && ev.state.pg) || '';
+  if (!pg) { var _h = (location.hash || '').replace(/^#\/?/, ''); pg = (_h && PAGE_META[_h] && !/-form$/.test(_h) && _appPaginaPermitida(_h)) ? _h : 'page-home'; }
   _navPopping = true;
   try { showPage(pg); } catch (e) {}
   _navPopping = false;
@@ -9788,7 +9790,7 @@ function entrarNoApp(user) {
   if (!_navRestaurado) {
     _navRestaurado = true;
     try {
-      var _ult = sessionStorage.getItem('ultimaPagina');
+      var _ult = (_navHashInicial && PAGE_META[_navHashInicial]) ? _navHashInicial : sessionStorage.getItem('ultimaPagina');
       if (_ult && _ult !== 'page-home' && PAGE_META[_ult] && !/-form$/.test(_ult) && _appPaginaPermitida(_ult)) {
         history.replaceState({ pg: 'page-home' }, '', '#page-home');
         _navUltima = 'page-home';
