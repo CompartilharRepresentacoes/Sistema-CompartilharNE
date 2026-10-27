@@ -28977,7 +28977,7 @@ function renderUsuarioPainel() {
 
 // ── Usuários ──
 function renderUsuarioList() {
-  var usuarios = getUsuariosSistema();
+  var usuarios = getUsuariosSistema().slice().sort(function(a,b){ return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR',{sensitivity:'base'}); });
   var tbody = document.getElementById('usu-tbody');
   var pag = document.getElementById('usu-paginacao');
   if (!tbody) return;
