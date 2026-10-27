@@ -7298,6 +7298,9 @@
                 <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#334155;cursor:pointer"><input type="checkbox" class="usu-uf-check" value="AL"> AL</label>
                 <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#334155;cursor:pointer"><input type="checkbox" class="usu-uf-check" value="SE"> SE</label>
                 <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#334155;cursor:pointer"><input type="checkbox" class="usu-uf-check" value="RN"> RN</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#334155;cursor:pointer"><input type="checkbox" class="usu-uf-check" value="SP"> SP</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#334155;cursor:pointer"><input type="checkbox" class="usu-uf-check" value="CE"> CE</label>
+                <button type="button" id="usu-uf-todos" onclick="usuUfsTodos()" style="font-size:11px;font-weight:700;color:#3d4180;background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;padding:3px 10px;cursor:pointer">Selecionar todos</button>
               </div>
               <div style="font-size:10px;color:#94a3b8;margin-top:5px">Se nenhuma UF for marcada, o usuário terá acesso a todas as regiões (sem restrição).</div>
             </div>
@@ -28976,6 +28979,12 @@ function renderUsuarioPainel() {
 }
 
 // ── Usuários ──
+function usuUfsTodos() {
+  var cks = Array.prototype.slice.call(document.querySelectorAll('.usu-uf-check'));
+  var todos = cks.every(function(el){ return el.checked; });
+  cks.forEach(function(el){ el.checked = !todos; });
+  var b = document.getElementById('usu-uf-todos'); if (b) b.textContent = todos ? 'Selecionar todos' : 'Limpar seleção';
+}
 function renderUsuarioList() {
   var usuarios = getUsuariosSistema().slice().sort(function(a,b){ return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR',{sensitivity:'base'}); });
   var tbody = document.getElementById('usu-tbody');
