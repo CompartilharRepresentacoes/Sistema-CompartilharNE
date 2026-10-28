@@ -24026,7 +24026,14 @@ function _vcPedidos() {
         prodId: it.prodId, prodCodigo: it.prodCodigo, prodNome: it.prodNome,
         qtdPedida: qtdPedida, qtdFaturada: qtdFat, restante: restante,
         precoUnit: precoUnit, pesoTotal: pesoUnit * qtdPedida, valorTotal: precoUnit * qtdPedida,
-        cxTam: (Number(it.qtdCaixas) > 0 && qtdPedida > 0) ? (qtdPedida / Number(it.qtdCaixas)) : (Number(it.cx) > 0 ? Number(it.cx) : 1)
+        // tamanho da caixa: vem do cadastro do produto (Quant. Caixa); produto vendido em CX usa 1
+        cxTam: (function () {
+          var un = prod ? String(prod.unidade || '').trim().toUpperCase() : '';
+          var qc = prod ? (parseFloat(String(prod.quant == null ? '' : prod.quant).replace(',', '.')) || 0) : 0;
+          if (un === 'CX') return 1;
+          if (qc > 0) return qc;
+          return (Number(it.qtdCaixas) > 0 && qtdPedida > 0) ? (qtdPedida / Number(it.qtdCaixas)) : (Number(it.cx) > 0 ? Number(it.cx) : 1);
+        })()
       };
     });
     var pesoPedido = linhasItens.reduce(function(acc, it){ return acc + it.pesoTotal; }, 0);
