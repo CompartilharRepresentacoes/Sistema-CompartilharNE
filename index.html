@@ -17005,7 +17005,10 @@ function _dashConstruirDadosAoVivo() {
   clientesBase.forEach(function (c) { cliIdx[c.id] = CLI.length; CLI.push(c.nome_fantasia || c.razao_social || ('Cliente ' + c.id)); CLI_INATIVO.push(c.ativo === false || String(c.ativo || 'Sim').trim().toLowerCase() === 'não' || String(c.ativo).trim().toLowerCase() === 'nao'); CLI_UF.push((typeof _appUfCliente === 'function' ? _appUfCliente(c) : (c.ent_estado || c.estado)) || ''); });
   function idxCliente(id, nome) {
     if (id != null && Object.prototype.hasOwnProperty.call(cliIdx, id)) return cliIdx[id];
-    var i = CLI.length; if (id != null) cliIdx[id] = i; CLI.push(nome || 'Cliente não cadastrado'); CLI_INATIVO.push(true); CLI_UF.push(''); return i;
+    // v193: cliente fora da lista visivel do usuario (restricao de UF) mantem a UF do cadastro, para entrar na lista/filtro de UF (CE, MA, SP...)
+    if (!idxCliente._ufMap) { idxCliente._ufMap = {}; try { ((typeof getClientes === 'function') ? getClientes() : []).forEach(function (c) { idxCliente._ufMap[c.id] = (c.ent_estado || c.estado || ''); }); } catch (e) {} }
+    var _ufFora = (id != null && idxCliente._ufMap[id]) || '';
+    var i = CLI.length; if (id != null) cliIdx[id] = i; CLI.push(nome || 'Cliente não cadastrado'); CLI_INATIVO.push(true); CLI_UF.push(_ufFora); return i;
   }
 
   var STATUS = statusValidos.slice();
