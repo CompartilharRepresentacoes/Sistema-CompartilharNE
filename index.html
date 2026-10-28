@@ -9700,6 +9700,8 @@ function _ufFiltrosAtualizar() {
 // sendo a barreira real (RLS); aqui só se limpa o menu e se evita abrir telas sem acesso.
 var _appPermVer = null;   // null = ainda não carregou (não bloqueia); objeto {chave:true}
 var _appEhAdmin = false;
+// v209: Diretor e Assistente enxergam tudo (todas as telas e todas as UFs), sem depender de UF marcada ou de permissão por tela
+function _appGrupoTotal() { return !!(_appUsuarioAtual && /^\s*(diretor|assistente)/i.test(_appUsuarioAtual.grupoNome || '')); }
 var _PAGINA_CHAVE = [
   [/^page-home$/, 'inicio'], [/^page-pedido-/, 'pedidos'], [/^page-sugestao-pedido$/, 'sugestao_pedido'],
   [/^page-bloqueios-pedidos$/, 'bloqueios_pedidos'], [/^page-consulta-preco$/, 'consulta_preco'],
@@ -9715,7 +9717,7 @@ var _PAGINA_CHAVE = [
   [/^page-(usuario-|grupo-)/, 'usuarios']
 ];
 function _appPaginaPermitida(pageId) {
-  if (_appPermVer === null || _appEhAdmin) return true;
+  if (_appPermVer === null || _appEhAdmin || _appGrupoTotal()) return true;
   for (var i = 0; i < _PAGINA_CHAVE.length; i++) {
     if (_PAGINA_CHAVE[i][0].test(pageId)) return !!_appPermVer[_PAGINA_CHAVE[i][1]];
   }
@@ -9727,7 +9729,7 @@ function _appAplicarMenuPermissoes() {
   function pid(el) { var m = /showPage\('([^']+)'/.exec(el.getAttribute('onclick') || ''); return m ? m[1] : null; }
   document.querySelectorAll('.sb-flyout a, .sb-flyout .fly-col').forEach(function (el) { el.style.display = ''; });
   itens.forEach(function (it) { it.style.display = ''; });
-  if (_appPermVer === null || _appEhAdmin) return;
+  if (_appPermVer === null || _appEhAdmin || _appGrupoTotal()) return;
   document.querySelectorAll('.sb-flyout a').forEach(function (a) {
     var p = pid(a); if (p && !_appPaginaPermitida(p)) a.style.display = 'none';
   });
@@ -9796,7 +9798,7 @@ function entrarNoApp(user) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('mainApp').style.display = 'block';
   const nome = user.displayName || user.email || 'Usuário';
-  _appUsuarioAtual = { nome: nome, email: user.email || '', ufs: user.ufs || [] };
+  _appUsuarioAtual = { nome: nome, email: user.email || '', ufs: user.ufs || [], grupoNome: user.grupoNome || '' };
   _ufFiltrosAtualizar();
   const primeiroNome = nome.split(' ')[0].split('@')[0];
   const inicial = primeiroNome[0].toUpperCase();
@@ -9845,6 +9847,7 @@ function _appNomeUsuarioAtual() {
 // (compatibilidade com usuários já existentes e com administradores). Só passa a restringir
 // quando o cadastro de Usuário tiver 1+ UF selecionada.
 function _appTemRestricaoUF() {
+  if (_appGrupoTotal()) return false;  // v209
   return !!(_appUsuarioAtual && _appUsuarioAtual.ufs && _appUsuarioAtual.ufs.length);
 }
 function _appUfCliente(cliente) {
