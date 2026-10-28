@@ -1393,6 +1393,18 @@
   #modal-pif-revisao table.pif-rev tr{border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;padding:8px}
   #modal-pif-revisao table.pif-rev td{border:none;padding:4px 2px}
 }
+
+/* Vendas Completas Faturadas: NF clicavel destaca itens */
+.vcf-nf{display:inline-block;cursor:pointer;background:#eef2ff;color:#3d4180;border:1px solid #c7d2fe;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;transition:background .15s}
+.vcf-nf:hover{background:#e0e7ff}.vcf-nf.vcf-nf-on{background:#3d4180;color:#fff;border-color:#3d4180}
+tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 0 #3d4180}
+.vcf-card.vcf-dim tr.vcf-item:not(.vcf-hl){opacity:.4}
+.vcf-qn{margin-left:6px;font-size:10px;font-weight:700;background:#3d4180;color:#fff;border-radius:6px;padding:1px 6px;white-space:nowrap}
+/* Calendario nos campos de data */
+.dp-wrap{position:relative;display:inline-block}.dp-wrap.dp-block{display:block}
+.dp-btn{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:0;padding:2px;cursor:pointer;color:#64748b;line-height:0;border-radius:4px}
+.dp-btn:hover{color:#3d4180;background:#eef2ff}
+.dp-hid{position:absolute;right:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <!-- jsPDF + html2canvas (geracao de PDF do Pedido na impressao) -->
@@ -5407,7 +5419,7 @@
             <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
-          <input onkeydown="if(event.key==='Enter')renderVendasCompletas()" id="vc-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <input onkeydown="if(event.key==='Enter')renderVendasCompletas()" id="vc-cliente" placeholder="Nome, CNPJ, código ou nº do pedido..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Produto</span>
           <input onkeydown="if(event.key==='Enter')renderVendasCompletas()" id="vc-produto" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
@@ -5467,7 +5479,7 @@
             <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
-          <input onkeydown="if(event.key==='Enter')renderVendasCompletasFaturadas()" id="vcf-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <input onkeydown="if(event.key==='Enter')renderVendasCompletasFaturadas()" id="vcf-cliente" placeholder="Nome, CNPJ, código ou nº do pedido..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Produto</span>
           <input onkeydown="if(event.key==='Enter')renderVendasCompletasFaturadas()" id="vcf-produto" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
@@ -5520,7 +5532,7 @@
             <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
-          <input onkeydown="if(event.key==='Enter')renderVendasSimplesNfs()" id="psn-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <input onkeydown="if(event.key==='Enter')renderVendasSimplesNfs()" id="psn-cliente" placeholder="Nome, CNPJ, código ou nº do pedido..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Produto</span>
           <input onkeydown="if(event.key==='Enter')renderVendasSimplesNfs()" id="psn-produto" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
@@ -5578,7 +5590,7 @@
             <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
-          <input onkeydown="if(event.key==='Enter')renderNaoFaturados()" id="pnf-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          <input onkeydown="if(event.key==='Enter')renderNaoFaturados()" id="pnf-cliente" placeholder="Nome, CNPJ, código ou nº do pedido..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Produto</span>
           <input onkeydown="if(event.key==='Enter')renderNaoFaturados()" id="pnf-produto" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </div>
@@ -5817,7 +5829,7 @@
         <div class="entf-linha-topo" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <div style="position:relative;flex:1;min-width:200px;max-width:300px">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="entctrl-busca" oninput="renderEntregaControle()" placeholder="Buscar por NF, loja ou código..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
+            <input id="entctrl-busca" oninput="renderEntregaControle()" placeholder="Buscar por NF, loja, código ou pedido..." style="width:100%;box-sizing:border-box;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
           </div>
           <span style="font-size:11px;font-weight:600;color:#64748b">Data Fat.</span>
           <div class="entf-daterow" style="display:contents">
@@ -20182,7 +20194,7 @@ function renderPedidoList() {
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
     if (!busca) return true;
-    return (p.clienteNome||'').toLowerCase().includes(busca) || (p.fornecedorNome||'').toLowerCase().includes(busca) || (p.numPedidoCliente||'').toLowerCase().includes(busca);
+    return (p.clienteNome||'').toLowerCase().includes(busca) || (p.fornecedorNome||'').toLowerCase().includes(busca) || (p.numPedidoCliente||'').toLowerCase().includes(busca) || _pedNumMatch(p, busca);
   });
   rows = rows.slice().sort(function(a,b){
     var va = _pedValorOrdenacao(a, _pedOrdCampo), vb = _pedValorOrdenacao(b, _pedOrdCampo);
@@ -20738,7 +20750,7 @@ function _pimprelDadosCompletas() {
       var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
       var cnpjMatch = cli && cli.cpf_cnpj && cliF.replace(/\D/g,'').length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1;
       var codMatch  = cli && cli.codigo && String(cli.codigo).toLowerCase().indexOf(cliF) !== -1;
-      if (!nomeMatch && !cnpjMatch && !codMatch) return false;
+      if (!nomeMatch && !cnpjMatch && !codMatch && !_pedNumMatch(p, cliF)) return false;
     }
     return true;
   });
@@ -20786,7 +20798,7 @@ function _pimprelDadosCompletasFat() {
       var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
       var cnpjMatch = cli && cli.cpf_cnpj && cliF.replace(/\D/g,'').length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1;
       var codMatch  = cli && cli.codigo && String(cli.codigo).toLowerCase().indexOf(cliF) !== -1;
-      if (!nomeMatch && !cnpjMatch && !codMatch) return false;
+      if (!nomeMatch && !cnpjMatch && !codMatch && !_pedNumMatch(p, cliF)) return false;
     }
     return true;
   });
@@ -20832,7 +20844,7 @@ function _pimprelDadosSimplesNf() {
     if (cliF) {
       var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
       var cnpjMatch = cli && cli.cpf_cnpj && cliF.replace(/\D/g,'').length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1;
-      if (!nomeMatch && !cnpjMatch) return false;
+      if (!nomeMatch && !cnpjMatch && !_pedNumMatch(p, cliF)) return false;
     }
     return true;
   });
@@ -20877,7 +20889,7 @@ function _pimprelDadosNaoFat() {
     if (cliF) {
       var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
       var cnpjMatch = cli && cli.cpf_cnpj && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1 && cliF.replace(/\D/g,'').length > 0;
-      if (!nomeMatch && !cnpjMatch) return false;
+      if (!nomeMatch && !cnpjMatch && !_pedNumMatch(p, cliF)) return false;
     }
     return true;
   });
@@ -23166,7 +23178,7 @@ function renderVendasSimplesNfs() {
     if (cliF) {
       var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
       var cnpjMatch = cli && cli.cpf_cnpj && cliF.replace(/\D/g,'').length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1;
-      if (!nomeMatch && !cnpjMatch) return false;
+      if (!nomeMatch && !cnpjMatch && !_pedNumMatch(p, cliF)) return false;
     }
     return true;
   });
@@ -23612,7 +23624,7 @@ function renderEntregaControle() {
       var nfMatch   = (f.numDuplicata||'').toLowerCase().indexOf(busca) !== -1;
       var lojaMatch = (p.clienteNome||'').toLowerCase().indexOf(busca) !== -1;
       var codMatch  = cli && cli.codigo && String(cli.codigo).toLowerCase().indexOf(busca) !== -1;
-      if (!nfMatch && !lojaMatch && !codMatch) return false;
+      if (!nfMatch && !lojaMatch && !codMatch && !_pedNumMatch(p, busca)) return false;
     }
     if (dataDe && (!f.data || f.data < dataDe)) return false;
     if (dataAte && (!f.data || f.data > dataAte)) return false;
@@ -23781,7 +23793,7 @@ function renderNaoFaturados() {
     if (cliF) {
       var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
       var cnpjMatch = cli && cli.cpf_cnpj && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1 && cliF.replace(/\D/g,'').length > 0;
-      if (!nomeMatch && !cnpjMatch) return false;
+      if (!nomeMatch && !cnpjMatch && !_pedNumMatch(p, cliF)) return false;
     }
     return true;
   });
@@ -23874,6 +23886,57 @@ function vcLimparFiltros() {
   renderVendasCompletas();
 }
 // Uma entrada por Pedido com itens (independente de status de faturamento), com cada item ja calculado (qtd faturada/nao faturada, peso, valor)
+
+// ── Calendario nos campos de data (dd/mm/aaaa): botao abre o seletor nativo e preenche o texto ──
+function _dpWrap(inp) {
+  if (!inp || inp.getAttribute('data-dp') || inp.type !== 'text') return;
+  inp.setAttribute('data-dp', '1');
+  var w = document.createElement('span');
+  var st = inp.getAttribute('style') || '';
+  w.className = 'dp-wrap' + (/width:\s*100%/.test(st) || inp.classList.contains('form-input') ? ' dp-block' : '');
+  inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
+  inp.style.paddingRight = '24px';
+  if (!/width:\s*100%/.test(st) && inp.offsetWidth && inp.offsetWidth < 118) inp.style.minWidth = '118px';
+  var b = document.createElement('button');
+  b.type = 'button'; b.tabIndex = -1; b.className = 'dp-btn'; b.title = 'Escolher no calendário';
+  b.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+  var h = document.createElement('input'); h.type = 'date'; h.tabIndex = -1; h.className = 'dp-hid';
+  w.appendChild(b); w.appendChild(h);
+  b.addEventListener('click', function (e) {
+    e.preventDefault(); e.stopPropagation();
+    if (inp.disabled || inp.readOnly) return;
+    h.value = _entctrlParseDataBR(inp.value) || '';
+    try { if (h.showPicker) h.showPicker(); else h.click(); } catch (er) { h.click(); }
+  });
+  h.addEventListener('change', function () {
+    if (!h.value) return;
+    inp.value = _entctrlDataParaBR(h.value);
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+    inp.dispatchEvent(new Event('blur'));
+  });
+}
+function _dpVarrer(raiz) {
+  if (!raiz || !raiz.querySelectorAll) return;
+  if (raiz.matches && raiz.matches('input[placeholder="dd/mm/aaaa"]')) _dpWrap(raiz);
+  raiz.querySelectorAll('input[placeholder="dd/mm/aaaa"]:not([data-dp])').forEach(_dpWrap);
+}
+(function () {
+  var pend = [], agendado = false;
+  function proc() { agendado = false; var l = pend; pend = []; l.forEach(_dpVarrer); }
+  function iniciar() {
+    _dpVarrer(document.body);
+    new MutationObserver(function (muts) {
+      muts.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1) pend.push(n); }); });
+      if (pend.length && !agendado) { agendado = true; (window.requestAnimationFrame || setTimeout)(proc, 50); }
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.body) iniciar(); else document.addEventListener('DOMContentLoaded', iniciar);
+})();
+function _pedNumMatch(p, q) {
+  q = String(q || '').trim().toLowerCase(); if (!q || !p) return false;
+  return [p.numPedidoCliente, p.numPedidoFornecedor, p.lancamento].some(function (v) { return v != null && String(v).toLowerCase().indexOf(q) !== -1; });
+}
 function _vcPedidos() {
   var produtosMap = {}; getProdutos().forEach(function(pr){ produtosMap[pr.id] = pr; });
   var pedidos = getPedidos();
@@ -23891,7 +23954,8 @@ function _vcPedidos() {
       return {
         prodId: it.prodId, prodCodigo: it.prodCodigo, prodNome: it.prodNome,
         qtdPedida: qtdPedida, qtdFaturada: qtdFat, restante: restante,
-        precoUnit: precoUnit, pesoTotal: pesoUnit * qtdPedida, valorTotal: precoUnit * qtdPedida
+        precoUnit: precoUnit, pesoTotal: pesoUnit * qtdPedida, valorTotal: precoUnit * qtdPedida,
+        cxTam: (Number(it.qtdCaixas) > 0 && qtdPedida > 0) ? (qtdPedida / Number(it.qtdCaixas)) : (Number(it.cx) > 0 ? Number(it.cx) : 1)
       };
     });
     var pesoPedido = linhasItens.reduce(function(acc, it){ return acc + it.pesoTotal; }, 0);
@@ -23967,7 +24031,7 @@ function renderVendasCompletas() {
       var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
       var cnpjMatch = cli && cli.cpf_cnpj && cliF.replace(/\D/g,'').length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1;
       var codMatch  = cli && cli.codigo && String(cli.codigo).toLowerCase().indexOf(cliF) !== -1;
-      if (!nomeMatch && !cnpjMatch && !codMatch) return false;
+      if (!nomeMatch && !cnpjMatch && !codMatch && !_pedNumMatch(p, cliF)) return false;
     }
     return true;
   });
@@ -24075,6 +24139,45 @@ function vcfLimparFiltros() {
   vcfAtualizarSubcategorias();
   renderVendasCompletasFaturadas();
 }
+// NFs do pedido (nao canceladas) e % faturado (pendente < 1 caixa conta como faturado)
+function _vcfNfsPedido(p) {
+  var out = [];
+  (p.faturas || []).forEach(function (f) { if (f && f.status !== 'Cancelado' && f.numDuplicata) out.push(f); });
+  return out;
+}
+function _vcfQtdNf(f, it) {
+  var q = 0;
+  (f.itens || []).forEach(function (fi) {
+    if ((it.prodId != null && fi.prodId === it.prodId) || (it.prodId == null && fi.prodCodigo === it.prodCodigo)) q += Number(fi.qtd) || 0;
+  });
+  return q;
+}
+function _vcfPctFaturado(itens) {
+  var tot = 0, fat = 0;
+  itens.forEach(function (it) {
+    tot += it.valorTotal;
+    if (it.qtdPedida > 0 && it.qtdFaturada > 0 && it.restante < Math.max(it.cxTam || 1, 1)) fat += it.valorTotal;
+    else fat += Math.min(it.precoUnit * it.qtdFaturada, it.valorTotal);
+  });
+  return tot > 0 ? Math.min(100, Math.round(fat / tot * 100)) : 0;
+}
+function _vcfNfClick(btn) {
+  var card = btn.closest('.vcf-card'); if (!card) return;
+  var on = btn.classList.contains('vcf-nf-on');
+  card.querySelectorAll('.vcf-nf').forEach(function (x) { x.classList.remove('vcf-nf-on'); });
+  card.classList.toggle('vcf-dim', !on);
+  card.querySelectorAll('tr.vcf-item').forEach(function (tr) {
+    tr.classList.remove('vcf-hl'); var q = tr.querySelector('.vcf-qn'); if (q) q.remove();
+    if (on) return;
+    (tr.getAttribute('data-nf') || '').split('|').forEach(function (par) {
+      var a = par.split('~'); if (a[0] !== btn.getAttribute('data-nf')) return;
+      tr.classList.add('vcf-hl');
+      var sp = document.createElement('span'); sp.className = 'vcf-qn'; sp.textContent = a[1] + ' nesta NF';
+      if (tr.children[1]) tr.children[1].appendChild(sp);
+    });
+  });
+  if (!on) btn.classList.add('vcf-nf-on'); else card.classList.remove('vcf-dim');
+}
 function renderVendasCompletasFaturadas() {
   var cont = document.getElementById('vcf-lista');
   var vazio = document.getElementById('vcf-vazio');
@@ -24106,7 +24209,7 @@ function renderVendasCompletasFaturadas() {
       var nomeMatch = (p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1;
       var cnpjMatch = cli && cli.cpf_cnpj && cliF.replace(/\D/g,'').length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(cliF.replace(/\D/g,'')) !== -1;
       var codMatch  = cli && cli.codigo && String(cli.codigo).toLowerCase().indexOf(cliF) !== -1;
-      if (!nomeMatch && !cnpjMatch && !codMatch) return false;
+      if (!nomeMatch && !cnpjMatch && !codMatch && !_pedNumMatch(p, cliF)) return false;
     }
     return true;
   });
@@ -24129,8 +24232,10 @@ function renderVendasCompletasFaturadas() {
     var dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
     var cor = statusCores[p.status] || { bg:'#f1f5f9', cor:'#64748b' };
+    var nfsPed = _vcfNfsPedido(p);
     var itensHtml = r.itens.map(function(it){
-      return '<tr style="border-bottom:1px solid #f8fafc">'
+      var dnf = nfsPed.map(function(f){ var q = _vcfQtdNf(f, it); return q > 0 ? (String(f.numDuplicata).replace(/[|~"<>]/g, '') + '~' + _pedFmtQtd(q)) : ''; }).filter(Boolean).join('|');
+      return '<tr class="vcf-item" data-nf="' + dnf + '" style="border-bottom:1px solid #f8fafc">'
         + '<td style="padding:5px 8px;font-size:11px;color:#64748b">' + _pedEsc(it.prodCodigo || '—') + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;color:#1e293b;font-weight:600">' + _pedEsc(it.prodNome || '') + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#64748b">' + _pedFmtMoeda(it.precoUnit) + '</td>'
@@ -24141,7 +24246,13 @@ function renderVendasCompletasFaturadas() {
         + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:' + (it.restante > 0 ? '#dc2626' : '#cbd5e1') + ';font-weight:700">' + _pedFmtQtd(it.restante) + '</td>'
         + '</tr>';
     }).join('');
-    return '<div style="background:#fff;border-radius:12px;border-bottom:3px solid #3d5aa8;box-shadow:0 4px 20px rgba(39,42,74,.12);overflow:hidden">'
+    var pctFat = _vcfPctFaturado(r.itens);
+    var nfsHtml = nfsPed.length
+      ? '<div class="vcf-nfs" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-right:auto"><span style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">NF</span>'
+        + nfsPed.map(function(f){ var n = String(f.numDuplicata).replace(/[|~"<>]/g, ''); return '<span class="vcf-nf" data-nf="' + n + '" onclick="_vcfNfClick(this)" title="Clique para destacar os itens desta NF">' + _pedEsc(n) + '</span>'; }).join('')
+        + '<span style="display:inline-flex;align-items:center;gap:6px;margin-left:6px"><span style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Faturado</span><span style="width:110px;height:8px;background:#dbeafe;border-radius:6px;overflow:hidden;display:inline-block"><i style="display:block;height:100%;width:' + pctFat + '%;background:linear-gradient(90deg,#3d4180,#2e4a7a)"></i></span><b style="font-size:12px;color:#1e293b">' + pctFat + '%</b></span></div>'
+      : '';
+    return '<div class="vcf-card" style="background:#fff;border-radius:12px;border-bottom:3px solid #3d5aa8;box-shadow:0 4px 20px rgba(39,42,74,.12);overflow:hidden">'
       + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
       + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
       + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
@@ -24153,7 +24264,8 @@ function renderVendasCompletasFaturadas() {
       + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Unit.</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Peso (kg)</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Total</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Não Faturada</th></tr></thead>'
       + '<tbody>' + itensHtml + '</tbody></table></div>'
-      + '<div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;background:#eff6ff;border-top:1px solid #dbeafe;padding:9px 16px">'
+      + '<div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;background:#eff6ff;border-top:1px solid #dbeafe;padding:9px 16px;flex-wrap:wrap">'
+      + nfsHtml
       + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Peso Total</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="width:1px;height:26px;background:#bfdbfe"></div>'
       + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Total</div><div style="font-size:14px;font-weight:800;color:#15803d;margin-top:1px">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
