@@ -24321,7 +24321,10 @@ function renderVendasCompletasFaturadas() {
         + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#64748b">' + it.pesoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#1e293b;font-weight:600">' + _pedFmtMoeda(it.valorTotal) + '</td>'
         + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#15803d;font-weight:700">' + _pedFmtQtd(it.qtdFaturada) + '</td>'
-        + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:' + (it.restante > 0 ? '#dc2626' : '#cbd5e1') + ';font-weight:700">' + _pedFmtQtd(it.restante) + '</td>'
+        + (function () {
+          var menosCx = it.restante > 0 && it.qtdFaturada > 0 && it.restante < Math.max(it.cxTam || 1, 1);
+          return '<td' + (menosCx ? ' title="Falta menos de 1 caixa: considerado faturado"' : '') + ' style="padding:5px 8px;font-size:11px;text-align:center;color:' + (it.restante > 0 ? (menosCx ? '#94a3b8' : '#dc2626') : '#cbd5e1') + ';font-weight:700">' + _pedFmtQtd(it.restante) + '</td>';
+        })()
         + '</tr>';
     }).join('');
     var pctFat = _vcfPctFaturado(r.itens);
