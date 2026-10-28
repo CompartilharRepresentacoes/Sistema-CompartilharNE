@@ -2121,6 +2121,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
   <div class="d-tab-btn active" data-tab="home">VISÃO GERAL</div>
   <div class="d-tab-btn" data-tab="vendedores">VENDEDORES</div>
   <div class="d-tab-btn" data-tab="clientes">CLIENTES</div>
+  <div class="d-tab-btn" data-tab="produtos">PRODUTOS</div>
   <div class="d-tab-btn" data-tab="fabricas">FÁBRICAS</div>
 </div>
 <section id="tab-home" class="tab-content active">
@@ -2281,6 +2282,10 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
     <div class="scroll-x"><table id="tabClientes"></table></div>
     <div id="tabClientesMsg" style="font-size:11px;color:#64748b;margin-top:6px"></div>
   </div>
+</section>
+<section id="tab-produtos" class="tab-content">
+  <div id="prFabSel" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+  <div id="prBody"></div>
 </section>
 <section id="tab-fabricas" class="tab-content">
   <div id="fabSelector" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
@@ -5555,7 +5560,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div class="ped-header-row" style="display:grid;grid-template-columns:130px 1.4fr 0.9fr 55px 1fr 1fr 1fr 90px 100px 90px 100px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
-            <span>Pedido Cliente</span><span>Cliente</span><span>Cidade</span><span style="text-align:center">Estado</span><span>Vendedor</span><span>Fornecedor</span><span>Transportadora</span><span>Duplicata</span><span>Data Faturamento</span><span style="text-align:center">Qtd Fat / Kg</span><span style="text-align:right">Valor Fat</span>
+            <span>Pedido Cliente</span><span>Cliente</span><span>Cidade</span><span style="text-align:center">Estado</span><span>Vendedor</span><span>Fornecedor</span><span>Transportadora</span><span>NF</span><span>Data Faturamento</span><span style="text-align:center">Qtd Fat / Kg</span><span style="text-align:right">Valor Fat</span>
           </div>
           <div id="psn-tbody" style="min-height:60px"></div>
           <div style="display:grid;grid-template-columns:1fr 90px 100px;padding:10px 14px;background:#f8fafc;border-top:1px solid #e2e8f0;align-items:center">
@@ -18902,6 +18907,472 @@ function dashInit() {
       document.getElementById('fabVendList').querySelectorAll('.dvg-vrank-trk i[data-pct]').forEach(_dvgAnimarBarra);
     }
 
+    // =============== ANÁLISE POR PRODUTO (aba Produtos) ===============
+    const _pdSt = { fab:-1, classe:null, limit:'25', ord:'fat', dir:-1, topM:'fat', mixA:'', mixB:'', mixJ:90, parado:60, abrir:null, focus:'abc' };
+    let _pdC = null;
+    const _pdAddDias = (ymd, n) => { const d = parseDate(ymd); d.setDate(d.getDate()+n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+    const _pdN1 = v => (v||0).toLocaleString('pt-BR', { minimumFractionDigits:1, maximumFractionDigits:1 });
+    const _pdN2 = v => (v||0).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    const _pdBRL2 = v => 'R$ ' + _pdN2(v);
+    const _pdCores = { A:'#0e2f6e', B:'#3d5aa8', C:'#94a3b8' };
+    // aplica os filtros globais do topo (vendedor, UF, cliente, fábrica) a um pedido
+    function _pdPassa(ci, fi, vi) {
+      if (state.fabricas.size && !state.fabricas.has(fi)) return false;
+      if (state.vendedores.size && !state.vendedores.has(vi)) return false;
+      if (state.uf.size) { const _ui = ufIdxOf[CLI_UF[ci]]; if (_ui === undefined || !state.uf.has(_ui)) return false; }
+      if (state.clientes.size && !state.clientes.has(ci)) return false;
+      return true;
+    }
+    // uma linha por produto faturado em cada fatura (valor ajustado para fechar com o valor da NF)
+    function _pdLinhas() {
+      const pm = new Map(); for (const p of PED) { if (p[8] != null && !pm.has(p[8])) pm.set(p[8], p); }
+      const prods = new Map((getProdutos() || []).map(pr => [pr.id, pr]));
+      const out = [];
+      for (const ped of getPedidos()) {
+        if (ped.status !== 'Faturado' && ped.status !== 'Faturado Parcial') continue;
+        const b = pm.get(ped.id); if (!b) continue;
+        const ci = b[1], fi = b[2], vi = b[3];
+        if (!_pdPassa(ci, fi, vi)) continue;
+        const preco = {};
+        (ped.itens || []).forEach(it => { const k = it.prodId != null ? 'i' + it.prodId : 'c' + it.prodCodigo; if (!preco[k]) preco[k] = { p: Number(it.precoUnit) || 0, nome: it.prodNome, cod: it.prodCodigo }; });
+        const fats = (ped.faturas || []).filter(f => f.status !== 'Cancelado');
+        const fontes = fats.length ? fats.map(f => ({ data: f.data, valor: Number(f.valor) || 0, itens: f.itens || [] }))
+          : [{ data: ped.data, valor: Number(ped.valorTotal) || 0, itens: (ped.itens || []).map(i => ({ qtd: i.quantidade, prodId: i.prodId, prodCodigo: i.prodCodigo })) }];
+        for (const f of fontes) {
+          const data = (f.data || ped.data || '').slice(0, 10); if (!data) continue;
+          const its = f.itens.map(it => { const k = it.prodId != null ? 'i' + it.prodId : 'c' + it.prodCodigo; const pi = preco[k] || {}; const q = Number(it.qtd) || 0; return { it, k, q, v: q * (pi.p || 0), pi }; });
+          const soma = its.reduce((s, x) => s + x.v, 0);
+          const fator = (soma > 0 && f.valor > 0) ? f.valor / soma : 1;
+          for (const x of its) {
+            if (!(x.q > 0)) continue;
+            const pr = x.it.prodId != null ? prods.get(x.it.prodId) : null;
+            const pesoU = pr ? (parseFloat(String(pr.peso).replace(',', '.')) || 0) : 0;
+            const qcx = pr ? (parseFloat(String(pr.quant == null ? '' : pr.quant).replace(',', '.')) || 0) : 0;
+            let pfi = fi;
+            if (pr && pr.fornecedor != null) { const ix = FAB_ID.indexOf(pr.fornecedor); if (ix >= 0) pfi = ix; }
+            out.push({ k: x.k, prodId: x.it.prodId, cod: (pr && pr.codigo) || x.it.prodCodigo || x.pi.cod || '', nome: (pr && pr.nome) || x.pi.nome || x.it.prodNome || x.it.prodCodigo || 'Produto',
+              pid: ped.id, ci, fi, vi, pfi, data, qtd: x.q, v: x.v * fator, kg: pesoU * x.q, cx: qcx > 0 ? x.q / qcx : 0 });
+          }
+        }
+      }
+      return out;
+    }
+    function _pdAgg(rows) {
+      const m = new Map();
+      for (const l of rows) {
+        let a = m.get(l.k);
+        if (!a) { a = { k:l.k, prodId:l.prodId, cod:l.cod, nome:l.nome, fi:l.pfi, qtd:0, kg:0, cx:0, fat:0, cli:new Map(), ven:new Map(), ped:new Set(), ult:'' }; m.set(l.k, a); }
+        a.qtd += l.qtd; a.kg += l.kg; a.cx += l.cx; a.fat += l.v;
+        a.cli.set(l.ci, (a.cli.get(l.ci) || 0) + l.v); a.ven.set(l.vi, (a.ven.get(l.vi) || 0) + l.v);
+        a.ped.add(l.pid); if (l.data > a.ult) a.ult = l.data;
+      }
+      return m;
+    }
+    function _pdVar(atual, ant) {
+      if (!(ant > 0)) return { pct: null, html: '<span style="color:#94a3b8">sem base anterior</span>' };
+      const d = (atual - ant) / ant;
+      const up = d >= 0;
+      return { pct: d, html: `<span style="color:${up?'#15803d':'#dc2626'};font-weight:700">${up?'▲':'▼'} ${Math.abs(d*100).toFixed(1).replace('.',',')}%</span> vs período anterior` };
+    }
+    function _pdBuckets(rows) {
+      const _feI = String(state.dtIni), _feF = String(state.dtFim);
+      const _feAi = parseInt(_feI.slice(0,4),10), _feMi = parseInt(_feI.slice(5,7),10)-1;
+      const _feAf = parseInt(_feF.slice(0,4),10), _feMf = parseInt(_feF.slice(5,7),10)-1;
+      const _feN = (_feAf - _feAi) * 12 + (_feMf - _feMi) + 1;
+      const _feModo = _feN === 1 ? 'semana' : (_feN <= 3 ? 'tri' : 'ano');
+      const labels = [], vals = [], idx = new Map();
+      if (_feModo === 'ano') {
+        for (let m = 0; m < 12; m++) { labels.push(monthLabels[m]); vals.push(0); }
+      } else if (_feModo === 'tri') {
+        for (let k = 0; k < _feN; k++) { const t = _feMi + k; idx.set((_feAi + Math.floor(t/12)) + '-' + String(t%12+1).padStart(2,'0'), k); labels.push(monthLabels[t%12]); vals.push(0); }
+      } else {
+        const nDias = new Date(_feAi, _feMi + 1, 0).getDate();
+        const dd = n => String(n).padStart(2,'0');
+        const ini = [], seg0 = [], ult = [];
+        for (let d = 1; d <= nDias; d++) {
+          const dow = new Date(_feAi, _feMi, d).getDay();
+          const seg = d - ((dow + 6) % 7);
+          const key = Math.max(1, seg);
+          if (!idx.has(key)) { idx.set(key, vals.length); vals.push(0); ini.push(key); seg0.push(seg); ult.push(d); }
+          idx.set('d' + d, idx.get(key));
+          ult[idx.get(key)] = d;
+        }
+        ini.forEach((i0, k) => { let fim = Math.min(nDias, seg0[k] + 4); if (fim < i0) fim = ult[k]; labels.push(dd(i0) + ' - ' + dd(fim)); });
+      }
+      for (const l of rows) {
+        let pos;
+        if (_feModo === 'ano') pos = parseInt(l.data.slice(5,7),10)-1;
+        else if (_feModo === 'tri') pos = idx.get(l.data.slice(0,7));
+        else pos = (parseInt(l.data.slice(5,7),10)-1 === _feMi && parseInt(l.data.slice(0,4),10) === _feAi) ? idx.get('d' + parseInt(l.data.slice(8,10),10)) : undefined;
+        if (pos === undefined) continue;
+        vals[pos] += l.v;
+      }
+      return { labels, vals, titulo: _feModo === 'semana' ? 'Evolução Semanal' : 'Evolução Mensal' };
+    }
+    function _pdRenderDonut(res, total) {
+      const svg = document.getElementById('prAbcDonutSvg'); if (!svg) return;
+      const g = document.getElementById('prAbcDonutG'); g.innerHTML = '';
+      const SVGNS = 'http://www.w3.org/2000/svg';
+      const r = 70, cx = 90, cy = 90, gap = 8, C = 2 * Math.PI * r;
+      const classes = ['A','B','C'];
+      const tagEl = document.getElementById('prAbcDonutTag'), valEl = document.getElementById('prAbcDonutVal');
+      function fitVal(t) { valEl.textContent = t; let s = 18; valEl.style.fontSize = s + 'px'; while (valEl.scrollWidth > 112 && s > 9) { s -= 1; valEl.style.fontSize = s + 'px'; } }
+      const mostrarTotal = () => { tagEl.textContent = 'TOTAL FATURADO'; fitVal(fmtBRLk(total)); };
+      const mostrarClasse = k => { tagEl.textContent = 'CLASSE ' + k; fitVal(fmtBRLk(res[k].fat)); };
+      const leg = document.getElementById('prAbcDonutLegend'); leg.innerHTML = '';
+      const avail = Math.max(0, C - gap * classes.length); let off = 0;
+      classes.forEach(k => {
+        const frac = total ? res[k].fat / total : 0, len = avail * frac;
+        const c = document.createElementNS(SVGNS, 'circle');
+        c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', r); c.setAttribute('fill', 'none');
+        c.setAttribute('stroke', _pdCores[k]); c.setAttribute('stroke-width', 22);
+        c.setAttribute('stroke-dasharray', len + ' ' + (C - len)); c.setAttribute('stroke-dashoffset', -off);
+        c.style.cursor = 'pointer'; c.addEventListener('mouseenter', () => mostrarClasse(k)); g.appendChild(c);
+        off += len + gap;
+        const row = document.createElement('div'); row.className = 'dvg-leg-row';
+        row.innerHTML = '<span class="dvg-leg-dot" style="background:' + _pdCores[k] + '"></span><span class="dvg-leg-nome">Classe ' + k + '</span><span class="dvg-leg-pct" style="font-size:14px;color:#fff;font-weight:800;white-space:nowrap">' + fmtBRL(res[k].fat) + '</span>';
+        row.addEventListener('mouseenter', () => mostrarClasse(k)); leg.appendChild(row);
+      });
+      const card = svg.closest('.dvg-carddark'); if (card) card.onmouseleave = mostrarTotal;
+      mostrarTotal();
+    }
+    function _pdSetFocus(which) {
+      _pdSt.focus = which;
+      const wrap = document.getElementById('prGrid'), a = document.getElementById('prCardAbc'), r = document.getElementById('prRiskCard');
+      if (!wrap || !a || !r) return;
+      if (which === 'risco') { wrap.classList.add('dvg-cli-focus-risco'); a.classList.add('dvg-collapsed'); r.classList.remove('dvg-collapsed'); }
+      else { wrap.classList.remove('dvg-cli-focus-risco'); r.classList.add('dvg-collapsed'); a.classList.remove('dvg-collapsed'); }
+    }
+    const _pdRow = (n, nome, sub, pct, dir, cor) => `<div style="display:flex;align-items:center;gap:10px;padding:6px 4px">
+      <span style="width:18px;text-align:center;font-size:11px;font-weight:700;color:#94a3b8">${n}</span>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;margin-bottom:3px"><span style="font-weight:600;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nome}</span><span style="font-weight:700;color:#1e293b;white-space:nowrap">${dir}</span></div>
+        ${sub ? `<div style="font-size:10.5px;color:#94a3b8;margin-bottom:3px">${sub}</div>` : ''}
+        <div class="dvg-vrank-trk"><i data-pct="${Math.max(0, Math.min(100, pct))}"${cor ? ` style="background:${cor}"` : ''}></i></div>
+      </div></div>`;
+    const _pdVazio = t => `<p style="font-size:12.5px;color:#94a3b8;padding:8px 4px">${t}</p>`;
+
+    function renderProdutos() {
+      const selEl = document.getElementById('prFabSel'), body = document.getElementById('prBody');
+      if (!selEl || !body) return;
+      selEl.innerHTML = ['Todas'].concat(FAB).map((f, i) => {
+        const idx = i - 1, active = idx === _pdSt.fab;
+        const st = active ? 'background:#272A4A;color:#fff;border:1px solid #272A4A;' : 'background:#f8fafc;color:#475569;border:1px solid #e2e8f0;';
+        return `<button style="${st}padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer" data-pf="${idx}">${escapeHtml(f)}</button>`;
+      }).join('');
+      selEl.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { _pdSt.fab = parseInt(b.dataset.pf, 10); _pdSt.classe = null; _pdSt.abrir = null; renderProdutos(); }));
+
+      let hist = [];
+      try { hist = _pdLinhas(); } catch (e) { console.error('renderProdutos', e); }
+      if (_pdSt.fab >= 0) hist = hist.filter(l => l.pfi === _pdSt.fab);
+      const ini = state.dtIni, fim = state.dtFim;
+      const cur = hist.filter(l => l.data >= ini && l.data <= fim);
+      const nDias = daysBetween(parseDate(ini), parseDate(fim)) + 1;
+      const pFim = _pdAddDias(ini, -1), pIni = _pdAddDias(ini, -nDias);
+      const prev = hist.filter(l => l.data >= pIni && l.data <= pFim);
+      const agg = _pdAgg(cur), aggP = _pdAgg(prev);
+      const arr = [...agg.values()].sort((a, b) => b.fat - a.fat);
+      const total = arr.reduce((s, a) => s + a.fat, 0);
+      let acc = 0;
+      arr.forEach((a, i) => { acc += a.fat; a.acum = total ? acc / total : 0; a.classe = a.acum <= 0.8 ? 'A' : a.acum <= 0.95 ? 'B' : 'C'; a.rank = i + 1; const p = aggP.get(a.k); a.prevFat = p ? p.fat : 0; });
+      const res = { A:{n:0,fat:0}, B:{n:0,fat:0}, C:{n:0,fat:0} };
+      arr.forEach(a => { res[a.classe].n++; res[a.classe].fat += a.fat; });
+      const kgTot = arr.reduce((s, a) => s + a.kg, 0);
+      const prevFatTot = [...aggP.values()].reduce((s, a) => s + a.fat, 0), prevKg = [...aggP.values()].reduce((s, a) => s + a.kg, 0);
+      const cliAtivos = new Set(cur.map(l => l.ci));
+
+      // produtos ativos no cadastro (respeita fábrica escolhida) e última venda
+      const ultVenda = new Map(); hist.forEach(l => { if (l.data <= fim) { const u = ultVenda.get(l.k); if (!u || l.data > u) ultVenda.set(l.k, l.data); } });
+      const ativos = (getProdutos() || []).filter(p => (p.ativo || 'Sim') !== 'Não').filter(p => {
+        const ix = FAB_ID.indexOf(p.fornecedor);
+        if (_pdSt.fab >= 0 && ix !== _pdSt.fab) return false;
+        if (state.fabricas.size && ix >= 0 && !state.fabricas.has(ix)) return false;
+        return true;
+      });
+      const semVendaPeriodo = ativos.filter(p => !agg.has('i' + p.id)).length;
+      const diasP = _pdSt.parado;
+      const parados = ativos.map(p => { const u = ultVenda.get('i' + p.id) || ''; return { nome: p.nome || p.codigo || 'Produto', cod: p.codigo, ult: u, dias: u ? daysBetween(parseDate(u), parseDate(fim)) : 99999 }; })
+        .filter(p => p.dias >= diasP).sort((a, b) => b.dias - a.dias);
+
+      const bk = _pdBuckets(cur);
+      const vF = _pdVar(total, prevFatTot), vK = _pdVar(kgTot, prevKg);
+      const precoKg = kgTot > 0 ? total / kgTot : 0, precoKgP = prevKg > 0 ? prevFatTot / prevKg : 0;
+      const vP = _pdVar(precoKg, precoKgP);
+
+      // Faturado x pedido
+      const fatPed = new Map();
+      try {
+        const pmx = new Map(); for (const p of PED) { if (p[8] != null && !pmx.has(p[8])) pmx.set(p[8], p); }
+        const prodsM = new Map((getProdutos() || []).map(pr => [pr.id, pr]));
+        for (const r of _vcPedidos()) {
+          const p = r.pedido;
+          if (p.status === 'Cancelado' || !p.data || p.data < ini || p.data > fim) continue;
+          if (!(p.faturas || []).some(f => f.status !== 'Cancelado')) continue;
+          const b = pmx.get(p.id); if (!b || !_pdPassa(b[1], b[2], b[3])) continue;
+          for (const it of r.itens) {
+            const k = it.prodId != null ? 'i' + it.prodId : 'c' + it.prodCodigo;
+            const pr = prodsM.get(it.prodId);
+            if (_pdSt.fab >= 0) { const ix = pr && pr.fornecedor != null ? FAB_ID.indexOf(pr.fornecedor) : b[2]; if ((ix >= 0 ? ix : b[2]) !== _pdSt.fab) continue; }
+            let a = fatPed.get(k); if (!a) { a = { nome: it.prodNome || it.prodCodigo || 'Produto', ped:0, fat:0, falta:0, vfalta:0, np:new Set() }; fatPed.set(k, a); }
+            a.ped += it.qtdPedida; a.fat += it.qtdFaturada;
+            const lim = _pnfLimiarPendenciaItem(pr);
+            if (it.restante >= lim - 0.0001) { a.falta += it.restante; a.vfalta += it.restante * it.precoUnit; a.np.add(p.id); }
+          }
+        }
+      } catch (e) { console.error('fatPed', e); }
+      const fatPedArr = [...fatPed.values()].filter(a => a.falta > 0).sort((a, b) => b.vfalta - a.vfalta);
+      const fatPedTot = fatPedArr.reduce((s, a) => s + a.vfalta, 0);
+
+      // Cobertura
+      const cobArr = arr.map(a => ({ nome: a.nome, n: a.cli.size })).sort((a, b) => b.n - a.n).slice(0, 8);
+      // Altas e quedas
+      const comp = [];
+      const chaves = new Set([...agg.keys(), ...aggP.keys()]);
+      chaves.forEach(k => { const a = agg.get(k), p = aggP.get(k); const f = a ? a.fat : 0, pf = p ? p.fat : 0; if (pf >= 500 || f >= 500) { if (pf > 0) comp.push({ nome: (a || p).nome, f, pf, d: (f - pf) / pf, dif: f - pf }); } });
+      const altas = comp.filter(c => c.d > 0).sort((a, b) => b.dif - a.dif).slice(0, 5);
+      const quedas = comp.filter(c => c.d < 0).sort((a, b) => a.dif - b.dif).slice(0, 5);
+      // Mapa de calor produto x UF
+      const ufs = [...new Set(cur.map(l => CLI_UF[l.ci]).filter(Boolean))].sort();
+      const topHm = arr.slice(0, 6);
+      const hm = new Map(); let hmMax = 0;
+      cur.forEach(l => { const u = CLI_UF[l.ci]; if (!u) return; const key = l.k + '|' + u; const v = (hm.get(key) || 0) + l.v; hm.set(key, v); });
+      topHm.forEach(a => ufs.forEach(u => { const v = hm.get(a.k + '|' + u) || 0; if (v > hmMax) hmMax = v; }));
+
+      _pdC = { hist, arr, total, cur, fim, res, ufs };
+      const prodOpts = (() => { const m = new Map(); hist.forEach(l => { if (!m.has(l.k)) m.set(l.k, l.nome); }); return [...m.entries()].sort((a, b) => String(a[1]).localeCompare(String(b[1]), 'pt-BR')); })();
+      _pdC.prodOpts = prodOpts;
+      if (!_pdSt.mixA || !prodOpts.some(o => o[0] === _pdSt.mixA)) _pdSt.mixA = arr[0] ? arr[0].k : (prodOpts[0] ? prodOpts[0][0] : '');
+      if (!_pdSt.mixB || !prodOpts.some(o => o[0] === _pdSt.mixB)) _pdSt.mixB = arr[1] ? arr[1].k : (prodOpts[1] ? prodOpts[1][0] : '');
+
+      const maxHm = hmMax || 1;
+      const hmHtml = (topHm.length && ufs.length) ? `<div style="overflow-x:auto"><table style="min-width:420px"><thead><tr><th style="text-align:left">Produto</th>${ufs.map(u => `<th class="num" style="text-align:center">${u}</th>`).join('')}</tr></thead><tbody>${topHm.map(a => `<tr><td style="font-size:11.5px;font-weight:600">${escapeHtml(a.nome)}</td>${ufs.map(u => { const v = hm.get(a.k + '|' + u) || 0; const t = v / maxHm; const bg = v > 0 ? `rgba(39,42,74,${(0.12 + t*0.88).toFixed(2)})` : '#f1f5f9'; return `<td style="text-align:center;padding:3px"><div style="background:${bg};color:${t>0.45?'#fff':'#1e293b'};border-radius:5px;padding:5px 2px;font-size:10.5px;font-weight:700">${v > 0 ? _dvgFmtAbrev(v) : '—'}</div></td>`; }).join('')}</tr>`).join('')}</tbody></table></div>` : _pdVazio('Sem vendas no período.');
+
+      const cardCls = 'background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 2px 8px rgba(15,23,42,.04)';
+      const topBtn = (m, t) => `<button type="button" data-tm="${m}" style="border:1px solid ${_pdSt.topM===m?'#272A4A':'#e2e8f0'};background:${_pdSt.topM===m?'#272A4A':'#fff'};color:${_pdSt.topM===m?'#fff':'#475569'};border-radius:6px;padding:3px 9px;font-size:10.5px;font-weight:700;cursor:pointer">${t}</button>`;
+
+      body.innerHTML = `
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          ${kpiCard('Faturamento', _dvgFmtBRLAbrev(total), 'brand', vF.html, null, 0, {id:'prK1', fmt:_dvgFmtBRLAbrev}, fmtBRL(total))}
+          ${kpiCard('Volume', Math.round(kgTot).toLocaleString('pt-BR') + ' kg', 'good', vK.html, null, 1, {id:'prK2', fmt:v=>Math.round(v).toLocaleString('pt-BR') + ' kg'})}
+          ${kpiCard('Produtos vendidos', arr.length.toLocaleString('pt-BR'), 'good', 'de ' + ativos.length.toLocaleString('pt-BR') + ' ativos no cadastro', null, 2, {id:'prK3', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
+          ${kpiCard('Preço médio / kg', _pdBRL2(precoKg), 'brand', vP.html, null, 3)}
+          ${kpiCard('Produtos classe A', res.A.n.toLocaleString('pt-BR'), 'good', 'geram 80% do faturamento', null, 4, {id:'prK5', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
+          ${kpiCard('Sem venda no período', semVendaPeriodo.toLocaleString('pt-BR'), semVendaPeriodo ? 'bad' : 'good', 'produtos ativos parados', null, 5, {id:'prK6', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[2.4fr_0.85fr] gap-4 mt-4">
+          <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">${bk.titulo}</h3>
+            <div style="height:240px;"><canvas id="prMensal"></canvas></div>
+          </div>
+          <div class="d-card"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px"><h3 class="font-semibold text-[15px]">Top 10 produtos</h3><div id="prTopBtns" style="display:flex;gap:4px">${topBtn('fat','R$')}${topBtn('kg','kg')}${topBtn('cx','caixas')}${topBtn('cli','clientes')}</div></div>
+            <div id="prTopList"></div>
+          </div>
+        </div>
+
+        <div class="dg21 dvg-cli-grid" id="prGrid" style="display:grid;gap:12px;margin:16px 0 12px">
+          <div class="d-card dvg-collapsible" id="prCardAbc">
+            <div class="dvg-ctitrow"><div class="dvg-ctit" style="color:#1e293b">Curva ABC de Produtos (Pareto)</div><span class="dvg-cchev" style="color:#94a3b8">&#9662;</span></div>
+            <div class="dvg-cbody">
+              <div class="dvg-abcsum" id="prAbcSum"></div>
+              <div class="dvg-carddark" style="padding:16px 18px">
+                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
+                  <svg id="prAbcDonutSvg" viewBox="0 0 180 180" width="170" height="170" style="flex-shrink:0">
+                    <g id="prAbcDonutG" transform="rotate(-90 90 90)"></g>
+                    <text id="prAbcDonutTag" x="90" y="82" text-anchor="middle" class="dvg-donuttag">TOTAL FATURADO</text>
+                    <foreignObject x="30" y="88" width="120" height="24"><div id="prAbcDonutVal" xmlns="http://www.w3.org/1999/xhtml" style="font-size:15px;color:#fff;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;width:fit-content;max-width:112px;margin:0 auto">R$ 0</div></foreignObject>
+                  </svg>
+                  <div class="dvg-legend" id="prAbcDonutLegend" style="flex:1;min-width:150px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="dvg-riskcard dvg-collapsible" id="prRiskCard">
+            <div class="dvg-ctitrow"><div class="dvg-ctit" style="color:#fff;text-transform:uppercase;letter-spacing:.04em;font-size:12px">Produtos parados</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">&#9888;&#65039;</span><span class="dvg-cchev" style="color:rgba(255,255,255,.6)">&#9662;</span></div></div>
+            <div class="dvg-cbody">
+              <div class="dvg-risk-num" id="prRiskNum">0</div>
+              <div class="dvg-risk-lbl">produtos ativos sem venda há mais tempo que o limite</div>
+              <div class="dvg-risk-input"><span style="font-size:12px;opacity:.85">Dias sem vender &ge;</span><input id="prDiasParado" type="number" min="0" max="999" value="${diasP}"></div>
+              <div id="prParados"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+          <div class="d-card"><h3 class="font-semibold text-[15px] mb-1">Faturado × pedido por produto</h3>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">Pedidos do período já com NF: quanto de cada produto ainda falta faturar (só conta falta de 1 caixa ou mais) · total que falta: <b style="color:#dc2626">${fmtBRL(fatPedTot)}</b></div>
+            <div id="prFatPed"></div>
+          </div>
+          <div class="d-card"><h3 class="font-semibold text-[15px] mb-1">Cobertura nos clientes (positivação)</h3>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">Em quantos dos ${cliAtivos.size.toLocaleString('pt-BR')} clientes que compraram no período cada produto foi vendido</div>
+            <div id="prCob"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+          <div class="d-card"><h3 class="font-semibold text-[15px] mb-1">Maiores altas e quedas</h3>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">Faturamento do produto vs. período anterior equivalente (${fmtDate(pIni)} a ${fmtDate(pFim)})</div>
+            <div id="prAltas"></div>
+          </div>
+          <div class="d-card"><h3 class="font-semibold text-[15px] mb-1">Produto × UF (mapa de calor)</h3>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">Os 6 produtos que mais faturam, por UF · intensidade = faturamento</div>
+            ${hmHtml}
+          </div>
+        </div>
+
+        <div class="d-card mt-4" id="prMixCard"></div>
+
+        <div class="d-card mt-4">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+            <span style="font-size:13px;font-weight:700;color:#1e293b">Tabela de Produtos<span id="prClasseTag" style="font-weight:400"></span></span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:11px;color:#64748b">Mostrar:</span>
+              <div class="dvg-pagechips" id="prLimit">
+                <button type="button" data-v="25"${_pdSt.limit==='25'?' class="active"':''}>25</button>
+                <button type="button" data-v="50"${_pdSt.limit==='50'?' class="active"':''}>50</button>
+                <button type="button" data-v="75"${_pdSt.limit==='75'?' class="active"':''}>75</button>
+                <button type="button" data-v="100"${_pdSt.limit==='100'?' class="active"':''}>100</button>
+                <button type="button" data-v="todos"${_pdSt.limit==='todos'?' class="active"':''}>Todos</button>
+              </div>
+            </div>
+          </div>
+          <div class="scroll-x"><table id="prTabela"></table></div>
+          <div id="prTabMsg" style="font-size:11px;color:#64748b;margin-top:6px"></div>
+        </div>`;
+
+      // KPIs animados
+      _dvgAnimarNumero(document.getElementById('prK1'), total, _dvgFmtBRLAbrev);
+      _dvgAnimarNumero(document.getElementById('prK2'), kgTot, v => Math.round(v).toLocaleString('pt-BR') + ' kg');
+      _dvgAnimarNumero(document.getElementById('prK3'), arr.length, v => Math.round(v).toLocaleString('pt-BR'));
+      _dvgAnimarNumero(document.getElementById('prK5'), res.A.n, v => Math.round(v).toLocaleString('pt-BR'));
+      _dvgAnimarNumero(document.getElementById('prK6'), semVendaPeriodo, v => Math.round(v).toLocaleString('pt-BR'));
+
+      // Evolução
+      const _o = chartOpts({ tooltip:c=>fmtBRL(c.parsed.y), yFmt:fmtBRLk, legend:false });
+      _o.scales.y.display = false; _o.scales.x.offset = true; _o.layout = { padding: { top: 22 } };
+      _o.animation = { duration: 1000, easing: 'easeOutBack', delay: (c) => (c.type === 'data' && c.mode === 'default') ? c.dataIndex * 70 : 0 };
+      window._dashRegChart(document.getElementById('prMensal'), {
+        type:'line', data:{ labels:bk.labels, datasets:[{ data:bk.vals, borderColor:'#4f7fe0', backgroundColor:'rgba(79,127,224,.15)', fill:true, tension:.35, pointRadius:2.5, pointBackgroundColor:'#4f7fe0', pointBorderColor:'#4f7fe0', pointHoverRadius:6 }] },
+        options: _o,
+        plugins: [{ id:'prGlow', beforeDatasetsDraw(ch) { ch.ctx.save(); ch.ctx.shadowColor = 'rgba(79,127,224,.85)'; ch.ctx.shadowBlur = 8; }, afterDatasetsDraw(ch) { ch.ctx.restore(); } },
+          { id:'prVals', afterDatasetsDraw(ch) { const { ctx } = ch; const meta = ch.getDatasetMeta(0); const vals = ch.data.datasets[0].data; ctx.save(); ctx.fillStyle = '#fff'; ctx.font = '700 10.5px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; meta.data.forEach((pt, i) => { ctx.fillText(fmtBRLk(vals[i]), pt.x, pt.y - 6); }); ctx.restore(); } }]
+      });
+
+      // Top 10
+      const renderTop = () => {
+        const m = _pdSt.topM;
+        const val = a => m === 'kg' ? a.kg : m === 'cx' ? a.cx : m === 'cli' ? a.cli.size : a.fat;
+        const fmtv = v => m === 'kg' ? Math.round(v).toLocaleString('pt-BR') + ' kg' : m === 'cx' ? Math.round(v).toLocaleString('pt-BR') + ' cx' : m === 'cli' ? Math.round(v).toLocaleString('pt-BR') + ' cli.' : fmtBRL(v);
+        const t = arr.slice().sort((a, b) => val(b) - val(a)).slice(0, 10);
+        const mx = t.length ? val(t[0]) : 0;
+        const el = document.getElementById('prTopList');
+        el.innerHTML = t.length ? t.map((a, i) => _pdRow(i + 1, escapeHtml(a.nome), '', mx ? val(a) / mx * 100 : 0, fmtv(val(a)))).join('') : _pdVazio('Nenhuma venda no período.');
+        el.querySelectorAll('.dvg-vrank-trk i[data-pct]').forEach(_dvgAnimarBarra);
+        document.querySelectorAll('#prTopBtns button').forEach(b => { const on = b.dataset.tm === _pdSt.topM; b.style.background = on ? '#272A4A' : '#fff'; b.style.color = on ? '#fff' : '#475569'; b.style.borderColor = on ? '#272A4A' : '#e2e8f0'; });
+      };
+      document.querySelectorAll('#prTopBtns button').forEach(b => b.addEventListener('click', () => { _pdSt.topM = b.dataset.tm; renderTop(); }));
+      renderTop();
+
+      // ABC
+      const sumEl = document.getElementById('prAbcSum');
+      sumEl.innerHTML = ['A','B','C'].map(k => {
+        const r = res[k], pct = total ? fmtPct(r.fat / total) : '—', ativo = _pdSt.classe === k;
+        return `<div class="dvg-abcsum-item${ativo?' active':''}" data-classe="${k}" style="border-bottom:3px solid ${_pdCores[k]}"><div class="dvg-abcsum-top"><div class="dvg-abcsum-icon" style="color:${_pdCores[k]}"><i class="ti ti-chart-pie"></i></div><div class="dvg-abcsum-lbl">CLASSE ${k}</div></div><b>${r.n.toLocaleString('pt-BR')} produtos</b><span>${pct} do faturamento</span></div>`;
+      }).join('');
+      sumEl.querySelectorAll('.dvg-abcsum-item').forEach(el => { el.onclick = ev => { ev.stopPropagation(); _pdSt.classe = (_pdSt.classe === el.dataset.classe) ? null : el.dataset.classe; sumEl.querySelectorAll('.dvg-abcsum-item').forEach(x => x.classList.toggle('active', x.dataset.classe === _pdSt.classe)); _pdRenderTabela(); const c = document.getElementById('prTabela'); if (c) c.closest('.d-card').scrollIntoView({ behavior:'smooth', block:'nearest' }); }; });
+      _pdRenderDonut(res, total);
+      document.getElementById('prCardAbc').onclick = () => _pdSetFocus('abc');
+      document.getElementById('prRiskCard').onclick = () => _pdSetFocus('risco');
+      _pdSetFocus(_pdSt.focus);
+
+      // Parados
+      const rn = document.getElementById('prRiskNum'); _dvgAnimarNumero(rn, parados.length, v => Math.round(v).toLocaleString('pt-BR'));
+      document.getElementById('prRiskCard').classList.toggle('dvg-risk-ok', parados.length === 0);
+      document.getElementById('prParados').innerHTML = parados.length === 0
+        ? `<div class="dvg-risk-list" style="text-align:center;padding:16px 0;font-size:12.5px">Nenhum produto ativo parado há ${diasP} dias ou mais. &#9989;</div>`
+        : `<div class="dvg-risk-list">${parados.slice(0, 40).map(p => `<div class="dvg-risk-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0"><b>${escapeHtml(p.nome)}</b><br><span style="opacity:.75;font-size:10.5px">${p.ult ? 'última venda ' + fmtDate(p.ult) : 'nunca vendido'}</span></span><span style="font-weight:700;white-space:nowrap">${p.dias === 99999 ? '—' : p.dias + ' dias'}</span></div>`).join('')}</div>` + (parados.length > 40 ? `<div style="font-size:11px;opacity:.8;margin-top:6px;text-align:center">…e mais ${parados.length - 40}.</div>` : '');
+      const di = document.getElementById('prDiasParado');
+      di.addEventListener('click', e => e.stopPropagation());
+      di.addEventListener('input', () => { _pdSt.parado = parseInt(di.value, 10) || 0; clearTimeout(di._t); di._t = setTimeout(renderProdutos, 350); });
+
+      // Faturado x pedido
+      const fpEl = document.getElementById('prFatPed');
+      fpEl.innerHTML = fatPedArr.length ? fatPedArr.slice(0, 8).map((a, i) => { const pct = a.ped ? Math.min(100, a.fat / a.ped * 100) : 0; return _pdRow(i + 1, escapeHtml(a.nome), `pedido ${fmtNum(a.ped)} · faturado ${fmtNum(a.fat)} · ${pct.toFixed(0)}% · ${a.np.size} pedido(s) com falta`, pct, `<span style="color:#dc2626">falta ${fmtBRL(a.vfalta)}</span>`, '#15803d'); }).join('') : _pdVazio('Nenhum produto com falta de faturamento no período. ✅');
+      fpEl.querySelectorAll('.dvg-vrank-trk i[data-pct]').forEach(_dvgAnimarBarra);
+      // Cobertura
+      const cbEl = document.getElementById('prCob'), cbMax = cliAtivos.size || 1;
+      cbEl.innerHTML = cobArr.length ? cobArr.map((c, i) => _pdRow(i + 1, escapeHtml(c.nome), '', c.n / cbMax * 100, `${c.n.toLocaleString('pt-BR')} · ${(c.n / cbMax * 100).toFixed(0)}%`)).join('') : _pdVazio('Sem vendas no período.');
+      cbEl.querySelectorAll('.dvg-vrank-trk i[data-pct]').forEach(_dvgAnimarBarra);
+      // Altas e quedas
+      const alEl = document.getElementById('prAltas');
+      const ln = (c, up) => `<div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:5px 4px;border-bottom:1px solid #f1f5f9"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:#1e293b">${escapeHtml(c.nome)}</span><span style="white-space:nowrap;font-weight:700;color:${up?'#15803d':'#dc2626'}">${up?'▲':'▼'} ${Math.abs(c.d*100).toFixed(0)}% <span style="color:#94a3b8;font-weight:500">(${c.dif>=0?'+':'-'}${fmtBRL(Math.abs(c.dif))})</span></span></div>`;
+      alEl.innerHTML = (altas.length || quedas.length) ? altas.map(c => ln(c, true)).join('') + quedas.map(c => ln(c, false)).join('') : _pdVazio('Sem base de comparação no período anterior.');
+
+      _pdRenderMix();
+      _pdRenderTabela();
+      _dvgWirePageChips('prLimit', () => { _pdSt.limit = _dvgPageChipVal('prLimit'); _pdRenderTabela(); });
+    }
+
+    function _pdRenderMix() {
+      const card = document.getElementById('prMixCard'); if (!card || !_pdC) return;
+      const { hist, fim, prodOpts } = _pdC;
+      const j = _pdSt.mixJ, ini = _pdAddDias(fim, -(j - 1));
+      const win = hist.filter(l => l.data >= ini && l.data <= fim);
+      const A = _pdSt.mixA, B = _pdSt.mixB;
+      const aRows = win.filter(l => l.k === A), bRows = win.filter(l => l.k === B);
+      const aMap = new Map(); aRows.forEach(l => { let x = aMap.get(l.ci); if (!x) { x = { kg:0, qtd:0, v:0, ult:'', vi:l.vi }; aMap.set(l.ci, x); } x.kg += l.kg; x.qtd += l.qtd; x.v += l.v; if (l.data > x.ult) { x.ult = l.data; x.vi = l.vi; } });
+      const bSet = new Set(bRows.map(l => l.ci));
+      const bPorCli = new Map(); bRows.forEach(l => bPorCli.set(l.ci, (bPorCli.get(l.ci) || 0) + l.v));
+      const bPorUf = new Map(); bPorCli.forEach((v, ci) => { const u = CLI_UF[ci] || ''; const x = bPorUf.get(u) || { s:0, n:0 }; x.s += v; x.n++; bPorUf.set(u, x); });
+      const bGeral = bPorCli.size ? [...bPorCli.values()].reduce((s, v) => s + v, 0) / bPorCli.size : 0;
+      const mesesJ = j / 30;
+      const opp = [...aMap.entries()].filter(([ci]) => !bSet.has(ci)).map(([ci, x]) => {
+        const u = CLI_UF[ci] || ''; const g = bPorUf.get(u);
+        const med = (g && g.n >= 3) ? g.s / g.n : bGeral;
+        return { ci, x, pot: med / mesesJ };
+      }).sort((a, b) => b.pot - a.pot || b.x.v - a.x.v);
+      const potTot = opp.reduce((s, o) => s + o.pot, 0);
+      const ambos = [...aMap.keys()].filter(ci => bSet.has(ci)).length;
+      const nome = k => (prodOpts.find(o => o[0] === k) || [0, ''])[1];
+      const sel = (id, val) => `<select id="${id}" style="max-width:260px;border:1px solid #e2e8f0;border-radius:7px;padding:5px 8px;font-size:12px;background:#f8fafc;color:#1e293b">${prodOpts.map(o => `<option value="${escapeHtml(o[0])}"${o[0] === val ? ' selected' : ''}>${escapeHtml(o[1])}</option>`).join('')}</select>`;
+      const kp = (t, v, s) => `<div style="flex:1;min-width:150px;background:#fff;border:1px solid #e5e7eb;border-bottom:3px solid #3d5aa8;border-radius:10px;padding:10px 12px"><div style="font-size:10.5px;color:#64748b;font-weight:600">${t}</div><div style="font-size:20px;font-weight:800;color:#1c2f66">${v}</div><div style="font-size:10.5px;color:#94a3b8">${s}</div></div>`;
+      card.innerHTML = `<h3 class="font-semibold text-[15px] mb-1">Sugestão de mix · quem compra A e ainda não compra B</h3>
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Clientes que compraram o produto A na janela escolhida (até ${fmtDate(fim)}) e não compraram o produto B</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;font-size:11.5px;color:#475569"><span>Compra</span>${sel('prMixA', A)}<span>Ainda não compra</span>${sel('prMixB', B)}<span>Janela</span>
+          <select id="prMixJ" style="border:1px solid #e2e8f0;border-radius:7px;padding:5px 8px;font-size:12px;background:#f8fafc">${[30,60,90,180,365].map(d => `<option value="${d}"${d === j ? ' selected' : ''}>${d} dias</option>`).join('')}</select></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">${kp('Compram A', aMap.size.toLocaleString('pt-BR'), 'clientes')}${kp('Compram A e B', ambos.toLocaleString('pt-BR'), aMap.size ? (ambos / aMap.size * 100).toFixed(0) + '% dos que compram A' : '—')}${kp('Oportunidade (A sem B)', opp.length.toLocaleString('pt-BR'), 'potencial ≈ ' + fmtBRL(potTot) + ' / mês')}</div>
+        <div class="scroll-x"><table><thead><tr><th>Cliente</th><th>UF</th><th>Vendedor</th><th class="num">Compra A (kg/mês)</th><th class="num">Última compra de A</th><th class="num">Potencial de B (R$/mês)</th></tr></thead>
+        <tbody>${opp.slice(0, 20).map(o => `<tr><td class="font-semibold">${escapeHtml(CLI[o.ci] || '')}</td><td>${escapeHtml(CLI_UF[o.ci] || '')}</td><td>${escapeHtml(VEND[o.x.vi] || '')}</td><td class="num">${_pdN1(o.x.kg / mesesJ)}</td><td class="num">${fmtDate(o.x.ult)}</td><td class="num font-semibold">${fmtBRL(o.pot)}</td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:14px">Nenhum cliente nessa situação.</td></tr>'}</tbody></table></div>
+        <div style="font-size:11px;color:#64748b;margin-top:6px">${opp.length > 20 ? `Mostrando os 20 maiores de ${opp.length}. ` : ''}Potencial de B = média mensal de B dos clientes que já compram B (da mesma UF, quando há 3 ou mais; senão, de todos).</div>`;
+      const onC = () => { _pdSt.mixA = document.getElementById('prMixA').value; _pdSt.mixB = document.getElementById('prMixB').value; _pdSt.mixJ = parseInt(document.getElementById('prMixJ').value, 10) || 90; _pdRenderMix(); };
+      ['prMixA', 'prMixB', 'prMixJ'].forEach(id => document.getElementById(id).addEventListener('change', onC));
+    }
+
+    function _pdRenderTabela() {
+      const t = document.getElementById('prTabela'); if (!t || !_pdC) return;
+      const base = _pdC.arr, total = _pdC.total;
+      let arr = _pdSt.classe ? base.filter(a => a.classe === _pdSt.classe) : base.slice();
+      const key = _pdSt.ord, dir = _pdSt.dir;
+      const getv = { rank:a=>a.rank, nome:a=>String(a.nome).toLowerCase(), fab:a=>String(FAB[a.fi] || '').toLowerCase(), qtd:a=>a.qtd, kg:a=>a.kg, fat:a=>a.fat, acum:a=>a.acum, preco:a=>a.kg > 0 ? a.fat / a.kg : 0, cli:a=>a.cli.size, vs:a=>a.prevFat > 0 ? (a.fat - a.prevFat) / a.prevFat : -9 }[key] || (a => a.fat);
+      arr.sort((a, b) => { const x = getv(a), y = getv(b); return (typeof x === 'string' ? x.localeCompare(y, 'pt-BR') : x - y) * dir; });
+      const lim = _pdSt.limit === 'todos' ? arr.length : parseInt(_pdSt.limit, 10);
+      const th = (k, txt, num) => `<th${num ? ' class="num"' : ''} data-ord="${k}" style="cursor:pointer;white-space:nowrap">${txt}${_pdSt.ord === k ? (_pdSt.dir < 0 ? ' ▼' : ' ▲') : ''}</th>`;
+      const rows = [];
+      arr.slice(0, lim).forEach(a => {
+        const vs = a.prevFat > 0 ? (a.fat - a.prevFat) / a.prevFat : null;
+        rows.push(`<tr data-k="${escapeHtml(a.k)}" style="cursor:pointer"><td class="text-ink-400">${a.rank}</td><td><span class="chip ${a.classe==='A'?'chip-good':a.classe==='B'?'chip-info':'chip-warn'}">${a.classe}</span></td><td class="font-semibold">${escapeHtml(a.nome)}</td><td>${escapeHtml(FAB[a.fi] || '')}</td><td class="num">${fmtNum(a.qtd)}</td><td class="num">${fmtNum(a.kg)}</td><td class="num font-semibold">${fmtBRL(a.fat)}</td><td class="num">${total ? fmtPct(a.fat / total) : '—'}</td><td class="num">${fmtPct(a.acum)}</td><td class="num">${a.kg > 0 ? _pdBRL2(a.fat / a.kg) : '—'}</td><td class="num">${a.cli.size}</td><td class="num" style="color:${vs == null ? '#94a3b8' : vs >= 0 ? '#15803d' : '#dc2626'};font-weight:700">${vs == null ? '—' : (vs >= 0 ? '▲ ' : '▼ ') + Math.abs(vs * 100).toFixed(0) + '%'}</td></tr>`);
+        if (_pdSt.abrir === a.k) {
+          const topC = [...a.cli.entries()].sort((x, y) => y[1] - x[1]).slice(0, 5).map(([ci, v]) => `${escapeHtml(CLI[ci] || '')} <b>${fmtBRL(v)}</b>`).join('<br>');
+          const topV = [...a.ven.entries()].sort((x, y) => y[1] - x[1]).slice(0, 5).map(([vi, v]) => `${escapeHtml(VEND[vi] || '')} <b>${fmtBRL(v)}</b>`).join('<br>');
+          rows.push(`<tr><td colspan="12" style="background:#f8fafc;padding:10px 14px"><div style="display:flex;gap:30px;flex-wrap:wrap;font-size:12px;color:#475569"><div><div style="font-size:10.5px;font-weight:700;color:#94a3b8;margin-bottom:4px">MAIORES CLIENTES</div>${topC}</div><div><div style="font-size:10.5px;font-weight:700;color:#94a3b8;margin-bottom:4px">VENDEDORES</div>${topV}</div><div><div style="font-size:10.5px;font-weight:700;color:#94a3b8;margin-bottom:4px">DADOS</div>${a.ped.size} pedido(s) · ${_pdN1(a.cx)} caixas · última venda ${a.ult ? fmtDate(a.ult) : '—'}</div></div></td></tr>`);
+        }
+      });
+      t.innerHTML = `<thead><tr>${th('rank','#')}<th>Classe</th>${th('nome','Produto')}${th('fab','Fábrica')}${th('qtd','Qtd',1)}${th('kg','Kg',1)}${th('fat','Faturamento',1)}<th class="num">% do total</th>${th('acum','% acumul.',1)}${th('preco','Preço méd./kg',1)}${th('cli','Clientes',1)}${th('vs','vs ant.',1)}</tr></thead><tbody>${rows.join('') || '<tr><td colspan="12" style="text-align:center;color:#94a3b8;padding:14px">Nenhum produto vendido no período.</td></tr>'}</tbody>`;
+      t.querySelectorAll('th[data-ord]').forEach(h => h.addEventListener('click', () => { const k = h.dataset.ord; if (_pdSt.ord === k) _pdSt.dir = -_pdSt.dir; else { _pdSt.ord = k; _pdSt.dir = (k === 'nome' || k === 'fab' || k === 'rank') ? 1 : -1; } _pdRenderTabela(); }));
+      t.querySelectorAll('tbody tr[data-k]').forEach(r => r.addEventListener('click', () => { _pdSt.abrir = (_pdSt.abrir === r.dataset.k) ? null : r.dataset.k; _pdRenderTabela(); }));
+      const tag = document.getElementById('prClasseTag'); if (tag) tag.textContent = _pdSt.classe ? ' · classe ' + _pdSt.classe : '';
+      const msg = document.getElementById('prTabMsg'); if (msg) msg.textContent = `${arr.length.toLocaleString('pt-BR')} produto(s)${_pdSt.classe ? ' na classe ' + _pdSt.classe : ''} · clique no produto para ver clientes e vendedores · clique no título da coluna para ordenar`;
+    }
+
+
     // =============== DADOS ===============
     let grid;
     function renderDados() {
@@ -18954,7 +19425,7 @@ function dashInit() {
     // metasLimpar removed
 
     // =============== TABS ===============
-    const TITULOS = { home:'Visão Geral', vendedores:'Ranking de Vendedores', clientes:'Ranking de Clientes', fabricas:'Análise por Fábrica', dados:'Dados', metas:'Configurações de Metas' };
+    const TITULOS = { home:'Visão Geral', vendedores:'Ranking de Vendedores', clientes:'Ranking de Clientes', produtos:'Análise de Produtos', fabricas:'Análise por Fábrica', dados:'Dados', metas:'Configurações de Metas' };
     document.querySelectorAll('.dash-root .d-tab-btn').forEach(b => b.addEventListener('click', () => {
       document.querySelectorAll('.dash-root .d-tab-btn').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
@@ -18971,6 +19442,7 @@ function dashInit() {
       if (state.aba==='home') renderHome();
       else if (state.aba==='vendedores') renderVendedores();
       else if (state.aba==='clientes') renderClientes();
+      else if (state.aba==='produtos') renderProdutos();
       else if (state.aba==='fabricas') renderFabricas();
       // dados tab not included
       // metas tab not included
@@ -20867,7 +21339,7 @@ function _pimprelDadosSimplesNf() {
     { header:'Cliente', get:function(r){ return _cpSemColchetes(r.pedido.clienteNome); } },
     { header:'Fornecedor', get:function(r){ return String(r.pedido.fornecedorNome||'').replace(/^\d+\s+/, ''); } },
     { header:'Transportadora', get:function(r){ return r.fatura.transportadoraNome || '—'; } },
-    { header:'Duplicata', get:function(r){ return r.fatura.numDuplicata || '—'; } },
+    { header:'NF', get:function(r){ return r.fatura.numDuplicata || '—'; } },
     { header:'Peso (kg)', align:'right', get:function(r){ return r.pesoFat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }); } },
     { header:'Valor', align:'right', destaque:true, get:function(r){ return _pedFmtMoeda(r.fatura.valor); } },
   ];
@@ -23206,7 +23678,7 @@ function renderVendasSimplesNfs() {
         + '<div class="mc-meta ped-r-vend" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(p.vendedorNome || '—') + '</div>'
         + '<div class="mc-meta ped-r-forn" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
         + '<div class="mc-meta ped-r-transp" style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(transportadoraNome || '—') + '</div>'
-        + '<div class="mc-meta ped-r-duplicata" style="font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
+        + '<div class="mc-meta ped-r-duplicata" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(f.numDuplicata || '—') + '</div>'
         + '<div class="mc-meta ped-r-datafat" style="font-size:12px;color:#64748b">' + dataFmt + '</div>'
         + '<div class="mc-meta ped-r-peso" style="font-size:12px;color:#64748b;text-align:center">' + r.pesoFat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + '</div>'
         + '<div class="mc-meta ped-r-valor" style="font-size:12.5px;font-weight:700;color:#15803d;text-align:right">' + _pedFmtMoeda(f.valor) + '</div>'
