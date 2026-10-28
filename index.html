@@ -17850,7 +17850,7 @@ function dashInit() {
     }
     // v190: quantos produtos distintos tiveram venda no periodo (e no mesmo periodo do ano anterior) e quantos estao ativos no cadastro
     function _dvgMixProdutos() {
-      const out = { n: 0, nAnt: 0, ativos: 0 };
+      const out = { n: 0, nAnt: 0, ativos: 0, emLinha: 0, emLinhaAnt: 0, pararam: 0 };
       try {
         const linhas = _pdLinhas();
         const cmp = _dvgPeriodoComparacao();
@@ -17876,6 +17876,29 @@ function dashInit() {
           const ix = FAB_ID.indexOf(p.fornecedor);
           return !(state.fabricas.size && ix >= 0 && !state.fabricas.has(ix));
         }).length;
+        // v204: "em linha" = produtos que ja tiveram ao menos 1 venda faturada ate o fim do periodo (lancamentos que nunca faturaram ficam de fora)
+        const prodsM = new Map((getProdutos() || []).map(p => [p.id, p]));
+        const fabOk = id => { const p = prodsM.get(id); if (!p) return true; const ix = FAB_ID.indexOf(p.fornecedor); return !(state.fabricas.size && ix >= 0 && !state.fabricas.has(ix)); };
+        const slim = (typeof _sbSlimTodos === 'function' ? _sbSlimTodos() : []) || [];
+        const everAte = (fim) => {
+          const m = new Map();
+          const add = (o) => {
+            if (o.status !== 'Faturado' && o.status !== 'Faturado Parcial') return;
+            for (const f of (o.faturas || [])) {
+              if (f.status === 'Cancelado' || !f.data || f.data > fim) continue;
+              for (const it of (f.itens || [])) { if (!(Number(it.qtd) > 0) || !fabOk(it.prodId)) continue; m.set(it.prodId != null ? 'i' + it.prodId : 'c' + it.prodCodigo, it.prodId); }
+            }
+          };
+          getPedidos().forEach(add); slim.forEach(add);
+          return m;
+        };
+        const evAt = everAte(state.dtFim);
+        let emL = 0;
+        evAt.forEach((pid, k) => { const p = prodsM.get(pid); if (a.has(k) || !p || (p.ativo || 'Sim') !== 'Não') emL++; });
+        a.forEach(k => { if (!evAt.has(k)) emL++; });
+        out.emLinha = Math.max(emL, out.n);
+        out.emLinhaAnt = Math.max(everAte(cmp.dtFim).size, out.nAnt);
+        out.pararam = Math.max(0, out.emLinha - out.n);
       } catch (e) { /* getPedidos/getProdutos indisponiveis neste contexto */ }
       return out;
     }
@@ -17926,14 +17949,14 @@ function dashInit() {
             + '<div class="dvg-kpi-cmp-bar"><span style="width:' + (_dvgKAnt.ativos / mx * 100).toFixed(1) + '%;background:#c9d4ee"></span></div></div>';
         })() : '';
         const _dvgMix = _dvgMixProdutos();
-        const _dvgTrendMix = _dvgMix.nAnt > 0 ? (() => { const d = _dvgMix.n - _dvgMix.nAnt; return '<div class="dvg-kpi-trend ' + (d >= 0 ? 'up' : 'down') + '">' + (d >= 0 ? '▲' : '▼') + ' ' + Math.abs(d).toLocaleString('pt-BR') + ' ite' + (Math.abs(d) === 1 ? 'm' : 'ns') + '</div>'; })() : '';
-        const _dvgCmpMix = _dvgMix.nAnt > 0 ? (() => {
-          const mx = Math.max(_dvgMix.n, _dvgMix.nAnt, 1);
-          return '<div class="dvg-kpi-cmp">'
-            + '<div class="dvg-kpi-cmp-row"><span>' + _dvgLblAt + '</span><b>' + fmtNum(_dvgMix.n) + ' produtos</b></div>'
-            + '<div class="dvg-kpi-cmp-bar"><span style="width:' + (_dvgMix.n / mx * 100).toFixed(1) + '%;background:#0e2f6e"></span></div>'
-            + '<div class="dvg-kpi-cmp-row"><span>' + _dvgLblAnt + '</span><b>' + fmtNum(_dvgMix.nAnt) + ' produtos</b></div>'
-            + '<div class="dvg-kpi-cmp-bar"><span style="width:' + (_dvgMix.nAnt / mx * 100).toFixed(1) + '%;background:#c9d4ee"></span></div></div>';
+        const _dvgPctMix = _dvgMix.emLinha ? _dvgMix.n / _dvgMix.emLinha * 100 : 0;
+        const _dvgPctMixAnt = _dvgMix.emLinhaAnt ? _dvgMix.nAnt / _dvgMix.emLinhaAnt * 100 : 0;
+        const _dvgTrendMix = (_dvgMix.nAnt > 0 && _dvgMix.emLinhaAnt > 0) ? (() => { const d = Math.round((_dvgPctMix - _dvgPctMixAnt) * 10) / 10; if (d === 0) return ''; return '<div class="dvg-kpi-trend ' + (d >= 0 ? 'up' : 'down') + '">' + (d >= 0 ? '▲' : '▼') + ' ' + Math.abs(d).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' p.p.</div>'; })() : '';
+        const _dvgCmpMix = (_dvgMix.nAnt > 0 && _dvgMix.emLinhaAnt > 0) ? (() => {
+          const lin = (rot, pct, cor) => '<div style="display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;font-size:11.5px;color:#1c2f66;margin-bottom:6px"><span>' + rot + '</span>'
+            + '<div style="height:6px;border-radius:4px;background:#eef2fb;overflow:hidden"><span style="display:block;height:100%;width:' + Math.min(100, pct).toFixed(1) + '%;background:' + cor + ';border-radius:4px"></span></div>'
+            + '<b style="color:#1e293b;font-weight:700;font-size:12px">' + Math.round(pct) + '%</b></div>';
+          return '<div class="dvg-kpi-cmp">' + lin(_dvgLblAt, _dvgPctMix, '#0e2f6e') + lin(_dvgLblAnt, _dvgPctMixAnt, '#c9d4ee') + '</div>';
         })() : '';
         kpiEl.innerHTML = `
           <div class="dvg-hero">
@@ -17967,9 +17990,9 @@ function dashInit() {
             <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#0e2f6e"><i class="ti ti-layout-grid"></i></div><div class="dvg-kpi-lbl">MIX DE PRODUTOS</div></div>${_dvgTrendMix}</div>
             <div class="dvg-kpi-half" style="margin-top:4px">
               <div><div class="dvg-kpi-lbl" style="white-space:nowrap">VENDERAM</div><div class="dvg-kpi-val" id="dvgKpiMixN">0</div></div>
-              <div><div class="dvg-kpi-lbl" style="white-space:nowrap">% DO MIX</div><div class="dvg-kpi-val" id="dvgKpiMixPct" style="color:#3d5aa8">0%</div></div>
+              <div><div class="dvg-kpi-lbl" style="white-space:nowrap">% MIX EM LINHA</div><div class="dvg-kpi-val" id="dvgKpiMixPct" style="color:#3d5aa8">0%</div></div>
             </div>
-            <div class="dvg-kpi-sub">de ${_dvgMix.ativos.toLocaleString('pt-BR')} produtos ativos</div>${_dvgCmpMix}
+            <div class="dvg-kpi-sub" style="display:flex;justify-content:space-between;gap:6px"><span>de ${_dvgMix.emLinha.toLocaleString('pt-BR')} em linha</span><span style="color:#b45309 !important;font-weight:700">${_dvgMix.pararam.toLocaleString('pt-BR')} pararam</span></div>${_dvgCmpMix}
           </div>
         `;
         _dvgAnimateHero(k.fat);
@@ -17980,7 +18003,7 @@ function dashInit() {
         _dvgAnimarNumero(document.getElementById('dvgKpiTicket'), k.ticket, _dvgFmtBRLAbrev);
         _dvgCountUp(document.getElementById('dvgKpiCli'), k.ativos, 0, '', '');
         _dvgCountUp(document.getElementById('dvgKpiMixN'), _dvgMix.n, 0, '', '');
-        _dvgCountUp(document.getElementById('dvgKpiMixPct'), _dvgMix.ativos ? _dvgMix.n / _dvgMix.ativos * 100 : 0, 0, '', '%');
+        _dvgCountUp(document.getElementById('dvgKpiMixPct'), _dvgPctMix, 0, '', '%');
       }
 
       // Faturamento mensal
