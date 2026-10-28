@@ -28097,12 +28097,27 @@ var EML_TXT_CANCEL = 'Não aprovada pela fábrica — manifestada como Desconhec
 function _emlFaturadoNf(forn, cliId, nf) {
   var alvo = _emlSemZeros(nf), mapa = null;
   if (!alvo) return null;
+  var un = {}; getProdutos().forEach(function (p) { un[p.id] = String(p.unidade || '').trim().toUpperCase(); });
   getPedidos().forEach(function (p) {
     if (String(p.fornecedorId || '') !== String(forn.id) || String(p.clienteId) !== String(cliId)) return;
-    (p.faturas || []).forEach(function (f) {
-      if (f.status === 'Cancelado' || _emlSemZeros(f.numDuplicata) !== alvo) return;
+    var fatsAtivas = (p.faturas || []).filter(function (f) { return f.status !== 'Cancelado'; });
+    fatsAtivas.forEach(function (f) {
+      if (_emlSemZeros(f.numDuplicata) !== alvo) return;
       mapa = mapa || {};
-      (f.itens || []).forEach(function (it) { mapa[it.prodId] = (mapa[it.prodId] || 0) + (Number(it.qtd) || 0); });
+      (f.itens || []).forEach(function (it) {
+        var q = Number(it.qtd) || 0, doPedido = false;
+        // Notas importadas do Pontti guardam quantidade proporcional (ex.: 17,3 em vez de 20 PC).
+        // Em item que nao e KG e veio fracionado, o numero confiavel e o do pedido (se a NF for a unica do pedido).
+        if (un[it.prodId] !== 'KG' && Math.abs(q - Math.round(q)) > 0.001) {
+          if (fatsAtivas.length === 1) {
+            q = (p.itens || []).filter(function (x) { return x.prodId === it.prodId; }).reduce(function (a, x) { return a + (Number(x.quantidade) || 0); }, 0);
+            doPedido = true;
+          } else return;
+        }
+        var cur = mapa[it.prodId] || { q: 0, doPedido: false };
+        cur.q += q; cur.doPedido = cur.doPedido || doPedido;
+        mapa[it.prodId] = cur;
+      });
     });
   });
   return mapa;
@@ -28112,7 +28127,7 @@ function _emlCompletar(r) {
   r.fat = (r.cli && forn && r.nfOrigem) ? _emlFaturadoNf(forn, r.cli.id, r.nfOrigem) : null;
   r.excede = false;
   r.itens.forEach(function (x) {
-    x.fat = (r.fat && x.p && r.fat[x.p.id] != null) ? r.fat[x.p.id] : null;
+    var fi = (r.fat && x.p) ? r.fat[x.p.id] : null; x.fat = fi ? fi.q : null; x.fatPed = !!(fi && fi.doPedido); if (x.fatPed) r.fatPed = true;
     x.excede = (x.fat != null && x.it.qtd > x.fat + 0.0001);
     if (x.excede) r.excede = true;
   });
@@ -28267,21 +28282,21 @@ function _emlRender() {
     var tab = '<div style="margin-top:6px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;font-size:11.5px"><div style="display:grid;grid-template-columns:1fr 62px 62px 82px;background:#f1f5f9;padding:5px 8px;font-weight:700;color:#64748b;font-size:10px;text-transform:uppercase"><span>Produto</span><span style="text-align:right">Faturou</span><span style="text-align:right">Devolveu</span><span style="text-align:right">Valor</span></div>'
       + r.itens.map(function (x) {
         return '<div style="display:grid;grid-template-columns:1fr 62px 62px 82px;padding:4px 8px;border-top:1px solid #f1f5f9"><span>' + _pedEsc(x.it.cod) + ' ' + _pedEsc(x.it.desc) + (x.p ? '' : ' <b style="color:#b91c1c">(não achei)</b>') + '</span>'
-          + '<span style="text-align:right;color:#64748b">' + (x.fat != null ? _emlFmtQ(x.fat) : '—') + '</span>'
+          + '<span style="text-align:right;color:#64748b">' + (x.fat != null ? _emlFmtQ(x.fat) + (x.fatPed ? '*' : '') : '—') + '</span>'
           + '<span style="text-align:right;font-weight:700;color:' + (x.excede ? '#b45309' : '#1e293b') + '">' + _emlFmtQ(x.it.qtd) + (x.excede ? ' ⚠' : '') + '</span>'
           + '<span style="text-align:right">' + _pedFmtMoeda(x.it.valor) + '</span></div>';
       }).join('')
       + '<div style="display:grid;grid-template-columns:1fr 82px;padding:6px 8px;border-top:2px solid #272A4A;background:#f8fafc;font-weight:800"><span>Total da NFD</span><span style="text-align:right">' + _pedFmtMoeda(r.total) + '</span></div></div>';
-    var rodape = '';
+    var rodape = r.fatPed ? '<div style="margin-top:4px;font-size:10.5px;color:#94a3b8">* quantidade do pedido (a NF importada do Pontti guarda quantidade proporcional)</div>' : '';
     if (r.ok && cancelada) {
-      rodape = '<div style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:11.5px;color:#991b1b"><b>Motivo do cancelamento (vai nas Observações):</b><br>' + _pedEsc(EML_TXT_CANCEL) + '</div>'
+      rodape += '<div style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:11.5px;color:#991b1b"><b>Motivo do cancelamento (vai nas Observações):</b><br>' + _pedEsc(EML_TXT_CANCEL) + '</div>'
         + '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:#64748b">Motivo da devolução (opcional): <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid #cbd5e1;border-radius:7px;padding:4px 8px;font-size:12px"><option value="">—</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></div>';
     } else if (r.ok && !r.aprov) {
-      rodape = '<div style="margin-top:8px;font-size:11.5px;color:#b45309">O e-mail não diz se a fábrica aprovou ou não. Tratar como: '
+      rodape += '<div style="margin-top:8px;font-size:11.5px;color:#b45309">O e-mail não diz se a fábrica aprovou ou não. Tratar como: '
         + '<button onclick="_emlSetAprov(' + i + ',\'sim\')" style="border:1px solid #15803d;background:#fff;color:#15803d;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">Aprovada</button> '
         + '<button onclick="_emlSetAprov(' + i + ',\'nao\')" style="border:1px solid #dc2626;background:#fff;color:#dc2626;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">Cancelada</button></div>';
     } else if (r.ok) {
-      rodape = '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:12px"><b>Motivo:</b> <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid ' + (r.motivo ? '#cbd5e1' : '#f59e0b') + ';background:' + (r.motivo ? '#fff' : '#fffbeb') + ';border-radius:7px;padding:4px 8px;font-size:12px"><option value="">Selecione...</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select>'
+      rodape += '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:12px"><b>Motivo:</b> <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid ' + (r.motivo ? '#cbd5e1' : '#f59e0b') + ';background:' + (r.motivo ? '#fff' : '#fffbeb') + ';border-radius:7px;padding:4px 8px;font-size:12px"><option value="">Selecione...</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select>'
         + (r.motivo ? '' : '<span style="color:#b45309;font-size:11px">não veio no ' + (r.origem === 'xml' ? 'XML' : 'e-mail') + ' — escolha para liberar</span>') + '</div>';
     }
     if (r.ok && r.excede) rodape += '<div style="margin-top:6px;font-size:11.5px;color:#b45309">⚠ Devolveu mais do que foi faturado na NF de origem — confira antes de lançar' + (pronta ? ' (vem desmarcada).' : '.') + '</div>';
