@@ -17183,7 +17183,7 @@ function dashInit() {
       uf: new Set(),
       aba: (document.querySelector('.dash-root .d-tab-btn.active')?.dataset.tab) || 'home',
       diasRisco: 60,
-      fabricaFoco: 0,
+      fabricaFoco: -1,
     };
 
     // =============== METAS (localStorage) ===============
@@ -18082,7 +18082,7 @@ function dashInit() {
         _dvgRenderRank('topProdutos', _tpTop.map(x=>({nome:x.nome, val:x.fat})));
       } catch (e) { _dvgRenderRank('topProdutos', []); }
     }
-    function kpiCard(titulo, valor, color, sub, kind, idx, anim, exact) {
+    function kpiCard(titulo, valor, color, sub, kind, idx, anim, exact, icone) {
       const _gradStops = ['#1c2f66', '#2c4488', '#3d5aa8', '#5b78c9', '#7b93d9', '#a9c2f5'];
       const barColor   = color==='bad' ? '#dc2626' : (_gradStops[idx||0] || '#1c2f66');
       const accentColor = barColor;
@@ -18090,7 +18090,7 @@ function dashInit() {
       const valTxt = anim ? anim.fmt(0) : valor;
       const valId = anim ? ` id="${anim.id}"` : '';
       return `<div style="background:#fff;border:1px solid #e5e7eb;border-bottom:3px solid ${accentColor};border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-        <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">${titulo}</div>
+        ${icone ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><div style="width:26px;height:26px;border-radius:8px;background:${color==='bad'?'#fef2f2':'#eef2fb'};color:${color==='bad'?'#dc2626':'#1c2f66'};display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0"><i class="ti ${icone}"></i></div><div style="font-size:11px;font-weight:700;letter-spacing:.03em;color:#1c2f66;text-transform:uppercase">${titulo}</div></div>` : `<div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">${titulo}</div>`}
         <div style="font-size:22px;font-weight:800;color:${valColor};line-height:1.2;letter-spacing:-.02em"${valId}>${valTxt}</div>
         ${exact ? `<div style="font-size:10px;color:#94a3b8;margin-top:-2px">${exact}</div>` : ''}
         <div style="font-size:11px;color:#94a3b8">${sub}</div>
@@ -18780,7 +18780,10 @@ function dashInit() {
     // =============== ANÁLISE POR FÁBRICA ===============
     function renderFabricas() {
       const sel = document.getElementById('fabSelector');
-      sel.innerHTML = FAB.map((f,i)=>{
+      // v199: botao "Todas" primeiro e fabricas em ordem alfabetica
+      const _fabOrd = [-1].concat(FAB.map((f,i)=>i).sort((x,y)=>String(FAB[x]).localeCompare(String(FAB[y]),'pt-BR',{sensitivity:'base'})));
+      sel.innerHTML = _fabOrd.map(i=>{
+        const f = i < 0 ? 'Todas' : FAB[i];
         const active = i===state.fabricaFoco;
         const st = active
           ? 'background:#272A4A;color:#fff;border:1px solid #272A4A;'
@@ -18790,13 +18793,15 @@ function dashInit() {
       sel.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{ state.fabricaFoco = parseInt(b.dataset.fi,10); renderFabricas(); }));
       const fi = state.fabricaFoco;
       const pedsAll = filtraPedidos();
-      const peds = pedsAll.filter(p => p[2]===fi);
+      const _fabTodas = fi < 0;
+      const peds = _fabTodas ? pedsAll : pedsAll.filter(p => p[2]===fi);
       const totalGeral = pedsAll.reduce((s,p)=>s+p[5],0);
       const fat = peds.reduce((s,p)=>s+p[5],0);
       const vol = peds.reduce((s,p)=>s+p[4],0);
       // v28: Nova Mix e São Vicente mostram Kg em destaque (R$ abaixo); as demais, R$ em destaque (Kg abaixo)
       const _fabKg = peds.reduce((s,p)=>s+(p[7]||0),0);
-      const _fabKgPri = ['novamix','saovicente'].indexOf(_cpNorm(FAB[fi]||'').replace(/\s+/g,'')) !== -1;
+      const _fabKgPri = !_fabTodas && ['novamix','saovicente'].indexOf(_cpNorm(FAB[fi]||'').replace(/\s+/g,'')) !== -1;
+      const _fabNome = _fabTodas ? 'todas as fábricas' : FAB[fi];
       const cli = new Set(peds.map(p=>p[1])).size;
       const n = new Set(peds.map(p => p[8] != null ? p[8] : p)).size;
       const ticket = n? fat/n : 0;
@@ -18844,10 +18849,10 @@ function dashInit() {
       // então cruza com getPedidos() real pelo fornecedorId (ou nome, se não cadastrado), respeitando período + status ok.
       const agProd = new Map();
       try {
-        const fabIdReal = FAB_ID[fi];
+        const fabIdReal = _fabTodas ? null : FAB_ID[fi];
         const produtosPorId = new Map((getProdutos() || []).map(pr => [pr.id, pr]));
         for (const pedidoReal of getPedidos()) {
-          const mesmoFornecedor = fabIdReal != null ? pedidoReal.fornecedorId === fabIdReal : (pedidoReal.fornecedorNome || '') === FAB[fi];
+          const mesmoFornecedor = _fabTodas ? true : (fabIdReal != null ? pedidoReal.fornecedorId === fabIdReal : (pedidoReal.fornecedorNome || '') === FAB[fi]);
           if (!mesmoFornecedor) continue;
           if (pedidoReal.data < state.dtIni || pedidoReal.data > state.dtFim) continue;
           if (!ST_OK.has(STATUS.indexOf(pedidoReal.status))) continue;
@@ -18879,14 +18884,19 @@ function dashInit() {
         let _y = parseInt(_ini.slice(0,4),10), _m = parseInt(_ini.slice(5,7),10);
         const _yf = parseInt(_fim.slice(0,4),10), _mf = parseInt(_fim.slice(5,7),10);
         while (_y < _yf || (_y === _yf && _m <= _mf)) { _mk.add(String(_m).padStart(2,'0') + '/' + _y); _m++; if (_m > 12) { _m = 1; _y++; } }
-        const _fid = String(FAB_ID[fi] != null ? FAB_ID[fi] : ''), _fnm = _cpNorm(FAB[fi] || '');
-        const _ms = _metasFab().filter(m => _mk.has(m.mes) && ((_fid && String(m.fornecedorId) === _fid) || (_cpNorm(m.fornecedorNome || '') === _fnm) || (_fnm && _cpNorm(m.fornecedorNome || '').indexOf(_fnm) !== -1)));
-        const _rs = _ms.filter(m => m.tipo === 'R$').reduce((t,m) => t + (Number(m.valor)||0), 0);
-        const _kg = _ms.filter(m => m.tipo !== 'R$').reduce((t,m) => t + (Number(m.valor)||0), 0);
-        if (_rs > 0) { metaF = _rs; atinge = fat / _rs; metaTxt = fmtBRL(_rs); }
+        const _metaDe = (fx) => {
+          const _fid = String(FAB_ID[fx] != null ? FAB_ID[fx] : ''), _fnm = _cpNorm(FAB[fx] || '');
+          const _ms = _metasFab().filter(m => _mk.has(m.mes) && ((_fid && String(m.fornecedorId) === _fid) || (_cpNorm(m.fornecedorNome || '') === _fnm) || (_fnm && _cpNorm(m.fornecedorNome || '').indexOf(_fnm) !== -1)));
+          return { rs: _ms.filter(m => m.tipo === 'R$').reduce((t,m) => t + (Number(m.valor)||0), 0), kg: _ms.filter(m => m.tipo !== 'R$').reduce((t,m) => t + (Number(m.valor)||0), 0) };
+        };
+        let _rs = 0, _kg = 0;
+        if (_fabTodas) { FAB.forEach((f,fx) => { const r = _metaDe(fx); _rs += r.rs; _kg += r.kg; }); }
+        else { const r = _metaDe(fi); _rs = r.rs; _kg = r.kg; }
+        if (_fabTodas && _rs > 0 && _kg > 0) { /* metas em R$ e em kg misturadas: sem total unico */ }
+        else if (_rs > 0) { metaF = _rs; atinge = fat / _rs; metaTxt = fmtBRL(_rs); }
         else if (_kg > 0) { const _real = peds.reduce((t,p) => t + (p[7]||0), 0); metaF = _kg; atinge = _real / _kg; metaTxt = fmtNum(_kg) + ' kg'; }
       } catch (e) { /* cadastro de metas indisponivel neste contexto */ }
-      if (metaF == null) {
+      if (metaF == null && !_fabTodas) {
         const _old = metas.fabrica && metas.fabrica[FAB[fi]] ? Number(metas.fabrica[FAB[fi]]) : null;
         if (_old) { metaF = _old; atinge = fat / _old; metaTxt = fmtBRL(_old); }
       }
@@ -18894,7 +18904,7 @@ function dashInit() {
       // v191: representatividade de clientes — ativos (cadastro, filtros UF/cliente) que ja compraram na fabrica em qualquer data
       const _fcOk = (ci) => { if (CLI_INATIVO[ci]) return false; if (state.clientes.size && !state.clientes.has(ci)) return false; if (state.uf.size) { const _ui = ufIdxOf[CLI_UF[ci]]; if (_ui === undefined || !state.uf.has(_ui)) return false; } return true; };
       let _fcBase = 0; for (let _i=0;_i<CLI.length;_i++) { if (_fcOk(_i)) _fcBase++; }
-      const _fcJa = new Set(filtraPedidos({dtIni:'0000-01-01', dtFim:'9999-12-31', ignorarFabrica:true}).filter(p => p[2]===fi && _fcOk(p[1])).map(p => p[1]));
+      const _fcJa = new Set(_fabTodas ? [] : filtraPedidos({dtIni:'0000-01-01', dtFim:'9999-12-31', ignorarFabrica:true}).filter(p => p[2]===fi && _fcOk(p[1])).map(p => p[1]));
       const _fcPer = new Set(peds.filter(p => _fcOk(p[1])).map(p => p[1])); _fcPer.forEach(c => _fcJa.add(c));
       const _fcPctBase = _fcBase ? _fcJa.size/_fcBase : 0;
       const _fcPctPer = _fcJa.size ? _fcPer.size/_fcJa.size : 0;
@@ -18902,14 +18912,21 @@ function dashInit() {
       const _fcFatBox = `<div><div style="font-size:11px;opacity:.8;font-weight:600">FATURAMENTO</div><div id="fabKpiFat" style="font-size:28px;font-weight:800;letter-spacing:-.02em;margin-top:4px;line-height:1.15">${_dvgFmtBRLAbrev(0)}</div><div style="font-size:11px;opacity:.65">${fmtBRL(fat)}</div></div>`;
       const _fcVolBox = `<div><div style="font-size:11px;opacity:.8;font-weight:600">VOLUME</div><div id="fabKpiVol" style="font-size:28px;font-weight:800;letter-spacing:-.02em;margin-top:4px;line-height:1.15">0 kg</div><div style="font-size:11px;opacity:.65">peso líquido faturado</div></div>`;
       const _fcHero = `<div style="background:linear-gradient(135deg,#1a1d3a,#3d4180 70%,#2e4a7a);color:#fff;border-radius:16px;padding:18px 22px;box-shadow:0 6px 20px rgba(26,29,58,.35);display:flex;flex-direction:column;justify-content:center">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:12px;opacity:.85;font-weight:600">Faturamento e Volume do Período</span><span style="background:rgba(255,255,255,.16);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap">${n} pedidos</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="display:flex;align-items:center;gap:6px"><span style="width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0"><i class="ti ti-cash"></i></span><span style="font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase">Faturamento e Volume</span></span><span style="background:rgba(255,255,255,.16);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap">${n} pedidos</span></div>
           <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:18px;align-items:center;margin-top:8px">${_fabKgPri ? _fcVolBox : _fcFatBox}<div style="background:rgba(255,255,255,.22);height:64px"></div>${_fabKgPri ? _fcFatBox : _fcVolBox}</div>
           <div style="font-size:11px;opacity:.65;margin-top:10px">${_fabKg>0 ? 'Preço médio ' + fmtBRL(fat/_fabKg) + ' / kg' : 'Sem peso informado no período'}</div></div>`;
+      const _fcCliTodas = `<div style="background:#fff;border:1px solid #e5e7eb;border-bottom:3px solid #5b78c9;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><div style="width:26px;height:26px;border-radius:8px;background:#eef2fb;color:#1c2f66;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0"><i class="ti ti-users"></i></div><div style="font-size:11px;font-weight:700;letter-spacing:.03em;color:#1c2f66;text-transform:uppercase">Clientes</div></div>
+          <div style="display:flex;align-items:baseline;gap:8px"><div id="fabKpiCli" style="font-size:22px;font-weight:800;color:#1c2f66;line-height:1.2;letter-spacing:-.02em">0</div><span style="font-size:11px;color:#94a3b8">compraram no período</span></div>
+          <div style="font-size:12px;color:#3d5aa8;font-weight:800">${_fcBase ? fmtPct(_fcBase ? _fcPer.size/_fcBase : 0) + ' dos ativos compraram no período' : 'sem clientes ativos na base'}</div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;gap:6px;margin-top:6px"><span>Compraram no período</span><b style="color:#1e293b;white-space:nowrap">${_fcPer.size.toLocaleString('pt-BR')} de ${_fcBase.toLocaleString('pt-BR')}</b></div>
+          <div style="height:7px;border-radius:4px;background:#e2e8f0;overflow:hidden;margin:3px 0 0"><i style="display:block;height:100%;border-radius:4px;width:${_fcW(_fcBase ? _fcPer.size/_fcBase : 0)}%;background:#3d5aa8"></i></div>
+        </div>`;
       const _fcCli = `<div style="background:#fff;border:1px solid #e5e7eb;border-bottom:3px solid #5b78c9;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
-          <div style="font-size:11px;color:#64748b;font-weight:600">Clientes</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><div style="width:26px;height:26px;border-radius:8px;background:#eef2fb;color:#1c2f66;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0"><i class="ti ti-users"></i></div><div style="font-size:11px;font-weight:700;letter-spacing:.03em;color:#1c2f66;text-transform:uppercase">Clientes</div></div>
           <div style="display:flex;align-items:baseline;gap:8px"><div id="fabKpiCli" style="font-size:22px;font-weight:800;color:#1c2f66;line-height:1.2;letter-spacing:-.02em">0</div><span style="font-size:11px;color:#94a3b8">compraram no período</span></div>
           <div style="font-size:12px;color:#3d5aa8;font-weight:800">${_fcBase ? fmtPct(_fcPctBase) + ' dos ativos já compraram na fábrica' : 'sem clientes ativos na base'}</div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;gap:6px;margin-top:6px"><span>Já compraram na ${escapeHtml(FAB[fi])}</span><b style="color:#1e293b;white-space:nowrap">${_fcJa.size.toLocaleString('pt-BR')} de ${_fcBase.toLocaleString('pt-BR')}</b></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;gap:6px;margin-top:6px"><span>Já compraram na ${escapeHtml(_fabNome)}</span><b style="color:#1e293b;white-space:nowrap">${_fcJa.size.toLocaleString('pt-BR')} de ${_fcBase.toLocaleString('pt-BR')}</b></div>
           <div style="height:7px;border-radius:4px;background:#e2e8f0;overflow:hidden;margin:3px 0 7px"><i style="display:block;height:100%;border-radius:4px;width:${_fcW(_fcPctBase)}%;background:#3d5aa8"></i></div>
           <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;gap:6px"><span>Compraram no período</span><b style="color:#1e293b;white-space:nowrap">${_fcPer.size.toLocaleString('pt-BR')} · ${_fcJa.size ? fmtPct(_fcPctPer) : '—'} deles</b></div>
           <div style="height:7px;border-radius:4px;background:#e2e8f0;overflow:hidden;margin:3px 0 0"><i style="display:block;height:100%;border-radius:4px;width:${_fcW(_fcBase ? _fcPer.size/_fcBase : 0)}%;background:#7b93d9"></i></div>
@@ -18917,10 +18934,10 @@ function dashInit() {
       document.getElementById('fabFicha').innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.9fr_1fr_1.25fr_1fr_1fr] gap-3 items-stretch">
           ${_fcHero}
-          ${kpiCard('% do total', fmtPct(part), 'brand', 'da Compartilhar no período', null, 2, {id:'fabKpiPart', fmt:fmtPct})}
-          ${_fcCli}
-          ${kpiCard('Ticket médio', _dvgFmtBRLAbrev(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:_dvgFmtBRLAbrev}, fmtBRL(ticket))}
-          ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${metaTxt}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null)}
+          ${kpiCard('% do total', fmtPct(part), 'brand', 'da Compartilhar no período', null, 2, {id:'fabKpiPart', fmt:fmtPct}, null, 'ti-chart-pie')}
+          ${_fabTodas ? _fcCliTodas : _fcCli}
+          ${kpiCard('Ticket médio', _dvgFmtBRLAbrev(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:_dvgFmtBRLAbrev}, fmtBRL(ticket), 'ti-receipt')}
+          ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${metaTxt}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null, null, 'ti-target-arrow')}
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-[2.4fr_0.85fr] gap-4 mt-4">
           <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">${_feTitulo}</h3>
@@ -18931,7 +18948,7 @@ function dashInit() {
           </div>
         </div>
         <div class="d-card mt-4">
-          <h3 class="font-semibold text-[15px] mb-2">Top 10 clientes de ${escapeHtml(FAB[fi])}</h3>
+          <h3 class="font-semibold text-[15px] mb-2">Top 10 clientes de ${escapeHtml(_fabNome)}</h3>
           <div class="scroll-x">
           <table>
             <thead><tr style="background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%)"><th style="background:transparent !important;color:#ffffff !important;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:0">#</th><th style="background:transparent !important;color:#ffffff !important;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:0">Cliente</th><th class="num" style="background:transparent !important;color:#ffffff !important;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:0">Faturamento</th><th class="num" style="background:transparent !important;color:#ffffff !important;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:0">Pedidos</th><th class="num" style="background:transparent !important;color:#ffffff !important;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:0">% da fábrica</th></tr></thead>
@@ -19151,8 +19168,9 @@ function dashInit() {
     function renderProdutos() {
       const selEl = document.getElementById('prFabSel'), body = document.getElementById('prBody');
       if (!selEl || !body) return;
-      selEl.innerHTML = ['Todas'].concat(FAB).map((f, i) => {
-        const idx = i - 1, active = idx === _pdSt.fab;
+      const _pdOrd = [-1].concat(FAB.map((f, i) => i).sort((x, y) => String(FAB[x]).localeCompare(String(FAB[y]), 'pt-BR', { sensitivity: 'base' })));
+      selEl.innerHTML = _pdOrd.map((idx) => {
+        const f = idx < 0 ? 'Todas' : FAB[idx], active = idx === _pdSt.fab;
         const st = active ? 'background:#272A4A;color:#fff;border:1px solid #272A4A;' : 'background:#f8fafc;color:#475569;border:1px solid #e2e8f0;';
         return `<button style="${st}padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer" data-pf="${idx}">${escapeHtml(f)}</button>`;
       }).join('');
@@ -19248,12 +19266,12 @@ function dashInit() {
 
       body.innerHTML = `
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          ${kpiCard('Faturamento', _dvgFmtBRLAbrev(total), 'brand', vF.html, null, 0, {id:'prK1', fmt:_dvgFmtBRLAbrev}, fmtBRL(total))}
-          ${kpiCard('Volume', Math.round(kgTot).toLocaleString('pt-BR') + ' kg', 'good', vK.html, null, 1, {id:'prK2', fmt:v=>Math.round(v).toLocaleString('pt-BR') + ' kg'})}
-          ${kpiCard('Produtos vendidos', arr.length.toLocaleString('pt-BR'), 'good', 'de ' + ativos.length.toLocaleString('pt-BR') + ' ativos no cadastro', null, 2, {id:'prK3', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
-          ${kpiCard('Preço médio / kg', _pdBRL2(precoKg), 'brand', vP.html, null, 3)}
-          ${kpiCard('Produtos classe A', res.A.n.toLocaleString('pt-BR'), 'good', 'geram 80% do faturamento', null, 4, {id:'prK5', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
-          ${kpiCard('Sem venda no período', semVendaPeriodo.toLocaleString('pt-BR'), semVendaPeriodo ? 'bad' : 'good', 'produtos ativos parados', null, 5, {id:'prK6', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
+          ${kpiCard('Faturamento', _dvgFmtBRLAbrev(total), 'brand', vF.html, null, 0, {id:'prK1', fmt:_dvgFmtBRLAbrev}, fmtBRL(total), 'ti-cash')}
+          ${kpiCard('Volume', Math.round(kgTot).toLocaleString('pt-BR') + ' kg', 'good', vK.html, null, 1, {id:'prK2', fmt:v=>Math.round(v).toLocaleString('pt-BR') + ' kg'}, null, 'ti-package')}
+          ${kpiCard('Produtos vendidos', arr.length.toLocaleString('pt-BR'), 'good', 'de ' + ativos.length.toLocaleString('pt-BR') + ' ativos no cadastro', null, 2, {id:'prK3', fmt:v=>Math.round(v).toLocaleString('pt-BR')}, null, 'ti-layout-grid')}
+          ${kpiCard('Preço médio / kg', _pdBRL2(precoKg), 'brand', vP.html, null, 3, null, null, 'ti-tag')}
+          ${kpiCard('Produtos classe A', res.A.n.toLocaleString('pt-BR'), 'good', 'geram 80% do faturamento', null, 4, {id:'prK5', fmt:v=>Math.round(v).toLocaleString('pt-BR')}, null, 'ti-star')}
+          ${kpiCard('Sem venda no período', semVendaPeriodo.toLocaleString('pt-BR'), semVendaPeriodo ? 'bad' : 'good', 'produtos ativos parados', null, 5, {id:'prK6', fmt:v=>Math.round(v).toLocaleString('pt-BR')}, null, 'ti-alert-triangle')}
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-[2.4fr_0.85fr] gap-4 mt-4">
           <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">${bk.titulo}</h3>
