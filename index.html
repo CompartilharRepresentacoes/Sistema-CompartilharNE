@@ -17849,6 +17849,29 @@ function dashInit() {
       return (fatAtual - fatAnterior) / fatAnterior;
     }
     // v190: quantos produtos distintos tiveram venda no periodo (e no mesmo periodo do ano anterior) e quantos estao ativos no cadastro
+    let _dvgPrimCache = { k: null, t: 0, v: null };
+    function _dvgPrimeiraVenda() {
+      const peds = getPedidos();
+      const slim = (typeof _sbSlimTodos === 'function' ? _sbSlimTodos() : []) || [];
+      const k = _pedImpressao(peds) + '#' + slim.length;
+      if (_dvgPrimCache.v && _dvgPrimCache.k === k && (Date.now() - _dvgPrimCache.t) < 60000) return _dvgPrimCache.v;
+      const m = new Map();
+      const add = (o) => {
+        if (o.status !== 'Faturado' && o.status !== 'Faturado Parcial') return;
+        for (const f of (o.faturas || [])) {
+          if (f.status === 'Cancelado' || !f.data) continue;
+          for (const it of (f.itens || [])) {
+            if (!(Number(it.qtd) > 0)) continue;
+            const key = it.prodId != null ? 'i' + it.prodId : 'c' + it.prodCodigo;
+            const cur = m.get(key);
+            if (!cur || f.data < cur.d) m.set(key, { d: f.data, pid: it.prodId });
+          }
+        }
+      };
+      peds.forEach(add); slim.forEach(add);
+      _dvgPrimCache = { k, t: Date.now(), v: m };
+      return m;
+    }
     function _dvgMixProdutos() {
       const out = { n: 0, nAnt: 0, ativos: 0, emLinha: 0, emLinhaAnt: 0, pararam: 0 };
       try {
@@ -17879,25 +17902,14 @@ function dashInit() {
         // v204: "em linha" = produtos que ja tiveram ao menos 1 venda faturada ate o fim do periodo (lancamentos que nunca faturaram ficam de fora)
         const prodsM = new Map((getProdutos() || []).map(p => [p.id, p]));
         const fabOk = id => { const p = prodsM.get(id); if (!p) return true; const ix = FAB_ID.indexOf(p.fornecedor); return !(state.fabricas.size && ix >= 0 && !state.fabricas.has(ix)); };
-        const slim = (typeof _sbSlimTodos === 'function' ? _sbSlimTodos() : []) || [];
-        const everAte = (fim) => {
-          const m = new Map();
-          const add = (o) => {
-            if (o.status !== 'Faturado' && o.status !== 'Faturado Parcial') return;
-            for (const f of (o.faturas || [])) {
-              if (f.status === 'Cancelado' || !f.data || f.data > fim) continue;
-              for (const it of (f.itens || [])) { if (!(Number(it.qtd) > 0) || !fabOk(it.prodId)) continue; m.set(it.prodId != null ? 'i' + it.prodId : 'c' + it.prodCodigo, it.prodId); }
-            }
-          };
-          getPedidos().forEach(add); slim.forEach(add);
-          return m;
-        };
-        const evAt = everAte(state.dtFim);
+        const prim = _dvgPrimeiraVenda();
+        const evAt = new Map(), evAnt = new Set();
+        prim.forEach((v, k) => { if (!fabOk(v.pid)) return; if (v.d <= state.dtFim) evAt.set(k, v.pid); if (v.d <= cmp.dtFim) evAnt.add(k); });
         let emL = 0;
         evAt.forEach((pid, k) => { const p = prodsM.get(pid); if (a.has(k) || !p || (p.ativo || 'Sim') !== 'Não') emL++; });
         a.forEach(k => { if (!evAt.has(k)) emL++; });
         out.emLinha = Math.max(emL, out.n);
-        out.emLinhaAnt = Math.max(everAte(cmp.dtFim).size, out.nAnt);
+        out.emLinhaAnt = Math.max(evAnt.size, out.nAnt);
         out.pararam = Math.max(0, out.emLinha - out.n);
       } catch (e) { /* getPedidos/getProdutos indisponiveis neste contexto */ }
       return out;
@@ -19065,11 +19077,21 @@ function dashInit() {
       return true;
     }
     // uma linha por produto faturado em cada fatura (valor ajustado para fechar com o valor da NF)
+    let _pdLinhasCache = { k: null, t: 0, v: null };
+    function _pdChaveFiltro() { return [...state.fabricas].sort().join(',') + '|' + [...state.vendedores].sort().join(',') + '|' + [...state.uf].sort().join(',') + '|' + [...state.clientes].sort((a, b) => a - b).join(','); }
     function _pdLinhas() {
+      const peds = getPedidos();
+      const k = _pedImpressao(peds) + '#' + _pdChaveFiltro() + '#' + PED.length;
+      if (_pdLinhasCache.v && _pdLinhasCache.k === k && (Date.now() - _pdLinhasCache.t) < 60000) return _pdLinhasCache.v;
+      const r = _pdLinhasCalc(peds);
+      _pdLinhasCache = { k, t: Date.now(), v: r };
+      return r;
+    }
+    function _pdLinhasCalc(pedsArg) {
       const pm = new Map(); for (const p of PED) { if (p[8] != null && !pm.has(p[8])) pm.set(p[8], p); }
       const prods = new Map((getProdutos() || []).map(pr => [pr.id, pr]));
       const out = [];
-      for (const ped of getPedidos()) {
+      for (const ped of (pedsArg || getPedidos())) {
         if (ped.status !== 'Faturado' && ped.status !== 'Faturado Parcial') continue;
         const b = pm.get(ped.id); if (!b) continue;
         const ci = b[1], fi = b[2], vi = b[3];
@@ -24633,9 +24655,27 @@ function _pedNumMatch(p, q) {
   q = String(q || '').trim().toLowerCase(); if (!q || !p) return false;
   return [p.numPedidoCliente, p.numPedidoFornecedor, p.lancamento].some(function (v) { return v != null && String(v).toLowerCase().indexOf(q) !== -1; });
 }
+// v207: impressao digital barata dos pedidos (detecta edicao/novo pedido) para reaproveitar calculos pesados entre abas
+function _pedImpressao(pedidos) {
+  var h = pedidos.length, i, p;
+  for (i = 0; i < pedidos.length; i++) {
+    p = pedidos[i];
+    h += (Number(p.valorTotal) || 0) + (Number(p.valorFaturado) || 0) + (p.faturas ? p.faturas.length * 7 : 0) + (p.itens ? p.itens.length * 13 : 0) + (p.status ? String(p.status).length : 0);
+  }
+  return Math.round(h * 100) / 100;
+}
+var _vcCache = { k: null, t: 0, v: null };
 function _vcPedidos() {
+  var pedsFp = getPedidos();
+  var kFp = _pedImpressao(pedsFp);
+  if (_vcCache.v && _vcCache.k === kFp && (Date.now() - _vcCache.t) < 60000) return _vcCache.v;
+  var r = _vcPedidosCalc(pedsFp);
+  _vcCache = { k: kFp, t: Date.now(), v: r };
+  return r;
+}
+function _vcPedidosCalc(pedidosArg) {
   var produtosMap = {}; getProdutos().forEach(function(pr){ produtosMap[pr.id] = pr; });
-  var pedidos = getPedidos();
+  var pedidos = pedidosArg || getPedidos();
   var lista = [];
   pedidos.forEach(function(p){
     var itens = p.itens || [];
