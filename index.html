@@ -1413,6 +1413,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 .dpc td{background:#c4c4c4;border:1px solid #a6a6a6;text-align:center;height:26px;font-size:13px;font-weight:600;color:#0b1a4a;cursor:pointer;padding:0}
 .dpc td:hover{background:#9fb4e6}.dpc td.fora{color:#8e8e8e;font-weight:400;background:#d2d2d2}
 .dpc td.sel{background:#ff6b6b;color:#fff;font-weight:700}.dpc td.hoje{background:#5a5a5a;color:#fff;font-weight:700}.dpc td.sel.hoje{background:#ff6b6b}
+.ped-ok-btn{display:none !important}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <!-- jsPDF + html2canvas (geracao de PDF do Pedido na impressao) -->
@@ -19933,7 +19934,7 @@ function _sbInicio(pre) {
   }
   if (_sbAbaOk[pre]) return;
   var lista = document.getElementById(pre + '-lista') || document.getElementById(pre + '-tbody');
-  if (lista) lista.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#94a3b8;font-size:13px">Escolha os filtros e clique em <b style="color:#DE7926">OK</b> para ver os pedidos.</div>';
+  if (lista) lista.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#94a3b8;font-size:13px">Escolha os filtros para ver os pedidos.</div>';
   var vz = document.getElementById(pre + '-vazio'); if (vz) vz.style.display = 'none';
 }
 (function () {
@@ -19942,6 +19943,27 @@ function _sbInicio(pre) {
     var orig = window[nome]; if (typeof orig !== 'function') return;
     window[nome] = function () { _sbAbaOk[pre] = true; return orig.apply(this, arguments); };
   });
+})();
+
+// Filtros das abas de Pedidos: aplicam sozinhos (sem botao OK)
+(function () {
+  var abas = { vc: 'renderVendasCompletas', vcf: 'renderVendasCompletasFaturadas', psn: 'renderVendasSimplesNfs', pnf: 'renderNaoFaturados' };
+  function ligar() {
+    Object.keys(abas).forEach(function (pre) {
+      var ok = document.querySelector('#page-pedido-list .ped-ok-btn[onclick^="' + abas[pre] + '"]') || document.querySelector('.ped-ok-btn[onclick^="' + abas[pre] + '"]');
+      var cont = ok && ok.parentElement; if (!cont || cont.getAttribute('data-auto')) return;
+      cont.setAttribute('data-auto', '1');
+      var t = null;
+      function agendar(ms) { clearTimeout(t); t = setTimeout(function () { if (typeof window[abas[pre]] === 'function') window[abas[pre]](); }, ms); }
+      cont.addEventListener('change', function (e) { if (e.target.tagName === 'SELECT') agendar(150); });
+      cont.addEventListener('input', function (e) {
+        var el = e.target; if (el.tagName !== 'INPUT') return;
+        if (el.getAttribute('placeholder') === 'dd/mm/aaaa') { var v = el.value; if (v === '' || /^\d{2}\/\d{2}\/\d{4}$/.test(v)) agendar(150); }
+        else agendar(400);
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ligar); else ligar();
 })();
 var _pedStatusFiltro = '';
 var _pedOrdCampo = 'data'; // v514: mais recentes primeiro (dtCadastro empatava em lotes importados e mostrava 2015 no topo)
@@ -23904,7 +23926,7 @@ function _dpWrap(inp) {
   w.className = 'dp-wrap' + (/width:\s*100%/.test(st) || inp.classList.contains('form-input') ? ' dp-block' : '');
   inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
   inp.style.paddingRight = '24px';
-  if (!/width:\s*100%/.test(st) && inp.offsetWidth && inp.offsetWidth < 118) inp.style.minWidth = '118px';
+  if (!/width:\s*100%/.test(st)) inp.style.minWidth = '132px';
   var b = document.createElement('button');
   b.type = 'button'; b.tabIndex = -1; b.className = 'dp-btn'; b.title = 'Escolher no calendário';
   b.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
