@@ -19305,8 +19305,8 @@ function dashInit() {
           <div class="dvg-carddark"><h3 style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">${bk.titulo}</h3>
             <div style="height:240px;"><canvas id="prMensal"></canvas></div>
           </div>
-          <div class="d-card"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px"><h3 class="font-semibold text-[15px]">Top 10 produtos</h3><div id="prTopBtns" style="display:flex;gap:4px">${topBtn('fat','R$')}${topBtn('kg','kg')}${topBtn('cx','caixas')}${topBtn('cli','clientes')}</div></div>
-            <div id="prTopList"></div>
+          <div class="d-card" style="position:relative;padding:0;min-height:320px"><div style="position:absolute;inset:0;padding:14px;display:flex;flex-direction:column"><div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;flex:none"><h3 class="font-semibold text-[15px]">Top 10 produtos</h3><div id="prTopBtns" style="display:flex;gap:4px">${topBtn('fat','R$')}${topBtn('kg','kg')}${topBtn('cx','caixas')}${topBtn('cli','clientes')}</div></div>
+            <div id="prTopList" style="flex:1;min-height:0;overflow-y:auto;padding-right:4px"></div></div>
           </div>
         </div>
 
