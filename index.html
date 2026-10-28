@@ -17394,7 +17394,7 @@ function dashInit() {
       const cliFabs = new Map();
       for (const p of peds) {
         fat += p[5]; vol += p[4]; _idsP.add(p[8] != null ? p[8] : p); pesoKg += (p[7]||0); caixas += (p[9]||0);
-        if (!CLI_INATIVO[p[1]]) cliSet.add(p[1]); // v46: so cliente ativo no cadastro (igual a aba Clientes)
+        cliSet.add(p[1]); // v192: conta todo cliente que comprou no periodo (inclusive os que hoje estao inativos), senao o comparativo com anos anteriores fica subestimado
         let s = cliFabs.get(p[1]); if (!s) { s = new Set(); cliFabs.set(p[1], s); }
         s.add(p[2]);
       }
@@ -17411,6 +17411,8 @@ function dashInit() {
         if (state.uf.size) { const _ui = ufIdxOf[CLI_UF[_i]]; if (_ui === undefined || !state.uf.has(_ui)) continue; }
         carteira++;
       }
+      // v192: inativos que compraram no periodo entram na base do periodo (positivacao nunca passa de 100%)
+      cliSet.forEach(ci => { if (CLI_INATIVO[ci]) carteira++; });
       const pos = carteira ? ativos/carteira : 0;
       return { fat, vol, pesoKg, caixas, ticket, ativos, mix, pos, nPedidos: n, carteira };
     }
@@ -17933,7 +17935,7 @@ function dashInit() {
               <div><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div class="dvg-kpi-val" id="dvgKpiCli">0</div>${_dvgTrendCli}</div>
               <div><div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div>${_dvgTrendPos}</div>
             </div>
-            <div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} clientes ativos na base</div>${_dvgCmpCliPos}
+            <div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} clientes na base</div>${_dvgCmpCliPos}
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #5b78c9">
             <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#5b78c9"><i class="ti ti-receipt"></i></div><div class="dvg-kpi-lbl">TICKET MÉDIO</div></div>${_dvgTrendTicket}</div>
@@ -18029,7 +18031,7 @@ function dashInit() {
         else if (_gModo === 'tri') pos = _gIdx.get(p[0].slice(0,7));
         else pos = (parseInt(p[0].slice(5,7),10)-1 === _gMi && parseInt(p[0].slice(0,4),10) === _gAi) ? _gIdx.get('d' + parseInt(p[0].slice(8,10),10)) : undefined;
         if (pos === undefined) continue;
-        if (CLI_INATIVO[p[1]]) continue; _pBk[pos].add(p[1]); if (pos > _pUlt) _pUlt = pos;
+        _pBk[pos].add(p[1]); if (pos > _pUlt) _pUlt = pos;
       }
       const _pPrim = _pBk.findIndex(st => st.size > 0);
       const acumSet = new Set(); const acumX=[]; const acumY=[];
@@ -18146,7 +18148,7 @@ function dashInit() {
       const antMes = (() => { if (!ultMes) return ''; const [y,m] = ultMes.split('-').map(Number); const dt = new Date(y, m-2, 1); return dt.toISOString().slice(0,7); })();
       for (const p of peds) {
         let a = ag.get(p[3]); if (!a) { a = { fat:0, vol:0, n:0, cli:new Set(), fab:new Set(), fatM:0, fatA:0 }; ag.set(p[3], a); }
-        a.fat += p[5]; a.vol += p[4]; _cntP(a, p); if (!CLI_INATIVO[p[1]]) a.cli.add(p[1]); a.fab.add(p[2]);
+        a.fat += p[5]; a.vol += p[4]; _cntP(a, p); a.cli.add(p[1]); a.fab.add(p[2]);
         const mes = p[0].slice(0,7);
         if (mes === ultMes) a.fatM += p[5];
         else if (mes === antMes && (!_mesAberto || parseInt(p[0].slice(8,10),10) <= _diaCorte)) a.fatA += p[5];
