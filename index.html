@@ -1879,7 +1879,9 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 .dash-root .dvg-greet{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px}
 .dash-root .dvg-greet-txt{font-size:14px;font-weight:700;color:#1e293b}
 .dash-root .dvg-greet-txt span{font-weight:400;color:#64748b;font-size:11px;margin-left:8px}
-.dash-root .dvg-kpis{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.dash-root .dvg-kpis{display:grid;grid-template-columns:1.5fr 1fr 1.3fr 1fr 1.15fr;gap:12px;margin-bottom:14px}
+.dash-root .dvg-kpi-half{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:2px}
+.dash-root .dvg-kpi-half .dvg-kpi-val{margin-top:2px}
 .dash-root .dvg-cli-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
 .dash-root .dvg-hero{background:linear-gradient(135deg,#14162c 0%,#272A4A 55%,#40446e 100%);border-radius:16px;padding:22px 26px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 22px rgba(0,0,0,.22)}
 .dash-root .dvg-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
@@ -17834,6 +17836,25 @@ function dashInit() {
       if (!fatAnterior) return null;
       return (fatAtual - fatAnterior) / fatAnterior;
     }
+    // v190: quantos produtos distintos tiveram venda no periodo (e no mesmo periodo do ano anterior) e quantos estao ativos no cadastro
+    function _dvgMixProdutos() {
+      const out = { n: 0, nAnt: 0, ativos: 0 };
+      try {
+        const linhas = _pdLinhas();
+        const cmp = _dvgPeriodoComparacao();
+        const a = new Set(), b = new Set();
+        for (const l of linhas) {
+          if (l.data >= state.dtIni && l.data <= state.dtFim) a.add(l.k);
+          else if (l.data >= cmp.dtIni && l.data <= cmp.dtFim) b.add(l.k);
+        }
+        out.n = a.size; out.nAnt = b.size;
+        out.ativos = (getProdutos() || []).filter(p => (p.ativo || 'Sim') !== 'Não').filter(p => {
+          const ix = FAB_ID.indexOf(p.fornecedor);
+          return !(state.fabricas.size && ix >= 0 && !state.fabricas.has(ix));
+        }).length;
+      } catch (e) { /* getPedidos/getProdutos indisponiveis neste contexto */ }
+      return out;
+    }
     function renderHome() {
       const peds = filtraPedidos();
       const k = kpis(peds);
@@ -17870,6 +17891,26 @@ function dashInit() {
         const _dvgCmpPos = _dvgKAnt ? _dvgCmpHtml(k.pos * 100, _dvgKAnt.pos * 100, v => v.toFixed(1).replace('.', ',') + '%', '#3d5aa8') : '';
         const _dvgCmpTicket = _dvgKAnt ? _dvgCmpHtml(k.ticket, _dvgKAnt.ticket, _dvgFmtBRLAbrev, '#5b78c9') : '';
         const _dvgCmpCli = _dvgKAnt ? _dvgCmpHtml(k.ativos, _dvgKAnt.ativos, v => fmtNum(v), '#7b93d9') : '';
+        // v190: card unico Positivacao + Clientes ativos e card Mix de produtos
+        const _dvgCmpCliPos = (_dvgKAnt && (_dvgKAnt.ativos || _dvgKAnt.pos)) ? (() => {
+          const mx = Math.max(k.ativos, _dvgKAnt.ativos, 1);
+          const fp = v => (v * 100).toFixed(1).replace('.', ',') + '%';
+          return '<div class="dvg-kpi-cmp">'
+            + '<div class="dvg-kpi-cmp-row"><span>' + _dvgLblAt + '</span><b>' + fmtNum(k.ativos) + ' clientes · ' + fp(k.pos) + '</b></div>'
+            + '<div class="dvg-kpi-cmp-bar"><span style="width:' + (k.ativos / mx * 100).toFixed(1) + '%;background:#3d5aa8"></span></div>'
+            + '<div class="dvg-kpi-cmp-row"><span>' + _dvgLblAnt + '</span><b>' + fmtNum(_dvgKAnt.ativos) + ' clientes · ' + fp(_dvgKAnt.pos) + '</b></div>'
+            + '<div class="dvg-kpi-cmp-bar"><span style="width:' + (_dvgKAnt.ativos / mx * 100).toFixed(1) + '%;background:#c9d4ee"></span></div></div>';
+        })() : '';
+        const _dvgMix = _dvgMixProdutos();
+        const _dvgTrendMix = _dvgMix.nAnt > 0 ? (() => { const d = _dvgMix.n - _dvgMix.nAnt; return '<div class="dvg-kpi-trend ' + (d >= 0 ? 'up' : 'down') + '">' + (d >= 0 ? '▲' : '▼') + ' ' + Math.abs(d).toLocaleString('pt-BR') + ' ite' + (Math.abs(d) === 1 ? 'm' : 'ns') + '</div>'; })() : '';
+        const _dvgCmpMix = _dvgMix.nAnt > 0 ? (() => {
+          const mx = Math.max(_dvgMix.n, _dvgMix.nAnt, 1);
+          return '<div class="dvg-kpi-cmp">'
+            + '<div class="dvg-kpi-cmp-row"><span>' + _dvgLblAt + '</span><b>' + fmtNum(_dvgMix.n) + ' produtos</b></div>'
+            + '<div class="dvg-kpi-cmp-bar"><span style="width:' + (_dvgMix.n / mx * 100).toFixed(1) + '%;background:#0e2f6e"></span></div>'
+            + '<div class="dvg-kpi-cmp-row"><span>' + _dvgLblAnt + '</span><b>' + fmtNum(_dvgMix.nAnt) + ' produtos</b></div>'
+            + '<div class="dvg-kpi-cmp-bar"><span style="width:' + (_dvgMix.nAnt / mx * 100).toFixed(1) + '%;background:#c9d4ee"></span></div></div>';
+        })() : '';
         kpiEl.innerHTML = `
           <div class="dvg-hero">
             <div class="dvg-hero-top">
@@ -17887,16 +17928,24 @@ function dashInit() {
             <div class="dvg-kpi-val" id="dvgKpiVol">0 kg</div><div class="dvg-kpi-sub">${Math.round(k.caixas).toLocaleString('pt-BR')} cx faturadas no período</div>${_dvgCmpVol}
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #3d5aa8">
-            <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#3d5aa8"><i class="ti ti-target-arrow"></i></div><div class="dvg-kpi-lbl">POSITIVAÇÃO</div></div>${_dvgTrendPos}</div>
-            <div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div><div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} ativos</div>${_dvgCmpPos}
+            <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#3d5aa8"><i class="ti ti-target-arrow"></i></div><div class="dvg-kpi-lbl">POSITIVAÇÃO DE CLIENTES</div></div></div>
+            <div class="dvg-kpi-half">
+              <div><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div class="dvg-kpi-val" id="dvgKpiCli">0</div>${_dvgTrendCli}</div>
+              <div><div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div>${_dvgTrendPos}</div>
+            </div>
+            <div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} clientes ativos na base</div>${_dvgCmpCliPos}
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #5b78c9">
             <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#5b78c9"><i class="ti ti-receipt"></i></div><div class="dvg-kpi-lbl">TICKET MÉDIO</div></div>${_dvgTrendTicket}</div>
             <div class="dvg-kpi-val" id="dvgKpiTicket">R$ 0,00</div><div class="dvg-kpi-sub">por pedido</div>${_dvgCmpTicket}
           </div>
-          <div class="dvg-kpi" style="border-bottom:3px solid #7b93d9">
-            <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#7b93d9"><i class="ti ti-users"></i></div><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div></div>${_dvgTrendCli}</div>
-            <div class="dvg-kpi-val" id="dvgKpiCli">0</div><div class="dvg-kpi-sub">no período</div>${_dvgCmpCli}
+          <div class="dvg-kpi" style="border-bottom:3px solid #0e2f6e">
+            <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#0e2f6e"><i class="ti ti-layout-grid"></i></div><div class="dvg-kpi-lbl">MIX DE PRODUTOS</div></div>${_dvgTrendMix}</div>
+            <div class="dvg-kpi-half">
+              <div><div class="dvg-kpi-lbl">PRODUTOS VENDIDOS</div><div class="dvg-kpi-val" id="dvgKpiMixN">0</div></div>
+              <div><div class="dvg-kpi-lbl">DO CADASTRO</div><div class="dvg-kpi-val" id="dvgKpiMixPct" style="color:#3d5aa8">0%</div></div>
+            </div>
+            <div class="dvg-kpi-sub">${_dvgMix.n.toLocaleString('pt-BR')} de ${_dvgMix.ativos.toLocaleString('pt-BR')} produtos ativos tiveram venda</div>${_dvgCmpMix}
           </div>
         `;
         _dvgAnimateHero(k.fat);
@@ -17906,6 +17955,8 @@ function dashInit() {
         _dvgCountUp(document.getElementById('dvgKpiPos'), k.pos*100, 1, '', '%');
         _dvgAnimarNumero(document.getElementById('dvgKpiTicket'), k.ticket, _dvgFmtBRLAbrev);
         _dvgCountUp(document.getElementById('dvgKpiCli'), k.ativos, 0, '', '');
+        _dvgCountUp(document.getElementById('dvgKpiMixN'), _dvgMix.n, 0, '', '');
+        _dvgCountUp(document.getElementById('dvgKpiMixPct'), _dvgMix.ativos ? _dvgMix.n / _dvgMix.ativos * 100 : 0, 0, '', '%');
       }
 
       // Faturamento mensal
@@ -18815,14 +18866,34 @@ function dashInit() {
         if (_old) { metaF = _old; atinge = fat / _old; metaTxt = fmtBRL(_old); }
       }
 
+      // v191: representatividade de clientes — ativos (cadastro, filtros UF/cliente) que ja compraram na fabrica em qualquer data
+      const _fcOk = (ci) => { if (CLI_INATIVO[ci]) return false; if (state.clientes.size && !state.clientes.has(ci)) return false; if (state.uf.size) { const _ui = ufIdxOf[CLI_UF[ci]]; if (_ui === undefined || !state.uf.has(_ui)) return false; } return true; };
+      let _fcBase = 0; for (let _i=0;_i<CLI.length;_i++) { if (_fcOk(_i)) _fcBase++; }
+      const _fcJa = new Set(filtraPedidos({dtIni:'0000-01-01', dtFim:'9999-12-31', ignorarFabrica:true}).filter(p => p[2]===fi && _fcOk(p[1])).map(p => p[1]));
+      const _fcPer = new Set(peds.filter(p => _fcOk(p[1])).map(p => p[1])); _fcPer.forEach(c => _fcJa.add(c));
+      const _fcPctBase = _fcBase ? _fcJa.size/_fcBase : 0;
+      const _fcPctPer = _fcJa.size ? _fcPer.size/_fcJa.size : 0;
+      const _fcW = v => Math.max(0, Math.min(100, v*100)).toFixed(1);
+      const _fcFatBox = `<div><div style="font-size:11px;opacity:.8;font-weight:600">FATURAMENTO</div><div id="fabKpiFat" style="font-size:28px;font-weight:800;letter-spacing:-.02em;margin-top:4px;line-height:1.15">${_dvgFmtBRLAbrev(0)}</div><div style="font-size:11px;opacity:.65">${fmtBRL(fat)}</div></div>`;
+      const _fcVolBox = `<div><div style="font-size:11px;opacity:.8;font-weight:600">VOLUME</div><div id="fabKpiVol" style="font-size:28px;font-weight:800;letter-spacing:-.02em;margin-top:4px;line-height:1.15">0 kg</div><div style="font-size:11px;opacity:.65">peso líquido faturado</div></div>`;
+      const _fcHero = `<div style="background:linear-gradient(135deg,#1a1d3a,#3d4180 70%,#2e4a7a);color:#fff;border-radius:16px;padding:18px 22px;box-shadow:0 6px 20px rgba(26,29,58,.35);display:flex;flex-direction:column;justify-content:center">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:12px;opacity:.85;font-weight:600">Faturamento e Volume do Período</span><span style="background:rgba(255,255,255,.16);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap">${n} pedidos</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:18px;align-items:center;margin-top:8px">${_fabKgPri ? _fcVolBox : _fcFatBox}<div style="background:rgba(255,255,255,.22);height:64px"></div>${_fabKgPri ? _fcFatBox : _fcVolBox}</div>
+          <div style="font-size:11px;opacity:.65;margin-top:10px">${_fabKg>0 ? 'Preço médio ' + fmtBRL(fat/_fabKg) + ' / kg' : 'Sem peso informado no período'}</div></div>`;
+      const _fcCli = `<div style="background:#fff;border:1px solid #e5e7eb;border-bottom:3px solid #5b78c9;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
+          <div style="font-size:11px;color:#64748b;font-weight:600">Clientes</div>
+          <div style="display:flex;align-items:baseline;gap:8px"><div id="fabKpiCli" style="font-size:22px;font-weight:800;color:#1c2f66;line-height:1.2;letter-spacing:-.02em">0</div><span style="font-size:11px;color:#94a3b8">compraram no período</span></div>
+          <div style="font-size:12px;color:#3d5aa8;font-weight:800">${_fcBase ? fmtPct(_fcPctBase) + ' dos ativos já compraram na fábrica' : 'sem clientes ativos na base'}</div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;gap:6px;margin-top:6px"><span>Já compraram na ${escapeHtml(FAB[fi])}</span><b style="color:#1e293b;white-space:nowrap">${_fcJa.size.toLocaleString('pt-BR')} de ${_fcBase.toLocaleString('pt-BR')}</b></div>
+          <div style="height:7px;border-radius:4px;background:#e2e8f0;overflow:hidden;margin:3px 0 7px"><i style="display:block;height:100%;border-radius:4px;width:${_fcW(_fcPctBase)}%;background:#3d5aa8"></i></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;gap:6px"><span>Compraram no período</span><b style="color:#1e293b;white-space:nowrap">${_fcPer.size.toLocaleString('pt-BR')} · ${_fcJa.size ? fmtPct(_fcPctPer) : '—'} deles</b></div>
+          <div style="height:7px;border-radius:4px;background:#e2e8f0;overflow:hidden;margin:3px 0 0"><i style="display:block;height:100%;border-radius:4px;width:${_fcW(_fcBase ? _fcPer.size/_fcBase : 0)}%;background:#7b93d9"></i></div>
+        </div>`;
       document.getElementById('fabFicha').innerHTML = `
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          ${kpiCard('Faturamento', _dvgFmtBRLAbrev(fat), 'brand', `${n} pedidos`, null, 0, {id:'fabKpiFat', fmt:_dvgFmtBRLAbrev}, fmtBRL(fat))}
-          ${_fabKgPri
-            ? kpiCard('Volume', Math.round(_fabKg).toLocaleString('pt-BR') + ' kg', 'good', 'peso líquido faturado', null, 1, {id:'fabKpiVol', fmt:v=>Math.round(v).toLocaleString('pt-BR') + ' kg'}, fmtBRL(fat))
-            : kpiCard('Volume', _dvgFmtBRLAbrev(fat), 'good', 'valor faturado', null, 1, {id:'fabKpiVol', fmt:_dvgFmtBRLAbrev}, Math.round(_fabKg).toLocaleString('pt-BR') + ' kg')}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.9fr_1fr_1.25fr_1fr_1fr] gap-3 items-stretch">
+          ${_fcHero}
           ${kpiCard('% do total', fmtPct(part), 'brand', 'da Compartilhar no período', null, 2, {id:'fabKpiPart', fmt:fmtPct})}
-          ${kpiCard('Clientes', cli.toLocaleString('pt-BR'), 'good', 'ativos no período', null, 3, {id:'fabKpiCli', fmt:v=>Math.round(v).toLocaleString('pt-BR')})}
+          ${_fcCli}
           ${kpiCard('Ticket médio', _dvgFmtBRLAbrev(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:_dvgFmtBRLAbrev}, fmtBRL(ticket))}
           ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${metaTxt}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null)}
         </div>
@@ -18854,9 +18925,9 @@ function dashInit() {
         </div>
       `;
       _dvgAnimarNumero(document.getElementById('fabKpiFat'), fat, _dvgFmtBRLAbrev);
-      if (_fabKgPri) _dvgAnimarNumero(document.getElementById('fabKpiVol'), _fabKg, v => Math.round(v).toLocaleString('pt-BR') + ' kg'); else _dvgAnimarNumero(document.getElementById('fabKpiVol'), fat, _dvgFmtBRLAbrev);
+      _dvgAnimarNumero(document.getElementById('fabKpiVol'), _fabKg, v => Math.round(v).toLocaleString('pt-BR') + ' kg');
       _dvgAnimarNumero(document.getElementById('fabKpiPart'), part, fmtPct);
-      _dvgAnimarNumero(document.getElementById('fabKpiCli'), cli, v => Math.round(v).toLocaleString('pt-BR'));
+      _dvgAnimarNumero(document.getElementById('fabKpiCli'), _fcPer.size, v => Math.round(v).toLocaleString('pt-BR'));
       _dvgAnimarNumero(document.getElementById('fabKpiTicket'), ticket, _dvgFmtBRLAbrev);
       if (atinge != null) _dvgAnimarNumero(document.getElementById('fabKpiMeta'), atinge, fmtPct);
       // Mensal (linha com brilho, mesmo padrão do drill-down de Vendedores)
