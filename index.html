@@ -1965,7 +1965,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
       .dash-root #dvgAbcDonutLegend .dvg-leg-pct{font-size:14px;color:#fff;font-weight:800;white-space:nowrap;flex-shrink:0}
 .dash-root .dvg-leg-row.active .dvg-leg-pct{color:#fff}
 .dash-root .dvg-btnlimpar{font-size:10.5px;color:#a9c2f5;background:none;border:none;cursor:pointer;text-decoration:underline;padding:0}
-.dash-root .dvg-ranks{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.dash-root .dvg-ranks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
 .dash-root .dvg-rankcard{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 4px 16px rgba(15,23,42,.08)}
 .dash-root .dvg-rankcard-tit{font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px}
 .dash-root .dvg-rrow{display:flex;align-items:center;gap:10px;margin-bottom:6px}
@@ -2155,6 +2155,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
   <div class="dvg-ranks">
     <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 Vendedores</div><div id="topVendedores"><div class="dvg-skel-row"></div><div class="dvg-skel-row"></div><div class="dvg-skel-row"></div></div></div>
     <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 Clientes</div><div id="topClientes"><div class="dvg-skel-row"></div><div class="dvg-skel-row"></div><div class="dvg-skel-row"></div></div></div>
+    <div class="dvg-rankcard"><div class="dvg-rankcard-tit">Top 5 Produtos</div><div id="topProdutos"><div class="dvg-skel-row"></div><div class="dvg-skel-row"></div><div class="dvg-skel-row"></div></div></div>
   </div>
   <div class="dvg-scrub" id="dvgScrubCard">
     <div class="dvg-scrub-top">
@@ -17947,8 +17948,8 @@ function dashInit() {
           <div class="dvg-kpi" style="border-bottom:3px solid #3d5aa8">
             <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#3d5aa8"><i class="ti ti-target-arrow"></i></div><div class="dvg-kpi-lbl">POSITIVAÇÃO DE CLIENTES</div></div></div>
             <div class="dvg-kpi-half">
-              <div><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div class="dvg-kpi-val" id="dvgKpiCli">0</div>${_dvgTrendCli}</div>
-              <div><div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div>${_dvgTrendPos}</div>
+              <div><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap"><div class="dvg-kpi-val" id="dvgKpiCli">0</div>${_dvgTrendCli}</div></div>
+              <div><div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap"><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div>${_dvgTrendPos}</div></div>
             </div>
             <div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} clientes na base</div>${_dvgCmpCliPos}
           </div>
@@ -18073,6 +18074,13 @@ function dashInit() {
       for (const p of peds) porCli[p[1]] += p[5];
       const topC = porCli.map((v,i)=>({i,v})).sort((a,b)=>b.v-a.v).slice(0,5).filter(x=>x.v>0);
       _dvgRenderRank('topClientes', topC.map(x=>({nome:CLI[x.i], val:x.v})));
+
+      // v196: Top produtos (faturamento por produto no periodo, respeita os filtros do topo)
+      try {
+        const _tpCur = _pdLinhas().filter(l => l.data >= state.dtIni && l.data <= state.dtFim);
+        const _tpTop = [..._pdAgg(_tpCur).values()].sort((a,b)=>b.fat-a.fat).slice(0,5).filter(x=>x.fat>0);
+        _dvgRenderRank('topProdutos', _tpTop.map(x=>({nome:x.nome, val:x.fat})));
+      } catch (e) { _dvgRenderRank('topProdutos', []); }
     }
     function kpiCard(titulo, valor, color, sub, kind, idx, anim, exact) {
       const _gradStops = ['#1c2f66', '#2c4488', '#3d5aa8', '#5b78c9', '#7b93d9', '#a9c2f5'];
@@ -35590,13 +35598,14 @@ function _drMontarDocumentoPdf(grupos, subtitulo) {
             + '<th style="padding:6px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor (R$)</th>'
             + '</tr></thead><tbody>' + linhasHtml + '</tbody></table>')
         : '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum registro encontrado com esses filtros.</div>')
-    + '<div style="display:flex;justify-content:flex-end;gap:22px;border-top:1.5px solid #272A4A;padding-top:10px;flex-wrap:wrap">'
+    + (grupos.length > 1 ? (''
+      + '<div style="display:flex;justify-content:flex-end;gap:22px;border-top:1.5px solid #272A4A;padding-top:10px;flex-wrap:wrap">'
       + '<div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Cadastrados</div><div style="font-size:14px;font-weight:800;color:#272A4A">' + totCad + '</div></div>'
       + '<div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Comprados</div><div style="font-size:14px;font-weight:800;color:#15803D">' + totComp + '</div></div>'
       + '<div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Sem venda</div><div style="font-size:14px;font-weight:800;color:#DC2626">' + totSem + '</div></div>'
       + '<div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Positivação</div><div style="font-size:14px;font-weight:800;color:#DE7926">' + (totCad ? (totComp / totCad * 100) : 0).toFixed(1) + '%</div></div>'
       + '<div style="text-align:right"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">Valor faturado</div><div style="font-size:14px;font-weight:800;color:#272A4A">' + _drFormatarPreco(totVal) + '</div></div>'
-    + '</div>';
+      + '</div>') : '');
 }
 
 // PDF completo de Dados Representadas: resumo Rede/Loja (como sempre foi) + 1 secao por
