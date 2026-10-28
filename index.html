@@ -5919,7 +5919,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
       </style>
         <div class="dev-mobile-actions" style="display:none;margin-bottom:10px">
           <button onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#DE7926;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">➕ Cadastrar</button>
-          <button onclick="emlAbrir()" style="width:100%;margin-top:8px;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer">&#9993; Importar e-mails da fábrica</button>
+          <button onclick="emlMenu(this)" style="width:100%;margin-top:8px;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer">Importar &#9662;</button>
         </div>
       <div id="dev-status-chips"></div>
       <div id="dev-kpis"></div>
@@ -5931,7 +5931,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <div><label>Motivo</label><select id="dev-f-motivo" onchange="_devAoTrocarMotivo()"><option value="">Todos</option></select></div>
           <div><label>UF</label><select id="dev-f-uf" onchange="renderDevolucaoList()"><option value="">Todas</option></select></div>
           <div><label>Vendedor</label><select id="dev-f-vend" onchange="renderDevolucaoList()"><option value="">Todos</option></select></div>
-          <div style="display:flex;gap:8px"><button onclick="_devLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button><button class="dev-hdr-mobile-hide" onclick="emlAbrir()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap">&#9993; Importar e-mails</button><button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">➕ Cadastrar</button></div>
+          <div style="display:flex;gap:8px"><button onclick="_devLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button><button class="dev-hdr-mobile-hide" onclick="emlMenu(this)" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap">Importar &#9662;</button><button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">➕ Cadastrar</button></div>
         </div>
       </div>
       <div id="dev-graficos"></div>
@@ -7700,15 +7700,17 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 <div id="eml-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9998;align-items:center;justify-content:center;padding:12px;box-sizing:border-box">
   <div style="background:#fff;border-radius:14px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden">
     <div style="background:linear-gradient(135deg,#272A4A,#3d4180);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between">
-      <div><div style="font-size:14px;font-weight:600">Importar e-mails de devolução da fábrica</div><div style="font-size:10.5px;color:rgba(255,255,255,.55)">Cole ou arraste o e-mail &middot; o sistema confere o cliente e lança só o que bater</div></div>
+      <div><div style="font-size:14px;font-weight:600">Importar devolução</div><div style="font-size:10.5px;color:rgba(255,255,255,.55)">Cole o e-mail ou anexe o XML da NFD &middot; o sistema confere o cliente e lança só o que bater</div></div>
       <button onclick="emlFechar()" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px">Fechar</button>
     </div>
     <div style="padding:14px 18px;overflow:auto">
-      <div id="eml-entrada"><textarea id="eml-texto" placeholder="Cole aqui o texto do e-mail (pode colar vários de uma vez) ou arraste os e-mails para cá..." ondragover="event.preventDefault()" ondrop="_emlSolto(event)" onpaste="setTimeout(_emlAnalisar,80)" style="width:100%;box-sizing:border-box;height:120px;border:2px dashed #cbd5e1;border-radius:10px;padding:10px;font-size:12px;font-family:inherit;resize:vertical"></textarea>
+      <div id="eml-entrada"><textarea id="eml-texto" placeholder="Cole aqui o texto do e-mail (pode colar vários de uma vez) ou arraste e-mails / arquivos XML para cá..." ondragover="event.preventDefault()" ondrop="_emlSolto(event)" onpaste="setTimeout(_emlAnalisar,80)" style="width:100%;box-sizing:border-box;height:120px;border:2px dashed #cbd5e1;border-radius:10px;padding:10px;font-size:12px;font-family:inherit;resize:vertical"></textarea>
       <div style="display:flex;gap:8px;margin:8px 0 12px;align-items:center;flex-wrap:wrap">
         <button onclick="_emlAnalisar()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">Analisar</button></div></div>
       <div style="display:flex;gap:8px;margin:0 0 10px;align-items:center;flex-wrap:wrap">
-        <button id="eml-btn-novo" onclick="_emlNovo()" style="display:none;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">&#9993; Colar outro e-mail</button>
+        <button id="eml-btn-novo" onclick="_emlNovo()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">&#9993; Colar e-mail</button>
+        <button id="eml-btn-xml" onclick="document.getElementById('eml-xml-input').click()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">Anexar XML</button>
+        <input type="file" id="eml-xml-input" accept=".xml,text/xml,application/xml" multiple style="display:none" onchange="_emlXmlEscolhidos(this)">
         <button id="eml-btn-lancar" onclick="_emlLancar()" style="display:none;background:#15803d;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">Lançar selecionadas</button>
         <span id="eml-msg" style="font-size:11.5px;font-weight:600"></span>
       </div>
@@ -25395,7 +25397,7 @@ function _rqExcluir(id) {
 function _rqToggle(id) {
   var r = _rqCache.find(function (x) { return x.id === id; }); if (!r) return;
   var novo = Object.assign({}, r, { ativo: r.ativo === 'Não' ? 'Sim' : 'Não' });
-  _rqGravarNoBanco([novo]).then(function () { r.ativo = novo.ativo; renderBloqueios(); })
+  _rqGravarNoBanco([novo]).then(function () { r.ativo = novo.ativo; var fsel = document.getElementById('rq-f-sit'); if (fsel && (fsel.value === 'ativas' || fsel.value === 'pausadas')) fsel.value = 'todas'; renderBloqueios(); })
     .catch(function (err) { alert('Não foi possível alterar: ' + err.message); });
 }
 function _rqLimparFiltros() {
@@ -27913,9 +27915,9 @@ function renderDevolucaoList() {
   var kp = document.getElementById('dev-kpis');
   if (kp) kp.innerHTML = _devBranco(
     _devKpiCard('Devoluções no período', atual.n.toLocaleString('pt-BR'), _devVar(atual.n, ant ? ant.n : null), (ant ? 'vs período anterior · ' : '') + atual.abertas + ' em aberto', '#1c2f66')
-    + _devKpiCard('Valor devolvido', _devFmtKg(atual.kg), _devVar(atual.v, ant ? ant.v : null), _pedFmtMoeda(atual.v), '#2c4488', true)
-    + _devKpiCard('% sobre faturamento', pct.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%', _devVar(pct, pctAnt, true), _devFmtK(atual.v) + ' de ' + _devFmtK(fat) + ' faturado', '#3d5aa8')
-    + _devKpiCard('Principal motivo', motTop ? _pedEsc(motTop) : '—', '', motTop && atual.v ? Math.round((atual.motivo[motTop] / atual.v) * 100) + '% do valor devolvido' : 'sem devoluções', '#5b78c9'));
+    + _devKpiCard('% sobre faturamento', pct.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%', _devVar(pct, pctAnt, true), _devFmtK(atual.v) + ' de ' + _devFmtK(fat) + ' faturado', '#2c4488')
+    + _devKpiCard('Principal motivo', motTop ? _pedEsc(motTop) : '—', '', motTop && atual.v ? Math.round((atual.motivo[motTop] / atual.v) * 100) + '% do valor devolvido' : 'sem devoluções', '#3d5aa8')
+    + _devKpiCard('Valor devolvido', _devFmtKg(atual.kg), _devVar(atual.v, ant ? ant.v : null), _pedFmtMoeda(atual.v), '#5b78c9', true));
 
   // evolução: 6 meses terminando no fim do período (ou mês atual)
   var fimRef = per ? per.fimDt : new Date();
@@ -27976,8 +27978,15 @@ function renderDevolucaoList() {
 var _emlRes = [];
 function _emlNum(s) { return parseFloat(String(s || '0').replace(/\./g, '').replace(',', '.')) || 0; }
 function _emlSemZeros(s) { return String(s || '').trim().replace(/^0+(?=\d)/, ''); }
-function _emlIso(br) { var m = String(br || '').match(/(\d{2})\/(\d{2})\/(\d{4})/); return m ? m[3] + '-' + m[2] + '-' + m[1] : ''; }
+function _emlIso(br) { var m = String(br || '').match(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})\b/); return m ? ((m[3].length === 2 ? '20' + m[3] : m[3]) + '-' + m[2] + '-' + m[1]) : ''; }
 // Le o texto de 1 ou varios e-mails e devolve [{codCli, nomeCli, nfd, serie, dataEmissao, itens:[{cod,desc,qtd,valor,nfVenda}], fornTxt}]
+function _emlAprovDoTexto(jan) {
+  var ult = function (re) { var m, p = -1; re.lastIndex = 0; while ((m = re.exec(jan))) p = m.index; return p; };
+  var pn = ult(/desconhecimento\s+de\s+opera|n[ãa]o\s+reconhecid|desacordo\s+com\s+a\s+pol[ií]tica/gi);
+  var pa = ult(/aprovad[ao]s?\b/gi);
+  if (pn >= 0 && pn >= pa) return 'nao';
+  return pa >= 0 ? 'sim' : '';
+}
 function _emlParse(texto) {
   var t = String(texto || '').replace(/ /g, ' ').replace(/\r/g, '');
   var out = [];
@@ -27986,11 +27995,12 @@ function _emlParse(texto) {
   marcas.forEach(function (mk, k) {
     var ate = k + 1 < marcas.length ? marcas[k + 1].i : t.length;
     var bloco = t.slice(mk.fim, ate).replace(/\s+/g, ' ');
-    var rr = /(\d{4,10})-(\d{1,4})\s*\/\s*(\d{2}\/\d{2}\/\d{4})\s+(\d+)\s+(.+?)\s+(\d[\d.]*,\d{2,4})\s+(\d[\d.]*,\d{2})\s+(\d+)\s+(\d+)/g, r;
+    var aprovMk = _emlAprovDoTexto(t.slice(Math.max(0, mk.i - 700), mk.i));
+    var rr = /(\d{4,10})-(\d{1,4})\s*\/\s*(\d{2}\/\d{2}\/(?:\d{4}|\d{2}))\s+(\d+)\s+(.+?)\s+(\d[\d.]*,\d{2,4})\s+(\d[\d.]*,\d{2})\s+(\d+)\s+(\d+)/g, r;
     var porNfd = {}, ordem = [];
     while ((r = rr.exec(bloco))) {
       var chave = r[1] + '-' + r[2];
-      if (!porNfd[chave]) { porNfd[chave] = { codCli: mk.cod, nomeCli: mk.nome, nfd: _emlSemZeros(r[1]), serie: r[2], dataEmissao: _emlIso(r[3]), itens: [] }; ordem.push(chave); }
+      if (!porNfd[chave]) { porNfd[chave] = { codCli: mk.cod, nomeCli: mk.nome, nfd: _emlSemZeros(r[1]), serie: r[2], dataEmissao: _emlIso(r[3]), aprov: aprovMk, itens: [] }; ordem.push(chave); }
       porNfd[chave].itens.push({ cod: _emlSemZeros(r[4]), desc: r[5].trim(), qtd: _emlNum(r[6]), valor: _emlNum(r[7]), nfVenda: _emlSemZeros(r[8]) });
     }
     ordem.forEach(function (c) { out.push(porNfd[c]); });
@@ -28082,101 +28092,269 @@ function _emlAchaProduto(forn, cod) {
   var c = _emlSemZeros(cod);
   return prods.find(function (p) { return String(p.fornecedor || '') === String(forn.id) && _emlSemZeros(p.codigo) === c; }) || null;
 }
-function _emlAnalisar() {
-  var texto = (document.getElementById('eml-texto') || {}).value || '';
-  var el = document.getElementById('eml-resultado'); if (!el) return;
-  var lista = _emlParse(texto);
-  var forn = _emlFornDoTexto(texto);
-  var jaTem = getDevolucoes();
-  _emlRes = lista.map(function (d, i) {
-    var r = { d: d, forn: forn, cli: null, itens: [], motivo: '', erros: [], jaLancada: false, nfOrigem: '', dataNfOrigem: '', total: 0 };
-    if (!forn) r.erros.push('Fábrica não identificada no e-mail');
-    d.itens.forEach(function (it) {
-      var p = forn ? _emlAchaProduto(forn, it.cod) : null;
-      if (!p && forn) r.erros.push('Produto ' + it.cod + ' (' + it.desc + ') não encontrado');
-      r.itens.push({ it: it, p: p });
-      r.total += it.valor;
+var EML_TXT_CANCEL = 'Não aprovada pela fábrica — manifestada como Desconhecimento de Operação, em desacordo com a política de devolução da companhia.';
+// quanto foi faturado por produto na NF de origem (null = NF nao localizada nos pedidos do cliente)
+function _emlFaturadoNf(forn, cliId, nf) {
+  var alvo = _emlSemZeros(nf), mapa = null;
+  if (!alvo) return null;
+  getPedidos().forEach(function (p) {
+    if (String(p.fornecedorId || '') !== String(forn.id) || String(p.clienteId) !== String(cliId)) return;
+    (p.faturas || []).forEach(function (f) {
+      if (f.status === 'Cancelado' || _emlSemZeros(f.numDuplicata) !== alvo) return;
+      mapa = mapa || {};
+      (f.itens || []).forEach(function (it) { mapa[it.prodId] = (mapa[it.prodId] || 0) + (Number(it.qtd) || 0); });
     });
-    var cont = {}; d.itens.forEach(function (it) { cont[it.nfVenda] = (cont[it.nfVenda] || 0) + 1; });
-    r.nfOrigem = Object.keys(cont).sort(function (a, b) { return cont[b] - cont[a]; })[0] || '';
-    if (forn) r.cli = _emlResolverCliente(forn, d, r.nfOrigem, r);
-    if (r.cli) {
-      r.jaLancada = jaTem.some(function (x) { return String(x.fornecedorId) === String(forn.id) && String(x.clienteId) === String(r.cli.id) && _emlSemZeros(x.nfEmitida) === d.nfd; });
-    }
-    r.ok = !r.erros.length && !r.jaLancada;
-    r.sel = r.ok;
-    return r;
   });
+  return mapa;
+}
+function _emlCompletar(r) {
+  var forn = r.forn, d = r.d, jaTem = getDevolucoes();
+  r.fat = (r.cli && forn && r.nfOrigem) ? _emlFaturadoNf(forn, r.cli.id, r.nfOrigem) : null;
+  r.excede = false;
+  r.itens.forEach(function (x) {
+    x.fat = (r.fat && x.p && r.fat[x.p.id] != null) ? r.fat[x.p.id] : null;
+    x.excede = (x.fat != null && x.it.qtd > x.fat + 0.0001);
+    if (x.excede) r.excede = true;
+  });
+  if (r.cli && forn) {
+    r.jaLancada = jaTem.some(function (x) { return String(x.fornecedorId) === String(forn.id) && String(x.clienteId) === String(r.cli.id) && _emlSemZeros(x.nfEmitida) === d.nfd; });
+  }
+  r.ok = !r.erros.length && !r.jaLancada;
+  r.motivo = ''; r.sel = false; r.selTocado = false;
+  _emlAtualizaSel(r);
+  return r;
+}
+function _emlPronta(r) {
+  if (!r.ok) return false;
+  return r.aprov === 'nao' || (r.aprov === 'sim' && !!r.motivo);
+}
+function _emlAtualizaSel(r) {
+  if (!_emlPronta(r)) { r.sel = false; return; }
+  if (!r.selTocado) r.sel = (r.aprov === 'nao') ? true : !r.excede;
+}
+function _emlNovoResultado(d, forn, origem) {
+  var r = { d: d, forn: forn, cli: null, itens: [], motivo: '', erros: [], jaLancada: false, nfOrigem: '', dataNfOrigem: '', total: 0, origem: origem, aprov: d.aprov || '', xmlAnexo: null };
+  if (!forn) r.erros.push(origem === 'xml' ? 'Fábrica não identificada pelo CNPJ do XML' : 'Fábrica não identificada no e-mail');
+  return r;
+}
+function _emlMontarEmail(d, forn) {
+  var r = _emlNovoResultado(d, forn, 'email');
+  d.itens.forEach(function (it) {
+    var p = forn ? _emlAchaProduto(forn, it.cod) : null;
+    if (!p && forn) r.erros.push('Produto ' + it.cod + ' (' + it.desc + ') não encontrado');
+    r.itens.push({ it: it, p: p });
+    r.total += it.valor;
+  });
+  var cont = {}; d.itens.forEach(function (it) { cont[it.nfVenda] = (cont[it.nfVenda] || 0) + 1; });
+  r.nfOrigem = Object.keys(cont).sort(function (a, b) { return cont[b] - cont[a]; })[0] || '';
+  if (forn) r.cli = _emlResolverCliente(forn, d, r.nfOrigem, r);
+  return _emlCompletar(r);
+}
+function _emlMontarXml(dados, nomeArq, dataUrl) {
+  var cnp = _devNormCnpj, forns = getFornecedores(), clientes = getClientes();
+  var forn = forns.find(function (f) { var c = cnp(f.cnpj); return c && (c === cnp(dados.emitCNPJ) || c === cnp(dados.destCNPJ)); }) || null;
+  var cnpCli = (forn && cnp(forn.cnpj) === cnp(dados.emitCNPJ)) ? dados.destCNPJ : dados.emitCNPJ;
+  var nfOrig = (dados.refNFe && dados.refNFe.length === 44) ? _emlSemZeros(dados.refNFe.substring(25, 34)) : '';
+  var d = { codCli: '', nomeCli: (forn && cnp(forn.cnpj) === cnp(dados.emitCNPJ)) ? dados.destNome : dados.emitNome, cnpjCli: cnpCli, nfd: _emlSemZeros(dados.nNF), serie: dados.serie || '', dataEmissao: dados.dataEmissao || '', aprov: 'sim',
+    itens: dados.itens.map(function (it) { return { cod: _emlSemZeros(it.codigo), desc: it.nome, qtd: it.qtd, valor: it.valorTotal, nfVenda: nfOrig, ean: it.ean }; }) };
+  var r = _emlNovoResultado(d, forn, 'xml');
+  r.xmlAnexo = { nome: nomeArq, dados: dataUrl || '', dtUpload: new Date().toISOString(), chave: dados.chave || '' };
+  r.nfOrigem = nfOrig;
+  if (!nfOrig) r.erros.push('O XML não traz a NF de origem (referência) — lance manualmente');
+  var produtos = getProdutos();
+  d.itens.forEach(function (it) {
+    var p = forn ? _emlAchaProduto(forn, it.cod) : null;
+    if (!p && it.ean) p = produtos.find(function (x) { return x.ean && _cpNorm(x.ean) === _cpNorm(it.ean); }) || null;
+    if (!p && forn) r.erros.push('Produto ' + it.cod + ' (' + it.desc + ') não encontrado');
+    r.itens.push({ it: it, p: p });
+    r.total += it.valor;
+  });
+  if (forn) {
+    var cands = clientes.filter(function (c) { return cnp(c.cpf_cnpj) && cnp(c.cpf_cnpj) === cnp(cnpCli); });
+    var donos = _emlDonosNf(forn, nfOrig);
+    if (cands.length > 1) { var cn = cands.filter(function (c) { return donos.some(function (o) { return o.cliId === String(c.id); }); }); if (cn.length) cands = cn; }
+    if (cands.length === 1) {
+      r.cli = cands[0];
+      var dono = donos.find(function (o) { return o.cliId === String(r.cli.id); });
+      if (dono) r.dataNfOrigem = dono.data;
+      else if (donos.length) r.erros.push('A NF de origem ' + nfOrig + ' pertence a outro cliente. Confira antes de lançar.');
+      var cx = (r.cli.codigos_fornecedor || []).filter(function (x) { return String(x.fornecedor_id) === String(forn.id); });
+      r.codSistema = cx.map(function (x) { return x.codigo_cliente; }).join(', ');
+    } else if (cands.length > 1) r.erros.push('Mais de um cliente com o CNPJ ' + cnpCli + ' — não consegui saber qual é');
+    else r.erros.push('Cliente não encontrado pelo CNPJ ' + cnpCli + ' do XML');
+  }
+  return _emlCompletar(r);
+}
+function _emlChave(r) { return String(r.forn ? r.forn.id : '') + '|' + r.d.nfd + '|' + (r.cli ? r.cli.id : (r.d.codCli || r.d.cnpjCli || r.d.nomeCli)); }
+function _emlMesclar(novos) {
+  var rep = 0;
+  novos.forEach(function (n) {
+    var ex = _emlRes.find(function (r) { return _emlChave(r) === _emlChave(n); });
+    if (ex) { rep++; if (n.xmlAnexo && !ex.xmlAnexo) ex.xmlAnexo = n.xmlAnexo; return; }
+    _emlRes.push(n);
+  });
+  return rep;
+}
+function _emlAnalisar() {
+  var ta = document.getElementById('eml-texto'); if (!ta) return;
+  var texto = ta.value || '';
+  if (!texto.trim()) { _emlRender(); return; }
+  var lista = _emlParse(texto), forn = _emlFornDoTexto(texto);
+  var novos = lista.map(function (d) { return _emlMontarEmail(d, forn); });
+  var rep = _emlMesclar(novos);
+  if (!novos.length) { document.getElementById('eml-msg').style.color = '#b45309'; document.getElementById('eml-msg').textContent = 'Não encontrei nenhuma devolução nesse texto. Cole o e-mail inteiro (com a linha "Cliente: ..." e a tabela).'; }
+  else document.getElementById('eml-msg').textContent = rep ? (rep + ' nota(s) já estavam na lista e foram ignoradas.') : '';
+  ta.value = '';
   _emlRender();
 }
+function _emlLerXmls(arqs) {
+  var msg = document.getElementById('eml-msg');
+  var pend = arqs.length, novos = [], falhas = 0;
+  if (!pend) return;
+  arqs.forEach(function (f) {
+    var r1 = new FileReader();
+    r1.onload = function (e) {
+      var dados = _devExtrairDadosXml(e.target.result);
+      var r2 = new FileReader();
+      r2.onload = function (e2) {
+        if (dados && dados.nNF && dados.itens && dados.itens.length) novos.push(_emlMontarXml(dados, f.name, e2.target.result)); else falhas++;
+        if (--pend === 0) {
+          var rep = _emlMesclar(novos);
+          if (msg) { msg.style.color = falhas ? '#b45309' : '#64748b'; msg.textContent = (falhas ? falhas + ' arquivo(s) XML não puderam ser lidos. ' : '') + (rep ? rep + ' nota(s) já estavam na lista e foram ignoradas.' : ''); }
+          document.getElementById('eml-entrada').style.display = 'none';
+          _emlRender();
+        }
+      };
+      r2.readAsDataURL(f);
+    };
+    r1.readAsText(f);
+  });
+}
+function _emlXmlEscolhidos(inp) { var arqs = Array.prototype.slice.call(inp.files || []); inp.value = ''; _emlLerXmls(arqs); }
+function _emlSetMotivo(i, v) { var r = _emlRes[i]; if (!r) return; r.motivo = v; _emlAtualizaSel(r); _emlRender(); }
+function _emlSetAprov(i, v) { var r = _emlRes[i]; if (!r) return; r.aprov = v; r.selTocado = false; _emlAtualizaSel(r); _emlRender(); }
+function _emlSetSel(i, v) { var r = _emlRes[i]; if (!r) return; r.sel = v; r.selTocado = true; _emlRender(); }
+function _emlFmtQ(n) { return (Number(n) || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 }); }
 function _emlRender() {
   var el = document.getElementById('eml-resultado'); if (!el) return;
-  if (!_emlRes.length) { el.innerHTML = '<div style="padding:14px;color:#b45309;font-size:12.5px">Não encontrei nenhuma devolução nesse texto. Cole o e-mail inteiro (com a linha "Cliente: ..." e a tabela).</div>'; return; }
-  var prontas = _emlRes.filter(function (r) { return r.ok; }).length;
-  var h = '<div style="font-size:12px;color:#475569;margin:2px 0 8px"><b>' + _emlRes.length + '</b> NFD encontrada(s) &middot; <b style="color:#15803d">' + prontas + '</b> pronta(s) para lançar</div>';
-  h += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><label style="font-size:11.5px;font-weight:600;color:#475569">Motivo (para todas):</label><select id="eml-motivo" style="border:1px solid #cbd5e1;border-radius:7px;padding:6px 8px;font-size:12px"><option value="">Selecione...</option>' + DEV_MOTIVOS.map(function (m) { return '<option>' + m + '</option>'; }).join('') + '</select></div>';
+  var btn = document.getElementById('eml-btn-lancar');
+  if (!_emlRes.length) { el.innerHTML = ''; if (btn) btn.style.display = 'none'; var e0 = document.getElementById('eml-entrada'); if (e0) e0.style.display = 'block'; return; }
+  var prontas = _emlRes.filter(function (r) { return _emlPronta(r) && r.aprov === 'sim'; }).length;
+  var cancel = _emlRes.filter(function (r) { return _emlPronta(r) && r.aprov === 'nao'; }).length;
+  var faltaMot = _emlRes.filter(function (r) { return r.ok && r.aprov === 'sim' && !r.motivo; }).length;
+  var conferir = _emlRes.filter(function (r) { return r.ok && !r.aprov; }).length;
+  var h = '<div style="font-size:12px;color:#475569;margin:2px 0 10px"><b>' + _emlRes.length + '</b> NFD encontrada(s)'
+    + (prontas ? ' &middot; <b style="color:#15803d">' + prontas + '</b> pronta(s)' : '')
+    + (faltaMot ? ' &middot; <b style="color:#b45309">' + faltaMot + '</b> falta motivo' : '')
+    + (cancel ? ' &middot; <b style="color:#991b1b">' + cancel + '</b> não aprovada(s) &mdash; entram como Cancelada' : '')
+    + (conferir ? ' &middot; <b style="color:#b45309">' + conferir + '</b> a conferir' : '') + '</div>';
   h += _emlRes.map(function (r, i) {
-    var cor = r.ok ? '#15803d' : (r.jaLancada ? '#64748b' : '#b91c1c'), bg = r.ok ? '#f0fdf4' : (r.jaLancada ? '#f1f5f9' : '#fef2f2');
-    var st = r.ok ? 'Pronta' : (r.jaLancada ? 'Já lançada' : 'Não lançar');
-    var d = r.d;
+    var d = r.d, pronta = _emlPronta(r), cancelada = r.aprov === 'nao';
+    var cor, bg, st;
+    if (r.jaLancada) { cor = '#64748b'; bg = '#f1f5f9'; st = 'Já lançada'; }
+    else if (!r.ok) { cor = '#b91c1c'; bg = '#fef2f2'; st = 'Não lançar'; }
+    else if (cancelada) { cor = '#dc2626'; bg = '#fee2e2'; st = 'Será lançada CANCELADA'; }
+    else if (!r.aprov) { cor = '#b45309'; bg = '#fef3c7'; st = 'Conferir'; }
+    else if (!r.motivo) { cor = '#f59e0b'; bg = '#fef3c7'; st = 'Falta motivo'; }
+    else { cor = '#15803d'; bg = '#dcfce7'; st = 'Pronta'; }
+    var corTxt = (cor === '#f59e0b') ? '#b45309' : cor;
+    var via = '<span style="font-size:10.5px;color:#64748b;border:1px solid #cbd5e1;border-radius:6px;padding:0 6px;margin-left:4px;font-weight:400">via ' + (r.origem === 'xml' ? 'XML' : 'e-mail') + '</span>';
+    var linhaOrigem = r.origem === 'xml'
+      ? 'XML: <b>' + _pedEsc(d.nomeCli || '') + '</b>' + (d.cnpjCli ? ' &middot; CNPJ ' + _pedEsc(d.cnpjCli) : '')
+      : 'E-mail: <b>' + _pedEsc(d.codCli) + '</b> ' + _pedEsc(d.nomeCli);
+    var nfo = 'NF origem ' + _pedEsc(r.nfOrigem || '—') + (r.dataNfOrigem ? ' (' + _pedEsc(_pimpFmtData(r.dataNfOrigem)) + ')' : '')
+      + (r.fat ? ' &middot; <b style="color:#15803d">encontrada no sistema</b>' : (r.cli ? ' &middot; <span style="color:#b45309">NF não localizada nos pedidos do cliente</span>' : ''));
+    var tab = '<div style="margin-top:6px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;font-size:11.5px"><div style="display:grid;grid-template-columns:1fr 62px 62px 82px;background:#f1f5f9;padding:5px 8px;font-weight:700;color:#64748b;font-size:10px;text-transform:uppercase"><span>Produto</span><span style="text-align:right">Faturou</span><span style="text-align:right">Devolveu</span><span style="text-align:right">Valor</span></div>'
+      + r.itens.map(function (x) {
+        return '<div style="display:grid;grid-template-columns:1fr 62px 62px 82px;padding:4px 8px;border-top:1px solid #f1f5f9"><span>' + _pedEsc(x.it.cod) + ' ' + _pedEsc(x.it.desc) + (x.p ? '' : ' <b style="color:#b91c1c">(não achei)</b>') + '</span>'
+          + '<span style="text-align:right;color:#64748b">' + (x.fat != null ? _emlFmtQ(x.fat) : '—') + '</span>'
+          + '<span style="text-align:right;font-weight:700;color:' + (x.excede ? '#b45309' : '#1e293b') + '">' + _emlFmtQ(x.it.qtd) + (x.excede ? ' ⚠' : '') + '</span>'
+          + '<span style="text-align:right">' + _pedFmtMoeda(x.it.valor) + '</span></div>';
+      }).join('')
+      + '<div style="display:grid;grid-template-columns:1fr 82px;padding:6px 8px;border-top:2px solid #272A4A;background:#f8fafc;font-weight:800"><span>Total da NFD</span><span style="text-align:right">' + _pedFmtMoeda(r.total) + '</span></div></div>';
+    var rodape = '';
+    if (r.ok && cancelada) {
+      rodape = '<div style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:11.5px;color:#991b1b"><b>Motivo do cancelamento (vai nas Observações):</b><br>' + _pedEsc(EML_TXT_CANCEL) + '</div>'
+        + '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:#64748b">Motivo da devolução (opcional): <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid #cbd5e1;border-radius:7px;padding:4px 8px;font-size:12px"><option value="">—</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></div>';
+    } else if (r.ok && !r.aprov) {
+      rodape = '<div style="margin-top:8px;font-size:11.5px;color:#b45309">O e-mail não diz se a fábrica aprovou ou não. Tratar como: '
+        + '<button onclick="_emlSetAprov(' + i + ',\'sim\')" style="border:1px solid #15803d;background:#fff;color:#15803d;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">Aprovada</button> '
+        + '<button onclick="_emlSetAprov(' + i + ',\'nao\')" style="border:1px solid #dc2626;background:#fff;color:#dc2626;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">Cancelada</button></div>';
+    } else if (r.ok) {
+      rodape = '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:12px"><b>Motivo:</b> <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid ' + (r.motivo ? '#cbd5e1' : '#f59e0b') + ';background:' + (r.motivo ? '#fff' : '#fffbeb') + ';border-radius:7px;padding:4px 8px;font-size:12px"><option value="">Selecione...</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select>'
+        + (r.motivo ? '' : '<span style="color:#b45309;font-size:11px">não veio no ' + (r.origem === 'xml' ? 'XML' : 'e-mail') + ' — escolha para liberar</span>') + '</div>';
+    }
+    if (r.ok && r.excede) rodape += '<div style="margin-top:6px;font-size:11.5px;color:#b45309">⚠ Devolveu mais do que foi faturado na NF de origem — confira antes de lançar' + (pronta ? ' (vem desmarcada).' : '.') + '</div>';
     return '<div style="border:1px solid #e2e8f0;border-left:4px solid ' + cor + ';border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff">'
       + '<div style="display:flex;gap:10px;align-items:flex-start">'
-      + (r.ok ? '<input type="checkbox" ' + (r.sel ? 'checked' : '') + ' onchange="_emlRes[' + i + '].sel=this.checked" style="margin-top:3px">' : '<span style="width:13px"></span>')
-      + '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700;color:#1e293b">NFD ' + _pedEsc(d.nfd) + ' &middot; ' + _pedEsc(_pimpFmtData(d.dataEmissao)) + ' <span style="background:' + bg + ';color:' + cor + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px">' + st + '</span></div>'
-      + '<div style="font-size:11.5px;color:#475569;margin-top:2px">E-mail: <b>' + _pedEsc(d.codCli) + '</b> ' + _pedEsc(d.nomeCli) + '</div>'
-      + '<div style="font-size:11.5px;color:#475569">Sistema: ' + (r.cli ? '<b style="color:#15803d">' + _pedEsc(_cpSemColchetes(r.cli.nome_fantasia || r.cli.razao_social || '')) + '</b>' : '<b style="color:#b91c1c">não encontrado</b>') + (r.forn ? ' &middot; ' + _pedEsc(_cpSemColchetes(r.forn.nome_fantasia || '')) : '') + (r.cli ? ' &middot; código cadastrado: <b>' + _pedEsc(r.codSistema || '—') + '</b>' : '') + '</div>'
-      + '<div style="font-size:11.5px;color:#64748b;margin-top:4px">NF origem ' + _pedEsc(r.nfOrigem) + (r.dataNfOrigem ? ' (' + _pedEsc(_pimpFmtData(r.dataNfOrigem)) + ')' : ' (data não localizada)') + ' &middot; ' + _pedFmtMoeda(r.total) + '</div>'
-      + '<div style="font-size:11px;color:#64748b;margin-top:2px">' + r.itens.map(function (x) { return _pedEsc(x.it.cod) + ' ' + _pedEsc(x.it.desc) + ' &times; ' + x.it.qtd + ' = ' + _pedFmtMoeda(x.it.valor) + (x.p ? '' : ' <b style="color:#b91c1c">(não achei)</b>'); }).join('<br>') + '</div>'
+      + (pronta ? '<input type="checkbox" ' + (r.sel ? 'checked' : '') + ' onchange="_emlSetSel(' + i + ',this.checked)" style="margin-top:3px">' : '<span style="width:13px"></span>')
+      + '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700;color:#1e293b">NFD ' + _pedEsc(d.nfd) + ' &middot; ' + _pedEsc(_pimpFmtData(d.dataEmissao)) + ' <span style="background:' + bg + ';color:' + corTxt + ';font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px">' + st + '</span>' + via + '</div>'
+      + '<div style="font-size:11.5px;color:#475569;margin-top:2px">' + linhaOrigem + '</div>'
+      + '<div style="font-size:11.5px;color:#475569">Sistema: ' + (r.cli ? '<b style="color:#15803d">' + _pedEsc(_cpSemColchetes(r.cli.nome_fantasia || r.cli.razao_social || '')) + '</b>' : '<b style="color:#b91c1c">não encontrado</b>') + (r.forn ? ' &middot; ' + _pedEsc(_cpSemColchetes(r.forn.nome_fantasia || '')) : '') + (r.codSistema ? ' &middot; código cadastrado: <b>' + _pedEsc(r.codSistema) + '</b>' : '') + '</div>'
+      + '<div style="font-size:11.5px;color:#64748b;margin-top:4px">' + nfo + '</div>'
+      + tab + rodape
       + (r.erros.length ? '<div style="font-size:11.5px;color:#b91c1c;margin-top:4px">' + r.erros.map(_pedEsc).join('<br>') + '</div>' : '')
       + '</div></div></div>';
   }).join('');
   el.innerHTML = h;
-  var btn = document.getElementById('eml-btn-lancar'); if (btn) btn.style.display = prontas ? 'inline-flex' : 'none';
-  var ent = document.getElementById('eml-entrada'); if (ent) ent.style.display = 'none';
-  var nv = document.getElementById('eml-btn-novo'); if (nv) nv.style.display = 'inline-flex';
+  var algumaPronta = _emlRes.some(function (r) { return _emlPronta(r); });
+  if (btn) btn.style.display = algumaPronta ? 'inline-flex' : 'none';
+  var ent = document.getElementById('eml-entrada'); if (ent && ent.style.display !== 'block') ent.style.display = 'none';
 }
 function _emlLancar() {
-  var motivo = (document.getElementById('eml-motivo') || {}).value || '';
   var msg = document.getElementById('eml-msg');
-  if (!motivo) { msg.style.color = '#dc2626'; msg.textContent = 'Escolha o Motivo antes de lançar.'; return; }
-  var escolhidas = _emlRes.filter(function (r) { return r.ok && r.sel; });
-  if (!escolhidas.length) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhuma devolução selecionada.'; return; }
+  var escolhidas = _emlRes.filter(function (r) { return _emlPronta(r) && r.sel; });
+  if (!escolhidas.length) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhuma devolução selecionada (as que faltam motivo precisam de motivo).'; return; }
   var dados = getDevolucoes(), prox = devProximoLancamento(), hoje = new Date().toISOString().slice(0, 10), agora = new Date().toISOString();
+  var nCanc = 0;
   escolhidas.forEach(function (r, i) {
     var vf = (r.cli.vendedores_fornecedor || []).find(function (v) { return String(v.fornId) === String(r.forn.id); }) || {};
     var itens = r.itens.map(function (x) { var q = x.it.qtd || 0; return { prodId: x.p.id, prodCodigo: x.p.codigo, prodNome: x.p.nome, valor: q ? x.it.valor / q : x.it.valor, quantidade: q, valorTotal: x.it.valor }; });
+    var canc = r.aprov === 'nao'; if (canc) nCanc++;
+    var origemTxt = (r.origem === 'xml' ? 'Importado do XML da NFD ' : 'Importado do e-mail da fábrica (NFD ') + r.d.nfd + (r.d.serie ? '-' + r.d.serie : '') + (r.origem === 'xml' ? '.' : ').');
     var obj = {
       id: 'dev' + (Date.now() + i), lancamento: prox + i, data: hoje,
       fornecedorId: r.forn.id, fornecedorNome: r.forn.nome_fantasia || '',
       clienteId: r.cli.id, clienteNome: r.cli.nome_fantasia || r.cli.razao_social || '',
       vendedorId: vf.vendId || '', vendedorNome: vf.vendNome || '',
       nfEmitida: r.d.nfd, dataNfEmitida: r.d.dataEmissao, nfOrigem: r.nfOrigem, dataNfOrigem: r.dataNfOrigem || '',
-      motivo: motivo, status: 'Aberto', obs: 'Importado do e-mail da fábrica (NFD ' + r.d.nfd + '-' + r.d.serie + ').',
-      itens: itens, totalProdutos: itens.reduce(function (a, it) { return a + it.valorTotal; }, 0), xmlAnexo: null, dtCadastro: agora
+      motivo: r.motivo || '', status: canc ? 'Cancelado' : 'Aberto', obs: (canc ? EML_TXT_CANCEL + ' ' : '') + origemTxt,
+      itens: itens, totalProdutos: itens.reduce(function (a, it) { return a + it.valorTotal; }, 0), xmlAnexo: r.xmlAnexo || null, dtCadastro: agora
     };
     try { Object.assign(obj, _appMontarAutoria(null, [])); } catch (e) {}
     dados.push(obj);
   });
   setDevolucoes(dados);
-  msg.style.color = '#15803d'; msg.textContent = escolhidas.length + ' devolução(ões) lançada(s) como "Aberto" — aprove na lista.';
-  _emlRes.forEach(function (r) { if (r.ok && r.sel) { r.ok = false; r.jaLancada = true; r.erros = []; } });
+  msg.style.color = '#15803d'; msg.textContent = escolhidas.length + ' devolução(ões) lançada(s)' + (nCanc ? ' (' + nCanc + ' como "Cancelado")' : '') + (escolhidas.length - nCanc ? ' — as "Aberto" você aprova na lista.' : '.');
+  _emlRes.forEach(function (r) { if (_emlPronta(r) && r.sel) { r.ok = false; r.jaLancada = true; r.erros = []; } });
   _emlRender();
   if (typeof renderDevolucaoList === 'function') renderDevolucaoList();
 }
-function emlAbrir() {
+function emlAbrir(modo) {
   var m = document.getElementById('eml-modal'); if (!m) return;
-  m.style.display = 'flex'; _emlRes = []; document.getElementById('eml-entrada').style.display = 'block'; document.getElementById('eml-btn-novo').style.display = 'none';
+  m.style.display = 'flex'; _emlRes = [];
+  document.getElementById('eml-entrada').style.display = (modo === 'xml') ? 'none' : 'block';
   document.getElementById('eml-texto').value = ''; document.getElementById('eml-resultado').innerHTML = ''; document.getElementById('eml-msg').textContent = '';
   var b = document.getElementById('eml-btn-lancar'); if (b) b.style.display = 'none';
+  if (modo === 'xml') { var xi = document.getElementById('eml-xml-input'); if (xi) xi.click(); }
 }
+function emlMenu(btn) {
+  var antigo = document.getElementById('eml-menu'); if (antigo) { antigo.remove(); return; }
+  var r = btn.getBoundingClientRect();
+  var mn = document.createElement('div'); mn.id = 'eml-menu';
+  mn.style.cssText = 'position:fixed;z-index:9997;top:' + (r.bottom + 4) + 'px;left:' + Math.max(8, Math.min(r.left, window.innerWidth - 280)) + 'px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.18);width:270px;overflow:hidden';
+  mn.innerHTML = '<div onclick="emlAbrir(\'email\');_emlFecharMenu()" style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid #f1f5f9;cursor:pointer"><b>E-mail da fábrica</b><div style="color:#64748b;font-size:11px;margin-top:2px">colar ou arrastar o texto do e-mail</div></div>'
+    + '<div onclick="emlAbrir(\'xml\');_emlFecharMenu()" style="padding:10px 14px;font-size:12.5px;cursor:pointer"><b>XML da NFD</b><div style="color:#64748b;font-size:11px;margin-top:2px">anexar um ou vários arquivos .xml</div></div>';
+  document.body.appendChild(mn);
+  setTimeout(function () { document.addEventListener('click', _emlFecharMenu, { once: true }); }, 0);
+}
+function _emlFecharMenu() { var mn = document.getElementById('eml-menu'); if (mn) mn.remove(); }
 function _emlNovo() {
   document.getElementById('eml-entrada').style.display = 'block';
-  document.getElementById('eml-texto').value = ''; document.getElementById('eml-resultado').innerHTML = ''; document.getElementById('eml-msg').textContent = '';
-  document.getElementById('eml-btn-novo').style.display = 'none'; document.getElementById('eml-btn-lancar').style.display = 'none'; _emlRes = [];
   document.getElementById('eml-texto').focus();
 }
 function emlFechar() { var m = document.getElementById('eml-modal'); if (m) m.style.display = 'none'; }
-// arrastar: texto ou arquivos (.eml/.txt/.html/.msg)
+// arrastar: texto ou arquivos (.eml/.txt/.html/.msg/.xml)
 function _emlTextoDeBuffer(buf) {
   var u8 = new Uint8Array(buf), cand = [];
   try { cand.push(new TextDecoder('utf-16le').decode(u8)); } catch (e) {}
@@ -28187,10 +28365,13 @@ function _emlTextoDeBuffer(buf) {
 function _emlSolto(ev) {
   ev.preventDefault();
   var ta = document.getElementById('eml-texto'), arqs = ev.dataTransfer && ev.dataTransfer.files ? Array.prototype.slice.call(ev.dataTransfer.files) : [];
+  var xmls = arqs.filter(function (f) { return /\.xml$/i.test(f.name); });
+  arqs = arqs.filter(function (f) { return !/\.xml$/i.test(f.name); });
   var txt = ev.dataTransfer ? (ev.dataTransfer.getData('text/plain') || '') : '';
   if (txt) { ta.value += (ta.value ? '\n\n' : '') + txt; }
+  if (xmls.length) _emlLerXmls(xmls);
   var pend = arqs.length, falhas = 0;
-  if (!pend) { _emlAnalisar(); return; }
+  if (!pend) { if (ta.value.trim()) _emlAnalisar(); return; }
   arqs.forEach(function (f) {
     var rd = new FileReader();
     rd.onload = function (e) {
@@ -28201,6 +28382,7 @@ function _emlSolto(ev) {
     rd.readAsArrayBuffer(f);
   });
 }
+
 
 function deleteDevolucao(id) {
   if (!confirm('Excluir esta devolução?')) return;
@@ -28486,6 +28668,7 @@ function _devExtrairDadosXml(xmlText) {
     var ide  = doc.getElementsByTagName('ide')[0];
 
     var nNF      = _devXmlTag(ide, 'nNF');
+    var serieNf  = _devXmlTag(ide, 'serie');
     var natOp    = _devXmlTag(ide, 'natOp');
     var dataEmissaoRaw = _devXmlTag(ide, 'dhEmi') || _devXmlTag(ide, 'dEmi');
     var dataEmissao = dataEmissaoRaw ? dataEmissaoRaw.slice(0,10) : '';
@@ -28551,7 +28734,7 @@ function _devExtrairDadosXml(xmlText) {
       }
     }
 
-    return { nNF: nNF, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
+    return { nNF: nNF, serie: serieNf, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
   } catch (e) {
     return null;
   }
