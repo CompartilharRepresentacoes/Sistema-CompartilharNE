@@ -19332,57 +19332,10 @@ function dashInit() {
           </div>
         </div>
 
-        <div class="dg21 dvg-cli-grid" id="prGrid" style="display:grid;gap:12px;margin:16px 0 12px">
-          <div class="d-card dvg-collapsible" id="prCardAbc">
-            <div class="dvg-ctitrow"><div class="dvg-ctit" style="color:#1e293b">Curva ABC de Produtos (Pareto)</div><span class="dvg-cchev" style="color:#94a3b8">&#9662;</span></div>
-            <div class="dvg-cbody">
-              <div class="dvg-abcsum" id="prAbcSum"></div>
-              <div class="dvg-carddark" style="padding:16px 18px">
-                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
-                  <svg id="prAbcDonutSvg" viewBox="0 0 180 180" width="170" height="170" style="flex-shrink:0">
-                    <g id="prAbcDonutG" transform="rotate(-90 90 90)"></g>
-                    <text id="prAbcDonutTag" x="90" y="82" text-anchor="middle" class="dvg-donuttag">TOTAL FATURADO</text>
-                    <foreignObject x="30" y="88" width="120" height="24"><div id="prAbcDonutVal" xmlns="http://www.w3.org/1999/xhtml" style="font-size:15px;color:#fff;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;width:fit-content;max-width:112px;margin:0 auto">R$ 0</div></foreignObject>
-                  </svg>
-                  <div class="dvg-legend" id="prAbcDonutLegend" style="flex:1;min-width:150px"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="dvg-riskcard dvg-collapsible" id="prRiskCard">
-            <div class="dvg-ctitrow"><div class="dvg-ctit" style="color:#fff;text-transform:uppercase;letter-spacing:.04em;font-size:12px">Produtos parados</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">&#9888;&#65039;</span><span class="dvg-cchev" style="color:rgba(255,255,255,.6)">&#9662;</span></div></div>
-            <div class="dvg-cbody">
-              <div class="dvg-risk-num" id="prRiskNum">0</div>
-              <div class="dvg-risk-lbl">produtos ativos sem venda há mais tempo que o limite</div>
-              <div class="dvg-risk-input"><span style="font-size:12px;opacity:.85">Dias sem vender &ge;</span><input id="prDiasParado" type="number" min="0" max="999" value="${diasP}"></div>
-              <div id="prParados"></div>
-            </div>
-          </div>
+        <div class="d-card" id="prCardAbc" style="margin:16px 0 12px">
+          <div class="dvg-ctit" style="color:#1e293b;margin-bottom:10px">Curva ABC de Produtos (Pareto)</div>
+          <div class="dvg-abcsum" id="prAbcSum" style="margin-bottom:0"></div>
         </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          <div class="d-card"><h3 class="font-semibold text-[15px] mb-1">Faturado × pedido por produto</h3>
-            <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">Pedidos do período já com NF: quanto de cada produto ainda falta faturar (só conta falta de 1 caixa ou mais) · total que falta: <b style="color:#dc2626">${fmtBRL(fatPedTot)}</b></div>
-            <div id="prFatPed"></div>
-          </div>
-          <div class="d-card"><h3 class="font-semibold text-[15px] mb-1">Cobertura nos clientes (positivação)</h3>
-            <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">Em quantos dos ${cliAtivos.size.toLocaleString('pt-BR')} clientes que compraram no período cada produto foi vendido</div>
-            <div id="prCob"></div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          <div class="d-card"><h3 class="font-semibold text-[15px] mb-1">Maiores altas e quedas</h3>
-            <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">Faturamento do produto vs. período anterior equivalente (${fmtDate(pIni)} a ${fmtDate(pFim)})</div>
-            <div id="prAltas"></div>
-          </div>
-          <div class="d-card"><h3 class="font-semibold text-[15px] mb-1">Produto × UF (mapa de calor)</h3>
-            <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">Os 6 produtos que mais faturam, por UF · intensidade = faturamento</div>
-            ${hmHtml}
-          </div>
-        </div>
-
-        <div class="d-card mt-4" id="prMixCard"></div>
 
         <div class="d-card mt-4">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
@@ -19439,38 +19392,9 @@ function dashInit() {
       const sumEl = document.getElementById('prAbcSum');
       sumEl.innerHTML = ['A','B','C'].map(k => {
         const r = res[k], pct = total ? fmtPct(r.fat / total) : '—', ativo = _pdSt.classe === k;
-        return `<div class="dvg-abcsum-item${ativo?' active':''}" data-classe="${k}" style="border-bottom:3px solid ${_pdCores[k]}"><div class="dvg-abcsum-top"><div class="dvg-abcsum-icon" style="color:${_pdCores[k]}"><i class="ti ti-chart-pie"></i></div><div class="dvg-abcsum-lbl">CLASSE ${k}</div></div><b>${r.n.toLocaleString('pt-BR')} produtos</b><span>${pct} do faturamento</span></div>`;
+        return `<div class="dvg-abcsum-item${ativo?' active':''}" data-classe="${k}" style="border-bottom:3px solid #3d5aa8"><div class="dvg-abcsum-top"><div class="dvg-abcsum-icon" style="color:#3d5aa8"><i class="ti ti-chart-pie"></i></div><div class="dvg-abcsum-lbl">CLASSE ${k}</div></div><b>${r.n.toLocaleString('pt-BR')} produtos</b><span>${pct} do faturamento</span></div>`;
       }).join('');
       sumEl.querySelectorAll('.dvg-abcsum-item').forEach(el => { el.onclick = ev => { ev.stopPropagation(); _pdSt.classe = (_pdSt.classe === el.dataset.classe) ? null : el.dataset.classe; sumEl.querySelectorAll('.dvg-abcsum-item').forEach(x => x.classList.toggle('active', x.dataset.classe === _pdSt.classe)); _pdRenderTabela(); const c = document.getElementById('prTabela'); if (c) c.closest('.d-card').scrollIntoView({ behavior:'smooth', block:'nearest' }); }; });
-      _pdRenderDonut(res, total);
-      document.getElementById('prCardAbc').onclick = () => _pdSetFocus('abc');
-      document.getElementById('prRiskCard').onclick = () => _pdSetFocus('risco');
-      _pdSetFocus(_pdSt.focus);
-
-      // Parados
-      const rn = document.getElementById('prRiskNum'); _dvgAnimarNumero(rn, parados.length, v => Math.round(v).toLocaleString('pt-BR'));
-      document.getElementById('prRiskCard').classList.toggle('dvg-risk-ok', parados.length === 0);
-      document.getElementById('prParados').innerHTML = parados.length === 0
-        ? `<div class="dvg-risk-list" style="text-align:center;padding:16px 0;font-size:12.5px">Nenhum produto ativo parado há ${diasP} dias ou mais. &#9989;</div>`
-        : `<div class="dvg-risk-list">${parados.slice(0, 40).map(p => `<div class="dvg-risk-row"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0"><b>${escapeHtml(p.nome)}</b><br><span style="opacity:.75;font-size:10.5px">${p.ult ? 'última venda ' + fmtDate(p.ult) : 'nunca vendido'}</span></span><span style="font-weight:700;white-space:nowrap">${p.dias === 99999 ? '—' : p.dias + ' dias'}</span></div>`).join('')}</div>` + (parados.length > 40 ? `<div style="font-size:11px;opacity:.8;margin-top:6px;text-align:center">…e mais ${parados.length - 40}.</div>` : '');
-      const di = document.getElementById('prDiasParado');
-      di.addEventListener('click', e => e.stopPropagation());
-      di.addEventListener('input', () => { _pdSt.parado = parseInt(di.value, 10) || 0; clearTimeout(di._t); di._t = setTimeout(renderProdutos, 350); });
-
-      // Faturado x pedido
-      const fpEl = document.getElementById('prFatPed');
-      fpEl.innerHTML = fatPedArr.length ? fatPedArr.slice(0, 8).map((a, i) => { const pct = a.ped ? Math.min(100, a.fat / a.ped * 100) : 0; return _pdRow(i + 1, escapeHtml(a.nome), `pedido ${fmtNum(a.ped)} · faturado ${fmtNum(a.fat)} · ${pct.toFixed(0)}% · ${a.np.size} pedido(s) com falta`, pct, `<span style="color:#dc2626">falta ${fmtBRL(a.vfalta)}</span>`, '#15803d'); }).join('') : _pdVazio('Nenhum produto com falta de faturamento no período. ✅');
-      fpEl.querySelectorAll('.dvg-vrank-trk i[data-pct]').forEach(_dvgAnimarBarra);
-      // Cobertura
-      const cbEl = document.getElementById('prCob'), cbMax = cliAtivos.size || 1;
-      cbEl.innerHTML = cobArr.length ? cobArr.map((c, i) => _pdRow(i + 1, escapeHtml(c.nome), '', c.n / cbMax * 100, `${c.n.toLocaleString('pt-BR')} · ${(c.n / cbMax * 100).toFixed(0)}%`)).join('') : _pdVazio('Sem vendas no período.');
-      cbEl.querySelectorAll('.dvg-vrank-trk i[data-pct]').forEach(_dvgAnimarBarra);
-      // Altas e quedas
-      const alEl = document.getElementById('prAltas');
-      const ln = (c, up) => `<div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:5px 4px;border-bottom:1px solid #f1f5f9"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:#1e293b">${escapeHtml(c.nome)}</span><span style="white-space:nowrap;font-weight:700;color:${up?'#15803d':'#dc2626'}">${up?'▲':'▼'} ${Math.abs(c.d*100).toFixed(0)}% <span style="color:#94a3b8;font-weight:500">(${c.dif>=0?'+':'-'}${fmtBRL(Math.abs(c.dif))})</span></span></div>`;
-      alEl.innerHTML = (altas.length || quedas.length) ? altas.map(c => ln(c, true)).join('') + quedas.map(c => ln(c, false)).join('') : _pdVazio('Sem base de comparação no período anterior.');
-
-      _pdRenderMix();
       _pdRenderTabela();
       _dvgWirePageChips('prLimit', () => { _pdSt.limit = _dvgPageChipVal('prLimit'); _pdRenderTabela(); });
     }
