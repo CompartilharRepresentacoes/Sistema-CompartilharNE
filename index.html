@@ -17222,7 +17222,7 @@ function dashInit() {
                 <button class="ms-none px-2 py-0.5 rounded border border-ink-200 dark:border-ink-800 hover:bg-ink-100 dark:hover:bg-ink-800">nenhuma</button>
               </div>
               <div class="ms-list">
-                ${items.map((name,i) => `
+                ${items.map((name,i) => ({ name, i })).sort((a, b) => String(a.name).localeCompare(String(b.name), 'pt-BR', { sensitivity: 'base', numeric: true })).map(({ name, i }) => `
                   <label class="ms-row" data-q="${escapeHtml(name.toLowerCase())}">
                     <input type="checkbox" data-i="${i}" ${stateSet.has(i)?'checked':''} />
                     <span class="truncate">${escapeHtml(name)}</span>
@@ -24000,6 +24000,50 @@ function _dpVarrer(raiz) {
     new MutationObserver(function (muts) {
       muts.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1) pend.push(n); }); });
       if (pend.length && !agendado) { agendado = true; (window.requestAnimationFrame || setTimeout)(proc, 50); }
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.body) iniciar(); else document.addEventListener('DOMContentLoaded', iniciar);
+})();
+
+// ── Listas de selecao (select): nomes sempre em ordem alfabetica ──
+var _selOrdemColl = (typeof Intl !== 'undefined' && Intl.Collator) ? new Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true }) : null;
+var _SEL_NAO_ORDENAR = /(status|qtd|ordem|periodo|per$|sit$|agrupar|unidade|forma|tipo|aba$|validade|venc|motivo|alvo|mes|ano|pagina|dia|hora)/i;
+function _selChave(o) { var t = String(o.textContent || '').trim(); var k = t.replace(/^[\d\s.\-–]+/, ''); return k || t; }
+function _selOrdenar(sel) {
+  if (!sel || sel.tagName !== 'SELECT' || sel.multiple || sel.getAttribute('data-nosort') != null) return;
+  var id = sel.id || sel.getAttribute('name') || '';
+  if (id && _SEL_NAO_ORDENAR.test(id)) return;
+  var ops = Array.prototype.slice.call(sel.options);
+  if (ops.length < 4) return;
+  if (ops.every(function (o) { return /^[\d.,\s]+$/.test(String(o.textContent).trim()) || /^todas?$/i.test(String(o.textContent).trim()); })) return;
+  var fixo = null, resto = ops;
+  var p = ops[0], pt = String(p.textContent || '').trim();
+  if (p.value === '' || /^(—|-|todas?|todos|selecione|nenhum|geral|qualquer)/i.test(pt)) { fixo = p; resto = ops.slice(1); }
+  var ord = resto.slice().sort(function (a, b) { var x = _selChave(a), y = _selChave(b); return _selOrdemColl ? _selOrdemColl.compare(x, y) : (x < y ? -1 : x > y ? 1 : 0); });
+  var igual = ord.every(function (o, i) { return o === resto[i]; });
+  if (igual) return;
+  var val = sel.value, idx = sel.selectedIndex;
+  ord.forEach(function (o) { sel.appendChild(o); });
+  if (fixo) sel.insertBefore(fixo, sel.firstChild);
+  if (idx >= 0) sel.value = val;
+}
+function _selVarrer(raiz) {
+  if (!raiz || !raiz.querySelectorAll) return;
+  if (raiz.tagName === 'SELECT') _selOrdenar(raiz);
+  raiz.querySelectorAll('select').forEach(_selOrdenar);
+}
+(function () {
+  var pend = new Set(), agendado = false;
+  function proc() { agendado = false; var l = Array.from(pend); pend.clear(); l.forEach(_selVarrer); }
+  function iniciar() {
+    _selVarrer(document.body);
+    new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        var t = m.target && m.target.nodeType === 1 ? m.target : null;
+        if (t && t.tagName === 'SELECT') pend.add(t);
+        m.addedNodes.forEach(function (n) { if (n.nodeType === 1) pend.add(n.tagName === 'OPTION' && n.parentNode ? n.parentNode : n); });
+      });
+      if (pend.size && !agendado) { agendado = true; (window.requestAnimationFrame || setTimeout)(proc, 30); }
     }).observe(document.body, { childList: true, subtree: true });
   }
   if (document.body) iniciar(); else document.addEventListener('DOMContentLoaded', iniciar);
