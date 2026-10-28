@@ -1410,9 +1410,9 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 .dpc-top a{cursor:pointer;color:#0b1a4a;font-weight:700;padding:0 2px}.dpc-top a:hover{color:#1d4ed8}
 .dpc table{border-collapse:separate;border-spacing:2px;width:100%;padding:2px;box-sizing:border-box}
 .dpc th{background:#0b1a4a;color:#fff;font-size:13px;font-weight:700;height:26px;text-align:center;text-transform:lowercase;padding:0;border:0}
-.dpc td{background:#c4c4c4;border:1px solid #a6a6a6;text-align:center;height:26px;font-size:13px;font-weight:600;color:#0b1a4a;cursor:pointer;padding:0}
-.dpc td:hover{background:#9fb4e6}.dpc td.fora{color:#8e8e8e;font-weight:400;background:#d2d2d2}
-.dpc td.sel{background:#ff6b6b;color:#fff;font-weight:700}.dpc td.hoje{background:#5a5a5a;color:#fff;font-weight:700}.dpc td.sel.hoje{background:#ff6b6b}
+.dpc td{background:#fff;border:1px solid #d6dae3;text-align:center;height:26px;font-size:13px;font-weight:600;color:#0b1a4a;cursor:pointer;padding:0}
+.dpc td:hover{background:#dbe4fb}.dpc td.fora{color:#b8bcc6;font-weight:400;background:#fff}
+.dpc td.sel{background:#ff6b6b;border-color:#ff6b6b;color:#fff;font-weight:700}.dpc td.hoje{background:#5a5a5a;border-color:#5a5a5a;color:#fff;font-weight:700}.dpc td.sel.hoje{background:#ff6b6b}
 .ped-ok-btn{display:none !important}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -24367,7 +24367,8 @@ function renderVendasCompletasFaturadas() {
         + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:#15803d;font-weight:700">' + _pedFmtQtd(it.qtdFaturada) + '</td>'
         + (function () {
           var menosCx = it.restante > 0 && it.qtdFaturada > 0 && it.restante < Math.max(it.cxTam || 1, 1);
-          return '<td' + (menosCx ? ' title="Falta menos de 1 caixa: considerado faturado"' : '') + ' style="padding:5px 8px;font-size:11px;text-align:center;color:' + (it.restante > 0 ? (menosCx ? '#94a3b8' : '#dc2626') : '#cbd5e1') + ';font-weight:700">' + _pedFmtQtd(it.restante) + '</td>';
+          var falta = it.restante > 0 && !menosCx;
+          return '<td' + (menosCx ? ' title="Falta menos de 1 caixa: considerado faturado"' : '') + ' style="padding:5px 8px;font-size:11px;text-align:center;' + (falta ? 'color:#dc2626;font-weight:700' : 'color:#64748b;font-weight:600;opacity:.4') + '">' + _pedFmtQtd(it.restante) + '</td>';
         })()
         + '</tr>';
     }).join('');
