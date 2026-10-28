@@ -7149,7 +7149,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         <div id="dr-msg" style="font-size:12px;min-height:14px;margin-top:8px"></div>
       </div>
 
-      <div id="dr-kpis" style="display:none;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px">
+      <div id="dr-kpis" style="display:none;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px">
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px">
           <div style="font-size:10.5px;color:#94a3b8;text-transform:uppercase">Cadastrados</div>
           <div id="dr-kpi-cadastrados" style="font-size:20px;font-weight:700;color:#272A4A;margin-top:2px">0</div>
@@ -7170,11 +7170,15 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <div style="font-size:10.5px;color:#94a3b8;text-transform:uppercase">Valor faturado</div>
           <div id="dr-kpi-valor" style="font-size:18px;font-weight:700;color:#272A4A;margin-top:2px">R$ 0,00</div>
         </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px">
+          <div style="font-size:10.5px;color:#94a3b8;text-transform:uppercase">Volume (KG)</div>
+          <div id="dr-kpi-kg" style="font-size:18px;font-weight:700;color:#272A4A;margin-top:2px">0,00 kg</div>
+        </div>
       </div>
 
       <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-        <div style="display:grid;grid-template-columns:1fr 90px 100px 100px 100px 120px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
-          <span>Rede / Loja</span><span>Cadastr.</span><span>Comprados</span><span>Sem venda</span><span>Positiv.</span><span>Valor (R$)</span>
+        <div style="display:grid;grid-template-columns:1fr 90px 100px 100px 100px 110px 120px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
+          <span>Rede / Loja</span><span>Cadastr.</span><span>Comprados</span><span>Sem venda</span><span>Positiv.</span><span>Volume (KG)</span><span>Valor (R$)</span>
         </div>
         <div id="dr-arvore" style="min-height:60px"></div>
       </div>
@@ -35258,9 +35262,20 @@ function _drRenderChips() {
   }).join('');
 }
 
+function _drFmt2(n) {
+  return (Number(n) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+var _drPesoMapCache = null;
+function _drPesoUnit(prodId) {
+  if (!_drPesoMapCache) {
+    _drPesoMapCache = {};
+    getProdutos().forEach(function (p) { _drPesoMapCache[p.id] = parseFloat(String(p.peso == null ? '' : p.peso).replace(',', '.')) || 0; });
+  }
+  return _drPesoMapCache[prodId] || 0;
+}
 function _drValorQtdProduto(fornId, prodId, clienteIds, dataDe, dataAte) {
   var total = 0, qtdTotal = 0;
-  if (!clienteIds.length) return { valor: 0, qtd: 0 };
+  if (!clienteIds.length) return { valor: 0, qtd: 0, kg: 0 };
   var idsSet = {}; clienteIds.forEach(function(id){ idsSet[id] = true; });
   getPedidos().forEach(function(p){
     if (String(p.fornecedorId) !== String(fornId)) return;
@@ -35278,7 +35293,7 @@ function _drValorQtdProduto(fornId, prodId, clienteIds, dataDe, dataAte) {
       });
     });
   });
-  return { valor: total, qtd: qtdTotal };
+  return { valor: total, qtd: qtdTotal, kg: qtdTotal * _drPesoUnit(prodId) };
 }
 
 function _drCadastroPara(skus, produtosMap, cliIdsValidos) {
@@ -35368,6 +35383,7 @@ function _drRedeMaeDoGrupo(g) {
 }
 
 function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
+  _drPesoMapCache = null;
   var produtosMap = {}; getProdutos().forEach(function(p){ produtosMap[p.id] = p; });
   var skus = getSkuClientes().filter(function(s){ return String(s.fornId) === String(fornId); });
   var catClientes = getCatClientes();
@@ -35388,7 +35404,7 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
 
       var produtosCalc = cadastro.map(function(item){
         var r = _drValorQtdProduto(fornId, item.prodId, clienteIdsTodos, dataDe, dataAte);
-        return { item: item, valor: r.valor, qtd: r.qtd, comprado: r.valor > 0 };
+        return { item: item, valor: r.valor, qtd: r.qtd, kg: r.kg, comprado: r.valor > 0 };
       });
       var comVenda = produtosCalc.filter(function(p){ return p.comprado; });
       var semVenda = produtosCalc.filter(function(p){ return !p.comprado; });
@@ -35401,28 +35417,30 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
         var idsLoja = clientesDaLoja.map(function(c){ return c.id; });
         var produtosLoja = comVenda.map(function(p){
           var r = _drValorQtdProduto(fornId, p.item.prodId, idsLoja, dataDe, dataAte);
-          return { item: p.item, valor: r.valor, qtd: r.qtd, comprado: r.valor > 0 };
+          return { item: p.item, valor: r.valor, qtd: r.qtd, kg: r.kg, comprado: r.valor > 0 };
         });
         var compradosLoja = produtosLoja.filter(function(x){ return x.comprado; }).length;
         var valorLoja = produtosLoja.reduce(function(acc, x){ return acc + x.valor; }, 0);
+        var kgLoja = produtosLoja.reduce(function(acc, x){ return acc + x.kg; }, 0);
         var uf = clientesDaLoja.length ? (clientesDaLoja[0].ent_estado || clientesDaLoja[0].estado || '') : '';
         return {
           nome: loja.nome || '', uf: uf,
           cadastrados: comVenda.length, comprados: compradosLoja,
           semVenda: comVenda.length - compradosLoja,
           positivacao: comVenda.length ? (compradosLoja / comVenda.length * 100) : 0,
-          valor: valorLoja, produtos: produtosLoja
+          valor: valorLoja, kg: kgLoja, produtos: produtosLoja
         };
       }).sort(function(a, b){ return b.valor - a.valor; });
 
       var valorTotalRede = comVenda.reduce(function(acc, p){ return acc + p.valor; }, 0);
+      var kgTotalRede = comVenda.reduce(function(acc, p){ return acc + p.kg; }, 0);
 
       grupos.push({
         tipo: 'rede', nome: rede.nome || '', id: sel.id,
         estados: Object.keys(estadosSet).sort().join(' / '),
         cadastrados: cadastro.length, comprados: comVenda.length, semVenda: semVenda.length,
         positivacao: cadastro.length ? (comVenda.length / cadastro.length * 100) : 0,
-        valor: valorTotalRede,
+        valor: valorTotalRede, kg: kgTotalRede,
         cadastroComVenda: comVenda.map(function(p){ return p.item; }),
         cadastroSemVenda: semVenda.map(function(p){ return p.item; }),
         lojas: lojasCalc
@@ -35441,11 +35459,28 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       _drEnriquecerItens(cadastroSub, fornId, clienteIdsSub);
       var produtosCalcSub = cadastroSub.map(function(item){
         var r = _drValorQtdProduto(fornId, item.prodId, clienteIdsSub, dataDe, dataAte);
-        return { item: item, valor: r.valor, qtd: r.qtd, comprado: r.valor > 0 };
+        return { item: item, valor: r.valor, qtd: r.qtd, kg: r.kg, comprado: r.valor > 0 };
       });
       var comVendaSub = produtosCalcSub.filter(function(p){ return p.comprado; });
       var semVendaSub = produtosCalcSub.filter(function(p){ return !p.comprado; });
       var valorSub = comVendaSub.reduce(function(acc, p){ return acc + p.valor; }, 0);
+      var kgSub = comVendaSub.reduce(function(acc, p){ return acc + p.kg; }, 0);
+      // Lojas (clientes) da Sub-Rede: mix sobre os itens comprados pela Sub-Rede
+      var lojasSub = clientesDaSub.map(function(c){
+        var prods = comVendaSub.map(function(p){
+          var r = _drValorQtdProduto(fornId, p.item.prodId, [c.id], dataDe, dataAte);
+          return { item: p.item, valor: r.valor, qtd: r.qtd, kg: r.kg, comprado: r.valor > 0 };
+        });
+        var comp = prods.filter(function(x){ return x.comprado; }).length;
+        return {
+          nome: _cpSemColchetes(c.nome_fantasia || c.razao_social || ''), uf: c.ent_estado || c.estado || '',
+          total: comVendaSub.length, comprados: comp,
+          positivacao: comVendaSub.length ? (comp / comVendaSub.length * 100) : 0,
+          valor: prods.reduce(function(a, x){ return a + x.valor; }, 0),
+          kg: prods.reduce(function(a, x){ return a + x.kg; }, 0),
+          produtos: prods.slice().sort(function(a, b){ return (b.comprado - a.comprado) || (b.valor - a.valor); })
+        };
+      }).sort(function(a, b){ return b.valor - a.valor; });
       var estadosSetSub = {};
       clientesDaSub.forEach(function(c){ var uf = c.ent_estado || c.estado; if (uf) estadosSetSub[uf] = true; });
       grupos.push({
@@ -35453,7 +35488,7 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
         estados: Object.keys(estadosSetSub).sort().join(' / '),
         cadastrados: cadastroSub.length, comprados: comVendaSub.length, semVenda: semVendaSub.length,
         positivacao: cadastroSub.length ? (comVendaSub.length / cadastroSub.length * 100) : 0,
-        valor: valorSub,
+        valor: valorSub, kg: kgSub, redeMaeNome: redeMae ? (redeMae.nome || '') : '', lojasSub: lojasSub,
         cadastroComVenda: comVendaSub.map(function(p){ return p.item; }),
         cadastroSemVenda: semVendaSub.map(function(p){ return p.item; }),
         produtos: produtosCalcSub
@@ -35465,17 +35500,18 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       _drEnriquecerItens(cadastroCli, fornId, [String(sel.id)]);
       var produtosCalcCli = cadastroCli.map(function(item){
         var r = _drValorQtdProduto(fornId, item.prodId, [sel.id], dataDe, dataAte);
-        return { item: item, valor: r.valor, qtd: r.qtd, comprado: r.valor > 0 };
+        return { item: item, valor: r.valor, qtd: r.qtd, kg: r.kg, comprado: r.valor > 0 };
       });
       var comVendaCli = produtosCalcCli.filter(function(p){ return p.comprado; });
       var semVendaCli = produtosCalcCli.filter(function(p){ return !p.comprado; });
       var valorCli = comVendaCli.reduce(function(acc, p){ return acc + p.valor; }, 0);
+      var kgCli = comVendaCli.reduce(function(acc, p){ return acc + p.kg; }, 0);
       grupos.push({
         tipo: 'cliente', nome: _cpSemColchetes(cli.nome_fantasia || cli.razao_social || ''), id: sel.id,
         estados: cli.ent_estado || cli.estado || '',
         cadastrados: cadastroCli.length, comprados: comVendaCli.length, semVenda: semVendaCli.length,
         positivacao: cadastroCli.length ? (comVendaCli.length / cadastroCli.length * 100) : 0,
-        valor: valorCli,
+        valor: valorCli, kg: kgCli,
         cadastroComVenda: comVendaCli.map(function(p){ return p.item; }),
         cadastroSemVenda: semVendaCli.map(function(p){ return p.item; }),
         produtos: produtosCalcCli
@@ -35522,56 +35558,84 @@ function _drToggleExpandido(chave) {
   _drRenderArvore(_drUltimosGrupos);
 }
 
+function _drLinhaItem(p, pad) {
+  var cor = p.comprado ? '#15803D' : '#DC2626';
+  var marca = p.comprado ? '&#10003;' : '&#10007;';
+  var nome = '<span><span style="color:' + cor + ';font-weight:700;margin-right:6px">' + marca + '</span>' + _pedEsc(p.item.prod.nome || '') + '</span>';
+  if (!p.comprado) {
+    return '<div style="display:grid;grid-template-columns:1fr 240px;padding:6px 14px 6px ' + pad + 'px;font-size:12px;color:#DC2626;border-bottom:1px solid #f8fafc">'
+      + nome + '<span style="text-align:right">sem venda no período</span></div>';
+  }
+  return '<div style="display:grid;grid-template-columns:1fr 110px 130px;padding:6px 14px 6px ' + pad + 'px;font-size:12px;color:#475569;border-bottom:1px solid #f8fafc">'
+    + nome + '<span style="text-align:right;color:#64748b">' + _drFmt2(p.kg) + ' kg</span>'
+    + '<span style="text-align:right;color:#475569">R$ ' + _drFmt2(p.valor) + '</span></div>';
+}
+
 function _drRenderArvore(grupos) {
   var cont = document.getElementById('dr-arvore');
   if (!grupos || !grupos.length) { cont.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum dado para exibir.</div>'; return; }
+  var GRID = 'grid-template-columns:1fr 90px 100px 100px 100px 110px 120px';
   var html = grupos.map(function(g, gi){
     var chaveG = 'g' + gi;
     var abertoG = !!_drExpandido[chaveG];
-    var linhaG = '<div onclick="_drToggleExpandido(\'' + chaveG + '\')" style="display:grid;grid-template-columns:1fr 90px 100px 100px 100px 120px;padding:10px 14px;align-items:center;font-size:12.5px;font-weight:700;color:#272A4A;background:#f8fafc;border-bottom:1px solid #e2e8f0;cursor:pointer">'
+    var linhaG = '<div onclick="_drToggleExpandido(\'' + chaveG + '\')" style="display:grid;' + GRID + ';padding:10px 14px;align-items:center;font-size:12.5px;font-weight:700;color:#272A4A;background:#f8fafc;border-bottom:1px solid #e2e8f0;cursor:pointer">'
       + '<div><span style="color:#94a3b8;margin-right:6px">' + (abertoG ? '&#9662;' : '&#9656;') + '</span>' + _pedEsc(g.nome) + ' <span style="font-weight:400;color:#94a3b8;font-size:11px">(' + _pedEsc(g.estados || '—') + ')</span></div>'
       + '<div>' + g.cadastrados + '</div>'
       + '<div style="color:#15803D">' + g.comprados + '</div>'
       + '<div style="color:#DC2626">' + g.semVenda + '</div>'
       + '<div style="color:#DE7926">' + g.positivacao.toFixed(1) + '%</div>'
-      + '<div>R$ ' + g.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + '</div>'
+      + '<div>' + _drFmt2(g.kg) + ' kg</div>'
+      + '<div>R$ ' + _drFmt2(g.valor) + '</div>'
       + '</div>';
     if (!abertoG) return linhaG;
     if (g.tipo === 'rede') {
       var lojasHtml = g.lojas.map(function(l, li){
         var chaveL = chaveG + '-l' + li;
         var abertoL = !!_drExpandido[chaveL];
-        var linhaL = '<div onclick="_drToggleExpandido(\'' + chaveL + '\')" style="display:grid;grid-template-columns:1fr 90px 100px 100px 100px 120px;padding:9px 14px 9px 28px;align-items:center;font-size:12.5px;color:#1e293b;border-bottom:1px solid #f1f5f9;cursor:pointer">'
+        var linhaL = '<div onclick="_drToggleExpandido(\'' + chaveL + '\')" style="display:grid;' + GRID + ';padding:9px 14px 9px 28px;align-items:center;font-size:12.5px;color:#1e293b;border-bottom:1px solid #f1f5f9;cursor:pointer">'
           + '<div><span style="color:#94a3b8;margin-right:6px">' + (abertoL ? '&#9662;' : '&#9656;') + '</span>' + _pedEsc(l.nome) + '</div>'
           + '<div>' + l.cadastrados + '</div>'
           + '<div style="color:#15803D">' + l.comprados + '</div>'
           + '<div style="color:#DC2626">' + l.semVenda + '</div>'
           + '<div style="color:#DE7926">' + l.positivacao.toFixed(1) + '%</div>'
-          + '<div>R$ ' + l.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + '</div>'
+          + '<div>' + _drFmt2(l.kg) + ' kg</div>'
+          + '<div>R$ ' + _drFmt2(l.valor) + '</div>'
           + '</div>';
         if (!abertoL) return linhaL;
-        var produtosHtml = l.produtos.map(function(p){
-          var cor = p.comprado ? '#15803D' : '#DC2626';
-          var marca = p.comprado ? '&#10003;' : '&#10007;';
-          var detalhe = p.comprado ? ('R$ ' + p.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })) : 'sem venda no período';
-          return '<div style="display:flex;justify-content:space-between;padding:6px 14px 6px 52px;font-size:12px;color:#475569;border-bottom:1px solid #f8fafc">'
-            + '<span><span style="color:' + cor + ';font-weight:700;margin-right:6px">' + marca + '</span>' + _pedEsc(p.item.prod.nome || '') + '</span>'
-            + '<span style="color:#94a3b8">' + detalhe + '</span></div>';
-        }).join('');
+        var produtosHtml = l.produtos.map(function(p){ return _drLinhaItem(p, 52); }).join('');
         return linhaL + produtosHtml;
       }).join('');
       return linhaG + lojasHtml;
-    } else {
-      var produtosHtml2 = (g.produtos || []).map(function(p){
-        var cor = p.comprado ? '#15803D' : '#DC2626';
-        var marca = p.comprado ? '&#10003;' : '&#10007;';
-        var detalhe = p.comprado ? ('R$ ' + p.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })) : 'sem venda no período';
-        return '<div style="display:flex;justify-content:space-between;padding:6px 14px 6px 28px;font-size:12px;color:#475569;border-bottom:1px solid #f8fafc">'
-          + '<span><span style="color:' + cor + ';font-weight:700;margin-right:6px">' + marca + '</span>' + _pedEsc(p.item.prod.nome || '') + '</span>'
-          + '<span style="color:#94a3b8">' + detalhe + '</span></div>';
-      }).join('');
-      return linhaG + produtosHtml2;
     }
+    var lojasSubHtml = '';
+    if (g.tipo === 'subrede' && g.lojasSub && g.lojasSub.length) {
+      var chaveLs = chaveG + '-L';
+      var abertoLs = !!_drExpandido[chaveLs];
+      lojasSubHtml += '<div onclick="_drToggleExpandido(\'' + chaveLs + '\')" style="display:flex;align-items:center;padding:9px 14px 9px 28px;font-size:12.5px;font-weight:700;color:#272A4A;background:#fbfcfe;border-bottom:1px solid #f1f5f9;cursor:pointer">'
+        + '<span style="color:#94a3b8;margin-right:6px">' + (abertoLs ? '&#9662;' : '&#9656;') + '</span>'
+        + _pedEsc(g.redeMaeNome || g.nome) + ' Lojas <span style="font-weight:400;color:#94a3b8;font-size:11px;margin-left:6px">(' + g.lojasSub.length + ' ' + (g.lojasSub.length === 1 ? 'loja' : 'lojas') + ')</span></div>';
+      if (abertoLs) {
+        lojasSubHtml += '<div style="display:grid;grid-template-columns:1fr 70px 190px 110px 130px;padding:6px 14px 6px 52px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid #f1f5f9">'
+          + '<span>Loja</span><span>UF</span><span>Mix</span><span style="text-align:right">KG</span><span style="text-align:right">Valor (R$)</span></div>';
+        g.lojasSub.forEach(function(l, li){
+          var chaveS = chaveLs + li;
+          var abertoS = !!_drExpandido[chaveS];
+          var semCompra = l.comprados === 0;
+          var corNome = semCompra ? '#DC2626' : '#1e293b';
+          lojasSubHtml += '<div onclick="_drToggleExpandido(\'' + chaveS + '\')" style="display:grid;grid-template-columns:1fr 70px 190px 110px 130px;padding:8px 14px 8px 52px;align-items:center;font-size:12.5px;color:' + corNome + ';border-bottom:1px solid #f1f5f9;cursor:pointer">'
+            + '<div><span style="color:#94a3b8;margin-right:6px">' + (abertoS ? '&#9662;' : '&#9656;') + '</span>' + _pedEsc(l.nome) + '</div>'
+            + '<div style="color:#64748b">' + _pedEsc(l.uf || '—') + '</div>'
+            + '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:11.5px;white-space:nowrap;color:' + (semCompra ? '#DC2626' : '#475569') + '">' + l.comprados + ' de ' + l.total + ' · ' + Math.round(l.positivacao) + '%</span>'
+            + '<span style="flex:1;height:6px;border-radius:3px;background:#e2e8f0;overflow:hidden"><i style="display:block;height:100%;width:' + Math.round(l.positivacao) + '%;background:' + (semCompra ? '#DC2626' : '#0e2f6e') + '"></i></span></div>'
+            + '<div style="text-align:right">' + (semCompra ? '—' : _drFmt2(l.kg) + ' kg') + '</div>'
+            + '<div style="text-align:right">' + (semCompra ? '—' : 'R$ ' + _drFmt2(l.valor)) + '</div>'
+            + '</div>';
+          if (abertoS) lojasSubHtml += l.produtos.map(function(p){ return _drLinhaItem(p, 76); }).join('');
+        });
+      }
+    }
+    var produtosHtml2 = (g.produtos || []).map(function(p){ return _drLinhaItem(p, 28); }).join('');
+    return linhaG + lojasSubHtml + produtosHtml2;
   }).join('');
   cont.innerHTML = html;
 }
@@ -35760,12 +35824,12 @@ function _drCarregarImagemWorkbook(wb, dataUrl) {
 
 function _drLinhaProduto(ws, p, nivel) {
   var comprado = p.comprado;
-  var nomeTxt = (comprado ? '\u2713  ' : '\u2717  ') + '[' + (p.item.prod.codigo || '') + ']  ' + (p.item.prod.nome || '');
-  var indent = nivel === 2 ? '               ' : '          ';
-  var row = ws.addRow([indent + nomeTxt, null, null, null, comprado ? p.qtd : null, comprado ? null : '\u2717', null, comprado ? (Math.round(p.valor * 100) / 100) : null, null]);
+  var nomeTxt = (comprado ? '✓  ' : '✗  ') + '[' + (p.item.prod.codigo || '') + ']  ' + (p.item.prod.nome || '');
+  var indent = nivel === 3 ? '                    ' : (nivel === 2 ? '               ' : '          ');
+  var row = ws.addRow([indent + nomeTxt, null, null, null, comprado ? p.qtd : null, comprado ? null : '✗', null, comprado ? (Math.round((p.kg || 0) * 100) / 100) : null, comprado ? (Math.round(p.valor * 100) / 100) : null, null]);
   row.height = 13; row.outlineLevel = nivel; row.hidden = true;
   var bg = comprado ? DR_CORES.prodOkBg : DR_CORES.prodNoBg;
-  for (var c = 1; c <= 9; c++) { row.getCell(c).fill = _drFill(bg); row.getCell(c).border = DR_BORDA_FINA; }
+  for (var c = 1; c <= 10; c++) { row.getCell(c).fill = _drFill(bg); row.getCell(c).border = DR_BORDA_FINA; }
   ws.mergeCells(row.number, 1, row.number, 4);
   if (comprado) {
     row.getCell(1).font = { name: 'Calibri', italic: true, size: 8, color: { argb: DR_CORES.blueTxt } };
@@ -35775,7 +35839,10 @@ function _drLinhaProduto(ws, p, nivel) {
     row.getCell(5).numFmt = DR_FMT_QTD1;
     row.getCell(8).font = { name: 'Calibri', size: 8, color: { argb: DR_CORES.blueTxt } };
     row.getCell(8).alignment = { horizontal: 'right', vertical: 'middle' };
-    row.getCell(8).numFmt = DR_FMT_MOEDA;
+    row.getCell(8).numFmt = '#,##0.00';
+    row.getCell(9).font = { name: 'Calibri', size: 8, color: { argb: DR_CORES.blueTxt } };
+    row.getCell(9).alignment = { horizontal: 'right', vertical: 'middle' };
+    row.getCell(9).numFmt = DR_FMT_MOEDA;
   } else {
     row.getCell(1).font = { name: 'Calibri', italic: true, size: 8, color: { argb: DR_CORES.darkredTxt } };
     row.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
@@ -35789,7 +35856,7 @@ function _drConstruirAbaResumo(wb, grupos, periodoTxt, abasPorGrupo) {
     views: [{ showGridLines: false, state: 'frozen', ySplit: 4, topLeftCell: 'A5' }],
     properties: { outlineProperties: { summaryBelow: false, summaryRight: true } }
   });
-  ws.columns = [{ width: 22 }, { width: 26 }, { width: 16 }, { width: 12 }, { width: 11 }, { width: 11 }, { width: 11 }, { width: 18 }, { width: 14 }];
+  ws.columns = [{ width: 22 }, { width: 26 }, { width: 16 }, { width: 12 }, { width: 11 }, { width: 11 }, { width: 11 }, { width: 15 }, { width: 18 }, { width: 14 }];
 
   var linhaTitulo = ws.addRow(['DADOS REPRESENTADAS \u2014 COMPARTILHAR']);
   linhaTitulo.height = 36;
@@ -35798,7 +35865,7 @@ function _drConstruirAbaResumo(wb, grupos, periodoTxt, abasPorGrupo) {
   linhaTitulo.getCell(1).fill = _drFill(DR_CORES.navy);
   linhaTitulo.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
 
-  var linhaSub = ws.addRow(['Per\u00edodo: ' + periodoTxt + '   |   Somente produtos cadastrados na rede   |   Clique no + para ver lojas   |   Clique no + da loja para ver produtos']);
+  var linhaSub = ws.addRow(['Per\u00edodo: ' + periodoTxt + '   |   Somente produtos cadastrados na rede   |   Clique no + para ver lojas   |   Clique no + da loja para ver produtos   |   Volume em KG']);
   linhaSub.height = 18;
   ws.mergeCells('A2:J2');
   linhaSub.getCell(1).font = { name: 'Calibri', italic: true, size: 10, color: { argb: DR_CORES.gray595 } };
@@ -35808,7 +35875,7 @@ function _drConstruirAbaResumo(wb, grupos, periodoTxt, abasPorGrupo) {
   var linhaVazia = ws.addRow([]);
   linhaVazia.height = 8;
 
-  var linhaHeader = ws.addRow(['F\u00e1brica', 'Rede', 'Estados', 'Cadastrados\nna Rede', 'Comprados', 'N\u00e3o\nComprados', 'Positiva\u00e7\u00e3o', 'Valor (R$)', 'Aba']);
+  var linhaHeader = ws.addRow(['F\u00e1brica', 'Rede', 'Estados', 'Cadastrados\nna Rede', 'Comprados', 'N\u00e3o\nComprados', 'Positiva\u00e7\u00e3o', 'Volume\n(KG)', 'Valor (R$)', 'Aba']);
   linhaHeader.height = 28;
   linhaHeader.eachCell(function (cell) {
     cell.font = { name: 'Calibri', bold: true, size: 9, color: { argb: DR_CORES.white } };
@@ -35816,11 +35883,11 @@ function _drConstruirAbaResumo(wb, grupos, periodoTxt, abasPorGrupo) {
     cell.border = DR_BORDA_FINA;
     cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
   });
-  ws.autoFilter = 'A4:I4';
+  ws.autoFilter = 'A4:J4';
 
   grupos.forEach(function (g) {
     var nomeAba = abasPorGrupo[g.__idx];
-    var rowRede = ws.addRow([g.fornNome, g.nome, g.estados, g.cadastrados, g.comprados, g.semVenda, g.positivacao.toFixed(1) + '%', Math.round(g.valor * 100) / 100, nomeAba]);
+    var rowRede = ws.addRow([g.fornNome, g.nome, g.estados, g.cadastrados, g.comprados, g.semVenda, g.positivacao.toFixed(1) + '%', Math.round((g.kg || 0) * 100) / 100, Math.round(g.valor * 100) / 100, nomeAba]);
     rowRede.height = 20;
     var estilosRede = {
       1: { font: { name: 'Calibri', bold: true, size: 10, color: { argb: DR_CORES.black } }, align: { horizontal: 'left', vertical: 'middle' } },
@@ -35830,10 +35897,11 @@ function _drConstruirAbaResumo(wb, grupos, periodoTxt, abasPorGrupo) {
       5: { font: { name: 'Calibri', bold: true, size: 10, color: { argb: DR_CORES.greenTxt } }, align: { horizontal: 'center', vertical: 'middle' } },
       6: { font: { name: 'Calibri', size: 10, color: { argb: DR_CORES.black } }, align: { horizontal: 'center', vertical: 'middle' } },
       7: { font: { name: 'Calibri', size: 10, color: { argb: DR_CORES.black } }, align: { horizontal: 'center', vertical: 'middle' } },
-      8: { font: { name: 'Calibri', size: 10, color: { argb: DR_CORES.black } }, align: { horizontal: 'right', vertical: 'middle' }, numFmt: DR_FMT_MOEDA },
-      9: { font: { name: 'Calibri', size: 10, color: { argb: DR_CORES.black } }, align: { horizontal: 'left', vertical: 'middle' } }
+      8: { font: { name: 'Calibri', size: 10, color: { argb: DR_CORES.black } }, align: { horizontal: 'right', vertical: 'middle' }, numFmt: '#,##0.00' },
+      9: { font: { name: 'Calibri', size: 10, color: { argb: DR_CORES.black } }, align: { horizontal: 'right', vertical: 'middle' }, numFmt: DR_FMT_MOEDA },
+      10: { font: { name: 'Calibri', size: 10, color: { argb: DR_CORES.black } }, align: { horizontal: 'left', vertical: 'middle' } }
     };
-    for (var c = 1; c <= 9; c++) {
+    for (var c = 1; c <= 10; c++) {
       var cell = rowRede.getCell(c);
       var e = estilosRede[c];
       cell.font = e.font; cell.alignment = e.align; cell.fill = _drFill(DR_CORES.redeBg); cell.border = DR_BORDA_FINA;
@@ -35845,9 +35913,9 @@ function _drConstruirAbaResumo(wb, grupos, periodoTxt, abasPorGrupo) {
 
     if (g.tipo === 'rede') {
       g.lojas.forEach(function (l) {
-        var rowLoja = ws.addRow(['    \u21b3 ' + l.nome, null, null, mostrarUf ? l.uf : null, l.comprados, l.semVenda, l.positivacao.toFixed(1) + '%', Math.round(l.valor * 100) / 100, null]);
+        var rowLoja = ws.addRow(['    \u21b3 ' + l.nome, null, null, mostrarUf ? l.uf : null, l.comprados, l.semVenda, l.positivacao.toFixed(1) + '%', Math.round((l.kg || 0) * 100) / 100, Math.round(l.valor * 100) / 100, null]);
         rowLoja.height = 15; rowLoja.outlineLevel = 1; rowLoja.hidden = true;
-        for (var c2 = 1; c2 <= 9; c2++) { rowLoja.getCell(c2).fill = _drFill(DR_CORES.lojaBg); rowLoja.getCell(c2).border = DR_BORDA_FINA; }
+        for (var c2 = 1; c2 <= 10; c2++) { rowLoja.getCell(c2).fill = _drFill(DR_CORES.lojaBg); rowLoja.getCell(c2).border = DR_BORDA_FINA; }
         rowLoja.getCell(1).font = { name: 'Calibri', italic: true, size: 9, color: { argb: DR_CORES.goldTxt } };
         rowLoja.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
         if (mostrarUf) {
@@ -35865,11 +35933,48 @@ function _drConstruirAbaResumo(wb, grupos, periodoTxt, abasPorGrupo) {
         rowLoja.getCell(7).alignment = { horizontal: 'center', vertical: 'middle' };
         rowLoja.getCell(8).font = { name: 'Calibri', size: 9, color: { argb: DR_CORES.goldTxt } };
         rowLoja.getCell(8).alignment = { horizontal: 'right', vertical: 'middle' };
-        rowLoja.getCell(8).numFmt = DR_FMT_MOEDA;
+        rowLoja.getCell(8).numFmt = '#,##0.00';
+        rowLoja.getCell(9).font = { name: 'Calibri', size: 9, color: { argb: DR_CORES.goldTxt } };
+        rowLoja.getCell(9).alignment = { horizontal: 'right', vertical: 'middle' };
+        rowLoja.getCell(9).numFmt = DR_FMT_MOEDA;
 
         l.produtos.forEach(function (p) { _drLinhaProduto(ws, p, 2); });
       });
     } else {
+      if (g.tipo === 'subrede' && g.lojasSub && g.lojasSub.length) {
+        // Filtro 1: linha "<Rede> Lojas" -> Filtro 2: cada loja (UF, mix, KG, valor) -> Filtro 3: itens da loja
+        var rowLs = ws.addRow(['    \u25b8 ' + (g.redeMaeNome || g.nome) + ' Lojas  (' + g.lojasSub.length + (g.lojasSub.length === 1 ? ' loja)' : ' lojas)')]);
+        rowLs.height = 16; rowLs.outlineLevel = 1; rowLs.hidden = true;
+        for (var cL = 1; cL <= 10; cL++) { rowLs.getCell(cL).fill = _drFill(DR_CORES.lojaBg); rowLs.getCell(cL).border = DR_BORDA_FINA; }
+        ws.mergeCells(rowLs.number, 1, rowLs.number, 10);
+        rowLs.getCell(1).font = { name: 'Calibri', bold: true, size: 10, color: { argb: DR_CORES.goldTxt } };
+        rowLs.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+        g.lojasSub.forEach(function (l) {
+          var semC = l.comprados === 0;
+          var rowL = ws.addRow(['          \u21b3 ' + l.nome, null, null, l.uf || null, l.comprados, l.total - l.comprados, l.positivacao.toFixed(1) + '%', Math.round((l.kg || 0) * 100) / 100, Math.round(l.valor * 100) / 100, null]);
+          rowL.height = 15; rowL.outlineLevel = 2; rowL.hidden = true;
+          for (var cM = 1; cM <= 10; cM++) { rowL.getCell(cM).fill = _drFill(DR_CORES.lojaBg); rowL.getCell(cM).border = DR_BORDA_FINA; }
+          ws.mergeCells(rowL.number, 1, rowL.number, 3);
+          var corL = semC ? DR_CORES.redTxt : DR_CORES.goldTxt;
+          rowL.getCell(1).font = { name: 'Calibri', italic: true, size: 9, color: { argb: corL } };
+          rowL.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+          rowL.getCell(4).font = { name: 'Calibri', bold: true, size: 9, color: { argb: corL } };
+          rowL.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' };
+          rowL.getCell(5).font = { name: 'Calibri', size: 9, color: { argb: DR_CORES.greenTxt } };
+          rowL.getCell(5).alignment = { horizontal: 'center', vertical: 'middle' };
+          rowL.getCell(6).font = { name: 'Calibri', size: 9, color: { argb: DR_CORES.redTxt } };
+          rowL.getCell(6).alignment = { horizontal: 'center', vertical: 'middle' };
+          rowL.getCell(7).font = { name: 'Calibri', size: 9, color: { argb: corL } };
+          rowL.getCell(7).alignment = { horizontal: 'center', vertical: 'middle' };
+          rowL.getCell(8).font = { name: 'Calibri', size: 9, color: { argb: corL } };
+          rowL.getCell(8).alignment = { horizontal: 'right', vertical: 'middle' };
+          rowL.getCell(8).numFmt = '#,##0.00';
+          rowL.getCell(9).font = { name: 'Calibri', size: 9, color: { argb: corL } };
+          rowL.getCell(9).alignment = { horizontal: 'right', vertical: 'middle' };
+          rowL.getCell(9).numFmt = DR_FMT_MOEDA;
+          l.produtos.forEach(function (p) { _drLinhaProduto(ws, p, 3); });
+        });
+      }
       g.produtos.forEach(function (p) { _drLinhaProduto(ws, p, 1); });
     }
   });
@@ -36252,14 +36357,15 @@ function _drGerar() {
   _drUltimosGrupos = grupos;
   _drExpandido = {};
 
-  var totCad = 0, totComp = 0, totSem = 0, totVal = 0;
-  grupos.forEach(function (g) { totCad += g.cadastrados; totComp += g.comprados; totSem += g.semVenda; totVal += g.valor; });
+  var totCad = 0, totComp = 0, totSem = 0, totVal = 0, totKg = 0;
+  grupos.forEach(function (g) { totCad += g.cadastrados; totComp += g.comprados; totSem += g.semVenda; totVal += g.valor; totKg += (g.kg || 0); });
   document.getElementById('dr-kpis').style.display = 'grid';
   document.getElementById('dr-kpi-cadastrados').textContent = totCad;
   document.getElementById('dr-kpi-comprados').textContent = totComp;
   document.getElementById('dr-kpi-semvenda').textContent = totSem;
   document.getElementById('dr-kpi-positivacao').textContent = (totCad ? (totComp / totCad * 100) : 0).toFixed(1) + '%';
-  document.getElementById('dr-kpi-valor').textContent = 'R$ ' + totVal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  document.getElementById('dr-kpi-valor').textContent = 'R$ ' + _drFmt2(totVal);
+  document.getElementById('dr-kpi-kg').textContent = _drFmt2(totKg) + ' kg';
   _drRenderArvore(grupos);
 
   if (typeof ExcelJS === 'undefined') {
