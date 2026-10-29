@@ -21849,10 +21849,10 @@ function _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxNum,
     var restoCx = quantidadeReal % cxNum;
     var ehMultiploCx = restoCx < 0.0001 || (cxNum - restoCx) < 0.0001;
     if (!ehMultiploCx) {
-      var qtdAbaixo = Math.floor(quantidadeReal / cxNum) * cxNum;
+      var qtdAbaixo = Math.round(Math.floor(quantidadeReal / cxNum) * cxNum * 1000) / 1000;
       avisos.push('Quantidade (' + quantidadeReal + ') não fecha caixa cheia deste produto (caixa = ' + cxNum + ') — o valor mais próximo para baixo seria ' + qtdAbaixo + '.');
     } else if (qtdOriginalPdf != null && Math.abs(qtdOriginalPdf - quantidadeReal) > 0.0001) {
-      avisos.push('Cliente pediu ' + qtdOriginalPdf + ', mas a caixa deste produto é fechada com ' + cxNum + ' — quantidade ajustada para ' + quantidadeReal + ' (caixa fechada). Se quiser completar mais uma caixa, digite ' + (quantidadeReal + cxNum) + '.');
+      avisos.push('Cliente pediu ' + qtdOriginalPdf + ', mas a caixa deste produto é fechada com ' + cxNum + ' — quantidade ajustada para ' + quantidadeReal + ' (caixa fechada). Se quiser completar mais uma caixa, digite ' + (Math.round((quantidadeReal + cxNum) * 1000) / 1000) + '.');
     }
   }
   return avisos;
@@ -21873,7 +21873,7 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
     if (!cxValido) return { erro: 'PDF traz "' + itemPdf.codigo + '" em CXA, mas o produto "' + (produto.nome || '') + '" não tem Quantidade por Caixa cadastrada — não é possível converter com segurança.' };
     modoUnid = 'cx';
     qtdCaixas = itemPdf.qtd;
-    quantidadeReal = itemPdf.qtd * cxNum;
+    quantidadeReal = Math.round(itemPdf.qtd * cxNum * 1000) / 1000;
     precoUnit = itemPdf.unitario / cxNum;
   } else {
     modoUnid = 'un';
@@ -21891,7 +21891,7 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
     var restoCxImport = quantidadeReal % cxNum;
     if (restoCxImport > 0.0001 && (cxNum - restoCxImport) > 0.0001) {
       qtdOriginalPdf = quantidadeReal;
-      quantidadeReal = Math.floor(quantidadeReal / cxNum) * cxNum;
+      quantidadeReal = Math.round(Math.floor(quantidadeReal / cxNum) * cxNum * 1000) / 1000;
     }
   }
 
@@ -22095,7 +22095,7 @@ function _pedImportRecalcularItem(ri, ii) {
   it.quantidade = novaQtd;
   it.precoUnit = novoPreco;
   it.valorTotal = novaQtd * novoPreco;
-  if (it.modoUnid === 'cx' && it._cxNum) it.qtdCaixas = novaQtd / it._cxNum;
+  if (it.modoUnid === 'cx' && it._cxNum) it.qtdCaixas = Math.round(novaQtd / it._cxNum * 1000) / 1000;
   it.avisos = _pedCalcularAvisosImportado(novoPreco, novaQtd, it.modoUnid, it._cxNum || 0, it._valorTabela || 0, it._qtdOriginalPdf);
   it._editadoManualmente = true;
 
@@ -37730,7 +37730,7 @@ function _pifResolverQuantidade(item, produto) {
   if (item.unidade === 'CX' && cxValido) {
     modoUnid = 'cx';
     qtdCaixas = item.qtd;
-    quantidade = item.qtd * cxNum;
+    quantidade = Math.round(item.qtd * cxNum * 1000) / 1000;
   }
   var avisos = [];
   if (modoUnid === 'un' && cxValido && produto.unidade !== 'KG') {
