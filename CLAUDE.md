@@ -39,3 +39,22 @@ O `.gitignore` funciona como **lista de liberação**: tudo é ignorado, menos o
 - Mensagens de commit em português, no padrão do histórico: `Tela: o que mudou` (ex.: `Relatorios: filtro Fornecedor aceita o codigo da fabrica`).
 - Valores em dinheiro e quantidades: cuidado com arredondamento (já houve bug de `44.800000000000004`).
 - Se algo der erro ou você não tiver certeza, diga isso claramente em vez de supor que funcionou.
+- **Nunca mude o estilo/tipo dos ícones** ao alterar telas.
+- Não apague arquivos nem dados sem pedir. Antes de operação em massa, confira a quantidade.
+
+## Antes de enviar
+
+- Faça uma cópia do `index.html` antes de editar (ex.: pasta `_backups_claude/`, que não vai para o GitHub).
+- Depois de editar, valide a sintaxe do JavaScript: extraia o `<script>` inline (o que não tem `src`) e rode `node --check`. Só siga se passar.
+- Mexa só dentro do `index.html` e só na área do pedido: o arquivo é único e vários colegas editam ao mesmo tempo (reformatar tudo causa conflito).
+- **Não peça nem use tokens de acesso pessoal do GitHub.** Se você não tiver login para enviar a branch, diga à pessoa para usar o **GitHub Desktop** (Commit > Publish branch > Create Pull Request).
+- Mudança no banco (SQL, usuários, permissões do Supabase) **não vai no PR**: escreva o SQL, explique o que faz e peça ao Marcos para rodar no painel do Supabase.
+- Trabalhe numa pasta **clonada só da pessoa**, nunca na pasta compartilhada do servidor.
+
+## Regras do negócio (resumo)
+
+- Fábricas: Allfood/Granarolo, Quatá/Nova Mix, São Vicente, Prieto, Bufalíssima, Villa Germânia, Velutti.
+- Status de pedido que contam como venda: `Faturado` e `Faturado Parcial`. Pedido `Cancelado` fica fora dos totais.
+- Devoluções: status `Finalizado`, `Aberto` e `Cancelado` (cancelada fica fora dos totais).
+- Permissões: Diretor e Assistente veem todas as telas e UFs. A restrição por UF só vale para quem tem UF marcada e não é Diretor nem Assistente.
+- "Mix em linha" = produtos ativos que já faturaram alguma vez; produtos que nunca faturaram saem do denominador.
