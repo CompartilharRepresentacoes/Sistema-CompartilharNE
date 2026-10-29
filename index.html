@@ -37878,6 +37878,14 @@ function _pwaArquivo(file) {
 
 function _pwaDig(s) { return String(s || '').replace(/\D/g, ''); }
 function _pwaNum(s) { s = String(s || '').trim(); if (s.indexOf(',') > -1) s = s.replace(/\./g, '').replace(',', '.'); var n = parseFloat(s); return isNaN(n) ? 0 : n; }
+// valor/total lido da tabela: "1.249,20" -> 1249.2 ; o OCR as vezes perde a virgula ("62400" -> 624.00)
+function _pwaTokValor(t) {
+  t = String(t || '').replace(/[^\d.,]/g, '');
+  if (!t) return 0;
+  if (t.indexOf(',') > -1) return _pwaNum(t);
+  var d = t.replace(/\./g, '');
+  return d.length >= 3 ? parseInt(d, 10) / 100 : (parseFloat(d) || 0);
+}
 function _pwaUn(u) {
   u = String(u || '').toUpperCase();
   if (/^KG/.test(u)) return 'KG';
@@ -37891,12 +37899,43 @@ function _pwaParsear(texto) {
   var reA = /^\W*?(\d+(?:[.,]\d+)?)\s*(kgs?|un|unid\w*|cx|caixas?|pct|pc)\b\.?\s*(.*)$/i;
   var reB = /^(.*?)\s+(\d+(?:[.,]\d+)?)\s*(kgs?|un|unid\w*|cx|caixas?|pct|pc)\b\.?\s*(.*)$/i;
   var rePreco = /(?:R\$\s*)?(\d{1,3}(?:\.\d{3})+,\d{2}|\d+[.,]\d{1,2})\s*(?:\/\s*)?(?:kg|un|cx)?\s*$/i;
-  var peds = [], atual = null, fornHint = '';
+  var peds = [], atual = null, fornHint = '', emForn = false;
   String(texto || '').split(/\r?\n/).forEach(function (bruta) {
     var l = bruta.replace(/\s+/g, ' ').trim();
     if (!l || /encaminhada/i.test(l)) return;
     l = l.replace(/\s*\b\d{1,2}:\d{2}\s*$/, '').trim();
     if (!l || /^\d{1,2}:\d{2}$/.test(l)) return;
+    // ── Pedido impresso pelo proprio sistema (cabecalho Cliente/Fornecedor + tabela de produtos) ──
+    var mCli = /^cliente\W*?:\s*(.*)$/i.exec(l);
+    if (mCli) {
+      emForn = false;
+      atual = { nome: mCli[1].replace(/\s*contato.*$/i, '').trim(), cnpj: '', itens: [], fornHint: fornHint, impresso: true };
+      peds.push(atual);
+      return;
+    }
+    var mForn = /^fornecedor\W*?:\s*(.*)$/i.exec(l);
+    if (mForn) {
+      emForn = true;
+      var fh = _pwaFornPorNome(mForn[1].replace(/\s*fone.*$/i, '').trim());
+      if (fh) { fornHint = fh; if (atual && atual.impresso) atual.fornHint = fh; }
+      return;
+    }
+    if (emForn && reCnpj.test(l)) return; // CNPJ do fornecedor (nao e o do cliente)
+    if (atual && atual.impresso && !atual.cnpj && !atual.itens.length && reCnpj.test(l)) { atual.cnpj = reCnpj.exec(l).slice(1).join(''); return; }
+    var mT = /^(\d{1,3})\s+(\d{3,6})\s+(.+)\s+(PC|KG|UN|UND|CX|PCT)\s+([\d.,\s—–-]+)$/i.exec(l);
+    if (mT && atual && atual.impresso) {
+      emForn = false;
+      var tk = mT[5].replace(/[—–-]/g, ' ').trim().split(/\s+/).filter(Boolean);
+      var tot = _pwaTokValor(tk[tk.length - 1]), val = tk.length > 1 ? _pwaTokValor(tk[tk.length - 2]) : 0;
+      var qt = 0;
+      if (tot && val) { var qc = tot / val; if (qc > 0 && Math.abs(qc * 10 - Math.round(qc * 10)) < 0.06) qt = Math.round(qc * 10) / 10; }
+      if (!qt && tk.length >= 4) { var q4 = _pwaNum(tk[tk.length - 3]); if (q4 > 0) qt = q4; }
+      if (!qt && tot && val) qt = Math.round(tot / val * 10) / 10;
+      if (!qt) return;
+      var dsc = mT[3].replace(/\bQ[i1l]\b/g, 'Qj').replace(/\b(\d{2,3}0)9\b/g, '$1g').replace(/D\.0\.P/g, 'D.O.P').replace(/^[^A-Za-zÀ-ú0-9]+/, '').trim();
+      atual.itens.push({ textoLido: l, desc: dsc, qtd: qt, unidade: _pwaUn(mT[4]), preco: (tot && val && Math.abs(qt * val - tot) <= tot * 0.005) ? val : 0 });
+      return;
+    }
     var mA = reA.exec(l), mB = mA ? null : reB.exec(l);
     var cn = reCnpj.exec(l);
     var ehCab = /^\W*(pedido|ped\b)/i.test(l) || (cn && !mA);
