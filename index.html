@@ -14748,7 +14748,7 @@ function _tpRedeFiltrar() {
   if (!_tpRedeItems.length) { drop.style.display = 'none'; return; }
   drop.onmousedown = function(e){ e.preventDefault(); };
   drop.innerHTML = _tpRedeItems.map(function(c, i) {
-    var pai = c.pai ? cats.find(function(p){ return p.id === c.pai; }) : null;
+    var pai = c.pai ? cats.find(function(p){ return String(p.id) === String(c.pai); }) : null;
     var label = pai ? _skuEsc(pai.nome||'') + ' <i class="ti ti-chevron-right" style="font-size:9px;color:#cbd5e1"></i> ' + _skuEsc(c.nome||'') : _skuEsc(c.nome||'');
     return '<div onclick="_tpRedeSelDrop('+i+')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9;color:#334155">'+label+'</div>';
   }).join('');
@@ -14757,7 +14757,7 @@ function _tpRedeFiltrar() {
 function _tpRedeSelDrop(i) {
   var c = _tpRedeItems[i]; if (!c) return;
   var cats = getCatClientes();
-  var pai = c.pai ? cats.find(function(p){ return p.id === c.pai; }) : null;
+  var pai = c.pai ? cats.find(function(p){ return String(p.id) === String(c.pai); }) : null;
   document.getElementById('tabpreco-rede-id').value    = c.id;
   document.getElementById('tabpreco-rede-busca').value = pai ? (pai.nome||'') + ' > ' + (c.nome||'') : (c.nome||'');
   document.getElementById('tabpreco-rede-drop').style.display = 'none';
@@ -14779,7 +14779,7 @@ function addTabPrecoRede() {
   var redeId = (document.getElementById('tabpreco-rede-id')||{}).value || '';
   var msg = document.getElementById('tabpreco-msg');
   if (!redeId) { alert('Selecione uma rede/sub rede cadastrada (pressione Enter para confirmar a busca).'); return; }
-  var cat = getCatClientes().find(function(c){ return c.id === redeId; }) || {};
+  var cat = getCatClientes().find(function(c){ return String(c.id) === String(redeId); }) || {};
   var ehSubRede = !!cat.pai;
   var clientesDaRede = getClientesVisiveis().filter(function(c){
     return ehSubRede ? String(c.subcategoria) === String(redeId) : String(c.categoria) === String(redeId);
