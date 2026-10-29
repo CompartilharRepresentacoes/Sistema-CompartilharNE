@@ -2,6 +2,7 @@
 # Qualquer arquivo novo na pasta NAO e publicado, a menos que seja liberado abaixo.
 *
 !.gitignore
+!CLAUDE.md
 !atualizar_github.bat
 !index.html
 !compartilhar logo vetor.svg
