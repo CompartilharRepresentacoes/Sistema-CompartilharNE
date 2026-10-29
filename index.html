@@ -21878,9 +21878,10 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
 
 function _pedProcessarBlocoImportadoPdf(bloco) {
   var fornecedor = getFornecedores().find(function (f) { return _pedNormCnpjDigits(f.cnpj) === bloco.fornecedorCnpj; });
-  var cliente = getClientes().find(function (c) { return _pedNormCnpjDigits(c.cpf_cnpj) === bloco.localEntregaCnpj; });
+  var cliente = (bloco.clienteForcado !== undefined) ? bloco.clienteForcado : getClientes().find(function (c) { return _pedNormCnpjDigits(c.cpf_cnpj) === bloco.localEntregaCnpj; });
 
   var resultado = {
+    lojaRotulo: bloco.lojaRotulo || '', origem: bloco.origem || '',
     numero: bloco.numero, fornecedorCnpj: bloco.fornecedorCnpj, localEntregaCnpj: bloco.localEntregaCnpj,
     fornecedor: fornecedor || null, cliente: cliente || null, itensOk: [], itensPendentes: []
   };
@@ -22097,6 +22098,7 @@ function _pedRenderRevisaoImportacao() {
       return '<div style="padding:10px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:8px;font-size:11.5px;color:#991b1b">Pedido nº ' + _pedEsc(r.numero) + ': Fornecedor (CNPJ ' + _pedEsc(r.fornecedorCnpj) + ') não encontrado no cadastro — não é possível importar.</div>';
     }
     if (!r.cliente) {
+      if (r.lojaRotulo) return '<div style="padding:10px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:8px;font-size:11.5px;color:#991b1b">Loja ' + _pedEsc(r.lojaRotulo) + ': ' + _pedEsc(r.motivoSemCliente || 'cliente não encontrado no cadastro') + ' — não é possível importar.</div>';
       return '<div style="padding:10px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:8px;font-size:11.5px;color:#991b1b">Pedido nº ' + _pedEsc(r.numero) + ': Cliente/loja (CNPJ ' + _pedEsc(r.localEntregaCnpj) + ') não encontrado no cadastro — não é possível importar.</div>';
     }
 
@@ -22206,7 +22208,7 @@ function _pedConfirmarImportacaoPdf() {
       vendedorId: vendedorId, vendedorNome: vendedorNome,
       data: new Date().toISOString().slice(0, 10),
       status: 'Pré-Venda',
-      obs: 'Importado automaticamente de PDF (Pedido de Compra nº ' + r.numero + ').',
+      obs: r.origem || ('Importado automaticamente de PDF (Pedido de Compra nº ' + r.numero + ').'),
       itens: itensLimpos,
       valorTotal: valorTotal,
       dtCadastro: new Date().toISOString()
@@ -22273,10 +22275,112 @@ function importarPedidosArquivo(input) {
     _pedImportarPdfArquivo(input);
   } else if (/^image\//.test(file.type) || /\.(jpg|jpeg|png)$/i.test(nomeMin)) {
     _pifImportarImagemArquivo(input);
+  } else if (/\.(xlsx|xls)$/i.test(nomeMin)) {
+    _pedImportarGradeExcel(file);
+    input.value = '';
   } else {
-    alert('Importação de pedidos via Excel em breve — ainda vamos definir o layout das colunas.');
+    alert('Tipo de arquivo não reconhecido. Use PDF, planilha (XLS/XLSX) ou imagem.');
     input.value = '';
   }
+}
+
+// ── Importar GRADE de pedido em Excel (itens nas linhas, lojas nas colunas) ──
+// Layout (ex.: Atacadao BA): "CNPJ : xx" do fornecedor no topo; uma linha de cabecalho com
+// Cod | ITEM | Embalagem | Pr.Und. | QTDE (uma coluna QTDE por loja); acima de cada QTDE o
+// numero da loja (e o nome). Gera 1 pedido por loja e reaproveita a tela de conferencia do PDF.
+// Loja = cliente cujo nome tem "LJ <numero>" (e "Atacad..."); produto = "Codigo Pedido" da Tabela de Preco.
+function _pedParseGradeExcel(aoa, nomeArquivo) {
+  var cnpj = '';
+  for (var i = 0; i < Math.min(aoa.length, 12) && !cnpj; i++) {
+    (aoa[i] || []).forEach(function (v) {
+      if (cnpj || typeof v !== 'string') return;
+      var m = /CNPJ\s*:?\s*([\d./-]{14,20})/i.exec(v);
+      if (m) cnpj = _pedNormCnpjDigits(m[1]);
+    });
+  }
+  var hi = -1;
+  for (var r = 0; r < Math.min(aoa.length, 30) && hi < 0; r++) {
+    var n = (aoa[r] || []).filter(function (v) { return /^qtde\.?$/i.test(String(v == null ? '' : v).trim()); }).length;
+    if (n >= 2) hi = r;
+  }
+  if (hi < 0 || !cnpj) return null;
+  var h = aoa[hi].map(function (v) { return String(v == null ? '' : v).trim(); });
+  var cCod = h.findIndex(function (x) { return /^c[oó]d/i.test(x); });
+  var cItem = h.findIndex(function (x) { return /^item/i.test(x); });
+  var cEmb = h.findIndex(function (x) { return /^embal/i.test(x); });
+  var cPreco = h.findIndex(function (x) { return /^pr\.?\s*und/i.test(x); });
+  if (cCod < 0 || cItem < 0 || cPreco < 0) return null;
+  var lojas = [];
+  h.forEach(function (x, c) {
+    if (!/^qtde\.?$/i.test(x)) return;
+    var num = '', nome = '';
+    for (var rr = hi - 1; rr >= 0; rr--) {
+      var v = (aoa[rr] || [])[c];
+      if (!num && typeof v === 'number' && v > 0) num = String(Math.round(v));
+      else if (!num && typeof v === 'string' && /^\d{1,5}$/.test(v.trim())) num = v.trim();
+    }
+    for (var r0 = 0; r0 < hi && !nome; r0++) { var v0 = (aoa[r0] || [])[c]; if (typeof v0 === 'string' && v0.trim() && !/^\d+$/.test(v0.trim())) nome = v0.trim(); }
+    if (num) lojas.push({ col: c, num: num, nome: nome });
+  });
+  var linhas = [];
+  for (var k = hi + 1; k < aoa.length; k++) {
+    var row = aoa[k] || [];
+    var cod = String(row[cCod] == null ? '' : row[cCod]).trim();
+    if (!cod) break;
+    var emb = String(cEmb >= 0 && row[cEmb] != null ? row[cEmb] : '').trim().toUpperCase();
+    var preco = parseFloat(String(row[cPreco] == null ? '' : row[cPreco]).replace(',', '.')) || 0;
+    var full = _pedNormCodigoPedido(cod), base = _pedNormCodigoPedido(cod.split('-')[0]);
+    var cands = [full]; if (base && base !== full) cands.push(base);
+    linhas.push({ row: row, codigo: cod, descricao: String(row[cItem] == null ? '' : row[cItem]).replace(/\s+/g, ' ').trim(), unidade: emb === 'CX' ? 'CXA' : (emb === 'KG' ? 'KG' : 'UN'), unitario: preco, cands: cands });
+  }
+  var mData = /(\d{2})-(\d{2})-(\d{4})/.exec(nomeArquivo || '');
+  var data = mData ? (mData[1] + mData[2] + mData[3]) : new Date().toISOString().slice(0, 10).split('-').reverse().join('');
+  var blocos = [];
+  lojas.forEach(function (lj) {
+    var itens = [];
+    linhas.forEach(function (ln) {
+      var q = parseFloat(String(ln.row[lj.col] == null ? '' : ln.row[lj.col]).replace(',', '.'));
+      if (!q || q <= 0) return;
+      itens.push({ descricao: ln.descricao, dataEnt: null, qtd: q, unitario: ln.unitario, codigo: ln.codigo, codigoNormalizado: ln.cands[0], codigoCandidatos: ln.cands, unidade: ln.unidade });
+    });
+    if (!itens.length) return;
+    blocos.push({ numero: 'GRADE ' + data + ' LJ ' + lj.num, fornecedorCnpj: cnpj, localEntregaCnpj: '', lojaRotulo: lj.num + (lj.nome ? ' ' + lj.nome : ''), lojaNum: lj.num, origem: 'Importado de grade Excel (' + (nomeArquivo || '') + ') - loja ' + lj.num + '.', itens: itens });
+  });
+  return blocos;
+}
+function _pedAcharClienteLojaGrade(num) {
+  var re = new RegExp('\\b(lj|loja)\\.?\\s*0*' + num + '\\b|\\(\\s*0*' + num + '\\s*\\)', 'i');
+  var ach = getClientes().filter(function (c) {
+    var nm = (c.nome_fantasia || '') + ' ' + (c.razao_social || '');
+    return /atacad/i.test(_cpNorm(nm)) && re.test(nm);
+  });
+  return ach;
+}
+function _pedImportarGradeExcel(file) {
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      var blocos = null;
+      for (var s = 0; s < wb.SheetNames.length && !blocos; s++) {
+        var aoa = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[s]], { header: 1, defval: null, raw: true });
+        blocos = _pedParseGradeExcel(aoa, file.name);
+      }
+      if (!blocos || !blocos.length) { alert('Não reconheci este Excel como grade de pedido (CNPJ do fornecedor no topo e colunas QTDE por loja).'); return; }
+      var resultados = blocos.map(function (b) {
+        var ach = _pedAcharClienteLojaGrade(b.lojaNum);
+        b.clienteForcado = ach.length === 1 ? ach[0] : null;
+        var res = _pedProcessarBlocoImportadoPdf(b);
+        if (!b.clienteForcado) res.motivoSemCliente = ach.length > 1 ? ('mais de um cliente com "LJ ' + b.lojaNum + '" no nome (' + ach.map(function (c) { return c.nome_fantasia || c.razao_social; }).join('; ') + ')') : ('nenhum cliente "Atacadão ... LJ ' + b.lojaNum + '" encontrado no cadastro');
+        return res;
+      });
+      _pedAbrirRevisaoImportacao(resultados);
+    } catch (err) {
+      console.error(err);
+      alert('Não foi possível ler este Excel: ' + (err && err.message ? err.message : 'erro desconhecido'));
+    }
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 // ── Import em lote de XML/NF (opção "XML / NF" ao clicar em Importar) ──
