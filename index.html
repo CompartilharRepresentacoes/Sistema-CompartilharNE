@@ -31257,11 +31257,21 @@ function limparFiltrosRelatorio() {
   var _ag = document.getElementById('rel-f-agrupar'); if (_ag) _ag.value = 'pedido';
   _relAtualizarSubcategorias();
 }
+// O filtro Fornecedor dos relatorios compara com o NOME da fabrica gravado no pedido; se o usuario
+// digitar o CODIGO (ex.: 0010) ou "0010 Allfood", troca pelo nome do fornecedor correspondente.
+function _relFornPorCodigoOuNome(txt) {
+  var t = String(txt || '').trim();
+  if (!t) return '';
+  var cod = t.split(/\s+/)[0].replace(/^0+/, '');
+  if (!cod) return t;
+  var ach = getFornecedores().filter(function (x) { return String(x.codigo || '').trim().replace(/^0+/, '') === cod; });
+  return ach.length === 1 ? (ach[0].nome_fantasia || ach[0].razao_social || t) : t;
+}
 function _relFiltros() {
   function v(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; }
   return {
     dataDe: _entctrlParseDataBR(v('rel-f-data-de')), dataAte: _entctrlParseDataBR(v('rel-f-data-ate')),
-    fornecedor: v('rel-f-fornecedor'), vendedor: v('rel-f-vendedor'),
+    fornecedor: _relFornPorCodigoOuNome(v('rel-f-fornecedor')), vendedor: v('rel-f-vendedor'),
     categoria: v('rel-f-categoria'), subcategoria: v('rel-f-subcategoria'),
     uf: v('rel-f-uf'), cliente: v('rel-f-cliente'),
     transportadora: v('rel-f-transportadora'), status: v('rel-f-status'),
