@@ -23931,6 +23931,19 @@ function entctrlSalvarDataEntrega(pedidoId, faturaId, valor) {
   setPedidos(data);
   renderEntregaControle();
 }
+// Transportadora digitada na mao (so para NF sem transportadora; fica editavel por f.transpManual)
+function entctrlSalvarTransportadora(pedidoId, faturaId, el) {
+  var data = getPedidos();
+  var pedido = data.find(function(x){ return x.id === pedidoId; });
+  if (!pedido) return;
+  var fatura = (pedido.faturas || []).find(function(x){ return x.id === faturaId; });
+  if (!fatura) return;
+  var nome = (el.value || '').trim();
+  fatura.transportadoraNome = nome;
+  if (nome) fatura.transpManual = true; else delete fatura.transpManual;
+  setPedidos(data);
+  renderEntregaControle();
+}
 // ── Data de Entrega digitada (sem calendario nativo): mascara dd/mm/aaaa <-> armazenamento ISO aaaa-mm-dd ──
 function _entctrlMaskData(el) {
   var digits = el.value.replace(/\D/g, '').slice(0, 8);
@@ -24245,7 +24258,9 @@ function renderEntregaControle() {
       + '<div class="mc-primary ent-cliente" style="order:2;font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
       + '<div class="ent-linha-forn" style="display:contents">'
       + '<div class="mc-meta ent-forn" style="order:5;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
-      + '<div class="mc-meta ent-transp" style="order:6;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(r.transportadoraNome || '—') + '</div>'
+      + ((!r.transportadoraNome || f.transpManual)
+        ? '<div class="mc-meta ent-transp" style="order:6;font-size:12px;color:#475569"><input type="text" maxlength="60" placeholder="Transportadora" value="' + _pedEsc(f.transportadoraNome || '') + '" onchange="entctrlSalvarTransportadora(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:92%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:6px;padding:4px 6px;font-size:11px"></div>'
+        : '<div class="mc-meta ent-transp" style="order:6;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(r.transportadoraNome) + '</div>')
       + '<div class="mc-meta ent-nf" style="order:7;font-size:12px;color:#475569">' + _pedEsc(f.numDuplicata || '—') + '</div>'
       + '</div>'
       + '<div class="ent-linha-local" style="display:contents">'
