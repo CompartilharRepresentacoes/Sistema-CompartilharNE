@@ -9085,6 +9085,8 @@ var _sbSlim = {}, _sbSlimP = {};
 function _sbSlimAno(ano) {
   if (_sbSlim[ano]) return Promise.resolve(true);
   if (_sbSlimP[ano]) return _sbSlimP[ano];
+  // sem login o Supabase recusa (permission denied); o Painel pede de novo depois do login
+  if (!_sbUid) return Promise.resolve(false);
   var k = 'slim|' + ano;
   _sbSlimP[ano] = _sbCacheGet(k).then(function (c) {
     if (c && c.t && (Date.now() - c.t) < 12 * 3600 * 1000) { _sbSlim[ano] = c.d; return true; }
