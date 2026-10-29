@@ -8967,6 +8967,7 @@ function _fsIniciarOuvintes(aoFicarTudoPronto) {
     if (aoFicarTudoPronto) aoFicarTudoPronto();
     _fsMostrarAvisoPedidos();
     _fsOuvirFotosProdutos();
+    try { _cadAutoIniciar(); } catch (eCa) { console.warn(eCa); }
     try { _restrCarregar(); } catch (eRq) { console.warn(eRq); }
     try { _cmdCarregar(); } catch (eCm) { console.warn(eCm); }
     try { _catCarregarSB(); } catch (eCt) { console.warn(eCt); }
@@ -9297,6 +9298,8 @@ function _sbGravarPedidos(arrayNovo) {
 // ---- Gravacao dos cadastros no Supabase (RPC gravar_cadastros) ----
 var _sbCadGravaveis = { clientes: 50, produtos: 100, fornecedores: 50, tabelas_preco: 3, transportadoras: 50, cat_clientes: 50, cat_produtos: 50, sku_clientes: 100, metas: 100, negociacoes_preco: 50, bloqueios_produto: 50, devolucoes: 20, ocorrencias_entrega: 50, usuarios: 20, gruposAcesso: 20, planejamento_reino_redes: 50, planejamento_reino_lojas: 50, planejamento_reino_vinculos: 100 };
 var _sbCadFila = {};
+var _sbCadPend = {};      // gravacoes de cadastro ainda em andamento (por colecao)
+var _sbCadUltimo = 0;     // quando foi a ultima gravacao local (a atualizacao automatica espera um pouco)
 var _sbCadRotulo = { clientes: 'cliente', produtos: 'produto', fornecedores: 'fornecedor', tabelas_preco: 'tabela de preço', transportadoras: 'transportadora', cat_clientes: 'categoria de cliente', cat_produtos: 'categoria de produto', sku_clientes: 'SKU por cliente', metas: 'meta', negociacoes_preco: 'negociação de preço', bloqueios_produto: 'bloqueio de produto', devolucoes: 'devolução', ocorrencias_entrega: 'ocorrência de entrega', usuarios: 'usuário', gruposAcesso: 'grupo de acesso' };
 // arquivos (fotos, XML, anexos) ficam na tabela arquivos_dados, fora do documento do cadastro
 function _sbArq(nome, o) {
@@ -9341,6 +9344,7 @@ function _sbGravarCadastro(nome, arrayNovo) {
   var _fotosAntes = {};
   if (nome === 'produtos') arqs.forEach(function (k) { _fotosAntes[k.ref] = _fsFotosProd[k.ref]; if (k.dados) _fsFotosProd[k.ref] = k.dados; else delete _fsFotosProd[k.ref]; });
   _fsCache[nome] = (nome === 'produtos' ? semFoto : (arrayNovo || [])).slice();
+  _sbCadPend[nome] = (_sbCadPend[nome] || 0) + 1; _sbCadUltimo = Date.now();
   _fsAoAtualizar(nome);
   function reverter() {
     if (nome === 'produtos') Object.keys(_fotosAntes).forEach(function (k) { if (_fotosAntes[k]) _fsFotosProd[k] = _fotosAntes[k]; else delete _fsFotosProd[k]; });
@@ -9381,7 +9385,58 @@ function _sbGravarCadastro(nome, arrayNovo) {
     var m = String(err.message || err);
     if (/row-level security|Sem permissao/i.test(m)) m = 'Você não tem permissão para esta alteração.\n\n(' + m + ')';
     alert('Não foi possível salvar o ' + (_sbCadRotulo[nome] || nome) + ': ' + m + '\n\nA alteração NÃO foi salva.');
+  }).then(function () {
+    _sbCadPend[nome] = Math.max(0, (_sbCadPend[nome] || 1) - 1); _sbCadUltimo = Date.now();
   });
+}
+
+// ---- Atualizacao automatica dos cadastros (outro usuario cadastrou produto/cliente etc.) ----
+// A cada ~1 min (e ao voltar para a aba) le os cadastros do banco e COMPLETA o cache local:
+// entram so os registros NOVOS (nao sobrescreve nem apaga nada do cache local), nao roda
+// enquanto este usuario esta gravando e nao mexe em pedidos nem em usuarios/permissoes.
+var _cadAutoColecoes = ['produtos', 'clientes', 'fornecedores', 'tabelas_preco', 'sku_clientes', 'bloqueios_produto', 'negociacoes_preco', 'transportadoras', 'cat_clientes', 'cat_produtos'];
+var _cadAutoBusy = false, _cadAutoUlt = 0, _cadAutoLigado = false;
+function _cadAutoGravando() {
+  return Object.keys(_sbCadPend).some(function (k) { return _sbCadPend[k] > 0; }) || (Date.now() - _sbCadUltimo < 8000);
+}
+function _cadAutoAvisar(nomes) {
+  var rot = { produtos: 'produtos', clientes: 'clientes', fornecedores: 'fornecedores', tabelas_preco: 'tabelas de preço', sku_clientes: 'SKU por cliente', bloqueios_produto: 'bloqueios', negociacoes_preco: 'negociações de preço', transportadoras: 'transportadoras', cat_clientes: 'categorias de cliente', cat_produtos: 'categorias de produto' };
+  var old = document.getElementById('cad-auto-aviso'); if (old && old.parentNode) old.parentNode.removeChild(old);
+  if (!document.body) return;
+  var d = document.createElement('div');
+  d.id = 'cad-auto-aviso';
+  d.style.cssText = 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#272A4A;color:#fff;font-size:12px;font-weight:600;padding:9px 18px;border-radius:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:99999';
+  d.textContent = 'Cadastros atualizados: ' + nomes.map(function (n) { return rot[n] || n; }).join(', ');
+  document.body.appendChild(d);
+  setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 4000);
+}
+function _cadAutoAtualizar(minMs) {
+  if (_cadAutoBusy || document.hidden || !_fsTodasProntas() || typeof SB === 'undefined') return;
+  if (Date.now() - _cadAutoUlt < (minMs || 55000)) return;
+  if (_cadAutoGravando()) return;
+  _cadAutoBusy = true; _cadAutoUlt = Date.now();
+  SB.rpc('docs_cadastros').then(function (r) {
+    if (r.error || !r.data || _cadAutoGravando()) return;
+    var mudou = [];
+    _cadAutoColecoes.forEach(function (n) {
+      var srv = r.data[n]; if (!Array.isArray(srv)) return;
+      var cache = (_fsCache[n] || []).slice(), pos = {};
+      cache.forEach(function (o, i) { if (o && o.id != null) pos[o.id] = i; });
+      var novos = [];
+      srv.forEach(function (o) {
+        if (!o || o.id == null) return;
+        if (pos[o.id] === undefined) novos.push(o);
+      });
+      if (novos.length) { _fsCache[n] = cache.concat(novos); mudou.push(n); }
+    });
+    if (mudou.length) { mudou.forEach(function (n) { _fsAoAtualizar(n); }); _cadAutoAvisar(mudou); }
+  }).catch(function (e) { console.warn('[cadastros] atualizacao automatica falhou:', e); }).then(function () { _cadAutoBusy = false; });
+}
+function _cadAutoIniciar() {
+  if (_cadAutoLigado) return;
+  _cadAutoLigado = true; _cadAutoUlt = Date.now();
+  setInterval(function () { _cadAutoAtualizar(55000); }, 60000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) _cadAutoAtualizar(30000); });
 }
 
 function _fsSet(nome, arrayNovo) {
