@@ -14934,32 +14934,65 @@ function _tpParsearPeriodoCelula(v) {
 }
 // Layout das colunas (mesmo da planilha gerada por confirmarExportTabPrecoForn):
 // 0=Codigo, 1=Produto (so leitura), 2=Cod.Pedido, 3=Cod.Cliente, 4=Valor, 5=Comissao, 6=Periodo
-function _tpImportarLinhas(linhas) {
+// Descobre as colunas pelo titulo da planilha (aceita "Forn | Cód | Produto | Cód Pedido | Cód Cliente"
+// e a planilha exportada pelo sistema). Sem titulo reconhecido, usa a ordem do layout acima.
+function _tpMapearColunas(cab) {
+  var col = { cod: 0, prod: 1, ped: 2, cli: 3, valor: 4, com: 5, per: 6, forn: -1 };
+  var h = (cab || []).map(function(x){ return _cpNorm(String(x == null ? '' : x)).replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); });
+  if (!h.some(function(x){ return /^cod/.test(x) || /produto/.test(x); })) return col;
+  var f = function(re) { return h.findIndex(function(x){ return re.test(x); }); };
+  var c = { forn: f(/^forn/), prod: f(/^(produto|descri)/), ped: f(/^cod\w* ped/), cli: f(/^cod\w* cli/), valor: f(/^(valor|preco)/), com: f(/^comiss/), per: f(/^period/) };
+  c.cod = h.findIndex(function(x, i){ return /^cod\w*$/.test(x) && i !== c.ped && i !== c.cli; });
+  if (c.cod < 0 || (c.ped < 0 && c.cli < 0)) return col;
+  return c;
+}
+function _tpImportarLinhas(linhas, col) {
+  col = col || { cod: 0, prod: 1, ped: 2, cli: 3, valor: 4, com: 5, per: 6, forn: -1 };
+  var cel = function(row, i) { return i >= 0 ? String(row[i] == null ? '' : row[i]).trim() : ''; };
   var produtos = getProdutos();
   var fornecedores = getFornecedores();
   var resumo = { total: 0, adicionados: 0, atualizados: 0, codigosNaoEncontrados: [], semValor: [], codigosAmbiguos: [] };
   linhas.forEach(function(row){
-    var codigo = String(row[0] || '').trim();
+    var codigo = cel(row, col.cod);
     if (!codigo) return;
     resumo.total++;
     var candidatos = produtos.filter(function(p){ return _cpNorm(p.codigo||'') === _cpNorm(codigo); });
+    // planilha com coluna de fornecedor: usa para escolher entre codigos repetidos em fabricas diferentes
+    var fornPlan = _cpNorm(cel(row, col.forn));
+    if (candidatos.length > 1 && fornPlan) {
+      var filtrados = candidatos.filter(function(p){
+        var _f = fornecedores.find(function(x){ return x.id === p.fornecedor; }) || {};
+        var nm = _cpNorm((_f.nome_fantasia || '') + ' ' + (_f.razao_social || ''));
+        return nm.indexOf(fornPlan) !== -1 || fornPlan.indexOf(_cpNorm(_f.nome_fantasia || '#')) !== -1;
+      });
+      if (filtrados.length) candidatos = filtrados;
+    }
     if (!candidatos.length) { resumo.codigosNaoEncontrados.push(codigo); return; }
     var prod = candidatos[0];
     if (candidatos.length > 1) {
       var _nomesForn = candidatos.map(function(p){ var _f = fornecedores.find(function(x){ return x.id === p.fornecedor; }); return _f ? (_f.nome_fantasia||_f.razao_social) : '—'; });
       resumo.codigosAmbiguos.push(codigo + ' (' + _nomesForn.join(', ') + ') — usado: ' + _nomesForn[0]);
     }
-    var valor = String(row[4] || '').trim();
-    if (!valor) { resumo.semValor.push(codigo + ' - ' + (prod.nome||'')); return; }
+    var valor = cel(row, col.valor);
+    var idxExistente = _tpItens.findIndex(function(it){ return it.prodId === prod.id; });
+    if (!valor) {
+      // sem valor na planilha: so completa Cod. Pedido / Cod. Cliente de um produto que ja esta na tabela
+      if (idxExistente < 0) { resumo.semValor.push(codigo + ' - ' + (prod.nome||'')); return; }
+      var ex = _tpItens[idxExistente];
+      var ped = cel(row, col.ped), cli = cel(row, col.cli);
+      if (ped) ex.codPedido = ped;
+      if (cli) ex.codCliente = cli;
+      resumo.atualizados++;
+      return;
+    }
     var forn = fornecedores.find(function(f){ return f.id === prod.fornecedor; }) || {};
     var itemObj = {
       prodId: prod.id, codigo: prod.codigo, nome: prod.nome,
       fornId: prod.fornecedor || '', fornNome: forn.nome_fantasia || forn.razao_social || '—',
-      codPedido: String(row[2]||'').trim(), codCliente: String(row[3]||'').trim(),
-      valor: valor, comissao: String(row[5]||'').trim(), periodo: _tpParsearPeriodoCelula(row[6]),
+      codPedido: cel(row, col.ped), codCliente: cel(row, col.cli),
+      valor: valor, comissao: cel(row, col.com), periodo: _tpParsearPeriodoCelula(col.per >= 0 ? row[col.per] : ''),
       dtCadastro: new Date().toLocaleDateString('pt-BR')
     };
-    var idxExistente = _tpItens.findIndex(function(it){ return it.prodId === prod.id; });
     if (idxExistente >= 0) { _tpItens[idxExistente] = itemObj; resumo.atualizados++; }
     else { _tpItens.push(itemObj); resumo.adicionados++; }
   });
@@ -14988,8 +15021,8 @@ function importTabPrecoFile(input) {
       var wb = XLSX.read(data, { type: 'array', cellDates: true });
       var ws = wb.Sheets[wb.SheetNames[0]];
       var aoa = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      aoa.shift();
-      var resumo = _tpImportarLinhas(aoa);
+      var col = _tpMapearColunas(aoa.shift());
+      var resumo = _tpImportarLinhas(aoa, col);
       _tpRenderProdList();
       alert(_tpMontarMensagemResumo(resumo));
     } catch (err) {
