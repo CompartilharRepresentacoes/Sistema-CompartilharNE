@@ -31465,7 +31465,7 @@ function _relPfRanking() {
   var seg = function (itens, atual, fnome) {
     return '<span style="display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">' + itens.map(function (it) {
       var on = String(it[0]) === String(atual);
-      return '<button type="button" onclick="' + fnome + '(' + JSON.stringify(it[0]) + ')" style="border:none;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;' + (on ? 'background:#272A4A;color:#fff' : 'background:#fff;color:#475569') + '">' + it[1] + '</button>';
+      return '<button type="button" onclick="' + fnome + '(' + (typeof it[0] === 'number' ? it[0] : "&#39;" + it[0] + "&#39;") + ')" style="border:none;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;' + (on ? 'background:#272A4A;color:#fff' : 'background:#fff;color:#475569') + '">' + it[1] + '</button>';
     }).join('') + '</span>';
   };
   var linhas = mostrar.map(function (g, i) {
@@ -31534,7 +31534,13 @@ function _relCalcPedidoFaturado(f) {
       // v51: faturado "contado" nunca passa do pedido (o que passou vira excedente), para Pedido - Faturado = Nao faturado
       var fqc = Math.min(fq, ped), falta = ped - fqc;
       var rsPedI = Number(it.valorTotal) || ped * preco, rsFatI = Math.min(fv, rsPedI);
-      itens.push({ nome: nome, cod: it.prodCodigo || '', kgPed: ped * peso, rsPed: rsPedI, kgFat: fqc * peso, rsFat: rsFatI, kgNao: falta * peso, rsNao: rsPedI - rsFatI, kgExc: (fq - fqc) * peso, rsExc: Math.max(0, fv - rsPedI), nfs: Object.keys(nfs).join(', ') });
+      // falta menor que uma caixa (Qtd/Cx do cadastro) nao conta como nao faturado; produto em CX = 1 caixa
+      var prCad = prodMap[it.prodId] || {}, un = String(prCad.unidade || '').trim().toUpperCase();
+      var cxTam = un === 'CX' ? 1 : (parseFloat(String(prCad.quant == null ? '' : prCad.quant).replace(',', '.')) || 0);
+      var ign = cxTam > 0 && falta > 0.000001 && falta < cxTam - 0.000001, faltaIgn = falta;
+      if (ign) { fqc = ped; falta = 0; rsFatI = rsPedI; }
+      var rsIgn = ign ? Math.max(0, rsPedI - Math.min(fv, rsPedI)) : 0;
+      itens.push({ nome: nome, cod: it.prodCodigo || '', un: un, qPed: ped, qFat: fqc, qNao: falta, ign: ign, rsIgn: rsIgn, qIgn: faltaIgn, cxTam: cxTam, kgPed: ped * peso, rsPed: rsPedI, kgFat: fqc * peso, rsFat: rsFatI, kgNao: falta * peso, rsNao: rsPedI - rsFatI, kgExc: (fq - fqc) * peso, rsExc: Math.max(0, fv - rsPedI), nfs: Object.keys(nfs).join(', ') });
     });
     if (fProd && !itens.length) return;
     var r = { p: p, cli: cli, itens: itens, pedKg: 0, fatKg: 0, naoKg: 0, excKg: 0, excRs: 0 };
@@ -31547,6 +31553,8 @@ function _relCalcPedidoFaturado(f) {
       var fatReal = fats.reduce(function(a,x){ return a + (Number(x.valor) || 0); }, 0);
       r.fatRs = Math.min(fatReal, r.pedRs);
       r.excRs = fatReal - r.fatRs;
+      var ignRs = itens.reduce(function(a,i){ return a + (i.rsIgn || 0); }, 0);
+      r.fatRs = Math.min(r.pedRs, r.fatRs + ignRs);
       r.naoRs = r.pedRs - r.fatRs;
     }
     r.pct = r.pedRs ? r.fatRs / r.pedRs : 0;
@@ -31590,12 +31598,19 @@ function _relCalcPedidoFaturado(f) {
     return [ _relNum(o.pedKg), _pedFmtMoeda(o.pedRs), '<span style="color:#15803d">' + _relNum(o.fatKg) + '</span>', '<span style="color:#15803d">' + _pedFmtMoeda(o.fatRs) + '</span>', corNao(o.naoKg), corNaoRs(o.naoRs), barPct(o.pct, o.pctKg), chipSit[o.situ] ];
   }
   var colsIni, rows = [], dets = [], totIni;
-  var colsMiniItens = [ {label:'Produto'}, {label:'Pedido Kg',right:true}, {label:'Pedido R$',right:true}, {label:'Faturado Kg',right:true}, {label:'Faturado R$',right:true}, {label:'Falta Kg',right:true}, {label:'Falta R$',right:true}, {label:'% fat.',right:true}, {label:'NF'} ];
+  var colsMiniItens = [ {label:'Produto'}, {label:'Pedido',right:true}, {label:'Pedido R$',right:true}, {label:'Faturado',right:true}, {label:'Faturado R$',right:true}, {label:'Falta',right:true}, {label:'Falta R$',right:true}, {label:'% fat.',right:true}, {label:'NF'} ];
+  // quantidade na unidade cadastrada do produto (kg fica em kg; PC/UN/CX etc. ficam como estao)
+  function qtdUn(i, q, kg) {
+    if (!i.un || i.un === 'KG') return _relNum(kg) + ' kg';
+    return _relNum(q, Math.abs(q - Math.round(q)) < 0.005 ? 0 : 2) + ' ' + i.un.toLowerCase();
+  }
   function miniItens(r) {
     if (!r.itens.length) return '<div style="font-size:11.5px;color:#94a3b8">Este pedido não tem itens cadastrados.</div>';
     return _relMini(colsMiniItens, r.itens.map(function(i){
       var pc = i.rsPed ? i.rsFat / i.rsPed : 0;
-      return [ _pedEsc(i.nome), _relNum(i.kgPed), _pedFmtMoeda(i.rsPed), _relNum(i.kgFat), _pedFmtMoeda(i.rsFat), i.kgNao > 0.005 ? '<b style="color:#b91c1c">' + _relNum(i.kgNao) + '</b>' : _relNum(i.kgNao), i.rsNao > 0.005 ? '<b style="color:#b91c1c">' + _pedFmtMoeda(i.rsNao) + '</b>' : _pedFmtMoeda(i.rsNao), fmtP(pc), _pedEsc(i.nfs || '—') ];
+      var falta = (i.kgNao > 0.005 || i.qNao > 0.005) ? '<b style="color:#b91c1c">' + qtdUn(i, i.qNao, i.kgNao) + '</b>' : qtdUn(i, i.qNao, i.kgNao);
+      if (i.ign) falta += ' <span style="font-size:10px;background:#fef3c7;color:#92400e;border-radius:4px;padding:1px 6px;font-weight:600">sobra ' + qtdUn(i, i.qIgn, i.qIgn * (i.qPed ? i.kgPed / i.qPed : 0)) + ' &lt; 1 cx</span>';
+      return [ _pedEsc(i.nome), qtdUn(i, i.qPed, i.kgPed), _pedFmtMoeda(i.rsPed), qtdUn(i, i.qFat, i.kgFat), _pedFmtMoeda(i.rsFat), falta, i.rsNao > 0.005 ? '<b style="color:#b91c1c">' + _pedFmtMoeda(i.rsNao) + '</b>' : _pedFmtMoeda(i.rsNao), fmtP(pc), _pedEsc(i.nfs || '—') ];
     }));
   }
   var colsMiniPed = [ {label:'Pedido'}, {label:'Data'}, {label:'Cliente'}, {label:'Pedido Kg',right:true}, {label:'Faturado Kg',right:true}, {label:'Falta Kg',right:true}, {label:'Pedido R$',right:true}, {label:'Faturado R$',right:true}, {label:'Falta R$',right:true}, {label:'Situação'} ];
