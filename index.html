@@ -2289,11 +2289,9 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
   </div>
 </section>
 <section id="tab-produtos" class="tab-content">
-  <div id="prFabSel" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
   <div id="prBody"></div>
 </section>
 <section id="tab-fabricas" class="tab-content">
-  <div id="fabSelector" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
   <div id="fabFicha"></div>
 </section>
 </div>
@@ -18913,18 +18911,7 @@ function dashInit() {
 
     // =============== ANÁLISE POR FÁBRICA ===============
     function renderFabricas() {
-      const sel = document.getElementById('fabSelector');
-      // v199: botao "Todas" primeiro e fabricas em ordem alfabetica
-      const _fabOrd = [-1].concat(FAB.map((f,i)=>i).sort((x,y)=>String(FAB[x]).localeCompare(String(FAB[y]),'pt-BR',{sensitivity:'base'})));
-      sel.innerHTML = _fabOrd.map(i=>{
-        const f = i < 0 ? 'Todas' : FAB[i];
-        const active = i===state.fabricaFoco;
-        const st = active
-          ? 'background:#272A4A;color:#fff;border:1px solid #272A4A;'
-          : 'background:#f8fafc;color:#475569;border:1px solid #e2e8f0;';
-        return `<button style="${st}padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;" data-fi="${i}" onmouseover="if(this.dataset.fi!='${state.fabricaFoco}')this.style.background='#f1f5f9'" onmouseout="if(this.dataset.fi!='${state.fabricaFoco}')this.style.background='#f8fafc'">${escapeHtml(f)}</button>`;
-      }).join('');
-      sel.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{ state.fabricaFoco = parseInt(b.dataset.fi,10); renderFabricas(); }));
+      // a fábrica agora vem só do filtro "Fábricas" do topo (fabricaFoco fica sempre -1)
       const fi = state.fabricaFoco;
       const pedsAll = filtraPedidos();
       const _fabTodas = fi < 0;
@@ -19310,15 +19297,9 @@ function dashInit() {
     const _pdVazio = t => `<p style="font-size:12.5px;color:#94a3b8;padding:8px 4px">${t}</p>`;
 
     function renderProdutos() {
-      const selEl = document.getElementById('prFabSel'), body = document.getElementById('prBody');
-      if (!selEl || !body) return;
-      const _pdOrd = [-1].concat(FAB.map((f, i) => i).sort((x, y) => String(FAB[x]).localeCompare(String(FAB[y]), 'pt-BR', { sensitivity: 'base' })));
-      selEl.innerHTML = _pdOrd.map((idx) => {
-        const f = idx < 0 ? 'Todas' : FAB[idx], active = idx === _pdSt.fab;
-        const st = active ? 'background:#272A4A;color:#fff;border:1px solid #272A4A;' : 'background:#f8fafc;color:#475569;border:1px solid #e2e8f0;';
-        return `<button style="${st}padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer" data-pf="${idx}">${escapeHtml(f)}</button>`;
-      }).join('');
-      selEl.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { _pdSt.fab = parseInt(b.dataset.pf, 10); _pdSt.classe = null; _pdSt.abrir = null; renderProdutos(); }));
+      const body = document.getElementById('prBody');
+      if (!body) return;
+      // a fábrica agora vem só do filtro "Fábricas" do topo (_pdSt.fab fica sempre -1)
 
       let hist = [];
       try { hist = _pdLinhas(); } catch (e) { console.error('renderProdutos', e); }
