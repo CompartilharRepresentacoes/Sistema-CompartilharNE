@@ -31532,15 +31532,21 @@ function _relCalcPedidoFaturado(f) {
         });
       });
       // v51: faturado "contado" nunca passa do pedido (o que passou vira excedente), para Pedido - Faturado = Nao faturado
-      var fqc = Math.min(fq, ped), falta = ped - fqc;
       var rsPedI = Number(it.valorTotal) || ped * preco, rsFatI = Math.min(fv, rsPedI);
-      // falta menor que uma caixa (Qtd/Cx do cadastro) nao conta como nao faturado; produto em CX = 1 caixa
+      // unidade: item lancado em CX num produto cadastrado em PC/KG/UN -> converte para a unidade do cadastro (CX x Qtd/Cx)
       var prCad = prodMap[it.prodId] || {}, un = String(prCad.unidade || '').trim().toUpperCase();
-      var cxTam = un === 'CX' ? 1 : (parseFloat(String(prCad.quant == null ? '' : prCad.quant).replace(',', '.')) || 0);
+      var itMed = String(it.medida || '').trim().toUpperCase();
+      var qpc = parseFloat(String(prCad.quant == null ? '' : prCad.quant).replace(',', '.')) || (Number(it.cx) > 0 ? Number(it.cx) : 0);
+      var fator = (itMed === 'CX' && un !== 'CX' && qpc > 0) ? qpc : 1;
+      if (!un) un = itMed;
+      var pedU = ped * fator, fqU = fq * fator;
+      var fqc = Math.min(fqU, pedU), falta = pedU - fqc;
+      // falta menor que uma caixa (Qtd/Cx do cadastro) nao conta como nao faturado; produto em CX = 1 caixa
+      var cxTam = un === 'CX' ? 1 : qpc;
       var ign = cxTam > 0 && falta > 0.000001 && falta < cxTam - 0.000001, faltaIgn = falta;
-      if (ign) { fqc = ped; falta = 0; rsFatI = rsPedI; }
+      if (ign) { fqc = pedU; falta = 0; rsFatI = rsPedI; }
       var rsIgn = ign ? Math.max(0, rsPedI - Math.min(fv, rsPedI)) : 0;
-      itens.push({ nome: nome, cod: it.prodCodigo || '', un: un, qPed: ped, qFat: fqc, qNao: falta, ign: ign, rsIgn: rsIgn, qIgn: faltaIgn, cxTam: cxTam, kgPed: ped * peso, rsPed: rsPedI, kgFat: fqc * peso, rsFat: rsFatI, kgNao: falta * peso, rsNao: rsPedI - rsFatI, kgExc: (fq - fqc) * peso, rsExc: Math.max(0, fv - rsPedI), nfs: Object.keys(nfs).join(', ') });
+      itens.push({ nome: nome, cod: it.prodCodigo || '', un: un, qPed: pedU, qFat: fqc, qNao: falta, ign: ign, rsIgn: rsIgn, qIgn: faltaIgn, cxTam: cxTam, kgPed: pedU * peso, rsPed: rsPedI, kgFat: fqc * peso, rsFat: rsFatI, kgNao: falta * peso, rsNao: rsPedI - rsFatI, kgExc: (fqU - fqc) * peso, rsExc: Math.max(0, fv - rsPedI), nfs: Object.keys(nfs).join(', ') });
     });
     if (fProd && !itens.length) return;
     var r = { p: p, cli: cli, itens: itens, pedKg: 0, fatKg: 0, naoKg: 0, excKg: 0, excRs: 0 };
