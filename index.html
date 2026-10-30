@@ -31447,8 +31447,55 @@ function gerarRelatorio() {
     html = '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Considera pedidos desde ' + _cc[2] + '/' + _cc[1] + '/' + _cc[0] + '. Para anos anteriores, informe o período (de) nos filtros.</div>' + html;
   }
   document.getElementById('rel-resultado').innerHTML = html;
+  if (_relAtual === 'pedido-faturado') _relPfRender();
 }
 
+// ── Pedido x Faturado: ranking de produtos (R$/Kg, Top 10/20/50/Todos) e paginacao da tabela (10 por pagina) ──
+function _relPfRender() { _relPfRanking(); _relPfTabela(); }
+function _relPfM(v) { _relPfSet('m', v); }
+function _relPfT(v) { _relPfSet('top', v); }
+function _relPfSet(k, v) { window._relPf[k] = v; if (k === 'pg') _relPfTabela(); else _relPfRanking(); }
+function _relPfRanking() {
+  var box = document.getElementById('rel-pf-rank'), S = window._relPf;
+  if (!box || !S) return;
+  var kg = S.m === 'kg', pk = kg ? 'pedKg' : 'pedRs', fk = kg ? 'fatKg' : 'fatRs', nk = kg ? 'naoKg' : 'naoRs';
+  var fmt = function (v) { return kg ? _relNum(v) + ' kg' : _pedFmtMoeda(v); };
+  var lista = S.prods.slice().sort(function (a, b) { return b[pk] - a[pk]; });
+  var mostrar = S.top ? lista.slice(0, S.top) : lista;
+  var seg = function (itens, atual, fnome) {
+    return '<span style="display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">' + itens.map(function (it) {
+      var on = String(it[0]) === String(atual);
+      return '<button type="button" onclick="' + fnome + '(' + JSON.stringify(it[0]) + ')" style="border:none;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;' + (on ? 'background:#272A4A;color:#fff' : 'background:#fff;color:#475569') + '">' + it[1] + '</button>';
+    }).join('') + '</span>';
+  };
+  var linhas = mostrar.map(function (g, i) {
+    var pc = g[pk] ? g[fk] / g[pk] : 0;
+    return '<tr style="border-top:1px solid #f1f5f9"><td style="padding:7px 12px;white-space:nowrap"><span style="display:inline-block;width:26px;color:#94a3b8">' + (i + 1) + '</span>' + _pedEsc(g.nome) + '</td>'
+      + '<td style="padding:7px 12px;text-align:right">' + fmt(g[pk]) + '</td>'
+      + '<td style="padding:7px 12px;text-align:right;color:#15803d">' + fmt(g[fk]) + '</td>'
+      + '<td style="padding:7px 12px;text-align:right">' + (g[nk] > 0.005 ? '<b style="color:#b91c1c">' + fmt(g[nk]) + '</b>' : fmt(g[nk])) + '</td>'
+      + '<td style="padding:7px 12px;text-align:right;white-space:nowrap"><span style="display:inline-block;width:44px;height:8px;background:#fee2e2;border-radius:5px;overflow:hidden;vertical-align:middle;margin-right:6px"><i style="display:block;height:100%;width:' + Math.min(100, pc * 100) + '%;background:#16a34a"></i></span>' + _relNum(pc * 100, 1) + '%</td></tr>';
+  }).join('');
+  var th = function (t, r) { return '<th style="padding:9px 12px;text-align:' + (r ? 'right' : 'left') + ';font-weight:700">' + t + '</th>'; };
+  box.innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);margin-bottom:12px;overflow-x:auto">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #e2e8f0"><span style="font-size:13px;font-weight:700;color:#1e293b">Produtos por ranking</span>'
+    + '<span style="display:flex;gap:8px;flex-wrap:wrap">' + seg([['rs', 'R$'], ['kg', 'Kg']], S.m, '_relPfM') + seg([[10, 'Top 10'], [20, '20'], [50, '50'], [0, 'Todos']], S.top, '_relPfT') + '</span></div>'
+    + '<table style="width:100%;border-collapse:collapse;font-size:12px;color:#1e293b"><thead><tr style="background:#f8fafc;font-size:9.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">' + th('Produto') + th('Pedido', 1) + th('Faturado', 1) + th('Não faturado', 1) + th('% faturado', 1) + '</tr></thead><tbody>'
+    + (linhas || '<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8">Nenhum produto para os filtros selecionados.</td></tr>') + '</tbody></table>'
+    + '<div style="padding:8px 14px;font-size:11px;color:#64748b;border-top:1px solid #f1f5f9">Mostrando ' + mostrar.length + ' de ' + lista.length + ' produtos · ordenado pelo pedido em ' + (kg ? 'Kg' : 'R$') + '</div></div>';
+}
+function _relPfTabela() {
+  var box = document.getElementById('rel-pf-tab'), S = window._relPf;
+  if (!box || !S || !S.tab) return;
+  var T = S.tab, POR = 10, total = T.rows.length, np = Math.max(1, Math.ceil(total / POR));
+  if (S.pg > np) S.pg = np; if (S.pg < 1) S.pg = 1;
+  var a = (S.pg - 1) * POR;
+  var html = _relTabela(T.cols, T.rows.slice(a, a + POR), { totais: T.tot, detalhes: T.dets.slice(a, a + POR), minWidth: T.minWidth });
+  var btn = function (txt, pg, off) { return '<button type="button" ' + (off ? 'disabled' : 'onclick="_relPfSet(\'pg\',' + pg + ')"') + ' style="border:1px solid #e2e8f0;background:#fff;border-radius:7px;padding:4px 11px;font-size:11.5px;font-weight:600;color:' + (off ? '#cbd5e1' : '#475569') + ';cursor:' + (off ? 'default' : 'pointer') + '">' + txt + '</button>'; };
+  var pager = total ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:11.5px;color:#64748b"><span>' + (a + 1) + '–' + Math.min(total, a + POR) + ' de ' + total + '</span>'
+    + '<span style="display:flex;align-items:center;gap:8px">' + btn('Anterior', S.pg - 1, S.pg <= 1) + '<span>Página ' + S.pg + ' de ' + np + '</span>' + btn('Próxima', S.pg + 1, S.pg >= np) + '</span></div>' : '';
+  box.innerHTML = html + pager;
+}
 // ── v49: Pedido x Faturado x Nao faturado (R$ e Kg), com filtros e detalhe por item ──
 function _relCalcPedidoFaturado(f) {
   var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
@@ -31606,7 +31653,17 @@ function _relCalcPedidoFaturado(f) {
   var cols = colsIni.concat(numCols);
   var tot = totIni.concat([ _relNum(T.pedKg), _pedFmtMoeda(T.pedRs), _relNum(T.fatKg), _pedFmtMoeda(T.fatRs), _relNum(T.naoKg), _pedFmtMoeda(T.naoRs), fmtP(pctT) + ' · ' + fmtP(pctTkg) + ' kg', '' ]);
   var nota = '<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Clique numa linha para ver o detalhe. Pedidos cancelados ficam fora. Pedido − Faturado = Não faturado: o que foi faturado além do pedido (preço/quantidade da NF maior que o pedido) não é somado em "Faturado" e aparece à parte no card. "Não faturado" = o que ainda está pendente no pedido; o Kg usa o peso cadastrado do produto.' + (f.produto ? ' Com filtro de produto, os valores em R$ são calculados item a item.' : '') + '</div>';
-  return kpis + barra + _relTabela(cols, rows, { totais: tot, detalhes: dets, minWidth: ag === 'pedido' ? 1500 : 1250 }) + nota;
+  // ranking de produtos (pedido / faturado / nao faturado), em R$ ou Kg, e tabela paginada de 10 em 10
+  var prodAg = {};
+  recs.forEach(function(r){ r.itens.forEach(function(i){
+    var k = (i.cod || '') + '|' + i.nome, g = prodAg[k] || (prodAg[k] = { nome: i.nome, pedRs: 0, fatRs: 0, naoRs: 0, pedKg: 0, fatKg: 0, naoKg: 0 });
+    g.pedRs += i.rsPed; g.fatRs += i.rsFat; g.naoRs += i.rsNao; g.pedKg += i.kgPed; g.fatKg += i.kgFat; g.naoKg += i.kgNao;
+  }); });
+  window._relPf = window._relPf || { m: 'rs', top: 10 };
+  window._relPf.prods = Object.keys(prodAg).map(function(k){ return prodAg[k]; });
+  window._relPf.tab = { cols: cols, rows: rows, dets: dets, tot: tot, minWidth: ag === 'pedido' ? 1500 : 1250 };
+  window._relPf.pg = 1;
+  return kpis + barra + '<div id="rel-pf-rank"></div><div id="rel-pf-tab"></div>' + nota;
 }
 
 function _relCalcPedidosParados(f) {
