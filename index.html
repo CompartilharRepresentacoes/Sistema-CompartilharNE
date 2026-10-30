@@ -6162,7 +6162,10 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </span>
           <span class="rel-campo" data-campo="fornecedor" style="display:flex;align-items:center;gap:6px">
             <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
-            <input id="rel-f-fornecedor" placeholder="Nome..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:130px">
+            <span style="position:relative;display:inline-block">
+              <input id="rel-f-fornecedor" placeholder="Nome ou código..." autocomplete="off" oninput="_relFornLista()" onfocus="_relFornLista()" onblur="setTimeout(_relFornFechar,150)" onkeydown="if(event.key==='Escape')_relFornFechar()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+              <div id="rel-f-fornecedor-lista" style="display:none;position:absolute;top:100%;left:0;margin-top:3px;min-width:230px;max-height:240px;overflow:auto;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 6px 20px rgba(39,42,74,.14);padding:4px;z-index:50"></div>
+            </span>
           </span>
           <span class="rel-campo" data-campo="vendedor" style="display:flex;align-items:center;gap:6px">
             <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
@@ -31240,6 +31243,30 @@ function limparFiltrosRelatorio() {
   });
   var _ag = document.getElementById('rel-f-agrupar'); if (_ag) _ag.value = 'pedido';
   _relAtualizarSubcategorias();
+}
+// Lista do campo Fornecedor dos relatorios: abre ao clicar, filtra ao digitar (nome ou codigo, sem acento).
+function _relFornFechar() { var d = document.getElementById('rel-f-fornecedor-lista'); if (d) d.style.display = 'none'; }
+function _relFornLista() {
+  var inp = document.getElementById('rel-f-fornecedor'), d = document.getElementById('rel-f-fornecedor-lista');
+  if (!inp || !d) return;
+  var nz = function (x) { return String(x == null ? '' : x).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); };
+  var esc = function (x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+  var q = nz(inp.value.trim()), qc = q.replace(/^0+/, '');
+  var itens = (getFornecedores() || []).map(function (x) {
+    return { cod: String(x.codigo || '').trim(), nome: String(x.nome_fantasia || x.razao_social || '').trim() };
+  }).filter(function (x) { return x.nome; }).filter(function (x) {
+    return !q || nz(x.nome).indexOf(q) >= 0 || nz(x.cod).indexOf(q) >= 0 || (qc && x.cod.replace(/^0+/, '') === qc);
+  }).sort(function (a, b) { return a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }); });
+  d.innerHTML = itens.length ? itens.map(function (x, i) {
+    return '<div data-i="' + i + '" style="padding:6px 9px;border-radius:6px;font-size:12px;color:#1e293b;cursor:pointer;white-space:nowrap" onmouseover="this.style.background=&#39;#eef2ff&#39;" onmouseout="this.style.background=&#39;&#39;">'
+      + (x.cod ? '<span style="color:#94a3b8;margin-right:6px">' + esc(x.cod) + '</span>' : '') + esc(x.nome) + '</div>';
+  }).join('') : '<div style="padding:7px 9px;font-size:12px;color:#94a3b8">Nenhuma fábrica encontrada</div>';
+  d.onmousedown = function (ev) {
+    var t = ev.target.closest('[data-i]'); if (!t) return;
+    inp.value = itens[parseInt(t.getAttribute('data-i'), 10)].nome;
+    _relFornFechar();
+  };
+  d.style.display = 'block';
 }
 // O filtro Fornecedor dos relatorios compara com o NOME da fabrica gravado no pedido; se o usuario
 // digitar o CODIGO (ex.: 0010) ou "0010 Allfood", troca pelo nome do fornecedor correspondente.
