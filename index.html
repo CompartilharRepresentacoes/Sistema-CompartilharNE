@@ -31612,12 +31612,17 @@ function _relCalcPedidoFaturado(f) {
   }
   function miniItens(r) {
     if (!r.itens.length) return '<div style="font-size:11.5px;color:#94a3b8">Este pedido não tem itens cadastrados.</div>';
-    return _relMini(colsMiniItens, r.itens.map(function(i){
+    // so mostra o que ainda falta faturar; itens faturados (ou com sobra menor que 1 caixa) ficam de fora do detalhe
+    var pend = r.itens.filter(function(i){ return i.kgNao > 0.005 || i.qNao > 0.005 || i.rsNao > 0.005; });
+    var ocultos = r.itens.length - pend.length;
+    var nota = ocultos ? '<div style="font-size:10.5px;color:#94a3b8;margin-top:6px">' + ocultos + (ocultos === 1 ? ' item faturado (ou com sobra menor que 1 cx) não aparece aqui' : ' itens faturados (ou com sobra menor que 1 cx) não aparecem aqui') + '</div>' : '';
+    if (!pend.length) return '<div style="font-size:11.5px;color:#15803d">Todos os itens deste pedido foram faturados.</div>' + nota;
+    return _relMini(colsMiniItens, pend.map(function(i){
       var pc = i.rsPed ? i.rsFat / i.rsPed : 0;
       var falta = (i.kgNao > 0.005 || i.qNao > 0.005) ? '<b style="color:#b91c1c">' + qtdUn(i, i.qNao, i.kgNao) + '</b>' : qtdUn(i, i.qNao, i.kgNao);
       if (i.ign) falta += ' <span style="font-size:10px;background:#fef3c7;color:#92400e;border-radius:4px;padding:1px 6px;font-weight:600">sobra ' + qtdUn(i, i.qIgn, i.qIgn * (i.qPed ? i.kgPed / i.qPed : 0)) + ' &lt; 1 cx</span>';
       return [ _pedEsc(i.nome), qtdUn(i, i.qPed, i.kgPed), _pedFmtMoeda(i.rsPed), qtdUn(i, i.qFat, i.kgFat), _pedFmtMoeda(i.rsFat), falta, i.rsNao > 0.005 ? '<b style="color:#b91c1c">' + _pedFmtMoeda(i.rsNao) + '</b>' : _pedFmtMoeda(i.rsNao), fmtP(pc), _pedEsc(i.nfs || '—') ];
-    }));
+    })) + nota;
   }
   var colsMiniPed = [ {label:'Pedido'}, {label:'Data'}, {label:'Cliente'}, {label:'Pedido Kg',right:true}, {label:'Faturado Kg',right:true}, {label:'Falta Kg',right:true}, {label:'Pedido R$',right:true}, {label:'Faturado R$',right:true}, {label:'Falta R$',right:true}, {label:'Situação'} ];
   function miniPeds(lista) {
