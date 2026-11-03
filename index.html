@@ -38158,12 +38158,12 @@ function _pwaParsear(texto) {
     if (mForn) {
       emForn = true;
       var fh = _pwaFornPorNome(mForn[1].replace(/\s*fone.*$/i, '').trim());
-      if (fh) { fornHint = fh; if (atual && atual.impresso) atual.fornHint = fh; }
+      if (fh) { fornHint = fh; if (atual && atual.impresso) { atual.fornHint = fh; atual.soForn = true; } }
       return;
     }
     if (emForn && reCnpj.test(l)) return; // CNPJ do fornecedor (nao e o do cliente)
     if (atual && atual.impresso && !atual.cnpj && !atual.itens.length && reCnpj.test(l)) { atual.cnpj = reCnpj.exec(l).slice(1).join(''); return; }
-    var mT = /^(\d{1,3})\s+(\d{3,6})\s+(.+)\s+(PC|KG|UN|UND|CX|PCT)\s+([\d.,\s—–-]+)$/i.exec(l);
+    var mT = /^(\d{1,3})\s+(\d{1,6})\s+(.+)\s+(PC|KG|UN|UND|CX|PCT)\s+([\d.,\s—–-]+)$/i.exec(l);
     if (mT && atual && atual.impresso) {
       emForn = false;
       var tk = mT[5].replace(/[—–-]/g, ' ').trim().split(/\s+/).filter(Boolean);
@@ -38173,8 +38173,8 @@ function _pwaParsear(texto) {
       if (!qt && tk.length >= 4) { var q4 = _pwaNum(tk[tk.length - 3]); if (q4 > 0) qt = q4; }
       if (!qt && tot && val) qt = Math.round(tot / val * 10) / 10;
       if (!qt) return;
-      var dsc = mT[3].replace(/\bQ[i1l]\b/g, 'Qj').replace(/\b(\d{2,3}0)9\b/g, '$1g').replace(/D\.0\.P/g, 'D.O.P').replace(/^[^A-Za-zÀ-ú0-9]+/, '').trim();
-      atual.itens.push({ textoLido: l, desc: dsc, qtd: qt, unidade: _pwaUn(mT[4]), preco: (tot && val && Math.abs(qt * val - tot) <= tot * 0.005) ? val : 0 });
+      var dsc = mT[3].replace(/\bQ[i1l]\b/g, 'Qj').replace(/\b(\d{2,3}[05])9\b/g, '$1g').replace(/D\.0\.P/g, 'D.O.P').replace(/^[^A-Za-zÀ-ú0-9]+/, '').trim();
+      atual.itens.push({ textoLido: l, cod: mT[2], desc: dsc, qtd: qt, unidade: _pwaUn(mT[4]), preco: (tot && val && Math.abs(qt * val - tot) <= tot * 0.005) ? val : 0 });
       return;
     }
     var mA = reA.exec(l), mB = mA ? null : reB.exec(l);
@@ -38277,7 +38277,8 @@ function _pwaLer() {
     var ach = pd.cliInformado ? { c: pd.cliInformado, via: 'informado' } : _pwaAcharCliente(pd);
     var itens = pd.itens.map(function (it) {
       var pool = pd.fornHint ? prods.filter(function (p) { return p.fornecedor === pd.fornHint; }) : null;
-      var pr = (pool && _pwaCasarGlobal(it.desc, pool, fornTok)) || (pd.soForn ? null : _pwaCasarGlobal(it.desc, prods, fornTok)), sug = false;
+      var codNum = String(it.cod || '').replace(/^0+/, '');
+      var pr = (pool && codNum && pool.filter(function (p) { return String(p.codigo || '').replace(/^0+/, '') === codNum; })[0]) || (pool && _pwaCasarGlobal(it.desc, pool, fornTok)) || (pd.soForn ? null : _pwaCasarGlobal(it.desc, prods, fornTok)), sug = false;
       if (!pr) {
         (pd.soForn ? [pool] : [pool, prods]).some(function (pl) {
           if (!pl) return false;
