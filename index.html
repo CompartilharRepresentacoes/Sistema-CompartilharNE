@@ -28651,7 +28651,7 @@ function _emlLancar() {
     var obj = {
       id: 'dev' + (Date.now() + i), lancamento: prox + i, data: hoje,
       fornecedorId: r.forn.id, fornecedorNome: r.forn.nome_fantasia || '',
-      clienteId: r.cli.id, clienteNome: r.cli.nome_fantasia || r.cli.razao_social || '',
+      clienteId: r.cli.id, clienteNome: (r.cli.codigo ? r.cli.codigo + ' ' : '') + (r.cli.nome_fantasia || r.cli.razao_social || ''),
       vendedorId: vf.vendId || '', vendedorNome: vf.vendNome || '',
       nfEmitida: r.d.nfd, dataNfEmitida: r.d.dataEmissao, nfOrigem: r.nfOrigem, dataNfOrigem: r.dataNfOrigem || '',
       motivo: r.motivo || '', status: canc ? 'Cancelado' : 'Aberto', obs: (canc ? EML_TXT_CANCEL + ' ' : '') + origemTxt,
