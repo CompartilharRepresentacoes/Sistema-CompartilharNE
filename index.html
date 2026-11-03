@@ -14987,17 +14987,22 @@ function _tpImportarLinhas(linhas, col) {
     var codigo = cel(row, col.cod);
     if (!codigo) return;
     resumo.total++;
-    var candidatos = produtos.filter(function(p){ return _cpNorm(p.codigo||'') === _cpNorm(codigo); });
-    // planilha com coluna de fornecedor: usa para escolher entre codigos repetidos em fabricas diferentes
+    // 1) codigo igual; 2) se nao achou, igual sem os zeros a esquerda (o Excel tira 001169 -> 1169).
+    // Com coluna de fabrica na planilha, vale so o produto daquela fabrica (um codigo igual de outra fabrica nao conta).
     var fornPlan = _cpNorm(cel(row, col.forn));
-    if (candidatos.length > 1 && fornPlan) {
-      var filtrados = candidatos.filter(function(p){
+    var daFabrica = function(lista) {
+      if (!fornPlan) return lista;
+      return lista.filter(function(p){
         var _f = fornecedores.find(function(x){ return x.id === p.fornecedor; }) || {};
         var nm = _cpNorm((_f.nome_fantasia || '') + ' ' + (_f.razao_social || ''));
         return nm.indexOf(fornPlan) !== -1 || fornPlan.indexOf(_cpNorm(_f.nome_fantasia || '#')) !== -1;
       });
-      if (filtrados.length) candidatos = filtrados;
-    }
+    };
+    var semZeros = function(x){ return _cpNorm(String(x == null ? '' : x)).trim().replace(/^0+/, ''); };
+    var exatos = produtos.filter(function(p){ return _cpNorm(p.codigo||'') === _cpNorm(codigo); });
+    var candidatos = daFabrica(exatos);
+    if (!candidatos.length && semZeros(codigo)) candidatos = daFabrica(produtos.filter(function(p){ return semZeros(p.codigo) === semZeros(codigo); }));
+    if (!candidatos.length) candidatos = exatos;
     if (!candidatos.length) { resumo.codigosNaoEncontrados.push(codigo); return; }
     var prod = candidatos[0];
     if (candidatos.length > 1) {
