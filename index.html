@@ -20671,7 +20671,7 @@ setInterval(function () { ['vc','vcf','psn','pnf'].forEach(_pedSubVis); }, 400);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ligar); else ligar();
 })();
 var _pedStatusFiltro = '';
-var _pedOrdCampo = 'data'; // v514: mais recentes primeiro (dtCadastro empatava em lotes importados e mostrava 2015 no topo)
+var _pedOrdCampo = 'lancamento'; // ao abrir: ordem de digitacao (ultimo pedido digitado no topo, pelo numero de Lancamento); clicar em Data ordena por data
 var _pedOrdDir = 'desc';
 function pedSetStatusFiltro(status) {
   _pedStatusFiltro = status;
@@ -20687,6 +20687,7 @@ function pedLimparFiltros() {
 }
 function _pedValorOrdenacao(p, campo) {
   switch (campo) {
+    case 'lancamento': return parseInt(p.lancamento, 10) || 0;
     case 'data': return p.data || '';
     case 'numPedidoCliente': return p.numPedidoCliente || '';
     case 'clienteNome': return _cpNorm(_cpSemColchetes(p.clienteNome||''));
@@ -20700,7 +20701,7 @@ function _pedValorOrdenacao(p, campo) {
 }
 function pedOrdenarPor(campo) {
   if (_pedOrdCampo === campo) { _pedOrdDir = (_pedOrdDir === 'asc') ? 'desc' : 'asc'; }
-  else { _pedOrdCampo = campo; _pedOrdDir = 'asc'; }
+  else { var _veioDaDigitacao = (_pedOrdCampo === 'lancamento'); _pedOrdCampo = campo; _pedOrdDir = (campo === 'data' && _veioDaDigitacao) ? 'desc' : 'asc'; }
   renderPedidoList();
 }
 function _pedAtualizarSetasOrdenacao() {
