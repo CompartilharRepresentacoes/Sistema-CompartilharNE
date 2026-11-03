@@ -14938,6 +14938,7 @@ function _tpParsearPeriodoCelula(v) {
   }
   return String(v || '').trim();
 }
+// (planilha pode vir sem titulo e sem os zeros a esquerda do codigo -- tratado em _tpMapearSemCabecalho e _tpImportarLinhas)
 // Layout das colunas (mesmo da planilha gerada por confirmarExportTabPrecoForn):
 // 0=Codigo, 1=Produto (so leitura), 2=Cod.Pedido, 3=Cod.Cliente, 4=Valor, 5=Comissao, 6=Periodo
 // Descobre as colunas pelo titulo da planilha (aceita "Forn | Cód | Produto | Cód Pedido | Cód Cliente"
