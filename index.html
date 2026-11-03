@@ -21045,7 +21045,38 @@ function pedFecharImpressao() {
   var modal = document.getElementById('modal-ped-impressao');
   if (modal) modal.style.display = 'none';
   _pimpPedidoId = '';
+  var _bx = document.getElementById('pimp-inner-box'); if (_bx && _bx._resetArrasto) _bx._resetArrasto();
 }
+// No computador, a janela "Imprimir Pedido" pode ser movida arrastando a barra de cima com o mouse.
+function _pimpAtivarArrasto() {
+  var h = document.getElementById('pimp-header-modal'), b = document.getElementById('pimp-inner-box');
+  if (!h || !b || h._arrasto) return;
+  h._arrasto = true; h.style.cursor = 'move'; h.style.userSelect = 'none';
+  var sx = 0, sy = 0, ox = 0, oy = 0, arrastando = false;
+  h.addEventListener('pointerdown', function (e) {
+    if (window.innerWidth <= 900 || e.button !== 0 || (e.target.closest && e.target.closest('button'))) return;
+    arrastando = true; sx = e.clientX - ox; sy = e.clientY - oy;
+    try { h.setPointerCapture(e.pointerId); } catch (e1) {}
+    e.preventDefault();
+  });
+  h.addEventListener('pointermove', function (e) {
+    if (!arrastando) return;
+    ox = e.clientX - sx; oy = e.clientY - sy;
+    b.style.transform = 'translate(' + ox + 'px,' + oy + 'px)';
+    var r = b.getBoundingClientRect();
+    // mantem a barra de cima sempre dentro da tela, para nao perder a janela
+    if (r.top < 0) oy -= r.top;
+    if (r.top > window.innerHeight - 40) oy -= r.top - (window.innerHeight - 40);
+    if (r.right < 80) ox += 80 - r.right;
+    if (r.left > window.innerWidth - 80) ox -= r.left - (window.innerWidth - 80);
+    b.style.transform = 'translate(' + ox + 'px,' + oy + 'px)';
+  });
+  var fim = function () { arrastando = false; };
+  h.addEventListener('pointerup', fim); h.addEventListener('pointercancel', fim);
+  b._resetArrasto = function () { ox = 0; oy = 0; b.style.transform = ''; };
+}
+_pimpAtivarArrasto();
+document.addEventListener('DOMContentLoaded', _pimpAtivarArrasto);
 function _pimpPedidoAtual() {
   return getPedidos().find(function(p){ return p.id === _pimpPedidoId; });
 }
