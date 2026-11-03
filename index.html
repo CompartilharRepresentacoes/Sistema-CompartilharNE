@@ -14618,8 +14618,8 @@ function _tpRenderProdList() {
     list.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhum produto adicionado</div>';
     return;
   }
-  // Ordem fixa: fabrica (A-Z) e depois codigo do produto (numerico). Ordena o proprio array para os botoes Editar/Remover (indice) continuarem certos.
-  _tpItens.sort(function(x, y){ return String(x.fornNome || '').localeCompare(String(y.fornNome || ''), 'pt', { sensitivity: 'base' }) || String(x.codigo || '').localeCompare(String(y.codigo || ''), 'pt', { numeric: true }); });
+  // Ordem fixa: fabrica (A-Z) e depois nome do produto (A-Z). Ordena o proprio array para os botoes Editar/Remover (indice) continuarem certos.
+  _tpItens.sort(function(x, y){ return String(x.fornNome || '').localeCompare(String(y.fornNome || ''), 'pt', { sensitivity: 'base' }) || String(x.nome || '').localeCompare(String(y.nome || ''), 'pt', { sensitivity: 'base', numeric: true }); });
   var produtosCadastro = getProdutos(); // Unidade vem sempre do cadastro do Produto (nao fica gravada no item)
   list.innerHTML = _tpItens.map(function(it,i){
     var prodCad = produtosCadastro.find(function(p){ return p.id === it.prodId; });
