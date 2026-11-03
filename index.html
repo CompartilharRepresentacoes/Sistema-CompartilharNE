@@ -5780,7 +5780,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                 <div id="ped-itens-tbody"><div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">Nenhum item adicionado.</div></div>
               </div>
               <div style="display:flex;justify-content:flex-end;padding-top:10px">
-                <div style="font-size:13px;color:#475569">Total do pedido: <span id="ped-total-geral" style="font-size:16px;font-weight:800;color:#272A4A;margin-left:6px">R$ 0,00</span><span class="so-comissao" style="margin-left:18px">Comissão prevista: <span id="ped-comissao-total" style="font-size:14px;font-weight:800;color:#1c2f66;margin-left:4px">R$ 0,00</span></span></div>
+                <div style="font-size:13px;color:#475569;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:baseline;gap:6px 22px"><span class="so-comissao">Comissão prevista: <span id="ped-comissao-total" style="font-size:13px;font-weight:400;color:#1c2f66;margin-left:4px">R$ 0,00</span></span><span>Peso total: <span id="ped-peso-total" style="font-size:13px;font-weight:400;color:#1e293b;margin-left:4px">0,00 kg</span></span><span>Total do pedido: <span id="ped-total-geral" style="font-size:16px;font-weight:800;color:#272A4A;margin-left:6px">R$ 0,00</span></span></div>
               </div>
             </div>
 
@@ -27789,6 +27789,8 @@ function renderPedItens() {
   if (!_pedItens.length) {
     tbody.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">Nenhum item adicionado.</div>';
     if (totalEl) totalEl.textContent = _pedFmtMoeda(0);
+    var _pz = document.getElementById('ped-peso-total'); if (_pz) _pz.textContent = '0,00 kg';
+    var _cz = document.getElementById('ped-comissao-total'); if (_cz) _cz.textContent = _pedFmtMoeda(0);
     return;
   }
   var total = 0;
@@ -27823,6 +27825,14 @@ function renderPedItens() {
   }).join('');
   if (totalEl) totalEl.textContent = _pedFmtMoeda(total);
   var _cEl = document.getElementById('ped-comissao-total'); if (_cEl) _cEl.textContent = _pedFmtMoeda(_pedComTotal);
+  // Peso total: peso cadastrado do produto x quantidade (mesma conta do pedido impresso)
+  var _prodsPeso = getProdutos();
+  var _pesoTot = _pedItens.reduce(function(acc, it){
+    var pr = _prodsPeso.find(function(x){ return x.id === it.prodId; });
+    var pu = pr ? (parseFloat(String(pr.peso).replace(',', '.')) || 0) : 0;
+    return acc + pu * (Number(it.quantidade) || 0);
+  }, 0);
+  var _pEl = document.getElementById('ped-peso-total'); if (_pEl) _pEl.textContent = _pesoTot.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kg';
 }
 
 // Restringe Número Pedido Cliente a letras/números e no máximo 1 ponto (sem ; nem outros símbolos)
