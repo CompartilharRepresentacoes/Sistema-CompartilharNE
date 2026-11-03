@@ -22717,7 +22717,7 @@ function _pimCalcularDivergenciasItem(itensPedido, itensNfConvertidos, produtos)
     }
     var itNf = nfRestantes[idx];
     nfRestantes.splice(idx, 1);
-    if (Math.abs((Number(itPed.quantidade) || 0) - (Number(itNf.qtd) || 0)) > _PIM_TOL_QTD) {
+    if ((Number(itNf.qtd) || 0) - (Number(itPed.quantidade) || 0) > _PIM_TOL_QTD) {
       divergencias.push({ tipo: 'quantidade', produtoCodigo: itPed.prodCodigo || '', produtoNome: itPed.prodNome || '', valorPedido: itPed.quantidade, valorFaturado: itNf.qtd });
     }
     if (Math.abs((Number(itPed.precoUnit) || 0) - (Number(itNf.precoUnit) || 0)) > _PIM_TOL_PRECO) {
