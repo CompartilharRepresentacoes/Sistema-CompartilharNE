@@ -19043,9 +19043,12 @@ function dashInit() {
       const agProd = new Map();
       try {
         const fabIdReal = _fabTodas ? null : FAB_ID[fi];
+        // a fabrica vem do filtro "Fabricas" do topo (state.fabricas): sem selecao = todas; com selecao, so os pedidos dessas fabricas
+        const _fabsSelProd = (_fabTodas && state.fabricas.size) ? state.fabricas : null;
         const produtosPorId = new Map((getProdutos() || []).map(pr => [pr.id, pr]));
         for (const pedidoReal of getPedidos()) {
-          const mesmoFornecedor = _fabTodas ? true : (fabIdReal != null ? pedidoReal.fornecedorId === fabIdReal : (pedidoReal.fornecedorNome || '') === FAB[fi]);
+          const _ixFabPed = _fabsSelProd ? (FAB_ID.indexOf(pedidoReal.fornecedorId) >= 0 ? FAB_ID.indexOf(pedidoReal.fornecedorId) : FAB.indexOf(pedidoReal.fornecedorNome || '')) : -1;
+          const mesmoFornecedor = _fabsSelProd ? (_ixFabPed >= 0 && _fabsSelProd.has(_ixFabPed)) : _fabTodas ? true : (fabIdReal != null ? pedidoReal.fornecedorId === fabIdReal : (pedidoReal.fornecedorNome || '') === FAB[fi]);
           if (!mesmoFornecedor) continue;
           if (pedidoReal.data < state.dtIni || pedidoReal.data > state.dtFim) continue;
           if (!ST_OK.has(STATUS.indexOf(pedidoReal.status))) continue;
