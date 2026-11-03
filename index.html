@@ -327,6 +327,13 @@
 
     /* v154: etiqueta "usando mes vizinho" */
     .mv-av { display:inline-block; margin-top:3px; font-size:10.5px; font-weight:700; color:#3b2a00; background:#fcd34d; border-radius:999px; padding:1px 9px; } .mv-av.clk { cursor:pointer; } .mv-av.clk:hover { background:#fde68a; }
+    /* Perfil Vendedor: nao ve comissao; nao digita preco nem Nº pedido do fornecedor */
+    body.perfil-vendedor .so-comissao { display:none !important; }
+    body.perfil-vendedor .ped-grid-itens { grid-template-columns:1fr 55px 55px 92px 80px 80px 70px 40px !important; }
+    body.perfil-vendedor .ped-itens-header, body.perfil-vendedor .ped-item-row { grid-template-columns:1fr 50px 45px 90px 55px 55px 95px 66px !important; }
+    body.perfil-vendedor .tp-grid-itens { grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 90px 80px !important; }
+    body.perfil-vendedor .tpcli-grid { grid-template-columns:1fr 1.3fr 90px 1fr !important; }
+    body.perfil-vendedor #ped-item-preco, body.perfil-vendedor #ped-edit-item-preco, body.perfil-vendedor #ped-num-fornecedor { background:#f8fafc; color:#64748b; cursor:not-allowed; }
     /* v137: Comissoes - padrao do sistema */
     #page-comissoes-list #com-abas { display:flex; gap:6px; background:#fff; border-radius:14px; padding:6px; box-shadow:0 2px 10px rgba(20,35,80,.10); margin-bottom:12px; }
     #page-comissoes-list .ng-aba { flex:1 1 auto; text-align:center; padding:11px 12px; border-radius:10px; background:#f1f5fb; color:#1c2f66; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
@@ -4597,7 +4604,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Valor</label>
             <input class="form-input" id="tabpreco-prod-valor" placeholder="0,00" oninput="_tpFormatValor(this)" onkeydown="_pedEnterAvanca(event,'tabpreco-prod-comissao')" style="width:100%">
           </div>
-          <div>
+          <div class="so-comissao">
             <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Comissão (%)</label>
             <input class="form-input" id="tabpreco-prod-comissao" placeholder="0,00" oninput="_tpFormatComissao(this)" maxlength="6" onkeydown="_pedEnterAvanca(event,'tabpreco-prod-periodo')" style="width:100%">
           </div>
@@ -4627,8 +4634,8 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </span>
           <span id="tabpreco-prod-count" style="font-size:10px;color:#94a3b8">0 produtos</span>
         </div>
-        <div style="display:grid;grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 80px 90px 80px;padding:6px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">
-          <span>Fornecedor</span><span>Código / Produto</span><span>Cód. Pedido</span><span>Cód. Cliente</span><span>Unidade</span><span>Valor</span><span>Comissão</span><span>Período</span><span>Dt. Cadastro</span><span style="text-align:center">Opções</span>
+        <div class="tp-grid-itens" style="display:grid;grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 80px 90px 80px;padding:6px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">
+          <span>Fornecedor</span><span>Código / Produto</span><span>Cód. Pedido</span><span>Cód. Cliente</span><span>Unidade</span><span>Valor</span><span class="so-comissao">Comissão</span><span>Período</span><span>Dt. Cadastro</span><span style="text-align:center">Opções</span>
         </div>
         <div id="tabpreco-prod-list"></div>
       </div>
@@ -5751,7 +5758,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Preço (R$)</label>
                   <input class="form-input" id="ped-item-preco" type="text" inputmode="decimal" oninput="_pedMaskPreco(this)" onkeydown="_pedEnterAvanca(event,'ped-item-desc')" placeholder="0,00" style="width:100%">
                 </div>
-                <div>
+                <div class="so-comissao">
                   <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px" title="Comissão cadastrada na tabela de preço específica do cliente">Comissão</label>
                   <input class="form-input" id="ped-item-comissao" readonly tabindex="-1" placeholder="—" style="width:100%;background:#f8fafc;color:#64748b;text-align:center">
                 </div>
@@ -5768,12 +5775,12 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
               <div id="ped-item-msg" style="font-size:11px;color:#dc2626;margin-top:-6px;margin-bottom:6px"></div>
               <div style="border:1px solid #eef2f7;border-radius:10px;overflow:hidden">
                 <div class="ped-itens-header" style="display:grid;grid-template-columns:1fr 50px 45px 90px 75px 55px 55px 95px 66px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
-                  <span>Produto</span><span>Medida</span><span>CX</span><span>Preço</span><span>Comissão</span><span>Desc.</span><span>Qtd.</span><span>Total</span><span></span>
+                  <span>Produto</span><span>Medida</span><span>CX</span><span>Preço</span><span class="so-comissao">Comissão</span><span>Desc.</span><span>Qtd.</span><span>Total</span><span></span>
                 </div>
                 <div id="ped-itens-tbody"><div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">Nenhum item adicionado.</div></div>
               </div>
               <div style="display:flex;justify-content:flex-end;padding-top:10px">
-                <div style="font-size:13px;color:#475569">Total do pedido: <span id="ped-total-geral" style="font-size:16px;font-weight:800;color:#272A4A;margin-left:6px">R$ 0,00</span><span style="margin-left:18px">Comissão prevista: <span id="ped-comissao-total" style="font-size:14px;font-weight:800;color:#1c2f66;margin-left:4px">R$ 0,00</span></span></div>
+                <div style="font-size:13px;color:#475569">Total do pedido: <span id="ped-total-geral" style="font-size:16px;font-weight:800;color:#272A4A;margin-left:6px">R$ 0,00</span><span class="so-comissao" style="margin-left:18px">Comissão prevista: <span id="ped-comissao-total" style="font-size:14px;font-weight:800;color:#1c2f66;margin-left:4px">R$ 0,00</span></span></div>
               </div>
             </div>
 
@@ -8213,8 +8220,8 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
             <div id="tpcli-print-data" style="font-size:11px;color:#94a3b8"></div>
           </div>
           <div id="tpcli-preview-titulo" style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px"></div>
-          <div style="display:grid;grid-template-columns:1fr 1.3fr 90px 1fr 70px;padding:6px 10px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">
-            <span>Fornecedor</span><span>Produto</span><span>Preço</span><span>Origem</span><span>Comissão</span>
+          <div class="tpcli-grid" style="display:grid;grid-template-columns:1fr 1.3fr 90px 1fr 70px;padding:6px 10px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">
+            <span>Fornecedor</span><span>Produto</span><span>Preço</span><span>Origem</span><span class="so-comissao">Comissão</span>
           </div>
           <div id="tpcli-preview-tbody"></div>
         </div>
@@ -8328,7 +8335,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Valor</label>
           <input class="form-input" id="tpprodedit-valor" placeholder="0,00" oninput="_tpFormatValor(this)" style="width:100%">
         </div>
-        <div>
+        <div class="so-comissao">
           <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Comissão (%)</label>
           <input class="form-input" id="tpprodedit-comissao" placeholder="0,00" oninput="_tpFormatComissao(this)" maxlength="6" style="width:100%">
         </div>
@@ -9783,7 +9790,30 @@ function _appPaginaPermitida(pageId) {
   }
   return false; // telas sem chave de permissão (comissões, apresentações, comandos): só administrador
 }
+// Perfil Vendedor (grupo "Vendedor"): nao ve comissao, nao digita preco nem Nº pedido do fornecedor.
+// Diretor, Assistente e administrador continuam vendo e editando tudo. Isto so controla a tela;
+// a barreira real continua sendo o banco (RLS).
+function _appEhVendedor() {
+  return !!(_appUsuarioAtual && !_appEhAdmin && !_appGrupoTotal() && /vendedor/i.test(_appUsuarioAtual.grupoNome || ''));
+}
+var _relTodosOriginal = null;
+function _appAplicarPerfilVendedor() {
+  var v = _appEhVendedor();
+  try { document.body.classList.toggle('perfil-vendedor', v); } catch (e1) {}
+  ['ped-item-preco', 'ped-edit-item-preco', 'ped-num-fornecedor'].forEach(function (id) {
+    var el = document.getElementById(id); if (el) el.readOnly = v;
+  });
+  try {
+    if (typeof RELATORIOS !== 'undefined') {
+      if (!_relTodosOriginal) _relTodosOriginal = RELATORIOS.slice();
+      var ocultos = { 'comissoes-mes': 1, 'inadimplencia-comissao': 1 };
+      RELATORIOS.length = 0;
+      _relTodosOriginal.forEach(function (r) { if (!(v && ocultos[r.id])) RELATORIOS.push(r); });
+    }
+  } catch (e2) { console.warn('Perfil vendedor (relatorios):', e2); }
+}
 function _appAplicarMenuPermissoes() {
+  _appAplicarPerfilVendedor();
   var sb = document.querySelector('.sb-item') ? document.querySelector('.sb-item').parentNode : null;
   var itens = document.querySelectorAll('.sb-item');
   function pid(el) { var m = /showPage\('([^']+)'/.exec(el.getAttribute('onclick') || ''); return m ? m[1] : null; }
@@ -14624,14 +14654,14 @@ function _tpRenderProdList() {
   list.innerHTML = _tpItens.map(function(it,i){
     var prodCad = produtosCadastro.find(function(p){ return p.id === it.prodId; });
     var unidade = (prodCad && prodCad.unidade) ? prodCad.unidade : '—';
-    return '<div style="display:grid;grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 80px 90px 80px;padding:9px 12px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
+    return '<div class="tp-grid-itens" style="display:grid;grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 80px 90px 80px;padding:9px 12px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
       + '<span style="color:#64748b;font-size:11px">'+(it.fornNome||'—')+'</span>'
       + '<span style="font-weight:600;color:#1e293b">'+(it.codigo?it.codigo+' – ':'')+it.nome+'</span>'
       + '<span style="color:#64748b">'+(it.codPedido||'—')+'</span>'
       + '<span style="color:#64748b">'+(it.codCliente||'—')+'</span>'
       + '<span style="color:#64748b;font-size:11px">'+unidade+'</span>'
       + '<span style="color:#1e293b;font-weight:600">R$ '+it.valor+'</span>'
-      + (function(){ var _r = _comResolver(_comFornDe(it.fornId), it.prodId, it.comissao, '', (document.getElementById('tabpreco-edit-id')||{}).value || ''); return '<span style="color:#1e293b;font-size:11px;font-weight:700">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'<br>'+_comOrigemTag(_r.origem)+'</span>'; })()
+      + (function(){ var _r = _comResolver(_comFornDe(it.fornId), it.prodId, it.comissao, '', (document.getElementById('tabpreco-edit-id')||{}).value || ''); return '<span class="so-comissao" style="color:#1e293b;font-size:11px;font-weight:700">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'<br>'+_comOrigemTag(_r.origem)+'</span>'; })()
       + '<span style="color:#DE7926;font-size:11px">'+(it.periodo||'—')+'</span>'
       + '<span style="color:#64748b">'+(it.dtCadastro||'—')+'</span>'
       + '<div style="display:flex;gap:4px;justify-content:center">'
@@ -15171,12 +15201,12 @@ function _tpcliRenderPreview(cliente) {
     return;
   }
   tbody.innerHTML = _tpcliLinhas.map(function(l){
-    return '<div style="display:grid;grid-template-columns:1fr 1.3fr 90px 1fr 70px;padding:6px 10px;border-bottom:1px solid #f1f5f9;font-size:11.5px;align-items:center">'
+    return '<div class="tpcli-grid" style="display:grid;grid-template-columns:1fr 1.3fr 90px 1fr 70px;padding:6px 10px;border-bottom:1px solid #f1f5f9;font-size:11.5px;align-items:center">'
       + '<div style="color:#64748b">' + _pedEsc(l.fornNome) + '</div>'
       + '<div style="font-weight:600;color:#1e293b">' + (l.prodCodigo?_pedEsc(l.prodCodigo)+' – ':'') + _pedEsc(l.prodNome) + '</div>'
       + '<div style="font-weight:700;color:#15803d">R$ ' + _pedEsc(String(l.preco||'0')) + '</div>'
       + '<div style="color:#DE7926">' + _pedEsc(l.origem) + '</div>'
-      + '<div style="color:#64748b">' + (l.comissao ? _pedEsc(l.comissao)+'%' : '—') + '</div>'
+      + '<div class="so-comissao" style="color:#64748b">' + (l.comissao ? _pedEsc(l.comissao)+'%' : '—') + '</div>'
       + '</div>';
   }).join('');
   wrap.style.display = 'block';
@@ -15187,8 +15217,10 @@ function tpcliBaixarExcel() {
   if (typeof XLSX === 'undefined') { alert('Biblioteca de Excel não carregou. Verifique a conexão com a internet e tente novamente.'); return; }
   var cliente = getClientes().find(function(c){ return c.id === _tpcliClienteId; }) || {};
   var aoa = [['Fornecedor','Código','Produto','Preço','Origem do Preço','Comissão']];
+  var _semCom = _appEhVendedor();
   _tpcliLinhas.forEach(function(l){
     aoa.push([l.fornNome||'', l.prodCodigo||'', l.prodNome||'', l.preco||'', l.origem||'', l.comissao ? (l.comissao+'%') : '']);
+    if (_semCom) { aoa[aoa.length - 1].pop(); }
   });
   var ws = XLSX.utils.aoa_to_sheet(aoa);
   var wb = XLSX.utils.book_new();
@@ -27482,6 +27514,13 @@ function _pedProdSel(i) {
   var achadoNeg = pedResolverPrecoNegociado(fornId, p.id, cliId);
   var achadoTab = pedResolverPrecoCliente(fornId, p.id, cliId);
   var achado = achadoNeg || achadoTab;
+  if (_appEhVendedor() && !(achado && _pedParseMoeda(achado.valor) > 0)) {
+    // vendedor nao digita preco: sem preco na tabela/negociacao do cliente, o item nao pode ser lancado
+    ['ped-item-prod-id', 'ped-item-prod-input', 'ped-item-medida', 'ped-item-cx', 'ped-item-preco'].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
+    var msgSemPreco = document.getElementById('ped-item-msg');
+    if (msgSemPreco) { msgSemPreco.style.color = '#dc2626'; msgSemPreco.textContent = 'Sem preço na tabela deste cliente para este produto. Fale com o escritório.'; }
+    return;
+  }
   document.getElementById('ped-item-preco').value    = _pedNumParaMascara(achado ? _pedParseMoeda(achado.valor) : 0);
   var _rc = _comResolver(_comFornDe(fornId), p.id, achado ? achado.comissao : '', cliId, null);
   document.getElementById('ped-item-comissao').value = _rc.pct > 0 ? _comFmtPct(_rc.pct) : '—';
@@ -27573,7 +27612,7 @@ function pedAddItem() {
   var preco = _pedParseMoeda(document.getElementById('ped-item-preco').value);
   var desc  = parseFloat(document.getElementById('ped-item-desc').value) || 0;
   if (qtd <= 0) { msg.textContent = 'Informe uma quantidade maior que zero.'; return; }
-  if (preco <= 0) { msg.textContent = 'Informe um preço válido, maior que zero.'; return; }
+  if (preco <= 0) { msg.textContent = _appEhVendedor() ? 'Sem preço na tabela deste cliente para este produto. Fale com o escritório.' : 'Informe um preço válido, maior que zero.'; return; }
   var cxNum = parseFloat(String(cx).replace(',', '.'));
   var modoUnid = (typeof _pedItemModoUnid !== 'undefined' && _pedItemModoUnid === 'cx') ? 'cx' : 'un';
   var qtdCaixas = null;
@@ -27721,7 +27760,7 @@ function renderPedItens() {
       + '<div style="color:#64748b">'+(it.medida!==undefined && it.medida!==''?_pedEsc(it.medida):'—')+'</div>'
       + '<div style="color:#64748b">'+(it.cx!==undefined && it.cx!==''?it.cx:'—')+'</div>'
       + '<div style="color:#64748b">'+_pedFmtMoeda(it.precoUnit)+'</div>'
-      + (function(){ var _r = _comResolver(_comFornDe(_pedItensFornId), it.prodId, it.comissao, _pedItensCliId, null); _pedComTotal += (Number(it.valorTotal)||0) * _r.pct / 100; return '<div style="color:#1e293b;font-size:11.5px;font-weight:700">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'<br>'+_comOrigemTag(_r.origem)+'</div>'; })()
+      + (function(){ var _r = _comResolver(_comFornDe(_pedItensFornId), it.prodId, it.comissao, _pedItensCliId, null); _pedComTotal += (Number(it.valorTotal)||0) * _r.pct / 100; return '<div class="so-comissao" style="color:#1e293b;font-size:11.5px;font-weight:700">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'<br>'+_comOrigemTag(_r.origem)+'</div>'; })()
       + '<div style="color:#64748b">'+(it.desconto||0)+'%</div>'
       + '<div style="color:#64748b" title="'+((it.modoUnid==='cx' && it.qtdCaixas)?(_pedEsc(String(it.qtdCaixas))+' CX × '+_pedEsc(String(it.cx||''))+' = '+it.quantidade+' '+_pedEsc(it.medida||'')):'')+'">'+((it.modoUnid==='cx' && it.qtdCaixas)?(it.qtdCaixas+' CX'):it.quantidade)+'</div>'
       + '<div style="font-weight:700;color:#1e293b">'+_pedFmtMoeda(it.valorTotal)+'</div>'
