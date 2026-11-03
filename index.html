@@ -14952,6 +14952,31 @@ function _tpMapearColunas(cab) {
   if (c.cod < 0 || (c.ped < 0 && c.cli < 0)) return col;
   return c;
 }
+// A primeira linha e titulo? (tem "Cod..." ou "Produto"). Planilha sem titulo comeca direto nos produtos.
+function _tpEhCabecalho(cab) {
+  var h = (cab || []).map(function(x){ return _cpNorm(String(x == null ? '' : x)).replace(/[^a-z0-9 ]/g, ' ').replace(/s+/g, ' ').trim(); });
+  return h.some(function(x){ return /^cod/.test(x) || /produto/.test(x); });
+}
+// Planilha SEM titulo: se a 1a coluna traz o nome da fabrica (ALLFOOD, QUATA...) e a 2a o codigo, o layout e
+// Fornecedor | Codigo | Produto | Cod.Pedido | Cod.Cliente | Valor | Periodo. Senao, usa o layout padrao.
+function _tpMapearSemCabecalho(linhas) {
+  var padrao = { cod: 0, prod: 1, ped: 2, cli: 3, valor: 4, com: 5, per: 6, forn: -1 };
+  var amostra = (linhas || []).filter(function(r){ return r && r.some(function(c){ return c != null && String(c).trim() !== ''; }); }).slice(0, 5);
+  if (!amostra.length) return padrao;
+  var fornecedores = getFornecedores();
+  var ehForn = function(v) {
+    var t = _cpNorm(String(v == null ? '' : v));
+    if (!t || /^[0-9.,]+$/.test(t)) return false;
+    return fornecedores.some(function(f){
+      var nm = _cpNorm((f.nome_fantasia || '') + ' ' + (f.razao_social || ''));
+      var nf = _cpNorm(f.nome_fantasia || '#');
+      return nm.indexOf(t) !== -1 || t.indexOf(nf) !== -1;
+    });
+  };
+  var votos = amostra.filter(function(r){ return ehForn(r[0]); }).length;
+  if (votos >= Math.ceil(amostra.length / 2)) return { forn: 0, cod: 1, prod: 2, ped: 3, cli: 4, valor: 5, com: -1, per: 6 };
+  return padrao;
+}
 function _tpImportarLinhas(linhas, col) {
   col = col || { cod: 0, prod: 1, ped: 2, cli: 3, valor: 4, com: 5, per: 6, forn: -1 };
   var cel = function(row, i) { return i >= 0 ? String(row[i] == null ? '' : row[i]).trim() : ''; };
@@ -14980,6 +15005,8 @@ function _tpImportarLinhas(linhas, col) {
       resumo.codigosAmbiguos.push(codigo + ' (' + _nomesForn.join(', ') + ') — usado: ' + _nomesForn[0]);
     }
     var valor = cel(row, col.valor);
+    var valorCru = col.valor >= 0 ? row[col.valor] : null;
+    if (typeof valorCru === 'number' && isFinite(valorCru)) valor = valorCru.toFixed(2).replace('.', ',');
     var idxExistente = _tpItens.findIndex(function(it){ return it.prodId === prod.id; });
     if (!valor) {
       // sem valor na planilha: so completa Cod. Pedido / Cod. Cliente de um produto que ja esta na tabela
@@ -15027,7 +15054,9 @@ function importTabPrecoFile(input) {
       var wb = XLSX.read(data, { type: 'array', cellDates: true });
       var ws = wb.Sheets[wb.SheetNames[0]];
       var aoa = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      var col = _tpMapearColunas(aoa.shift());
+      var col;
+      if (_tpEhCabecalho(aoa[0])) { col = _tpMapearColunas(aoa.shift()); }
+      else { col = _tpMapearSemCabecalho(aoa); }
       var resumo = _tpImportarLinhas(aoa, col);
       _tpRenderProdList();
       alert(_tpMontarMensagemResumo(resumo));
