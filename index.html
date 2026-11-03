@@ -14988,6 +14988,12 @@ function _tpImportarLinhas(linhas, col) {
     if (!codigo) return;
     resumo.total++;
     var candidatos = produtos.filter(function(p){ return _cpNorm(p.codigo||'') === _cpNorm(codigo); });
+    // o Excel tira os zeros a esquerda (001169 vira 1169): se nao achou igual, compara sem os zeros do comeco
+    if (!candidatos.length) {
+      var semZeros = function(x){ return _cpNorm(String(x == null ? '' : x)).trim().replace(/^0+/, ''); };
+      var alvo = semZeros(codigo);
+      if (alvo) candidatos = produtos.filter(function(p){ return semZeros(p.codigo) === alvo; });
+    }
     // planilha com coluna de fornecedor: usa para escolher entre codigos repetidos em fabricas diferentes
     var fornPlan = _cpNorm(cel(row, col.forn));
     if (candidatos.length > 1 && fornPlan) {
