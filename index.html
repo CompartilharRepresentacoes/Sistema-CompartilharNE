@@ -31589,13 +31589,18 @@ function gerarRelatorio() {
 function _relPfRender() { _relPfRanking(); _relPfTabela(); }
 function _relPfM(v) { _relPfSet('m', v); }
 function _relPfT(v) { _relPfSet('top', v); }
+// clicar no titulo da coluna ordena o ranking (de novo na mesma coluna inverte a ordem)
+function _relPfOrd(k) { var S = window._relPf; if (!S) return; if ((S.ord || 'ped') === k) S.dir = -(S.dir || -1); else { S.ord = k; S.dir = -1; } _relPfRanking(); }
 function _relPfSet(k, v) { window._relPf[k] = v; if (k === 'pg') _relPfTabela(); else _relPfRanking(); }
 function _relPfRanking() {
   var box = document.getElementById('rel-pf-rank'), S = window._relPf;
   if (!box || !S) return;
   var kg = S.m === 'kg', pk = kg ? 'pedKg' : 'pedRs', fk = kg ? 'fatKg' : 'fatRs', nk = kg ? 'naoKg' : 'naoRs';
   var fmt = function (v) { return kg ? _relNum(v) + ' kg' : _pedFmtMoeda(v); };
-  var lista = S.prods.slice().sort(function (a, b) { return b[pk] - a[pk]; });
+  var ord = S.ord || 'ped', dir = S.dir || -1;
+  var valOrd = function (g) { return ord === 'fat' ? g[fk] : ord === 'nao' ? g[nk] : ord === 'pct' ? (g[pk] ? g[fk] / g[pk] : 0) : g[pk]; };
+  var lista = S.prods.slice().sort(function (a, b) { return (valOrd(a) - valOrd(b)) * dir; });
+  var fundo = function (k) { return ord === k ? 'background:#eef2ff;' : ''; };
   var mostrar = S.top ? lista.slice(0, S.top) : lista;
   var seg = function (itens, atual, fnome) {
     return '<span style="display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">' + itens.map(function (it) {
@@ -31606,18 +31611,19 @@ function _relPfRanking() {
   var linhas = mostrar.map(function (g, i) {
     var pc = g[pk] ? g[fk] / g[pk] : 0;
     return '<tr style="border-top:1px solid #f1f5f9"><td style="padding:7px 12px;white-space:nowrap"><span style="display:inline-block;width:26px;color:#94a3b8">' + (i + 1) + '</span>' + _pedEsc(g.nome) + '</td>'
-      + '<td style="padding:7px 12px;text-align:right">' + fmt(g[pk]) + '</td>'
-      + '<td style="padding:7px 12px;text-align:right;color:#15803d">' + fmt(g[fk]) + '</td>'
-      + '<td style="padding:7px 12px;text-align:right">' + (g[nk] > 0.005 ? '<b style="color:#b91c1c">' + fmt(g[nk]) + '</b>' : fmt(g[nk])) + '</td>'
-      + '<td style="padding:7px 12px;text-align:right;white-space:nowrap"><span style="display:inline-block;width:44px;height:8px;background:#fee2e2;border-radius:5px;overflow:hidden;vertical-align:middle;margin-right:6px"><i style="display:block;height:100%;width:' + Math.min(100, pc * 100) + '%;background:#16a34a"></i></span>' + _relNum(pc * 100, 1) + '%</td></tr>';
+      + '<td style="padding:7px 12px;text-align:right;' + fundo('ped') + '">' + fmt(g[pk]) + '</td>'
+      + '<td style="padding:7px 12px;text-align:right;color:#15803d;' + fundo('fat') + '">' + fmt(g[fk]) + '</td>'
+      + '<td style="padding:7px 12px;text-align:right;' + fundo('nao') + '">' + (g[nk] > 0.005 ? '<b style="color:#b91c1c">' + fmt(g[nk]) + '</b>' : fmt(g[nk])) + '</td>'
+      + '<td style="padding:7px 12px;text-align:right;white-space:nowrap;' + fundo('pct') + '"><span style="display:inline-block;width:44px;height:8px;background:#fee2e2;border-radius:5px;overflow:hidden;vertical-align:middle;margin-right:6px"><i style="display:block;height:100%;width:' + Math.min(100, pc * 100) + '%;background:#16a34a"></i></span>' + _relNum(pc * 100, 1) + '%</td></tr>';
   }).join('');
   var th = function (t, r) { return '<th style="padding:9px 12px;text-align:' + (r ? 'right' : 'left') + ';font-weight:700">' + t + '</th>'; };
+  var thk = function (t, k) { var on = ord === k; return '<th onclick="_relPfOrd(&#39;' + k + '&#39;)" title="Ordenar por ' + t.toLowerCase() + '" style="padding:9px 12px;text-align:right;font-weight:700;cursor:pointer;user-select:none;white-space:nowrap;' + (on ? 'color:#272A4A;background:#e0e7ff' : '') + '">' + t + (on ? (dir < 0 ? ' ▼' : ' ▲') : '') + '</th>'; };
   box.innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);margin-bottom:12px;overflow-x:auto">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #e2e8f0"><span style="font-size:13px;font-weight:700;color:#1e293b">Produtos por ranking</span>'
     + '<span style="display:flex;gap:8px;flex-wrap:wrap">' + seg([['rs', 'R$'], ['kg', 'Kg']], S.m, '_relPfM') + seg([[10, 'Top 10'], [20, '20'], [50, '50'], [0, 'Todos']], S.top, '_relPfT') + '</span></div>'
-    + '<table style="width:100%;border-collapse:collapse;font-size:12px;color:#1e293b"><thead><tr style="background:#f8fafc;font-size:9.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">' + th('Produto') + th('Pedido', 1) + th('Faturado', 1) + th('Não faturado', 1) + th('% faturado', 1) + '</tr></thead><tbody>'
+    + '<table style="width:100%;border-collapse:collapse;font-size:12px;color:#1e293b"><thead><tr style="background:#f8fafc;font-size:9.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em">' + th('Produto') + thk('Pedido', 'ped') + thk('Faturado', 'fat') + thk('Não faturado', 'nao') + thk('% faturado', 'pct') + '</tr></thead><tbody>'
     + (linhas || '<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8">Nenhum produto para os filtros selecionados.</td></tr>') + '</tbody></table>'
-    + '<div style="padding:8px 14px;font-size:11px;color:#64748b;border-top:1px solid #f1f5f9">Mostrando ' + mostrar.length + ' de ' + lista.length + ' produtos · ordenado pelo pedido em ' + (kg ? 'Kg' : 'R$') + '</div></div>';
+    + '<div style="padding:8px 14px;font-size:11px;color:#64748b;border-top:1px solid #f1f5f9">Mostrando ' + mostrar.length + ' de ' + lista.length + ' produtos · ordenado por ' + ({ ped: 'pedido', fat: 'faturado', nao: 'não faturado', pct: '% faturado' }[ord]) + ' em ' + (kg ? 'Kg' : 'R$') + ' (' + (dir < 0 ? 'maior primeiro' : 'menor primeiro') + ') · clique no título da coluna para mudar</div></div>';
 }
 function _relPfTabela() {
   var box = document.getElementById('rel-pf-tab'), S = window._relPf;
