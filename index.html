@@ -25381,6 +25381,7 @@ function pedResolverPrecoCliente(fornId, prodId, clienteId) {
 
 // ── Autocomplete Produto (itens do pedido) ──
 var _pedProdItems = [];
+var _pedProdCodMap = {};
 function _pedProdFiltrar() {
   var q = (document.getElementById('ped-item-prod-input').value || '').trim();
   var drop = document.getElementById('ped-item-prod-drop');
@@ -25392,8 +25393,23 @@ function _pedProdFiltrar() {
   var cliId = document.getElementById('ped-cli-id').value;
   var base = getProdutos();
   if (fornId) base = base.filter(function(p){ return p.fornecedor === fornId; });
+  // Tambem acha pelo Cód. Pedido / Cód. Cliente cadastrado nas tabelas de preço do cliente (ou de todas, se ainda não escolheu o cliente)
+  _pedProdCodMap = {};
+  var qSimples = q.replace(/[^a-z0-9]/gi, '').toLowerCase();
+  if (qSimples.length >= 3) {
+    getTabPrecos().forEach(function(tab){
+      if ((tab.ativo || 'Sim') !== 'Sim') return;
+      if (cliId && !(tab.clientes || []).some(function(c){ return String(c.cliId || '').trim() === String(cliId).trim(); })) return;
+      (tab.itens || []).forEach(function(it){
+        if (fornId && it.fornId && String(it.fornId).trim() !== String(fornId).trim()) return;
+        var cp = String(it.codPedido || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+        var cc = String(it.codCliente || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+        if ((cp && cp.indexOf(qSimples) !== -1) || (cc && cc.indexOf(qSimples) !== -1)) _pedProdCodMap[it.prodId] = it.codPedido || it.codCliente;
+      });
+    });
+  }
   _pedProdItems = base.filter(function(p){
-    return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
+    return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n) || !!_pedProdCodMap[p.id];
   }).slice(0,15);
   if (!_pedProdItems.length) { drop.style.display='none'; return; }
   drop.onmousedown = function(e){ e.preventDefault(); };
@@ -25407,7 +25423,9 @@ function _pedProdFiltrar() {
     }
     return '<div onclick="_pedProdSel('+i+')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">'
       + (p.codigo?'<span style="font-weight:700;color:#272A4A;margin-right:8px">'+_pedEsc(p.codigo)+'</span>':'')
-      + '<span style="color:#334155;flex:1">'+_pedEsc(p.nome||'')+'</span></div>';
+      + '<span style="color:#334155;flex:1">'+_pedEsc(p.nome||'')+'</span>'
+      + (_pedProdCodMap[p.id] ? '<span style="color:#DE7926;font-size:10.5px;font-weight:700;margin-left:8px;white-space:nowrap">Cód. '+_pedEsc(String(_pedProdCodMap[p.id]))+'</span>' : '')
+      + '</div>';
   }).join('');
   drop.style.display = 'block';
 }
