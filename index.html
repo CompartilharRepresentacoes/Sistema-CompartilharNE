@@ -19083,14 +19083,16 @@ function dashInit() {
           return { rs: _ms.filter(m => m.tipo === 'R$').reduce((t,m) => t + (Number(m.valor)||0), 0), kg: _ms.filter(m => m.tipo !== 'R$').reduce((t,m) => t + (Number(m.valor)||0), 0) };
         };
         let _rs = 0, _kg = 0;
-        if (_fabTodas) { FAB.forEach((f,fx) => { const r = _metaDe(fx); _rs += r.rs; _kg += r.kg; }); }
-        else { const r = _metaDe(fi); _rs = r.rs; _kg = r.kg; }
-        if (_fabTodas && _rs > 0 && _kg > 0) { /* metas em R$ e em kg misturadas: sem total unico */ }
+        // a fabrica vem do filtro "Fabricas" do topo (state.fabricas); sem selecao = todas. A meta soma so as fabricas escolhidas.
+        const _fabsMeta = (!_fabTodas) ? [fi] : (state.fabricas.size ? [...state.fabricas] : FAB.map((f,fx) => fx));
+        _fabsMeta.forEach(fx => { const r = _metaDe(fx); _rs += r.rs; _kg += r.kg; });
+        if (_fabsMeta.length > 1 && _rs > 0 && _kg > 0) { /* metas em R$ e em kg misturadas: sem total unico */ }
         else if (_rs > 0) { metaF = _rs; atinge = fat / _rs; metaTxt = fmtBRL(_rs); }
         else if (_kg > 0) { const _real = peds.reduce((t,p) => t + (p[7]||0), 0); metaF = _kg; atinge = _real / _kg; metaTxt = fmtNum(_kg) + ' kg'; }
       } catch (e) { /* cadastro de metas indisponivel neste contexto */ }
-      if (metaF == null && !_fabTodas) {
-        const _old = metas.fabrica && metas.fabrica[FAB[fi]] ? Number(metas.fabrica[FAB[fi]]) : null;
+      const _fiUnica = !_fabTodas ? fi : (state.fabricas.size === 1 ? [...state.fabricas][0] : -1);
+      if (metaF == null && _fiUnica >= 0) {
+        const _old = metas.fabrica && metas.fabrica[FAB[_fiUnica]] ? Number(metas.fabrica[FAB[_fiUnica]]) : null;
         if (_old) { metaF = _old; atinge = fat / _old; metaTxt = fmtBRL(_old); }
       }
 
