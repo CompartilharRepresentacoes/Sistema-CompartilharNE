@@ -38164,6 +38164,11 @@ function _pwaParsear(texto) {
     if (emForn && reCnpj.test(l)) return; // CNPJ do fornecedor (nao e o do cliente)
     if (atual && atual.impresso && !atual.cnpj && !atual.itens.length && reCnpj.test(l)) { atual.cnpj = reCnpj.exec(l).slice(1).join(''); return; }
     var mT = /^(\d{1,3})\s+(\d{1,6})\s+(.+)\s+(PC|KG|UN|UND|CX|PCT)\s+([\d.,\s—–-]+)$/i.exec(l);
+    // OCR as vezes troca a unidade ou junta/some o numero do item: segunda tentativa, mais tolerante (4 numeros apos a unidade)
+    if (!mT && atual && atual.impresso) {
+      var mL = /^(?:(\d{1,3})\s+)?(?:(\d{1,6})\s+)?(.+?)\s+([A-Za-z]{2,4})\s+((?:[\d.,]+\s+){3}[\d.,]+)$/.exec(l.replace(/[|¦_]/g, ' ').replace(/\s+/g, ' ').trim());
+      if (mL && /^[UKPC]/i.test(mL[4])) { var u4 = mL[4].toUpperCase(); u4 = /^K/.test(u4) ? 'KG' : /^C/.test(u4) ? 'CX' : /^P/.test(u4) ? 'PC' : 'UND'; mT = [mL[0], mL[1] || '', mL[2] || '', mL[3], u4, mL[5]]; }
+    }
     if (mT && atual && atual.impresso) {
       emForn = false;
       var tk = mT[5].replace(/[—–-]/g, ' ').trim().split(/\s+/).filter(Boolean);
