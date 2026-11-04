@@ -6201,6 +6201,17 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
             <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
             <input id="rel-f-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           </span>
+          <span class="rel-campo" data-campo="ladob" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:700;color:#272A4A;border-left:2px solid #e2e8f0;padding-left:10px">Comparar com</span>
+            <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
+            <select id="rel-f-b-categoria" onchange="_relAtualizarSubcategoriasB()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
+            <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
+            <select id="rel-f-b-subcategoria" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
+            <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
+            <select id="rel-f-b-uf" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option><option value="AL">AL</option><option value="BA">BA</option><option value="PB">PB</option><option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option></select>
+            <span style="font-size:11px;font-weight:600;color:#64748b">Cliente</span>
+            <input id="rel-f-b-cliente" placeholder="Nome, CNPJ ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
+          </span>
           <span class="rel-campo" data-campo="transportadora" style="display:flex;align-items:center;gap:6px">
             <span style="font-size:11px;font-weight:600;color:#64748b">Transportadora</span>
             <input id="rel-f-transportadora" placeholder="Nome..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:120px">
@@ -31508,6 +31519,7 @@ var RELATORIOS = [
   { id:'inadimplencia-comissao', nivel:'gerencial', icon:'ti-cash-off', titulo:'Inadimplência de comissão', desc:'Comissões vencidas e não recebidas, por fábrica e tempo de atraso.', campos:['data','fornecedor'] },
   { id:'carteira-regiao', nivel:'analitico', icon:'ti-map-2', titulo:'Carteira por região', desc:'Clientes ativos, inativos e faturado por UF, com detalhe por cidade.', campos:['data','fornecedor','vendedor','uf','categoria','subcategoria'] },
   { id:'mix-cliente', nivel:'analitico', icon:'ti-layout-grid', titulo:'Mix por cliente', desc:'Produtos que cada cliente compra e os que ainda não comprou (oportunidade de mix).', campos:['data','fornecedor','vendedor','uf','categoria','subcategoria','cliente'] },
+  { id:'comparativo-mix', nivel:'analitico', icon:'ti-arrows-left-right', titulo:'Comparativo de mix entre redes ou clientes', desc:'Compara dois lados (rede + UF ou cliente) e mostra quais produtos um compra e o outro não.', campos:['data','fornecedor','uf','categoria','subcategoria','cliente','ladob'] },
   { id:'positivacao-vendedor', nivel:'gerencial', icon:'ti-user-check', titulo:'Positivação por vendedor', desc:'Clientes da carteira que compraram no período, % de positivação e ticket por cliente.', campos:['data','vendedor','fornecedor','uf','categoria','subcategoria'] },
   { id:'vendas-produto', nivel:'analitico', icon:'ti-package', titulo:'Vendas por produto e categoria', desc:'Faturado e quilos por produto, com resumo por categoria.', campos:['data','fornecedor','vendedor','uf','cliente','categoria','subcategoria','produto'] },
   { id:'comparativo-anual', nivel:'gerencial', icon:'ti-chart-bar', titulo:'Comparativo mês a mês e ano contra ano', desc:'Faturado de cada mês contra o mesmo mês do ano anterior.', campos:['data','fornecedor','vendedor','uf'] },
@@ -31608,8 +31620,22 @@ function _relPopularFiltros() {
     catSel.innerHTML = '<option value="">Todas</option>' + categorias.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
     catSel.dataset.populado = '1';
   }
+  var catSelB = document.getElementById('rel-f-b-categoria');
+  if (catSelB && !catSelB.dataset.populado) {
+    var categoriasB = getCatClientes().filter(function(c){ return !c.pai; });
+    catSelB.innerHTML = '<option value="">Todas</option>' + categoriasB.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+    catSelB.dataset.populado = '1';
+  }
   _relAtualizarSubcategorias();
   renderRelatoriosLista();
+}
+function _relAtualizarSubcategoriasB() {
+  var catSel = document.getElementById('rel-f-b-categoria'), subSel = document.getElementById('rel-f-b-subcategoria');
+  if (!catSel || !subSel) return;
+  var catId = catSel.value, valorAtual = subSel.value;
+  var subs = catId ? getCatClientes().filter(function(c){ return String(c.pai) === String(catId); }) : [];
+  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+  if (subs.some(function(x){ return String(x.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function _relAtualizarSubcategorias() {
   var catId = document.getElementById('rel-f-categoria') ? document.getElementById('rel-f-categoria').value : '';
@@ -31674,9 +31700,10 @@ function voltarRelatorios() {
   document.getElementById('rel-lista-view').style.display = 'block';
 }
 function limparFiltrosRelatorio() {
-  ['rel-f-data-de','rel-f-data-ate','rel-f-fornecedor','rel-f-vendedor','rel-f-categoria','rel-f-uf','rel-f-cliente','rel-f-transportadora','rel-f-status','rel-f-produto','rel-f-numero'].forEach(function(id){
+  ['rel-f-data-de','rel-f-data-ate','rel-f-fornecedor','rel-f-vendedor','rel-f-categoria','rel-f-uf','rel-f-cliente','rel-f-transportadora','rel-f-status','rel-f-produto','rel-f-numero','rel-f-b-categoria','rel-f-b-uf','rel-f-b-cliente'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
+  _relAtualizarSubcategoriasB();
   var _ag = document.getElementById('rel-f-agrupar'); if (_ag) _ag.value = 'pedido';
   _relAtualizarSubcategorias();
 }
@@ -31722,7 +31749,8 @@ function _relFiltros() {
     categoria: v('rel-f-categoria'), subcategoria: v('rel-f-subcategoria'),
     uf: v('rel-f-uf'), cliente: v('rel-f-cliente'),
     transportadora: v('rel-f-transportadora'), status: v('rel-f-status'),
-    produto: v('rel-f-produto'), numero: v('rel-f-numero'), agrupar: v('rel-f-agrupar') || 'pedido'
+    produto: v('rel-f-produto'), numero: v('rel-f-numero'), agrupar: v('rel-f-agrupar') || 'pedido',
+    b: { categoria: v('rel-f-b-categoria'), subcategoria: v('rel-f-b-subcategoria'), uf: v('rel-f-b-uf'), cliente: v('rel-f-b-cliente') }
   };
 }
 
@@ -31872,6 +31900,7 @@ function gerarRelatorio() {
   else if (_relAtual === 'inadimplencia-comissao') html = _relCalcInadimplenciaComissao(f);
   else if (_relAtual === 'carteira-regiao') html = _relCalcCarteiraRegiao(f);
   else if (_relAtual === 'mix-cliente') html = _relCalcMixCliente(f);
+  else if (_relAtual === 'comparativo-mix') html = _relCalcComparativoMix(f);
   else if (_relAtual === 'positivacao-vendedor') html = _relCalcPositivacao(f);
   else if (_relAtual === 'vendas-produto') html = _relCalcVendasProduto(f);
   else if (_relAtual === 'comparativo-anual') html = _relCalcComparativoAnual(f);
@@ -33324,6 +33353,69 @@ function _relMixAbrir(id) {
   for (var i = 0; i < n; i++) rows.push([ _pedEsc(tem[i] || ''), _pedEsc(falta[i] || '') ]);
   var el = document.getElementById('rel-mix-det');
   if (el) { el.innerHTML = '<div style="font-size:12px;font-weight:700;color:#272A4A;margin-bottom:6px">' + _pedEsc(_cpSemColchetes(o.nome)) + ' · compra ' + tem.length + ' · não comprou ' + falta.length + '</div>' + _relTabela([ { label:'Compra (' + tem.length + ')' }, { label:'Ainda não comprou (' + falta.length + ')' } ], rows); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+}
+
+// 9b · Comparativo de mix entre dois lados (rede + UF ou cliente): quem compra o que e o outro nao
+function _relNomeLado(x) {
+  var cats = getCatClientes(), nome = function(id){ var c = cats.filter(function(k){ return String(k.id) === String(id); })[0]; return c ? (c.nome || '') : ''; };
+  var partes = [];
+  if (x.categoria) partes.push(nome(x.categoria));
+  if (x.subcategoria) partes.push(nome(x.subcategoria));
+  if (x.cliente) partes.push(x.cliente);
+  var t = partes.join(' · ');
+  if (x.uf) t += (t ? ' · ' : '') + x.uf;
+  return t || 'Todos';
+}
+function _relCalcComparativoMix(f) {
+  var B = f.b || {};
+  if (!B.categoria && !B.subcategoria && !B.uf && !B.cliente) {
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:40px 20px;text-align:center"><div style="font-size:12px;color:#94a3b8">Escolha o lado de "Comparar com" (rede, UF ou cliente) e clique em "Gerar relatório".</div></div>';
+  }
+  var ate = f.dataAte || _relHojeISO(), de = f.dataDe;
+  if (!de) { var d0 = new Date(ate + 'T12:00:00'); d0.setFullYear(d0.getFullYear() - 1); de = d0.getFullYear() + '-' + String(d0.getMonth()+1).padStart(2,'0') + '-' + String(d0.getDate()).padStart(2,'0'); }
+  var baseA = { fornecedor: f.fornecedor, categoria: f.categoria, subcategoria: f.subcategoria, uf: f.uf, cliente: f.cliente };
+  var baseB = { fornecedor: f.fornecedor, categoria: B.categoria, subcategoria: B.subcategoria, uf: B.uf, cliente: B.cliente };
+  var pm = {}; getProdutos().forEach(function(pr){ pm[pr.id] = pr; });
+  function juntar(filtros, comPeriodo) {
+    var M = {};
+    _relBaseFaturas(Object.assign({}, filtros, comPeriodo ? { dataDe: de, dataAte: ate } : {})).forEach(function(l){
+      (l.fatura.itens || []).forEach(function(i){
+        var pr = pm[i.prodId] || {}, nome = i.prodNome || pr.nome || 'Produto', k = i.prodId || nome;
+        var o = M[k] = M[k] || { nome: nome, cod: i.prodCodigo || pr.codigo || '', fab: l.pedido.fornecedorNome || '', v: 0, kg: 0, ult: '' };
+        var q = Number(i.qtd) || 0;
+        o.v += q * (Number(i.precoFat) || 0); o.kg += _relPesoProd(pr) * q;
+        if (l.fatura.data && l.fatura.data > o.ult) o.ult = l.fatura.data;
+      });
+    });
+    return M;
+  }
+  var A = juntar(baseA, true), Bm = juntar(baseB, true);
+  var Aall = juntar(baseA, false), Ball = juntar(baseB, false);   // historico completo (para saber se "parou" ou "nunca comprou")
+  var nomeA = _relNomeLado(baseA), nomeB = _relNomeLado(baseB);
+  var soA = [], soB = [], ambos = [];
+  Object.keys(A).forEach(function(k){ if (Bm[k]) ambos.push(k); else soA.push(k); });
+  Object.keys(Bm).forEach(function(k){ if (!A[k]) soB.push(k); });
+  var porValor = function(M){ return function(x, y){ return M[y].v - M[x].v; }; };
+  soA.sort(porValor(A)); soB.sort(porValor(Bm)); ambos.sort(porValor(A));
+  var kg = function(v){ return v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }); };
+  var prod = function(o){ return _pedEsc((o.cod ? o.cod + ' · ' : '') + o.nome); };
+  var sit = function(hist, k){ return hist[k] && hist[k].ult ? '<span style="color:#c2410c;font-weight:600">Parou · última em ' + _relFmtDataBR(hist[k].ult) + '</span>' : '<span style="color:#dc2626;font-weight:600">Nunca comprou</span>'; };
+  var kpis = _relKpis([
+    { label: nomeA + ' compra, ' + nomeB + ' não', valor: soA.length + ' produtos', cor:'#c2410c' },
+    { label:'Os dois compram', valor: ambos.length + ' produtos', cor:'#15803d' },
+    { label: nomeB + ' compra, ' + nomeA + ' não', valor: soB.length + ' produtos', cor:'#1d4ed8' },
+    { label:'Período', valor: _relFmtDataBR(de) + ' – ' + _relFmtDataBR(ate) }
+  ]);
+  var titulo = function(t){ return '<div style="font-weight:700;color:#272A4A;font-size:12px;margin:12px 0 6px">' + _pedEsc(t) + '</div>'; };
+  var colsUm = function(lado, outro){ return [ { label:'Produto' }, { label:'Fábrica', width:'150px' }, { label: _pedEsc(lado) + ' · Faturado', width:'150px', right:true }, { label:'Kg', width:'80px', right:true }, { label:'Última compra', width:'110px', right:true }, { label: _pedEsc(outro), width:'230px' } ]; };
+  var t1 = _relTabela(colsUm(nomeA, nomeB), soA.map(function(k){ var o = A[k]; return [ prod(o), _pedEsc(o.fab), _pedFmtMoeda(o.v), kg(o.kg), _relFmtDataBR(o.ult), sit(Ball, k) ]; }), { minWidth: 900 });
+  var t3 = _relTabela(colsUm(nomeB, nomeA), soB.map(function(k){ var o = Bm[k]; return [ prod(o), _pedEsc(o.fab), _pedFmtMoeda(o.v), kg(o.kg), _relFmtDataBR(o.ult), sit(Aall, k) ]; }), { minWidth: 900 });
+  var t2 = _relTabela([ { label:'Produto' }, { label:'Fábrica', width:'150px' }, { label: _pedEsc(nomeA) + ' · Faturado', width:'160px', right:true }, { label: _pedEsc(nomeB) + ' · Faturado', width:'160px', right:true } ], ambos.map(function(k){ var a = A[k], b = Bm[k]; return [ prod(a), _pedEsc(a.fab), _pedFmtMoeda(a.v), _pedFmtMoeda(b.v) ]; }), { minWidth: 700 });
+  return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Período: ' + _relFmtDataBR(de) + ' a ' + _relFmtDataBR(ate) + ' (padrão: últimos 12 meses). Conta só o que foi faturado (NF não cancelada). Lado A = filtros de Rede, Sub Rede, UF e Cliente; lado B = "Comparar com". "Nunca comprou" vale para os pedidos carregados no sistema.</div>'
+    + kpis
+    + titulo(nomeA + ' compra e ' + nomeB + ' não (' + soA.length + ')') + t1
+    + titulo('Os dois compram (' + ambos.length + ')') + t2
+    + titulo(nomeB + ' compra e ' + nomeA + ' não (' + soB.length + ')') + t3;
 }
 
 // 10 · Positivação por vendedor
