@@ -23258,6 +23258,7 @@ function _pedSalvarAnexoAoPedido(pedidoId, file, tipo, callbacks) {
       var data = getPedidos();
       var idx = data.findIndex(function(x){ return x.id === pedidoId; });
       if (idx < 0) return;
+      data[idx] = JSON.parse(JSON.stringify(data[idx])); // getPedidos() devolve os mesmos objetos do cache: copia antes de mudar, senao o sistema acha que nada mudou e nao grava
       if (!data[idx].anexos) data[idx].anexos = [];
       data[idx].anexos.push(anexo);
       _pedAtualizarValorFaturado(data[idx]);
@@ -23516,6 +23517,7 @@ function pedAlterarStatus(id, novoStatus) {
   var data = getPedidos();
   var idx = data.findIndex(function(x){ return x.id === id; });
   if (idx < 0) return;
+  data[idx] = JSON.parse(JSON.stringify(data[idx])); // getPedidos() devolve os mesmos objetos do cache: copia antes de mudar, senao o sistema acha que nada mudou e nao grava
   data[idx].status = novoStatus;
   setPedidos(data);
   pedFecharStatusPopover();
@@ -23770,6 +23772,7 @@ function pedSalvarFatura() {
   var data = getPedidos();
   var idx = data.findIndex(function(x){ return x.id === pedido.id; });
   if (idx < 0) return;
+  data[idx] = JSON.parse(JSON.stringify(data[idx])); // getPedidos() devolve os mesmos objetos do cache: copia antes de mudar, senao o sistema acha que nada mudou e nao grava
   if (!data[idx].faturas) data[idx].faturas = [];
   data[idx].faturas.push({
     id: 'f' + Date.now() + Math.random().toString(36).slice(2,7),
@@ -23802,6 +23805,7 @@ function pedExcluirFatura(faturaId) {
   var data = getPedidos();
   var idx = data.findIndex(function(x){ return x.id === pedido.id; });
   if (idx < 0) return;
+  data[idx] = JSON.parse(JSON.stringify(data[idx])); // getPedidos() devolve os mesmos objetos do cache: copia antes de mudar, senao o sistema acha que nada mudou e nao grava
   data[idx].faturas = (data[idx].faturas || []).filter(function(f){ return f.id !== faturaId; });
   _pfatAtualizarStatusPedido(data[idx]);
   setPedidos(data);
