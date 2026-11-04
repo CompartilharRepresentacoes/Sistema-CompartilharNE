@@ -832,6 +832,7 @@
       #page-pedido-list #ped-filtros-geral .ped-spacer { display:none !important; }
       #page-pedido-list .ped-header-row { display:none !important; }
       #page-pedido-list .ped-r-pedido::before { content:'Pedido nº '; color:#94a3b8; }
+      #page-pedido-list .ped-r-pedfor::before { content:'Ped. Forn.: '; color:#94a3b8; }
       #page-pedido-list .ped-r-forn::before { content:'Forn: '; color:#94a3b8; }
       #page-pedido-list .ped-r-vend::before { content:'Vend: '; color:#94a3b8; }
       #page-pedido-list .ped-r-valor::before { content:'Valor: '; color:#94a3b8; font-weight:400; }
@@ -909,6 +910,7 @@
       }
       #pss-tbody .ped-r-data { order:1 !important; }
       #pss-tbody .ped-r-pedido { order:2 !important; }
+      #pss-tbody .ped-r-pedfor { order:2 !important; }
       #pss-tbody .mc-badge { order:3 !important; margin-left:auto !important; }
       #pss-tbody .mc-primary { order:4 !important; flex-basis:100% !important; }
       #pss-tbody .ped-r-forn { order:5 !important; text-transform:uppercase !important; font-weight:700 !important; color:#272A4A !important; }
@@ -5419,8 +5421,8 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </div>
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
-          <div class="ped-header-row" style="display:grid;grid-template-columns:85px 130px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
-            <span>Data</span><span>Pedido</span><span>Cliente</span><span style="text-align:center">UF</span><span>Fornecedor</span><span>Vendedor</span><span>Valor</span><span>Status</span>
+          <div class="ped-header-row" style="display:grid;grid-template-columns:85px 130px 120px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
+            <span>Data</span><span>Pedido</span><span>Pedido Fornec.</span><span>Cliente</span><span style="text-align:center">UF</span><span>Fornecedor</span><span>Vendedor</span><span>Valor</span><span>Status</span>
           </div>
           <div id="pss-tbody" style="min-height:60px"></div>
           <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
@@ -21008,9 +21010,10 @@ function renderVendaSimples() {
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
     var cor = statusCores[p.status] || { bg:'#f1f5f9', cor:'#64748b' };
     var statusHtml = '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>';
-    return '<div class="mc-row ped-row-hover" style="display:grid;grid-template-columns:85px 130px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
+    return '<div class="mc-row ped-row-hover" style="display:grid;grid-template-columns:85px 130px 120px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
       + '<div class="mc-meta ped-r-data" style="font-size:12px;color:#64748b"><span class="ped-dot" style="background:' + cor.cor + '"></span>' + dataFmt + '</div>'
       + '<div class="mc-meta ped-r-pedido" style="font-size:12.5px;color:#475569;white-space:nowrap;line-height:1.25">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
+      + '<div class="mc-meta ped-r-pedfor" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25">' + _pedEsc(p.numPedidoFornecedor || '—') + '</div>'
       + '<div class="mc-primary" style="font-size:13px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word;line-height:1.3">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
       + '<div class="mc-meta ped-r-uf" style="font-size:12px;color:#64748b;text-align:center">' + _pedEsc(uf) + '</div>'
       + '<div class="mc-meta ped-r-forn" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
