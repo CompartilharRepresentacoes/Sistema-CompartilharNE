@@ -10285,9 +10285,49 @@ function _pgQtd(selectId) {
   var v = el ? el.value : '10';
   return v === 'todos' ? Infinity : (parseInt(v, 10) || 10);
 }
+// 20 por pagina + botoes de pagina (o seletor "Mostrar" fica escondido)
+var _PG_POR = 20, _pgEst = {}, _pgUlt = null;
+function _pgIrLista(selectId, n) {
+  var e = _pgEst[selectId], sel = document.getElementById(selectId); if (!e || !sel) return;
+  e.pag = n; e.manter = true;
+  if (typeof sel.onchange === 'function') sel.onchange();
+  var b = document.getElementById('pgb-' + selectId); if (b && b.scrollIntoView) b.scrollIntoView({ block: 'nearest' });
+}
 function _pgAplicar(lista, selectId) {
-  var qtd = _pgQtd(selectId);
-  return qtd === Infinity ? lista : lista.slice(0, qtd);
+  var sel = document.getElementById(selectId);
+  var e = _pgEst[selectId] || (_pgEst[selectId] = { pag: 1, sig: '' });
+  var id = function (x) { return x ? (x.id || x.codigo || (x.pedido && x.pedido.id) || (x.fatura && x.fatura.id) || '') : ''; };
+  var sig = lista.length + '|' + id(lista[0]) + '|' + id(lista[lista.length - 1]);
+  if (!e.manter && sig !== e.sig) e.pag = 1;   // filtro/busca mudou: volta para a pagina 1
+  e.manter = false; e.sig = sig;
+  var total = lista.length, np = Math.max(1, Math.ceil(total / _PG_POR));
+  if (e.pag > np) e.pag = np; if (e.pag < 1) e.pag = 1;
+  var ini = (e.pag - 1) * _PG_POR, fatia = lista.slice(ini, ini + _PG_POR);
+  _pgUlt = { qtd: fatia.length, ini: ini, total: total, np: np };
+  if (sel && sel.parentNode && sel.parentNode.parentNode) {
+    var ctrl = sel.parentNode, foot = ctrl.parentNode;
+    ctrl.style.display = 'none';
+    var bar = document.getElementById('pgb-' + selectId);
+    if (!bar) { bar = document.createElement('div'); bar.id = 'pgb-' + selectId; foot.insertBefore(bar, ctrl.nextSibling); }
+    bar.style.cssText = 'display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end';
+    if (np <= 1) { bar.innerHTML = ''; }
+    else {
+      var est = 'border:1px solid #e2e8f0;background:#fff;border-radius:7px;padding:3px 9px;font-size:11px;font-weight:600;color:#475569;cursor:pointer';
+      var btn = function (txt, n, ativo, off) {
+        return '<button type="button" ' + (off ? 'disabled' : 'onclick="_pgIrLista(\'' + selectId + '\',' + n + ')"') + ' style="' + est + (ativo ? ';background:#272A4A;color:#fff;border-color:#272A4A' : '') + (off ? ';opacity:.4;cursor:default' : '') + '">' + txt + '</button>';
+      };
+      var nums = {}; nums[1] = 1; nums[np] = 1;
+      for (var k = e.pag - 2; k <= e.pag + 2; k++) { if (k >= 1 && k <= np) nums[k] = 1; }
+      var h = btn('\u00AB Anterior', e.pag - 1, false, e.pag <= 1), ult = 0;
+      Object.keys(nums).map(Number).sort(function (a, b) { return a - b; }).forEach(function (n) {
+        if (ult && n - ult > 1) h += '<span style="color:#94a3b8">\u2026</span>';
+        h += btn(String(n), n, n === e.pag, false); ult = n;
+      });
+      h += btn('Pr\u00F3xima \u00BB', e.pag + 1, false, e.pag >= np);
+      bar.innerHTML = h;
+    }
+  }
+  return fatia;
 }
 // exibidos: quantos itens estão sendo desenhados agora (após o corte do "Mostrar")
 // totalFiltrado: quantos itens batem com a busca/filtro atual (antes do corte)
@@ -10295,6 +10335,10 @@ function _pgAplicar(lista, selectId) {
 function _pgTexto(exibidos, totalFiltrado, totalGeral, singular, plural) {
   singular = singular || 'registro'; plural = plural || 'registros';
   if (totalGeral == null) totalGeral = totalFiltrado;
+  var _u = _pgUlt; _pgUlt = null;
+  if (_u && _u.np > 1 && _u.qtd === exibidos && _u.total === totalFiltrado) {
+    return 'Mostrando ' + (_u.ini + 1) + ' a ' + (_u.ini + _u.qtd) + ' de ' + totalFiltrado + ' ' + (totalFiltrado === 1 ? singular : plural) + (totalGeral !== totalFiltrado ? ' (de ' + totalGeral + ' no total)' : '');
+  }
   var palavraFiltro = totalFiltrado === 1 ? singular : plural;
   if (totalFiltrado === totalGeral) {
     if (exibidos >= totalFiltrado) return totalGeral + ' ' + palavraFiltro;
@@ -37552,7 +37596,7 @@ function renderComissoes() {
     ? _pgAplicar(linhas, 'com-qtd').map(_comRenderNF).join('')
     : '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma comiss\u00e3o encontrada no per\u00edodo.</div>';
   var totFat = 0; linhas.forEach(function(d){ totFat += d.faturado; });
-  document.getElementById('com-rodape').innerHTML = '<span>'+_pgTexto(Math.min(linhas.length,_pgQtd('com-qtd')),linhas.length,linhas.length,'NF','NFs')+' \u00b7 Faturado '+_finMoeda(totFat)+'</span><span>Comiss\u00e3o '+_finMoeda(totalPrevisto)+'</span>';
+  document.getElementById('com-rodape').innerHTML = '<span>'+_pgTexto(Math.min(linhas.length - (_pgUlt ? _pgUlt.ini : 0), _PG_POR),linhas.length,linhas.length,'NF','NFs')+' \u00b7 Faturado '+_finMoeda(totFat)+'</span><span>Comiss\u00e3o '+_finMoeda(totalPrevisto)+'</span>';
 }
 function _comSetFab(id) { document.getElementById('com-fornecedor').value = id; renderComissoes(); }
 function _comTagsPct(pcts) {
