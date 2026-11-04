@@ -5380,6 +5380,12 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
       <!-- ═══ Painel: Venda Simples ═══ -->
       <div id="ped-painel-simples" style="display:none">
         <div class="ped-filtros-bar" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(15,23,42,.04)">
+          <div class="ped-data-row">
+          <span style="font-size:11px;font-weight:600;color:#64748b">Data</span>
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="pss-data-de" oninput="_entctrlMaskData(this)" onchange="renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          <span style="color:#94a3b8;font-size:13px">→</span>
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="pss-data-ate" oninput="_entctrlMaskData(this)" onchange="renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+          </div>
           <div class="ped-mf-toggle" onclick="_pedToggleMaisFiltros('pss')">Mais filtros <span>&#9662;</span></div>
         <div id="pss-filtros-extra" class="ped-filtros-extra" style="display:contents">
           <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
@@ -20832,7 +20838,7 @@ function pedSetAba(aba) {
   if (abaMobileAtual) abaMobileAtual.textContent = PED_ABA_LABELS[aba] || aba;
   _pedFecharAbasMenu();
   if (aba === 'geral') renderPedidoList();
-  if (aba === 'simples') { _pssPopularFiltros(); renderVendaSimples(); }
+  if (aba === 'simples') { _pssPopularFiltros(); _pssSemanaAtual(); }
   if (aba === 'nao-fat') { _pnfPopularFiltros(); _sbInicio('pnf'); _sbSemanaAnt('pnf'); }
   if (aba === 'simples-nf') { _psnPopularFiltros(); _sbInicio('psn'); _sbSemanaAnt('psn'); }
   if (aba === 'completas') { _vcPopularFiltros(); _sbInicio('vc'); }
@@ -20893,8 +20899,20 @@ function pssAtualizarLojas() {
   lojaSel.innerHTML = '<option value="">Todas</option>' + lojas.map(function(c){ return '<option value="'+c.id+'">'+_pedEsc(c.nome||'')+'</option>'; }).join('');
   if (lojas.some(function(l){ return String(l.id) === String(valorAtual); })) lojaSel.value = valorAtual;
 }
+// ao abrir a aba Venda simples: ja vem com a semana atual (segunda a domingo)
+function _pssSemanaAtual() {
+  var de = document.getElementById('pss-data-de'), ate = document.getElementById('pss-data-ate');
+  if (de && ate) {
+    var h = new Date(), dow = (h.getDay() + 6) % 7; // 0 = segunda
+    var ini = new Date(h.getFullYear(), h.getMonth(), h.getDate() - dow);
+    var fim = new Date(ini.getFullYear(), ini.getMonth(), ini.getDate() + 6);
+    var f = function (d) { return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); };
+    de.value = f(ini); ate.value = f(fim);
+  }
+  renderVendaSimples();
+}
 function pssLimparFiltros() {
-  ['pss-vendedor','pss-uf','pss-fornecedor','pss-produto','pss-rede'].forEach(function(id){
+  ['pss-data-de','pss-data-ate','pss-vendedor','pss-uf','pss-fornecedor','pss-produto','pss-rede'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
   pssAtualizarLojas();
@@ -20913,8 +20931,14 @@ function renderVendaSimples() {
   var prodF     = (document.getElementById('pss-produto') ? document.getElementById('pss-produto').value : '').toLowerCase();
   var redeF     = document.getElementById('pss-rede') ? document.getElementById('pss-rede').value : '';
   var lojaF     = document.getElementById('pss-loja') ? document.getElementById('pss-loja').value : '';
+  var dataDe    = _entctrlParseDataBR(document.getElementById('pss-data-de') ? document.getElementById('pss-data-de').value : '');
+  var dataAte   = _entctrlParseDataBR(document.getElementById('pss-data-ate') ? document.getElementById('pss-data-ate').value : '');
+  // periodo anterior ao corte: carrega so os anos do filtro (mesmo comportamento da Visao Geral)
+  if (dataDe && dataDe < _fsPedidosCorte && !_fsPeriodoCarregado(dataDe, dataAte || _fsPedidosCorte)) { _fsCarregarPedidosPeriodo(dataDe, dataAte || _fsPedidosCorte); }
 
   var rows = pedidos.filter(function(p){
+    if (dataDe && (!p.data || p.data < dataDe)) return false;
+    if (dataAte && (!p.data || p.data > dataAte)) return false;
     if (vendedorF && p.vendedorId !== vendedorF) return false;
     if (fornF && p.fornecedorId !== fornF) return false;
     var cli = clientesMap[p.clienteId];
