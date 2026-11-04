@@ -17499,6 +17499,18 @@ function dashInit() {
       return out;
     }
 
+    // Com fabrica selecionada: so conta cliente que JA COMPROU algum dia nessa(s) fabrica(s). Sem fabrica: null (todos).
+    function _clientesDaFabricaSel() {
+      if (!state.fabricas.size) return null;
+      const set = new Set();
+      for (let i = 0; i < PED.length; i++) { const p = PED[i]; if (state.fabricas.has(p[2]) && ST_OK.has(p[6])) set.add(p[1]); }
+      return set;
+    }
+    function _nomeFabricasSel() {
+      if (!state.fabricas.size) return '';
+      if (state.fabricas.size === 1) return String(FAB[[...state.fabricas][0]] || '').replace(/^\d+\s+/, '');
+      return 'fábricas selecionadas';
+    }
     function filtraDevolucoes(porOrigem) {
       const ini = state.dtIni, fim = state.dtFim;
       const fabSet = state.fabricas, venSet = state.vendedores, cliSet = state.clientes, ufSet = state.uf;
@@ -17624,8 +17636,10 @@ function dashInit() {
       // carteira = clientes não inativos
       // v47: carteira respeita filtros de UF e de cliente (igual a aba Clientes)
       let carteira = 0;
+      const _jaFab = _clientesDaFabricaSel();
       for (let _i = 0; _i < CLI_INATIVO.length; _i++) {
         if (CLI_INATIVO[_i]) continue;
+        if (_jaFab && !_jaFab.has(_i)) continue;
         if (state.clientes.size && !state.clientes.has(_i)) continue;
         if (state.uf.size) { const _ui = ufIdxOf[CLI_UF[_i]]; if (_ui === undefined || !state.uf.has(_ui)) continue; }
         carteira++;
@@ -18200,7 +18214,7 @@ function dashInit() {
               <div><div class="dvg-kpi-lbl">CLIENTES ATIVOS</div><div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap"><div class="dvg-kpi-val" id="dvgKpiCli">0</div>${_dvgTrendCli}</div></div>
               <div><div class="dvg-kpi-lbl">POSITIVAÇÃO</div><div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap"><div class="dvg-kpi-val" id="dvgKpiPos" style="color:#3d5aa8">0%</div>${_dvgTrendPos}</div></div>
             </div>
-            <div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} clientes na base</div>${_dvgCmpCliPos}
+            <div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} clientes ${state.fabricas.size === 1 ? 'da ' + escapeHtml(_nomeFabricasSel()) : (state.fabricas.size ? 'das ' + _nomeFabricasSel() : 'na base')}</div>${_dvgCmpCliPos}
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #5b78c9">
             <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#5b78c9"><i class="ti ti-receipt"></i></div><div class="dvg-kpi-lbl">TICKET MÉDIO</div></div>${_dvgTrendTicket}</div>
@@ -18991,7 +19005,8 @@ function dashInit() {
         return true;
       };
       let _dvgKpiCliAtivos = 0;
-      for (let _i=0;_i<CLI.length;_i++) { if (!CLI_INATIVO[_i] && _dvgCliVisivelFiltro(_i)) _dvgKpiCliAtivos++; }
+      const _jaFabCli = _clientesDaFabricaSel();
+      for (let _i=0;_i<CLI.length;_i++) { if (!CLI_INATIVO[_i] && _dvgCliVisivelFiltro(_i) && (!_jaFabCli || _jaFabCli.has(_i))) _dvgKpiCliAtivos++; }
       const _dvgKpiPositivados = arr.filter(c => !c.inativo).length;
       const _dvgKpiPositivadosPct = _dvgKpiCliAtivos ? fmtPct(_dvgKpiPositivados/_dvgKpiCliAtivos) : '—';
       const _dvgPedsHistorico = filtraPedidos({ dtIni:'0001-01-01', todosStatus:false });
@@ -19001,7 +19016,7 @@ function dashInit() {
       const _dvgCliKpisEl = document.getElementById('dvgCliKpis');
       if (_dvgCliKpisEl) {
         _dvgCliKpisEl.innerHTML = [
-          { icon:'ti-users', cor:'#0e2f6e', lbl:'CLIENTES ATIVOS', id:'dvgCliKpiAtivos', sub:'na base de cadastro' },
+          { icon:'ti-users', cor:'#0e2f6e', lbl:'CLIENTES ATIVOS', id:'dvgCliKpiAtivos', sub: state.fabricas.size ? 'que já compraram ' + (state.fabricas.size === 1 ? 'na ' : 'nas ') + _nomeFabricasSel() : 'na base de cadastro' },
           { icon:'ti-user-check', cor:'#1c2f66', lbl:'POSITIVADOS', id:'dvgCliKpiPositivados', sub:_dvgKpiPositivadosPct+' dos ativos compraram' },
           { icon:'ti-alert-triangle', cor:'#3d5aa8', lbl:'CLIENTES EM RISCO', id:'dvgCliKpiRisco', sub:dias+'+ dias sem comprar' },
           { icon:'ti-user-plus', cor:'#185fa5', lbl:'NOVOS NO PERÍODO', id:'dvgCliKpiNovos', sub:'1ª compra dentro do período' },
