@@ -23459,7 +23459,7 @@ function pedMostrarFaturasTooltip(ev, id) {
   var tip = document.getElementById('ped-faturas-tooltip');
   if (!tip) return;
   if (!faturas.length) {
-    tip.innerHTML = '<div style="padding:10px 12px;font-size:11px;color:#94a3b8">Nenhuma NF faturada ainda.</div>';
+    tip.innerHTML = '<div style="padding:10px 12px;font-size:11px;color:#fff">Nenhuma NF faturada ainda.</div>';
   } else {
     tip.innerHTML = '<div style="padding:8px 12px;font-size:10.5px;font-weight:700;color:#fff;border-bottom:1px solid rgba(255,255,255,.15)">NFs Faturadas</div>'
       + faturas.map(function(f){
