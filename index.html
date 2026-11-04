@@ -6329,7 +6329,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
           <div style="font-size:13.5px;font-weight:700;color:#272A4A;margin-bottom:10px">3 · Números e conteúdo</div>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
-            <span style="font-size:11px;font-weight:600;color:#64748b">Base dos números (faturamento, ticket médio, evolução)</span>
+            <span style="font-size:11px;font-weight:600;color:#64748b">Base dos números (faturamento, pedido médio, evolução)</span>
             <select id="ap-per" onchange="_apRender()" class="ap-in" style="width:auto"><option value="12m">Últimos 12 meses</option><option value="6m">Últimos 6 meses</option><option value="ano">Ano atual</option></select>
             <span style="font-size:11px;color:#94a3b8">Carteira inteira das fábricas marcadas, em pedidos faturados</span>
           </div>
@@ -6384,7 +6384,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
             <input type="checkbox" checked onchange="_apresToggleTopico('visao',this.checked,this)" style="margin-top:2px">
             <div>
               <div style="font-size:12.5px;font-weight:700;color:#1e293b">Visão geral de vendas</div>
-              <div style="font-size:11px;color:#64748b">Faturamento, volume, ticket médio e clientes ativos</div>
+              <div style="font-size:11px;color:#64748b">Faturamento, volume, pedido médio e clientes ativos</div>
             </div>
           </label>
           <label class="apres-topico" data-id="evolucao" style="display:flex;gap:10px;align-items:flex-start;border:1px solid #e2e8f0;border-radius:9px;padding:10px 12px;cursor:pointer;background:#f8fafc">
@@ -17895,7 +17895,7 @@ function dashInit() {
         '<div>Faturamento<b>' + fmtBRL(m.fat) + _varMes(m.fat, mAnt ? mAnt.fat : 0) + '</b></div>' +
         '<div>Volume<b>' + fmtNum(m.peso) + ' kg' + _varMes(m.peso, mAnt ? mAnt.peso : 0) + '</b></div>' +
         '<div>Pedidos<b>' + m.n.toLocaleString('pt-BR') + _varMes(m.n, mAnt ? mAnt.n : 0) + '</b></div>' +
-        '<div>Ticket médio<b>' + fmtBRL(tkAtual) + _varMes(tkAtual, tkAnt) + '</b></div>';
+        '<div>Pedido médio<b>' + fmtBRL(tkAtual) + _varMes(tkAtual, tkAnt) + '</b></div>';
       det.classList.add('open');
     }
     function _dvgHoverMesFim() {
@@ -17912,7 +17912,7 @@ function dashInit() {
         '<div>Faturamento<b>' + fmtBRL(r.fat) + '</b></div>' +
         '<div>Volume<b>' + fmtNum(r.peso) + ' kg</b></div>' +
         '<div>Pedidos<b>' + r.n.toLocaleString('pt-BR') + '</b></div>' +
-        '<div>Ticket médio<b>' + fmtBRL(r.ticket) + '</b></div>';
+        '<div>Pedido médio<b>' + fmtBRL(r.ticket) + '</b></div>';
       det.classList.add('open');
     }
     const _dvgFabPalette = ['#1c2f66','#2c4488','#3d5aa8','#5b78c9','#7b93d9','#a9c2f5','#c9d9fb','#e3ecfc'];
@@ -18293,7 +18293,7 @@ function dashInit() {
             <div class="dvg-kpi-sub">${k.ativos} de ${k.carteira} clientes ${state.fabricas.size === 1 ? 'da ' + escapeHtml(_nomeFabricasSel()) : (state.fabricas.size ? 'das ' + _nomeFabricasSel() : 'na base')}</div>${_dvgCmpCliPos}
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #5b78c9">
-            <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#5b78c9"><i class="ti ti-receipt"></i></div><div class="dvg-kpi-lbl">TICKET MÉDIO</div></div>${_dvgTrendTicket}</div>
+            <div class="dvg-kpi-top"><div class="dvg-kpi-titlewrap"><div class="dvg-kpi-icon" style="color:#5b78c9"><i class="ti ti-receipt"></i></div><div class="dvg-kpi-lbl">PEDIDO MÉDIO</div></div>${_dvgTrendTicket}</div>
             <div class="dvg-kpi-val" id="dvgKpiTicket">R$ 0,00</div><div class="dvg-kpi-sub">por pedido</div>${_dvgCmpTicket}
           </div>
           <div class="dvg-kpi" style="border-bottom:3px solid #0e2f6e">
@@ -19270,7 +19270,7 @@ function dashInit() {
           ${_fcHero}
           ${kpiCard('% do total', fmtPct(part), 'brand', 'da Compartilhar no período', null, 2, {id:'fabKpiPart', fmt:fmtPct}, null, 'ti-chart-pie')}
           ${_fabTodas ? _fcCliTodas : _fcCli}
-          ${kpiCard('Ticket médio', _dvgFmtBRLAbrev(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:_dvgFmtBRLAbrev}, fmtBRL(ticket), 'ti-receipt')}
+          ${kpiCard('Pedido médio', _dvgFmtBRLAbrev(ticket), 'brand', 'por pedido', null, 4, {id:'fabKpiTicket', fmt:_dvgFmtBRLAbrev}, fmtBRL(ticket), 'ti-receipt')}
           ${kpiCard('% da meta', atinge!=null?fmtPct(atinge):'—', atinge!=null && atinge>=.95 ? 'good':'brand', metaF?`meta: ${metaTxt}`:'sem meta cadastrada', null, 5, atinge!=null ? {id:'fabKpiMeta', fmt:fmtPct} : null, null, 'ti-target-arrow')}
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-[2.4fr_0.85fr] gap-4 mt-4">
@@ -26710,7 +26710,7 @@ function _prStatsEvolucaoHtml(p, pAnt) {
   }
   return bloco('Total em Kg', _prFmtKg(p.kg) + ' kg', _prSetaTendencia(p.kg, pAnt ? pAnt.kg : null)) +
     bloco('Total em R$', _prFmtMoeda(p.rs), _prSetaTendencia(p.rs, pAnt ? pAnt.rs : null)) +
-    bloco('Ticket Médio', ticket != null ? _prFmtMoeda(ticket) : '—', _prSetaTendencia(ticket, ticketAnt)) +
+    bloco('Pedido Médio', ticket != null ? _prFmtMoeda(ticket) : '—', _prSetaTendencia(ticket, ticketAnt)) +
     bloco('Total de Lojas', p.lojas != null ? p.lojas : '—', _prSetaTendencia(p.lojas, pAnt ? pAnt.lojas : null));
 }
 
@@ -31484,7 +31484,7 @@ var RELATORIOS = [
   { id:'devolucoes', nivel:'operacional', icon:'ti-arrow-back-up', titulo:'Devoluções por motivo', desc:'Devoluções agrupadas por motivo.', campos:['data','fornecedor','cliente','uf','categoria','subcategoria'] },
   { id:'curva-abc', nivel:'analitico', icon:'ti-chart-pie', titulo:'Curva ABC de clientes', desc:'Classificação A/B/C por faturamento.', campos:['data','categoria','subcategoria','fornecedor','vendedor','uf','cliente'] },
   { id:'vendas-uf', nivel:'analitico', icon:'ti-map-pin', titulo:'Vendas por UF e Rede', desc:'Faturamento cruzado por estado e rede.', campos:['data','uf','categoria','subcategoria','fornecedor','vendedor','cliente'] },
-  { id:'ticket-vendedor', nivel:'analitico', icon:'ti-users', titulo:'Ticket médio por vendedor', desc:'Valor faturado e ticket médio por vendedor.', campos:['data','vendedor','fornecedor','uf','cliente','categoria','subcategoria'] },
+  { id:'ticket-vendedor', nivel:'analitico', icon:'ti-users', titulo:'Pedido médio por vendedor', desc:'Valor faturado e pedido médio por vendedor.', campos:['data','vendedor','fornecedor','uf','cliente','categoria','subcategoria'] },
   { id:'prazo-entrega', nivel:'analitico', icon:'ti-truck', titulo:'Prazo prometido vs. realizado', desc:'Dias de diferença por UF e transportadora.', campos:['data','uf','fornecedor','vendedor','cliente'] },
   { id:'meta-realizado', nivel:'gerencial', icon:'ti-target', titulo:'Faturamento vs. meta', desc:'Realizado por fornecedor e mês, comparado à meta.', campos:['data','vendedor','fornecedor'] },
   { id:'evolucao-mensal', nivel:'gerencial', icon:'ti-chart-line', titulo:'Evolução mensal consolidada', desc:'Faturamento e peso mês a mês.', campos:['data','fornecedor','vendedor','uf','cliente','categoria','subcategoria'] },
@@ -31497,7 +31497,7 @@ var RELATORIOS = [
   { id:'sem-faturar', nivel:'operacional', icon:'ti-clock-pause', titulo:'Pedidos sem faturar há X dias', desc:'Pedidos sem nenhuma NF, com dias parados e valor, por faixa.', campos:['data','fornecedor','vendedor','cliente','uf','categoria','subcategoria','status'] },
   { id:'novos-reativados', nivel:'analitico', icon:'ti-user-plus', titulo:'Clientes novos e reativados', desc:'Clientes que compraram pela primeira vez ou voltaram após 90+ dias.', campos:['data','vendedor','cliente','uf','categoria','subcategoria','status'] },
   { id:'faturamento-liquido', nivel:'gerencial', icon:'ti-receipt-2', titulo:'Faturamento líquido', desc:'Faturado menos devoluções, mês a mês.', campos:['data','fornecedor','vendedor'] },
-  { id:'ranking-transportadoras', nivel:'gerencial', icon:'ti-truck', titulo:'Ranking de transportadoras', desc:'NFs, valor transportado, ticket médio e prazo médio de entrega por transportadora.', campos:['data','fornecedor','transportadora','uf','cliente'] },
+  { id:'ranking-transportadoras', nivel:'gerencial', icon:'ti-truck', titulo:'Ranking de transportadoras', desc:'NFs, valor transportado, pedido médio e prazo médio de entrega por transportadora.', campos:['data','fornecedor','transportadora','uf','cliente'] },
   { id:'ranking-fabricas', nivel:'gerencial', icon:'ti-trophy', titulo:'Ranking de fábricas', desc:'Faturamento por fábrica no mês, participação e variação sobre o mês anterior.', campos:['data','vendedor','uf'] },
   { id:'cadastros-incompletos', nivel:'operacional', icon:'ti-clipboard-x', titulo:'Cadastros incompletos', desc:'Clientes e produtos com informação faltando.', campos:['fornecedor','cliente','status'] },
   { id:'ocorrencias-entrega', nivel:'operacional', icon:'ti-alert-circle', titulo:'Ocorrências de entrega', desc:'Ocorrências lançadas por tipo, cliente e transportadora, com valor afetado.', campos:['data','cliente','transportadora','status'] },
@@ -32411,11 +32411,11 @@ function _relCalcTicketVendedor(f) {
   }).sort(function(a,b){ return b.valor - a.valor; });
   var kpis = _relKpis([
     { label:'Vendedores', valor: lista.length },
-    { label:'Ticket Médio Geral', valor: _pedFmtMoeda(lista.length ? lista.reduce(function(a,v){return a+v.ticket;},0)/lista.length : 0) }
+    { label:'Pedido Médio Geral', valor: _pedFmtMoeda(lista.length ? lista.reduce(function(a,v){return a+v.ticket;},0)/lista.length : 0) }
   ]);
   var cols = [
     { label:'Vendedor' }, { label:'Qtd. Pedidos', width:'100px', right:true },
-    { label:'Valor Total', width:'120px', right:true }, { label:'Ticket Médio', width:'120px', right:true }, { label:'Fornecedores', width:'100px', right:true }
+    { label:'Valor Total', width:'120px', right:true }, { label:'Pedido Médio', width:'120px', right:true }, { label:'Fornecedores', width:'100px', right:true }
   ];
   var rows = lista.map(function(v){
     return [ _pedEsc(v.nome), String(v.qtdPedidos), _pedFmtMoeda(v.valor), _pedFmtMoeda(v.ticket), String(v.fornecedores) ];
@@ -32998,7 +32998,7 @@ function _relCalcRankingTransportadoras(f) {
     { label:'Prazo médio de entrega', valor: fd(td, tne) },
     { label:'NFs sem data de entrega', valor: String(tp) }
   ]);
-  var cols = [ { label:'#', width:'40px' }, { label:'Transportadora' }, { label:'NFs', width:'80px', right:true }, { label:'Valor', width:'130px', right:true }, { label:'% valor', width:'80px', right:true }, { label:'Ticket médio', width:'120px', right:true }, { label:'Prazo médio', width:'110px', right:true }, { label:'Sem entrega', width:'100px', right:true } ];
+  var cols = [ { label:'#', width:'40px' }, { label:'Transportadora' }, { label:'NFs', width:'80px', right:true }, { label:'Valor', width:'130px', right:true }, { label:'% valor', width:'80px', right:true }, { label:'Pedido médio', width:'120px', right:true }, { label:'Prazo médio', width:'110px', right:true }, { label:'Sem entrega', width:'100px', right:true } ];
   var rows = lista.map(function(x, i){ return [ i + 1, _pedEsc(x.k), x.o.n, _pedFmtMoeda(x.o.v), (tv ? (x.o.v / tv * 100).toFixed(1).replace('.', ',') : '0,0') + '%', _pedFmtMoeda(x.o.n ? x.o.v / x.o.n : 0), fd(x.o.dias, x.o.ne), x.o.pend ]; });
   return '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">Prazo = data da NF até a data de entrega registrada (somente NFs com entrega informada). NFs sem transportadora lançada: ' + semT + ' (' + _pedFmtMoeda(semTV) + ').</div>' + kpis + _relTabela(cols, rows, { totais: [ '', 'TOTAL', tn, _pedFmtMoeda(tv), '100%', _pedFmtMoeda(tn ? tv / tn : 0), fd(td, tne), tp ] });
 }
@@ -33933,7 +33933,7 @@ function _apresPreviewVisaoHtml(d, dAnterior) {
   return '<div class="apr-kpi-row">'
     + _apresPreviewKpiCard('Faturamento', 'R$ ' + d.faturamentoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}), dAnterior ? _apresFormatarVariacao(d.faturamentoTotal, dAnterior.faturamentoTotal) : null)
     + _apresPreviewKpiCard('Volume', d.pesoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' kg', dAnterior ? _apresFormatarVariacao(d.pesoTotal, dAnterior.pesoTotal) : null)
-    + _apresPreviewKpiCard('Ticket médio', 'R$ ' + d.ticketMedio.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}), dAnterior ? _apresFormatarVariacao(d.ticketMedio, dAnterior.ticketMedio) : null)
+    + _apresPreviewKpiCard('Pedido médio', 'R$ ' + d.ticketMedio.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}), dAnterior ? _apresFormatarVariacao(d.ticketMedio, dAnterior.ticketMedio) : null)
     + _apresPreviewKpiCard('Clientes ativos', String(d.clientesAtivos), dAnterior ? _apresFormatarVariacao(d.clientesAtivos, dAnterior.clientesAtivos) : null)
     + '</div>';
 }
@@ -34332,7 +34332,7 @@ function _apSlidesPrev() {
     if (!pags.length) out.push({ nome: 'Ficha do produto', html: H('Ficha do produto') + '<div class="apr-empty">Escolha produtos no passo 2.</div>' + F() });
     pags.forEach(function(g){ out.push({ nome: 'Ficha ' + g.forn, html: H('Ficha do produto — ' + g.forn + (g.tot > 1 ? ' (' + g.pag + '/' + g.tot + ')' : '')) + '<div class="apr-prodgrid" style="align-content:start;grid-auto-rows:min-content">' + g.itens.map(function(p){ return '<div class="apr-prodcard">' + (p.foto ? '<img src="' + p.foto + '">' : '') + '<div class="apr-pnome">' + (p.codigo ? _apresEscHtml(p.codigo) + ' — ' : '') + _apresEscHtml(p.nome || '') + '</div><div style="font-size:8px;color:#64748b">' + _apresEscHtml(_apInfoProd(p).join(' · ')) + '</div></div>'; }).join('') + '</div>' + F() }); });
   }
-  if (on('numeros')) out.push({ nome: 'Números', html: H('Nossos números · ' + d.per.txt) + '<div class="apr-kpi-row">' + _apresPreviewKpiCard('Faturamento', _apBRL0(d.fat)) + _apresPreviewKpiCard('Ticket médio por pedido', _apBRL(d.ticket)) + _apresPreviewKpiCard('Pedidos', String(d.nPed)) + _apresPreviewKpiCard('Clientes atendidos', String(d.nCli)) + '</div>' + F() });
+  if (on('numeros')) out.push({ nome: 'Números', html: H('Nossos números · ' + d.per.txt) + '<div class="apr-kpi-row">' + _apresPreviewKpiCard('Faturamento', _apBRL0(d.fat)) + _apresPreviewKpiCard('Pedido médio por pedido', _apBRL(d.ticket)) + _apresPreviewKpiCard('Pedidos', String(d.nPed)) + _apresPreviewKpiCard('Clientes atendidos', String(d.nCli)) + '</div>' + F() });
   if (on('evolucao')) { var mx = Math.max.apply(null, d.meses.map(function(m){ return d.porMes[m] || 0; }).concat([1])); out.push({ nome: 'Evolução', html: H('Evolução de vendas · ' + d.per.txt) + '<div class="apr-chart">' + d.meses.map(function(m){ var v = d.porMes[m] || 0; return '<div class="apr-mbar" style="height:' + Math.max(3, Math.round(v / mx * 100)) + '%"><span class="apr-mlbl">' + m.slice(5) + '/' + m.slice(2,4) + '</span></div>'; }).join('') + '</div>' + F() }); }
   if (on('top')) out.push({ nome: 'Top produtos', html: H('Produtos mais vendidos') + _apresPreviewTabelaHtml(d.top.map(function(p){ return [p.nome, _apBRL0(p.valor)]; }), true) + F() });
   if (on('condicoes')) out.push({ nome: 'Condições', html: H('Condições comerciais') + (f.cond ? _apresPreviewObsHtml(f.cond) : '<div class="apr-empty">Preencha as condições comerciais no passo 3.</div>') + F() });
@@ -34436,7 +34436,7 @@ function _apMontarPptx(f, fs, logos, pags, mapImg) {
     pags.forEach(function(g){ var sp = C('Ficha do produto — ' + g.forn + (g.tot > 1 ? ' (' + g.pag + '/' + g.tot + ')' : ''));
       _apresGradeProdutos(sp, g.itens.map(function(p){ return { codigo: p.codigo || '', nome: p.nome || '', ean: p.ean || '', shelf: p.shelf || '', quant: p.quant || '', unidade: p.unidade || '', imagem: mapImg[p.id] }; })); }); }
   if (on('numeros')) { var sn = C('Nossos números · ' + d.per.txt);
-    _apresCards(sn, [{ label:'Faturamento', valor: _apBRL0(d.fat) }, { label:'Ticket médio por pedido', valor: _apBRL(d.ticket) }, { label:'Pedidos', valor: String(d.nPed) }, { label:'Clientes atendidos', valor: String(d.nCli) }], 1.3); }
+    _apresCards(sn, [{ label:'Faturamento', valor: _apBRL0(d.fat) }, { label:'Pedido médio', valor: _apBRL(d.ticket) }, { label:'Pedidos', valor: String(d.nPed) }, { label:'Clientes atendidos', valor: String(d.nCli) }], 1.3); }
   if (on('evolucao')) { var sv = C('Evolução de vendas · ' + d.per.txt);
     sv.addChart(pptx.ChartType.bar, [{ name:'Faturamento', labels: d.meses.map(function(m){ return m.slice(5) + '/' + m.slice(2,4); }), values: d.meses.map(function(m){ return Math.round(d.porMes[m] || 0); }) }], { x:0.5, y:1.15, w:9, h:4.2, barColor:'DE7926', showLegend:false, catAxisLabelColor:'64748B', valAxisLabelColor:'64748B' }); }
   if (on('top')) { var st = C('Produtos mais vendidos'); _apresTabela(st, ['Produto','Valor faturado'], d.top.map(function(p){ return [p.nome, _apBRL0(p.valor)]; })); }
@@ -34621,7 +34621,7 @@ function _apresMontarPptx(d, logoRede, logoForn, dataDe, dataAte, novosProdutosP
     _apresCards(s2, [
       { label:'Faturamento', valor:'R$ ' + d.faturamentoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}), variacao: dAnterior ? _apresFormatarVariacao(d.faturamentoTotal, dAnterior.faturamentoTotal) : null },
       { label:'Volume', valor: d.pesoTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' kg', variacao: dAnterior ? _apresFormatarVariacao(d.pesoTotal, dAnterior.pesoTotal) : null },
-      { label:'Ticket médio', valor:'R$ ' + d.ticketMedio.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}), variacao: dAnterior ? _apresFormatarVariacao(d.ticketMedio, dAnterior.ticketMedio) : null },
+      { label:'Pedido médio', valor:'R$ ' + d.ticketMedio.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}), variacao: dAnterior ? _apresFormatarVariacao(d.ticketMedio, dAnterior.ticketMedio) : null },
       { label:'Clientes ativos', valor: String(d.clientesAtivos), variacao: dAnterior ? _apresFormatarVariacao(d.clientesAtivos, dAnterior.clientesAtivos) : null }
     ], 1.15);
   }
