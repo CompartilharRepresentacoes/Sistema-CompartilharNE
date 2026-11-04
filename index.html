@@ -7590,10 +7590,12 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
     <div class="com-filtros-topo" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <span style="font-size:11px;font-weight:600;color:#64748b">Mês</span>
       <select id="com-mes" onchange="_comSelecionarMes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"></select>
+      <span style="font-size:11px;font-weight:600;color:#64748b">Ano</span>
+      <select id="com-ano" onchange="_comSelecionarMes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"></select>
       <span style="font-size:11px;font-weight:600;color:#64748b;margin-left:6px">Período</span>
-      <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="com-data-de" oninput="_entctrlMaskData(this);renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+      <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="com-data-de" oninput="_entctrlMaskData(this);_comDataManual();renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
       <span style="color:#94a3b8;font-size:13px">&#8594;</span>
-      <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="com-data-ate" oninput="_entctrlMaskData(this);renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
+      <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="com-data-ate" oninput="_entctrlMaskData(this);_comDataManual();renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
       <select id="com-fornecedor" onchange="renderComissoes()" style="display:none;border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
       <select id="com-status" style="display:none" onchange="renderComissoes()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
         <option value="">Todos</option>
@@ -37709,35 +37711,45 @@ function _finListaComissoes(deIso, ateIso, fornecedorIdFiltro, statusFiltro) {
 }
 
 var _COM_MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-// Monta as opcoes do select de Mes: 18 meses pra tras + o mes atual, mais recente
-// primeiro, no formato "Outubro/2026" (value "AAAA-MM"). Selecionado "Personalizado"
-// (value vazio) quando o usuario mexe nas datas de Periodo na mao, sem bater com
-// nenhum mes inteiro -- assim o select nunca mostra um mes errado.
+// Mes (Janeiro a Dezembro) e depois Ano. "Personalizado" (mes vazio) aparece quando as datas sao digitadas a mao.
 function _comPopularSelectMes(selecionado) {
-  var sel = document.getElementById('com-mes');
-  if (!sel) return;
+  var selM = document.getElementById('com-mes'), selA = document.getElementById('com-ano');
+  if (!selM || !selA) return;
   var hoje = new Date();
-  var opcoes = ['<option value="">Personalizado</option>'];
-  for (var i = 0; i < 19; i++) {
-    var d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-    var val = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-    opcoes.push('<option value="' + val + '">' + _COM_MESES_PT[d.getMonth()] + '/' + d.getFullYear() + '</option>');
-  }
-  sel.innerHTML = opcoes.join('');
-  sel.value = selecionado || '';
+  selM.innerHTML = '<option value="">Personalizado</option>' + _COM_MESES_PT.map(function(n, i){ return '<option value="' + String(i+1).padStart(2,'0') + '">' + n + '</option>'; }).join('');
+  var anos = [];
+  for (var y = hoje.getFullYear(); y >= 2024; y--) anos.push('<option value="' + y + '">' + y + '</option>');
+  selA.innerHTML = anos.join('');
+  var pa = String(selecionado || '').split('-');
+  selM.value = pa[1] || '';
+  selA.value = pa[0] || String(hoje.getFullYear());
+  if (selA.value !== (pa[0] || String(hoje.getFullYear()))) selA.value = String(hoje.getFullYear());
 }
-// Troca Periodo (De/Ate) pro mes inteiro escolhido no select -- 1o ao ultimo dia do mes.
+function _comDataManual() { var m = document.getElementById('com-mes'); if (m) m.value = ''; }
+// Periodo do mes escolhido. Fabrica com "Periodo (dia de corte)": de dia N do mes anterior ate N-1 do mes escolhido
+// (ex.: corte 26, Outubro/2026 -> 26/09/2026 a 25/10/2026). Demais casos: mes inteiro.
+function _comPeriodoDoMes(ano, mes, fornId) {
+  var fo = fornId ? _comFornDe(fornId) : null;
+  var dia = fo && (fo.comissaoFormaPagamento || '') === 'periodo_corte' ? (parseInt(fo.comissaoDiaCorte, 10) || 26) : 0;
+  if (dia > 1) {
+    var ultAnt = new Date(ano, mes, 0).getDate();
+    var ini = new Date(ano, mes - 1, Math.min(dia, ultAnt));
+    var ultMes = new Date(ano, mes + 1, 0).getDate();
+    var fim = new Date(ano, mes, Math.min(dia - 1, ultMes));
+    return { ini: ini, fim: fim };
+  }
+  return { ini: new Date(ano, mes, 1), fim: new Date(ano, mes + 1, 0) };
+}
+function _comAplicarMes() {
+  var m = (document.getElementById('com-mes') || {}).value, y = (document.getElementById('com-ano') || {}).value;
+  if (!m || !y) return false;   // "Personalizado": nao mexe nas datas
+  var per = _comPeriodoDoMes(parseInt(y, 10), parseInt(m, 10) - 1, (document.getElementById('com-fornecedor') || {}).value || '');
+  document.getElementById('com-data-de').value = _finBr(_finIso(per.ini));
+  document.getElementById('com-data-ate').value = _finBr(_finIso(per.fim));
+  return true;
+}
 function _comSelecionarMes() {
-  var sel = document.getElementById('com-mes');
-  var val = sel ? sel.value : '';
-  if (!val) return; // "Personalizado": nao mexe nas datas, deixa como o usuario deixou
-  var partes = val.split('-');
-  var ano = parseInt(partes[0], 10), mes = parseInt(partes[1], 10) - 1;
-  var ini = new Date(ano, mes, 1);
-  var fim = new Date(ano, mes + 1, 0);
-  document.getElementById('com-data-de').value = _finBr(_finIso(ini));
-  document.getElementById('com-data-ate').value = _finBr(_finIso(fim));
-  renderComissoes();
+  if (_comAplicarMes()) renderComissoes();
 }
 function _comPopularFiltros() {
   var sel = document.getElementById('com-fornecedor');
@@ -37748,7 +37760,8 @@ function _comPopularFiltros() {
   }
   var deEl = document.getElementById('com-data-de');
   var ateEl = document.getElementById('com-data-ate');
-  var mesAtualSelecionado = document.getElementById('com-mes').value;
+  var _m0 = (document.getElementById('com-mes') || {}).value, _a0 = (document.getElementById('com-ano') || {}).value;
+  var mesAtualSelecionado = (_m0 && _a0) ? (_a0 + '-' + _m0) : '';
   if (deEl && !deEl.value) {
     var hoje = new Date();
     var ini = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
@@ -37849,7 +37862,7 @@ function renderComissoes() {
   var totFat = 0; linhas.forEach(function(d){ totFat += d.faturado; });
   document.getElementById('com-rodape').innerHTML = '<span>'+_pgTexto(Math.min(linhas.length - (_pgUlt ? _pgUlt.ini : 0), _PG_POR),linhas.length,linhas.length,'NF','NFs')+' \u00b7 Faturado '+_finMoeda(totFat)+'</span><span>Comiss\u00e3o '+_finMoeda(totalPrevisto)+'</span>';
 }
-function _comSetFab(id) { document.getElementById('com-fornecedor').value = id; renderComissoes(); }
+function _comSetFab(id) { document.getElementById('com-fornecedor').value = id; _comAplicarMes(); renderComissoes(); }
 function _comTagsPct(pcts) {
   var m = {}, ordem = [];
   (pcts||[]).forEach(function(p){ var k = p.origem + '|' + p.pct; if (!m[k]) { m[k] = p; ordem.push(k); } });
