@@ -7750,6 +7750,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         <span style="color:rgba(255,255,255,.5);font-size:13px">Carregando PDF...</span>
       </div>
       <div id="cartilha-book-wrap" style="position:relative;width:766px;height:520px;max-width:100%;display:none">
+        <div id="cartilha-pf-wrap" style="display:none;margin:0 auto;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.8);border-radius:6px"></div>
         <div id="cartilha-book-pages" style="display:none;position:relative;width:766px;height:520px;max-width:100%">
           <div style="position:absolute;inset:0;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.8);pointer-events:none"></div>
           <div id="cartilha-page-left" style="position:absolute;left:0;top:0;width:380px;height:520px;background:#f5f5f5;border-radius:6px 0 0 6px;overflow:hidden;display:flex;align-items:center;justify-content:center">
@@ -11858,6 +11859,7 @@ async function _navegarCartilhaVertical(dir) {
 }
 function _cartilhaAvancar(dir) {
   if (window._cartilhaModo === 'vertical') _navegarCartilhaVertical(dir);
+  else if (window._cartilhaPF) { if (dir > 0) window._cartilhaPF.flipNext(); else window._cartilhaPF.flipPrev(); }
   else navegarCartilha(dir * 2);
 }
 function _aplicarModoCartilhaUI() {
@@ -11952,6 +11954,74 @@ async function _cartAjustarFormato() {
     } else _cartAplicarDim(380, 520);
   } catch (e) { _cartAplicarDim(380, 520); }
 }
+// ---- Catalogo: virar pagina com dobra de papel (biblioteca StPageFlip carregada so quando abre um catalogo) ----
+var _cartPfPromise = null;
+function _cartCarregarPageFlip() {
+  if (window.St && window.St.PageFlip) return Promise.resolve();
+  if (_cartPfPromise) return _cartPfPromise;
+  _cartPfPromise = Promise.race([
+    new Promise(function (res, rej) {
+      var sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js';
+      sc.onload = res; sc.onerror = function () { rej(new Error('pageflip')); };
+      document.head.appendChild(sc);
+    }),
+    new Promise(function (res, rej) { setTimeout(function () { rej(new Error('pageflip-timeout')); }, 8000); })
+  ]).catch(function (e) { _cartPfPromise = null; throw e; });
+  return _cartPfPromise;
+}
+async function _cartRenderPagePF(i) {
+  var pdf = window._cartilhaPdf, cv = window._cartPfCanv && window._cartPfCanv[i];
+  if (!pdf || !cv || window._cartPfRend[i] || i < 0 || i >= pdf.numPages) return;
+  window._cartPfRend[i] = 1;
+  try {
+    var pw = window._cPW || 380, ph = window._cPH || 520, dpr = Math.min(2, window.devicePixelRatio || 1);
+    var W = Math.round(pw * dpr), H = Math.round(ph * dpr);
+    var page = await pdf.getPage(i + 1);
+    var v0 = page.getViewport({ scale: 1 });
+    var vp = page.getViewport({ scale: Math.min(W / v0.width, H / v0.height) });
+    var tmp = document.createElement('canvas'); tmp.width = Math.round(vp.width); tmp.height = Math.round(vp.height);
+    await page.render({ canvasContext: tmp.getContext('2d'), viewport: vp }).promise;
+    if (!window._cartPfCanv) return;
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext('2d'); ctx.fillStyle = '#f5f5f5'; ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(tmp, Math.floor((W - tmp.width) / 2), Math.floor((H - tmp.height) / 2));
+  } catch (e) { if (window._cartPfRend) window._cartPfRend[i] = 0; }
+}
+function _cartRenderPerto(idx) { for (var k = idx - 2; k <= idx + 5; k++) _cartRenderPagePF(k); }
+function _cartDestruirPF() {
+  if (window._cartilhaPF) { try { window._cartilhaPF.destroy(); } catch (e) {} window._cartilhaPF = null; }
+  var w = document.getElementById('cartilha-pf-wrap'); if (w) { w.innerHTML = ''; w.style.display = 'none'; }
+  window._cartPfCanv = null; window._cartPfRend = null;
+}
+async function _cartIniciarPF() {
+  try {
+    await _cartCarregarPageFlip();
+    if (!(window.St && window.St.PageFlip)) return false;
+    var pdf = window._cartilhaPdf, n = pdf.numPages, pw = window._cPW || 380, ph = window._cPH || 520;
+    var wrap = document.getElementById('cartilha-pf-wrap');
+    wrap.innerHTML = ''; wrap.style.display = 'block'; wrap.style.width = (pw * 2) + 'px'; wrap.style.height = ph + 'px';
+    var host = document.createElement('div'); host.style.cssText = 'width:' + (pw * 2) + 'px;height:' + ph + 'px'; wrap.appendChild(host);
+    window._cartPfCanv = []; window._cartPfRend = {};
+    var els = [];
+    for (var i = 0; i < n; i++) {
+      var d = document.createElement('div'); d.className = 'page'; d.style.cssText = 'background:#f5f5f5;overflow:hidden';
+      var c = document.createElement('canvas'); c.style.cssText = 'display:block;width:100%;height:100%';
+      d.appendChild(c); window._cartPfCanv.push(c); els.push(d); host.appendChild(d);
+    }
+    var pf = new St.PageFlip(host, { width: pw, height: ph, size: 'stretch', minWidth: pw, maxWidth: pw, minHeight: ph, maxHeight: ph, showCover: false, maxShadowOpacity: 0.55, drawShadow: true, flippingTime: 900, usePortrait: false, mobileScrollSupport: false, startPage: 0 });
+    pf.loadFromHTML(els);
+    window._cartilhaPF = pf;
+    pf.on('flip', function (e) {
+      var idx = e.data; window._cartilhaPagAtual = (idx - (idx % 2)) + 1;
+      _updateCartilhaInfo(); _cartRenderPerto(idx);
+    });
+    await Promise.all([_cartRenderPagePF(0), _cartRenderPagePF(1), _cartRenderPagePF(2), _cartRenderPagePF(3)]);
+    _cartRenderPerto(0);
+    window._cartilhaPagAtual = 1; _updateCartilhaInfo();
+    return true;
+  } catch (e) { _cartDestruirPF(); return false; }
+}
 async function abrirCartilha(fornId) {
   const cats = getCatalogos();
   const cat  = cats.find(c => c.fornecedor_id === fornId);
@@ -11979,6 +12049,7 @@ async function abrirCartilha(fornId) {
   const onTouchEnd = e => {
     const t = e.changedTouches[0];
     const dx = t.clientX - _touchX, dy = t.clientY - _touchY;
+    if (window._cartilhaPF) return;   // com a dobra de pagina o proprio livro cuida do arrastar
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) _cartilhaAvancar(dx < 0 ? 1 : -1);
   };
   if (viewerRow) {
@@ -12013,8 +12084,10 @@ async function abrirCartilha(fornId) {
     if (window._cartilhaModo === 'vertical') {
       await _renderPaginaVertical(1);
     } else {
-      await _renderSpread(1);
-      document.getElementById('cartilha-book-pages').style.display = 'block';
+      if (!(await _cartIniciarPF())) {   // sem a dobra (ex.: sem internet para a biblioteca): usa o livro antigo
+        await _renderSpread(1);
+        document.getElementById('cartilha-book-pages').style.display = 'block';
+      }
     }
     document.getElementById('cartilha-loading').style.display = 'none';
   } catch(e) {
@@ -12032,6 +12105,7 @@ async function navegarCartilha(delta) {
 }
 function fecharCartilha() {
   document.getElementById('modal-cartilha').style.display = 'none';
+  _cartDestruirPF();
   window._cartilhaPdf = null; window._cartilhaFornId = null; window._cartilhaAnimating = false;
   if (window._cartilhaKeyHandler) { document.removeEventListener('keydown', window._cartilhaKeyHandler); window._cartilhaKeyHandler = null; }
   if (window._cartilhaTouchCleanup) { window._cartilhaTouchCleanup(); window._cartilhaTouchCleanup = null; }
