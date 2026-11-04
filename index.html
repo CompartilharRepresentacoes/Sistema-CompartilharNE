@@ -20572,6 +20572,50 @@ function _sbLazy(el, arr, fn) {
 }
 
 
+// ---- lista grande: 20 por pagina + botoes de pagina (usado nas abas de Pedidos) ----
+var _pagEst = {};
+function _pagIr(key, n) {
+  var e = _pagEst[key]; if (!e) return;
+  e.pag = n; if (typeof window[e.fn] === 'function') window[e.fn](true);
+  var t = document.getElementById('pag-' + key + '-topo'); if (t && t.scrollIntoView) t.scrollIntoView({ block: 'start' });
+}
+function _pagCards(key, abrir) {
+  var e = _pagEst[key]; if (!e) return;
+  document.querySelectorAll('#' + e.cont + ' .vcf-card').forEach(function (c) { _vcfAbrirCard(c, abrir); });
+}
+function _pagLimpar(key) { ['topo', 'base'].forEach(function (x) { var e = document.getElementById('pag-' + key + '-' + x); if (e) e.innerHTML = ''; }); }
+function _sbPagina(key, fn, el, lista, manter, cards, rotulo, rowFn) {
+  var e = _pagEst[key] || (_pagEst[key] = { pag: 1 });
+  e.fn = fn; e.cont = el.id;
+  if (manter !== true) e.pag = 1;
+  var POR = 20, total = lista.length, np = Math.max(1, Math.ceil(total / POR));
+  if (e.pag > np) e.pag = np; if (e.pag < 1) e.pag = 1;
+  var ini = (e.pag - 1) * POR, pagina = lista.slice(ini, ini + POR);
+  var mk = function (x, antes) { var id = 'pag-' + key + '-' + x, d = document.getElementById(id); if (!d) { d = document.createElement('div'); d.id = id; el.parentNode.insertBefore(d, antes ? el : el.nextSibling); } return d; };
+  var topo = mk('topo', true), base = mk('base', false);
+  var est = 'border:1px solid #e2e8f0;background:#fff;border-radius:8px;padding:5px 11px;font-size:11.5px;font-weight:600;color:#475569;cursor:pointer';
+  topo.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:11.5px;color:#64748b';
+  topo.innerHTML = '<span>Mostrando ' + (ini + 1) + ' a ' + (ini + pagina.length) + ' de ' + total + ' ' + rotulo + '</span>'
+    + (cards ? '<span style="display:flex;gap:6px"><button type="button" onclick="_pagCards(\'' + key + '\',true)" style="' + est + '">Expandir todos</button><button type="button" onclick="_pagCards(\'' + key + '\',false)" style="' + est + '">Recolher todos</button></span>' : '');
+  base.style.cssText = 'display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px';
+  if (np <= 1) { base.innerHTML = ''; }
+  else {
+    var btn = function (txt, n, ativo, off) {
+      return '<button type="button" ' + (off ? 'disabled' : 'onclick="_pagIr(\'' + key + '\',' + n + ')"') + ' style="' + est + (ativo ? ';background:#272A4A;color:#fff;border-color:#272A4A' : '') + (off ? ';opacity:.4;cursor:default' : '') + '">' + txt + '</button>';
+    };
+    var nums = {}; nums[1] = 1; nums[np] = 1;
+    for (var k = e.pag - 2; k <= e.pag + 2; k++) { if (k >= 1 && k <= np) nums[k] = 1; }
+    var h = btn('\u00AB Anterior', e.pag - 1, false, e.pag <= 1), ult = 0;
+    Object.keys(nums).map(Number).sort(function (a, b) { return a - b; }).forEach(function (n) {
+      if (ult && n - ult > 1) h += '<span style="color:#94a3b8">\u2026</span>';
+      h += btn(String(n), n, n === e.pag, false); ult = n;
+    });
+    h += btn('Pr\u00F3xima \u00BB', e.pag + 1, false, e.pag >= np);
+    base.innerHTML = h;
+  }
+  _sbLazy(el, pagina, rowFn);
+}
+
 // abas pesadas de Pedidos: abrem no mes atual; os filtros so valem ao clicar em OK
 var _sbMesInit = {};
 function _sbDefMes(pre) {
@@ -24006,7 +24050,7 @@ function _psnLinhas() {
   });
   return linhas;
 }
-function renderVendasSimplesNfs() {
+function renderVendasSimplesNfs(manterPag) {
   var tbody = document.getElementById('psn-tbody');
   if (!tbody) return;
 
@@ -24041,9 +24085,10 @@ function renderVendasSimplesNfs() {
   var kpi = document.getElementById('psn-kpi-total'); if (kpi) kpi.textContent = linhas.length;
 
   if (!linhas.length) {
+    _pagLimpar('psn');
     tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhuma NF encontrada com esses filtros.</div>';
   } else {
-    _sbLazy(tbody, linhas, function(r){
+    _sbPagina('psn', 'renderVendasSimplesNfs', tbody, linhas, manterPag, false, 'NFs', function(r){
       var p = r.pedido, f = r.fatura;
       var cli = clientesMap[p.clienteId];
       var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
@@ -24630,7 +24675,7 @@ function _pnfPendentes() {
   });
   return lista;
 }
-function renderNaoFaturados() {
+function renderNaoFaturados(manterPag) {
   var cont = document.getElementById('pnf-lista');
   var vazio = document.getElementById('pnf-vazio');
   var kpi = document.getElementById('pnf-kpi-total');
@@ -24677,9 +24722,9 @@ function renderNaoFaturados() {
   var pnfKP = document.getElementById('pnf-kpi-peso'); if (pnfKP) pnfKP.textContent = pnfPesoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
   if (kpi) kpi.textContent = lista.length;
-  if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; return; }
+  if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; _pagLimpar('pnf'); return; }
   vazio.style.display = 'none';
-  _sbLazy(cont, lista, function(r){
+  _sbPagina('pnf', 'renderNaoFaturados', cont, lista, manterPag, true, 'pedidos', function(r){
     var p = r.pedido;
     var dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
@@ -24696,16 +24741,16 @@ function renderNaoFaturados() {
         + '<td style="padding:5px 8px;font-size:11px;text-align:right;color:#dc2626;font-weight:700">' + _pedFmtMoeda(it.valorNaoFaturado) + '</td>'
         + '</tr>';
     }).join('');
-    return '<div style="background:#fff;border-radius:12px;border-bottom:3px solid #3d5aa8;box-shadow:0 4px 20px rgba(39,42,74,.12);overflow:hidden">'
-      + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
-      + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
+    return '<div class="vcf-card" style="background:#fff;border-radius:12px;border-bottom:3px solid #3d5aa8;box-shadow:0 4px 20px rgba(39,42,74,.12);overflow:hidden">'
+      + '<div class="vcx-header-row" onclick="_vcfToggleCard(this)" title="Clique para ver os produtos" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;cursor:pointer">'
+      + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8"><span class="vcf-seta" style="display:inline-block;width:14px;color:#64748b">\u25B6</span>' + dataFmt + '</div>'
       + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
       + '<div class="vcx-r-forn" style="font-size:11.5px;color:#272A4A;font-weight:700">' + _pedEsc(fornNomeSo) + '</div>'
       + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
       + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fefce8;color:#a16207">' + _pedEsc(p.status) + '</span>'
+      + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#fefce8;color:#a16207">' + _pedEsc(p.status) + '</span>' + '<span style="margin-left:auto;font-size:11px;color:#94a3b8">' + r.pendentes.length + ' produto' + (r.pendentes.length === 1 ? '' : 's') + '</span>'
       + '</div>'
-      + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
+      + '<div class="mc-table-wrap" style="display:none"><table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Pedida</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Falta Faturar</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Não Faturado</th></tr></thead>'
       + '<tbody>' + itensHtml + '</tbody></table></div>'
       + '<div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;background:#eff6ff;border-top:1px solid #dbeafe;padding:9px 16px">'
@@ -25009,7 +25054,7 @@ function _pedFiltraProdPsn(linhas, id) {
     return (r.fatura.itens || []).some(function(it){ var pr = pm[it.prodId] || {}; return _pedProdBate(termo, it.prodCodigo || pr.codigo, it.prodNome || pr.nome); });
   });
 }
-function renderVendasCompletas() {
+function renderVendasCompletas(manterPag) {
   var cont = document.getElementById('vc-lista');
   var vazio = document.getElementById('vc-vazio');
   if (!cont || !vazio) return;
@@ -25066,12 +25111,12 @@ function renderVendasCompletas() {
   var kVN = document.getElementById('vc-kpi-valor-naofat'); if (kVN) kVN.textContent = _pedFmtMoeda(totalValorNaoFaturado);
   var kPN = document.getElementById('vc-kpi-peso-naofat'); if (kPN) kPN.textContent = totalPesoNaoFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
-  if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; return; }
+  if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; _pagLimpar('vc'); return; }
   vazio.style.display = 'none';
 
   var statusCores = { 'Pré-Venda':{bg:'#f1f5f9',cor:'#64748b'}, 'Aguardando Retorno':{bg:'#fff7ed',cor:'#c2410c'}, 'Enviado':{bg:'#eff6ff',cor:'#1d4ed8'}, 'Faturado':{bg:'#f0fdf4',cor:'#15803d'}, 'Faturado Parcial':{bg:'#fefce8',cor:'#a16207'}, 'Bonificado':{bg:'#ecfeff',cor:'#0e7490'}, 'Cancelado':{bg:'#fff5f5',cor:'#dc2626'} };
 
-  _sbLazy(cont, lista, function(r){
+  _sbPagina('vc', 'renderVendasCompletas', cont, lista, manterPag, true, 'pedidos', function(r){
     var p = r.pedido;
     var dataFmt = p.data ? p.data.split('-').reverse().join('/') : '—';
     var fornNomeSo = String(p.fornecedorNome || '').replace(/^\d+\s+/, '');
@@ -25088,16 +25133,16 @@ function renderVendasCompletas() {
         + '<td style="padding:5px 8px;font-size:11px;text-align:center;color:' + (it.restante > 0 ? '#dc2626' : '#cbd5e1') + ';font-weight:700">' + _pedFmtQtd(it.restante) + '</td>'
         + '</tr>';
     }).join('');
-    return '<div style="background:#fff;border-radius:12px;border-bottom:3px solid #3d5aa8;box-shadow:0 4px 20px rgba(39,42,74,.12);overflow:hidden">'
-      + '<div class="vcx-header-row" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap">'
-      + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8">' + dataFmt + '</div>'
+    return '<div class="vcf-card" style="background:#fff;border-radius:12px;border-bottom:3px solid #3d5aa8;box-shadow:0 4px 20px rgba(39,42,74,.12);overflow:hidden">'
+      + '<div class="vcx-header-row" onclick="_vcfToggleCard(this)" title="Clique para ver os produtos" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;cursor:pointer">'
+      + '<div class="vcx-r-data" style="font-size:11px;color:#94a3b8"><span class="vcf-seta" style="display:inline-block;width:14px;color:#64748b">\u25B6</span>' + dataFmt + '</div>'
       + '<div class="vcx-r-cliente" style="font-size:12px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
       + '<div class="vcx-r-forn" style="font-size:11.5px;color:#272A4A;font-weight:700">' + _pedEsc(fornNomeSo) + '</div>'
       + '<div class="vcx-r-vend" style="font-size:11px;color:#94a3b8">Vendedor: ' + _pedEsc(p.vendedorNome || '—') + '</div>'
       + '<div class="vcx-r-pedido" style="font-size:11px;color:#94a3b8">Pedido: ' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
-      + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>'
+      + '<span class="vcx-badge" style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(p.status) + '</span>' + '<span style="margin-left:auto;font-size:11px;color:#94a3b8">' + r.itens.length + ' produto' + (r.itens.length === 1 ? '' : 's') + '</span>'
       + '</div>'
-      + '<div class="mc-table-wrap"><table style="width:100%;border-collapse:collapse">'
+      + '<div class="mc-table-wrap" style="display:none"><table style="width:100%;border-collapse:collapse">'
       + '<thead><tr style="text-align:left;background:#f8fafc"><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Cód</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase">Produto</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Unit.</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Peso (kg)</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:right">Valor Total</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Faturada</th><th style="padding:5px 8px;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;text-align:center">Qtd Não Faturada</th></tr></thead>'
       + '<tbody>' + itensHtml + '</tbody></table></div>'
       + '<div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;background:#eff6ff;border-top:1px solid #dbeafe;padding:9px 16px">'
