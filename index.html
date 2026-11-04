@@ -25465,8 +25465,12 @@ function _pedCliFiltrar() {
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   var qDigits = q.replace(/\D/g, '');
+  // so numeros (pode ter . / -): so mostra o cliente quando o codigo ou o CNPJ/CPF esta COMPLETO; nome continua a partir da 3a letra
+  var _soNumCli = /^[\d.\-\/\s]+$/.test(q);
+  var _semZerosCli = function (v) { return String(v || '').replace(/\D/g, '').replace(/^0+(?=.)/, ''); };
   _pedCliItems = getClientesVisiveis().filter(function(c){
     var docDigits = (c.cpf_cnpj||'').replace(/\D/g, '');
+    if (_soNumCli) return (!!c.codigo && _semZerosCli(c.codigo) === _semZerosCli(qDigits)) || (docDigits.length >= 11 && docDigits === qDigits);
     return _cpNorm(c.nome_fantasia||c.razao_social||'').includes(n)
         || _cpNorm(c.codigo||'').includes(n)
         || (qDigits && docDigits && docDigits.includes(qDigits));
@@ -25546,6 +25550,10 @@ function _pedProdFiltrar() {
   // Tambem acha pelo Cód. Pedido / Cód. Cliente cadastrado nas tabelas de preço do cliente (ou de todas, se ainda não escolheu o cliente)
   _pedProdCodMap = {};
   var qSimples = q.replace(/[^a-z0-9]/gi, '').toLowerCase();
+  // so numeros: so mostra o produto quando o codigo esta COMPLETO (codigo do produto, Cod. Pedido ou Cod. Cliente); nome continua a partir da 3a letra
+  var _soNum = /^\d+$/.test(q.replace(/\s/g, ''));
+  var _semZeros = function (v) { return String(v || '').replace(/[^a-z0-9]/gi, '').toLowerCase().replace(/^0+(?=.)/, ''); };
+  var _qExato = _semZeros(q);
   if (qSimples.length >= 3) {
     getTabPrecos().forEach(function(tab){
       if ((tab.ativo || 'Sim') !== 'Sim') return;
@@ -25554,11 +25562,13 @@ function _pedProdFiltrar() {
         if (fornId && it.fornId && String(it.fornId).trim() !== String(fornId).trim()) return;
         var cp = String(it.codPedido || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
         var cc = String(it.codCliente || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
-        if ((cp && cp.indexOf(qSimples) !== -1) || (cc && cc.indexOf(qSimples) !== -1)) _pedProdCodMap[it.prodId] = it.codPedido || it.codCliente;
+        var _ok = _soNum ? ((cp && _semZeros(cp) === _qExato) || (cc && _semZeros(cc) === _qExato)) : ((cp && cp.indexOf(qSimples) !== -1) || (cc && cc.indexOf(qSimples) !== -1));
+        if (_ok) _pedProdCodMap[it.prodId] = it.codPedido || it.codCliente;
       });
     });
   }
   _pedProdItems = base.filter(function(p){
+    if (_soNum) return _semZeros(p.codigo) === _qExato || (p.ean && _semZeros(p.ean) === _qExato) || !!_pedProdCodMap[p.id];
     return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n) || !!_pedProdCodMap[p.id];
   }).slice(0,15);
   if (!_pedProdItems.length) { drop.style.display='none'; return; }
