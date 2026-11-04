@@ -5422,7 +5422,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         </div>
         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow:hidden">
           <div class="ped-header-row" style="display:grid;grid-template-columns:85px 130px 120px 1.6fr 60px 1fr 0.9fr 100px 110px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;align-items:center">
-            <span>Data</span><span>Pedido</span><span>Pedido Fornec.</span><span>Cliente</span><span style="text-align:center">UF</span><span>Fornecedor</span><span>Vendedor</span><span>Valor</span><span>Status</span>
+            <span id="pss-th-data" onclick="pssOrdenarPor('data')" style="cursor:pointer;user-select:none">Data<span class="pss-seta"></span></span><span id="pss-th-numPedidoCliente" onclick="pssOrdenarPor('numPedidoCliente')" style="cursor:pointer;user-select:none">Pedido<span class="pss-seta"></span></span><span id="pss-th-numPedidoFornecedor" onclick="pssOrdenarPor('numPedidoFornecedor')" style="cursor:pointer;user-select:none">Pedido Fornec.<span class="pss-seta"></span></span><span id="pss-th-clienteNome" onclick="pssOrdenarPor('clienteNome')" style="cursor:pointer;user-select:none">Cliente<span class="pss-seta"></span></span><span id="pss-th-uf" onclick="pssOrdenarPor('uf')" style="cursor:pointer;user-select:none;text-align:center">UF<span class="pss-seta"></span></span><span id="pss-th-fornecedorNome" onclick="pssOrdenarPor('fornecedorNome')" style="cursor:pointer;user-select:none">Fornecedor<span class="pss-seta"></span></span><span id="pss-th-vendedorNome" onclick="pssOrdenarPor('vendedorNome')" style="cursor:pointer;user-select:none">Vendedor<span class="pss-seta"></span></span><span id="pss-th-valorTotal" onclick="pssOrdenarPor('valorTotal')" style="cursor:pointer;user-select:none">Valor<span class="pss-seta"></span></span><span id="pss-th-status" onclick="pssOrdenarPor('status')" style="cursor:pointer;user-select:none">Status<span class="pss-seta"></span></span>
           </div>
           <div id="pss-tbody" style="min-height:60px"></div>
           <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
@@ -20928,6 +20928,26 @@ function _pssSemanaAtual() {
   }
   renderVendaSimples();
 }
+// Venda simples: ao abrir fica na ordem de digitacao (numero de lancamento, do mais antigo ao mais novo; o ultimo digitado fica embaixo).
+// Clicar no titulo de uma coluna ordena por ela (1o clique crescente, 2o decrescente) e mostra a seta so nessa coluna.
+var _pssOrdCampo = 'lancamento', _pssOrdDir = 'asc';
+function pssOrdenarPor(campo) {
+  if (_pssOrdCampo === campo) { _pssOrdDir = (_pssOrdDir === 'asc') ? 'desc' : 'asc'; }
+  else { _pssOrdCampo = campo; _pssOrdDir = 'asc'; }
+  renderVendaSimples();
+}
+function _pssValorOrd(p, campo, clientesMap) {
+  if (campo === 'numPedidoFornecedor') return String(p.numPedidoFornecedor || '');
+  if (campo === 'uf') { var c = clientesMap[p.clienteId]; return c ? String(c.estado || '') : ''; }
+  return _pedValorOrdenacao(p, campo);
+}
+function _pssAtualizarSetas() {
+  ['data','numPedidoCliente','numPedidoFornecedor','clienteNome','uf','fornecedorNome','vendedorNome','valorTotal','status'].forEach(function(c){
+    var th = document.getElementById('pss-th-' + c); if (!th) return;
+    var seta = th.querySelector('.pss-seta'); if (!seta) return;
+    seta.textContent = (_pssOrdCampo === c) ? (_pssOrdDir === 'asc' ? ' ▲' : ' ▼') : '';
+  });
+}
 function pssLimparFiltros() {
   ['pss-data-de','pss-data-ate','pss-vendedor','pss-uf','pss-fornecedor','pss-produto','pss-rede'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
@@ -20970,7 +20990,13 @@ function renderVendaSimples() {
     }
     return true;
   });
-  rows = rows.slice().sort(function(a,b){ return (b.dtCadastro||'').localeCompare(a.dtCadastro||''); });
+  rows = rows.slice().sort(function(a,b){
+    var va = _pssValorOrd(a, _pssOrdCampo, clientesMap), vb = _pssValorOrd(b, _pssOrdCampo, clientesMap);
+    var cmp = (typeof va === 'number' && typeof vb === 'number') ? (va - vb) : String(va).localeCompare(String(vb), 'pt-BR', { numeric: true });
+    if (cmp === 0) cmp = (parseInt(a.lancamento, 10) || 0) - (parseInt(b.lancamento, 10) || 0);
+    return _pssOrdDir === 'asc' ? cmp : -cmp;
+  });
+  _pssAtualizarSetas();
 
   var produtosMapPss = {}; getProdutos().forEach(function(pr){ produtosMapPss[pr.id] = pr; });
   var pssValorTotal = rows.reduce(function(acc,p){ return acc + (Number(p.valorTotal)||0); }, 0);
