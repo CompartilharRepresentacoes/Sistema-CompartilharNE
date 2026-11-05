@@ -23852,6 +23852,7 @@ function pedRemoverAnexo(i) {
 var _pfatPedidoId = '';
 function _pfatPedidoAtual() { return getPedidos().find(function(x){ return x.id === _pfatPedidoId; }); }
 function _pfatValorFaturasAtivo(pedido) {
+  if (pedido && pedido.status === 'Bonificado') return 0;   // Bonificado: NF ligada ao pedido nao conta como faturado
   return (pedido.faturas || []).filter(function(f){ return f.status !== 'Cancelado'; }).reduce(function(s,f){ return s + (Number(f.valor)||0); }, 0);
 }
 function _pfatQtdFaturadaItem(pedido, prodId, prodCodigo) {
@@ -23866,7 +23867,7 @@ function _pfatQtdFaturadaItem(pedido, prodId, prodCodigo) {
 }
 function _pfatAtualizarStatusPedido(pedido) {
   pedido.valorFaturado = _pfatValorFaturasAtivo(pedido);
-  if (pedido.status === 'Cancelado') return;
+  if (pedido.status === 'Cancelado' || pedido.status === 'Bonificado') return;   // Bonificado continua Bonificado mesmo com NF
   var itens = pedido.itens || [];
   if (!itens.length) return;
   var totalPedido = 0, totalFaturado = 0;
@@ -24260,6 +24261,7 @@ function _psnLinhas() {
   var produtosMap = {}; getProdutos().forEach(function(pr){ produtosMap[pr.id] = pr; });
   var linhas = [];
   pedidos.forEach(function(p){
+    if (p.status === 'Bonificado') return;   // NF de pedido Bonificado nao entra nos totais de faturamento
     (p.faturas || []).forEach(function(f){
       if (f.status === 'Cancelado') return;
       var pesoFat = (f.itens || []).reduce(function(acc, it){
@@ -31850,6 +31852,7 @@ function _relBaseFaturas(f) {
   getPedidos().forEach(function(p){
     var cli = clientesMap[p.clienteId] || {};
     if (!_appClienteVisivelUF(cli)) return;
+    if (p.status === 'Bonificado') return;   // NF de pedido Bonificado nao entra nos relatorios de faturamento
     (p.faturas || []).forEach(function(fat){
       if (fat.status === 'Cancelado') return;
       if (f.dataDe && fat.data < f.dataDe) return;
@@ -32530,6 +32533,7 @@ function _relCalcMetaRealizado(f) {
     pedidos.forEach(function(p){
       if (String(p.fornecedorId) !== String(m.fornecedorId)) return;
       if (f.vendedor && String(p.vendedorId||'') !== String(f.vendedor)) return;
+      if (p.status === 'Bonificado') return;
       (p.faturas||[]).forEach(function(fat){
         if (fat.status === 'Cancelado') return;
         if (!mesIni || !mesFim) return;
@@ -32749,7 +32753,7 @@ function _relCalcPainelMes(f) {
   var prodMap = {}; getProdutos().forEach(function(p){ prodMap[p.id] = p; });
   var F = {};
   getPedidos().forEach(function(p){
-    if (p.status === 'Cancelado') return;
+    if (p.status === 'Cancelado' || p.status === 'Bonificado') return;
     if (f.vendedor && String(p.vendedorId || '') !== String(f.vendedor)) return;
     if (f.fornecedor && _cpNorm(p.fornecedorNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return;
     (p.faturas || []).forEach(function(fat){
@@ -33666,6 +33670,7 @@ function _apresLinhas(redeId, subId, fornId, dataDe, dataAte) {
     if (!_appClienteVisivelUF(cli)) return;
     if (String(cli.categoria || '') !== String(redeId)) return;
     if (subId && String(cli.subcategoria || '') !== String(subId)) return;
+    if (p.status === 'Bonificado') return;
     (p.faturas || []).forEach(function(fat){
       if (fat.status === 'Cancelado') return;
       if (dataDe && fat.data < dataDe) return;
@@ -34386,6 +34391,7 @@ function _apDados() {
     if (!_apS.forns[p.fornecedorId]) return;
     var cli = cliMap[p.clienteId] || {};
     if (!_appClienteVisivelUF(cli)) return;
+    if (p.status === 'Bonificado') return;
     (p.faturas || []).forEach(function(f){
       if (f.status === 'Cancelado') return;
       if (!f.data || f.data < per.de || f.data > per.ate) return;
@@ -36321,6 +36327,7 @@ function _drValorQtdProduto(fornId, prodId, clienteIds, dataDe, dataAte) {
   getPedidos().forEach(function(p){
     if (String(p.fornecedorId) !== String(fornId)) return;
     if (!idsSet[p.clienteId]) return;
+    if (p.status === 'Bonificado') return;
     (p.faturas || []).forEach(function(fat){
       if (fat.status === 'Cancelado') return;
       if (dataDe && fat.data < dataDe) return;
@@ -37679,6 +37686,7 @@ function _finListaComissoes(deIso, ateIso, fornecedorIdFiltro, statusFiltro) {
   var porForn = {};
   pedidos.forEach(function(pedido){
     if (fornecedorIdFiltro && pedido.fornecedorId !== fornecedorIdFiltro) return;
+    if (pedido.status === 'Bonificado') return;   // Bonificado nao gera comissao
     (pedido.faturas || []).forEach(function(fatura){
       if (fatura.status === 'Cancelado') return;
       if (deIso && fatura.data < deIso) return;
@@ -38105,6 +38113,7 @@ function _cpiCompararComSistema(fornecedorId, parseResult) {
   var clientes = getClientes();
   var sistemaPorNf = {};
   pedidos.forEach(function (pedido) {
+    if (pedido.status === 'Bonificado') return;
     (pedido.faturas || []).forEach(function (fatura) {
       if (fatura.status === 'Cancelado') return;
       var nfNorm = _pfatNormNumNF(fatura.numDuplicata);
