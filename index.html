@@ -5152,6 +5152,10 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                 </div>
                 <input type="hidden" id="sku-cli-id">
               </div>
+              <div id="sku-codforn-wrap">
+                <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px" title="Código que este cliente/rede usa para identificar o fornecedor (ex.: Allfood = 771313 no Mateus)">Cód. do fornecedor neste cliente</label>
+                <input id="sku-codforn" class="form-input" placeholder="Ex: 771313" autocomplete="off" style="width:100%;font-family:monospace;font-size:13px;font-weight:600;letter-spacing:.04em">
+              </div>
               <div id="sku-produto-unico-wrap">
                 <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Produto <span style="color:#D82621">*</span></label>
                 <div style="position:relative">
@@ -9009,6 +9013,7 @@ function _fsIniciarOuvintes(aoFicarTudoPronto) {
     _fsOuvirFotosProdutos();
     try { _cadAutoIniciar(); } catch (eCa) { console.warn(eCa); }
     try { _restrCarregar(); } catch (eRq) { console.warn(eRq); }
+    try { _cfcCarregar(); } catch (eCf) { console.warn(eCf); }
     try { _cmdCarregar(); } catch (eCm) { console.warn(eCm); }
     try { _catCarregarSB(); } catch (eCt) { console.warn(eCt); }
     var hoje = new Date(); var fimAno = (hoje.getFullYear() + 1) + '-12-31';
@@ -20030,6 +20035,7 @@ function initSkuClientesList() {
   if (ff) ff.value = '';
   document.getElementById('sku-busca') && (document.getElementById('sku-busca').value='');
   renderSkuList();
+  _cfcCarregar(function () { renderSkuList(); });
 }
 
 function skuSetForma(v) {
@@ -20093,6 +20099,13 @@ function renderSkuList() {
       gruposMap[key].count++;
     });
     var grupos = ordem.map(function(k){ return gruposMap[k]; });
+    _cfcCache.forEach(function (c) {
+      if ((c.tipo || 'rede') !== 'rede') return;
+      if (filtForn && c.fornId !== filtForn) return;
+      if (filtCli && c.cliId !== filtCli) return;
+      if (busca || filtForma) return;
+      if (!gruposMap[c.fornId + '|' + c.cliId]) grupos.push({ fornId: c.fornId, fornNome: c.fornNome, cliId: c.cliId, cliNome: c.cliNome, count: 0 });
+    });
     grupos.sort(function(a,b){ return (a.cliNome||'').localeCompare(b.cliNome||''); });
 
     var totalG = grupos.length;
@@ -20104,7 +20117,7 @@ function renderSkuList() {
     var kpiG = document.getElementById('sku-kpi-total');
     if (kpiG) kpiG.textContent = fil.length;
 
-    if (header) header.innerHTML = '<span style="flex:1">Fornecedor</span><span style="flex:1">Rede</span><span style="width:90px;flex-shrink:0;text-align:center">SKUs</span><span style="width:70px;flex-shrink:0;text-align:center">Opções</span>';
+    if (header) header.innerHTML = '<span style="flex:1">Fornecedor</span><span style="flex:1">Rede</span><span style="width:110px;flex-shrink:0;text-align:center">Cód. fornecedor</span><span style="width:90px;flex-shrink:0;text-align:center">SKUs</span><span style="width:70px;flex-shrink:0;text-align:center">Opções</span>';
 
     if (pagG.length === 0) {
       tbody.innerHTML = '<div style="padding:32px;text-align:center;color:#94a3b8;font-size:13px">Nenhuma rede com SKU cadastrado</div>';
@@ -20116,6 +20129,7 @@ function renderSkuList() {
         rowsG += '<div class="mc-row" style="display:flex;padding:10px 14px;background:'+bgG+';border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px;gap:4px">'
           + '<span class="mc-secondary" style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(g.fornNome||''))+'</span>'
           + '<span class="mc-primary" style="flex:1;color:#334155;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(g.cliNome||'')+'</span>'
+          + '<span class="mc-meta" style="width:110px;flex-shrink:0;text-align:center;font-family:monospace;font-weight:700;color:#334155">'+_skuEsc(_cfcCodigo(g.fornId,'rede',g.cliId) || '—')+'</span>'
           + '<span class="mc-meta" style="width:90px;flex-shrink:0;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:5px;font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1">'+g.count+' SKU'+(g.count!==1?'s':'')+'</span></span>'
           + '<span class="mc-actions" style="width:70px;flex-shrink:0;display:flex;justify-content:center">'
           + '<button onclick="abrirSkuRedeDetalhe(\''+g.fornId+'\',\''+g.cliId+'\')" style="width:26px;height:26px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#272A4A;font-size:13px" title="Visualizar"><i class="ti ti-eye"></i></button>'
@@ -20180,12 +20194,14 @@ function abrirSkuRedeDetalhe(fornId, cliId) {
   var itens = getSkuClientes().filter(function(r){ return (r.tipo||'rede')==='rede' && r.fornId===fornId && r.cliId===cliId; });
   var fornNome = itens.length ? itens[0].fornNome : '';
   var cliNome  = itens.length ? itens[0].cliNome  : '';
+  var _cfcDet = _cfcDe(fornId, 'rede', cliId);
+  if (!itens.length && _cfcDet) { fornNome = _cfcDet.fornNome || ''; cliNome = _cfcDet.cliNome || ''; }
   _skuRedeDetalheAtual = { fornId: fornId, fornNome: fornNome, cliId: cliId, cliNome: cliNome };
 
   var tituloEl = document.getElementById('skured-titulo');
   if (tituloEl) tituloEl.textContent = cliNome || '—';
   var subEl = document.getElementById('skured-subtitulo');
-  if (subEl) subEl.textContent = 'Fornecedor: '+_cpSemColchetes(fornNome||'')+' · '+itens.length+' SKU'+(itens.length!==1?'s':'')+' cadastrado'+(itens.length!==1?'s':'');
+  if (subEl) subEl.textContent = 'Fornecedor: '+_cpSemColchetes(fornNome||'')+' · '+itens.length+' SKU'+(itens.length!==1?'s':'')+' cadastrado'+(itens.length!==1?'s':'')+(_cfcCodigo(fornId,'rede',cliId) ? ' · Cód. do fornecedor: '+_cfcCodigo(fornId,'rede',cliId) : '');
 
   var FORMA_COLOR = {CX:'#0369a1',UND:'#166534',PC:'#86198f',KG:'#c2410c'};
   var FORMA_BG    = {CX:'#e0f2fe',UND:'#f0fdf4',PC:'#fdf4ff',KG:'#fff7ed'};
@@ -20345,6 +20361,9 @@ function openSkuClientesForm(params) {
   skuFormaSel(r ? (r.forma||'CX') : 'CX');
   var skuAutoriaEl = document.getElementById('sku-autoria-info');
   if (skuAutoriaEl) skuAutoriaEl.innerHTML = r ? _appRenderAutoriaHtml(r) : '';
+  var _cfEl = document.getElementById('sku-codforn'); if (_cfEl) _cfEl.value = '';
+  _skuCodFornAtualizar(true);
+  _cfcCarregar(function () { _skuCodFornAtualizar(false); });
 }
 
 function _skuModoLote() {
@@ -20363,6 +20382,7 @@ function skuSetTipo(t, manterSelecao) {
   if (!manterSelecao) {
     document.getElementById('sku-cli-input').value = '';
     document.getElementById('sku-cli-id').value    = '';
+    var _cfEl2 = document.getElementById('sku-codforn'); if (_cfEl2) _cfEl2.value = '';
   }
 
   // alternar entre modo único (Cliente específico / edição) e modo lote (nova Rede)
@@ -20424,11 +20444,56 @@ function _skuFornKey(e) {
   if (hit) { _skuFornItems=[hit]; _skuFornSel(0); }
   if (e.key==='Tab') { e.preventDefault(); setTimeout(function(){ var el=document.getElementById('sku-cli-input'); if(el)el.focus(); },50); }
 }
+// ---- Codigo do FORNECEDOR no CLIENTE (ex.: Allfood = 771313 no Mateus). Tabela propria: codigos_fornecedor_cliente ----
+var _cfcCache = [], _cfcCarregando = false, _cfcOk = null;
+function _cfcId(fornId, tipo, cliId) { return 'cfc_' + fornId + '_' + (tipo || 'rede') + '_' + cliId; }
+function _cfcCarregar(cb) {
+  if (typeof SB === 'undefined') { if (cb) cb(); return; }
+  if (_cfcCarregando) { if (cb) setTimeout(cb, 500); return; }
+  _cfcCarregando = true;
+  SB.from('codigos_fornecedor_cliente').select('id_legado,dados').then(function (r) {
+    _cfcCarregando = false;
+    if (r.error) { _cfcOk = false; console.warn('[cod. fornecedor] tabela indisponivel:', r.error.message); }
+    else { _cfcOk = true; _cfcCache = (r.data || []).map(function (x) { return x.dados; }).filter(Boolean); }
+    if (cb) cb();
+  }, function () { _cfcCarregando = false; _cfcOk = false; if (cb) cb(); });
+}
+function _cfcDe(fornId, tipo, cliId) { var id = _cfcId(fornId, tipo, cliId); return _cfcCache.find(function (d) { return d.id === id; }) || null; }
+function _cfcCodigo(fornId, tipo, cliId) { var d = _cfcDe(fornId, tipo, cliId); return d ? String(d.codigo || '') : ''; }
+// devolve uma promessa: true se gravou (ou nao havia o que gravar), false se o banco recusou
+function _cfcSalvar(fornId, fornNome, tipo, cliId, cliNome, codigo) {
+  codigo = String(codigo || '').trim();
+  var antigo = _cfcDe(fornId, tipo, cliId);
+  if ((antigo ? String(antigo.codigo || '') : '') === codigo) return Promise.resolve(true);
+  if (typeof SB === 'undefined') return Promise.resolve(false);
+  var id = _cfcId(fornId, tipo, cliId);
+  var doc = { id: id, fornId: fornId, fornNome: fornNome, tipo: tipo, cliId: cliId, cliNome: cliNome, codigo: codigo, dtCadastro: antigo ? (antigo.dtCadastro || new Date().toISOString()) : new Date().toISOString() };
+  try { Object.assign(doc, _appMontarAutoria(antigo || null, antigo ? _appDiffGenerico(antigo, doc) : [])); } catch (eAu) {}
+  var args = codigo ? { p_docs: [JSON.parse(JSON.stringify(doc))], p_apagar: [] } : { p_docs: [], p_apagar: [id] };
+  return SB.rpc('gravar_codigos_fornecedor', args).then(function (r) {
+    if (r.error) throw new Error(r.error.message);
+    _cfcCache = _cfcCache.filter(function (d) { return d.id !== id; });
+    if (codigo) _cfcCache.push(doc);
+    try { if (document.getElementById('sku-tbody')) renderSkuList(); } catch (eR) {}
+    return true;
+  }).catch(function (err) {
+    alert('Não foi possível salvar o código do fornecedor: ' + (err && err.message ? err.message : err) + '\n\nO código NÃO foi salvo.');
+    return false;
+  });
+}
+function _skuCodFornAtualizar(forcar) {
+  var el = document.getElementById('sku-codforn'); if (!el) return;
+  var f = (document.getElementById('sku-forn-id') || {}).value, c = (document.getElementById('sku-cli-id') || {}).value;
+  if (!f || !c) return;
+  if (!forcar && el.value) return;
+  el.value = _cfcCodigo(f, _skuTipo, c);
+}
 function _skuFornSel(i) {
   var f = _skuFornItems[i]; if (!f) return;
   document.getElementById('sku-forn-id').value    = f.id;
   document.getElementById('sku-forn-input').value = (f.codigo?f.codigo+' ':'')+(f.nome_fantasia||f.razao_social||'');
   document.getElementById('sku-forn-drop').style.display = 'none';
+  _skuCodFornAtualizar(true);
 }
 
 // ── Autocomplete Rede / Cliente (estilo TabPreco) ──
@@ -20471,6 +20536,7 @@ function _skuCliSel(i) {
   document.getElementById('sku-cli-id').value    = c.id;
   document.getElementById('sku-cli-input').value = c.nome;
   document.getElementById('sku-cli-drop').style.display = 'none';
+  _skuCodFornAtualizar(true);
 }
 
 // ── Autocomplete Produto (4+ chars, Enter/Tab confirma) ──
@@ -20631,7 +20697,16 @@ function _salvarSkuLote() {
 
   if (!fornId) { alert('Selecione o fornecedor'); return; }
   if (!cliId)  { alert('Selecione a rede'); return; }
-  if (!_skuLoteItens.length) { alert('Adicione ao menos um produto à lista'); return; }
+  var codForn = (document.getElementById('sku-codforn') || {}).value || '';
+  if (!_skuLoteItens.length) {
+    // sem produtos na lista: se so o codigo do fornecedor mudou, salva so o codigo
+    if (String(codForn).trim() !== _cfcCodigo(fornId, 'rede', cliId)) {
+      _cfcSalvar(fornId, fornNome, 'rede', cliId, cliNome, codForn).then(function (ok) { if (ok) showPage('page-sku-clientes-list'); });
+      return;
+    }
+    alert('Adicione ao menos um produto à lista (ou informe o código do fornecedor)'); return;
+  }
+  _cfcSalvar(fornId, fornNome, 'rede', cliId, cliNome, codForn);
 
   var dados = getSkuClientes();
   _skuLoteItens.forEach(function(it) {
@@ -20693,6 +20768,7 @@ function salvarSkuCliente() {
   if (!prodId)  { alert('Selecione o produto'); return; }
   if (!sku)     { alert('Informe o SKU do cliente'); return; }
   if (!forma)   { alert('Selecione a forma de compra'); return; }
+  _cfcSalvar(fornId, fornNome, tipo, cliId, cliNome, (document.getElementById('sku-codforn') || {}).value || '');
 
   var dados = getSkuClientes();
   var editId = document.getElementById('sku-edit-id').value;
