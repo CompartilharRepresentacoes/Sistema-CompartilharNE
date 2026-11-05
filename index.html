@@ -29213,7 +29213,7 @@ function _emlLancar() {
   var nCanc = 0;
   escolhidas.forEach(function (r, i) {
     var vf = (r.cli.vendedores_fornecedor || []).find(function (v) { return String(v.fornId) === String(r.forn.id); }) || {};
-    // se o cliente nao tem vendedor especifico desta fabrica, usa o Vendedor Principal (mesma regra do pedido)
+    // vendedor da importacao: se o cliente nao tem vendedor especifico desta fabrica, usa o Vendedor Principal (mesma regra do pedido)
     var vendIdImp = vf.vendId || _cliResolverVendedorPorForn(r.cli, r.forn.id) || '';
     var vendObjImp = vendIdImp ? getUsuariosSistema().find(function (u) { return String(u.id) === String(vendIdImp); }) : null;
     var itens = r.itens.map(function (x) { var q = x.it.qtd || 0; return { prodId: x.p.id, prodCodigo: x.p.codigo, prodNome: x.p.nome, valor: q ? x.it.valor / q : x.it.valor, quantidade: q, valorTotal: x.it.valor }; });
