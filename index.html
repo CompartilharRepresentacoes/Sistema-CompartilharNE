@@ -6052,6 +6052,8 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                     <option value="Logística">Logística</option>
                     <option value="Falta">Falta</option>
                     <option value="Qualidade">Qualidade</option>
+                    <option value="Inversão">Inversão</option>
+                    <option value="Diferença de Peso">Diferença de Peso</option>
                   </select>
                 </div>
                 <div>
@@ -6974,6 +6976,8 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                     <option value="Logística">Logística</option>
                     <option value="Falta">Falta</option>
                     <option value="Qualidade">Qualidade</option>
+                    <option value="Inversão">Inversão</option>
+                    <option value="Diferença de Peso">Diferença de Peso</option>
                   </select>
                 </div>
                 <div>
@@ -28393,7 +28397,7 @@ function salvarPedido() {
 // ═══════════════════════════════════════════════════
 // DEVOLUÇÕES (registro de devoluções de clientes)
 // ═══════════════════════════════════════════════════
-var DEV_MOTIVOS = ['Avaria','Vencido','Logística','Falta','Qualidade'];
+var DEV_MOTIVOS = ['Avaria','Vencido','Logística','Falta','Qualidade','Inversão','Diferença de Peso'];
 var _devMotivosFiltro = [];
 var _devItens = [];
 var _devXmlAtual = null;
@@ -28899,6 +28903,8 @@ function _emlMotivoDoTexto(t) {
   if (/avaria|danific|quebra|amassad|vazamento/.test(n)) return 'Avaria';
   if (/vencid|validade|vencimento/.test(n)) return 'Vencido';
   if (/qualidade|contaminad/.test(n)) return 'Qualidade';
+  if (/inversao|invertid/.test(n)) return 'Inversão';
+  if (/diferenca de peso|diferenca no peso|diferenca peso|peso/.test(n)) return 'Diferença de Peso';
   if (/logistic|atraso|transporte/.test(n)) return 'Logística';
   if (/falta|faltou|nao recebid|nao entregue/.test(n)) return 'Falta';
   return '';
@@ -29173,7 +29179,7 @@ function _emlRender() {
       rodape += '<div style="margin-top:8px;font-size:11.5px;color:#b45309">O e-mail não diz se a fábrica aprovou ou não. Tratar como: '
         + '<button onclick="_emlSetAprov(' + i + ',\'sim\')" style="border:1px solid #15803d;background:#fff;color:#15803d;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">Aprovada</button> '
         + '<button onclick="_emlSetAprov(' + i + ',\'nao\')" style="border:1px solid #dc2626;background:#fff;color:#dc2626;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">Cancelada</button></div>';
-    } else if (r.ok) {
+    } else if (r.ok || !r.jaLancada) {
       rodape += '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:12px"><b>Motivo:</b> <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid ' + (r.motivo ? '#cbd5e1' : '#f59e0b') + ';background:' + (r.motivo ? '#fff' : '#fffbeb') + ';border-radius:7px;padding:4px 8px;font-size:12px"><option value="">Selecione...</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select>'
         + (r.motivo ? (r.motivoAuto ? '<span style="color:#64748b;font-size:11px">lido da observação do XML: ' + _pedEsc(r.motivoXml) + '</span>' : '') : '<span style="color:#b45309;font-size:11px">' + (r.motivoXml ? 'XML diz: ' + _pedEsc(r.motivoXml) + ' — escolha o motivo' : 'não veio no ' + (r.origem === 'xml' ? 'XML' : 'e-mail') + ' — escolha para liberar') + '</span>') + '</div>';
     }
@@ -31950,7 +31956,7 @@ function abrirRelatorio(id) {
     } else if (id === 'clientes-parados') {
       statusSel.innerHTML = '<option value="">Todas as faixas (30+ dias)</option><option value="30">30–59 dias</option><option value="60">60–89 dias</option><option value="90">90+ dias</option>';
     } else if (id === 'devolucoes-agrup') {
-      statusSel.innerHTML = '<option value="">Todos os motivos</option><option>Vencido</option><option>Logística</option><option>Falta</option><option>Qualidade</option><option>Avaria</option>';
+      statusSel.innerHTML = '<option value="">Todos os motivos</option><option>Vencido</option><option>Logística</option><option>Falta</option><option>Qualidade</option><option>Avaria</option><option>Inversão</option><option>Diferença de Peso</option>';
     } else if (id === 'ocorrencias-entrega') {
       statusSel.innerHTML = '<option value="">Todos os tipos</option>' + (typeof OC_TIPOS !== 'undefined' ? OC_TIPOS : []).map(function(t){ return '<option>' + t + '</option>'; }).join('');
     } else if (id === 'tabelas-vencer') {
