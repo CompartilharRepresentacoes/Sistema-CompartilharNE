@@ -20295,7 +20295,7 @@ function skuFilFiltrarRede(q) {
   if (!drop) return;
   if (!q) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _skuFilRedeItems = getCatClientes().filter(function(c){ return _cpNorm(c.nome||'').indexOf(n)!==-1; }).slice(0,15);
+  _skuFilRedeItems = getCatClientes().filter(function(c){ return !c.pai && _cpNorm(c.nome||'').indexOf(n)!==-1; }).slice(0,15);
   if (!_skuFilRedeItems.length) { drop.style.display='none'; return; }
   drop.onmousedown = function(e){ e.preventDefault(); };
   drop.innerHTML = _skuFilRedeItems.map(function(c, i){
@@ -20508,7 +20508,7 @@ function _skuCliFiltrar() {
     // Busca em Categorias de Cliente (redes)
     var cats = getCatClientes();
     _skuCliItems = cats.filter(function(c) {
-      return _cpNorm(c.nome||'').includes(n);
+      return !c.pai && _cpNorm(c.nome||'').includes(n);
     }).slice(0,15).map(function(c){ return {id:c.id, nome:c.nome, tipo:'rede'}; });
   } else {
     // Busca em Clientes individuais
@@ -20690,7 +20690,7 @@ function _salvarSkuLote() {
   var cliId    = document.getElementById('sku-cli-id').value.trim();
   if (cliInput && !cliId) {
     var nc = _cpNorm(cliInput);
-    var hc = getCatClientes().find(function(c){ return _cpNorm(c.nome||'').includes(nc); });
+    var hc = getCatClientes().find(function(c){ return !c.pai && _cpNorm(c.nome||'').includes(nc); });
     if (hc) { cliId = hc.id; cliInput = hc.nome; document.getElementById('sku-cli-id').value=hc.id; }
   }
   var cliNome = cliInput;
@@ -20741,7 +20741,7 @@ function salvarSkuCliente() {
   if (cliInput && !cliId) {
     var nc = _cpNorm(cliInput);
     if (_skuTipo==='rede') {
-      var hc = getCatClientes().find(function(c){ return _cpNorm(c.nome||'').includes(nc); });
+      var hc = getCatClientes().find(function(c){ return !c.pai && _cpNorm(c.nome||'').includes(nc); });
       if (hc) { cliId = hc.id; cliInput = hc.nome; document.getElementById('sku-cli-id').value=hc.id; }
     } else {
       var hc = getClientes().find(function(c){ return _cpNorm(c.nome_fantasia||c.razao_social||'').includes(nc) || _cpNorm(c.codigo||'')===nc; });
