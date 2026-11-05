@@ -9378,10 +9378,10 @@ function _sbGravarCadastro(nome, arrayNovo) {
     if (!old || JSON.stringify(_sbSemArq(nome, old)) !== JSON.stringify(o)) alterados.push(o);
   });
   antigo.forEach(function (o) { if (o && o.id && !idsNovo[o.id]) apagar.push(o.id); });
-  if (!alterados.length && !apagar.length && !arqs.length) return;
+  if (!alterados.length && !apagar.length && !arqs.length) return true;
   if (apagar.length > 20) {
     alert('Por segurança, a exclusão de ' + apagar.length + ' registros de uma vez foi bloqueada. Nada foi apagado.');
-    return;
+    return false;
   }
   var _fotosAntes = {};
   if (nome === 'produtos') arqs.forEach(function (k) { _fotosAntes[k.ref] = _fsFotosProd[k.ref]; if (k.dados) _fsFotosProd[k.ref] = k.dados; else delete _fsFotosProd[k.ref]; });
@@ -9421,15 +9421,19 @@ function _sbGravarCadastro(nome, arrayNovo) {
     return seq;
   }).then(function () {
     console.log('[Supabase] ' + nome + ' gravados:', alterados.length, 'alterado(s),', apagar.length, 'apagado(s)');
+    return true;
   }).catch(function (err) {
     console.error('[Supabase] ERRO ao gravar ' + nome + ':', err);
     reverter();
     var m = String(err.message || err);
     if (/row-level security|Sem permissao/i.test(m)) m = 'Você não tem permissão para esta alteração.\n\n(' + m + ')';
     alert('Não foi possível salvar o ' + (_sbCadRotulo[nome] || nome) + ': ' + m + '\n\nA alteração NÃO foi salva.');
-  }).then(function () {
+    return false;
+  }).then(function (ok) {
     _sbCadPend[nome] = Math.max(0, (_sbCadPend[nome] || 1) - 1); _sbCadUltimo = Date.now();
+    return ok;
   });
+  return _sbCadFila[nome];
 }
 
 // ---- Atualizacao automatica dos cadastros (outro usuario cadastrou produto/cliente etc.) ----
@@ -9521,7 +9525,7 @@ function _fsSet(nome, arrayNovo) {
     return;
   }
   if (nome === 'pedidos') { _sbGravarPedidos(arrayNovo); return; }
-  if (_sbCadGravaveis[nome]) { _sbGravarCadastro(nome, arrayNovo); return; }
+  if (_sbCadGravaveis[nome]) { return _sbGravarCadastro(nome, arrayNovo); }
   var antigo = _fsCache[nome] || [];
   var mapAntigo = {};
   antigo.forEach(function (o) { if (o && o.id) mapAntigo[o.id] = o; });
@@ -28407,7 +28411,7 @@ var _devXmlPendentes = [];
 var _devXmlLinkCandidatos = {};
 
 function getDevolucoes() { return firebaseConfigurado ? _fsGet('devolucoes') : JSON.parse(localStorage.getItem('devolucoes') || '[]'); }
-function setDevolucoes(data) { if (firebaseConfigurado) { _fsSet('devolucoes', data); } else { localStorage.setItem('devolucoes', JSON.stringify(data)); } }
+function setDevolucoes(data) { if (firebaseConfigurado) { return _fsSet('devolucoes', data); } else { localStorage.setItem('devolucoes', JSON.stringify(data)); return true; } }
 
 // Vinculo manual de produto por fornecedor: quando o codigo do produto na NFD
 // nao bate com o codigo interno nem com o EAN cadastrado, o usuario vincula uma
@@ -29150,7 +29154,7 @@ function _emlRender() {
   h += _emlRes.map(function (r, i) {
     var d = r.d, pronta = _emlPronta(r), cancelada = r.aprov === 'nao';
     var cor, bg, st;
-    if (r.jaLancada) { cor = '#64748b'; bg = '#f1f5f9'; st = 'Já lançada'; }
+    if (r.jaLancada) { cor = '#64748b'; bg = '#f1f5f9'; st = 'JÁ LANÇADA'; }
     else if (!r.ok) { cor = '#b91c1c'; bg = '#fef2f2'; st = 'Não lançar'; }
     else if (cancelada) { cor = '#dc2626'; bg = '#fee2e2'; st = 'Será lançada CANCELADA'; }
     else if (!r.aprov) { cor = '#b45309'; bg = '#fef3c7'; st = 'Conferir'; }
@@ -29200,6 +29204,7 @@ function _emlRender() {
   if (btn) btn.style.display = algumaPronta ? 'inline-flex' : 'none';
   var ent = document.getElementById('eml-entrada'); if (ent && ent.style.display !== 'block') ent.style.display = 'none';
 }
+var _emlGravando = false;
 function _emlLancar() {
   var msg = document.getElementById('eml-msg');
   var escolhidas = _emlRes.filter(function (r) { return _emlPronta(r) && r.sel; });
@@ -29208,6 +29213,9 @@ function _emlLancar() {
   var nCanc = 0;
   escolhidas.forEach(function (r, i) {
     var vf = (r.cli.vendedores_fornecedor || []).find(function (v) { return String(v.fornId) === String(r.forn.id); }) || {};
+    // se o cliente nao tem vendedor especifico desta fabrica, usa o Vendedor Principal (mesma regra do pedido)
+    var vendIdImp = vf.vendId || _cliResolverVendedorPorForn(r.cli, r.forn.id) || '';
+    var vendObjImp = vendIdImp ? getUsuariosSistema().find(function (u) { return String(u.id) === String(vendIdImp); }) : null;
     var itens = r.itens.map(function (x) { var q = x.it.qtd || 0; return { prodId: x.p.id, prodCodigo: x.p.codigo, prodNome: x.p.nome, valor: q ? x.it.valor / q : x.it.valor, quantidade: q, valorTotal: x.it.valor }; });
     var canc = r.aprov === 'nao'; if (canc) nCanc++;
     var origemTxt = (r.origem === 'xml' ? 'Importado do XML da NFD ' : 'Importado do e-mail da fábrica (NFD ') + r.d.nfd + (r.d.serie ? '-' + r.d.serie : '') + (r.origem === 'xml' ? '.' : ').');
@@ -29215,19 +29223,25 @@ function _emlLancar() {
       id: 'dev' + (Date.now() + i), lancamento: prox + i, data: hoje,
       fornecedorId: r.forn.id, fornecedorNome: r.forn.nome_fantasia || '',
       clienteId: r.cli.id, clienteNome: (r.cli.codigo ? r.cli.codigo + ' ' : '') + (r.cli.nome_fantasia || r.cli.razao_social || ''),
-      vendedorId: vf.vendId || '', vendedorNome: vf.vendNome || '',
+      vendedorId: vendIdImp, vendedorNome: vf.vendNome || (vendObjImp ? (vendObjImp.nome || vendObjImp.nome_fantasia || '') : ''),
       nfEmitida: r.d.nfd, dataNfEmitida: r.d.dataEmissao, nfOrigem: r.nfOrigem, dataNfOrigem: r.dataNfOrigem || '',
-      motivo: r.motivo || '', status: canc ? 'Cancelado' : 'Aberto', obs: (canc ? EML_TXT_CANCEL + ' ' : '') + origemTxt,
+      motivo: r.motivo || '', status: canc ? 'Cancelado' : 'Finalizado', obs: (canc ? EML_TXT_CANCEL + ' ' : '') + origemTxt,
       itens: itens, totalProdutos: itens.reduce(function (a, it) { return a + it.valorTotal; }, 0), xmlAnexo: r.xmlAnexo || null, dtCadastro: agora
     };
     try { Object.assign(obj, _appMontarAutoria(null, [])); } catch (e) {}
     dados.push(obj);
   });
-  setDevolucoes(dados);
-  msg.style.color = '#15803d'; msg.textContent = escolhidas.length + ' devolução(ões) lançada(s)' + (nCanc ? ' (' + nCanc + ' como "Cancelado")' : '') + (escolhidas.length - nCanc ? ' — as "Aberto" você aprova na lista.' : '.');
+  if (_emlGravando) return;
+  _emlGravando = true;
+  msg.style.color = '#64748b'; msg.textContent = 'Gravando...';
+  Promise.resolve(setDevolucoes(dados)).then(function (ok) {
+  _emlGravando = false;
+  if (ok === false) { msg.style.color = '#dc2626'; msg.textContent = 'Não foi possível salvar. Nenhuma devolução foi lançada — confira o aviso e tente de novo.'; _emlRender(); return; }
+  msg.style.color = '#15803d'; msg.textContent = escolhidas.length + ' devolução(ões) lançada(s)' + (nCanc ? ' (' + nCanc + ' como "Cancelado")' : '') + (escolhidas.length - nCanc ? ' — as demais entraram como "Finalizado".' : '.');
   _emlRes.forEach(function (r) { if (_emlPronta(r) && r.sel) { r.ok = false; r.jaLancada = true; r.erros = []; } });
   _emlRender();
   if (typeof renderDevolucaoList === 'function') renderDevolucaoList();
+  });
 }
 function emlAbrir(modo) {
   var m = document.getElementById('eml-modal'); if (!m) return;
