@@ -29920,7 +29920,32 @@ function fecharModalXmlDevolucao() {
   if (modal) modal.style.display = 'none';
 }
 function _devVerXmlBrutoModal() {
-  if (_devXmlModalDados) window.open(_devXmlModalDados, '_blank');
+  if (!_devXmlModalDados) return;
+  // O Chrome bloqueia abrir endereco "data:" em aba nova (abre em branco). Converte o XML guardado
+  // em um arquivo temporario (blob) e abre esse; se o navegador barrar a aba, baixa o arquivo.
+  var dados = String(_devXmlModalDados), bytes;
+  try {
+    var m = dados.match(/^data:([^,]*?)(;base64)?,([\s\S]*)$/);
+    if (m && m[2]) {
+      var bin = atob(m[3]); bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i) & 255;
+    } else if (m) {
+      bytes = new TextEncoder().encode(decodeURIComponent(m[3]));
+    } else {
+      bytes = new TextEncoder().encode(dados);
+    }
+    var url = URL.createObjectURL(new Blob([bytes], { type: 'text/xml;charset=utf-8' }));
+    var w = window.open(url, '_blank');
+    if (!w) {
+      var a = document.createElement('a'); a.href = url; a.download = (document.getElementById('dev-xml-modal-subtitulo') || {}).textContent || 'nfd.xml';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+    setTimeout(function () { URL.revokeObjectURL(url); }, 120000);
+  } catch (err) {
+    console.error('[XML] nao foi possivel abrir o arquivo:', err);
+    var msg = document.getElementById('dev-xml-modal-msg');
+    if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Não consegui abrir o arquivo XML.'; }
+  }
 }
 function _devCopiarCampoModal(inputId) {
   var campo = document.getElementById(inputId);
