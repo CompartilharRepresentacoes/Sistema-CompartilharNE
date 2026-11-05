@@ -11959,6 +11959,7 @@ async function _flipCartilha(dir, newLeft) {
 function _cartAplicarDim(pw, ph) {
   window._cPW = pw; window._cPH = ph;
   var set = function (id, css) { var e = document.getElementById(id); if (e) Object.assign(e.style, css); };
+  set('cartilha-viewer-outer', { maxWidth: Math.max(766, pw * 2 + 6) + 'px' });   // catalogo em paisagem e mais largo que 766px: sem isso o livro cobre a seta da direita
   set('cartilha-book-wrap', { width: (pw * 2 + 6) + 'px', height: ph + 'px' });
   set('cartilha-book-pages', { width: (pw * 2 + 6) + 'px', height: ph + 'px' });
   set('cartilha-page-left', { width: pw + 'px', height: ph + 'px' });
