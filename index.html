@@ -9468,6 +9468,39 @@ function _cadAutoAtualizar(minMs) {
     if (mudou.length) { mudou.forEach(function (n) { _fsAoAtualizar(n); }); _cadAutoAvisar(mudou); }
   }).catch(function (e) { console.warn('[cadastros] atualizacao automatica falhou:', e); }).then(function () { _cadAutoBusy = false; });
 }
+// ---- Atualizar agora (tela de Novo Pedido) ----
+// Quando alguem cadastra um produto ou corrige um preco enquanto o pedido esta aberto, ao digitar o
+// codigo do produto o sistema le os cadastros do banco na hora (no maximo 1 vez a cada 8 segundos),
+// traz os registros novos E os que foram alterados, e avisa. Nao mexe no que esta sendo gravado.
+var _pedCadBusy = false, _pedCadUlt = 0;
+function _cadStr(o) {
+  return JSON.stringify(o, function (k, v) {
+    if (v && typeof v === 'object' && !Array.isArray(v)) { var s = {}; Object.keys(v).sort().forEach(function (x) { s[x] = v[x]; }); return s; }
+    return v;
+  });
+}
+function _pedAtualizarCadastros(cb) {
+  cb = cb || function () {};
+  if (_pedCadBusy || _cadAutoBusy || typeof SB === 'undefined' || !_fsTodasProntas() || _cadAutoGravando() || Date.now() - _pedCadUlt < 8000) { cb(false); return; }
+  _pedCadBusy = true; _pedCadUlt = Date.now();
+  var mudou = [];
+  SB.rpc('docs_cadastros').then(function (r) {
+    if (r.error || !r.data || _cadAutoGravando()) return;
+    ['produtos', 'tabelas_preco', 'negociacoes_preco', 'bloqueios_produto', 'sku_clientes'].forEach(function (n) {
+      var srv = r.data[n]; if (!Array.isArray(srv)) return;
+      var cache = (_fsCache[n] || []).slice(), pos = {}, alterou = false;
+      cache.forEach(function (o, i) { if (o && o.id != null) pos[o.id] = i; });
+      srv.forEach(function (o) {
+        if (!o || o.id == null) return;
+        var i = pos[o.id];
+        if (i === undefined) { cache.push(o); pos[o.id] = cache.length - 1; alterou = true; }
+        else if (_cadStr(cache[i]) !== _cadStr(o)) { cache[i] = o; alterou = true; }
+      });
+      if (alterou) { _fsCache[n] = cache; mudou.push(n); }
+    });
+    if (mudou.length) { mudou.forEach(function (n) { try { _fsAoAtualizar(n); } catch (e) {} }); _cadAutoAvisar(mudou); }
+  }).catch(function (e) { console.warn('[pedido] atualizar cadastros falhou:', e); }).then(function () { _pedCadBusy = false; cb(mudou.length > 0); });
+}
 function _cadAutoIniciar() {
   if (_cadAutoLigado) return;
   _cadAutoLigado = true; _cadAutoUlt = Date.now();
@@ -25773,6 +25806,14 @@ function _pedProdFiltrar() {
   if (!drop) return;
   document.getElementById('ped-item-prod-id').value = '';
   if (q.length < 3) { drop.style.display='none'; return; }
+  if (!_pedProdFiltrar._refazendo) {
+    _pedAtualizarCadastros(function (mudou) {
+      var inp = document.getElementById('ped-item-prod-input');
+      if (!mudou || !inp || (inp.value || '').trim() !== q) return;
+      _pedProdFiltrar._refazendo = true;
+      try { _pedProdFiltrar(); } finally { _pedProdFiltrar._refazendo = false; }
+    });
+  }
   var n = _cpNorm(q);
   var fornId = document.getElementById('ped-forn-id').value;
   var cliId = document.getElementById('ped-cli-id').value;
@@ -27964,6 +28005,19 @@ function _pedProdSel(i) {
   document.getElementById('ped-item-preco').value    = _pedNumParaMascara(achado ? _pedParseMoeda(achado.valor) : 0);
   var _rc = _comResolver(_comFornDe(fornId), p.id, achado ? achado.comissao : '', cliId, null);
   document.getElementById('ped-item-comissao').value = _rc.pct > 0 ? _comFmtPct(_rc.pct) : '—';
+  if (!_pedProdSel._refazendo) {
+    var _precoInicial = document.getElementById('ped-item-preco').value;
+    _pedAtualizarCadastros(function (mudou) {
+      if (!mudou) return;
+      if (document.getElementById('ped-item-prod-id').value !== String(p.id)) return;
+      if (document.getElementById('ped-item-qtd').value !== '' || document.getElementById('ped-item-preco').value !== _precoInicial) return;
+      var novo = getProdutos().find(function (x) { return x.id === p.id; });
+      if (!novo) return;
+      _pedProdItems = [novo];
+      _pedProdSel._refazendo = true;
+      try { _pedProdSel(0); } finally { _pedProdSel._refazendo = false; }
+    });
+  }
   var itemMsg = document.getElementById('ped-item-msg');
   if (itemMsg) {
     if (achadoNeg) {
