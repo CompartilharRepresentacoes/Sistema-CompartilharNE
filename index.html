@@ -9067,7 +9067,7 @@ async function _sbCarregarPedidos(ini, fim, cli) {
     while (i < jan.length) {
       var j = jan[i++];
       var fechado = j[1] < limite; // mes antes do mes passado: nao muda mais
-      var k = 'c2|' + j[0] + '|' + (cli || '');
+      var k = 'c3|' + j[0] + '|' + (cli || '');   // c3: troca de versao limpa a copia antiga (itens das NFs foram corrigidos em 05/11/2026)
       var c = fechado ? await _sbCacheGet(k) : null;
       if (c && c.t && (Date.now() - c.t) < 12 * 3600 * 1000) { Array.prototype.push.apply(res, c.d); continue; }
       var r = await SB.rpc('docs_pedidos', { p_ini: j[0], p_fim: j[1], p_cli: cli || null });
@@ -9121,7 +9121,7 @@ function _sbSlimAno(ano) {
   if (_sbSlimP[ano]) return _sbSlimP[ano];
   // sem login o Supabase recusa (permission denied); o Painel pede de novo depois do login
   if (!_sbUid) return Promise.resolve(false);
-  var k = 'slim|' + ano;
+  var k = 'slim2|' + ano;
   _sbSlimP[ano] = _sbCacheGet(k).then(function (c) {
     if (c && c.t && (Date.now() - c.t) < 12 * 3600 * 1000) { _sbSlim[ano] = c.d; return true; }
     return SB.rpc('dash_linhas', { p_ini: ano + '-01-01', p_fim: ano + '-12-31' }).then(function (r) {
