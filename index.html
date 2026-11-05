@@ -7873,6 +7873,14 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 
       <div style="border:1px solid #e2e8f0;border-radius:9px;padding:14px">
         <div style="font-size:11.5px;font-weight:700;color:#1e293b;margin-bottom:10px">Nova Fatura</div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:10.5px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Tipo da NF</label>
+          <div style="display:inline-flex;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;font-size:12px;font-weight:600">
+            <span id="pfat-tipo-venda" onclick="_pfatSetTipo('venda')" style="padding:6px 16px;cursor:pointer;background:#272A4A;color:#fff">Venda</span>
+            <span id="pfat-tipo-remessa" onclick="_pfatSetTipo('remessa')" style="padding:6px 16px;cursor:pointer;background:#f8fafc;color:#475569">Remessa (loja)</span>
+          </div>
+          <div id="pfat-tipo-aviso" style="display:none;margin-top:8px;font-size:11px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:7px 10px">Remessa: o sistema coloca o R no número, deixa o valor em zero e não leva os itens. Não conta como faturamento, comissão nem quilos.</div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.4fr;gap:10px;margin-bottom:12px">
           <div>
             <label style="font-size:10.5px;font-weight:600;color:#475569;display:block;margin-bottom:4px">Número Duplicata</label>
@@ -7891,7 +7899,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
             <select class="form-input" id="pfat-transportadora" style="width:100%"></select>
           </div>
         </div>
-        <div style="overflow-x:auto">
+        <div id="pfat-itens-wrap" style="overflow-x:auto">
           <table style="width:100%;border-collapse:collapse">
             <thead>
               <tr style="text-align:left;border-bottom:1px solid #e2e8f0">
@@ -23003,6 +23011,15 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
   if (!pedidosCandidatos || !pedidosCandidatos.length) {
     return { pedido: null, ambiguo: false, motivo: 'Nenhum pedido do fornecedor/período encontrado para esta NF.' };
   }
+  // REMESSA para a loja: o destinatario e a loja (outro CNPJ), entao acha a venda do CD pelo MESMO VALOR e MESMA DATA
+  if (_nfEhRemessaXml(nfDados.natOp, nfDados.cfop)) {
+    var vRem = Number(nfDados.valor) || 0, dRem = String(nfDados.dataEmissao || '').slice(0, 10);
+    var vendasRem = pedidosCandidatos.filter(function (p) {
+      return (p.faturas || []).some(function (f) { return f.status !== 'Cancelado' && !_nfRemessa(f) && Math.abs((Number(f.valor) || 0) - vRem) <= 1 && _nfDiasEntre(f.data, dRem) <= 3; });
+    });
+    if (vendasRem.length === 1) return { pedido: vendasRem[0], ambiguo: false, motivo: 'remessa: mesmo valor e data da venda' };
+    return { pedido: null, ambiguo: vendasRem.length > 1, motivo: vendasRem.length > 1 ? 'Remessa: mais de uma venda com o mesmo valor e data. Anexe pelo pedido certo.' : 'Remessa: não achei a venda do CD com o mesmo valor e data. Confira o período e se a NF de venda já foi lançada.' };
+  }
   var destDigits = _devNormCnpj(nfDados.destCNPJ);
   var emitDigits = _devNormCnpj(nfDados.emitCNPJ);
 
@@ -23189,7 +23206,7 @@ function _pinfRenderRevisao() {
         var avisosTipo = r.nfs.map(function (x) {
           var tipo = _nfClassificarTipo(x.dados.natOp, x.dados.cfop);
           if (tipo === 'Bonificação' && r.pedido.status !== 'Bonificado') return '<div>NF ' + _pedEsc(x.dados.nNF || '') + ' identificada como <b>Bonificação</b> pelo XML, mas o pedido está com status "' + _pedEsc(r.pedido.status || '') + '". Confira se o status deveria virar "Bonificado".</div>';
-          if (tipo === 'Remessa') return '<div>NF ' + _pedEsc(x.dados.nNF || '') + ' identificada como <b>Remessa</b> pelo XML — normalmente não representa uma venda faturável. Confira antes de aprovar.</div>';
+          if (tipo === 'Remessa') return '<div>NF ' + _pedEsc(x.dados.nNF || '') + ' identificada como <b>Remessa</b> pelo XML. ' + (_nfEhRemessaXml(x.dados.natOp, x.dados.cfop) ? 'Será lançada como <b>' + _pedEsc(_nfNumComR(x.dados.nNF)) + '</b> (valor zero, sem itens) e não conta como faturamento.' : 'Normalmente não representa uma venda faturável. Confira antes de aprovar.') + '</div>';
           return '';
         }).filter(Boolean).join('');
         var avisoTipoHtml = avisosTipo ? ('<div style="color:#92400e;font-size:11px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;margin-top:8px;display:flex;flex-direction:column;gap:3px">' + avisosTipo + '</div>') : '';
@@ -23890,6 +23907,18 @@ function pedFecharFaturamento() {
   _pfatPedidoId = '';
   renderPedidoList();
 }
+var _pfatTipo = 'venda';
+function _pfatSetTipo(t) {
+  _pfatTipo = (t === 'remessa') ? 'remessa' : 'venda';
+  var rem = _pfatTipo === 'remessa';
+  var bV = document.getElementById('pfat-tipo-venda'), bR = document.getElementById('pfat-tipo-remessa');
+  if (bV) { bV.style.background = rem ? '#f8fafc' : '#272A4A'; bV.style.color = rem ? '#475569' : '#fff'; }
+  if (bR) { bR.style.background = rem ? '#c2410c' : '#f8fafc'; bR.style.color = rem ? '#fff' : '#475569'; }
+  var av = document.getElementById('pfat-tipo-aviso'); if (av) av.style.display = rem ? 'block' : 'none';
+  var vEl = document.getElementById('pfat-valor'); if (vEl) { vEl.disabled = rem; if (rem) vEl.value = '0,00'; else if (vEl.value === '0,00') vEl.value = ''; }
+  var wrap = document.getElementById('pfat-itens-wrap'); if (wrap) wrap.style.display = rem ? 'none' : '';
+  var nEl = document.getElementById('pfat-num-duplicata'); if (nEl && rem && nEl.value.trim() && !_nfRemessa({ numDuplicata: nEl.value })) nEl.value = _nfNumComR(nEl.value);
+}
 function _pfatRender() {
   var pedido = _pfatPedidoAtual();
   if (!pedido) return;
@@ -23927,6 +23956,7 @@ function _pfatRender() {
   var numDupEl = document.getElementById('pfat-num-duplicata'); if (numDupEl) numDupEl.value = '';
   var dataEl = document.getElementById('pfat-data'); if (dataEl) dataEl.value = _entctrlDataParaBR(new Date().toISOString().slice(0,10));
   var valorEl = document.getElementById('pfat-valor'); if (valorEl) valorEl.value = '';
+  _pfatSetTipo('venda');
 
   var tbody = document.getElementById('pfat-itens-tbody');
   if (tbody) {
@@ -23981,7 +24011,7 @@ function _pfatRenderFaturas(pedido) {
     var dataFmt = f.data ? f.data.split('-').reverse().join('/') : '—';
     var cancelada = f.status === 'Cancelado';
     return '<tr style="' + (cancelada ? 'opacity:.5' : '') + '">'
-      + '<td style="padding:6px 8px;font-size:11px">' + _pedEsc(f.numDuplicata || '—') + (f.origem === 'xml' ? ' <i class="ti ti-file-code" title="Lançada via XML" style="color:#15803d;font-size:9px"></i>' : '') + '</td>'
+      + '<td style="padding:6px 8px;font-size:11px">' + _pedEsc(f.numDuplicata || '—') + (_nfRemessa(f) ? ' <span style="font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:10px;background:#fff7ed;color:#c2410c">Remessa</span>' : '') + (f.origem === 'xml' ? ' <i class="ti ti-file-code" title="Lançada via XML" style="color:#15803d;font-size:9px"></i>' : '') + '</td>'
       + '<td style="padding:6px 8px;font-size:11px">' + dataFmt + '</td>'
       + '<td style="padding:6px 8px;font-size:11px;font-weight:700">' + _pedFmtMoeda(f.valor) + '</td>'
       + '<td style="padding:6px 8px;font-size:10.5px;font-weight:700;color:' + (cancelada ? '#dc2626' : '#15803d') + '">' + (cancelada ? 'Cancelado' : 'Enviado') + '</td>'
@@ -23996,6 +24026,9 @@ function pedSalvarFatura() {
   if (!pedido) return;
   var msg = document.getElementById('pfat-msg');
   var numDup = (document.getElementById('pfat-num-duplicata').value || '').trim();
+  var ehRemessa = (_pfatTipo === 'remessa');
+  if (ehRemessa && numDup) numDup = _nfNumComR(numDup);
+  if (!ehRemessa && numDup && _nfRemessa({ numDuplicata: numDup })) { if (msg) msg.textContent = 'Número com R é de remessa. Escolha o tipo "Remessa (loja)" ou tire o R do número.'; return; }
   var dataFatRaw = document.getElementById('pfat-data').value;
   var dataFat = _entctrlParseDataBR(dataFatRaw);
   var valorInput = _pedParseMoeda(document.getElementById('pfat-valor').value);
@@ -24010,7 +24043,7 @@ function pedSalvarFatura() {
   if (duplicataManual) { if (msg) msg.textContent = 'Já existe uma fatura com o número "' + numDup + '" para este cliente e fábrica (Pedido nº ' + (duplicataManual.pedido.numPedidoCliente || duplicataManual.pedido.lancamento || '') + ').'; return; }
 
   var itensFatura = [];
-  var rows = document.querySelectorAll('#pfat-itens-tbody tr[data-prodid]');
+  var rows = ehRemessa ? [] : document.querySelectorAll('#pfat-itens-tbody tr[data-prodid]');
   var erroPrecoFaltando = '';
   rows.forEach(function(tr){
     var qtdInput = tr.querySelector('.pfat-item-qtd');
@@ -24033,8 +24066,13 @@ function pedSalvarFatura() {
   if (erroPrecoFaltando) { if (msg) msg.textContent = erroPrecoFaltando; return; }
 
   var valorCalc = itensFatura.reduce(function(s,it){ return s + it.qtd * it.precoFat; }, 0);
-  var valorFinal = valorInput > 0 ? valorInput : valorCalc;
-  if (valorFinal <= 0 && !itensFatura.length) { if (msg) msg.textContent = 'Informe o Valor da fatura ou a quantidade de algum item a faturar.'; return; }
+  var valorFinal = ehRemessa ? 0 : (valorInput > 0 ? valorInput : valorCalc);
+  if (!ehRemessa && valorFinal <= 0 && !itensFatura.length) { if (msg) msg.textContent = 'Informe o Valor da fatura ou a quantidade de algum item a faturar.'; return; }
+  // aviso de duplicidade: venda com o mesmo valor e data de outra NF de venda do mesmo pedido (pode ser remessa)
+  if (!ehRemessa && valorFinal > 0) {
+    var igual = (pedido.faturas || []).find(function (x) { return x.status !== 'Cancelado' && !_nfRemessa(x) && Math.abs((Number(x.valor) || 0) - valorFinal) <= 1 && x.data === dataFat; });
+    if (igual && !confirm('Este pedido já tem a NF ' + igual.numDuplicata + ' com o mesmo valor e a mesma data. Pode ser uma remessa para a loja. Lançar mesmo assim como VENDA (conta no faturamento)?')) return;
+  }
 
   var data = getPedidos();
   var idx = data.findIndex(function(x){ return x.id === pedido.id; });
@@ -24109,11 +24147,13 @@ function _pfatExtrairDadosXmlPedido(xmlText) {
     var ide = doc.getElementsByTagName('ide')[0];
     var totais = doc.getElementsByTagName('ICMSTot')[0];
     var nNF = _devXmlTag(ide, 'nNF');
+    var natOpX = _devXmlTag(ide, 'natOp');
     var dhEmi = _devXmlTag(ide, 'dhEmi') || _devXmlTag(ide, 'dEmi');
     var dataEmi = dhEmi ? dhEmi.slice(0,10) : new Date().toISOString().slice(0,10);
     var vNF = parseFloat(_devXmlTag(totais, 'vNF')) || 0;
     var itens = [];
     var detEls = doc.getElementsByTagName('det');
+    var cfopX = detEls.length && detEls[0].getElementsByTagName('prod')[0] ? _devXmlTag(detEls[0].getElementsByTagName('prod')[0], 'CFOP') : '';
     for (var i = 0; i < detEls.length; i++) {
       var prod = detEls[i].getElementsByTagName('prod')[0];
       if (!prod) continue;
@@ -24128,7 +24168,7 @@ function _pfatExtrairDadosXmlPedido(xmlText) {
     }
     var transportadora = _pfatResolverTransportadoraXml(doc);
     return {
-      nNF: nNF, data: dataEmi, valor: vNF, itens: itens,
+      nNF: nNF, data: dataEmi, valor: vNF, itens: itens, natOp: natOpX, cfop: cfopX,
       transportadoraId: transportadora ? transportadora.id : '',
       transportadoraNome: transportadora ? transportadora.nome : ''
     };
@@ -24162,6 +24202,32 @@ function _pfatConverterItemXmlParaUnidades(match, produto) {
     precoFat: qtdEmUnidades > 0 ? (valorItemXml / qtdEmUnidades) : match.precoUnit
   };
 }
+// ===== NF de REMESSA (ex.: remessa para a loja de um CD) =====
+// Convencao do Pontti mantida: numero da NF com "R" (423573R ou R423573) e valor ZERO. Remessa NUNCA conta como
+// faturamento, comissao, quilos nem totais (a venda ja foi faturada na NF do CD).
+function _nfRemessa(f) {
+  var n = String((f && f.numDuplicata) || '').replace(/[\s\-_.]/g, '');
+  return /^R\d+$/i.test(n) || /^\d+R$/i.test(n);
+}
+function _nfNumComR(n) {
+  var d = String(n || '').trim().replace(/[\s\-_.]/g, '');
+  if (/^R/i.test(d)) d = d.slice(1);
+  if (/R$/i.test(d)) d = d.slice(0, -1);
+  return d ? d + 'R' : '';
+}
+// Reconhece SIMPLES REMESSA pelo XML (natureza ou CFOP 5923/6923). Venda, bonificacao e amostra nunca viram remessa.
+function _nfEhRemessaXml(natOp, cfop) {
+  var op = String(natOp || '').toUpperCase();
+  if (op.normalize) op = op.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var cf = String(cfop || '').replace(/\D/g, '');
+  if (op.indexOf('VENDA') !== -1 || op.indexOf('BONIFICA') !== -1 || op.indexOf('AMOSTRA') !== -1 || op.indexOf('TROCA') !== -1) return false;
+  return op.indexOf('SIMPLES REMESSA') !== -1 || op.indexOf('CONTA E ORDEM') !== -1 || cf === '5923' || cf === '6923';
+}
+function _nfDiasEntre(a, b) {
+  var da = new Date(String(a || '').slice(0, 10) + 'T12:00:00'), db = new Date(String(b || '').slice(0, 10) + 'T12:00:00');
+  if (isNaN(da) || isNaN(db)) return 9999;
+  return Math.abs(Math.round((da - db) / 86400000));
+}
 function _pfatNormNumNF(v) {
   return String(v || '').trim().replace(/^0+(?=\d)/, '');
 }
@@ -24193,14 +24259,15 @@ function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
   var idx = data.findIndex(function(x){ return x.id === pedidoId; });
   if (idx < 0) return { ok: false, motivo: 'Pedido não encontrado.' };
   var pedido = data[idx];
-  var numNfCandidata = dados.nNF || nomeArquivo;
+  var ehRemessaXml = _nfEhRemessaXml(dados.natOp, dados.cfop);
+  var numNfCandidata = ehRemessaXml ? _nfNumComR(dados.nNF || nomeArquivo) : (dados.nNF || nomeArquivo);
   var duplicata = _pfatNumDuplicataJaExiste(pedido.clienteId, pedido.fornecedorId, numNfCandidata);
   if (duplicata) {
     return { ok: false, motivo: 'NF ' + (dados.nNF || numNfCandidata) + ' já foi faturada anteriormente para este cliente/fábrica (Pedido nº ' + (duplicata.pedido.numPedidoCliente || duplicata.pedido.lancamento || '') + ') — não foi lançada de novo.' };
   }
   var produtos = getProdutos();
   var itensFatura = [];
-  (pedido.itens || []).forEach(function(it){
+  if (!ehRemessaXml) (pedido.itens || []).forEach(function(it){
     var match = dados.itens.find(function(x){ return x.codigo && _cpNorm(x.codigo || '') === _cpNorm(it.prodCodigo || ''); });
     if (match && match.qtd > 0) {
       var produto = produtos.find(function(p){ return p.id === it.prodId; });
@@ -24208,11 +24275,11 @@ function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
       itensFatura.push({ prodId: it.prodId, prodCodigo: it.prodCodigo, prodNome: it.prodNome, qtd: convertido.qtd, precoFat: convertido.precoFat || it.precoUnit });
     }
   });
-  var valorFatura = dados.valor || itensFatura.reduce(function(s,it){ return s + it.qtd * it.precoFat; }, 0);
+  var valorFatura = ehRemessaXml ? 0 : (dados.valor || itensFatura.reduce(function(s,it){ return s + it.qtd * it.precoFat; }, 0));
   if (!pedido.faturas) pedido.faturas = [];
   pedido.faturas.push({
     id: 'f' + Date.now() + Math.random().toString(36).slice(2,7),
-    numDuplicata: dados.nNF || nomeArquivo, data: dados.data, valor: valorFatura,
+    numDuplicata: numNfCandidata, data: dados.data, valor: valorFatura,
     transportadoraId: dados.transportadoraId || '', transportadoraNome: dados.transportadoraNome || '',
     status: 'Enviado', origem: 'xml', itens: itensFatura,
     dataLiquidezReal: '', comissaoRecebidaEm: ''
@@ -24263,7 +24330,7 @@ function _psnLinhas() {
   pedidos.forEach(function(p){
     if (p.status === 'Bonificado') return;   // NF de pedido Bonificado nao entra nos totais de faturamento
     (p.faturas || []).forEach(function(f){
-      if (f.status === 'Cancelado') return;
+      if (f.status === 'Cancelado' || _nfRemessa(f)) return;
       var pesoFat = (f.itens || []).reduce(function(acc, it){
         var prod = produtosMap[it.prodId];
         var pesoUnit = prod ? (parseFloat(String(prod.peso).replace(',', '.')) || 0) : 0;
@@ -31854,7 +31921,7 @@ function _relBaseFaturas(f) {
     if (!_appClienteVisivelUF(cli)) return;
     if (p.status === 'Bonificado') return;   // NF de pedido Bonificado nao entra nos relatorios de faturamento
     (p.faturas || []).forEach(function(fat){
-      if (fat.status === 'Cancelado') return;
+      if (fat.status === 'Cancelado' || _nfRemessa(fat)) return;
       if (f.dataDe && fat.data < f.dataDe) return;
       if (f.dataAte && fat.data > f.dataAte) return;
       if (f.fornecedor && _cpNorm(p.fornecedorNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return;
@@ -32535,7 +32602,7 @@ function _relCalcMetaRealizado(f) {
       if (f.vendedor && String(p.vendedorId||'') !== String(f.vendedor)) return;
       if (p.status === 'Bonificado') return;
       (p.faturas||[]).forEach(function(fat){
-        if (fat.status === 'Cancelado') return;
+        if (fat.status === 'Cancelado' || _nfRemessa(fat)) return;
         if (!mesIni || !mesFim) return;
         if (fat.data < mesIni || fat.data > mesFim) return;
         if (m.tipo === 'KG') {
@@ -32757,7 +32824,7 @@ function _relCalcPainelMes(f) {
     if (f.vendedor && String(p.vendedorId || '') !== String(f.vendedor)) return;
     if (f.fornecedor && _cpNorm(p.fornecedorNome || '').indexOf(_cpNorm(f.fornecedor)) === -1) return;
     (p.faturas || []).forEach(function(fat){
-      if (fat.status === 'Cancelado' || (fat.data || '').slice(0,7) !== ym) return;
+      if (fat.status === 'Cancelado' || _nfRemessa(fat) || (fat.data || '').slice(0,7) !== ym) return;
       var k = p.fornecedorId || p.fornecedorNome; var g = F[k] = F[k] || { nome: p.fornecedorNome || '', rs:0, kg:0 };
       g.rs += Number(fat.valor) || 0;
       (fat.itens || []).forEach(function(it){ var pr = prodMap[it.prodId]; var pe = pr ? (parseFloat(String(pr.peso || '0').replace(',', '.')) || 0) : 0; g.kg += pe * (Number(it.qtd) || 0); });
@@ -33672,7 +33739,7 @@ function _apresLinhas(redeId, subId, fornId, dataDe, dataAte) {
     if (subId && String(cli.subcategoria || '') !== String(subId)) return;
     if (p.status === 'Bonificado') return;
     (p.faturas || []).forEach(function(fat){
-      if (fat.status === 'Cancelado') return;
+      if (fat.status === 'Cancelado' || _nfRemessa(fat)) return;
       if (dataDe && fat.data < dataDe) return;
       if (dataAte && fat.data > dataAte) return;
       linhas.push({ pedido: p, fatura: fat, cliente: cli });
@@ -34393,7 +34460,7 @@ function _apDados() {
     if (!_appClienteVisivelUF(cli)) return;
     if (p.status === 'Bonificado') return;
     (p.faturas || []).forEach(function(f){
-      if (f.status === 'Cancelado') return;
+      if (f.status === 'Cancelado' || _nfRemessa(f)) return;
       if (!f.data || f.data < per.de || f.data > per.ate) return;
       var v = Number(f.valor) || 0; fat += v; peds[p.id] = true; clis[p.clienteId || p.clienteNome] = true;
       var m = f.data.slice(0,7); porMes[m] = (porMes[m] || 0) + v;
@@ -36329,7 +36396,7 @@ function _drValorQtdProduto(fornId, prodId, clienteIds, dataDe, dataAte) {
     if (!idsSet[p.clienteId]) return;
     if (p.status === 'Bonificado') return;
     (p.faturas || []).forEach(function(fat){
-      if (fat.status === 'Cancelado') return;
+      if (fat.status === 'Cancelado' || _nfRemessa(fat)) return;
       if (dataDe && fat.data < dataDe) return;
       if (dataAte && fat.data > dataAte) return;
       (fat.itens || []).forEach(function(it){
@@ -37688,7 +37755,7 @@ function _finListaComissoes(deIso, ateIso, fornecedorIdFiltro, statusFiltro) {
     if (fornecedorIdFiltro && pedido.fornecedorId !== fornecedorIdFiltro) return;
     if (pedido.status === 'Bonificado') return;   // Bonificado nao gera comissao
     (pedido.faturas || []).forEach(function(fatura){
-      if (fatura.status === 'Cancelado') return;
+      if (fatura.status === 'Cancelado' || _nfRemessa(fatura)) return;   // remessa (R, valor zero) nao gera comissao
       if (deIso && fatura.data < deIso) return;
       if (ateIso && fatura.data > ateIso) return;
       var forn = fornecedores.find(function(f){ return f.id === pedido.fornecedorId; });
@@ -38115,7 +38182,7 @@ function _cpiCompararComSistema(fornecedorId, parseResult) {
   pedidos.forEach(function (pedido) {
     if (pedido.status === 'Bonificado') return;
     (pedido.faturas || []).forEach(function (fatura) {
-      if (fatura.status === 'Cancelado') return;
+      if (fatura.status === 'Cancelado' || _nfRemessa(fatura)) return;
       var nfNorm = _pfatNormNumNF(fatura.numDuplicata);
       if (!nfNorm) return;
       var comissao = _finValorComissaoFatura(fatura, pedido);
