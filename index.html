@@ -21173,7 +21173,7 @@ function renderPedidoList() {
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
     if (!busca) return true;
-    return (p.clienteNome||'').toLowerCase().includes(busca) || (p.fornecedorNome||'').toLowerCase().includes(busca) || (p.numPedidoCliente||'').toLowerCase().includes(busca) || _pedNumMatch(p, busca);
+    return (p.clienteNome||'').toLowerCase().includes(busca) || (p.fornecedorNome||'').toLowerCase().includes(busca) || (p.numPedidoCliente||'').toLowerCase().includes(busca) || _pedNumMatch(p, busca) || (p.faturas||[]).some(function (f) { return f && f.status !== 'Cancelado' && _pedNfBate(f, busca); });
   });
   rows = rows.slice().sort(function(a,b){
     var va = _pedValorOrdenacao(a, _pedOrdCampo), vb = _pedValorOrdenacao(b, _pedOrdCampo);
@@ -21649,7 +21649,7 @@ function _pimprelDadosGeral() {
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
     if (!busca) return true;
-    return (p.clienteNome||'').toLowerCase().indexOf(busca) !== -1 || (p.fornecedorNome||'').toLowerCase().indexOf(busca) !== -1 || (p.numPedidoCliente||'').toLowerCase().indexOf(busca) !== -1 || _pedNumMatch(p, busca);
+    return (p.clienteNome||'').toLowerCase().indexOf(busca) !== -1 || (p.fornecedorNome||'').toLowerCase().indexOf(busca) !== -1 || (p.numPedidoCliente||'').toLowerCase().indexOf(busca) !== -1 || _pedNumMatch(p, busca) || (p.faturas||[]).some(function (f) { return f && f.status !== 'Cancelado' && _pedNfBate(f, busca); });
   });
   rows = rows.slice().sort(function(a,b){   // mesma ordem que esta na tela
     var va = _pedValorOrdenacao(a, _pedOrdCampo), vb = _pedValorOrdenacao(b, _pedOrdCampo);
@@ -21864,7 +21864,7 @@ function _pimprelDadosSimplesNf() {
     if (ufF && (!cli || cli.estado !== ufF)) return false;
     if (catF && (!cli || String(cli.categoria||'') !== String(catF))) return false;
     if (subF && (!cli || String(cli.subcategoria||'') !== String(subF))) return false;
-    if (cliF && !_pedIdMatch(p, cli, cliF) && !_pedRowProd(r, cliF)) return false;
+    if (cliF && !_pedIdMatch(p, cli, cliF, true) && !_pedNfBate(f, cliF) && !_pedRowProd(r, cliF)) return false;
     return true;
   });
   linhas = _pedFiltraProdPsn(linhas, 'psn-produto');
@@ -24298,7 +24298,7 @@ function renderVendasSimplesNfs(manterPag) {
     if (ufF && (!cli || cli.estado !== ufF)) return false;
     if (catF && (!cli || String(cli.categoria||'') !== String(catF))) return false;
     if (subF && (!cli || String(cli.subcategoria||'') !== String(subF))) return false;
-    if (cliF && !_pedIdMatch(p, cli, cliF) && !_pedRowProd(r, cliF)) return false;
+    if (cliF && !_pedIdMatch(p, cli, cliF, true) && !_pedNfBate(f, cliF) && !_pedRowProd(r, cliF)) return false;
     return true;
   });
   linhas = _pedFiltraProdPsn(linhas, 'psn-produto');
@@ -25214,8 +25214,9 @@ function _pedProdBate(termo, cod, nome) {
 }
 var _pedPmC = { t: 0, m: {} };
 function _pedPm() { var n = Date.now(); if (n - _pedPmC.t > 3000) { var m = {}; getProdutos().forEach(function(pr){ m[pr.id] = pr; }); _pedPmC = { t: n, m: m }; } return _pedPmC.m; }
-function _pedIdMatch(p, cli, cliF) {
+function _pedIdMatch(p, cli, cliF, semNf) {
   if (!cliF) return true;
+  if (!semNf && (p.faturas || []).some(function (f) { return f && f.status !== 'Cancelado' && _pedNfBate(f, cliF); })) return true;
   if ((p.clienteNome||'').toLowerCase().indexOf(cliF) !== -1) return true;
   var dg = cliF.replace(/\D/g,'');
   if (cli && cli.cpf_cnpj && dg.length > 0 && String(cli.cpf_cnpj).replace(/\D/g,'').indexOf(dg) !== -1) return true;
@@ -25267,11 +25268,17 @@ function _pedFiltraProdPnf(lista, id) {
   });
   return out;
 }
+// a Busca tambem acha pelo numero da NF (duplicata)
+function _pedNfBate(fat, q) {
+  q = String(q || '').trim().toLowerCase(); if (!q || !fat) return false;
+  return String(fat.numDuplicata || '').toLowerCase().indexOf(q) !== -1;
+}
 function _pedFiltraProdPsn(linhas, id) {
   var ctx = _pedBuscaCtx(id); if (!ctx.prod && !ctx.busca) return linhas;
   var pm = _pedPm();
   return linhas.filter(function(r){
-    var termo = _pedTermoLinha(ctx, r.pedido);
+    if (!ctx.prod && _pedNfBate(r.fatura, ctx.busca)) return true;
+    var termo = ctx.prod || ((ctx.busca && !_pedIdMatch(r.pedido, ctx.cm[r.pedido.clienteId], ctx.busca, true)) ? ctx.busca : '');
     if (!termo) return true;
     return (r.fatura.itens || []).some(function(it){ var pr = pm[it.prodId] || {}; return _pedProdBate(termo, it.prodCodigo || pr.codigo, it.prodNome || pr.nome); });
   });
