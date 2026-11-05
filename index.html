@@ -18617,7 +18617,7 @@ function dashInit() {
       t.querySelectorAll('.dvg-vrank-row').forEach(row => row.addEventListener('click', () => drillVendedor(parseInt(row.dataset.ven,10))));
       const _dvgFecharBtn = t.querySelector('#drillFechar');
       if (_dvgFecharBtn) _dvgFecharBtn.addEventListener('click', (e) => { e.stopPropagation(); drillVendedor(_dvgVendSelecionado); });
-      if (_dvgVendSelecionado != null) {
+      if (_dvgVendSelecionado != null && ven.some(v => v.i === _dvgVendSelecionado)) {
         _dvgPopularDrillVendedor(_dvgVendSelecionado);
         const _dvgDetEl = t.querySelector('.dvg-vrank-detail');
         if (_dvgDetEl) _dvgDetEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
