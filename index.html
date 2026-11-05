@@ -28892,10 +28892,114 @@ function _emlFaturadoNf(forn, cliId, nf) {
   });
   return mapa;
 }
+// ---- Motivo escrito no XML -> motivo da nossa lista (se nao bater com nenhum, o usuario escolhe na mao) ----
+function _emlMotivoDoTexto(t) {
+  var n = String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  if (!n.trim()) return '';
+  if (/avaria|danific|quebra|amassad|vazamento/.test(n)) return 'Avaria';
+  if (/vencid|validade|vencimento/.test(n)) return 'Vencido';
+  if (/qualidade|contaminad/.test(n)) return 'Qualidade';
+  if (/logistic|atraso|transporte/.test(n)) return 'Logística';
+  if (/falta|faltou|nao recebid|nao entregue/.test(n)) return 'Falta';
+  return '';
+}
+// ---- Produto da NFD que nao bateu por codigo/EAN: sugere pelo nome (itens da NF de origem) e permite escolher ----
+var _emlTmp = {};
+function _emlTokNomeProd(t) {
+  var n = String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  var stop = { rf: 1, de: 1, da: 1, do: 1, com: 1, sem: 1, para: 1, kg: 1, cx: 1, und: 1 };
+  return n.split(' ').filter(function (w) { return w.length >= 3 && !stop[w]; });
+}
+function _emlScoreNomeProd(descXml, nomeProd) {
+  var a = _emlTokNomeProd(descXml), b = _emlTokNomeProd(nomeProd);
+  if (!a.length || !b.length) return 0;
+  return a.filter(function (w) { return b.indexOf(w) >= 0; }).length / a.length;
+}
+function _emlSugestoes(r, x) {
+  if (!r.fat) return [];
+  var ja = {}; r.itens.forEach(function (y) { if (y.p) ja[y.p.id] = 1; });
+  var prods = getProdutos(), out = [];
+  Object.keys(r.fat).forEach(function (pid) {
+    if (ja[pid]) return;
+    var p = prods.find(function (q) { return String(q.id) === String(pid); }); if (!p) return;
+    out.push({ p: p, score: _emlScoreNomeProd(x.it.desc, p.nome || '') });
+  });
+  out.sort(function (a, b) { return b.score - a.score; });
+  return out;
+}
+function _emlAplicarProd(r, x, p, auto) {
+  x.p = p; x.autoSug = !!auto;
+  var pre = 'Produto ' + x.it.cod + ' (';
+  r.erros = r.erros.filter(function (m) { return m.indexOf(pre) !== 0; });
+}
+function _emlSugerirItens(r) {
+  r.itens.forEach(function (x) {
+    if (x.p || x.semAuto) return;
+    var sg = _emlSugestoes(r, x);
+    if (sg.length && sg[0].score >= 0.6 && (sg.length === 1 || sg[0].score - sg[1].score >= 0.2)) _emlAplicarProd(r, x, sg[0].p, true);
+  });
+}
+function _emlRecalc(r) {
+  var m = r.motivo;
+  _emlCompletar(r);
+  r.motivo = m; r.selTocado = false; _emlAtualizaSel(r);
+}
+function _emlEscolherIdx(tipo, i, j, k) {
+  var r = _emlRes[i]; if (!r) return;
+  var x = r.itens[j], lista = _emlTmp[tipo + i + '-' + j]; if (!x || !lista || !lista[k]) return;
+  var p = lista[k];
+  _emlAplicarProd(r, x, p, false);
+  if (r.forn) _devSalvarVinculoXml(r.forn.id, x.it.cod, p.id);
+  _emlRecalc(r); _emlRender();
+}
+function _emlTrocarProd(i, j) {
+  var r = _emlRes[i]; if (!r) return;
+  var x = r.itens[j]; if (!x) return;
+  x.p = null; x.autoSug = false; x.semAuto = true;
+  var msg = 'Produto ' + x.it.cod + ' (' + x.it.desc + ') não encontrado';
+  if (r.erros.indexOf(msg) < 0) r.erros.push(msg);
+  _emlRecalc(r); _emlRender();
+}
+function _emlBuscarProd(i, j, q) {
+  var r = _emlRes[i], box = document.getElementById('eml-busca-' + i + '-' + j); if (!r || !box) return;
+  q = String(q || '').trim();
+  if (q.length < 2 || !r.forn) { box.innerHTML = ''; return; }
+  var n = _cpNorm(q), doNf = r.fat || {};
+  var lista = getProdutos().filter(function (p) {
+    return String(p.fornecedor || '') === String(r.forn.id) && (_cpNorm(p.nome || '').indexOf(n) >= 0 || _cpNorm(p.codigo || '').indexOf(n) >= 0);
+  });
+  lista.sort(function (a, b) { return (doNf[b.id] ? 1 : 0) - (doNf[a.id] ? 1 : 0); });
+  lista = lista.slice(0, 8);
+  _emlTmp['b' + i + '-' + j] = lista;
+  box.innerHTML = lista.map(function (p, k) {
+    return '<div onclick="_emlEscolherIdx(\'b\',' + i + ',' + j + ',' + k + ')" style="padding:5px 8px;cursor:pointer;border:1px solid #e2e8f0;border-top:none;background:#fff">'
+      + '<b>' + _pedEsc(p.codigo || '') + '</b> ' + _pedEsc(p.nome || '') + (doNf[p.id] ? ' <span style="color:#15803d;font-size:10px;font-weight:700">da NF de origem</span>' : '') + '</div>';
+  }).join('') || '<div style="padding:5px 8px;color:#b91c1c;border:1px solid #e2e8f0;border-top:none;background:#fff">Nenhum produto desta fábrica com esse código ou nome.</div>';
+}
+function _emlLinhaProd(r, x, i, j) {
+  var st = 'grid-column:1/-1;font-size:11px;margin:3px 0 2px;';
+  if (x.p && x.autoSug) {
+    return '<div style="' + st + 'color:#b45309">✔ sugerido pelo nome (NF de origem): <b>' + _pedEsc(x.p.codigo || '') + ' ' + _pedEsc(x.p.nome || '') + '</b> '
+      + '<a href="javascript:void(0)" onclick="_emlTrocarProd(' + i + ',' + j + ')" style="color:#272A4A;font-weight:700">Trocar</a></div>';
+  }
+  if (x.p || !r.forn) return '';
+  var sg = _emlSugestoes(r, x).slice(0, 3).map(function (z) { return z.p; });
+  _emlTmp['s' + i + '-' + j] = sg;
+  var h = '<div style="' + st + '">';
+  if (sg.length) {
+    h += '<div style="color:#64748b;margin-bottom:4px">Sugestões da NF ' + _pedEsc(r.nfOrigem) + ': ' + sg.map(function (p, k) {
+      return '<button onclick="_emlEscolherIdx(\'s\',' + i + ',' + j + ',' + k + ')" style="border:1px solid #272A4A;background:#fff;color:#272A4A;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;cursor:pointer;margin:0 4px 3px 0">' + _pedEsc(p.codigo || '') + ' ' + _pedEsc(p.nome || '') + '</button>';
+    }).join('') + '</div>';
+  }
+  h += '<input type="text" placeholder="ou procure: digite o código ou nome (só ' + _pedEsc(_cpSemColchetes(r.forn.nome_fantasia || r.forn.razao_social || 'desta fábrica')) + ')..." oninput="_emlBuscarProd(' + i + ',' + j + ',this.value)" style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:6px;padding:4px 8px;font-size:11.5px">'
+    + '<div id="eml-busca-' + i + '-' + j + '"></div></div>';
+  return h;
+}
 function _emlCompletar(r) {
   var forn = r.forn, d = r.d, jaTem = getDevolucoes();
   r.fat = (r.cli && forn && r.nfOrigem) ? _emlFaturadoNf(forn, r.cli.id, r.nfOrigem) : null;
   r.excede = false;
+  try { _emlSugerirItens(r); } catch (eSg) { console.warn(eSg); }
   r.itens.forEach(function (x) {
     var fi = (r.fat && x.p) ? r.fat[x.p.id] : null; x.fat = fi ? fi.q : null; x.fatPed = !!(fi && fi.doPedido); if (x.fatPed) r.fatPed = true;
     x.excede = (x.fat != null && x.it.qtd > x.fat + 0.0001);
@@ -28968,7 +29072,11 @@ function _emlMontarXml(dados, nomeArq, dataUrl) {
     } else if (cands.length > 1) r.erros.push('Mais de um cliente com o CNPJ ' + cnpCli + ' — não consegui saber qual é');
     else r.erros.push('Cliente não encontrado pelo CNPJ ' + cnpCli + ' do XML');
   }
-  return _emlCompletar(r);
+  var rr = _emlCompletar(r);
+  rr.motivoXml = dados.motivoTxt || '';
+  var mm = _emlMotivoDoTexto(rr.motivoXml);
+  if (mm) { rr.motivo = mm; rr.motivoAuto = true; _emlAtualizaSel(rr); }
+  return rr;
 }
 function _emlChave(r) { return String(r.forn ? r.forn.id : '') + '|' + r.d.nfd + '|' + (r.cli ? r.cli.id : (r.d.codCli || r.d.cnpjCli || r.d.nomeCli)); }
 function _emlMesclar(novos) {
@@ -29050,11 +29158,11 @@ function _emlRender() {
     var nfo = 'NF origem ' + _pedEsc(r.nfOrigem || '—') + (r.dataNfOrigem ? ' (' + _pedEsc(_pimpFmtData(r.dataNfOrigem)) + ')' : '')
       + (r.fat ? ' &middot; <b style="color:#15803d">encontrada no sistema</b>' : (r.cli ? ' &middot; <span style="color:#b45309">NF não localizada nos pedidos do cliente</span>' : ''));
     var tab = '<div style="margin-top:6px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;font-size:11.5px"><div style="display:grid;grid-template-columns:1fr 62px 62px 82px;background:#f1f5f9;padding:5px 8px;font-weight:700;color:#64748b;font-size:10px;text-transform:uppercase"><span>Produto</span><span style="text-align:right">Faturou</span><span style="text-align:right">Devolveu</span><span style="text-align:right">Valor</span></div>'
-      + r.itens.map(function (x) {
+      + r.itens.map(function (x, j) {
         return '<div style="display:grid;grid-template-columns:1fr 62px 62px 82px;padding:4px 8px;border-top:1px solid #f1f5f9"><span>' + _pedEsc(x.it.cod) + ' ' + _pedEsc(x.it.desc) + (x.p ? '' : ' <b style="color:#b91c1c">(não achei)</b>') + '</span>'
           + '<span style="text-align:right;color:#64748b">' + (x.fat != null ? _emlFmtQ(x.fat) + (x.fatPed ? '*' : '') : '—') + '</span>'
           + '<span style="text-align:right;font-weight:700;color:' + (x.excede ? '#b45309' : '#1e293b') + '">' + _emlFmtQ(x.it.qtd) + (x.excede ? ' ⚠' : '') + '</span>'
-          + '<span style="text-align:right">' + _pedFmtMoeda(x.it.valor) + '</span></div>';
+          + '<span style="text-align:right">' + _pedFmtMoeda(x.it.valor) + '</span>' + _emlLinhaProd(r, x, i, j) + '</div>';
       }).join('')
       + '<div style="display:grid;grid-template-columns:1fr 82px;padding:6px 8px;border-top:2px solid #272A4A;background:#f8fafc;font-weight:800"><span>Total da NFD</span><span style="text-align:right">' + _pedFmtMoeda(r.total) + '</span></div></div>';
     var rodape = r.fatPed ? '<div style="margin-top:4px;font-size:10.5px;color:#94a3b8">* quantidade calculada a partir do pedido (a NF importada do Pontti guarda quantidade proporcional)</div>' : '';
@@ -29067,7 +29175,7 @@ function _emlRender() {
         + '<button onclick="_emlSetAprov(' + i + ',\'nao\')" style="border:1px solid #dc2626;background:#fff;color:#dc2626;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">Cancelada</button></div>';
     } else if (r.ok) {
       rodape += '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:12px"><b>Motivo:</b> <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid ' + (r.motivo ? '#cbd5e1' : '#f59e0b') + ';background:' + (r.motivo ? '#fff' : '#fffbeb') + ';border-radius:7px;padding:4px 8px;font-size:12px"><option value="">Selecione...</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select>'
-        + (r.motivo ? '' : '<span style="color:#b45309;font-size:11px">não veio no ' + (r.origem === 'xml' ? 'XML' : 'e-mail') + ' — escolha para liberar</span>') + '</div>';
+        + (r.motivo ? (r.motivoAuto ? '<span style="color:#64748b;font-size:11px">lido da observação do XML: ' + _pedEsc(r.motivoXml) + '</span>' : '') : '<span style="color:#b45309;font-size:11px">' + (r.motivoXml ? 'XML diz: ' + _pedEsc(r.motivoXml) + ' — escolha o motivo' : 'não veio no ' + (r.origem === 'xml' ? 'XML' : 'e-mail') + ' — escolha para liberar') + '</span>') + '</div>';
     }
     if (r.ok && r.excede) rodape += '<div style="margin-top:6px;font-size:11.5px;color:#b45309">⚠ Devolveu mais do que foi faturado na NF de origem — confira antes de lançar' + (pronta ? ' (vem desmarcada).' : '.') + '</div>';
     return '<div style="border:1px solid #e2e8f0;border-left:4px solid ' + cor + ';border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff">'
@@ -29489,6 +29597,12 @@ function _devExtrairDadosXml(xmlText) {
       }
     }
 
+    var motivoTxt = '';
+    var cplM = doc.getElementsByTagName('infCpl');
+    if (cplM.length) {
+      var mM = (cplM[0].textContent || '').match(/MOTIVO\s*[:\-]+\s*(.+?)(?=\s+-\s+|\s+[A-Z]{2,}:|$)/i);
+      if (mM) motivoTxt = mM[1].trim();
+    }
     var chave = '';
     var infNFeEls = doc.getElementsByTagName('infNFe');
     if (infNFeEls.length) {
@@ -29543,7 +29657,7 @@ function _devExtrairDadosXml(xmlText) {
       }
     }
 
-    return { nNF: nNF, serie: serieNf, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, nfOrigemTxt: nfOrigemTxt, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
+    return { nNF: nNF, serie: serieNf, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, nfOrigemTxt: nfOrigemTxt, motivoTxt: motivoTxt, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
   } catch (e) {
     return null;
   }
