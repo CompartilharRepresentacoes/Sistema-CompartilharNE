@@ -28739,10 +28739,17 @@ function _emlFaturadoNf(forn, cliId, nf) {
         // Notas importadas do Pontti guardam quantidade proporcional (ex.: 17,3 em vez de 20 PC).
         // Em item que nao e KG e veio fracionado, o numero confiavel e o do pedido (se a NF for a unica do pedido).
         if (un[it.prodId] !== 'KG' && Math.abs(q - Math.round(q)) > 0.001) {
+          var qPed = (p.itens || []).filter(function (x) { return x.prodId === it.prodId; }).reduce(function (a, x) { return a + (Number(x.quantidade) || 0); }, 0);
           if (fatsAtivas.length === 1) {
-            q = (p.itens || []).filter(function (x) { return x.prodId === it.prodId; }).reduce(function (a, x) { return a + (Number(x.quantidade) || 0); }, 0);
-            doPedido = true;
-          } else return;
+            q = qPed;
+          } else {
+            // pedido com mais de uma NF: reparte a quantidade do pedido na proporcao do que cada NF guardou
+            var soma = 0;
+            fatsAtivas.forEach(function (g) { (g.itens || []).forEach(function (j) { if (j.prodId === it.prodId) soma += Number(j.qtd) || 0; }); });
+            if (!(qPed > 0 && soma > 0)) return;
+            q = Math.round(Math.min(qPed, qPed * q / soma) * 100) / 100;
+          }
+          doPedido = true;
         }
         var cur = mapa[it.prodId] || { q: 0, doPedido: false };
         cur.q += q; cur.doPedido = cur.doPedido || doPedido;
@@ -28917,7 +28924,7 @@ function _emlRender() {
           + '<span style="text-align:right">' + _pedFmtMoeda(x.it.valor) + '</span></div>';
       }).join('')
       + '<div style="display:grid;grid-template-columns:1fr 82px;padding:6px 8px;border-top:2px solid #272A4A;background:#f8fafc;font-weight:800"><span>Total da NFD</span><span style="text-align:right">' + _pedFmtMoeda(r.total) + '</span></div></div>';
-    var rodape = r.fatPed ? '<div style="margin-top:4px;font-size:10.5px;color:#94a3b8">* quantidade do pedido (a NF importada do Pontti guarda quantidade proporcional)</div>' : '';
+    var rodape = r.fatPed ? '<div style="margin-top:4px;font-size:10.5px;color:#94a3b8">* quantidade calculada a partir do pedido (a NF importada do Pontti guarda quantidade proporcional)</div>' : '';
     if (r.ok && cancelada) {
       rodape += '<div style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:11.5px;color:#991b1b"><b>Motivo do cancelamento (vai nas Observações):</b><br>' + _pedEsc(EML_TXT_CANCEL) + '</div>'
         + '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:#64748b">Motivo da devolução (opcional): <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid #cbd5e1;border-radius:7px;padding:4px 8px;font-size:12px"><option value="">—</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></div>';
