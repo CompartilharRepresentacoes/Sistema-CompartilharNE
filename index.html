@@ -20009,6 +20009,67 @@ function getSkuClientes() { return firebaseConfigurado ? _fsGet('sku_clientes') 
 function setSkuClientes(d) { if (firebaseConfigurado) { _fsSet('sku_clientes', d); } else { localStorage.setItem('sku_clientes', JSON.stringify(d)); } }
 
 var _skuPage = 0;
+var _skuAbertos = {};   // redes com a cascata aberta (chave: fornId|cliId)
+function skuToggleRede(key) { _skuAbertos[key] = !_skuAbertos[key]; renderSkuList(); }
+// Cascata: SKUs cadastrados da rede (Cod. sistema / Produto / SKU cliente / Forma / Opcoes)
+function _skuDetalheHtml(g, itens) {
+  var pm = {}; getProdutos().forEach(function (p) { pm[p.id] = p; });
+  var FC = { CX: '#0369a1', UND: '#166534', PC: '#86198f', KG: '#c2410c' }, FB = { CX: '#e0f2fe', UND: '#f0fdf4', PC: '#fdf4ff', KG: '#fff7ed' };
+  var col = 'display:flex;align-items:center;gap:4px;padding:7px 12px;font-size:12px';
+  var h = '<div style="padding:8px 14px 12px 38px;background:#f8fafc;border-bottom:1px solid #e2e8f0"><div style="border:1px solid #e2e8f0;border-left:3px solid #DE7926;background:#fff;overflow:hidden">'
+    + '<div style="' + col + ';background:#f1f5f9;border-bottom:1px solid #e2e8f0;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em">'
+    + '<span style="width:100px;flex-shrink:0">Cód. sistema</span><span style="flex:1">Produto</span><span style="width:120px;flex-shrink:0">SKU cliente</span><span style="width:60px;flex-shrink:0;text-align:center">Forma</span><span style="width:70px;flex-shrink:0;text-align:center">Opções</span></div>';
+  if (!itens.length) {
+    h += '<div style="padding:16px;text-align:center;color:#94a3b8;font-size:12px">Nenhum SKU cadastrado nesta rede. Use o botão + para cadastrar.</div>';
+  } else {
+    itens.slice().sort(function (a, b) { return String((pm[a.prodId] || {}).codigo || '').localeCompare(String((pm[b.prodId] || {}).codigo || ''), 'pt-BR', { numeric: true }); }).forEach(function (r) {
+      var p = pm[r.prodId];
+      h += '<div class="mc-row" style="' + col + ';border-bottom:1px solid #f1f5f9">'
+        + '<span class="mc-meta" style="width:100px;flex-shrink:0;font-family:monospace;color:#64748b">' + _skuEsc(p ? (p.codigo || '—') : '—') + '</span>'
+        + '<span class="mc-primary" style="flex:1;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _skuEsc(_cpSemColchetes(r.prodNome || (p ? p.nome : '') || '')) + '</span>'
+        + '<span class="mc-meta" style="width:120px;flex-shrink:0;font-family:monospace;font-weight:700;color:#1e293b">' + _skuEsc(r.sku || '') + '</span>'
+        + '<span class="mc-badge" style="width:60px;flex-shrink:0;text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;background:' + (FB[r.forma] || '#f1f5f9') + ';color:' + (FC[r.forma] || '#475569') + '">' + _skuEsc(r.forma || '') + '</span></span>'
+        + '<span class="mc-actions" style="width:70px;flex-shrink:0;display:flex;gap:5px;justify-content:center">'
+        + '<button onclick="showPage(\'page-sku-clientes-form\',{id:\'' + r.id + '\'})" style="width:24px;height:24px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#64748b;font-size:12px" title="Editar"><i class="ti ti-edit"></i></button>'
+        + '<button onclick="skuExcluirUm(\'' + r.id + '\')" style="width:24px;height:24px;border-radius:6px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;color:#dc2626;font-size:12px" title="Excluir"><i class="ti ti-trash"></i></button>'
+        + '</span></div>';
+    });
+  }
+  return h + '</div></div>';
+}
+function skuNovoNaRede(fornId, cliId) {
+  var ref = getSkuClientes().find(function (r) { return (r.tipo || 'rede') === 'rede' && r.fornId === fornId && r.cliId === cliId; }) || _cfcDe(fornId, 'rede', cliId) || {};
+  showPage('page-sku-clientes-form', { fornId: fornId, fornNome: ref.fornNome || '', cliId: cliId, cliNome: ref.cliNome || '', travar: true });
+}
+function skuExcluirUm(id) {
+  var r = getSkuClientes().find(function (x) { return x.id === id; }); if (!r) return;
+  if (!confirm('Excluir o SKU ' + (r.sku || '') + ' do produto "' + _cpSemColchetes(r.prodNome || '') + '"?\n\nEssa ação não pode ser desfeita.')) return;
+  setSkuClientes(getSkuClientes().filter(function (x) { return x.id !== id; }));
+  renderSkuList();
+}
+function skuExcluirRede(fornId, cliId) {
+  var todos = getSkuClientes();
+  var alvo = todos.filter(function (r) { return (r.tipo || 'rede') === 'rede' && r.fornId === fornId && r.cliId === cliId; });
+  var cod = _cfcCodigo(fornId, 'rede', cliId);
+  if (!alvo.length) {
+    // rede so com o codigo do fornecedor (sem SKU)
+    if (!cod) return;
+    if (!confirm('Excluir o código do fornecedor ' + cod + ' desta rede?\n\nEssa ação não pode ser desfeita.')) return;
+    var cf = _cfcDe(fornId, 'rede', cliId) || {};
+    _cfcSalvar(fornId, cf.fornNome || '', 'rede', cliId, cf.cliNome || '', '').then(function () { renderSkuList(); });
+    return;
+  }
+  var fn = _cpSemColchetes(alvo[0].fornNome || ''), rn = alvo[0].cliNome || '';
+  if (!confirm('Excluir ' + alvo.length + ' SKU' + (alvo.length !== 1 ? 's' : '') + ' de ' + fn + ' na rede ' + rn + '?\n\nEssa ação não pode ser desfeita.' + (cod ? '\n(O código do fornecedor ' + cod + ' continua cadastrado.)' : ''))) return;
+  // o sistema apaga no maximo 20 registros por gravacao (protecao): apaga em lotes de 20
+  var ids = alvo.map(function (r) { return r.id; }), atual = todos.slice();
+  while (ids.length) {
+    var lote = {}; ids.splice(0, 20).forEach(function (i) { lote[i] = 1; });
+    atual = atual.filter(function (x) { return !lote[x.id]; });
+    setSkuClientes(atual);
+  }
+  renderSkuList();
+}
 var _skuPerPage = 20;
 
 function initSkuClientesList() {
@@ -20117,7 +20178,7 @@ function renderSkuList() {
     var kpiG = document.getElementById('sku-kpi-total');
     if (kpiG) kpiG.textContent = fil.length;
 
-    if (header) header.innerHTML = '<span style="flex:1">Fornecedor</span><span style="flex:1">Rede</span><span style="width:110px;flex-shrink:0;text-align:center">Cód. fornecedor</span><span style="width:90px;flex-shrink:0;text-align:center">SKUs</span><span style="width:70px;flex-shrink:0;text-align:center">Opções</span>';
+    if (header) header.innerHTML = '<span style="width:24px;flex-shrink:0"></span><span style="flex:1">Fornecedor</span><span style="flex:1">Rede</span><span style="width:110px;flex-shrink:0;text-align:center">Cód. fornecedor</span><span style="width:90px;flex-shrink:0;text-align:center">SKUs</span><span style="width:80px;flex-shrink:0;text-align:center">Opções</span>';
 
     if (pagG.length === 0) {
       tbody.innerHTML = '<div style="padding:32px;text-align:center;color:#94a3b8;font-size:13px">Nenhuma rede com SKU cadastrado</div>';
@@ -20126,14 +20187,18 @@ function renderSkuList() {
       for (var ig = 0; ig < pagG.length; ig++) {
         var g = pagG[ig];
         var bgG = ig % 2 === 0 ? '#fff' : '#fafbff';
-        rowsG += '<div class="mc-row" style="display:flex;padding:10px 14px;background:'+bgG+';border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px;gap:4px">'
+        var gKey = g.fornId + '|' + g.cliId, gAberto = !!_skuAbertos[gKey];
+        rowsG += '<div class="mc-row" onclick="skuToggleRede(\'' + gKey + '\')" style="display:flex;padding:10px 14px;background:'+(gAberto ? '#eff6ff' : bgG)+';border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px;gap:4px;cursor:pointer">'
+          + '<span class="mc-meta" style="width:24px;flex-shrink:0;color:#64748b;font-size:15px"><i class="ti ' + (gAberto ? 'ti-chevron-down' : 'ti-chevron-right') + '"></i></span>'
           + '<span class="mc-secondary" style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(g.fornNome||''))+'</span>'
           + '<span class="mc-primary" style="flex:1;color:#334155;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(g.cliNome||'')+'</span>'
           + '<span class="mc-meta" style="width:110px;flex-shrink:0;text-align:center;font-family:monospace;font-weight:700;color:#334155">'+_skuEsc(_cfcCodigo(g.fornId,'rede',g.cliId) || '—')+'</span>'
           + '<span class="mc-meta" style="width:90px;flex-shrink:0;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:5px;font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1">'+g.count+' SKU'+(g.count!==1?'s':'')+'</span></span>'
-          + '<span class="mc-actions" style="width:70px;flex-shrink:0;display:flex;justify-content:center">'
-          + '<button onclick="abrirSkuRedeDetalhe(\''+g.fornId+'\',\''+g.cliId+'\')" style="width:26px;height:26px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#272A4A;font-size:13px" title="Visualizar"><i class="ti ti-eye"></i></button>'
+          + '<span class="mc-actions" style="width:80px;flex-shrink:0;display:flex;gap:6px;justify-content:center">'
+          + '<button onclick="event.stopPropagation();skuNovoNaRede(\''+g.fornId+'\',\''+g.cliId+'\')" style="width:26px;height:26px;border-radius:6px;border:1px solid #DE7926;background:#fff;cursor:pointer;color:#DE7926;font-size:13px" title="Cadastrar SKU nesta rede"><i class="ti ti-plus"></i></button>'
+          + '<button onclick="event.stopPropagation();skuExcluirRede(\''+g.fornId+'\',\''+g.cliId+'\')" style="width:26px;height:26px;border-radius:6px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;color:#dc2626;font-size:13px" title="Excluir"><i class="ti ti-trash"></i></button>'
           + '</span></div>';
+        if (gAberto) rowsG += _skuDetalheHtml(g, fil.filter(function (r) { return r.fornId + '|' + r.cliId === gKey; }));
       }
       tbody.innerHTML = rowsG;
     }
@@ -20361,6 +20426,13 @@ function openSkuClientesForm(params) {
   skuFormaSel(r ? (r.forma||'CX') : 'CX');
   var skuAutoriaEl = document.getElementById('sku-autoria-info');
   if (skuAutoriaEl) skuAutoriaEl.innerHTML = r ? _appRenderAutoriaHtml(r) : '';
+  // aberto pelo botao "+" da lista: fornecedor e rede ja vem preenchidos e travados
+  var _trav = !!params.travar && !r;
+  ['sku-forn-input', 'sku-cli-input'].forEach(function (id) {
+    var el = document.getElementById(id); if (!el) return;
+    el.readOnly = _trav; el.style.background = _trav ? '#f1f5f9' : ''; el.style.cursor = _trav ? 'not-allowed' : '';
+  });
+  ['sku-tipo-rede', 'sku-tipo-cli'].forEach(function (id) { var el = document.getElementById(id); if (el) el.style.pointerEvents = _trav ? 'none' : ''; });
   var _cfEl = document.getElementById('sku-codforn'); if (_cfEl) _cfEl.value = '';
   _skuCodFornAtualizar(true);
   _cfcCarregar(function () { _skuCodFornAtualizar(false); });
@@ -20547,7 +20619,10 @@ function _skuProdFiltrar() {
   if (!drop) return;
   if (q.length < 4) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
+  var fId = (document.getElementById('sku-forn-id') || {}).value;
+  if (!fId) { drop.innerHTML = '<div style="padding:8px 12px;font-size:12px;color:#b45309">Escolha o fornecedor primeiro.</div>'; drop.style.display = 'block'; return; }
   _skuProdItems = getProdutos().filter(function(p) {
+    if (String(p.fornecedor || '') !== String(fId)) return false;
     return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
   }).slice(0,15);
   if (!_skuProdItems.length) { drop.style.display='none'; return; }
@@ -20586,7 +20661,10 @@ function _skuLoteProdFiltrar() {
   if (!drop) return;
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
+  var fId = (document.getElementById('sku-forn-id') || {}).value;
+  if (!fId) { drop.innerHTML = '<div style="padding:8px 12px;font-size:12px;color:#b45309">Escolha o fornecedor primeiro.</div>'; drop.style.display = 'block'; return; }
   _skuLoteProdItems = getProdutos().filter(function(p) {
+    if (String(p.fornecedor || '') !== String(fId)) return false;
     return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
   }).slice(0,15);
   if (!_skuLoteProdItems.length) { drop.style.display='none'; return; }
@@ -20697,6 +20775,9 @@ function _salvarSkuLote() {
 
   if (!fornId) { alert('Selecione o fornecedor'); return; }
   if (!cliId)  { alert('Selecione a rede'); return; }
+  var _pm = {}; getProdutos().forEach(function (p) { _pm[p.id] = p; });
+  var _fora = _skuLoteItens.filter(function (it) { var p = _pm[it.prodId]; return p && String(p.fornecedor || '') !== String(fornId); });
+  if (_fora.length) { alert('Há produto de outro fornecedor na lista: ' + _fora.map(function (it) { return _cpSemColchetes(it.prodNome || ''); }).join(', ') + '.\n\nRemova da lista antes de salvar.'); return; }
   var codForn = (document.getElementById('sku-codforn') || {}).value || '';
   if (!_skuLoteItens.length) {
     // sem produtos na lista: se so o codigo do fornecedor mudou, salva so o codigo
@@ -20768,6 +20849,8 @@ function salvarSkuCliente() {
   if (!prodId)  { alert('Selecione o produto'); return; }
   if (!sku)     { alert('Informe o SKU do cliente'); return; }
   if (!forma)   { alert('Selecione a forma de compra'); return; }
+  var _pSel = getProdutos().find(function (p) { return String(p.id) === String(prodId); });
+  if (_pSel && String(_pSel.fornecedor || '') !== String(fornId)) { alert('Este produto não é do fornecedor selecionado.'); return; }
   _cfcSalvar(fornId, fornNome, tipo, cliId, cliNome, (document.getElementById('sku-codforn') || {}).value || '');
 
   var dados = getSkuClientes();
