@@ -28937,7 +28937,7 @@ function _emlMontarXml(dados, nomeArq, dataUrl) {
   var cnp = _devNormCnpj, forns = getFornecedores(), clientes = getClientes();
   var forn = forns.find(function (f) { var c = cnp(f.cnpj); return c && (c === cnp(dados.emitCNPJ) || c === cnp(dados.destCNPJ)); }) || null;
   var cnpCli = (forn && cnp(forn.cnpj) === cnp(dados.emitCNPJ)) ? dados.destCNPJ : dados.emitCNPJ;
-  var nfOrig = (dados.refNFe && dados.refNFe.length === 44) ? _emlSemZeros(dados.refNFe.substring(25, 34)) : '';
+  var nfOrig = (dados.refNFe && dados.refNFe.length === 44) ? _emlSemZeros(dados.refNFe.substring(25, 34)) : _emlSemZeros(dados.nfOrigemTxt || '');
   var d = { codCli: '', nomeCli: (forn && cnp(forn.cnpj) === cnp(dados.emitCNPJ)) ? dados.destNome : dados.emitNome, cnpjCli: cnpCli, nfd: _emlSemZeros(dados.nNF), serie: dados.serie || '', dataEmissao: dados.dataEmissao || '', aprov: 'sim',
     itens: dados.itens.map(function (it) { return { cod: _emlSemZeros(it.codigo), desc: it.nome, qtd: it.qtd, valor: it.valorTotal, nfVenda: nfOrig, ean: it.ean }; }) };
   var r = _emlNovoResultado(d, forn, 'xml');
@@ -29462,6 +29462,19 @@ function _devExtrairDadosXml(xmlText) {
     var refNFe   = '';
     var refEls = doc.getElementsByTagName('refNFe');
     if (refEls.length) refNFe = (refEls[0].textContent||'').trim();
+    // NF de origem quando nao vem no campo de referencia: <refNF><nNF> (modelo antigo) ou escrita na
+    // observacao (infCpl), ex.: "DEVOLUCAO PARCIAL S/NFE 002723125 SR 001". Sempre conferida depois
+    // so nos pedidos do cliente que emitiu a NFD.
+    var nfOrigemTxt = '';
+    var refNfEls = doc.getElementsByTagName('refNF');
+    if (refNfEls.length) nfOrigemTxt = _devXmlTag(refNfEls[0], 'nNF').replace(/^0+/, '');
+    if (!nfOrigemTxt) {
+      var cplO = doc.getElementsByTagName('infCpl');
+      if (cplO.length) {
+        var mO = (cplO[0].textContent || '').match(/(?:S\/\s*N\.?\s*F\.?\s*-?\s*E?|SOBRE\s+(?:A\s+)?N\.?\s*F\.?\s*-?\s*E?|REF(?:ERENTE|\.)?\s*(?:A\s+)?N\.?\s*F\.?\s*-?\s*E?|N\.?\s*F\.?\s*-?\s*E?\s*(?:DE\s+)?ORIGEM|NOTA\s+(?:FISCAL\s+)?(?:DE\s+)?ORIGEM)\s*(?:N[ºO°.]*\s*)?[:\-]?\s*(\d{44}|\d{3,9}(?!\d))/i);
+        if (mO) nfOrigemTxt = (mO[1].length === 44 ? mO[1].substring(25, 34) : mO[1]).replace(/^0+/, '');
+      }
+    }
 
     var chave = '';
     var infNFeEls = doc.getElementsByTagName('infNFe');
@@ -29517,7 +29530,7 @@ function _devExtrairDadosXml(xmlText) {
       }
     }
 
-    return { nNF: nNF, serie: serieNf, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
+    return { nNF: nNF, serie: serieNf, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, nfOrigemTxt: nfOrigemTxt, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
   } catch (e) {
     return null;
   }
@@ -29570,6 +29583,8 @@ function _devProcessarArquivoXml(file) {
     if (dados.refNFe && dados.refNFe.length === 44) {
       var numOrigem = dados.refNFe.substring(25,34).replace(/^0+/, '');
       document.getElementById('dev-nf-origem').value = numOrigem || dados.refNFe.substring(25,34);
+    } else if (dados.nfOrigemTxt) {
+      document.getElementById('dev-nf-origem').value = dados.nfOrigemTxt;
     }
 
     var fornecedores = getFornecedores();
@@ -30239,6 +30254,8 @@ function revAnexarXml(input) {
     if (dados.refNFe && dados.refNFe.length === 44) {
       var numOrigem = dados.refNFe.substring(25,34).replace(/^0+/, '');
       document.getElementById('rev-nf-origem').value = numOrigem || dados.refNFe.substring(25,34);
+    } else if (dados.nfOrigemTxt) {
+      document.getElementById('rev-nf-origem').value = dados.nfOrigemTxt;
     }
 
     var produtos = getProdutos();
