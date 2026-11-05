@@ -5929,7 +5929,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
       </style>
         <div class="dev-mobile-actions" style="display:none;margin-bottom:10px">
           <button onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#DE7926;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">➕ Cadastrar</button>
-          <button onclick="emlMenu(this)" style="width:100%;margin-top:8px;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer">Importar &#9662;</button>
+          <button onclick="emlMenu(this)" style="width:100%;margin-top:8px;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer">Importar</button>
         </div>
       <div id="dev-status-chips"></div>
       <div id="dev-kpis"></div>
@@ -5941,7 +5941,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <div><label>Motivo</label><select id="dev-f-motivo" onchange="_devAoTrocarMotivo()"><option value="">Todos</option></select></div>
           <div><label>UF</label><select id="dev-f-uf" onchange="renderDevolucaoList()"><option value="">Todas</option></select></div>
           <div><label>Vendedor</label><select id="dev-f-vend" onchange="renderDevolucaoList()"><option value="">Todos</option></select></div>
-          <div style="display:flex;gap:8px"><button onclick="_devLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button><button class="dev-hdr-mobile-hide" onclick="emlMenu(this)" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap">Importar &#9662;</button><button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">➕ Cadastrar</button></div>
+          <div style="display:flex;gap:8px"><button onclick="_devLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button><button class="dev-hdr-mobile-hide" onclick="emlMenu(this)" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap">Importar</button><button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">➕ Cadastrar</button></div>
         </div>
       </div>
       <div id="dev-graficos"></div>
@@ -7723,18 +7723,17 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 #cartilha-viewer-outer{min-width:0;flex:1}
 #cartilha-canvas-vertical{max-width:100%;height:auto}
 </style>
-<div id="eml-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9998;align-items:center;justify-content:center;padding:12px;box-sizing:border-box">
+<div id="eml-modal" ondragover="_emlDragOver(event)" ondragenter="_emlDragOver(event)" ondragleave="_emlDragLeave(event)" ondrop="_emlSolto(event)" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9998;align-items:center;justify-content:center;padding:12px;box-sizing:border-box">
   <div style="background:#fff;border-radius:14px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden">
     <div style="background:linear-gradient(135deg,#272A4A,#3d4180);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between">
       <div><div style="font-size:14px;font-weight:600">Importar devolução</div><div style="font-size:10.5px;color:rgba(255,255,255,.55)">Cole o e-mail ou anexe o XML da NFD &middot; o sistema confere o cliente e lança só o que bater</div></div>
       <button onclick="emlFechar()" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px">Fechar</button>
     </div>
     <div style="padding:14px 18px;overflow:auto">
-      <div id="eml-entrada"><textarea id="eml-texto" placeholder="Cole aqui o texto do e-mail (pode colar vários de uma vez) ou arraste e-mails / arquivos XML para cá..." ondragover="event.preventDefault()" ondrop="_emlSolto(event)" onpaste="setTimeout(_emlAnalisar,80)" style="width:100%;box-sizing:border-box;height:120px;border:2px dashed #cbd5e1;border-radius:10px;padding:10px;font-size:12px;font-family:inherit;resize:vertical"></textarea>
+      <div id="eml-entrada"><textarea id="eml-texto" placeholder="Cole o texto do e-mail aqui, ou arraste para cá o e-mail / os arquivos XML da NFD..." onpaste="setTimeout(_emlAnalisar,80)" style="width:100%;box-sizing:border-box;height:120px;border:2px dashed #cbd5e1;border-radius:10px;padding:10px;font-size:12px;font-family:inherit;resize:vertical"></textarea>
       <div style="display:flex;gap:8px;margin:8px 0 12px;align-items:center;flex-wrap:wrap">
         <button onclick="_emlAnalisar()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">Analisar</button></div></div>
       <div style="display:flex;gap:8px;margin:0 0 10px;align-items:center;flex-wrap:wrap">
-        <button id="eml-btn-novo" onclick="_emlNovo()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">&#9993; Colar e-mail</button>
         <button id="eml-btn-xml" onclick="document.getElementById('eml-xml-input').click()" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">Anexar XML</button>
         <input type="file" id="eml-xml-input" accept=".xml,text/xml,application/xml" multiple style="display:none" onchange="_emlXmlEscolhidos(this)">
         <button id="eml-btn-lancar" onclick="_emlLancar()" style="display:none;background:#15803d;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer">Lançar selecionadas</button>
@@ -28982,6 +28981,7 @@ function _emlAnalisar() {
   var ta = document.getElementById('eml-texto'); if (!ta) return;
   var texto = ta.value || '';
   if (!texto.trim()) { _emlRender(); return; }
+  if (/^\s*(<\?xml|<nfeProc|<NFe)/i.test(texto)) { ta.value = ''; _emlLerXmls([new File([texto], 'NFD-colada.xml', { type: 'text/xml' })]); return; }
   var lista = _emlParse(texto), forn = _emlFornDoTexto(texto);
   var novos = lista.map(function (d) { return _emlMontarEmail(d, forn); });
   var rep = _emlMesclar(novos);
@@ -29004,7 +29004,6 @@ function _emlLerXmls(arqs) {
         if (--pend === 0) {
           var rep = _emlMesclar(novos);
           if (msg) { msg.style.color = falhas ? '#b45309' : '#64748b'; msg.textContent = (falhas ? falhas + ' arquivo(s) XML não puderam ser lidos. ' : '') + (rep ? rep + ' nota(s) já estavam na lista e foram ignoradas.' : ''); }
-          document.getElementById('eml-entrada').style.display = 'none';
           _emlRender();
         }
       };
@@ -29116,12 +29115,13 @@ function _emlLancar() {
 function emlAbrir(modo) {
   var m = document.getElementById('eml-modal'); if (!m) return;
   m.style.display = 'flex'; _emlRes = [];
-  document.getElementById('eml-entrada').style.display = (modo === 'xml') ? 'none' : 'block';
+  document.getElementById('eml-entrada').style.display = 'block';
   document.getElementById('eml-texto').value = ''; document.getElementById('eml-resultado').innerHTML = ''; document.getElementById('eml-msg').textContent = '';
   var b = document.getElementById('eml-btn-lancar'); if (b) b.style.display = 'none';
-  if (modo === 'xml') { var xi = document.getElementById('eml-xml-input'); if (xi) xi.click(); }
 }
 function emlMenu(btn) {
+  // entrada unica: abre a janela direto; o sistema descobre sozinho se e e-mail ou XML
+  _emlFecharMenu(); emlAbrir(); return;
   var antigo = document.getElementById('eml-menu'); if (antigo) { antigo.remove(); return; }
   var r = btn.getBoundingClientRect();
   var mn = document.createElement('div'); mn.id = 'eml-menu';
@@ -29145,8 +29145,18 @@ function _emlTextoDeBuffer(buf) {
   for (var i = 0; i < cand.length; i++) { var t = cand[i].replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' '); if (/Cliente:/.test(t)) return t; }
   return '';
 }
+function _emlDragOver(ev) {
+  ev.preventDefault();
+  var ta = document.getElementById('eml-texto'); if (ta) { ta.style.borderColor = '#3b82f6'; ta.style.background = '#eff6ff'; }
+}
+function _emlDragLeave(ev) {
+  var m = document.getElementById('eml-modal');
+  if (ev.relatedTarget && m && m.contains(ev.relatedTarget)) return;
+  var ta = document.getElementById('eml-texto'); if (ta) { ta.style.borderColor = '#cbd5e1'; ta.style.background = ''; }
+}
 function _emlSolto(ev) {
   ev.preventDefault();
+  var ta0 = document.getElementById('eml-texto'); if (ta0) { ta0.style.borderColor = '#cbd5e1'; ta0.style.background = ''; }
   var ta = document.getElementById('eml-texto'), arqs = ev.dataTransfer && ev.dataTransfer.files ? Array.prototype.slice.call(ev.dataTransfer.files) : [];
   var xmls = arqs.filter(function (f) { return /\.xml$/i.test(f.name); });
   arqs = arqs.filter(function (f) { return !/\.xml$/i.test(f.name); });
