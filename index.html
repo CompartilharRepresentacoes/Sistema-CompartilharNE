@@ -14545,7 +14545,7 @@ function _tvpExportarExcel() {
   var imgRedeId = (d.rede && d.rede.foto) ? _drCarregarImagemWorkbook(wb, d.rede.foto) : null;
   _xlLogosTopo(ws, wb, [imgRedeId, imgFornId], totalCols, linhaHeader.number - 1);
 
-  var nomeArquivo = 'Tabela_Preco_' + _cpNorm(d.t.nome || d.t.codigo || 'export').replace(/\s+/g, '_') + '.xlsx';
+  var nomeArquivo = _arqNome('Tabela Preco ' + (d.t.nome || d.t.codigo || 'export')) + '.xlsx';
   wb.xlsx.writeBuffer().then(function (buffer) {
     var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     var url = URL.createObjectURL(blob);
@@ -15130,7 +15130,7 @@ function confirmarExportTabPrecoForn() {
   var wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Tabela de Preço');
   try {
-    XLSX.writeFile(wb, 'tabela_preco_' + fornNome.replace(/[^\wÀ-ÿ ]/g,'').trim().replace(/\s+/g,'_') + '.xlsx');
+    XLSX.writeFile(wb, _arqNome('Tabela Preco ' + fornNome.replace(/[^\wÀ-ÿ ]/g,'')) + '.xlsx');
     fecharModalTabPrecoExportForn();
   } catch (err) {
     alert('Erro ao gerar Excel: ' + (err && err.message ? err.message : err));
@@ -15417,7 +15417,7 @@ function tpcliBaixarExcel() {
   var wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Tabela');
   var nomeCli = _cpNorm(_cpSemColchetes(cliente.nome_fantasia||cliente.razao_social||'cliente')).replace(/\s+/g,'_');
-  try { XLSX.writeFile(wb, 'tabela_preco_' + nomeCli + '.xlsx'); }
+  try { XLSX.writeFile(wb, _arqNome('Tabela Preco ' + nomeCli) + '.xlsx'); }
   catch (err) { alert('Erro ao gerar Excel: ' + (err && err.message ? err.message : err)); }
 }
 function tpcliBaixarPdf() {
@@ -32308,7 +32308,8 @@ function exportarRelatorioCsv() {
   var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'relatorio_' + (_relAtual || 'dados') + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  var _relTit = (RELATORIOS.find(function(x){ return x.id === _relAtual; }) || {}).titulo || 'dados';
+  a.download = _arqNome('Relatorio ' + _relTit + ' ' + new Date().toISOString().slice(0,10)) + '.csv';
   document.body.appendChild(a); a.click();
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
@@ -36610,7 +36611,7 @@ function _sugGerarExcel() {
   var imgFornId = forn.foto ? _drCarregarImagemWorkbook(wb, forn.foto) : null;
   _xlLogosTopo(ws, wb, [imgRedeId, imgFornId], totalCols, linhaHeader.number - 1);
 
-  var nomeArquivo = 'Sugestao_Pedido_' + fornNome.replace(/[^a-zA-Z0-9]+/g, '_') + '_' + escopoNome.replace(/[^a-zA-Z0-9]+/g, '_') + '.xlsx';
+  var nomeArquivo = _arqNome('Sugestao Pedido ' + fornNome + ' ' + ((rede && rede.nome) ? rede.nome : escopoNome)) + '.xlsx';
   wb.xlsx.writeBuffer().then(function(buffer){
     var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     var url = URL.createObjectURL(blob);
@@ -38056,8 +38057,12 @@ function _xlRegistrarDim(wb, id, dataUrl) {
 function _xlFit(wb, id, maxW, maxH) {
   var d = wb && wb.__dims ? wb.__dims[id] : null;
   if (!d || !d.w || !d.h) return { w: maxW, h: maxH };
-  var k = Math.min(maxW / d.w, maxH / d.h, 2);
+  var k = Math.min(maxW / d.w, maxH / d.h);   // sem limite de ampliacao: todas as logos ocupam o mesmo espaco
   return { w: Math.max(1, Math.round(d.w * k)), h: Math.max(1, Math.round(d.h * k)) };
+}
+// Nome de arquivo para download: sem acento, sem "_" e sem caracteres que o Windows nao aceita
+function _arqNome(txt) {
+  return String(txt == null ? '' : txt).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[_\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
 }
 // Coloca as logos (esquerda -> direita) alinhadas a direita do topo da planilha, lado a lado, sem sobrepor.
 // nTopo = quantidade de linhas acima do cabecalho da tabela (a altura delas e ajustada para caber a logo).
@@ -38392,7 +38397,7 @@ function _drGerarExcelReal(grupos, dataDe, dataAte) {
 
   var nomesFornecedores = [];
   grupos.forEach(function (g) { if (g.fornNome && nomesFornecedores.indexOf(g.fornNome) === -1) nomesFornecedores.push(g.fornNome); });
-  var nomeArquivo = 'Dados_Representadas_' + nomesFornecedores.join('_').replace(/[^a-zA-Z0-9]+/g, '_') + '.xlsx';
+  var nomeArquivo = _arqNome('Dados Representadas ' + nomesFornecedores.join(' ')) + '.xlsx';
   return wb.xlsx.writeBuffer().then(function (buffer) {
     var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     var url = URL.createObjectURL(blob);
