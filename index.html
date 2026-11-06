@@ -29087,6 +29087,7 @@ function _emlFaturadoNf(forn, cliId, nf) {
         }
         var cur = mapa[it.prodId] || { q: 0, doPedido: false };
         cur.q += q; cur.doPedido = cur.doPedido || doPedido;
+        if (Number(it.precoFat) > 0) cur.pf = Number(it.precoFat);
         mapa[it.prodId] = cur;
       });
     });
@@ -29205,6 +29206,15 @@ function _emlCompletar(r) {
   try { _emlSugerirItens(r); } catch (eSg) { console.warn(eSg); }
   r.itens.forEach(function (x) {
     var fi = (r.fat && x.p) ? r.fat[x.p.id] : null; x.fat = fi ? fi.q : null; x.fatPed = !!(fi && fi.doPedido); if (x.fatPed) r.fatPed = true;
+    // Algumas NFs de origem guardam a quantidade em CAIXAS (preco da caixa). A devolucao vem em PC: converte pela quantidade por caixa do cadastro.
+    x.fatCx = false;
+    if (fi && x.fat != null && !fi.doPedido) {
+      var _qcx = parseFloat(String(x.p.quant || '').replace(',', '.')) || 0, _un = String(x.p.unidade || '').trim().toUpperCase();
+      var _pu = Number(x.it.qtd) > 0 ? (Number(x.it.valor) || 0) / Number(x.it.qtd) : 0;
+      if (_un !== 'KG' && _un !== 'CX' && _qcx > 1 && _pu > 0 && fi.pf > 0 && Math.abs(fi.pf / _pu - _qcx) / _qcx <= 0.05) {
+        x.fat = Math.round(x.fat * _qcx * 100) / 100; x.fatCx = true; r.fatCx = true;
+      }
+    }
     x.excede = (x.fat != null && x.it.qtd > x.fat + 0.0001);
     if (x.excede) r.excede = true;
   });
@@ -29369,6 +29379,7 @@ function _emlRender() {
       }).join('')
       + '<div style="display:grid;grid-template-columns:1fr 82px;padding:6px 8px;border-top:2px solid #272A4A;background:#f8fafc;font-weight:800"><span>Total da NFD</span><span style="text-align:right">' + _pedFmtMoeda(r.total) + '</span></div></div>';
     var rodape = r.fatPed ? '<div style="margin-top:4px;font-size:10.5px;color:#94a3b8">* quantidade calculada a partir do pedido (a NF importada do Pontti guarda quantidade proporcional)</div>' : '';
+    if (r.fatCx) rodape += '<div style="margin-top:4px;font-size:10.5px;color:#94a3b8">A NF de origem foi faturada em caixas; o "Faturou" já está convertido para PC (quantidade por caixa do cadastro do produto).</div>';
     if (r.ok && cancelada) {
       rodape += '<div style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:11.5px;color:#991b1b"><b>Motivo do cancelamento (vai nas Observações):</b><br>' + _pedEsc(EML_TXT_CANCEL) + '</div>'
         + '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:#64748b">Motivo da devolução (opcional): <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid #cbd5e1;border-radius:7px;padding:4px 8px;font-size:12px"><option value="">—</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></div>';
