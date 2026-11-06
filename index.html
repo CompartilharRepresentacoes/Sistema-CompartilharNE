@@ -32018,6 +32018,7 @@ var RELATORIOS = [
   { id:'curva-abc', nivel:'analitico', icon:'ti-chart-pie', titulo:'Curva ABC de clientes', desc:'Classificação A/B/C por faturamento.', campos:['data','categoria','subcategoria','fornecedor','vendedor','uf','cliente'] },
   { id:'vendas-uf', nivel:'analitico', icon:'ti-map-pin', titulo:'Vendas por Rede e UF', desc:'Faturamento por rede, sub-rede e estado.', campos:['data','uf','categoria','subcategoria','fornecedor','vendedor','cliente'] },
   { id:'clientes-completo', nivel:'analitico', icon:'ti-users-group', titulo:'Relatório de Clientes', desc:'Compras, prazo, mix, devoluções e cadastro de cada cliente. Você escolhe as colunas.', campos:[] },
+  { id:'produtos-completo', nivel:'analitico', icon:'ti-package', titulo:'Relatório de Produtos', desc:'Vendas, clientes que compram e histórico de cada produto. Você escolhe as colunas.', campos:[] },
   { id:'ticket-vendedor', nivel:'analitico', icon:'ti-users', titulo:'Pedido médio por vendedor', desc:'Valor faturado e pedido médio por vendedor.', campos:['data','vendedor','fornecedor','uf','cliente','categoria','subcategoria'] },
   { id:'prazo-entrega', nivel:'analitico', icon:'ti-truck', titulo:'Prazo prometido vs. realizado', desc:'Dias de diferença por UF e transportadora.', campos:['data','uf','fornecedor','vendedor','cliente'] },
   { id:'meta-realizado', nivel:'gerencial', icon:'ti-target', titulo:'Faturamento vs. meta', desc:'Realizado por fornecedor e mês, comparado à meta.', campos:['data','vendedor','fornecedor'] },
@@ -32218,6 +32219,7 @@ function abrirRelatorio(id) {
   document.getElementById('rel-tipo-view').style.display = 'none';
   document.getElementById('rel-detalhe-view').style.display = 'block';
   if (id === 'clientes-completo') { try { _rcMontar(); } catch (eRc) { console.error(eRc); } }
+  if (id === 'produtos-completo') { try { _rpMontar(); } catch (eRp) { console.error(eRp); } }
 }
 function voltarRelatorios() {
   document.getElementById('rel-detalhe-view').style.display = 'none';
@@ -32231,6 +32233,7 @@ function limparFiltrosRelatorio() {
   var _ag = document.getElementById('rel-f-agrupar'); if (_ag) _ag.value = 'pedido';
   _relAtualizarSubcategorias();
   if (_relAtual === 'clientes-completo') { try { _rcMontar(); } catch (eRc) { console.error(eRc); } }
+  if (_relAtual === 'produtos-completo') { try { _rpMontar(); } catch (eRp) { console.error(eRp); } }
 }
 // Lista do campo Fornecedor dos relatorios: abre ao clicar, filtra ao digitar (nome ou codigo, sem acento).
 function _relFornFechar() { var d = document.getElementById('rel-f-fornecedor-lista'); if (d) d.style.display = 'none'; }
@@ -32385,6 +32388,7 @@ function _relBaseFaturas(f) {
 
 function gerarRelatorio() {
   if (_relAtual === 'clientes-completo') { _rcGerar(); return; }
+  if (_relAtual === 'produtos-completo') { _rpGerar(); return; }
   var f = _relFiltros();
   // v528: periodo anterior ao corte -> carrega so os anos do periodo e gera de novo
   var _iniCarga = f.dataDe, _histAnos = ({ 'comparativo-anual': 1, 'sazonalidade': 2 })[_relAtual];
@@ -34218,6 +34222,283 @@ function _rcVerPrazo(i) {
   _rcModal('Prazos por fornecedor', _pedEsc(r.nome) + ' · prazo médio ' + String(r.prazoMed).replace('.', ',') + ' dias', _relMini([{ label: 'Fornecedor' }, { label: 'Prazo', right: true }], r.prazos.map(function (p) { return [_pedEsc(p[0]), _pedEsc(p[1] || '—')]; })));
 }
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape') _rcFecharModal(); });
+
+// ===== Relatório de Produtos: filtros e colunas em grupos em cascata (abrir um fecha o outro) =====
+var _rpAberto = 'filtros';
+var _rpDados = null;
+var _rpCtx = null;
+var _rpGrupos = [
+  { id: 'cad', nome: 'Cadastro', cols: [
+    { k: 'cod', t: 'Código', w: 90, on: 1 }, { k: 'nome', t: 'Nome', w: 250, on: 1 }, { k: 'forn', t: 'Fábrica', w: 130, on: 1 },
+    { k: 'cat', t: 'Categoria', w: 120, on: 0 }, { k: 'ean', t: 'EAN', w: 130, on: 0 }, { k: 'un', t: 'Unidade', w: 80, on: 0 },
+    { k: 'peso', t: 'Peso (kg)', w: 80, on: 0 }, { k: 'qcx', t: 'Qtd. por caixa', w: 100, on: 0 }, { k: 'sit', t: 'Situação', w: 80, on: 0 },
+    { k: 'foto', t: 'Foto', w: 60, on: 0 }, { k: 'dtcad', t: 'Data de cadastro', w: 110, on: 0 } ] },
+  { id: 'vend', nome: 'Vendas (no período)', cols: [
+    { k: 'kg', t: 'Quantidade vendida (kg)', w: 140, on: 1 }, { k: 'fat', t: 'Faturamento', w: 130, on: 1 },
+    { k: 'part', t: '% do total da fábrica', w: 120, on: 0 }, { k: 'pmkg', t: 'Preço médio por kg', w: 120, on: 0 },
+    { k: 'pmcx', t: 'Preço médio por caixa', w: 130, on: 0 }, { k: 'ped', t: 'Pedidos e NFs', w: 110, on: 0 },
+    { k: 'vr', t: 'Variação x período anterior', w: 130, on: 0 }, { k: 'rank', t: 'Ranking (na fábrica / geral)', w: 140, on: 0 } ] },
+  { id: 'cli', nome: 'Clientes', cols: [
+    { k: 'cli', t: 'Clientes que compram', w: 150, on: 1 }, { k: 'par', t: 'Clientes que pararam', w: 130, on: 1 },
+    { k: 'nun', t: 'Clientes que nunca compraram', w: 150, on: 0 }, { k: 'redes', t: 'Redes que compram', w: 190, on: 0 },
+    { k: 'ufs', t: 'UFs que compram', w: 130, on: 0 }, { k: 'maior', t: 'Maior cliente', w: 180, on: 0 } ] },
+  { id: 'hist', nome: 'Histórico e situação', cols: [
+    { k: 'prim', t: 'Primeira venda', w: 100, on: 0 }, { k: 'ult', t: 'Última venda', w: 100, on: 1 },
+    { k: 'dias', t: 'Dias sem vender', w: 100, on: 1 }, { k: 'freq', t: 'Frequência de venda', w: 130, on: 0 },
+    { k: 'linha', t: 'Situação no mix', w: 130, on: 0 } ] }
+];
+
+function _rpMontar() {
+  _rpAberto = 'filtros'; _rpDados = null;
+  var forns = (getFornecedores() || []).map(function (x) { return _cpSemColchetes(x.nome_fantasia || x.razao_social || ''); }).filter(Boolean).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
+  var fornIds = {}; (getFornecedores() || []).forEach(function (x) { fornIds[_cpSemColchetes(x.nome_fantasia || x.razao_social || '')] = x.id; });
+  window._rpFornIds = fornIds;
+  var cats = (getCatProdutos() || []).filter(function (c) { return !c.pai; }).sort(function (a, b) { return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR'); });
+  var redes = getCatClientes().filter(function (c) { return !c.pai; });
+  var vends = getVendedoresAtivos();
+  var st = _rcEstiloSel();
+  var filtros = '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">'
+    + '<div style="grid-column:1 / -1">' + _rcCampo('Buscar produto', '<input id="rp-f-busca" placeholder="Código, nome ou EAN..." autocomplete="off" onkeydown="if(event.key===\'Enter\')gerarRelatorio()" oninput="_rpResumo()" style="' + st + '">') + '</div>'
+    + _rcCampo('Fábrica', '<select id="rp-f-forn" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option>' + forns.map(function (n) { return '<option value="' + _pedEsc(n) + '">' + _pedEsc(n) + '</option>'; }).join('') + '</select>')
+    + _rcCampo('Categoria', '<select id="rp-f-cat" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option>' + cats.map(function (c) { return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('') + '</select>')
+    + _rcCampo('Status', '<select id="rp-f-status" onchange="_rpResumo()" style="' + st + '"><option value="ativo">Ativos</option><option value="inativo">Inativos</option><option value="">Todos</option></select>')
+    + _rcCampo('Período', '<select id="rp-f-per" onchange="_rpPerMudou();_rpResumo()" style="' + st + '"><option value="">Todo o histórico</option><option value="12">Últimos 12 meses</option><option value="6">Últimos 6 meses</option><option value="3">Últimos 3 meses</option><option value="datas">Escolher datas...</option></select>')
+    + _rcCampo('UF (onde vendeu)', '<select id="rp-f-uf" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option><option>AL</option><option>BA</option><option>PB</option><option>PE</option><option>RN</option><option>SE</option></select>')
+    + _rcCampo('Rede (quem comprou)', '<select id="rp-f-rede" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option>' + redes.map(function (c) { return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('') + '</select>')
+    + _rcCampo('Vendedor', '<select id="rp-f-vend" onchange="_rpResumo()" style="' + st + '"><option value="">Todos</option>' + vends.map(function (v) { return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('') + '</select>')
+    + _rcCampo('Situação no mix', '<select id="rp-f-mix" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option><option value="linha">Em linha (vendeu nos últimos 30 dias)</option><option value="semgiro">Sem giro (30+ dias sem vender)</option><option value="nunca">Nunca faturou</option></select>')
+    + '<div id="rp-datas" style="display:none;grid-column:1 / -1;gap:8px;align-items:center;flex-wrap:wrap"><span style="font-size:11px;font-weight:600;color:#64748b">De</span><input id="rp-f-de" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;width:100px"><span style="font-size:11px;font-weight:600;color:#64748b">até</span><input id="rp-f-ate" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;width:100px"></div>'
+    + '</div>'
+    + '<div style="margin-top:10px;display:flex;align-items:center;gap:10px"><button onclick="gerarRelatorio()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:11.5px;font-weight:700;cursor:pointer">Gerar relatório</button>'
+    + '<span style="font-size:10.5px;color:#64748b">Com UF, Rede ou Vendedor escolhidos, só entram produtos que foram vendidos nesse recorte.</span></div>';
+  document.getElementById('rel-resultado').innerHTML = '<div id="rp-painel"></div><div id="rp-tabela" style="margin-top:12px"><div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:40px 20px;text-align:center;font-size:12px;color:#94a3b8">Escolha os filtros e as colunas e clique em "Gerar relatório"</div></div>';
+  var grupos = [{ id: 'filtros', nome: 'Filtros', corpo: filtros }];
+  _rpGrupos.forEach(function (g, gi) {
+    var corpo = '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 14px">' + g.cols.map(function (c, ci) {
+      return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#1e293b;cursor:pointer"><input type="checkbox" id="rp-c-' + gi + '-' + ci + '" ' + (c.on ? 'checked' : '') + ' onchange="_rpMarcar(' + gi + ',' + ci + ',this.checked)">' + _pedEsc(c.t) + '</label>';
+    }).join('') + '</div>';
+    grupos.push({ id: g.id, nome: g.nome, corpo: corpo, gi: gi });
+  });
+  document.getElementById('rp-painel').innerHTML = grupos.map(function (g) {
+    var extra = g.gi != null ? '<span onclick="event.stopPropagation();_rpTodas(' + g.gi + ')" style="font-size:11px;color:#2563eb;margin-left:12px;font-weight:600">marcar todas</span>' : '';
+    return '<div class="rp-g" data-g="' + g.id + '" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04)">'
+      + '<div onclick="_rpAbrir(\'' + g.id + '\')" style="display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:#f8fafc;user-select:none"><span class="rp-seta" style="font-size:11px;color:#94a3b8;display:inline-block;transition:transform .15s">&#9654;</span><b style="font-size:12.5px;color:#272A4A">' + g.nome + '</b>' + extra + '<span id="rp-res-' + g.id + '" style="margin-left:auto;font-size:11px;color:#64748b"></span></div>'
+      + '<div class="rp-corpo" style="display:none;padding:12px 14px;border-top:1px solid #e5e7eb">' + g.corpo + '</div></div>';
+  }).join('');
+  _rpAplicarAbertos(); _rpResumo();
+}
+function _rpAplicarAbertos() {
+  document.querySelectorAll('#rp-painel .rp-g').forEach(function (el) {
+    var on = el.getAttribute('data-g') === _rpAberto;
+    el.querySelector('.rp-corpo').style.display = on ? 'block' : 'none';
+    el.querySelector('.rp-seta').style.transform = on ? 'rotate(90deg)' : 'none';
+  });
+}
+function _rpAbrir(id) { _rpAberto = (_rpAberto === id) ? null : id; _rpAplicarAbertos(); }
+function _rpPerMudou() {
+  var d = document.getElementById('rp-datas'), p = (document.getElementById('rp-f-per') || {}).value;
+  if (d) d.style.display = p === 'datas' ? 'flex' : 'none';
+}
+function _rpLerFiltros() {
+  function v(id) { var el = document.getElementById(id); return el ? String(el.value || '').trim() : ''; }
+  var fn = v('rp-f-forn');
+  return { busca: v('rp-f-busca'), fornNome: fn, fornId: fn ? (window._rpFornIds || {})[fn] : '', cat: v('rp-f-cat'), status: v('rp-f-status'), per: v('rp-f-per'), deTxt: v('rp-f-de'), ateTxt: v('rp-f-ate'), uf: v('rp-f-uf'), rede: v('rp-f-rede'), vend: v('rp-f-vend'), mix: v('rp-f-mix') };
+}
+function _rpResumo() {
+  var el = document.getElementById('rp-res-filtros'); if (!el) return;
+  var F = _rpLerFiltros(), t = [];
+  var tx = function (id) { var s = document.getElementById(id); return s ? s.options[s.selectedIndex].text : ''; };
+  if (F.busca) t.push('"' + F.busca + '"');
+  if (F.fornNome) t.push('Fábrica: ' + F.fornNome);
+  if (F.cat) t.push('Categoria: ' + tx('rp-f-cat'));
+  t.push(tx('rp-f-status'));
+  if (F.per) t.push(tx('rp-f-per'));
+  if (F.uf) t.push('UF: ' + F.uf);
+  if (F.rede) t.push('Rede: ' + tx('rp-f-rede'));
+  if (F.vend) t.push('Vendedor: ' + tx('rp-f-vend'));
+  if (F.mix) t.push(tx('rp-f-mix'));
+  el.textContent = t.join(' · ');
+  _rpGrupos.forEach(function (g) { var r = document.getElementById('rp-res-' + g.id); if (r) r.textContent = g.cols.filter(function (c) { return c.on; }).length + ' de ' + g.cols.length + ' colunas marcadas'; });
+}
+function _rpMarcar(gi, ci, v) { _rpGrupos[gi].cols[ci].on = v ? 1 : 0; _rpResumo(); _rpRenderTabela(); }
+function _rpTodas(gi) {
+  var g = _rpGrupos[gi], tudo = g.cols.every(function (c) { return c.on; });
+  g.cols.forEach(function (c, ci) { c.on = tudo ? 0 : 1; var cb = document.getElementById('rp-c-' + gi + '-' + ci); if (cb) cb.checked = !!c.on; });
+  _rpResumo(); _rpRenderTabela();
+}
+
+function _rpGerar() {
+  var F = _rpLerFiltros(), per = _rcPeriodo(F);
+  var alvo = document.getElementById('rp-tabela');
+  if (per.de && per.de < _fsPedidosCorte && !_fsPeriodoCarregado(per.de, per.ate || _fsPedidosCorte)) {
+    var _idCarga = _relAtual;
+    if (alvo) alvo.innerHTML = '<div style="padding:30px;text-align:center;font-size:12px;color:#64748b">Carregando pedidos de ' + per.de.slice(0, 4) + '…</div>';
+    _fsCarregarPedidosPeriodo(per.de, per.ate || _fsPedidosCorte).then(function (ok) {
+      if (ok && _relAtual === _idCarga) _rpGerar();
+      else if (!ok && alvo) alvo.innerHTML = '<div style="padding:30px;text-align:center;font-size:12px;color:#b91c1c">Não foi possível carregar os pedidos antigos. Tente novamente.</div>';
+    });
+    return;
+  }
+  if (alvo) alvo.innerHTML = '<div style="padding:30px;text-align:center;font-size:12px;color:#64748b">Gerando…</div>';
+  setTimeout(function () {
+    try { _rpDados = _rpCalcular(F, per); } catch (e) { console.error(e); if (alvo) alvo.innerHTML = '<div style="padding:30px;text-align:center;font-size:12px;color:#b91c1c">Erro ao gerar o relatório: ' + _pedEsc(e && e.message ? e.message : e) + '</div>'; return; }
+    _rpAberto = null; _rpAplicarAbertos();
+    _rpRenderTabela();
+  }, 20);
+}
+
+function _rpCalcular(F, per) {
+  var hoje = _relHojeISO();
+  var catCli = {}; getCatClientes().forEach(function (c) { catCli[c.id] = c; });
+  var catProd = {}; (getCatProdutos() || []).forEach(function (c) { catProd[c.id] = c; });
+  var forns = getFornecedores() || [], fornById = {}, fornByNome = {};
+  forns.forEach(function (x) { fornById[x.id] = x; fornByNome[_cpNorm(x.nome_fantasia || x.razao_social || '')] = x; });
+  var nomeForn = function (id) { var x = fornById[id]; return x ? _cpSemColchetes(x.nome_fantasia || x.razao_social || '') : ''; };
+  var fidDoPed = function (p) { return p.fornecedorId || (fornByNome[_cpNorm(p.fornecedorNome || '')] || {}).id || ''; };
+  var prods = getProdutos(), pm = {}, pcod = {};
+  prods.forEach(function (p) { pm[p.id] = p; pcod[String(p.fornecedor) + '|' + String(p.codigo || '').trim()] = p; });
+  var cli = {}; getClientes().forEach(function (c) {
+    var cat = catCli[c.categoria], redeId = '', redeNome = '';
+    if (cat && cat.pai && catCli[cat.pai]) { redeId = cat.pai; redeNome = catCli[cat.pai].nome || ''; } else if (cat) { redeId = cat.id; redeNome = cat.nome || ''; }
+    cli[String(c.id)] = { nome: _cpSemColchetes(c.nome_fantasia || c.razao_social || ''), ativo: (c.ativo || 'Sim') !== 'Não', redeId: redeId, rede: redeNome, uf: c.ent_estado || c.estado || '' };
+  });
+
+  var prevDe = '', prevAte = '';
+  if (per.de && per.ate) { var dias = _relDiasEntre(per.de, per.ate) + 1; var d1 = new Date(per.de + 'T12:00:00'); d1.setDate(d1.getDate() - 1); prevAte = d1.toISOString().slice(0, 10); d1.setDate(d1.getDate() - dias + 1); prevDe = d1.toISOString().slice(0, 10); }
+
+  var linhas = _relBaseFaturas({ uf: F.uf, vendedor: F.vend });
+  var H = {}, P = {}, FC = {}, totForn = {};   // historico por produto, periodo por produto, clientes por fabrica, total R$ por fabrica no periodo
+  linhas.forEach(function (l) {
+    var ck = String(l.cliente.id || l.pedido.clienteId), ci = cli[ck] || { nome: l.pedido.clienteNome || '', ativo: true, redeId: '', rede: '', uf: '' };
+    if (F.rede && String(ci.redeId) !== String(F.rede)) return;
+    var dt = l.fatura.data || '', fid = fidDoPed(l.pedido);
+    if (fid) (FC[fid] = FC[fid] || {})[ck] = 1;
+    var emP = (!per.de || dt >= per.de) && (!per.ate || dt <= per.ate);
+    var emA = prevDe && dt >= prevDe && dt <= prevAte;
+    (l.fatura.itens || []).forEach(function (i) {
+      var q = Number(i.qtd) || 0; if (!(q > 0)) return;
+      var pr = i.prodId != null ? pm[i.prodId] : pcod[String(fid) + '|' + String(i.prodCodigo || '').trim()];
+      if (!pr) return;
+      var pid = pr.id, v = q * (Number(i.precoFat) || 0), kg = _relPesoProd(pr) * q;
+      var h = H[pid] = H[pid] || { ult: '', prim: '', cli: {} };
+      if (dt > h.ult) h.ult = dt;
+      if (!h.prim || dt < h.prim) h.prim = dt;
+      if (!h.cli[ck] || dt > h.cli[ck]) h.cli[ck] = dt;
+      if (emA) { var a = (P[pid] = P[pid] || { v: 0, kg: 0, q: 0, nf: {}, peds: {}, cli: {}, ant: 0 }); a.ant += kg; }
+      if (!emP) return;
+      var o = P[pid] = P[pid] || { v: 0, kg: 0, q: 0, nf: {}, peds: {}, cli: {}, ant: 0 };
+      o.v += v; o.kg += kg; o.q += q;
+      o.nf[String(l.pedido.id) + '|' + (l.fatura.numDuplicata || l.fatura.data || '')] = 1;
+      var pk = String(l.pedido.id); if (!o.peds[pk] || dt < o.peds[pk]) o.peds[pk] = dt;
+      var cc = o.cli[ck] = o.cli[ck] || { v: 0, kg: 0, ult: '' }; cc.v += v; cc.kg += kg; if (dt > cc.ult) cc.ult = dt;
+      var tf = pr.fornecedor; totForn[tf] = (totForn[tf] || 0) + v;
+    });
+  });
+
+  // ranking por kg (todos os produtos com venda no periodo)
+  var todosKg = Object.keys(P).filter(function (id) { return P[id].kg > 0; }).map(function (id) { return { id: id, kg: P[id].kg, f: pm[id] ? pm[id].fornecedor : '' }; }).sort(function (a, b) { return b.kg - a.kg; });
+  var rkG = {}, rkF = {}, cF = {}; todosKg.forEach(function (x, n) { rkG[x.id] = n + 1; cF[x.f] = (cF[x.f] || 0) + 1; rkF[x.id] = cF[x.f]; });
+
+  var universo = function (fid) { return Object.keys(FC[fid] || {}).filter(function (ck) { return cli[ck] && cli[ck].ativo; }); };
+  var busca = _cpNorm(F.busca || ''), temRecorte = !!(F.uf || F.rede || F.vend), rows = [];
+  prods.forEach(function (p) {
+    var ativo = (p.ativo || 'Sim') !== 'Não';
+    if (F.status === 'ativo' && !ativo) return;
+    if (F.status === 'inativo' && ativo) return;
+    if (F.fornId && String(p.fornecedor) !== String(F.fornId)) return;
+    if (F.cat && String(p.categoria) !== String(F.cat) && String(p.subcategoria) !== String(F.cat)) return;
+    if (busca && _cpNorm((p.codigo || '') + ' ' + (p.nome || '') + ' ' + (p.ean || '')).indexOf(busca) === -1) return;
+    var h = H[p.id], o = P[p.id];
+    if (temRecorte && !h) return;
+    var dias = h && h.ult ? _relDiasEntre(h.ult, hoje) : null;
+    var linha = !ativo ? 'Inativo' : (!h ? 'Nunca faturou' : (dias > 30 ? 'Sem giro' : 'Em linha'));
+    if (F.mix === 'linha' && linha !== 'Em linha') return;
+    if (F.mix === 'semgiro' && linha !== 'Sem giro') return;
+    if (F.mix === 'nunca' && linha !== 'Nunca faturou') return;
+    var uni = universo(p.fornecedor), compram = o ? Object.keys(o.cli) : [];
+    var pararam = h ? Object.keys(h.cli).filter(function (ck) { return cli[ck] && cli[ck].ativo && _relDiasEntre(h.cli[ck], hoje) > 60; }) : [];
+    var nunca = uni.filter(function (ck) { return !(h && h.cli[ck]); });
+    var redes = {}, ufs = {}, maior = '', maiorV = 0;
+    compram.forEach(function (ck) { var c = cli[ck]; if (!c) return; if (c.rede) redes[c.rede] = 1; if (c.uf) ufs[c.uf] = 1; if (o.cli[ck].v > maiorV) { maiorV = o.cli[ck].v; maior = c.nome; } });
+    var lst = function (m) { var a = Object.keys(m).sort(); return a.length > 3 ? a.slice(0, 3).join(', ') + ' (+' + (a.length - 3) + ')' : a.join(', '); };
+    var freq = '—';
+    if (o) { var ds = Object.keys(o.peds).map(function (x) { return o.peds[x]; }).sort(); ds = ds.filter(function (x, i) { return i === 0 || x !== ds[i - 1]; }); if (ds.length >= 2) freq = Math.round(_relDiasEntre(ds[0], ds[ds.length - 1]) / (ds.length - 1)); }
+    var vr = null; if (prevDe) { var ant = o ? o.ant : (P[p.id] ? P[p.id].ant : 0); vr = ant > 0 ? Math.round(((o ? o.kg : 0) - ant) / ant * 100) : (o && o.kg > 0 ? 'novo' : null); }
+    var cat = catProd[p.categoria], dtc = String(p.criadoEm || p.dtCadastro || ''); dtc = /^\d{4}-\d{2}-\d{2}/.test(dtc) ? _relFmtDataBR(dtc.slice(0, 10)) : dtc;
+    rows.push({
+      id: p.id, cod: p.codigo || '', nome: _cpSemColchetes(p.nome || ''), forn: nomeForn(p.fornecedor), cat: cat ? (cat.nome || '') : (p.categoria || ''), ean: p.ean || '', un: p.unidade || '', peso: p.peso || '', qcx: p.quant || '',
+      sit: ativo ? 'Ativo' : 'Inativo', foto: p.foto ? 'Sim' : 'Não', dtcad: dtc,
+      kg: o ? o.kg : 0, fat: o ? o.v : 0, part: (o && totForn[p.fornecedor]) ? o.v / totForn[p.fornecedor] * 100 : 0, pmkg: (o && o.kg > 0) ? o.v / o.kg : null, pmcx: (o && o.q > 0) ? o.v / o.q : null,
+      nPed: o ? Object.keys(o.peds).length : 0, nNf: o ? Object.keys(o.nf).length : 0, vr: vr, rkG: rkG[p.id] || 0, rkF: rkF[p.id] || 0,
+      nCli: compram.length, nUni: uni.length, nPar: pararam.length, nNun: nunca.length, redes: lst(redes), ufs: lst(ufs), maior: maior,
+      prim: h ? h.prim : '', ult: h ? h.ult : '', dias: dias, freq: freq, linha: linha, fid: p.fornecedor
+    });
+  });
+  rows.sort(function (a, b) { return a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }); });
+  _rpCtx = { cli: cli, H: H, P: P, universo: universo, hoje: hoje };
+  return { rows: rows, per: per, nota: 'Pedidos carregados no sistema desde ' + _relFmtDataBR(_fsPedidosCorte) + ' (para períodos mais antigos, escolha as datas).' };
+}
+
+function _rpCel(k, r, i) {
+  var s = function (x) { return _pedEsc(x == null ? '' : String(x)); }, tr = '—';
+  var olho = function (t, titulo) { return '<span onclick="event.stopPropagation();_rpVerLista(' + i + ',\'' + t + '\')" title="' + titulo + '" style="cursor:pointer;color:#2563eb;margin-left:6px;vertical-align:-2px">' + _rcOlho + '</span>'; };
+  switch (k) {
+    case 'cod': return '<b>' + s(r.cod) + '</b>';
+    case 'nome': return s(r.nome); case 'forn': return s(r.forn) || tr; case 'cat': return s(r.cat) || tr; case 'ean': return s(r.ean) || tr;
+    case 'un': return s(r.un) || tr; case 'peso': return s(r.peso) || tr; case 'qcx': return s(r.qcx) || tr; case 'sit': return s(r.sit); case 'foto': return s(r.foto); case 'dtcad': return s(r.dtcad) || tr;
+    case 'kg': return r.kg > 0 ? _relNum(r.kg, 1) + ' kg' : tr;
+    case 'fat': return r.fat > 0 ? _pedFmtMoeda(r.fat) : tr;
+    case 'part': return r.fat > 0 ? _relNum(r.part, 1) + '%' : tr;
+    case 'pmkg': return r.pmkg == null ? tr : _pedFmtMoeda(r.pmkg);
+    case 'pmcx': return r.pmcx == null ? tr : _pedFmtMoeda(r.pmcx);
+    case 'ped': return r.nPed ? r.nPed + ' pedidos<br><span style="color:#64748b;font-size:11px">' + r.nNf + ' NFs</span>' : tr;
+    case 'vr': return r.vr == null ? tr : (r.vr === 'novo' ? 'novo' : '<span style="color:' + (r.vr < 0 ? '#dc2626' : '#16a34a') + ';font-weight:700">' + (r.vr > 0 ? '+' : '') + r.vr + '%</span>');
+    case 'rank': return r.rkG ? r.rkF + 'º / ' + r.rkG + 'º' : tr;
+    case 'cli': return r.nUni ? r.nCli + ' de ' + r.nUni + ' (' + Math.round(r.nCli / r.nUni * 100) + '%)' + (r.nCli ? olho('cli', 'Ver clientes que compram') : '') : (r.nCli ? String(r.nCli) + olho('cli', 'Ver clientes que compram') : tr);
+    case 'par': return r.nPar ? r.nPar + olho('par', 'Ver clientes que pararam') : '0';
+    case 'nun': return r.nNun ? r.nNun + olho('nun', 'Ver clientes que nunca compraram') : '0';
+    case 'redes': return s(r.redes) || tr; case 'ufs': return s(r.ufs) || tr; case 'maior': return s(r.maior) || tr;
+    case 'prim': return r.prim ? _relFmtDataBR(r.prim) : tr; case 'ult': return r.ult ? _relFmtDataBR(r.ult) : tr;
+    case 'dias': return r.dias == null ? tr : (r.dias > 30 ? '<span style="color:#dc2626;font-weight:700">' + r.dias + '</span>' : String(r.dias));
+    case 'freq': return r.freq === '—' ? tr : 'a cada ' + r.freq + ' dias';
+    case 'linha': return s(r.linha);
+  }
+  return '';
+}
+function _rpRenderTabela() {
+  var el = document.getElementById('rp-tabela'); if (!el || !_rpDados) return;
+  var cols = []; _rpGrupos.forEach(function (g) { g.cols.forEach(function (c) { if (c.on) cols.push(c); }); });
+  var rows = _rpDados.rows;
+  var vazio = function (t) { return '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:40px 20px;text-align:center;font-size:12px;color:#94a3b8">' + t + '</div>'; };
+  if (!rows.length) { el.innerHTML = vazio('Nenhum produto para os filtros selecionados.'); return; }
+  var tot = rows.reduce(function (s, r) { return s + r.fat; }, 0), kg = rows.reduce(function (s, r) { return s + r.kg; }, 0);
+  var parados = rows.filter(function (r) { return r.sit === 'Ativo' && r.dias != null && r.dias > 30; }).length;
+  var kpis = _relKpis([{ label: 'Produtos', valor: rows.length }, { label: 'Faturado no período', valor: _pedFmtMoeda(tot) }, { label: 'Kg vendidos', valor: _relNum(kg, 0) }, { label: 'Sem vender há mais de 30 dias', valor: parados, cor: '#dc2626' }]);
+  if (!cols.length) { el.innerHTML = kpis + vazio('Marque ao menos uma coluna.'); return; }
+  var grid = cols.map(function (c) { return 'minmax(' + c.w + 'px,1fr)'; }).join(' '), minw = cols.reduce(function (s, c) { return s + c.w; }, 0);
+  var head = cols.map(function (c) { return '<div style="padding:9px 12px">' + _pedEsc(c.t) + '</div>'; }).join('');
+  var body = rows.map(function (r, i) {
+    return '<div data-relrow="1" style="display:grid;grid-template-columns:' + grid + ';border-top:1px solid #f1f5f9;font-size:12px;color:#1e293b">'
+      + cols.map(function (c) { return '<div style="padding:8px 12px;word-break:break-word">' + _rpCel(c.k, r, i) + '</div>'; }).join('') + '</div>';
+  }).join('');
+  el.innerHTML = kpis + '<div style="font-size:10.5px;color:#64748b;margin-bottom:8px">' + _pedEsc(_rpDados.nota) + ' Quantidades em kg. Primeira/última venda e dias sem vender olham todo o histórico; o restante respeita o período escolhido. Clientes = ativos que já compraram da fábrica do produto.</div>'
+    + '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);overflow-x:auto"><div style="min-width:' + minw + 'px">'
+    + '<div data-relrow="1" style="display:grid;grid-template-columns:' + grid + ';background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">' + head + '</div>' + body + '</div></div>';
+}
+function _rpVerLista(i, t) {
+  var r = _rpDados && _rpDados.rows[i], C = _rpCtx; if (!r || !C) return;
+  var h = C.H[r.id] || { cli: {} }, o = C.P[r.id] || { cli: {} }, linhas = [], titulo = '', vazio = 'Nenhum cliente.';
+  var nome = function (ck) { return C.cli[ck] ? C.cli[ck].nome : ck; };
+  if (t === 'cli') {
+    titulo = 'Clientes que compram'; linhas = Object.keys(o.cli).sort(function (a, b) { return o.cli[b].v - o.cli[a].v; }).map(function (ck) { return [nome(ck), _relNum(o.cli[ck].kg, 1) + ' kg · ' + _pedFmtMoeda(o.cli[ck].v)]; });
+  } else if (t === 'par') {
+    titulo = 'Clientes que pararam de comprar (mais de 60 dias)'; linhas = Object.keys(h.cli).filter(function (ck) { return C.cli[ck] && C.cli[ck].ativo && _relDiasEntre(h.cli[ck], C.hoje) > 60; }).sort(function (a, b) { return h.cli[a] < h.cli[b] ? -1 : 1; }).map(function (ck) { return [nome(ck), 'última compra em ' + _relFmtDataBR(h.cli[ck]) + ' (' + _relDiasEntre(h.cli[ck], C.hoje) + ' dias)']; });
+  } else {
+    titulo = 'Clientes que nunca compraram'; linhas = C.universo(r.fid).filter(function (ck) { return !h.cli[ck]; }).sort(function (a, b) { return nome(a).localeCompare(nome(b), 'pt-BR'); }).map(function (ck) { return [nome(ck), '']; });
+  }
+  var corpo = linhas.length ? linhas.map(function (l) { return '<div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12px"><span>' + _pedEsc(l[0]) + '</span><span style="color:#64748b">' + _pedEsc(l[1]) + '</span></div>'; }).join('') : '<div style="font-size:12px;color:#64748b">' + vazio + '</div>';
+  _rcModal(titulo + ' (' + linhas.length + ')', _pedEsc(r.cod + ' · ' + r.nome), corpo);
+}
 
 function _relCalcMixCliente(f) {
   var per = _relDefPeriodo(f, '90');
