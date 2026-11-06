@@ -32016,7 +32016,7 @@ var RELATORIOS = [
   { id:'vencimentos', nivel:'operacional', icon:'ti-tag', titulo:'Negociações de preço vencendo', desc:'Vigências a vencer ou já vencidas.', campos:['data','fornecedor'] },
   { id:'devolucoes', nivel:'operacional', icon:'ti-arrow-back-up', titulo:'Devoluções por motivo', desc:'Devoluções agrupadas por motivo.', campos:['data','fornecedor','cliente','uf','categoria','subcategoria'] },
   { id:'curva-abc', nivel:'analitico', icon:'ti-chart-pie', titulo:'Curva ABC de clientes', desc:'Classificação A/B/C por faturamento.', campos:['data','categoria','subcategoria','fornecedor','vendedor','uf','cliente'] },
-  { id:'vendas-uf', nivel:'analitico', icon:'ti-map-pin', titulo:'Vendas por UF e Rede', desc:'Faturamento cruzado por estado e rede.', campos:['data','uf','categoria','subcategoria','fornecedor','vendedor','cliente'] },
+  { id:'vendas-uf', nivel:'analitico', icon:'ti-map-pin', titulo:'Vendas por Rede e UF', desc:'Faturamento por rede, sub-rede e estado.', campos:['data','uf','categoria','subcategoria','fornecedor','vendedor','cliente'] },
   { id:'ticket-vendedor', nivel:'analitico', icon:'ti-users', titulo:'Pedido médio por vendedor', desc:'Valor faturado e pedido médio por vendedor.', campos:['data','vendedor','fornecedor','uf','cliente','categoria','subcategoria'] },
   { id:'prazo-entrega', nivel:'analitico', icon:'ti-truck', titulo:'Prazo prometido vs. realizado', desc:'Dias de diferença por UF e transportadora.', campos:['data','uf','fornecedor','vendedor','cliente'] },
   { id:'meta-realizado', nivel:'gerencial', icon:'ti-target', titulo:'Faturamento vs. meta', desc:'Realizado por fornecedor e mês, comparado à meta.', campos:['data','vendedor','fornecedor'] },
@@ -32296,6 +32296,9 @@ function exportarRelatorioCsv() {
       return '"' + String(c.innerText || '').replace(/^[▸▾]\s*/, '').replace(/\s+/g, ' ').trim().replace(/"/g, '""') + '"';
     }).join(';');
   }).join('\r\n');
+  if (_relAtual === 'vendas-uf' && window._relCsvVendasRedeUf) {
+    csv = window._relCsvVendasRedeUf.map(function(l){ return l.map(function(c){ return '"' + String(c).replace(/"/g, '""') + '"'; }).join(';'); }).join('\r\n');
+  }
   var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -32913,38 +32916,71 @@ function _relCalcCurvaAbc(f) {
 }
 
 function _relCalcVendasUf(f) {
+  // Vendas por Rede e UF: Rede > Sub-rede > UF > Clientes (cada nivel abre ao clicar)
   var linhas = _relBaseFaturas(f);
   var catMap = {}; getCatClientes().forEach(function(c){ catMap[c.id] = c; });
-  var grupos = {};
+  var redes = {};
   linhas.forEach(function(l){
     var uf = l.cliente.ent_estado || l.cliente.estado || '—';
     var cat = catMap[l.cliente.categoria];
-    var catNome = cat ? cat.nome : '—';
-    var key = uf + '|' + catNome;
-    if (!grupos[key]) grupos[key] = { uf:uf, categoria:catNome, valor:0, qtd:0, cli:{} };
-    var _cn = _cpSemColchetes(l.cliente.nome_fantasia || l.pedido.clienteNome || '—'); grupos[key].cli[_cn] = (grupos[key].cli[_cn] || 0) + (Number(l.fatura.valor) || 0);
-    grupos[key].valor += Number(l.fatura.valor) || 0;
-    grupos[key].qtd++;
+    var redeNome = '—', subNome = '';
+    if (cat) {
+      var pai = cat.pai ? catMap[cat.pai] : null;
+      if (pai) { redeNome = pai.nome || '—'; subNome = cat.nome || ''; } else { redeNome = cat.nome || '—'; }
+    }
+    var v = Number(l.fatura.valor) || 0;
+    var R = redes[redeNome] || (redes[redeNome] = { nome: redeNome, valor: 0, qtd: 0, subs: {} });
+    var S = R.subs[subNome] || (R.subs[subNome] = { nome: subNome, valor: 0, qtd: 0, ufs: {} });
+    var U = S.ufs[uf] || (S.ufs[uf] = { uf: uf, valor: 0, qtd: 0, cli: {} });
+    R.valor += v; R.qtd++; S.valor += v; S.qtd++; U.valor += v; U.qtd++;
+    var cn = _cpSemColchetes(l.cliente.nome_fantasia || l.pedido.clienteNome || '—'); U.cli[cn] = (U.cli[cn] || 0) + v;
   });
-  var lista = Object.keys(grupos).map(function(k){ return grupos[k]; }).sort(function(a,b){ return b.valor - a.valor; });
+  var porValor = function(a, b){ return b.valor - a.valor; };
+  var obj2lista = function(o){ return Object.keys(o).map(function(k){ return o[k]; }).sort(porValor); };
+  var lista = obj2lista(redes);
   var total = lista.reduce(function(acc,g){ return acc + g.valor; }, 0);
+  var totalQtd = lista.reduce(function(acc,g){ return acc + g.qtd; }, 0);
   var kpis = _relKpis([
-    { label:'Combinações UF/Rede', valor: lista.length },
+    { label:'Redes', valor: lista.length },
     { label:'Valor Total Faturado', valor: _pedFmtMoeda(total) }
   ]);
   var cols = [
-    { label:'UF', width:'60px' }, { label:'Rede' },
+    { label:'Rede' },
     { label:'Qtd. NFs', width:'90px', right:true }, { label:'Valor Faturado', width:'130px', right:true }
   ];
-  var rows = lista.map(function(g){
-    return [ _pedEsc(g.uf), _pedEsc(g.categoria), String(g.qtd), _pedFmtMoeda(g.valor) ];
+  var GRID = '1fr 90px 130px';
+  function lin(pad, rotulo, qtd, valor, abre, fundo) {
+    return '<div' + (abre ? ' onclick="_relToggleDet(this)"' : '') + ' style="display:grid;grid-template-columns:' + GRID + ';border-top:1px solid #e2e8f0;font-size:12px;color:#1e293b;background:' + fundo + ';' + (abre ? 'cursor:pointer;' : '') + '">'
+      + '<div style="padding:8px 12px 8px ' + pad + 'px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (abre ? '<span class="rel-chev" style="color:#94a3b8;margin-right:5px">▸</span>' : '') + rotulo + '</div>'
+      + '<div style="padding:8px 12px;text-align:right">' + qtd + '</div><div style="padding:8px 12px;text-align:right">' + valor + '</div></div>';
+  }
+  function det(html) { return '<div class="rel-det" style="display:none">' + html + '</div>'; }
+  function ufsHtml(S, pad) {
+    return obj2lista(S.ufs).map(function(U){
+      var cli = Object.keys(U.cli).sort(function(a,b){ return U.cli[b]-U.cli[a]; }).map(function(k){ return [ _pedEsc(k), _pedFmtMoeda(U.cli[k]), (U.valor ? (U.cli[k]/U.valor*100).toFixed(1).replace('.', ',') + '%' : '—') ]; });
+      return lin(pad, _pedEsc(U.uf), String(U.qtd), _pedFmtMoeda(U.valor), true, '#f1f5f9')
+        + det('<div style="padding:6px 14px 10px ' + (pad + 22) + 'px;background:#f1f5f9">' + _relMini([{label:'Cliente'},{label:'Valor faturado',right:true},{label:'% da UF',right:true}], cli) + '</div>');
+    }).join('');
+  }
+  var rows = lista.map(function(R){ return [ _pedEsc(R.nome), String(R.qtd), _pedFmtMoeda(R.valor) ]; });
+  var dets = lista.map(function(R){
+    var subs = obj2lista(R.subs), temSub = subs.some(function(S){ return S.nome; });
+    var corpo;
+    if (!temSub) corpo = ufsHtml(subs[0], 30);
+    else corpo = subs.map(function(S){
+      return lin(30, S.nome ? _pedEsc(S.nome) : 'Sem sub-rede', String(S.qtd), _pedFmtMoeda(S.valor), true, '#f8fafc') + det(ufsHtml(S, 52));
+    }).join('');
+    return '<div style="margin:-8px -14px -12px -30px">' + corpo + '</div>';
   });
-  var dets = lista.map(function(g){
-    return _relMini([{label:'Cliente'},{label:'Valor faturado',right:true},{label:'% do grupo',right:true}], Object.keys(g.cli).sort(function(a,b){ return g.cli[b]-g.cli[a]; }).map(function(k){ return [ _pedEsc(k), _pedFmtMoeda(g.cli[k]), (g.valor ? (g.cli[k]/g.valor*100).toFixed(1) : '0') + '%' ]; }));
-  });
-  return kpis + _relTabela(cols, rows, { detalhes: dets, totais: [ 'TOTAL', '', String(lista.reduce(function(a,g){return a+g.qtd;},0)), _pedFmtMoeda(total) ] });
+  // exportacao: uma tabela so (Rede; Sub-rede; UF; Qtd. NFs; Valor faturado)
+  var csv = [['Rede', 'Sub-rede', 'UF', 'Qtd. NFs', 'Valor faturado']];
+  lista.forEach(function(R){ obj2lista(R.subs).forEach(function(S){ obj2lista(S.ufs).forEach(function(U){
+    csv.push([R.nome, S.nome || 'Sem sub-rede', U.uf, U.qtd, U.valor.toFixed(2).replace('.', ',')]);
+  }); }); });
+  csv.push(['TOTAL', '', '', totalQtd, total.toFixed(2).replace('.', ',')]);
+  window._relCsvVendasRedeUf = lista.length ? csv : null;
+  return kpis + _relTabela(cols, rows, { detalhes: dets, totais: [ 'TOTAL', String(totalQtd), _pedFmtMoeda(total) ] });
 }
-
 function _relCalcTicketVendedor(f) {
   var linhas = _relBaseFaturas(f);
   var porVendedor = {};
