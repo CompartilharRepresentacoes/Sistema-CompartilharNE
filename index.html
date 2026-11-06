@@ -28169,6 +28169,14 @@ function _pedProdSel(i) {
     document.getElementById('ped-item-prod-drop').style.display = 'none';
     return;
   }
+  if (_pedItens.some(function (x) { return String(x.prodId) === String(p.id); })) {
+    var itemMsgDup = document.getElementById('ped-item-msg');
+    if (itemMsgDup) { itemMsgDup.style.color = '#dc2626'; itemMsgDup.textContent = 'Este produto já está no pedido. Para mudar a quantidade, use o lápis da linha.'; }
+    document.getElementById('ped-item-prod-drop').style.display = 'none';
+    document.getElementById('ped-item-prod-input').value = '';
+    document.getElementById('ped-item-prod-id').value = '';
+    return;
+  }
   document.getElementById('ped-item-prod-id').value    = p.id;
   document.getElementById('ped-item-prod-input').value = (p.codigo?p.codigo+' ':'')+(p.nome||'');
   document.getElementById('ped-item-prod-drop').style.display = 'none';
@@ -28299,6 +28307,7 @@ function pedAddItem() {
   var cliIdAdd  = document.getElementById('ped-cli-id').value;
   var bloqueioAdd = _bloqVerificar(fornIdAdd, prodId, cliIdAdd);
   if (bloqueioAdd) { msg.textContent = 'Produto bloqueado' + (bloqueioAdd.motivo ? (': ' + bloqueioAdd.motivo) : ' para este cliente') + '.'; return; }
+  if (_pedItens.some(function (x) { return String(x.prodId) === String(prodId); })) { msg.textContent = 'Este produto já está no pedido. Para mudar a quantidade, use o lápis da linha.'; return; }
   var medida    = document.getElementById('ped-item-medida').value;
   var cx        = document.getElementById('ped-item-cx').value;
   var comissao  = document.getElementById('ped-item-comissao').value;
