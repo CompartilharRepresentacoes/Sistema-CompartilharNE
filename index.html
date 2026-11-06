@@ -23294,6 +23294,30 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
 // "extra" (que veio faturado mas nao existia no pedido -- ai so temos o codigo/nome que vieram do
 // XML do fornecedor, e tentamos casar com o cadastro pra mostrar o codigo do sistema).
 // OBS: divergencia de PESO fica de fora nesta v1, de proposito (ver comentario mais acima).
+// Saldo do pedido para a conferencia: desconta de cada item o que JA foi faturado em NFs anteriores
+// (nao canceladas) do mesmo pedido. Item ja faturado por completo (sobra menor que 1 caixa, mesma regra
+// do relatorio de pedidos nao faturados) vira quantidade 0 e nao e acusado como "nao foi faturado";
+// se a NF nova ainda trouxer esse item, a conferencia acusa (possivel faturamento em duplicidade).
+function _pinfItensSaldoPedido(pedido, produtos) {
+  var jaFaturados = [];
+  var itens = (pedido.itens || []).map(function (it) {
+    var qtdPed = Number(it.quantidade) || 0;
+    var qtdFat = _pfatQtdFaturadaItem(pedido, it.prodId, it.prodCodigo);
+    if (!(qtdFat > 0)) return it;
+    var prod = (produtos || []).find(function (p) { return String(p.id) === String(it.prodId); });
+    var restante = qtdPed - qtdFat;
+    var completo = restante < _pnfLimiarPendenciaItem(prod) - 0.0001;
+    var nfs = [];
+    (pedido.faturas || []).forEach(function (f) {
+      if (f.status === 'Cancelado') return;
+      var tem = (f.itens || []).some(function (x) { return (it.prodId && x.prodId === it.prodId) || (!it.prodId && it.prodCodigo && x.prodCodigo === it.prodCodigo); });
+      if (tem) nfs.push('NF ' + (f.numDuplicata || '?') + (f.data ? ' (' + _pimpFmtData(f.data) + ')' : ''));
+    });
+    if (completo) jaFaturados.push({ codigo: it.prodCodigo || '', nome: it.prodNome || '', nfs: nfs });
+    return Object.assign({}, it, { quantidade: completo ? 0 : restante, _jaFaturado: completo });
+  });
+  return { itens: itens, jaFaturados: jaFaturados };
+}
 var _PIM_TOL_QTD = 0.01;
 var _PIM_TOL_PRECO = 0.01;
 function _pimCalcularDivergenciasItem(itensPedido, itensNfConvertidos, produtos) {
@@ -23304,13 +23328,14 @@ function _pimCalcularDivergenciasItem(itensPedido, itensNfConvertidos, produtos)
   (itensPedido || []).forEach(function (itPed) {
     var idx = nfRestantes.findIndex(function (itNf) { return itNf.codigo && _cpNorm(itNf.codigo) === _cpNorm(itPed.prodCodigo || ''); });
     if (idx === -1) {
+      if (itPed._jaFaturado) return;
       divergencias.push({ tipo: 'faltando', produtoCodigo: itPed.prodCodigo || '', produtoNome: itPed.prodNome || '', valorPedido: itPed.quantidade, valorFaturado: 0 });
       return;
     }
     var itNf = nfRestantes[idx];
     nfRestantes.splice(idx, 1);
     if ((Number(itNf.qtd) || 0) - (Number(itPed.quantidade) || 0) > _PIM_TOL_QTD) {
-      divergencias.push({ tipo: 'quantidade', produtoCodigo: itPed.prodCodigo || '', produtoNome: itPed.prodNome || '', valorPedido: itPed.quantidade, valorFaturado: itNf.qtd });
+      divergencias.push({ tipo: 'quantidade', produtoCodigo: itPed.prodCodigo || '', produtoNome: itPed.prodNome || '', valorPedido: itPed.quantidade, valorFaturado: itNf.qtd, jaFaturadoAntes: !!itPed._jaFaturado });
     }
     if (Math.abs((Number(itPed.precoUnit) || 0) - (Number(itNf.precoUnit) || 0)) > _PIM_TOL_PRECO) {
       divergencias.push({ tipo: 'preco', produtoCodigo: itPed.prodCodigo || '', produtoNome: itPed.prodNome || '', valorPedido: itPed.precoUnit, valorFaturado: itNf.precoUnit });
@@ -23365,8 +23390,9 @@ function _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos) 
   var resultados = ordemPedidos.map(function (pid) {
     var grupo = gruposPorPedido[pid];
     var itensNfConvertidos = _pinfAgregarItensNfsPedido(grupo.xmls.map(function (x) { return x.dados; }), produtos);
-    var divergencias = _pimCalcularDivergenciasItem(grupo.pedido.itens || [], itensNfConvertidos, produtos);
-    return { pedido: grupo.pedido, nfs: grupo.xmls, divergencias: divergencias, status: divergencias.length ? 'divergente' : 'ok', aprovadoManual: false };
+    var saldoPed = _pinfItensSaldoPedido(grupo.pedido, produtos);
+    var divergencias = _pimCalcularDivergenciasItem(saldoPed.itens, itensNfConvertidos, produtos);
+    return { pedido: grupo.pedido, nfs: grupo.xmls, divergencias: divergencias, jaFaturados: saldoPed.jaFaturados, status: divergencias.length ? 'divergente' : 'ok', aprovadoManual: false };
   });
 
   _pinfResultados = resultados;
@@ -23421,6 +23447,11 @@ function _pinfRenderRevisao() {
           return '<button type="button" onclick="_pinfVerPdf(' + ri + ',' + i + ')" style="background:#f8fafc;border:1px solid #e2e8f0;color:#475569;border-radius:6px;padding:4px 10px;font-size:10.5px;cursor:pointer;margin-left:6px;white-space:nowrap"><i class="ti ti-file-type-pdf" style="color:#dc2626;margin-right:3px"></i>Ver PDF' + (pdfsDisponiveis.length > 1 ? (' (' + (i + 1) + ')') : '') + '</button>';
         }).join('');
 
+        var nJaFat = (r.jaFaturados || []).length;
+        var infoJaFat = nJaFat ? ('<div style="color:#475569;font-size:10.5px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px 10px;margin-top:8px;display:flex;flex-direction:column;gap:2px">'
+          + '<div style="font-weight:600"><i class="ti ti-info-circle"></i> ' + nJaFat + (nJaFat === 1 ? ' item do pedido já tinha sido faturado' : ' itens do pedido já tinham sido faturados') + ' em NFs anteriores (não conta como pendência)</div>'
+          + r.jaFaturados.map(function (j) { return '<div>' + _pedEsc((j.codigo ? j.codigo + ' - ' : '') + (j.nome || '')) + (j.nfs.length ? ' · ' + _pedEsc(j.nfs.join(', ')) : '') + '</div>'; }).join('')
+          + '</div>') : '';
         var corpo;
         if (aprovadoOk) {
           corpo = '<div style="display:flex;align-items:center;gap:6px;color:#15803d;font-size:11.5px;font-weight:600;background:#f0fdf4;border-radius:6px;padding:6px 10px;margin-top:8px">'
@@ -23431,7 +23462,7 @@ function _pinfRenderRevisao() {
           var linhas = r.divergencias.map(function (d) {
             var rotProd = _pedEsc((d.produtoCodigo ? d.produtoCodigo + ' - ' : '') + (d.produtoNome || ''));
             if (d.tipo === 'preco') return '<div>Preço — <b>' + rotProd + '</b>: pedido ' + _pedFmtMoeda(d.valorPedido) + ' &rarr; faturado ' + _pedFmtMoeda(d.valorFaturado) + '</div>';
-            if (d.tipo === 'quantidade') return '<div>Quantidade — <b>' + rotProd + '</b>: pedido ' + d.valorPedido + ' &rarr; faturado ' + d.valorFaturado + '</div>';
+            if (d.tipo === 'quantidade') return '<div>Quantidade — <b>' + rotProd + '</b>: pedido ' + d.valorPedido + (d.jaFaturadoAntes ? ' (já faturado em NF anterior)' : '') + ' &rarr; faturado ' + d.valorFaturado + '</div>';
             if (d.tipo === 'faltando') return '<div><b>' + rotProd + '</b>: estava no pedido mas não foi faturado</div>';
             if (d.tipo === 'extra') return '<div><b>' + rotProd + '</b>: faturado, mas não estava no pedido</div>';
             return '';
@@ -23452,6 +23483,7 @@ function _pinfRenderRevisao() {
           + '<div>' + pdfsBtns + '</div>'
           + '</div>'
           + corpo
+          + infoJaFat
           + avisoTipoHtml
           + '</div>';
       }).join('');
