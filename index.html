@@ -23123,6 +23123,20 @@ function _pinfProcessar() {
   var pdfFiles = _pinfArquivosSelecionados.filter(function (f) { return /\.pdf$/i.test(f.name); });
 
   _pinfLerXmlsSequencial(xmlFiles, 0, [], function (xmlLidos) {
+    // pedidos do fornecedor citados pelo numero na NF ("N Ped. Venda"), mesmo fora do periodo digitado
+    var numsForn = {};
+    xmlLidos.forEach(function (it) { if (it.dados && it.dados.numPedForn) numsForn[_pinfNumLimpo(it.dados.numPedForn)] = 1; });
+    var jaTem = {}; pedidosCandidatos.forEach(function (p) { jaTem[p.id] = 1; });
+    getPedidos().forEach(function (p) {
+      if (String(p.fornecedorId || '') !== String(fornecedorId) || jaTem[p.id]) return;
+      var nf = _pinfNumLimpo(p.numPedidoFornecedor);
+      if (!nf || !numsForn[nf]) return;
+      var cli = clientes.find(function (c) { return c.id === p.clienteId; });
+      var clone = Object.assign({}, p);
+      clone._clienteCnpjDigits = cli ? _devNormCnpj(cli.cpf_cnpj) : '';
+      clone._soPorNumero = true;
+      pedidosCandidatos.push(clone);
+    });
     _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos);
     _pinfFecharFiltro();
     _pinfAbrirRevisao();
@@ -23209,13 +23223,47 @@ function _pinfAgregarItensNfsPedido(listaDados, produtos) {
 // exigindo pelo menos 1 item em comum. Se sobrar ambiguidade real (mais de um candidato igualmente
 // bom), retorna pedido:null (fica pendente pra vinculo manual) -- e preferivel menos automacao a
 // casar errado.
+// Numero de pedido "limpo" para comparar: sem acento, sem simbolos, minusculo e sem zeros a esquerda.
+function _pinfNumLimpo(v) {
+  return String(v == null ? '' : v).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '').replace(/^0+(?=\d)/, '');
+}
+// Numero do pedido do cliente: igual, ou um comeca com o outro e o que sobra sao so letras (ate 3),
+// ex.: 123462 com 123462R; 123459bonificac com 123459bonificacao. Nao casa 12346 com 123462.
+function _pinfNumCasa(a, b) {
+  a = _pinfNumLimpo(a); b = _pinfNumLimpo(b);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  var curto = a.length < b.length ? a : b, longo = a.length < b.length ? b : a;
+  var resto = longo.slice(curto.length);
+  return longo.indexOf(curto) === 0 && /^[a-z]{1,3}$/.test(resto) && /[0-9a-z]$/.test(curto) && /\d/.test(curto);
+}
 function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
   nfDados = nfDados || {};
   if (!pedidosCandidatos || !pedidosCandidatos.length) {
     return { pedido: null, ambiguo: false, motivo: 'Nenhum pedido do fornecedor/período encontrado para esta NF.' };
   }
-  // REMESSA para a loja: o destinatario e a loja (outro CNPJ), entao acha a venda do CD pelo MESMO VALOR e MESMA DATA
+  // 1) numero do pedido do FORNECEDOR ("N Ped. Venda" / "N Ped. BRINDE" na observacao): exato, vale mesmo fora do periodo
+  if (nfDados.numPedForn) {
+    var pfNum = _pinfNumLimpo(nfDados.numPedForn);
+    var porForn = pedidosCandidatos.filter(function (p) { return pfNum && _pinfNumLimpo(p.numPedidoFornecedor) === pfNum; });
+    if (porForn.length === 1) return { pedido: porForn[0], ambiguo: false, motivo: 'numPedidoFornecedor' };
+  }
+  // pedidos trazidos so pelo numero (fora do periodo) nao entram nas regras por CNPJ/itens/valor
+  var pedidosCandidatosTodos = pedidosCandidatos;
+  pedidosCandidatos = pedidosCandidatos.filter(function (p) { return !p._soPorNumero; });
+  if (!pedidosCandidatos.length) {
+    return { pedido: null, ambiguo: false, motivo: 'Nenhum pedido do fornecedor/período encontrado para esta NF.' };
+  }
+  // REMESSA para a loja: o destinatario e a loja (outro CNPJ). Primeiro segue a NF de venda citada na propria remessa
+  // ("NF ref."), se ela ja estiver lancada; so depois acha a venda do CD pelo MESMO VALOR e MESMA DATA
   if (_nfEhRemessaXml(nfDados.natOp, nfDados.cfop)) {
+    if (nfDados.nfRef) {
+      var nrRef = _pfatNormNumNF(nfDados.nfRef);
+      var porRef = pedidosCandidatosTodos.filter(function (p) {
+        return (p.faturas || []).some(function (f) { return f.status !== 'Cancelado' && !_nfRemessa(f) && _pfatNormNumNF(f.numDuplicata) === nrRef; });
+      });
+      if (porRef.length === 1) return { pedido: porRef[0], ambiguo: false, motivo: 'remessa: NF de referência ' + nfDados.nfRef };
+    }
     var vRem = Number(nfDados.valor) || 0, dRem = String(nfDados.dataEmissao || '').slice(0, 10);
     var vendasRem = pedidosCandidatos.filter(function (p) {
       return (p.faturas || []).some(function (f) { return f.status !== 'Cancelado' && !_nfRemessa(f) && Math.abs((Number(f.valor) || 0) - vRem) <= 1 && _nfDiasEntre(f.data, dRem) <= 3; });
@@ -23260,7 +23308,7 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
   if (porCnpj.length === 1) return { pedido: porCnpj[0], ambiguo: false, motivo: 'cnpj' };
   if (porCnpj.length > 1) {
     if (numPedNf) {
-      var porNumero = porCnpj.filter(function (p) { return _pinfNormNumPedido(p.numPedidoCliente) === numPedNf; });
+      var porNumero = porCnpj.filter(function (p) { return _pinfNumCasa(p.numPedidoCliente, nfDados.numPedido); });
       if (porNumero.length === 1) return { pedido: porNumero[0], ambiguo: false, motivo: 'cnpj+numeroPedido' };
     }
     var ordenadosCnpj = ordenarPorScoreEValor(porCnpj);
@@ -23277,7 +23325,7 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
   // de um cliente diferente. 2ª prioridade (única): número do pedido do cliente, se a NF
   // trouxer essa informação, buscando entre TODOS os candidatos do período.
   if (numPedNf) {
-    var porNumeroTodos = pedidosCandidatos.filter(function (p) { return _pinfNormNumPedido(p.numPedidoCliente) === numPedNf; });
+    var porNumeroTodos = pedidosCandidatos.filter(function (p) { return _pinfNumCasa(p.numPedidoCliente, nfDados.numPedido); });
     if (porNumeroTodos.length === 1) return { pedido: porNumeroTodos[0], ambiguo: false, motivo: 'numeroPedido' };
     if (porNumeroTodos.length > 1) {
       return { pedido: null, ambiguo: true, motivo: 'Mais de um pedido com o mesmo número no período — não foi possível decidir automaticamente qual corresponde a esta NF.' };
@@ -23365,9 +23413,20 @@ function _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos) 
   var jaImportadas = [];
   var usadosPdf = [];
 
-  xmlLidos.forEach(function (item) {
+  // vendas primeiro, remessas depois: a remessa segue o pedido da NF de venda citada nela ("NF ref.")
+  var _ehRem = function (it) { return !!(it.dados && _nfEhRemessaXml(it.dados.natOp, it.dados.cfop)); };
+  var ordenadosLote = xmlLidos.filter(function (it) { return !_ehRem(it); }).concat(xmlLidos.filter(_ehRem));
+  var pedidoPorNF = {};
+
+  ordenadosLote.forEach(function (item) {
     if (!item.dados) { naoIdentificados.push({ nome: item.file.name, motivo: 'Não foi possível ler este XML (arquivo inválido ou corrompido).' }); return; }
-    var escolha = _pimEscolherPedidoCandidato(item.dados, pedidosCandidatos);
+    var escolha = null;
+    if (_ehRem(item) && item.dados.nfRef && pedidoPorNF[_pfatNormNumNF(item.dados.nfRef)]) {
+      escolha = { pedido: pedidoPorNF[_pfatNormNumNF(item.dados.nfRef)], ambiguo: false, motivo: 'remessa: segue a NF de venda ' + item.dados.nfRef };
+    } else {
+      escolha = _pimEscolherPedidoCandidato(item.dados, pedidosCandidatos);
+    }
+    if (escolha.pedido && !_ehRem(item) && item.dados.nNF) pedidoPorNF[_pfatNormNumNF(item.dados.nNF)] = escolha.pedido;
     if (!escolha.pedido) {
       var pdfParNaoIdent = _pinfLocalizarPdfParaNf(item.dados, pdfFiles, usadosPdf);
       naoIdentificados.push({ nome: item.file.name, nNF: item.dados.nNF, clienteNome: item.dados.destNome || item.dados.emitNome || '', motivo: escolha.motivo || 'Pedido correspondente não identificado automaticamente.', pdfFile: pdfParNaoIdent });
@@ -23389,9 +23448,11 @@ function _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos) 
 
   var resultados = ordemPedidos.map(function (pid) {
     var grupo = gruposPorPedido[pid];
-    var itensNfConvertidos = _pinfAgregarItensNfsPedido(grupo.xmls.map(function (x) { return x.dados; }), produtos);
+    var xmlsComItens = grupo.xmls.filter(function (x) { return !_nfEhRemessaXml(x.dados.natOp, x.dados.cfop); });
+    var itensNfConvertidos = _pinfAgregarItensNfsPedido(xmlsComItens.map(function (x) { return x.dados; }), produtos);
     var saldoPed = _pinfItensSaldoPedido(grupo.pedido, produtos);
-    var divergencias = _pimCalcularDivergenciasItem(saldoPed.itens, itensNfConvertidos, produtos);
+    // grupo so de remessas (lancadas com valor zero e sem itens): nao ha itens para conferir
+    var divergencias = xmlsComItens.length ? _pimCalcularDivergenciasItem(saldoPed.itens, itensNfConvertidos, produtos) : [];
     return { pedido: grupo.pedido, nfs: grupo.xmls, divergencias: divergencias, jaFaturados: saldoPed.jaFaturados, status: divergencias.length ? 'divergente' : 'ok', aprovadoManual: false };
   });
 
@@ -29890,7 +29951,23 @@ function _devExtrairDadosXml(xmlText) {
       }
     }
 
-    return { nNF: nNF, serie: serieNf, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, nfOrigemTxt: nfOrigemTxt, motivoTxt: motivoTxt, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
+    // Texto da observacao (infCpl): dele saem o numero do pedido do FORNECEDOR ("N Ped. Venda: 506106" ou
+    // "N Ped. BRINDE: 506103"), a NF de referencia de uma remessa ("NF ref.: Serie: 004, N :000440667 ...") e,
+    // quando a NF nao traz <xPed>, o numero do pedido do cliente escrito na observacao ("N Ped. Cliente: 123459bonificac").
+    var infCplTodo = '';
+    var infCplEl2 = doc.getElementsByTagName('infCpl');
+    if (infCplEl2.length) infCplTodo = infCplEl2[0].textContent || '';
+    var numPedForn = '';
+    var mPf = infCplTodo.match(/N[º°o]?\s*PED\.?\s*(?:VENDA|BRINDE)\s*[:\-]?\s*(\d{3,})/i);
+    if (mPf) numPedForn = mPf[1];
+    var nfRef = '';
+    var mRef = infCplTodo.match(/NF\s*REF\.?\s*:[\s\S]*?\bN\s*[:.º°]?\s*0*(\d{1,9})\b/i);
+    if (mRef) nfRef = mRef[1];
+    if (!nfRef) { var mChv = infCplTodo.match(/\[(\d{44})\]/); if (mChv) nfRef = mChv[1].substring(25, 34).replace(/^0+/, ''); }
+    if (!nfRef && refNFe.replace(/\D/g, '').length === 44) nfRef = refNFe.replace(/\D/g, '').substring(25, 34).replace(/^0+/, '');
+    if (!numPedidoXml) { var mPc = infCplTodo.match(/N[º°o]?\s*PED\.?\s*CLIENTE\s*:\s*([A-Za-z0-9]+)/i); if (mPc) numPedidoXml = mPc[1]; }
+
+    return { numPedForn: numPedForn, nfRef: nfRef, nNF: nNF, serie: serieNf, dataEmissao: dataEmissao, emitCNPJ: emitCNPJ, emitNome: emitNome, destCNPJ: destCNPJ, destNome: destNome, refNFe: refNFe, nfOrigemTxt: nfOrigemTxt, motivoTxt: motivoTxt, chave: chave, itens: itens, valor: vNF, numPedido: numPedidoXml, natOp: natOp, cfop: cfop };
   } catch (e) {
     return null;
   }
