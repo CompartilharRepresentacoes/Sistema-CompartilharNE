@@ -23191,15 +23191,30 @@ function _pinfLocalizarPdfParaNf(dados, pdfFiles, usadosPdf) {
 // _pfatConverterItemXmlParaUnidades (mesma engine ja usada no Faturamento por XML avulso) e
 // somando por codigo de produto -- o preco final de cada codigo agregado e o valor total / qtd
 // total (media ponderada, cobre o caso raro de o mesmo produto vir em 2 NFs com precos diferentes).
+// EAN so com digitos; "SEM GTIN", zeros e codigos curtos demais nao valem
+function _pinfEanLimpo(v) {
+  var d = String(v == null ? '' : v).replace(/\D/g, '');
+  return (d.length >= 8 && !/^0+$/.test(d)) ? d : '';
+}
+// Produto cadastrado de um item da NF: primeiro pelo codigo do fornecedor; se nao achar, pelo EAN
+// (a fabrica as vezes usa codigos diferentes para o mesmo produto, ex.: caixa e unidade, com o mesmo EAN)
+function _pinfProdutoDoItemNf(it, produtos) {
+  var cod = _cpNorm(it.codigo || '');
+  var p = (produtos || []).find(function (x) { return cod && _cpNorm(x.codigo || '') === cod; });
+  if (p) return p;
+  var ean = _pinfEanLimpo(it.ean);
+  if (!ean) return null;
+  return (produtos || []).find(function (x) { return _pinfEanLimpo(x.ean) === ean; }) || null;
+}
 function _pinfAgregarItensNfsPedido(listaDados, produtos) {
   var porCodigo = {};
   var ordemCodigos = [];
   (listaDados || []).forEach(function (dados) {
     (dados.itens || []).forEach(function (it) {
-      var produto = produtos.find(function (p) { return _cpNorm(p.codigo || '') === _cpNorm(it.codigo || ''); });
+      var produto = _pinfProdutoDoItemNf(it, produtos);
       var convertido = _pfatConverterItemXmlParaUnidades({ qtd: it.qtd, unidadeXml: it.unidadeXml || '', valorItem: it.valorTotal, precoUnit: it.valorUnit }, produto);
-      var chave = _cpNorm(it.codigo || '');
-      if (!porCodigo[chave]) { porCodigo[chave] = { codigo: it.codigo, nome: it.nome, qtd: 0, valorTotal: 0 }; ordemCodigos.push(chave); }
+      var chave = _cpNorm(produto ? produto.codigo : (it.codigo || ''));
+      if (!porCodigo[chave]) { porCodigo[chave] = { codigo: produto ? produto.codigo : it.codigo, nome: produto ? (produto.nome || it.nome) : it.nome, qtd: 0, valorTotal: 0 }; ordemCodigos.push(chave); }
       porCodigo[chave].qtd += convertido.qtd;
       porCodigo[chave].valorTotal += convertido.qtd * (convertido.precoFat || 0);
     });
@@ -24458,6 +24473,7 @@ function _pfatExtrairDadosXmlPedido(xmlText) {
         nome: _devXmlTag(prod, 'xProd'),
         qtd: parseFloat(_devXmlTag(prod, 'qCom')) || 0,
         unidadeXml: _devXmlTag(prod, 'uCom') || '',
+        ean: _devXmlTag(prod, 'cEAN') || '',
         valorItem: parseFloat(_devXmlTag(prod, 'vProd')) || 0,
         precoUnit: parseFloat(_devXmlTag(prod, 'vUnCom')) || 0
       });
@@ -24565,6 +24581,12 @@ function _pfatCriarFaturaAutoXml(pedidoId, xmlText, nomeArquivo) {
   var itensFatura = [];
   if (!ehRemessaXml) (pedido.itens || []).forEach(function(it){
     var match = dados.itens.find(function(x){ return x.codigo && _cpNorm(x.codigo || '') === _cpNorm(it.prodCodigo || ''); });
+    if (!match) {
+      // mesmo produto com outro codigo na NF (mesmo EAN do cadastro)
+      var _prodEan = produtos.find(function(p){ return p.id === it.prodId; });
+      var _eanPed = _prodEan ? _pinfEanLimpo(_prodEan.ean) : '';
+      if (_eanPed) match = dados.itens.find(function(x){ return _pinfEanLimpo(x.ean) === _eanPed; });
+    }
     if (match && match.qtd > 0) {
       var produto = produtos.find(function(p){ return p.id === it.prodId; });
       var convertido = _pfatConverterItemXmlParaUnidades(match, produto);
