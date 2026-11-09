@@ -32694,39 +32694,40 @@ function _relCalcPedidoFaturado(f) {
       // falta menor que uma caixa (Qtd/Cx do cadastro) nao conta como nao faturado; produto em CX = 1 caixa
       var cxTam = un === 'CX' ? 1 : qpc;
       var ign = cxTam > 0 && falta > 0.000001 && falta < cxTam - 0.000001, faltaIgn = falta;
-      if (ign) { fqc = pedU; falta = 0; rsFatI = rsPedI; }
-      var rsIgn = ign ? Math.max(0, rsPedI - Math.min(fv, rsPedI)) : 0;
-      itens.push({ nome: nome, cod: it.prodCodigo || '', un: un, qPed: pedU, qFat: fqc, qNao: falta, ign: ign, rsIgn: rsIgn, qIgn: faltaIgn, cxTam: cxTam, kgPed: pedU * peso, rsPed: rsPedI, kgFat: fqc * peso, rsFat: rsFatI, kgNao: falta * peso, rsNao: rsPedI - rsFatI, kgExc: (fqU - fqc) * peso, rsExc: Math.max(0, fv - rsPedI), nfs: Object.keys(nfs).join(', ') });
+      // sobra menor que 1 caixa: sai do "nao faturado", mas o "faturado" continua sendo o que a NF faturou de fato
+      var rsIgn = ign ? Math.max(0, rsPedI - rsFatI) : 0;
+      if (ign) { falta = 0; }
+      itens.push({ nome: nome, cod: it.prodCodigo || '', un: un, qPed: pedU, qFat: fqc, qNao: falta, ign: ign, rsIgn: rsIgn, qIgn: faltaIgn, cxTam: cxTam, kgPed: pedU * peso, rsPed: rsPedI, kgFat: fqc * peso, rsFat: rsFatI, kgNao: falta * peso, kgIgn: ign ? faltaIgn * peso : 0, rsNao: rsPedI - rsFatI - rsIgn, kgExc: (fqU - fqc) * peso, rsExc: Math.max(0, fv - rsPedI), nfs: Object.keys(nfs).join(', ') });
     });
     if (fProd && !itens.length) return;
-    var r = { p: p, cli: cli, itens: itens, pedKg: 0, fatKg: 0, naoKg: 0, excKg: 0, excRs: 0 };
-    itens.forEach(function(i){ r.pedKg += i.kgPed; r.fatKg += i.kgFat; r.naoKg += i.kgNao; r.excKg += i.kgExc; });
+    var r = { p: p, cli: cli, itens: itens, pedKg: 0, fatKg: 0, naoKg: 0, excKg: 0, excRs: 0, ignKg: 0, ignRs: 0 };
+    itens.forEach(function(i){ r.pedKg += i.kgPed; r.fatKg += i.kgFat; r.naoKg += i.kgNao; r.excKg += i.kgExc; r.ignKg += i.kgIgn; });
     if (fProd) {
       r.pedRs = 0; r.fatRs = 0; r.naoRs = 0;
-      itens.forEach(function(i){ r.pedRs += i.rsPed; r.fatRs += i.rsFat; r.naoRs += i.rsNao; r.excRs += i.rsExc; });
+      itens.forEach(function(i){ r.pedRs += i.rsPed; r.fatRs += i.rsFat; r.naoRs += i.rsNao; r.excRs += i.rsExc; r.ignRs += i.rsIgn; });
     } else {
       r.pedRs = Number(p.valorTotal) || itens.reduce(function(a,i){ return a + i.rsPed; }, 0);
       var fatReal = fats.reduce(function(a,x){ return a + (Number(x.valor) || 0); }, 0);
       r.fatRs = Math.min(fatReal, r.pedRs);
       r.excRs = fatReal - r.fatRs;
       var ignRs = itens.reduce(function(a,i){ return a + (i.rsIgn || 0); }, 0);
-      r.fatRs = Math.min(r.pedRs, r.fatRs + ignRs);
-      r.naoRs = r.pedRs - r.fatRs;
+      r.ignRs = ignRs;
+      r.naoRs = Math.max(0, r.pedRs - r.fatRs - ignRs);
     }
     r.pct = r.pedRs ? r.fatRs / r.pedRs : 0;
     r.pctKg = r.pedKg ? r.fatKg / r.pedKg : 0;
-    r.situ = r.pct >= 0.995 ? 'ok' : (r.fatRs > 0 ? 'par' : 'nao');
+    r.situ = ((r.pedRs ? (r.fatRs + (r.ignRs || 0)) / r.pedRs : 0) >= 0.995) ? 'ok' : (r.fatRs > 0 ? 'par' : 'nao');
     if (f.status && r.situ !== f.status) return;
     recs.push(r);
   });
-  var T = { n: recs.length, pedKg: 0, pedRs: 0, fatKg: 0, fatRs: 0, naoKg: 0, naoRs: 0, excKg: 0, excRs: 0 };
-  recs.forEach(function(r){ T.excKg += r.excKg; T.excRs += r.excRs; T.pedKg += r.pedKg; T.pedRs += r.pedRs; T.fatKg += r.fatKg; T.fatRs += r.fatRs; T.naoKg += r.naoKg; T.naoRs += r.naoRs; });
+  var T = { n: recs.length, pedKg: 0, pedRs: 0, fatKg: 0, fatRs: 0, naoKg: 0, naoRs: 0, excKg: 0, excRs: 0, ignKg: 0, ignRs: 0 };
+  recs.forEach(function(r){ T.ignKg += r.ignKg; T.ignRs += r.ignRs; T.excKg += r.excKg; T.excRs += r.excRs; T.pedKg += r.pedKg; T.pedRs += r.pedRs; T.fatKg += r.fatKg; T.fatRs += r.fatRs; T.naoKg += r.naoKg; T.naoRs += r.naoRs; });
   var pctT = T.pedRs ? T.fatRs / T.pedRs : 0, pctTkg = T.pedKg ? T.fatKg / T.pedKg : 0;
   var fmtP = function(v){ return _relNum(v * 100, 1) + '%'; };
   var kpis = _relKpis([
     { label: 'Pedido', valor: _pedFmtMoeda(T.pedRs), sub: _relNum(T.pedKg) + ' kg · ' + T.n + ' pedidos', cor: '#272A4A' },
     { label: 'Faturado', valor: _pedFmtMoeda(T.fatRs), sub: _relNum(T.fatKg) + ' kg · ' + fmtP(pctT) + ' do pedido' + (T.excRs > 0.005 || T.excKg > 0.005 ? '<br>+ ' + _pedFmtMoeda(T.excRs) + ' · ' + _relNum(T.excKg) + ' kg faturados acima do pedido (fora desta conta)' : ''), cor: '#15803d' },
-    { label: 'Não faturado', valor: _pedFmtMoeda(T.naoRs), sub: _relNum(T.naoKg) + ' kg · ' + fmtP(T.pedRs ? T.naoRs / T.pedRs : 0) + ' do pedido', cor: T.naoRs > 0 ? '#dc2626' : '#15803d' },
+    { label: 'Não faturado', valor: _pedFmtMoeda(T.naoRs), sub: _relNum(T.naoKg) + ' kg · ' + fmtP(T.pedRs ? T.naoRs / T.pedRs : 0) + ' do pedido' + ((T.ignRs > 0.005 || T.ignKg > 0.005) ? '<br><span style="color:#94a3b8">+ ' + _pedFmtMoeda(T.ignRs) + ' · ' + _relNum(T.ignKg) + ' kg de sobras menores que 1 caixa (não contam como pendência)</span>' : ''), cor: T.naoRs > 0 ? '#dc2626' : '#15803d' },
     { label: 'Atendimento', valor: fmtP(pctT), sub: 'R$ · em Kg: ' + fmtP(pctTkg), cor: '#2563eb' }
   ]);
   var barra = '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;margin-bottom:12px"><div style="height:10px;border-radius:6px;background:#fee2e2;overflow:hidden"><i style="display:block;height:100%;width:' + Math.min(100, pctT * 100) + '%;background:#16a34a"></i></div>'
@@ -32792,14 +32793,14 @@ function _relCalcPedidoFaturado(f) {
     var rotulo = { cliente:'Cliente', fornecedor:'Fábrica', vendedor:'Vendedor', produto:'Produto' }[ag] || 'Grupo';
     colsIni = [ {label: rotulo, width:'2fr'}, {label:'Pedidos', width:'80px', right:true} ];
     var grupos = {};
-    function novoG(nome) { return { nome: nome, ids: {}, lista: [], pedKg:0, pedRs:0, fatKg:0, fatRs:0, naoKg:0, naoRs:0 }; }
+    function novoG(nome) { return { nome: nome, ids: {}, lista: [], pedKg:0, pedRs:0, fatKg:0, fatRs:0, naoKg:0, naoRs:0, ignRs:0, ignKg:0 }; }
     if (ag === 'produto') {
       recs.forEach(function(r){
         r.itens.forEach(function(i){
           var k = (i.cod || '') + '|' + i.nome;
           var g = grupos[k] || (grupos[k] = novoG(i.nome));
           g.ids[r.p.id] = true; g.lista.push({ r: r, i: i });
-          g.pedKg += i.kgPed; g.pedRs += i.rsPed; g.fatKg += i.kgFat; g.fatRs += i.rsFat; g.naoKg += i.kgNao; g.naoRs += i.rsNao;
+          g.pedKg += i.kgPed; g.pedRs += i.rsPed; g.fatKg += i.kgFat; g.fatRs += i.rsFat; g.naoKg += i.kgNao; g.naoRs += i.rsNao; g.ignRs += i.rsIgn; g.ignKg += i.kgIgn;
         });
       });
     } else {
@@ -32807,17 +32808,17 @@ function _relCalcPedidoFaturado(f) {
         var nome = ag === 'cliente' ? _cpSemColchetes(r.cli.nome_fantasia || r.p.clienteNome || '—') : (ag === 'fornecedor' ? _cpSemColchetes(r.p.fornecedorNome || '—') : (r.p.vendedorNome || '—'));
         var g = grupos[nome] || (grupos[nome] = novoG(nome));
         g.ids[r.p.id] = true; g.lista.push(r);
-        g.pedKg += r.pedKg; g.pedRs += r.pedRs; g.fatKg += r.fatKg; g.fatRs += r.fatRs; g.naoKg += r.naoKg; g.naoRs += r.naoRs;
+        g.pedKg += r.pedKg; g.pedRs += r.pedRs; g.fatKg += r.fatKg; g.fatRs += r.fatRs; g.naoKg += r.naoKg; g.naoRs += r.naoRs; g.ignRs += r.ignRs; g.ignKg += r.ignKg;
       });
     }
     var lista = Object.keys(grupos).map(function(k){ return grupos[k]; }).sort(function(a,b){ return b.naoRs - a.naoRs; });
     lista.forEach(function(g){
-      g.pct = g.pedRs ? g.fatRs / g.pedRs : 0; g.pctKg = g.pedKg ? g.fatKg / g.pedKg : 0; g.situ = sitDe(g.pct, g.fatRs);
+      g.pct = g.pedRs ? g.fatRs / g.pedRs : 0; g.pctKg = g.pedKg ? g.fatKg / g.pedKg : 0; g.situ = sitDe(g.pedRs ? (g.fatRs + g.ignRs) / g.pedRs : 0, g.fatRs);
       rows.push([ '<b>' + _pedEsc(g.nome) + '</b>', String(Object.keys(g.ids).length) ].concat(numCells(g)));
       if (ag === 'produto') {
         dets.push(_relMini(colsMiniPed, g.lista.map(function(x){
           var r = x.r, i = x.i;
-          return [ _pedEsc(r.p.numPedidoCliente || r.p.id), dataBR(r.p.data), _pedEsc(_cpSemColchetes(r.cli.nome_fantasia || r.p.clienteNome || '')), _relNum(i.kgPed), _relNum(i.kgFat), _relNum(i.kgNao), _pedFmtMoeda(i.rsPed), _pedFmtMoeda(i.rsFat), _pedFmtMoeda(i.rsNao), chipSit[sitDe(i.rsPed ? i.rsFat / i.rsPed : 0, i.rsFat)] ];
+          return [ _pedEsc(r.p.numPedidoCliente || r.p.id), dataBR(r.p.data), _pedEsc(_cpSemColchetes(r.cli.nome_fantasia || r.p.clienteNome || '')), _relNum(i.kgPed), _relNum(i.kgFat), _relNum(i.kgNao), _pedFmtMoeda(i.rsPed), _pedFmtMoeda(i.rsFat), _pedFmtMoeda(i.rsNao), chipSit[sitDe(i.rsPed ? (i.rsFat + i.rsIgn) / i.rsPed : 0, i.rsFat)] ];
         })));
       } else {
         dets.push(miniPeds(g.lista));
@@ -32825,10 +32826,10 @@ function _relCalcPedidoFaturado(f) {
     });
     totIni = [ 'TOTAL', String(T.n) ];
   }
-  T.pct = pctT; T.pctKg = pctTkg; T.situ = sitDe(pctT, T.fatRs);
+  T.pct = pctT; T.pctKg = pctTkg; T.situ = sitDe(T.pedRs ? (T.fatRs + T.ignRs) / T.pedRs : 0, T.fatRs);
   var cols = colsIni.concat(numCols);
   var tot = totIni.concat([ _relNum(T.pedKg), _pedFmtMoeda(T.pedRs), _relNum(T.fatKg), _pedFmtMoeda(T.fatRs), _relNum(T.naoKg), _pedFmtMoeda(T.naoRs), fmtP(pctT) + ' · ' + fmtP(pctTkg) + ' kg', '' ]);
-  var nota = '<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Clique numa linha para ver o detalhe. Pedidos cancelados ficam fora. Pedido − Faturado = Não faturado: o que foi faturado além do pedido (preço/quantidade da NF maior que o pedido) não é somado em "Faturado" e aparece à parte no card. "Não faturado" = o que ainda está pendente no pedido; o Kg usa o peso cadastrado do produto.' + (f.produto ? ' Com filtro de produto, os valores em R$ são calculados item a item.' : '') + '</div>';
+  var nota = '<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Clique numa linha para ver o detalhe. Pedidos cancelados ficam fora. Pedido = Faturado + Não faturado + sobras menores que 1 caixa. "Faturado" é só o que as NFs faturaram (até o valor do pedido); o que foi faturado além do pedido (preço/quantidade da NF maior que o pedido) aparece à parte no card. "Não faturado" = o que ainda está pendente; falta menor que 1 caixa não conta como pendência e aparece em cinza no card. O Kg usa o peso cadastrado do produto.' + (f.produto ? ' Com filtro de produto, os valores em R$ são calculados item a item.' : '') + '</div>';
   // ranking de produtos (pedido / faturado / nao faturado), em R$ ou Kg, e tabela paginada de 10 em 10
   var prodAg = {};
   recs.forEach(function(r){ r.itens.forEach(function(i){
