@@ -29933,7 +29933,7 @@ function _devExtrairDadosXml(xmlText) {
     if (!nfOrigemTxt) {
       var cplO = doc.getElementsByTagName('infCpl');
       if (cplO.length) {
-        var mO = (cplO[0].textContent || '').match(/(?:S\/\s*N\.?\s*F\.?\s*-?\s*E?|SOBRE\s+(?:A\s+)?N\.?\s*F\.?\s*-?\s*E?|REF(?:ERENTE|\.)?\s*(?:A\s+)?N\.?\s*F\.?\s*-?\s*E?|N\.?\s*F\.?\s*-?\s*E?\s*(?:DE\s+)?ORIGEM|NOTA\s+(?:FISCAL\s+)?(?:DE\s+)?ORIGEM)\s*(?:N[ºO°.]*\s*)?[:\-]?\s*(\d{44}|\d{3,9}(?!\d))/i);
+        var mO = (cplO[0].textContent || '').match(/(?:S\/\s*N\.?\s*F\.?\s*-?\s*E?|SOBRE\s+(?:A\s+)?N\.?\s*F\.?\s*-?\s*E?|REF(?:ERENTE|\.)?\s*(?:A\s+)?N\.?\s*F\.?\s*-?\s*E?|REF(?:ERENTE|\.)?\s*(?:A\s+)?(?:A\s+)?NOTA\s+FISCAL|N\.?\s*F\.?\s*-?\s*E?\s*(?:DE\s+)?ORIGEM|NOTA\s+(?:FISCAL\s+)?(?:DE\s+)?ORIGEM)(?:\s*\(\s*S\s*\))?\s*(?:N[ºO°.]*\s*)?[:\-]?\s*(\d{44}|\d{3,9}(?!\d))/i);
         if (mO) nfOrigemTxt = (mO[1].length === 44 ? mO[1].substring(25, 34) : mO[1]).replace(/^0+/, '');
       }
     }
