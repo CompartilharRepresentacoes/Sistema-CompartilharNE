@@ -22537,11 +22537,61 @@ function _pedImportarPdfProcessar(textoCompleto) {
 // itens e TOTAIS), não precisa agrupar varias paginas pelo mesmo "Numero"
 // como no Atacadao.
 
+// ── Layout "Emitir Pedido de Compra" (ERP do cliente, rodape COMPRA MERC.) ──
+// Ex.: pedido da MF Importacao para a Allfood. O pdf.js entrega o texto fora de ordem: em cada
+// pagina, os numeros de uma linha (codigo, embalagem, unidade, quantidade, "- cod. fabrica", precos)
+// vem juntos e a descricao ("& NOME DO PRODUTO") vem depois deles. Por isso le os numeros e as
+// descricoes separadamente e junta na ordem em que aparecem na pagina.
+function _pedParsePedidoTextoCompraMerc(paginasTexto) {
+  var cab = String((paginasTexto || [])[0] || '');
+  var mNum = /([0-9]{3,12})\s+N[uú]mero\s+do\s+Pedido/i.exec(cab) || /N[uú]mero\s+do\s+Pedido\s*:?\s*([0-9]{3,12})/i.exec(cab);
+  var numero = mNum ? mNum[1] : '';
+  var mCnpjs = cab.match(/\b\d{14}\b/g) || [];   // CNPJ do cliente (Empresa) e do fornecedor, sem pontuacao
+  // o 1o CNPJ de 14 digitos e da Empresa (cliente que compra); o fornecedor aparece depois ("Fornecedor:")
+  var cnpjCliente = mCnpjs[0] || '';
+  var cnpjForn = '';
+  var iFor = cab.search(/Fornecedor\s*:/i);
+  mCnpjs.forEach(function (c) { if (!cnpjForn && c !== cnpjCliente) cnpjForn = c; });
+  if (!cnpjForn && iFor >= 0) { var mm = /\b\d{14}\b/.exec(cab.slice(iFor)); if (mm) cnpjForn = mm[0]; }
+
+  var numRe = /(\d{3,6})\s+(\d+X\S+)\s+(UN|UND|KG|PT|PC|PCT|CX|CXA)\s+(\d[\d.]*,\d{2})\s+\d[\d.]*,\d{2}\s+\d[\d.]*,\d{2}\s+-\s+(\d{3,6})\s+(?:\d[\d.]*,\d{2}\s+){4}(\d[\d.]*,\d{2,6})/g;
+  var itens = [], erroPag = false;
+  (paginasTexto || []).forEach(function (t) {
+    t = String(t || '');
+    var nums = [], m;
+    numRe.lastIndex = 0;
+    while ((m = numRe.exec(t))) nums.push(m);
+    // descricoes: "& TEXTO" ate 2 espacos seguidos
+    var descs = [], dRe = /&\s+(.+?)(?=\s{2,}|$)/g, d;
+    while ((d = dRe.exec(t))) descs.push(d[1].trim());
+    if (nums.length !== descs.length) { erroPag = true; return; }
+    nums.forEach(function (n, i) {
+      var un = n[3].toUpperCase();
+      var unidade = (un === 'KG') ? 'KG' : (un === 'CX' || un === 'CXA') ? 'CXA' : 'UN';
+      var cod = n[1];
+      itens.push({
+        descricao: descs[i], dataEnt: null,
+        qtd: parseFloat(n[4].replace(/\./g, '').replace(',', '.')),
+        unitario: parseFloat(n[6].replace(/\./g, '').replace(',', '.')),
+        codigo: cod, codigoNormalizado: _pedNormCodigoPedido(cod), codigoCandidatos: _pedCandidatosCodigoPedido(cod),
+        unidade: unidade, codFabrica: n[5], embalagem: n[2]
+      });
+    });
+  });
+  if (erroPag || !itens.length || !numero || !cnpjCliente || !cnpjForn) return [];
+  return [{
+    numero: numero, fornecedorCnpj: cnpjForn, localEntregaCnpj: cnpjCliente, itens: itens,
+    origem: 'Importado de PDF "Pedido de Compra" nº ' + numero + ' (' + itens.length + ' itens).'
+  }];
+}
+
 // Detecta qual layout de PDF de pedido este texto e, pra rotear pro parser certo.
 // Retorna 'atacadao', 'sendas' ou null (layout desconhecido/nao configurado ainda).
 function _pedDetectarLayoutPdf(textoCompleto) {
   if (/Consinco/.test(textoCompleto)) return 'sendas';
   if (/Numero:\s*\d+/.test(textoCompleto) && /Local\s+de\s+Entrega\s*:/.test(textoCompleto)) return 'atacadao';
+  // "210 - Emitir Pedido de Compra" (ERP do cliente, ex.: MF Importacao -> Allfood)
+  if (/COMPRA\s+MERC/i.test(textoCompleto) && /N[uú]mero\s+do\s+Pedido/i.test(textoCompleto)) return 'compra_merc';
   return null;
 }
 
@@ -22875,6 +22925,8 @@ function _pedImportarPdfArquivo(input) {
           resultados = _pedImportarPdfProcessar(textoCompleto);
         } else if (layout === 'sendas') {
           resultados = _pedImportarPdfProcessarSendas(paginasItens);
+        } else if (layout === 'compra_merc') {
+          resultados = _pedParsePedidoTextoCompraMerc(paginasTexto).map(_pedProcessarBlocoImportadoPdf);
         } else {
           alert('Este layout de PDF ainda não é reconhecido pelo sistema. Fale com o suporte pra configurarmos esse formato também.');
           return;
