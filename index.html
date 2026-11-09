@@ -25803,7 +25803,7 @@ function vcfLimparFiltros() {
   vcfAtualizarSubcategorias();
   renderVendasCompletasFaturadas();
 }
-// NFs do pedido (nao canceladas) e % faturado (pendente < 1 caixa conta como faturado)
+// NFs do pedido (nao canceladas) e % faturado (real: sem arredondar a falta e sem limitar ao pedido; a tela mostra no maximo 100%)
 function _vcfNfsPedido(p) {
   var out = [];
   (p.faturas || []).forEach(function (f) { if (f && f.status !== 'Cancelado' && f.numDuplicata) out.push(f); });
@@ -25820,8 +25820,7 @@ function _vcfPctFaturado(itens) {
   var tot = 0, fat = 0;
   itens.forEach(function (it) {
     tot += it.valorTotal;
-    if (it.qtdPedida > 0 && it.qtdFaturada > 0 && it.restante < Math.max(it.cxTam || 1, 1)) fat += it.valorTotal;
-    else fat += Math.min(it.precoUnit * it.qtdFaturada, it.valorTotal);
+    fat += it.precoUnit * it.qtdFaturada;   // faturado real: falta menor que 1 caixa nao conta como faturada; faturado a maior entra
   });
   return tot > 0 ? Math.min(100, Math.round(fat / tot * 100)) : 0;
 }
@@ -32681,8 +32680,8 @@ function _relCalcPedidoFaturado(f) {
           if (fat.numDuplicata) nfs[fat.numDuplicata] = true;
         });
       });
-      // v51: faturado "contado" nunca passa do pedido (o que passou vira excedente), para Pedido - Faturado = Nao faturado
-      var rsPedI = Number(it.valorTotal) || ped * preco, rsFatI = Math.min(fv, rsPedI);
+      // faturado = o que as NFs faturaram de fato (se faturou a maior, entra no faturado)
+      var rsPedI = Number(it.valorTotal) || ped * preco, rsFatI = fv;
       // unidade: item lancado em CX num produto cadastrado em PC/KG/UN -> converte para a unidade do cadastro (CX x Qtd/Cx)
       var prCad = prodMap[it.prodId] || {}, un = String(prCad.unidade || '').trim().toUpperCase();
       var itMed = String(it.medida || '').trim().toUpperCase();
@@ -32690,14 +32689,14 @@ function _relCalcPedidoFaturado(f) {
       var fator = (itMed === 'CX' && un !== 'CX' && qpc > 0) ? qpc : 1;
       if (!un) un = itMed;
       var pedU = ped * fator, fqU = fq * fator;
-      var fqc = Math.min(fqU, pedU), falta = pedU - fqc;
+      var fqc = fqU, falta = Math.max(0, pedU - fqU);
       // falta menor que uma caixa (Qtd/Cx do cadastro) nao conta como nao faturado; produto em CX = 1 caixa
       var cxTam = un === 'CX' ? 1 : qpc;
       var ign = cxTam > 0 && falta > 0.000001 && falta < cxTam - 0.000001, faltaIgn = falta;
       // sobra menor que 1 caixa: sai do "nao faturado", mas o "faturado" continua sendo o que a NF faturou de fato
-      var rsIgn = ign ? Math.max(0, rsPedI - rsFatI) : 0;
+      var rsIgn = ign ? Math.max(0, rsPedI - Math.min(fv, rsPedI)) : 0;
       if (ign) { falta = 0; }
-      itens.push({ nome: nome, cod: it.prodCodigo || '', un: un, qPed: pedU, qFat: fqc, qNao: falta, ign: ign, rsIgn: rsIgn, qIgn: faltaIgn, cxTam: cxTam, kgPed: pedU * peso, rsPed: rsPedI, kgFat: fqc * peso, rsFat: rsFatI, kgNao: falta * peso, kgIgn: ign ? faltaIgn * peso : 0, rsNao: rsPedI - rsFatI - rsIgn, kgExc: (fqU - fqc) * peso, rsExc: Math.max(0, fv - rsPedI), nfs: Object.keys(nfs).join(', ') });
+      itens.push({ nome: nome, cod: it.prodCodigo || '', un: un, qPed: pedU, qFat: fqc, qNao: falta, ign: ign, rsIgn: rsIgn, qIgn: faltaIgn, cxTam: cxTam, kgPed: pedU * peso, rsPed: rsPedI, kgFat: fqc * peso, rsFat: rsFatI, kgNao: falta * peso, kgIgn: ign ? faltaIgn * peso : 0, rsNao: Math.max(0, rsPedI - fv - rsIgn), kgExc: Math.max(0, fqU - pedU) * peso, rsExc: Math.max(0, fv - rsPedI), nfs: Object.keys(nfs).join(', ') });
     });
     if (fProd && !itens.length) return;
     var r = { p: p, cli: cli, itens: itens, pedKg: 0, fatKg: 0, naoKg: 0, excKg: 0, excRs: 0, ignKg: 0, ignRs: 0 };
@@ -32708,11 +32707,11 @@ function _relCalcPedidoFaturado(f) {
     } else {
       r.pedRs = Number(p.valorTotal) || itens.reduce(function(a,i){ return a + i.rsPed; }, 0);
       var fatReal = fats.reduce(function(a,x){ return a + (Number(x.valor) || 0); }, 0);
-      r.fatRs = Math.min(fatReal, r.pedRs);
-      r.excRs = fatReal - r.fatRs;
+      r.fatRs = fatReal;
+      r.excRs = Math.max(0, fatReal - r.pedRs);
       var ignRs = itens.reduce(function(a,i){ return a + (i.rsIgn || 0); }, 0);
       r.ignRs = ignRs;
-      r.naoRs = Math.max(0, r.pedRs - r.fatRs - ignRs);
+      r.naoRs = Math.max(0, r.pedRs - Math.min(fatReal, r.pedRs) - ignRs);
     }
     r.pct = r.pedRs ? r.fatRs / r.pedRs : 0;
     r.pctKg = r.pedKg ? r.fatKg / r.pedKg : 0;
@@ -32726,7 +32725,7 @@ function _relCalcPedidoFaturado(f) {
   var fmtP = function(v){ return _relNum(v * 100, 1) + '%'; };
   var kpis = _relKpis([
     { label: 'Pedido', valor: _pedFmtMoeda(T.pedRs), sub: _relNum(T.pedKg) + ' kg · ' + T.n + ' pedidos', cor: '#272A4A' },
-    { label: 'Faturado', valor: _pedFmtMoeda(T.fatRs), sub: _relNum(T.fatKg) + ' kg · ' + fmtP(pctT) + ' do pedido' + (T.excRs > 0.005 || T.excKg > 0.005 ? '<br>+ ' + _pedFmtMoeda(T.excRs) + ' · ' + _relNum(T.excKg) + ' kg faturados acima do pedido (fora desta conta)' : ''), cor: '#15803d' },
+    { label: 'Faturado', valor: _pedFmtMoeda(T.fatRs), sub: _relNum(T.fatKg) + ' kg · ' + fmtP(pctT) + ' do pedido', cor: '#15803d' },
     { label: 'Não faturado', valor: _pedFmtMoeda(T.naoRs), sub: _relNum(T.naoKg) + ' kg · ' + fmtP(T.pedRs ? T.naoRs / T.pedRs : 0) + ' do pedido' + ((T.ignRs > 0.005 || T.ignKg > 0.005) ? '<br><span style="color:#94a3b8">+ ' + _pedFmtMoeda(T.ignRs) + ' · ' + _relNum(T.ignKg) + ' kg de sobras menores que 1 caixa (não contam como pendência)</span>' : ''), cor: T.naoRs > 0 ? '#dc2626' : '#15803d' },
     { label: 'Atendimento', valor: fmtP(pctT), sub: 'R$ · em Kg: ' + fmtP(pctTkg), cor: '#2563eb' }
   ]);
@@ -32829,7 +32828,7 @@ function _relCalcPedidoFaturado(f) {
   T.pct = pctT; T.pctKg = pctTkg; T.situ = sitDe(T.pedRs ? (T.fatRs + T.ignRs) / T.pedRs : 0, T.fatRs);
   var cols = colsIni.concat(numCols);
   var tot = totIni.concat([ _relNum(T.pedKg), _pedFmtMoeda(T.pedRs), _relNum(T.fatKg), _pedFmtMoeda(T.fatRs), _relNum(T.naoKg), _pedFmtMoeda(T.naoRs), fmtP(pctT) + ' · ' + fmtP(pctTkg) + ' kg', '' ]);
-  var nota = '<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Clique numa linha para ver o detalhe. Pedidos cancelados ficam fora. Pedido = Faturado + Não faturado + sobras menores que 1 caixa. "Faturado" é só o que as NFs faturaram (até o valor do pedido); o que foi faturado além do pedido (preço/quantidade da NF maior que o pedido) aparece à parte no card. "Não faturado" = o que ainda está pendente; falta menor que 1 caixa não conta como pendência e aparece em cinza no card. O Kg usa o peso cadastrado do produto.' + (f.produto ? ' Com filtro de produto, os valores em R$ são calculados item a item.' : '') + '</div>';
+  var nota = '<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Clique numa linha para ver o detalhe. Pedidos cancelados ficam fora. "Faturado" = tudo o que as NFs faturaram, inclusive o que passou do pedido. "Não faturado" = o que ainda está pendente no pedido; falta menor que 1 caixa não conta como pendência e aparece em cinza no card (não entra em Faturado nem em Não faturado). O Kg usa o peso cadastrado do produto.' + (f.produto ? ' Com filtro de produto, os valores em R$ são calculados item a item.' : '') + '</div>';
   // ranking de produtos (pedido / faturado / nao faturado), em R$ ou Kg, e tabela paginada de 10 em 10
   var prodAg = {};
   recs.forEach(function(r){ r.itens.forEach(function(i){
