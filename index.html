@@ -5806,7 +5806,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 
             <!-- Botões -->
             <div style="display:flex;gap:10px;padding-top:4px">
-              <button onclick="salvarPedido()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px">
+              <button onclick="salvarPedido()" title="Ctrl+Enter" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px">
                 <i class="ti ti-device-floppy"></i> Salvar
               </button>
               <button onclick="showPage('page-pedido-list')" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:600;cursor:pointer">
@@ -28723,6 +28723,18 @@ function salvarPedido() {
   msg.textContent = '✔ Pedido salvo com sucesso!';
   setTimeout(function(){ msg.textContent=''; showPage('page-pedido-list'); }, 900);
 }
+
+// Atalho Ctrl+Enter: salva o pedido na tela de Novo Pedido (igual ao botao Salvar)
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter' || !e.ctrlKey || e.altKey || e.shiftKey || e.repeat) return;
+  var pg = document.getElementById('page-pedido-form');
+  if (!pg || pg.offsetParent === null) return;
+  e.preventDefault();
+  if (window._pedAtalhoSalvando) return;
+  window._pedAtalhoSalvando = true;
+  setTimeout(function () { window._pedAtalhoSalvando = false; }, 1500);
+  salvarPedido();
+});
 
 // ═══════════════════════════════════════════════════
 // DEVOLUÇÕES (registro de devoluções de clientes)
