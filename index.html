@@ -26079,8 +26079,33 @@ function _pedProdFiltrar() {
   var n = _cpNorm(q);
   var fornId = document.getElementById('ped-forn-id').value;
   var cliId = document.getElementById('ped-cli-id').value;
+  // Regra: so aparece produto que esta numa tabela de preco ATIVA da fabrica onde o cliente esta incluido
+  var _avisoProd = function (txt) {
+    drop.onmousedown = function (e) { e.preventDefault(); };
+    drop.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:#64748b;background:#f8fafc;line-height:1.4">' + _pedEsc(txt) + '</div>';
+    drop.style.display = 'block';
+  };
+  if (!fornId || !cliId) { _avisoProd('Escolha a fábrica e o cliente antes de buscar o produto.'); return; }
+  var _permitidos = {}, _temTabela = false;
+  getTabPrecos().forEach(function (tab) {
+    if ((tab.ativo || 'Sim') !== 'Sim') return;
+    if (tab.fornecedor && String(tab.fornecedor).trim() !== String(fornId).trim()) return;
+    if (!(tab.clientes || []).some(function (c) { return String(c.cliId || '').trim() === String(cliId).trim(); })) return;
+    _temTabela = true;
+    (tab.itens || []).forEach(function (it) {
+      if (it.fornId && String(it.fornId).trim() !== String(fornId).trim()) return;
+      if (it.prodId != null && String(it.prodId).trim() !== '') _permitidos[String(it.prodId).trim()] = true;
+    });
+  });
+  if (!_temTabela) {
+    var _fornObj = (getFornecedores() || []).find(function (x) { return String(x.id) === String(fornId); });
+    var _fornTxt = _fornObj ? _cpSemColchetes(_fornObj.nome_fantasia || _fornObj.razao_social || '') : '';
+    _avisoProd('Este cliente não está em nenhuma tabela de preço' + (_fornTxt ? ' da ' + _fornTxt : ' desta fábrica') + '. Inclua o cliente numa tabela para lançar pedido.');
+    return;
+  }
   var base = getProdutos();
   if (fornId) base = base.filter(function(p){ return p.fornecedor === fornId; });
+  base = base.filter(function (p) { return _permitidos[String(p.id).trim()]; });
   // Tambem acha pelo Cód. Pedido / Cód. Cliente cadastrado nas tabelas de preço do cliente (ou de todas, se ainda não escolheu o cliente)
   _pedProdCodMap = {};
   var qSimples = q.replace(/[^a-z0-9]/gi, '').toLowerCase();
