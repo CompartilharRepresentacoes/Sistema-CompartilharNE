@@ -18406,13 +18406,13 @@ function dashInit() {
         let sem = 0;
         for (let d = 1; d <= nDias; d++) {
           const dow = new Date(_gAi, _gMi, d).getDay();
-          const seg = d - ((dow + 6) % 7);         // dia da segunda-feira dessa semana (pode ser < 1)
+          const seg = d - dow;         // dia do domingo dessa semana (pode ser < 1)
           const key = Math.max(1, seg);
           if (!_gIdx.has(key)) { sem++; _gNovo(key, ''); _gBuckets[_gBuckets.length-1]._seg = seg; _gBuckets[_gBuckets.length-1]._ini = key; _gBuckets[_gBuckets.length-1]._n = sem; }
           _gIdx.set('d' + d, _gIdx.get(key));
           _gBuckets[_gIdx.get(key)]._ult = d;
         }
-        _gBuckets.forEach(b => { let fim = Math.min(nDias, b._seg + 4); if (fim < b._ini) fim = b._ult; b.label = dd(b._ini) + ' - ' + dd(fim); });
+        _gBuckets.forEach(b => { let fim = Math.min(nDias, b._seg + 6); if (fim < b._ini) fim = b._ult; b.label = dd(b._ini) + ' - ' + dd(fim); });
       }
       for (const p of peds) {
         let pos;
@@ -19223,13 +19223,13 @@ function dashInit() {
         const ini = [], seg0 = [], ult = [];
         for (let d = 1; d <= nDias; d++) {
           const dow = new Date(_feAi, _feMi, d).getDay();
-          const seg = d - ((dow + 6) % 7);
+          const seg = d - dow;
           const key = Math.max(1, seg);
           if (!_feIdx.has(key)) { _feIdx.set(key, meses.length); meses.push(0); ini.push(key); seg0.push(seg); ult.push(d); }
           _feIdx.set('d' + d, _feIdx.get(key));
           ult[_feIdx.get(key)] = d;
         }
-        ini.forEach((i0, k) => { let fim = Math.min(nDias, seg0[k] + 4); if (fim < i0) fim = ult[k]; _feLabels.push(dd(i0) + ' - ' + dd(fim)); });
+        ini.forEach((i0, k) => { let fim = Math.min(nDias, seg0[k] + 6); if (fim < i0) fim = ult[k]; _feLabels.push(dd(i0) + ' - ' + dd(fim)); });
       }
       for (const p of peds) {
         let pos;
@@ -19518,13 +19518,13 @@ function dashInit() {
         const ini = [], seg0 = [], ult = [];
         for (let d = 1; d <= nDias; d++) {
           const dow = new Date(_feAi, _feMi, d).getDay();
-          const seg = d - ((dow + 6) % 7);
+          const seg = d - dow;
           const key = Math.max(1, seg);
           if (!idx.has(key)) { idx.set(key, vals.length); vals.push(0); ini.push(key); seg0.push(seg); ult.push(d); }
           idx.set('d' + d, idx.get(key));
           ult[idx.get(key)] = d;
         }
-        ini.forEach((i0, k) => { let fim = Math.min(nDias, seg0[k] + 4); if (fim < i0) fim = ult[k]; labels.push(dd(i0) + ' - ' + dd(fim)); });
+        ini.forEach((i0, k) => { let fim = Math.min(nDias, seg0[k] + 6); if (fim < i0) fim = ult[k]; labels.push(dd(i0) + ' - ' + dd(fim)); });
       }
       for (const l of rows) {
         let pos;
@@ -21016,11 +21016,11 @@ function _sbDefMes(pre) {
 })();
 
 
-// v108: abas Completas Faturadas / Simples NFs / Nao Faturadas abrem com a semana anterior (seg-dom) ja preenchida e ja listando (toda vez que a aba e aberta)
+// v108: abas Completas Faturadas / Simples NFs / Nao Faturadas abrem com a semana anterior (dom-sab) ja preenchida e ja listando (toda vez que a aba e aberta)
 function _sbSemanaAnt(pre) {
   var de = document.getElementById(pre + '-data-de'), ate = document.getElementById(pre + '-data-ate');
   if (!de || !ate) return;
-  var h = new Date(), dow = (h.getDay() + 6) % 7; // 0 = segunda
+  var h = new Date(), dow = h.getDay(); // 0 = domingo
   var ini = new Date(h.getFullYear(), h.getMonth(), h.getDate() - dow - 7);
   var fim = new Date(ini.getFullYear(), ini.getMonth(), ini.getDate() + 6);
   var f = function (d) { return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); };
@@ -21214,11 +21214,11 @@ function pssAtualizarLojas() {
   lojaSel.innerHTML = '<option value="">Todas</option>' + lojas.map(function(c){ return '<option value="'+c.id+'">'+_pedEsc(c.nome||'')+'</option>'; }).join('');
   if (lojas.some(function(l){ return String(l.id) === String(valorAtual); })) lojaSel.value = valorAtual;
 }
-// ao abrir a aba Venda simples: ja vem com a semana atual (segunda a domingo)
+// ao abrir a aba Venda simples: ja vem com a semana atual (domingo a sabado)
 function _pssSemanaAtual() {
   var de = document.getElementById('pss-data-de'), ate = document.getElementById('pss-data-ate');
   if (de && ate) {
-    var h = new Date(), dow = (h.getDay() + 6) % 7; // 0 = segunda
+    var h = new Date(), dow = h.getDay(); // 0 = domingo
     var ini = new Date(h.getFullYear(), h.getMonth(), h.getDate() - dow);
     var fim = new Date(ini.getFullYear(), ini.getMonth(), ini.getDate() + 6);
     var f = function (d) { return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); };
