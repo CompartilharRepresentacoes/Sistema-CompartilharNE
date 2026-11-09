@@ -9003,6 +9003,7 @@ function _fsIniciarOuvintes(aoFicarTudoPronto) {
     if (r.error) { console.error('docs_cadastros', r.error); mostrarErroLogin('Erro ao ler o Supabase: ' + r.error.message); var bt = document.getElementById('btnEntrar'); if (bt) { bt.disabled = false; bt.textContent = 'Entrar'; } _fsOuvindo = false; return; }
     var c = r.data || {};
     _fsColecoes.forEach(function (n) { if (n !== 'pedidos') { _fsCache[n] = c[n] || []; _fsPronto[n] = true; } });
+    try { (_fsCache['clientes'] || []).forEach(_cadNormCliente); } catch (eNc) { console.warn(eNc); }
     // v54: Rede sem Sub Rede vem do banco com subcategoriaId nulo; o modulo Reino espera '' (v461)
     ['planejamento_reino_redes', 'planejamento_reino_lojas', 'planejamento_reino_vinculos'].forEach(function (n) {
       (_fsCache[n] || []).forEach(function (o) { if (o && (o.subcategoriaId == null || o.subcategoriaId === 'null' || o.subcategoriaId === 'undefined')) o.subcategoriaId = ''; });
@@ -9364,6 +9365,24 @@ function _sbSemArq(nome, o) {
   if (nome === 'ocorrencias_entrega' && 'anexoData' in o) { var c3 = Object.assign({}, o); delete c3.anexoData; return c3; }
   return o;
 }
+// O banco guarda o prazo do cliente como "prazo" e a tabela como "nome"; a tela usa "valor" nos dois. Traduz nos dois sentidos.
+function _cadNormCliente(c) {
+  if (!c || typeof c !== 'object') return c;
+  [['prazos_fornecedor', 'prazo'], ['tabelas_fornecedor', 'nome']].forEach(function (par) {
+    var lista = c[par[0]]; if (!Array.isArray(lista)) return;
+    lista.forEach(function (it) { if (it && (it.valor == null || it.valor === '') && it[par[1]] != null) it.valor = it[par[1]]; });
+  });
+  return c;
+}
+function _cadClienteParaBanco(c) {
+  if (!c || typeof c !== 'object') return c;
+  var o = Object.assign({}, c);
+  [['prazos_fornecedor', 'prazo'], ['tabelas_fornecedor', 'nome']].forEach(function (par) {
+    if (!Array.isArray(o[par[0]])) return;
+    o[par[0]] = o[par[0]].map(function (it) { var x = Object.assign({}, it); if (x.valor != null && x.valor !== '') x[par[1]] = x.valor; return x; });
+  });
+  return o;
+}
 function _sbGravarCadastro(nome, arrayNovo) {
   var antigo = _fsCache[nome] || [];
   var mapAntigo = {}, idsNovo = {}, alterados = [], apagar = [];
@@ -9408,7 +9427,7 @@ function _sbGravarCadastro(nome, arrayNovo) {
     var seq = Promise.resolve();
     lotes.forEach(function (lote, n) {
       seq = seq.then(function () {
-        return SB.rpc('gravar_cadastros', { p_colecao: nome, p_docs: JSON.parse(JSON.stringify(lote)), p_apagar: n === 0 ? apagar : [] }).then(function (r) {
+        return SB.rpc('gravar_cadastros', { p_colecao: nome, p_docs: JSON.parse(JSON.stringify(nome === 'clientes' ? lote.map(_cadClienteParaBanco) : lote)), p_apagar: n === 0 ? apagar : [] }).then(function (r) {
           if (r.error) throw new Error(r.error.message);
         });
       });
@@ -9476,7 +9495,7 @@ function _cadAutoAtualizar(minMs) {
       var novos = [];
       srv.forEach(function (o) {
         if (!o || o.id == null) return;
-        if (pos[o.id] === undefined) novos.push(o);
+        if (pos[o.id] === undefined) { if (n === 'clientes') _cadNormCliente(o); novos.push(o); }
       });
       if (novos.length) { _fsCache[n] = cache.concat(novos); mudou.push(n); }
     });
@@ -21582,7 +21601,7 @@ function _pimpRender() {
   var dataEntrega = _entctrlDataPrevista(pedido.data, uf);
 
   var prazoItem = (cliente.prazos_fornecedor || []).find(function(x){ return x.fornId === pedido.fornecedorId; });
-  var prazoTxt = prazoItem ? prazoItem.valor : '—';
+  var prazoTxt = prazoItem ? (prazoItem.valor || prazoItem.prazo || '—') : '—';
 
   var enderecoCliente = [cliente.endereco, cliente.numero].filter(Boolean).join(', ') + (cliente.complemento ? ' - ' + cliente.complemento : '');
   var enderecoFornecedor = [fornecedor.endereco, fornecedor.numero].filter(Boolean).join(', ') + (fornecedor.complemento ? ' - ' + fornecedor.complemento : '');
@@ -34279,8 +34298,8 @@ function _rcCalcular(F, per) {
     var top = o ? Object.keys(o.prods).map(function (kk) { return o.prods[kk]; }).sort(function (a, b) { return b.v - a.v; }).slice(0, 3).map(function (x) { return nomeProd(x.id, x.nome); }) : [];
 
     // prazos
-    var prazos = (c.prazos_fornecedor || []).filter(function (p) { return !F.fornId || String(p.fornId) === String(F.fornId); }).map(function (p) { return [_cpSemColchetes(p.fornNome || nomeForn(p.fornId)), String(p.valor || '')]; });
-    var medias = []; (c.prazos_fornecedor || []).forEach(function (p) { if (F.fornId && String(p.fornId) !== String(F.fornId)) return; var n = _rcNum(p.valor); if (n.length) medias.push(n.reduce(function (s, x) { return s + x; }, 0) / n.length); });
+    var prazos = (c.prazos_fornecedor || []).filter(function (p) { return !F.fornId || String(p.fornId) === String(F.fornId); }).map(function (p) { return [_cpSemColchetes(p.fornNome || nomeForn(p.fornId)), String(p.valor || p.prazo || '')]; });
+    var medias = []; (c.prazos_fornecedor || []).forEach(function (p) { if (F.fornId && String(p.fornId) !== String(F.fornId)) return; var n = _rcNum(p.valor || p.prazo); if (n.length) medias.push(n.reduce(function (s, x) { return s + x; }, 0) / n.length); });
     var prazoMed = medias.length ? Math.round(medias.reduce(function (s, x) { return s + x; }, 0) / medias.length * 10) / 10 : null;
 
     var dv = DV[k], motTop = '—';
