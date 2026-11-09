@@ -21337,13 +21337,13 @@ function renderVendaSimples() {
   }
 
   var statusCores = {
-    'Pré-Venda':          { bg:'#eff6ff', cor:'#2563eb' },
-    'Aguardando Retorno': { bg:'#fff7ed', cor:'#DE7926' },
-    'Enviado':            { bg:'#f5f3ff', cor:'#7c3aed' },
-    'Faturado':           { bg:'#f0fdf4', cor:'#15803d' },
-    'Faturado Parcial':   { bg:'#fefce8', cor:'#a16207' },
-    'Bonificado':         { bg:'#ecfeff', cor:'#0e7490' },
-    'Cancelado':          { bg:'#fff5f5', cor:'#dc2626' },
+    'Pré-Venda':          { bg:'transparent', cor:'#ea580c' },
+    'Aguardando Retorno': { bg:'transparent', cor:'#ca8a04' },
+    'Enviado':            { bg:'transparent', cor:'#1d4ed8' },
+    'Faturado':           { bg:'transparent', cor:'#15803d' },
+    'Faturado Parcial':   { bg:'transparent', cor:'#db2777' },
+    'Bonificado':         { bg:'transparent', cor:'#334155' },
+    'Cancelado':          { bg:'transparent', cor:'#dc2626' },
   };
 
   tbody.innerHTML = rows.map(function(p){
@@ -21441,13 +21441,13 @@ function renderPedidoList() {
   }
 
   const statusCores = {
-    'Pré-Venda':          { bg:'#eff6ff', cor:'#2563eb' },
-    'Aguardando Retorno': { bg:'#fff7ed', cor:'#DE7926' },
-    'Enviado':            { bg:'#f5f3ff', cor:'#7c3aed' },
-    'Faturado':           { bg:'#f0fdf4', cor:'#15803d' },
-    'Faturado Parcial':   { bg:'#fefce8', cor:'#a16207' },
-    'Bonificado':         { bg:'#ecfeff', cor:'#0e7490' },
-    'Cancelado':          { bg:'#fff5f5', cor:'#dc2626' },
+    'Pré-Venda':          { bg:'transparent', cor:'#ea580c' },
+    'Aguardando Retorno': { bg:'transparent', cor:'#ca8a04' },
+    'Enviado':            { bg:'transparent', cor:'#1d4ed8' },
+    'Faturado':           { bg:'transparent', cor:'#15803d' },
+    'Faturado Parcial':   { bg:'transparent', cor:'#db2777' },
+    'Bonificado':         { bg:'transparent', cor:'#334155' },
+    'Cancelado':          { bg:'transparent', cor:'#dc2626' },
   };
 
   tbody.innerHTML = rows.map(function(p){
@@ -21758,13 +21758,13 @@ function pedGerarPdfImpressao() {
 // ═══════════════════════════════════════════════════
 var _pimprelAbaAtual = 'geral';
 var _PIMPREL_STATUS_CORES = {
-  'Pré-Venda':          { bg:'#eff6ff', cor:'#2563eb' },
-  'Aguardando Retorno': { bg:'#fff7ed', cor:'#DE7926' },
-  'Enviado':            { bg:'#f5f3ff', cor:'#7c3aed' },
-  'Faturado':           { bg:'#f0fdf4', cor:'#15803d' },
-  'Faturado Parcial':   { bg:'#fefce8', cor:'#a16207' },
-  'Bonificado':         { bg:'#ecfeff', cor:'#0e7490' },
-  'Cancelado':          { bg:'#fff5f5', cor:'#dc2626' },
+  'Pré-Venda':          { bg:'transparent', cor:'#ea580c' },
+  'Aguardando Retorno': { bg:'transparent', cor:'#ca8a04' },
+  'Enviado':            { bg:'transparent', cor:'#1d4ed8' },
+  'Faturado':           { bg:'transparent', cor:'#15803d' },
+  'Faturado Parcial':   { bg:'transparent', cor:'#db2777' },
+  'Bonificado':         { bg:'transparent', cor:'#334155' },
+  'Cancelado':          { bg:'transparent', cor:'#dc2626' },
 };
 function _pimprelPeriodoTxt(dataDe, dataAte) {
   var fmt = function(iso){ return iso ? iso.split('-').reverse().join('/') : ''; };
@@ -24258,7 +24258,7 @@ function _pfatRender() {
   var ref = document.getElementById('pfat-ref');
   if (ref) ref.textContent = _cpSemColchetes(pedido.clienteNome || '') + ' · ' + fornNomeSo;
 
-  var statusCores = { 'Pré-Venda':{bg:'#f1f5f9',cor:'#64748b'}, 'Aguardando Retorno':{bg:'#fff7ed',cor:'#c2410c'}, 'Enviado':{bg:'#eff6ff',cor:'#1d4ed8'}, 'Faturado':{bg:'#f0fdf4',cor:'#15803d'}, 'Faturado Parcial':{bg:'#fefce8',cor:'#a16207'}, 'Bonificado':{bg:'#ecfeff',cor:'#0e7490'}, 'Cancelado':{bg:'#fff5f5',cor:'#dc2626'} };
+  var statusCores = { 'Pré-Venda':{bg:'transparent',cor:'#ea580c'}, 'Aguardando Retorno':{bg:'transparent',cor:'#ca8a04'}, 'Enviado':{bg:'transparent',cor:'#1d4ed8'}, 'Faturado':{bg:'transparent',cor:'#15803d'}, 'Faturado Parcial':{bg:'transparent',cor:'#db2777'}, 'Bonificado':{bg:'transparent',cor:'#334155'}, 'Cancelado':{bg:'transparent',cor:'#dc2626'} };
   var cor = statusCores[pedido.status] || { bg:'#f1f5f9', cor:'#64748b' };
 
   var infoGrid = document.getElementById('pfat-info-grid');
@@ -25749,7 +25749,7 @@ function renderVendasCompletas(manterPag) {
   if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; _pagLimpar('vc'); return; }
   vazio.style.display = 'none';
 
-  var statusCores = { 'Pré-Venda':{bg:'#f1f5f9',cor:'#64748b'}, 'Aguardando Retorno':{bg:'#fff7ed',cor:'#c2410c'}, 'Enviado':{bg:'#eff6ff',cor:'#1d4ed8'}, 'Faturado':{bg:'#f0fdf4',cor:'#15803d'}, 'Faturado Parcial':{bg:'#fefce8',cor:'#a16207'}, 'Bonificado':{bg:'#ecfeff',cor:'#0e7490'}, 'Cancelado':{bg:'#fff5f5',cor:'#dc2626'} };
+  var statusCores = { 'Pré-Venda':{bg:'transparent',cor:'#ea580c'}, 'Aguardando Retorno':{bg:'transparent',cor:'#ca8a04'}, 'Enviado':{bg:'transparent',cor:'#1d4ed8'}, 'Faturado':{bg:'transparent',cor:'#15803d'}, 'Faturado Parcial':{bg:'transparent',cor:'#db2777'}, 'Bonificado':{bg:'transparent',cor:'#334155'}, 'Cancelado':{bg:'transparent',cor:'#dc2626'} };
 
   _sbPagina('vc', 'renderVendasCompletas', cont, lista, manterPag, true, 'pedidos', function(r){
     var p = r.pedido;
@@ -25924,7 +25924,7 @@ function renderVendasCompletasFaturadas(manterPag) {
   if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; _vcfLimparBarras(); return; }
   vazio.style.display = 'none';
 
-  var statusCores = { 'Faturado':{bg:'#f0fdf4',cor:'#15803d'}, 'Faturado Parcial':{bg:'#fefce8',cor:'#a16207'} };
+  var statusCores = { 'Faturado':{bg:'transparent',cor:'#15803d'}, 'Faturado Parcial':{bg:'transparent',cor:'#db2777'} };
 
   var _vcfTotal = lista.length, _vcfNp = Math.max(1, Math.ceil(_vcfTotal / _vcfPorPag));
   if (_vcfPag > _vcfNp) _vcfPag = _vcfNp; if (_vcfPag < 1) _vcfPag = 1;
@@ -32875,7 +32875,7 @@ function _relCalcPedidoFaturado(f) {
 
 function _relCalcPedidosParados(f) {
   var hoje = new Date();
-  var statusCores = { 'Pré-Venda':{bg:'#f1f5f9',cor:'#64748b'}, 'Aguardando Retorno':{bg:'#fff7ed',cor:'#c2410c'}, 'Enviado':{bg:'#eff6ff',cor:'#1d4ed8'}, 'Faturado':{bg:'#f0fdf4',cor:'#15803d'}, 'Faturado Parcial':{bg:'#fefce8',cor:'#a16207'}, 'Bonificado':{bg:'#ecfeff',cor:'#0e7490'}, 'Cancelado':{bg:'#fff5f5',cor:'#dc2626'} };
+  var statusCores = { 'Pré-Venda':{bg:'transparent',cor:'#ea580c'}, 'Aguardando Retorno':{bg:'transparent',cor:'#ca8a04'}, 'Enviado':{bg:'transparent',cor:'#1d4ed8'}, 'Faturado':{bg:'transparent',cor:'#15803d'}, 'Faturado Parcial':{bg:'transparent',cor:'#db2777'}, 'Bonificado':{bg:'transparent',cor:'#334155'}, 'Cancelado':{bg:'transparent',cor:'#dc2626'} };
   var pedidos = getPedidos().filter(function(p){ return p.status !== 'Faturado' && p.status !== 'Cancelado'; });
   var _cmPP = {}; getClientes().forEach(function(c){ _cmPP[c.id] = c; });
   pedidos = pedidos.filter(function(p){
