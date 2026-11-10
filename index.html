@@ -22634,9 +22634,73 @@ function _pedParsePedidoTextoCompraMerc(paginasTexto) {
   }];
 }
 
+// ── Layout Consinco "PEDIDO DE COMPRAS" com colunas "Cod Forn | Codigo Produtos a Receber | Embalagem | Quantidade | Valor Unitario" ──
+// Ex.: Novo Atacado -> Allfood. Diferente do layout "Sendas" (colunas em outras posicoes) e o PDF vem GIRADO
+// (pagina em pe com o conteudo deitado): as posicoes ja chegam convertidas para o que se ve na tela
+// (ver _pedPaginasItensVisuais). O pedido ocupa varias paginas, entao os itens de todas as paginas viram
+// UM pedido so. Le cada linha pelas colunas (esquerda -> direita), sem depender de posicao fixa em pixels:
+//   [Cod Forn] [Codigo do produto] [Descricao] [Embalagem "CX 10" / "KG 1"] [Quantidade] [Valor Unitario] ...
+// Valor Unitario e o preco de 1 UNIDADE da embalagem (4,00 CX de 10 x 15,57 = 622,80); o sistema espera o
+// preco da CAIXA quando a unidade e CXA, entao multiplica pelo conteudo da embalagem.
+function _pedParsePedidoTextoConsincoCod(paginasItensVis) {
+  var numero = '', itens = [], cnpjForn = '', cnpjCli = '', erro = false;
+  (paginasItensVis || []).forEach(function (items) {
+    var txt = items.map(function (it) { return it.str; }).join(' ');
+    if (!numero) { var mN = /PEDIDO DE COMPRAS\D*(\d+)/.exec(txt); if (mN) numero = mN[1]; }
+    var linhas = _pedAgruparLinhasPdf(items);
+    var c = _pedExtrairCnpjsPaginaSendas(linhas);
+    if (!cnpjForn && c.fornecedorCnpj) cnpjForn = c.fornecedorCnpj;
+    if (!cnpjCli && c.clienteCnpj) cnpjCli = c.clienteCnpj;
+    Object.keys(linhas).map(Number).sort(function (a, b) { return b - a; }).forEach(function (y) {
+      var tk = linhas[y];
+      var emb = tk.find(function (t) { return /^(CX|CXA|KG|UN|UND|PC|PCT)\s+\d+$/i.test(t.str.trim()); });
+      if (!emb) return;
+      var esq = tk.filter(function (t) { return t.x < emb.x - 1; });
+      var dir = tk.filter(function (t) { return t.x > emb.x + 1 && /^[\d.]+,\d+$/.test(t.str.trim()); });
+      if (dir.length < 2) return;
+      var codForn = '', codProd = '', desc = [];
+      esq.forEach(function (t) {
+        var s = t.str.trim();
+        if (/^\d+$/.test(s) && t.x < 75 && !codForn) codForn = s;
+        else if (/^\d{4,7}$/.test(s) && t.x >= 75 && !codProd) codProd = s;
+        else desc.push(s);
+      });
+      if (!codForn && !codProd) return;
+      var mE = /^([A-Za-z]+)\s+(\d+)$/.exec(emb.str.trim());
+      var un = mE[1].toUpperCase(), conteudo = parseInt(mE[2], 10) || 1;
+      var qtd = _pedParseMoeda(dir[0].str), unit = _pedParseMoeda(dir[1].str);
+      var unidade = (un === 'CX' || un === 'CXA') ? 'CXA' : (un === 'KG' ? 'KG' : 'UN');
+      var unitCx = unidade === 'CXA' ? Math.round(unit * conteudo * 100) / 100 : unit;
+      var cod = codProd || codForn;
+      itens.push({
+        descricao: desc.join(' ').replace(/\s+/g, ' ').trim(), dataEnt: null, qtd: qtd, unitario: unitCx,
+        codigo: cod, codigoNormalizado: _pedNormCodigoPedido(cod),
+        codigoCandidatos: _pedCandidatosCodigoPedido(cod),
+        unidade: unidade, codFornPdf: codForn, codProdutoPdf: codProd, embalagem: emb.str.trim(), unitarioPdf: unit
+      });
+    });
+  });
+  if (!itens.length || !numero || !cnpjForn || !cnpjCli) return [];
+  return [{
+    numero: numero, fornecedorCnpj: cnpjForn, localEntregaCnpj: cnpjCli, itens: itens,
+    origem: 'Importado de PDF "Pedido de Compras" nº ' + numero + ' (' + itens.length + ' itens).'
+  }];
+}
+// Converte as posicoes do pdf.js para o que se ve na tela quando a pagina vem girada (rotate 90/270).
+function _pedPaginasItensVisuais(pagina, content, lib) {
+  if (!pagina.rotate) return content.items;
+  var vp = pagina.getViewport({ scale: 1 });
+  return content.items.map(function (it) {
+    var t = lib.Util.transform(vp.transform, it.transform);
+    return { str: it.str, transform: [t[0], t[1], t[2], t[3], t[4], vp.height - t[5]] };
+  });
+}
+
 // Detecta qual layout de PDF de pedido este texto e, pra rotear pro parser certo.
 // Retorna 'atacadao', 'sendas' ou null (layout desconhecido/nao configurado ainda).
 function _pedDetectarLayoutPdf(textoCompleto) {
+  // Consinco com colunas "Cod Forn | Codigo Produtos a Receber" (ex.: Novo Atacado -> Allfood): outro layout que o do Sendas
+  if (/Consinco/.test(textoCompleto) && /C[oó]digo\s+Produtos\s+a\s+Receber/i.test(textoCompleto)) return 'consinco_cod';
   if (/Consinco/.test(textoCompleto)) return 'sendas';
   if (/Numero:\s*\d+/.test(textoCompleto) && /Local\s+de\s+Entrega\s*:/.test(textoCompleto)) return 'atacadao';
   // "210 - Emitir Pedido de Compra" (ERP do cliente, ex.: MF Importacao -> Allfood)
@@ -22957,12 +23021,14 @@ function _pedImportarPdfArquivo(input) {
     lib.getDocument({ data: new Uint8Array(e.target.result) }).promise.then(function (pdf) {
       var paginasTexto = [];
       var paginasItens = [];
+      var paginasItensVis = [];   // posicoes como se ve na tela (PDF girado)
       var promessas = [];
       for (let p = 1; p <= pdf.numPages; p++) {
         promessas.push(pdf.getPage(p).then(function (page) {
           return page.getTextContent().then(function (content) {
             paginasTexto[p - 1] = content.items.map(function (it) { return it.str; }).join(' ');
             paginasItens[p - 1] = content.items;
+            paginasItensVis[p - 1] = _pedPaginasItensVisuais(page, content, lib);
           });
         }));
       }
@@ -22974,6 +23040,8 @@ function _pedImportarPdfArquivo(input) {
           resultados = _pedImportarPdfProcessar(textoCompleto);
         } else if (layout === 'sendas') {
           resultados = _pedImportarPdfProcessarSendas(paginasItens);
+        } else if (layout === 'consinco_cod') {
+          resultados = _pedParsePedidoTextoConsincoCod(paginasItensVis).map(_pedProcessarBlocoImportadoPdf);
         } else if (layout === 'compra_merc') {
           resultados = _pedParsePedidoTextoCompraMerc(paginasTexto).map(_pedProcessarBlocoImportadoPdf);
         } else {
