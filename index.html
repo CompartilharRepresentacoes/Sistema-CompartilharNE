@@ -22722,9 +22722,42 @@ function _pedPaginasItensVisuais(pagina, content, lib) {
   });
 }
 
+// ── Layout "RP One - Enterprise" (pedido de compra do cliente, colunas: Cod Barras | Cod Forn | Descricao | Qtde Emb | Emb | Pr Unit | Pr Emb | Vl Total) ──
+// Ex.: Cambui (Comercial Bahiano de Alimentos) -> Allfood. O texto sai em ordem, entao le cada linha de item direto.
+// "Cod Forn" e o codigo do produto na fabrica; "Pr Emb" e o preco da CAIXA (Pr Unit x conteudo da embalagem), que e o que o
+// sistema espera quando a unidade e CXA.
+function _pedParsePedidoTextoRpOne(paginasTexto) {
+  var t = (paginasTexto || []).map(function (x) { return String(x || ''); }).join(' ').replace(/\s+/g, ' ');
+  var mNum = /N[uú]mero\s+do\s+Pedido\s*:\s*(\d+)/i.exec(t);
+  var mForn = /Fornecedor\s*:[^:]*?CNPJ\s*:\s*([\d./-]{14,18})/i.exec(t);
+  var mEmp = /Empresa\s*:.*?CNPJ\s*:\s*([\d./-]{14,18})/i.exec(t);
+  var numero = mNum ? mNum[1] : '';
+  var cnpjForn = mForn ? _pedNormCnpjDigits(mForn[1]) : '', cnpjCli = mEmp ? _pedNormCnpjDigits(mEmp[1]) : '';
+  var itens = [], m;
+  var re = /(\d{8,14})\s+(\d{3,9})\s+(.+?)\s+(\d+(?:,\d+)?)\s+(CX|CXA|KG|UN|UND|PC|PCT)\/(\d+)\s+(\d[\d.]*,\d{2,4})\s+(\d[\d.]*,\d{2})\s+(\d[\d.]*,\d{2})(?=\s|$)/gi;
+  while ((m = re.exec(t))) {
+    var un = m[5].toUpperCase();
+    var unidade = (un === 'CX' || un === 'CXA') ? 'CXA' : (un === 'KG' ? 'KG' : 'UN');
+    var prUnit = _pedParseMoeda(m[7]), prEmb = _pedParseMoeda(m[8]);
+    itens.push({
+      descricao: m[3].trim(), dataEnt: null, qtd: _pedParseMoeda(m[4]),
+      unitario: unidade === 'CXA' ? prEmb : prUnit,
+      codigo: m[2], codigoNormalizado: _pedNormCodigoPedido(m[2]), codigoCandidatos: _pedCandidatosCodigoPedido(m[2]),
+      unidade: unidade, codBarras: m[1], embalagem: un + '/' + m[6], prUnitPdf: prUnit, totalPdf: _pedParseMoeda(m[9])
+    });
+  }
+  if (!itens.length || !numero || !cnpjForn || !cnpjCli) return [];
+  return [{
+    numero: numero, fornecedorCnpj: cnpjForn, localEntregaCnpj: cnpjCli, itens: itens,
+    origem: 'Importado de PDF "Pedido de Compra" nº ' + numero + ' (' + itens.length + ' itens).'
+  }];
+}
+
 // Detecta qual layout de PDF de pedido este texto e, pra rotear pro parser certo.
 // Retorna 'atacadao', 'sendas' ou null (layout desconhecido/nao configurado ainda).
 function _pedDetectarLayoutPdf(textoCompleto) {
+  // "RP One - Enterprise" (ex.: Cambui -> Allfood): Cod Barras | Cod Forn | Descricao | Qtde Emb | Emb | Pr Unit | Pr Emb | Vl Total
+  if (/RP\s+One\s*-\s*Enterprise/i.test(textoCompleto) && /Cod\s+Forn/i.test(textoCompleto)) return 'rp_one';
   // Consinco com colunas "Cod Forn | Codigo Produtos a Receber" (ex.: Novo Atacado -> Allfood): outro layout que o do Sendas
   if (/Consinco/.test(textoCompleto) && /C[oó]digo\s+Produtos\s+a\s+Receber/i.test(textoCompleto)) return 'consinco_cod';
   if (/Consinco/.test(textoCompleto)) return 'sendas';
@@ -23066,6 +23099,8 @@ function _pedImportarPdfArquivo(input) {
           resultados = _pedImportarPdfProcessar(textoCompleto);
         } else if (layout === 'sendas') {
           resultados = _pedImportarPdfProcessarSendas(paginasItens);
+        } else if (layout === 'rp_one') {
+          resultados = _pedParsePedidoTextoRpOne(paginasTexto).map(_pedProcessarBlocoImportadoPdf);
         } else if (layout === 'consinco_cod') {
           resultados = _pedParsePedidoTextoConsincoCod(paginasItensVis).map(_pedProcessarBlocoImportadoPdf);
         } else if (layout === 'compra_merc') {
