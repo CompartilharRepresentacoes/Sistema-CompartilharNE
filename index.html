@@ -5282,7 +5282,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <button onclick="showPage('page-home')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 13px;font-size:11px;cursor:pointer">&#8629; Voltar</button>
         </div>
       </div>
-      <input type="file" id="ped-import-file" accept=".xlsx,.xls,.pdf,image/*,.jpg,.jpeg,.png" style="display:none" onchange="importarPedidosArquivo(this)">
+      <input type="file" id="ped-import-file" accept=".xlsx,.xls,.pdf,image/*,.jpg,.jpeg,.png" multiple style="display:none" onchange="importarPedidosArquivo(this)">
       <!-- Abas de visao (mesmo estilo das abas da pagina Inicio: maiusculas + sublinhado laranja); Importar/Cadastrar ficam na mesma linha, a direita -->
       <div id="ped-abas-desktop" style="display:flex;align-items:center;gap:10px;border-bottom:2px solid #e2e8f0;margin-bottom:14px;background:#f8fafc;border-radius:10px 10px 0 0;padding:4px 4px 0;flex-wrap:wrap">
         <div style="display:flex;gap:2px;flex-wrap:wrap;flex:1">
@@ -8603,7 +8603,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         <div style="font-size:10.5px;margin-top:6px;color:#272A4A">Aceita: Planilha (XLS/XLSX) &middot; PDF &middot; Imagem &middot; Texto</div>
         <div id="pwa-ocr" style="display:none;margin-top:10px;font-size:12px;color:#b45309;font-weight:600"></div>
       </div>
-      <input type="file" id="pwa-file" accept=".xlsx,.xls,.pdf,image/*,.jpg,.jpeg,.png" style="display:none" onchange="_pwaArquivoGeral(this.files[0]);this.value=''">
+      <input type="file" id="pwa-file" accept=".xlsx,.xls,.pdf,image/*,.jpg,.jpeg,.png" multiple style="display:none" onchange="_pwaArquivosGeral(this.files);this.value=''">
       <textarea id="pwa-texto" placeholder="Texto do pedido (ex.: PEDIDO CF ROSA E SILVA - 05.359.030/0020-75 ... 100KG QUEIJO PROVOLONE YEMA R$ 55,00kg). Se colar um print, o texto lido aparece aqui e pode ser corrigido." style="width:100%;height:110px;margin-top:10px;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font:12.5px system-ui;box-sizing:border-box"></textarea>
       <div id="pwa-semcnpj" style="display:none;margin-top:12px;border:1px solid #DE7926;background:#fff8f0;border-radius:9px;padding:12px 14px">
         <div style="font-size:12.5px;font-weight:700;color:#1e293b">Pedido sem CNPJ &mdash; informe o Cliente e o Fornecedor</div>
@@ -22457,6 +22457,28 @@ function _pedResolverProdutoPorCodigoPedido(fornId, clienteId, codigoCandidatos)
   return null;
 }
 
+// Acha o item da Tabela de Preco do cliente pelo CODIGO DO PRODUTO (codigo da fabrica), sem depender do Codigo Pedido.
+function _pedResolverProdutoPorCodigoFabrica(fornId, clienteId, codigo) {
+  var alvo = String(codigo || '').trim().replace(/^0+/, '');
+  if (!alvo || !clienteId) return null;
+  var cliIdS = String(clienteId).trim(), fornIdS = fornId ? String(fornId).trim() : '';
+  var produtos = getProdutos();
+  var tabelas = getTabPrecos().filter(function (t) { return (t.ativo || 'Sim') === 'Sim'; });
+  for (var i = 0; i < tabelas.length; i++) {
+    var vinc = (tabelas[i].clientes || []).some(function (c) { return String(c.cliId || '').trim() === cliIdS; });
+    if (!vinc) continue;
+    var itens = tabelas[i].itens || [];
+    for (var j = 0; j < itens.length; j++) {
+      var it = itens[j];
+      if (fornIdS && it.fornId && String(it.fornId).trim() !== fornIdS) continue;
+      var p = produtos.find(function (x) { return x.id === it.prodId; });
+      if (!p) continue;
+      if (fornIdS && String(p.fornecedor) !== fornIdS) continue;
+      if (String(p.codigo || '').trim().replace(/^0+/, '') === alvo) return it;
+    }
+  }
+  return null;
+}
 // Diagnostico usado só quando a resolução acima falha, pra explicar exatamente
 // por que (mesmo padrão de _pedDiagnosticoPreco, já usado no lançamento manual):
 // procura o mesmo Código Pedido em QUALQUER tabela ativa, ignorando o filtro de
@@ -22589,6 +22611,9 @@ function _pedProcessarBlocoImportadoPdf(bloco) {
 
   bloco.itens.forEach(function (itemPdf) {
     var tabItem = _pedResolverProdutoPorCodigoPedido(fornecedor.id, cliente.id, itemPdf.codigoCandidatos);
+    // PDF que traz o codigo da propria fabrica (ex.: Cambui -> Allfood): se o Codigo Pedido nao esta preenchido na tabela,
+    // acha o produto pelo CODIGO do produto (mesmo codigo da fabrica) dentro das tabelas do cliente
+    if (!tabItem && itemPdf.codigoDaFabrica) tabItem = _pedResolverProdutoPorCodigoFabrica(fornecedor.id, cliente.id, itemPdf.codigo);
     if (!tabItem) {
       var diag = _pedDiagnosticoCodigoPedido(fornecedor.id, cliente.id, itemPdf.codigoCandidatos, cliente.nome_fantasia || cliente.razao_social);
       resultado.itensPendentes.push({ origem: itemPdf, motivo: 'Código "' + itemPdf.codigo + '" não encontrado. ' + diag });
@@ -22745,7 +22770,8 @@ function _pedParsePedidoTextoRpOne(paginasTexto) {
       descricao: m[3].trim(), dataEnt: null, qtd: _pedParseMoeda(m[4]),
       unitario: unidade === 'CXA' ? prEmb : prUnit,
       codigo: m[2], codigoNormalizado: _pedNormCodigoPedido(m[2]), codigoCandidatos: _pedCandidatosCodigoPedido(m[2]),
-      unidade: unidade, codBarras: m[1], embalagem: un + '/' + m[6], prUnitPdf: prUnit, totalPdf: _pedParseMoeda(m[9])
+      unidade: unidade, codBarras: m[1], embalagem: un + '/' + m[6], prUnitPdf: prUnit, totalPdf: _pedParseMoeda(m[9]),
+      codigoDaFabrica: true
     });
   }
   if (!itens.length || !numero || !cnpjForn || !cnpjCli) return [];
@@ -23121,51 +23147,70 @@ function _pedConfirmarImportacaoPdf() {
   alert(criados + ' pedido(s) importado(s) com sucesso.' + (pulados ? (' ' + pulados + ' ignorado(s) por já existir um pedido igual (mesmo Fornecedor, Cliente e Número).') : ''));
 }
 
+// Le UM PDF (ArrayBuffer) e devolve { resultados } ou { erro } -- sem abrir tela nem dar alert
+function _pedLerPdfBuffer(buffer, lib) {
+  return lib.getDocument({ data: new Uint8Array(buffer) }).promise.then(function (pdf) {
+    var paginasTexto = [];
+    var paginasItens = [];
+    var paginasItensVis = [];   // posicoes como se ve na tela (PDF girado)
+    var promessas = [];
+    for (let p = 1; p <= pdf.numPages; p++) {
+      promessas.push(pdf.getPage(p).then(function (page) {
+        return page.getTextContent().then(function (content) {
+          paginasTexto[p - 1] = content.items.map(function (it) { return it.str; }).join(' ');
+          paginasItens[p - 1] = content.items;
+          paginasItensVis[p - 1] = _pedPaginasItensVisuais(page, content, lib);
+        });
+      }));
+    }
+    return Promise.all(promessas).then(function () {
+      var textoCompleto = paginasTexto.join(' ');
+      var layout = _pedDetectarLayoutPdf(textoCompleto);
+      var resultados;
+      if (layout === 'atacadao') {
+        resultados = _pedImportarPdfProcessar(textoCompleto);
+      } else if (layout === 'sendas') {
+        resultados = _pedImportarPdfProcessarSendas(paginasItens);
+      } else if (layout === 'rp_one') {
+        resultados = _pedParsePedidoTextoRpOne(paginasTexto).map(_pedProcessarBlocoImportadoPdf);
+      } else if (layout === 'consinco_cod') {
+        resultados = _pedParsePedidoTextoConsincoCod(paginasItensVis).map(_pedProcessarBlocoImportadoPdf);
+      } else if (layout === 'compra_merc') {
+        resultados = _pedParsePedidoTextoCompraMerc(paginasTexto).map(_pedProcessarBlocoImportadoPdf);
+      } else {
+        return { erro: 'Este layout de PDF ainda não é reconhecido pelo sistema. Fale com o suporte pra configurarmos esse formato também.' };
+      }
+      if (!resultados.length) return { erro: 'Não foi possível reconhecer nenhum pedido/loja neste PDF.' };
+      return { resultados: resultados };
+    }).catch(function () { return { erro: 'Não foi possível ler os itens deste PDF.' }; });
+  }, function () { return { erro: 'Não foi possível abrir este PDF.' }; });
+}
+
+// Importa 1 ou VARIOS PDFs de uma vez: junta todos os pedidos/lojas numa unica tela de conferencia
 function _pedImportarPdfArquivo(input) {
-  var file = input.files[0]; if (!file) return;
+  var files = Array.prototype.slice.call((input && input.files) || []);
+  if (!files.length) return;
   var lib = _getPdfjsLib();
   if (!lib) { alert('PDF.js indisponível — recarregue a página e tente novamente.'); input.value = ''; return; }
-  var reader = new FileReader();
-  reader.onload = function (e) {
-    lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    lib.getDocument({ data: new Uint8Array(e.target.result) }).promise.then(function (pdf) {
-      var paginasTexto = [];
-      var paginasItens = [];
-      var paginasItensVis = [];   // posicoes como se ve na tela (PDF girado)
-      var promessas = [];
-      for (let p = 1; p <= pdf.numPages; p++) {
-        promessas.push(pdf.getPage(p).then(function (page) {
-          return page.getTextContent().then(function (content) {
-            paginasTexto[p - 1] = content.items.map(function (it) { return it.str; }).join(' ');
-            paginasItens[p - 1] = content.items;
-            paginasItensVis[p - 1] = _pedPaginasItensVisuais(page, content, lib);
-          });
-        }));
-      }
-      Promise.all(promessas).then(function () {
-        var textoCompleto = paginasTexto.join(' ');
-        var layout = _pedDetectarLayoutPdf(textoCompleto);
-        var resultados;
-        if (layout === 'atacadao') {
-          resultados = _pedImportarPdfProcessar(textoCompleto);
-        } else if (layout === 'sendas') {
-          resultados = _pedImportarPdfProcessarSendas(paginasItens);
-        } else if (layout === 'rp_one') {
-          resultados = _pedParsePedidoTextoRpOne(paginasTexto).map(_pedProcessarBlocoImportadoPdf);
-        } else if (layout === 'consinco_cod') {
-          resultados = _pedParsePedidoTextoConsincoCod(paginasItensVis).map(_pedProcessarBlocoImportadoPdf);
-        } else if (layout === 'compra_merc') {
-          resultados = _pedParsePedidoTextoCompraMerc(paginasTexto).map(_pedProcessarBlocoImportadoPdf);
-        } else {
-          alert('Este layout de PDF ainda não é reconhecido pelo sistema. Fale com o suporte pra configurarmos esse formato também.');
-          return;
-        }
-        if (!resultados.length) { alert('Não foi possível reconhecer nenhum pedido/loja neste PDF.'); return; }
-        _pedAbrirRevisaoImportacao(resultados);
-      }).catch(function () { alert('Não foi possível ler os itens deste PDF.'); });
-    }).catch(function () { alert('Não foi possível abrir este PDF.'); });
+  lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  var lerArquivo = function (file) {
+    return new Promise(function (ok) {
+      var reader = new FileReader();
+      reader.onload = function (e) { _pedLerPdfBuffer(e.target.result, lib).then(ok); };
+      reader.onerror = function () { ok({ erro: 'Não foi possível abrir este PDF.' }); };
+      reader.readAsArrayBuffer(file);
+    });
   };
-  reader.readAsArrayBuffer(file);
+  Promise.all(files.map(lerArquivo)).then(function (lista) {
+    var todos = [], erros = [];
+    lista.forEach(function (r, i) {
+      if (r.erro) erros.push(files.length > 1 ? (files[i].name + ': ' + r.erro) : r.erro);
+      else todos = todos.concat(r.resultados);
+    });
+    if (erros.length) alert(files.length > 1 ? ('Alguns PDFs não foram lidos:\n\n' + erros.join('\n')) : erros[0]);
+    if (!todos.length) return;
+    _pedAbrirRevisaoImportacao(todos);
+  });
   input.value = '';
 }
 
@@ -23174,6 +23219,12 @@ function _pedImportarPdfArquivo(input) {
 function importarPedidosArquivo(input) {
   var file = input.files[0];
   if (!file) return;
+  if (input.files.length > 1) {
+    var todosPdf = Array.prototype.every.call(input.files, function (f) { return /\.pdf$/i.test(f.name || '') || f.type === 'application/pdf'; });
+    if (!todosPdf) { alert('Para importar vários arquivos de uma vez, todos precisam ser PDF. Importe a planilha ou a imagem separadamente.'); input.value = ''; return; }
+    _pedImportarPdfArquivo(input);
+    return;
+  }
   var nomeMin = file.name.toLowerCase();
   if (/\.pdf$/i.test(nomeMin) || file.type === 'application/pdf') {
     _pedImportarPdfArquivo(input);
@@ -40365,12 +40416,27 @@ document.addEventListener('drop', function (e) {
   var m = document.getElementById('modal-pwa');
   if (!m || m.style.display !== 'flex') return;
   e.preventDefault();
-  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-  if (f) _pwaArquivoGeral(f);
+  var fs = e.dataTransfer && e.dataTransfer.files;
+  if (fs && fs.length) _pwaArquivosGeral(fs);
 });
 
 // Roteador da tela unica "Importar Pedido": imagem vai para a leitura do print (WhatsApp);
 // PDF/planilha seguem o fluxo de sempre (importarPedidosArquivo), sem alteracao.
+// Varios arquivos de uma vez (arrastar ou escolher): so vale se todos forem PDF; 1 arquivo segue o fluxo de sempre
+function _pwaArquivosGeral(lista) {
+  var arr = Array.prototype.slice.call(lista || []);
+  if (!arr.length) return;
+  if (arr.length === 1) { _pwaArquivoGeral(arr[0]); return; }
+  var todosPdf = arr.every(function (f) { return /\.pdf$/i.test(f.name || '') || f.type === 'application/pdf'; });
+  if (!todosPdf) {
+    var er = document.getElementById('pwa-erro1');
+    er.textContent = 'Para importar vários arquivos de uma vez, todos precisam ser PDF. Importe a planilha ou a imagem separadamente.';
+    er.style.display = 'block';
+    return;
+  }
+  _pwaFechar();
+  importarPedidosArquivo({ files: arr, value: '' });
+}
 function _pwaArquivoGeral(file) {
   if (!file) return;
   var nome = (file.name || '').toLowerCase();
