@@ -26453,6 +26453,7 @@ function _pedProdFiltrar() {
   var drop = document.getElementById('ped-item-prod-drop');
   if (!drop) return;
   document.getElementById('ped-item-prod-id').value = '';
+  _pedProdHi = -1;
   if (q.length < 3) { drop.style.display='none'; return; }
   if (!_pedProdFiltrar._refazendo) {
     _pedAtualizarCadastros(function (mudou) {
@@ -26526,7 +26527,7 @@ function _pedProdFiltrar() {
         + '<span style="color:#b91c1c;flex:1;text-decoration:line-through">'+_pedEsc(p.nome||'')+'</span>'
         + '<span style="color:#dc2626;font-size:9.5px;font-weight:700;text-transform:uppercase;margin-left:8px;white-space:nowrap">Bloqueado</span></div>';
     }
-    return '<div onclick="_pedProdSel('+i+')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">'
+    return '<div class="ped-prod-opt" data-i="'+i+'" onclick="_pedProdSel('+i+')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">'
       + (p.codigo?'<span style="font-weight:700;color:#272A4A;margin-right:8px">'+_pedEsc(p.codigo)+'</span>':'')
       + '<span style="color:#334155;flex:1">'+_pedEsc(p.nome||'')+'</span>'
       + (_pedProdCodMap[p.id] ? '<span style="color:#DE7926;font-size:10.5px;font-weight:700;margin-left:8px;white-space:nowrap">Cód. '+_pedEsc(String(_pedProdCodMap[p.id]))+'</span>' : '')
@@ -26534,9 +26535,29 @@ function _pedProdFiltrar() {
   }).join('');
   drop.style.display = 'block';
 }
+var _pedProdHi = -1;
+function _pedProdOpts() {
+  var drop = document.getElementById('ped-item-prod-drop');
+  return (drop && drop.style.display !== 'none') ? Array.prototype.slice.call(drop.querySelectorAll('.ped-prod-opt')) : [];
+}
+function _pedProdMarcar(opts, k) {
+  opts.forEach(function (o, j) { o.style.background = (j === k) ? '#e0e7ff' : ''; });
+  _pedProdHi = (k >= 0 && opts[k]) ? parseInt(opts[k].getAttribute('data-i'), 10) : -1;
+  if (k >= 0 && opts[k] && opts[k].scrollIntoView) opts[k].scrollIntoView({ block: 'nearest' });
+}
 function _pedProdKey(e) {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    var opts = _pedProdOpts(); if (!opts.length) return;
+    e.preventDefault();
+    var atual = -1; opts.forEach(function (o, j) { if (parseInt(o.getAttribute('data-i'), 10) === _pedProdHi) atual = j; });
+    var k = e.key === 'ArrowDown' ? Math.min(atual + 1, opts.length - 1) : Math.max(atual - 1, 0);
+    if (atual < 0) k = e.key === 'ArrowDown' ? 0 : opts.length - 1;
+    _pedProdMarcar(opts, k);
+    return;
+  }
   if (e.key!=='Enter' && e.key!=='Tab') return;
-  if (_pedProdItems.length===1) { _pedProdSel(0); }
+  if (_pedProdHi >= 0 && _pedProdItems[_pedProdHi] && _pedProdOpts().length && e.key === 'Enter') { _pedProdSel(_pedProdHi); }
+  else if (_pedProdItems.length===1) { _pedProdSel(0); }
   if (e.key==='Enter') {
     e.preventDefault();
     if (document.getElementById('ped-item-prod-id').value) _pedEnterAvanca(e, 'ped-item-preco');
