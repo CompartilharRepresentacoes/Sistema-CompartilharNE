@@ -26374,6 +26374,7 @@ function _pedCliFiltrar() {
   var drop = document.getElementById('ped-cli-drop');
   if (!drop) return;
   document.getElementById('ped-cli-id').value = '';
+  _pedCliHi = -1;
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   var qDigits = q.replace(/\D/g, '');
@@ -26382,23 +26383,45 @@ function _pedCliFiltrar() {
   var _semZerosCli = function (v) { return String(v || '').replace(/\D/g, '').replace(/^0+(?=.)/, ''); };
   _pedCliItems = getClientesVisiveis().filter(function(c){
     var docDigits = (c.cpf_cnpj||'').replace(/\D/g, '');
-    if (_soNumCli) return (!!c.codigo && _semZerosCli(c.codigo) === _semZerosCli(qDigits)) || (docDigits.length >= 11 && docDigits === qDigits);
-    return _cpNorm(c.nome_fantasia||c.razao_social||'').includes(n)
+    // nome fantasia ou razão social: acha o texto em qualquer parte (inclusive números, ex.: "298" -> "... Lj 298")
+    var noNome = _cpNorm(c.nome_fantasia||'').includes(n) || _cpNorm(c.razao_social||'').includes(n);
+    if (_soNumCli) return (!!c.codigo && _semZerosCli(c.codigo) === _semZerosCli(qDigits)) || (docDigits.length >= 11 && docDigits === qDigits) || noNome;
+    return noNome
         || _cpNorm(c.codigo||'').includes(n)
         || (qDigits && docDigits && docDigits.includes(qDigits));
-  }).slice(0,15);
+  });
+  if (_soNumCli) {
+    // quem tem o código exatamente igual ao digitado vem primeiro
+    var _exatoCli = function (c) { return (!!c.codigo && _semZerosCli(c.codigo) === _semZerosCli(qDigits)) ? 0 : 1; };
+    _pedCliItems = _pedCliItems.map(function (c, k) { return { c: c, k: k }; }).sort(function (a, b) { return (_exatoCli(a.c) - _exatoCli(b.c)) || (a.k - b.k); }).map(function (x) { return x.c; });
+  }
+  _pedCliItems = _pedCliItems.slice(0,15);
   if (!_pedCliItems.length) { drop.style.display='none'; return; }
   drop.onmousedown = function(e){ e.preventDefault(); };
   drop.innerHTML = _pedCliItems.map(function(c,i){
-    return '<div onclick="_pedCliSel('+i+')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9">'
+    return '<div class="ped-cli-opt" data-i="'+i+'" onclick="_pedCliSel('+i+')" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9">'
       + (c.codigo?'<span style="font-weight:700;color:#272A4A;margin-right:8px">'+_pedEsc(c.codigo)+'</span>':'')
       + '<span style="color:#334155">'+_pedEsc(c.nome_fantasia||c.razao_social||'')+'</span></div>';
   }).join('');
   drop.style.display = 'block';
 }
+var _pedCliHi = -1;
 function _pedCliKey(e) {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    var drop = document.getElementById('ped-cli-drop');
+    var opts = (drop && drop.style.display !== 'none') ? Array.prototype.slice.call(drop.querySelectorAll('.ped-cli-opt')) : [];
+    if (!opts.length) return;
+    e.preventDefault();
+    var atual = _pedCliHi;
+    var k = atual < 0 ? (e.key === 'ArrowDown' ? 0 : opts.length - 1) : (e.key === 'ArrowDown' ? Math.min(atual + 1, opts.length - 1) : Math.max(atual - 1, 0));
+    opts.forEach(function (o, j) { o.style.background = (j === k) ? '#e0e7ff' : ''; });
+    _pedCliHi = k;
+    if (opts[k].scrollIntoView) opts[k].scrollIntoView({ block: 'nearest' });
+    return;
+  }
   if (e.key!=='Enter' && e.key!=='Tab') return;
-  if (_pedCliItems.length===1) { _pedCliSel(0); }
+  if (_pedCliHi >= 0 && _pedCliItems[_pedCliHi] && e.key === 'Enter') { _pedCliSel(_pedCliHi); }
+  else if (_pedCliItems.length===1) { _pedCliSel(0); }
   if (e.key==='Enter') {
     e.preventDefault();
     if (document.getElementById('ped-cli-id').value) _pedEnterAvanca(e, 'ped-num-cliente');
