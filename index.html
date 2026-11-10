@@ -22570,6 +22570,8 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
     valorTotal: quantidadeReal * precoUnit, modoUnid: modoUnid, qtdCaixas: qtdCaixas,
     avisos: avisos, _excluidoImport: false,
     _cxNum: cxValido ? cxNum : 0, _valorTabela: valorTabela, _qtdOriginalPdf: qtdOriginalPdf,
+    // preco do pedido (PDF) x preco da tabela: quando divergem, a conferencia pede para escolher qual esta correto
+    _precoPdf: precoUnit, _precoDiverge: (valorTabela > 0 && Math.abs(precoUnit - valorTabela) > 0.01), _precoEscolha: '',
     _origemPdf: { codigo: itemPdf.codigo, unidade: itemPdf.unidade, qtd: itemPdf.qtd, unitario: itemPdf.unitario, descricao: itemPdf.descricao }
   };
 }
@@ -22906,12 +22908,38 @@ function _pedImportRecalcularItem(ri, ii) {
 
   it.quantidade = novaQtd;
   it.precoUnit = novoPreco;
+  if (it._precoDiverge) it._precoEscolha = Math.abs(novoPreco - (it._precoPdf || 0)) < 0.005 ? 'pedido' : (Math.abs(novoPreco - (it._valorTabela || 0)) < 0.005 ? 'tabela' : 'manual');
   it.valorTotal = novaQtd * novoPreco;
   if (it.modoUnid === 'cx' && it._cxNum) it.qtdCaixas = Math.round(novaQtd / it._cxNum * 1000) / 1000;
   it.avisos = _pedCalcularAvisosImportado(novoPreco, novaQtd, it.modoUnid, it._cxNum || 0, it._valorTabela || 0, it._qtdOriginalPdf);
   it._editadoManualmente = true;
 
   _pedRenderRevisaoImportacao();
+}
+
+// Escolha do preco correto (pedido x tabela) quando o preco do PDF diverge do cadastrado na Tabela de Preco
+function _pedImportAplicarPreco(it, qual) {
+  var p = qual === 'pedido' ? it._precoPdf : it._valorTabela;
+  it.precoUnit = p;
+  it.valorTotal = it.quantidade * p;
+  it._precoEscolha = qual;
+  it.avisos = _pedCalcularAvisosImportado(p, it.quantidade, it.modoUnid, it._cxNum || 0, it._valorTabela || 0, it._qtdOriginalPdf);
+}
+function _pedImportEscolherPreco(ri, ii, qual) {
+  var it = _pedImportResultados[ri] && _pedImportResultados[ri].itensOk[ii];
+  if (!it) return;
+  _pedImportAplicarPreco(it, qual);
+  _pedRenderRevisaoImportacao();
+}
+function _pedImportEscolherPrecoTodos(ri, qual) {
+  var r = _pedImportResultados[ri];
+  if (!r) return;
+  r.itensOk.forEach(function (it) { if (it._precoDiverge && !it._excluidoImport) _pedImportAplicarPreco(it, qual); });
+  _pedRenderRevisaoImportacao();
+}
+function _pedImportBtnPreco(ri, ii, qual, rotulo, sel) {
+  return '<button type="button" onclick="_pedImportEscolherPreco(' + ri + ',' + ii + ',&#39;' + qual + '&#39;)" style="border-radius:5px;padding:2px 8px;font-size:10.5px;font-weight:700;cursor:pointer;'
+    + (sel ? 'background:#272A4A;color:#fff;border:1px solid #272A4A' : 'background:#fff;color:#272A4A;border:1px solid #94a3b8') + '">' + (sel ? '&#10003; ' : '') + rotulo + '</button>';
 }
 
 // Remove/restaura um item do pedido que sera criado, sem apagar ele da lista —
@@ -22971,10 +22999,19 @@ function _pedRenderRevisaoImportacao() {
     // de restaurar) em vez de sumir, pra dar pra desfazer.
     var itensParaRevisar = [];
     r.itensOk.forEach(function (it, ii) {
-      if ((it.avisos && it.avisos.length) || it._excluidoImport) itensParaRevisar.push({ it: it, ii: ii });
+      if ((it.avisos && it.avisos.length) || it._excluidoImport || it._precoDiverge) itensParaRevisar.push({ it: it, ii: ii });
     });
+    var divergentes = r.itensOk.filter(function (x) { return x._precoDiverge && !x._excluidoImport; });
+    var semEscolha = divergentes.filter(function (x) { return !x._precoEscolha; }).length;
+    var atalhoPrecoHtml = divergentes.length > 1
+      ? '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:2px 0 8px;font-size:10.5px;font-weight:700;color:#92400e">'
+        + 'Itens com preço diferente: ' + divergentes.length + (semEscolha ? ' (' + semEscolha + ' sem escolha)' : ' (todos escolhidos)')
+        + '<button type="button" onclick="_pedImportEscolherPrecoTodos(' + ri + ',&#39;tabela&#39;)" style="margin-left:6px;background:#fff;color:#272A4A;border:1px solid #94a3b8;border-radius:5px;padding:2px 8px;font-size:10.5px;font-weight:700;cursor:pointer">Todos pela tabela</button>'
+        + '<button type="button" onclick="_pedImportEscolherPrecoTodos(' + ri + ',&#39;pedido&#39;)" style="background:#fff;color:#272A4A;border:1px solid #94a3b8;border-radius:5px;padding:2px 8px;font-size:10.5px;font-weight:700;cursor:pointer">Todos pelo pedido</button></div>'
+      : '';
     var avisosHtml = itensParaRevisar.length
       ? '<div style="margin-top:6px;font-size:10.5px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px">'
+        + atalhoPrecoHtml
         + itensParaRevisar.map(function (o) {
             var it = o.it, ii = o.ii;
             if (it._excluidoImport) {
@@ -22986,6 +23023,13 @@ function _pedRenderRevisaoImportacao() {
             return '<div style="padding:4px 0;border-top:1px dashed #fde68a">'
               + '<div style="font-weight:600">' + _pedEsc(it.prodNome) + '</div>'
               + '<div>' + it.avisos.map(function (a) { return '⚠ ' + _pedEsc(a); }).join('<br>') + '</div>'
+              + (it._precoDiverge
+                  ? '<div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap"><span style="font-size:10px;font-weight:700">Preço correto:</span>'
+                    + _pedImportBtnPreco(ri, ii, 'pedido', 'Pedido ' + _pedFmtMoeda(it._precoPdf), it._precoEscolha === 'pedido')
+                    + _pedImportBtnPreco(ri, ii, 'tabela', 'Tabela ' + _pedFmtMoeda(it._valorTabela), it._precoEscolha === 'tabela')
+                    + (it._precoEscolha === 'manual' ? '<span style="font-size:10px">(valor digitado)</span>' : (it._precoEscolha ? '' : '<span style="font-size:10px;color:#dc2626;font-weight:700">escolha uma opção</span>'))
+                    + '</div>'
+                  : '')
               + '<div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap">'
               + '<label style="font-size:10px;display:flex;align-items:center;gap:3px">Qtd <input type="number" min="0" step="any" value="' + it.quantidade + '" id="ped-import-qtd-' + ri + '-' + ii + '" onchange="_pedImportRecalcularItem(' + ri + ',' + ii + ')" style="width:60px;border:1px solid #fbbf24;border-radius:5px;padding:2px 4px;font-size:10.5px"></label>'
               + '<label style="font-size:10px;display:flex;align-items:center;gap:3px">Preço <input type="text" inputmode="decimal" value="' + _pedNumParaMascara(it.precoUnit) + '" id="ped-import-preco-' + ri + '-' + ii + '" oninput="_pedMaskPreco(this)" onchange="_pedImportRecalcularItem(' + ri + ',' + ii + ')" style="width:70px;border:1px solid #fbbf24;border-radius:5px;padding:2px 4px;font-size:10.5px"></label>'
@@ -23016,6 +23060,13 @@ function _pedRenderRevisaoImportacao() {
 }
 
 function _pedConfirmarImportacaoPdf() {
+  var _faltaPreco = 0;
+  _pedImportResultados.forEach(function (r, i) {
+    var chk = document.getElementById('ped-import-check-' + i);
+    if (!chk || chk.disabled || !chk.checked) return;
+    r.itensOk.forEach(function (it) { if (!it._excluidoImport && it._precoDiverge && !it._precoEscolha) _faltaPreco++; });
+  });
+  if (_faltaPreco) { alert('Escolha qual preço está correto (do pedido ou da tabela) em ' + _faltaPreco + ' item(ns) com preço diferente antes de importar.'); return; }
   var dados = getPedidos();
   var proximoLancamento = _pedMaxLancamento(dados) + 1;
   var criados = 0, pulados = 0;
