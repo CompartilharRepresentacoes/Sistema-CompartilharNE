@@ -21787,6 +21787,12 @@ function _pimpPrecoComDesc(it) {
   return Math.ceil(Math.round(p * (100 - d) * 100) / 100) / 100;
 }
 
+// Total do item: preço unitário com desconto (arredondado para cima no centavo) x quantidade
+function _pedTotalComDesc(qtd, preco, desc) {
+  if (!(desc > 0)) return qtd * preco;
+  return Math.round(qtd * _pimpPrecoComDesc({ precoUnit: preco, desconto: desc }) * 100) / 100;
+}
+
 function pedImprimirPopup() {
   window.print();
 }
@@ -28798,7 +28804,7 @@ function pedAddItem() {
       return;
     }
   }
-  var valorTotal = quantidadeReal * preco * (1 - desc/100);
+  var valorTotal = _pedTotalComDesc(quantidadeReal, preco, desc);
   _pedItens.push({
     prodId: produto.id, prodCodigo: produto.codigo, prodNome: produto.nome, medida: medida, cx: cx, comissao: comissao,
     quantidade: quantidadeReal, precoUnit: preco, desconto: desc, valorTotal: valorTotal,
@@ -28882,7 +28888,7 @@ function pedSalvarEdicaoItemModal() {
   it.desconto   = desc;
   it.modoUnid   = modoUnid;
   it.qtdCaixas  = qtdCaixas;
-  it.valorTotal = quantidadeReal * preco * (1 - desc/100);
+  it.valorTotal = _pedTotalComDesc(quantidadeReal, preco, desc);
   pedFecharEdicaoItem();
   renderPedItens();
 }
