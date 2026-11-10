@@ -29487,6 +29487,59 @@ function _emlScoreNome(nomeEmail, c) {
   return a.filter(function (w) { return b.indexOf(w) !== -1; }).length;
 }
 // todas as faturas ativas deste fornecedor com este numero de NF (qualquer cliente)
+// Pedidos antigos (de anos anteriores ao corte) nao ficam na memoria: carrega os das lojas candidatas antes de procurar a NF de origem
+function _emlPreCarregar(ids) {
+  if (typeof firebaseConfigurado === 'undefined' || !firebaseConfigurado || typeof _fsCarregarPedidosCliente !== 'function') return Promise.resolve();
+  var vistos = {}, ps = [];
+  (ids || []).forEach(function (id) { if (id != null && !vistos[id]) { vistos[id] = 1; ps.push(_fsCarregarPedidosCliente(id)); } });
+  return Promise.all(ps).then(function () {}, function () {});
+}
+function _emlIdsXml(dados) {
+  var cnp = _devNormCnpj, a = cnp(dados.emitCNPJ), b = cnp(dados.destCNPJ);
+  return getClientes().filter(function (c) { var x = cnp(c.cpf_cnpj); return x && (x === a || x === b); }).map(function (c) { return c.id; });
+}
+// NF de origem com mais de 6 meses
+function _emlNfAntiga(r) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(r.dataNfOrigem || '')) return false;
+  var lim = new Date(); lim.setMonth(lim.getMonth() - 6);
+  return r.dataNfOrigem < lim.toISOString().slice(0, 10);
+}
+function _emlAbrirCancelar(i) {
+  var r = _emlRes[i]; if (!r) return;
+  var antigo = document.getElementById('eml-cancel-ov'); if (antigo) antigo.remove();
+  var ov = document.createElement('div'); ov.id = 'eml-cancel-ov';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML = '<div style="background:#fff;border-radius:12px;padding:16px 18px;width:100%;max-width:420px;box-shadow:0 12px 40px rgba(15,23,42,.3)">'
+    + '<div style="font-size:14px;font-weight:700;color:#1e293b">Cancelar NFD ' + _pedEsc(r.d.nfd) + '</div>'
+    + '<div style="font-size:12px;color:#64748b;margin:4px 0 8px">Informe o motivo do cancelamento</div>'
+    + '<textarea id="eml-cancel-txt" rows="3" placeholder="Ex.: NF de origem muito antiga" style="width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:8px;font-size:12.5px;font-family:inherit;resize:vertical;box-sizing:border-box"></textarea>'
+    + '<div id="eml-cancel-erro" style="display:none;color:#b91c1c;font-size:11.5px;margin-top:4px">Escreva o motivo do cancelamento.</div>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">'
+    + '<button onclick="_emlFecharCancelar()" style="border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer">Voltar</button>'
+    + '<button onclick="_emlConfirmarCancelar(' + i + ')" style="border:none;background:#dc2626;color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">Confirmar cancelamento</button></div></div>';
+  document.body.appendChild(ov);
+  var ta = document.getElementById('eml-cancel-txt'); if (ta) ta.focus();
+}
+function _emlFecharCancelar() { var ov = document.getElementById('eml-cancel-ov'); if (ov) ov.remove(); }
+function _emlConfirmarCancelar(i) {
+  var r = _emlRes[i]; if (!r) return;
+  var ta = document.getElementById('eml-cancel-txt'), er = document.getElementById('eml-cancel-erro');
+  var t = ta ? String(ta.value || '').trim() : '';
+  if (!t) { if (er) er.style.display = 'block'; return; }
+  r.motivoCancel = 'NFD cancelada. Motivo: ' + t;
+  r.aprov = 'nao'; r.selTocado = false; _emlAtualizaSel(r);
+  _emlFecharCancelar(); _emlRender();
+}
+function _emlDesfazCancel(i) {
+  var r = _emlRes[i]; if (!r) return;
+  r.motivoCancel = ''; r.aprov = ''; r.selTocado = false; _emlAtualizaSel(r); _emlRender();
+}
+function _emlUsarDaNf(i, j, k) {
+  var r = _emlRes[i]; if (!r) return;
+  var x = r.itens[j], lista = _emlTmp['n' + i + '-' + j]; if (!x || !lista || !lista[k]) return;
+  x.p = lista[k]; x.autoSug = false;
+  _emlRecalc(r); _emlRender();
+}
 function _emlDonosNf(forn, nf) {
   var alvo = _emlSemZeros(nf), out = [];
   if (!forn || !alvo) return out;
@@ -29666,6 +29719,14 @@ function _emlLinhaProd(r, x, i, j) {
     return '<div style="' + st + 'color:#b45309">✔ sugerido pelo nome (NF de origem): <b>' + _pedEsc(x.p.codigo || '') + ' ' + _pedEsc(x.p.nome || '') + '</b> '
       + '<a href="javascript:void(0)" onclick="_emlTrocarProd(' + i + ',' + j + ')" style="color:#272A4A;font-weight:700">Trocar</a></div>';
   }
+  if (x.p && x.fat == null && r.fat) {
+    var sn = _emlSugestoes(r, x).filter(function (z) { return z.score >= 0.5; }).slice(0, 2).map(function (z) { return z.p; });
+    _emlTmp['n' + i + '-' + j] = sn;
+    if (!sn.length) return '';
+    return '<div style="' + st + 'color:#b45309">Este produto não consta na NF de origem. Na NF foi faturado: ' + sn.map(function (p, k) {
+      return '<button onclick="_emlUsarDaNf(' + i + ',' + j + ',' + k + ')" style="border:1px solid #272A4A;background:#fff;color:#272A4A;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;cursor:pointer;margin:0 4px 3px 0">' + _pedEsc(p.codigo || '') + ' ' + _pedEsc(p.nome || '') + '</button>';
+    }).join('') + '</div>';
+  }
   if (x.p || !r.forn) return '';
   var sg = _emlSugestoes(r, x).slice(0, 3).map(function (z) { return z.p; });
   _emlTmp['s' + i + '-' + j] = sg;
@@ -29787,6 +29848,11 @@ function _emlAnalisar() {
   if (!texto.trim()) { _emlRender(); return; }
   if (/^\s*(<\?xml|<nfeProc|<NFe)/i.test(texto)) { ta.value = ''; _emlLerXmls([new File([texto], 'NFD-colada.xml', { type: 'text/xml' })]); return; }
   var lista = _emlParse(texto), forn = _emlFornDoTexto(texto);
+  var ids = [];
+  if (forn) lista.forEach(function (d) { _emlCandidatos(forn, d.codCli).forEach(function (c) { ids.push(c.id); }); });
+  _emlPreCarregar(ids).then(function () { _emlAnalisarMontar(lista, forn, ta); });
+}
+function _emlAnalisarMontar(lista, forn, ta) {
   var novos = lista.map(function (d) { return _emlMontarEmail(d, forn); });
   var rep = _emlMesclar(novos);
   if (!novos.length) { document.getElementById('eml-msg').style.color = '#b45309'; document.getElementById('eml-msg').textContent = 'Não encontrei nenhuma devolução nesse texto. Cole o e-mail inteiro (com a linha "Cliente: ..." e a tabela).'; }
@@ -29804,12 +29870,16 @@ function _emlLerXmls(arqs) {
       var dados = _devExtrairDadosXml(e.target.result);
       var r2 = new FileReader();
       r2.onload = function (e2) {
-        if (dados && dados.nNF && dados.itens && dados.itens.length) novos.push(_emlMontarXml(dados, f.name, e2.target.result)); else falhas++;
-        if (--pend === 0) {
-          var rep = _emlMesclar(novos);
-          if (msg) { msg.style.color = falhas ? '#b45309' : '#64748b'; msg.textContent = (falhas ? falhas + ' arquivo(s) XML não puderam ser lidos. ' : '') + (rep ? rep + ' nota(s) já estavam na lista e foram ignoradas.' : ''); }
-          _emlRender();
-        }
+        var fim = function () {
+          if (--pend === 0) {
+            var rep = _emlMesclar(novos);
+            if (msg) { msg.style.color = falhas ? '#b45309' : '#64748b'; msg.textContent = (falhas ? falhas + ' arquivo(s) XML não puderam ser lidos. ' : '') + (rep ? rep + ' nota(s) já estavam na lista e foram ignoradas.' : ''); }
+            _emlRender();
+          }
+        };
+        if (dados && dados.nNF && dados.itens && dados.itens.length) {
+          _emlPreCarregar(_emlIdsXml(dados)).then(function () { novos.push(_emlMontarXml(dados, f.name, e2.target.result)); fim(); });
+        } else { falhas++; fim(); }
       };
       r2.readAsDataURL(f);
     };
@@ -29849,6 +29919,7 @@ function _emlRender() {
       ? 'XML: <b>' + _pedEsc(d.nomeCli || '') + '</b>' + (d.cnpjCli ? ' &middot; CNPJ ' + _pedEsc(d.cnpjCli) : '')
       : 'E-mail: <b>' + _pedEsc(d.codCli) + '</b> ' + _pedEsc(d.nomeCli);
     var nfo = 'NF origem ' + _pedEsc(r.nfOrigem || '—') + (r.dataNfOrigem ? ' (' + _pedEsc(_pimpFmtData(r.dataNfOrigem)) + ')' : '')
+      + (_emlNfAntiga(r) ? ' <b style="color:#dc2626">ATENÇÃO</b>' : '')
       + (r.fat ? ' &middot; <b style="color:#15803d">encontrada no sistema</b>' : (r.cli ? ' &middot; <span style="color:#b45309">NF não localizada nos pedidos do cliente</span>' : ''));
     var tab = '<div style="margin-top:6px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;font-size:11.5px"><div style="display:grid;grid-template-columns:1fr 62px 62px 82px;background:#f1f5f9;padding:5px 8px;font-weight:700;color:#64748b;font-size:10px;text-transform:uppercase"><span>Produto</span><span style="text-align:right">Faturou</span><span style="text-align:right">Devolveu</span><span style="text-align:right">Valor</span></div>'
       + r.itens.map(function (x, j) {
@@ -29861,7 +29932,7 @@ function _emlRender() {
     var rodape = r.fatPed ? '<div style="margin-top:4px;font-size:10.5px;color:#94a3b8">* quantidade calculada a partir do pedido (a NF importada do Pontti guarda quantidade proporcional)</div>' : '';
     if (r.fatCx) rodape += '<div style="margin-top:4px;font-size:10.5px;color:#94a3b8">A NF de origem foi faturada em caixas; o "Faturou" já está convertido para PC (quantidade por caixa do cadastro do produto).</div>';
     if (r.ok && cancelada) {
-      rodape += '<div style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:11.5px;color:#991b1b"><b>Motivo do cancelamento (vai nas Observações):</b><br>' + _pedEsc(EML_TXT_CANCEL) + '</div>'
+      rodape += '<div style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:11.5px;color:#991b1b"><b>Motivo do cancelamento (vai nas Observações):</b><br>' + _pedEsc(r.motivoCancel || EML_TXT_CANCEL) + (r.motivoCancel ? ' <a href="javascript:void(0)" onclick="_emlDesfazCancel(' + i + ')" style="color:#272A4A;font-weight:700;margin-left:6px">Desfazer cancelamento</a>' : '') + '</div>'
         + '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:#64748b">Motivo da devolução (opcional): <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid #cbd5e1;border-radius:7px;padding:4px 8px;font-size:12px"><option value="">—</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></div>';
     } else if (r.ok && !r.aprov) {
       rodape += '<div style="margin-top:8px;font-size:11.5px;color:#b45309">O e-mail não diz se a fábrica aprovou ou não. Tratar como: '
@@ -29871,6 +29942,7 @@ function _emlRender() {
       rodape += '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:12px"><b>Motivo:</b> <select onchange="_emlSetMotivo(' + i + ',this.value)" style="border:1px solid ' + (r.motivo ? '#cbd5e1' : '#f59e0b') + ';background:' + (r.motivo ? '#fff' : '#fffbeb') + ';border-radius:7px;padding:4px 8px;font-size:12px"><option value="">Selecione...</option>' + DEV_MOTIVOS.map(function (m) { return '<option' + (r.motivo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select>'
         + (r.motivo ? (r.motivoAuto ? '<span style="color:#64748b;font-size:11px">lido da observação do XML: ' + _pedEsc(r.motivoXml) + '</span>' : '') : '<span style="color:#b45309;font-size:11px">' + (r.motivoXml ? 'XML diz: ' + _pedEsc(r.motivoXml) + ' — escolha o motivo' : 'não veio no ' + (r.origem === 'xml' ? 'XML' : 'e-mail') + ' — escolha para liberar') + '</span>') + '</div>';
     }
+    if (r.ok && !r.jaLancada && !cancelada) rodape += '<div style="margin-top:8px"><button onclick="_emlAbrirCancelar(' + i + ')" style="border:1px solid #dc2626;background:#fff;color:#dc2626;border-radius:6px;padding:4px 12px;font-size:11.5px;font-weight:700;cursor:pointer">Cancelar NFD</button></div>';
     if (r.ok && r.excede) rodape += '<div style="margin-top:6px;font-size:11.5px;color:#b45309">⚠ Devolveu mais do que foi faturado na NF de origem — confira antes de lançar' + (pronta ? ' (vem desmarcada).' : '.') + '</div>';
     return '<div style="border:1px solid #e2e8f0;border-left:4px solid ' + cor + ';border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff">'
       + '<div style="display:flex;gap:10px;align-items:flex-start">'
@@ -29909,7 +29981,7 @@ function _emlLancar() {
       clienteId: r.cli.id, clienteNome: (r.cli.codigo ? r.cli.codigo + ' ' : '') + (r.cli.nome_fantasia || r.cli.razao_social || ''),
       vendedorId: vendIdImp, vendedorNome: vf.vendNome || (vendObjImp ? (vendObjImp.nome || vendObjImp.nome_fantasia || '') : ''),
       nfEmitida: r.d.nfd, dataNfEmitida: r.d.dataEmissao, nfOrigem: r.nfOrigem, dataNfOrigem: r.dataNfOrigem || '',
-      motivo: r.motivo || '', status: canc ? 'Cancelado' : 'Finalizado', obs: (canc ? EML_TXT_CANCEL + ' ' : '') + origemTxt,
+      motivo: r.motivo || '', status: canc ? 'Cancelado' : 'Finalizado', obs: (canc ? (r.motivoCancel || EML_TXT_CANCEL) + ' ' : '') + origemTxt,
       itens: itens, totalProdutos: itens.reduce(function (a, it) { return a + it.valorTotal; }, 0), xmlAnexo: r.xmlAnexo || null, dtCadastro: agora
     };
     try { Object.assign(obj, _appMontarAutoria(null, [])); } catch (e) {}
