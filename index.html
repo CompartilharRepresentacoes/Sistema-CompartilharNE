@@ -21718,7 +21718,7 @@ function _pimpRender() {
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:center">' + _pedEsc(it.medida || '') + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:right">' + pesoItem.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:center">' + _pedEsc(it.quantidade) + '</td>'
-      + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:right">' + _pedFmtMoeda(it.precoUnit) + '</td>'
+      + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:right">' + _pedFmtMoeda(_pimpPrecoComDesc(it)) + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:right">' + _pedFmtMoeda(it.valorTotal) + '</td>'
       + '</tr>';
   }).join('');
@@ -21778,6 +21778,13 @@ function _pimpRender() {
     + '</div>'
 
     + (pedido.obs ? '<div style="font-size:12px;color:#1e293b;white-space:pre-wrap;line-height:1.35;margin-top:8px"><span style="color:#94a3b8;font-weight:700">OBS.:</span> ' + _pedEsc(pedido.obs) + '</div>' : '');
+}
+
+// Preço unitário já com o desconto do item, arredondado para cima no centavo
+function _pimpPrecoComDesc(it) {
+  var p = Number(it.precoUnit) || 0, d = Number(it.desconto) || 0;
+  if (d <= 0) return p;
+  return Math.ceil(Math.round(p * (100 - d) * 100) / 100) / 100;
 }
 
 function pedImprimirPopup() {
