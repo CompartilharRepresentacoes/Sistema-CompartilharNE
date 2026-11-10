@@ -29497,7 +29497,7 @@ function _emlParse(texto) {
     var ate = k + 1 < marcas.length ? marcas[k + 1].i : t.length;
     var bloco = t.slice(mk.fim, ate).replace(/\s+/g, ' ');
     var aprovMk = _emlAprovDoTexto(t.slice(Math.max(0, mk.i - 700), mk.i));
-    var rr = /(\d{4,10})-(\d{1,4})\s*\/\s*(\d{2}\/\d{2}\/(?:\d{4}|\d{2}))\s+(\d+)\s+(.+?)\s+(\d[\d.]*,\d{2,4})\s+(\d[\d.]*,\d{2})\s+(\d+)\s+(\d+)/g, r;
+    var rr = /(\d{4,10})-(\d{1,4})\s*\/\s*(\d{2}\/\d{2}\/(?:\d{4}|\d{2}))\s+([0-9A-Za-z]+)\s+(.+?)\s+(\d[\d.]*,\d{2,4})\s+(\d[\d.]*,\d{2})\s+(\d+)\s+(\d+)/g, r;
     var porNfd = {}, ordem = [];
     while ((r = rr.exec(bloco))) {
       var chave = r[1] + '-' + r[2];
@@ -29743,7 +29743,8 @@ function _emlEscolherIdx(tipo, i, j, k) {
   var x = r.itens[j], lista = _emlTmp[tipo + i + '-' + j]; if (!x || !lista || !lista[k]) return;
   var p = lista[k];
   _emlAplicarProd(r, x, p, false);
-  if (r.forn) _devSalvarVinculoXml(r.forn.id, x.it.cod, p.id);
+  // codigo generico (ex.: GENERICOXML) serve para qualquer produto: nao grava vinculo, escolhe-se de novo a cada nota
+  if (r.forn && !/^GENERICO/i.test(String(x.it.cod || ''))) _devSalvarVinculoXml(r.forn.id, x.it.cod, p.id);
   _emlRecalc(r); _emlRender();
 }
 function _emlTrocarProd(i, j) {
