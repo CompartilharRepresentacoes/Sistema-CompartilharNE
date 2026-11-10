@@ -4573,7 +4573,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                 onmouseover="this.style.background='#1a1d33'" onmouseout="this.style.background='#272A4A'">
                 <i class="ti ti-file-spreadsheet" style="font-size:10px"></i> Exportar
               </button>
-              <button type="button" onclick="document.getElementById('tabpreco-import-file').click()" title="Importar produtos de Excel"
+              <button type="button" onclick="tpAbrirImportar()" title="Importar produtos de Excel"
                 style="background:#15803d;color:#fff;border:none;border-radius:6px;padding:7px 10px;font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;height:34px"
                 onmouseover="this.style.background='#166534'" onmouseout="this.style.background='#15803d'">
                 <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="importar" style="font-size:10px"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15M12 15V4M7.5 8.5 12 4l4.5 4.5"/></svg> Importar
@@ -15219,12 +15219,14 @@ function _tpMapearSemCabecalho(linhas) {
   if (votos >= Math.ceil(amostra.length / 2)) return { forn: 0, cod: 1, prod: 2, ped: 3, cli: 4, valor: 5, com: -1, per: 6 };
   return padrao;
 }
-function _tpImportarLinhas(linhas, col) {
+function _tpImportarLinhas(linhas, col, fornIdEscolhido) {
   col = col || { cod: 0, prod: 1, ped: 2, cli: 3, valor: 4, com: 5, per: 6, forn: -1 };
   var cel = function(row, i) { return i >= 0 ? String(row[i] == null ? '' : row[i]).trim() : ''; };
-  var produtos = getProdutos();
+  var todosProdutos = getProdutos();
+  // fabrica escolhida na janela do Importar: so os produtos dela entram; o resto da planilha e ignorado e avisado
+  var produtos = fornIdEscolhido ? todosProdutos.filter(function(p){ return String(p.fornecedor) === String(fornIdEscolhido); }) : todosProdutos;
   var fornecedores = getFornecedores();
-  var resumo = { total: 0, adicionados: 0, atualizados: 0, codigosNaoEncontrados: [], semValor: [], codigosAmbiguos: [] };
+  var resumo = { total: 0, adicionados: 0, atualizados: 0, codigosNaoEncontrados: [], semValor: [], codigosAmbiguos: [], outraFabrica: [] };
   linhas.forEach(function(row){
     var codigo = cel(row, col.cod);
     if (!codigo) return;
@@ -15245,7 +15247,13 @@ function _tpImportarLinhas(linhas, col) {
     var candidatos = daFabrica(exatos);
     if (!candidatos.length && semZeros(codigo)) candidatos = daFabrica(produtos.filter(function(p){ return semZeros(p.codigo) === semZeros(codigo); }));
     if (!candidatos.length) candidatos = exatos;
-    if (!candidatos.length) { resumo.codigosNaoEncontrados.push(codigo); return; }
+    if (!candidatos.length) {
+      // existe em outra fabrica? entao a linha e dessa outra fabrica (nao conta como "nao encontrado")
+      var _soZeros = function(x){ return _cpNorm(String(x == null ? '' : x)).trim().replace(/^0+/, ''); };
+      if (fornIdEscolhido && todosProdutos.some(function(p){ return _cpNorm(p.codigo||'') === _cpNorm(codigo) || (_soZeros(codigo) && _soZeros(p.codigo) === _soZeros(codigo)); })) resumo.outraFabrica.push(codigo);
+      else resumo.codigosNaoEncontrados.push(codigo);
+      return;
+    }
     var prod = candidatos[0];
     if (candidatos.length > 1) {
       var _nomesForn = candidatos.map(function(p){ var _f = fornecedores.find(function(x){ return x.id === p.fornecedor; }); return _f ? (_f.nome_fantasia||_f.razao_social) : '—'; });
@@ -15278,15 +15286,54 @@ function _tpImportarLinhas(linhas, col) {
   });
   return resumo;
 }
-function _tpMontarMensagemResumo(resumo) {
-  var msg = resumo.adicionados + ' produto(s) adicionado(s), ' + resumo.atualizados + ' atualizado(s) (de ' + resumo.total + ' linha(s) na planilha).';
+function _tpMontarMensagemResumo(resumo, fornNome) {
+  var msg = (fornNome ? 'Fábrica: ' + fornNome + '.\n' : '') + resumo.adicionados + ' produto(s) adicionado(s), ' + resumo.atualizados + ' atualizado(s) (de ' + resumo.total + ' linha(s) na planilha).';
   var avisos = [];
   if (resumo.codigosNaoEncontrados.length) avisos.push(resumo.codigosNaoEncontrados.length + ' código(s) não encontrado(s) no cadastro de Produtos: ' + resumo.codigosNaoEncontrados.join(', '));
   if (resumo.codigosAmbiguos && resumo.codigosAmbiguos.length) avisos.push(resumo.codigosAmbiguos.length + ' código(s) cadastrado(s) em mais de um fornecedor — confira se o fornecedor certo foi usado: ' + resumo.codigosAmbiguos.join('; '));
   if (resumo.semValor.length) avisos.push(resumo.semValor.length + ' linha(s) sem valor preenchido: ' + resumo.semValor.join(', '));
+  if (resumo.outraFabrica && resumo.outraFabrica.length) avisos.push(resumo.outraFabrica.length + ' linha(s) IGNORADA(S) por serem de outra fábrica (não a escolhida): ' + resumo.outraFabrica.join(', '));
   if (avisos.length) msg += '\n\nAtenção: ' + avisos.join('; ') + '.';
   msg += '\n\nRevise a lista de produtos na tela antes de clicar em Salvar.';
   return msg;
+}
+// Janela do botao Importar da Tabela de Preco: escolher a FABRICA antes de escolher a planilha.
+// So os produtos da fabrica escolhida sao importados (evita atualizar produto de outra fabrica com o mesmo codigo).
+function tpAbrirImportar() {
+  var velho = document.getElementById('tp-import-fab'); if (velho) velho.parentNode.removeChild(velho);
+  var forns = getFornecedores().slice().sort(function (a, b) { return (a.nome_fantasia || a.razao_social || '').localeCompare(b.nome_fantasia || b.razao_social || '', 'pt-BR'); });
+  // se a tabela aberta ja tem produtos de uma fabrica so, ja vem marcada
+  var idsTab = {}; (_tpItens || []).forEach(function (it) { if (it.fornId !== undefined && it.fornId !== '') idsTab[String(it.fornId)] = 1; });
+  var unico = Object.keys(idsTab).length === 1 ? Object.keys(idsTab)[0] : '';
+  var ov = document.createElement('div');
+  ov.id = 'tp-import-fab';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML = '<div style="background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.3);padding:20px 22px;width:100%;max-width:380px">'
+    + '<div style="font-size:14px;font-weight:700;color:#272A4A;margin-bottom:4px">Importar produtos da planilha</div>'
+    + '<div style="font-size:11.5px;color:#64748b;margin-bottom:12px">Escolha a fábrica. Só os produtos dela serão importados.</div>'
+    + '<label style="font-size:11px;font-weight:700;color:#64748b;display:block;margin-bottom:4px">Fábrica</label>'
+    + '<select id="tp-import-fab-sel" class="form-input" style="width:100%"><option value="">-- Selecione --</option>'
+    + forns.map(function (f) { return '<option value="' + _pedEsc(String(f.id)) + '"' + (String(f.id) === unico ? ' selected' : '') + '>' + _pedEsc((f.codigo ? f.codigo + ' ' : '') + (f.nome_fantasia || f.razao_social || '')) + '</option>'; }).join('')
+    + '</select>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">'
+    + '<button type="button" id="tp-import-fab-cancel" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">Cancelar</button>'
+    + '<button type="button" id="tp-import-fab-ok" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer">Escolher planilha</button>'
+    + '</div></div>';
+  document.body.appendChild(ov);
+  var sel = document.getElementById('tp-import-fab-sel'), ok = document.getElementById('tp-import-fab-ok');
+  var atualizar = function () { var on = !!sel.value; ok.disabled = !on; ok.style.opacity = on ? '1' : '.45'; ok.style.cursor = on ? 'pointer' : 'not-allowed'; };
+  var fechar = function () { document.removeEventListener('keydown', esc); if (ov.parentNode) ov.parentNode.removeChild(ov); };
+  var esc = function (ev) { if (ev.key === 'Escape') fechar(); };
+  document.addEventListener('keydown', esc);
+  sel.onchange = atualizar; atualizar();
+  document.getElementById('tp-import-fab-cancel').onclick = fechar;
+  ov.onclick = function (ev) { if (ev.target === ov) fechar(); };
+  ok.onclick = function () {
+    if (!sel.value) return;
+    window._tpImportFornId = sel.value;
+    fechar();
+    document.getElementById('tabpreco-import-file').click();
+  };
 }
 function importTabPrecoFile(input) {
   var file = input.files[0]; if (!file) return;
@@ -15304,9 +15351,11 @@ function importTabPrecoFile(input) {
       var col;
       if (_tpEhCabecalho(aoa[0])) { col = _tpMapearColunas(aoa.shift()); }
       else { col = _tpMapearSemCabecalho(aoa); }
-      var resumo = _tpImportarLinhas(aoa, col);
+      var _fid = window._tpImportFornId || '';
+      var _fobj = getFornecedores().find(function(f){ return String(f.id) === String(_fid); }) || {};
+      var resumo = _tpImportarLinhas(aoa, col, _fid);
       _tpRenderProdList();
-      alert(_tpMontarMensagemResumo(resumo));
+      alert(_tpMontarMensagemResumo(resumo, _fobj.nome_fantasia || _fobj.razao_social || ''));
     } catch (err) {
       alert('Erro ao importar planilha: ' + (err && err.message ? err.message : err));
     }
