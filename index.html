@@ -13339,7 +13339,7 @@ function filtrarFornCliVendForn() {
   document.getElementById('cli-vendforn-forn-sel').value = '';
   if (!q) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _cliVendFornItems = getFornecedores().filter(function(f){
+  _cliVendFornItems = _ordNome(getFornecedores()).filter(function(f){
     return _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n) || _cpNorm(f.codigo||'').includes(n);
   }).slice(0,15);
   if (!_cliVendFornItems.length) { drop.style.display='none'; return; }
@@ -13451,7 +13451,7 @@ function filtrarFornCliPrazo() {
   document.getElementById('cli-prazo-forn-sel').value = '';
   if (!q) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _cliPrazoFornItems = getFornecedores().filter(function(f){
+  _cliPrazoFornItems = _ordNome(getFornecedores()).filter(function(f){
     return _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n) || _cpNorm(f.codigo||'').includes(n);
   }).slice(0,15);
   if (!_cliPrazoFornItems.length) { drop.style.display='none'; return; }
@@ -13484,7 +13484,7 @@ function filtrarFornCliTabela() {
   document.getElementById('cli-tabela-forn-sel').value = '';
   if (!q) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _cliTabelaFornItems = getFornecedores().filter(function(f){
+  _cliTabelaFornItems = _ordNome(getFornecedores()).filter(function(f){
     return _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n) || _cpNorm(f.codigo||'').includes(n);
   }).slice(0,15);
   if (!_cliTabelaFornItems.length) { drop.style.display='none'; return; }
@@ -14639,7 +14639,7 @@ function _tabPrecoFiltrarProd() {
   if (!drop) return;
   if (busca.length < 3) { drop.style.display = 'none'; return; }
   busca = busca.toLowerCase();
-  _tabPrecoProdItems = getProdutos().filter(function(p) {
+  _tabPrecoProdItems = _ordNome(getProdutos()).filter(function(p) {
     return (p.nome||'').toLowerCase().includes(busca) || (p.codigo||'').toLowerCase().includes(busca);
   });
   if (!_tabPrecoProdItems.length) { drop.style.display = 'none'; return; }
@@ -14723,7 +14723,7 @@ function _tpCliFiltrar() {
   document.getElementById('tabpreco-cli-id').value = '';
   if (!q) { drop.style.display = 'none'; _tpCliItems = []; return; }
   var n = _cpNorm(q);
-  _tpCliItems = getClientesVisiveis().filter(function(c) {
+  _tpCliItems = _ordNome(getClientesVisiveis()).filter(function(c) {
     return _cpNorm(c.nome_fantasia||c.razao_social||'').includes(n) || _cpNorm(c.codigo||'').includes(n);
   }).slice(0,15);
   if (!_tpCliItems.length) { drop.style.display = 'none'; return; }
@@ -15009,7 +15009,7 @@ function _tpRedeFiltrar() {
   if (!q) { drop.style.display = 'none'; _tpRedeItems = []; return; }
   var n = _cpNorm(q);
   var cats = getCatClientes();
-  _tpRedeItems = cats.filter(function(c){ return _cpNorm(c.nome||'').includes(n); }).slice(0,15);
+  _tpRedeItems = _ordNome(cats).filter(function(c){ return _cpNorm(c.nome||'').includes(n); }).slice(0,15);
   if (!_tpRedeItems.length) { drop.style.display = 'none'; return; }
   drop.onmousedown = function(e){ e.preventDefault(); };
   drop.innerHTML = _tpRedeItems.map(function(c, i) {
@@ -15417,7 +15417,7 @@ function _tpcliFiltrar() {
   if (!q) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   var qDigits = q.replace(/\D/g, '');
-  _tpcliItems = getClientes().filter(function(c){
+  _tpcliItems = _ordNome(getClientes()).filter(function(c){
     var docDigits = (c.cpf_cnpj||'').replace(/\D/g, '');
     return _cpNorm(c.nome_fantasia||c.razao_social||'').includes(n)
         || _cpNorm(c.codigo||'').includes(n)
@@ -15746,7 +15746,7 @@ function _negAtualizarSubcategorias() {
   if (!subSel) return;
   var valorAtual = subSel.value;
   var subs = catId ? getCatClientes().filter(function(c){ return String(c.pai) === String(catId); }) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _skuEsc(c.nome||'') + '</option>'; }).join('');
+  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function(c){ return '<option value="' + c.id + '">' + _skuEsc(c.nome||'') + '</option>'; }).join('');
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 
@@ -15755,7 +15755,7 @@ function _negPopularRedes() {
   if (!sel) return;
   var valorAtual = sel.value;
   var redes = getCatClientes().filter(function(c){ return !c.pai; });
-  sel.innerHTML = '<option value="">-- Selecione --</option>' + redes.map(function(c){ return '<option value="' + c.id + '">' + _skuEsc(c.nome||'') + '</option>'; }).join('');
+  sel.innerHTML = '<option value="">-- Selecione --</option>' + _ordNome(redes).map(function(c){ return '<option value="' + c.id + '">' + _skuEsc(c.nome||'') + '</option>'; }).join('');
   if (redes.some(function(r){ return String(r.id) === String(valorAtual); })) sel.value = valorAtual;
 }
 
@@ -15768,7 +15768,7 @@ function _negProdFiltrar() {
   document.getElementById('negpreco-prod-id').value = '';
   if (busca.length < 4) { drop.style.display = 'none'; return; }
   busca = busca.toLowerCase();
-  _negProdItems = getProdutos().filter(function(p){
+  _negProdItems = _ordNome(getProdutos()).filter(function(p){
     return (p.nome||'').toLowerCase().indexOf(busca) !== -1 || (p.codigo||'').toLowerCase().indexOf(busca) !== -1;
   });
   if (!_negProdItems.length) { drop.style.display = 'none'; return; }
@@ -15815,7 +15815,7 @@ function _negCliFiltrar() {
   document.getElementById('negpreco-cli-id').value = '';
   if (!q) { drop.style.display = 'none'; _negCliItems = []; return; }
   var n = _cpNorm(q);
-  _negCliItems = getClientesVisiveis().filter(function(c){
+  _negCliItems = _ordNome(getClientesVisiveis()).filter(function(c){
     return _cpNorm(c.nome_fantasia||c.razao_social||'').indexOf(n) !== -1 || _cpNorm(c.codigo||'').indexOf(n) !== -1;
   }).slice(0,15);
   if (!_negCliItems.length) { drop.style.display = 'none'; return; }
@@ -16011,7 +16011,7 @@ function _prodListAtualizarSubcategorias() {
   const subSel = document.getElementById('produto-filtro-subcategoria');
   if (!subSel) return;
   const subs = catId ? getCatProdutos().filter(c => String(c.pai) === String(catId)) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(c => '<option value="' + c.id + '">' + _pedEsc(c.nome||'') + '</option>').join('');
+  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(c => '<option value="' + c.id + '">' + _pedEsc(c.nome||'') + '</option>').join('');
   renderProdutoList();
 }
 function renderProdutoList() {
@@ -16780,7 +16780,7 @@ function _cpPopularRedeCategoria() {
   var sel = document.getElementById('cp-cat-rede-sel');
   if (!sel) return;
   var redes = getCatClientes().filter(function (c) { return !c.pai; });
-  sel.innerHTML = '<option value="">Selecione...</option>' + redes.map(function (c) {
+  sel.innerHTML = '<option value="">Selecione...</option>' + _ordNome(redes).map(function (c) {
     return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>';
   }).join('');
 }
@@ -16795,7 +16795,7 @@ function _cpAtualizarSubRede() {
     var subs = getCatClientes().filter(function (c) { return String(c.pai) === String(redeId); });
     if (subs.length) {
       if (subWrap) subWrap.style.display = '';
-      if (subSel) subSel.innerHTML += subs.map(function (s) {
+      if (subSel) subSel.innerHTML += _ordNome(subs).map(function (s) {
         return '<option value="' + s.id + '">' + _pedEsc(s.nome || '') + '</option>';
       }).join('');
     }
@@ -17274,6 +17274,14 @@ function _cpFocusNext(fieldId) {
   return false;
 }
 
+// Ordem alfabetica (sem diferenciar maiuscula/acento) para listas de escolha e resultados de busca.
+var _ordCollator = (typeof Intl !== 'undefined' && Intl.Collator) ? new Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true }) : null;
+function _ordNome(arr) {
+  if (!arr || !arr.slice) return arr;
+  var pares = arr.map(function (x) { return { x: x, k: String((x && (x.nome_fantasia || x.razao_social || x.nome || x.login)) || '').replace(/^\s*\[[^\]]*\]\s*/, '') }; });
+  pares.sort(function (a, b) { return _ordCollator ? _ordCollator.compare(a.k, b.k) : a.k.localeCompare(b.k, 'pt-BR'); });
+  return pares.map(function (p) { return p.x; });
+}
 function _cpNorm(s) {
   return (s||'')
     .toLowerCase()
@@ -20163,7 +20171,7 @@ function initSkuClientesList() {
   var fEl = document.getElementById('sku-filtro-forn');
   if (fEl) {
     var forns = getFornecedores();
-    fEl.innerHTML = '<option value="">Todos</option>' + forns.map(function(f){
+    fEl.innerHTML = '<option value="">Todos</option>' + _ordNome(forns).map(function(f){
       var nm = f.nome_fantasia||f.razao_social||'';
       return '<option value="'+f.id+'">'+_skuEsc(nm)+'</option>';
     }).join('');
@@ -20466,7 +20474,7 @@ function skuFilFiltrarRede(q) {
   if (!drop) return;
   if (!q) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _skuFilRedeItems = getCatClientes().filter(function(c){ return !c.pai && _cpNorm(c.nome||'').indexOf(n)!==-1; }).slice(0,15);
+  _skuFilRedeItems = _ordNome(getCatClientes()).filter(function(c){ return !c.pai && _cpNorm(c.nome||'').indexOf(n)!==-1; }).slice(0,15);
   if (!_skuFilRedeItems.length) { drop.style.display='none'; return; }
   drop.onmousedown = function(e){ e.preventDefault(); };
   drop.innerHTML = _skuFilRedeItems.map(function(c, i){
@@ -20488,7 +20496,7 @@ function skuFilFiltrarCli(q) {
   if (!drop) return;
   if (!q) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _skuFilCliItems = getClientesVisiveis().filter(function(c){
+  _skuFilCliItems = _ordNome(getClientesVisiveis()).filter(function(c){
     return _cpNorm(c.nome_fantasia||c.razao_social||'').indexOf(n)!==-1 || _cpNorm(c.codigo||'')===n;
   }).slice(0,15);
   if (!_skuFilCliItems.length) { drop.style.display='none'; return; }
@@ -20598,7 +20606,7 @@ function _skuFornFiltrar() {
   if (!drop) return;
   if (!q) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _skuFornItems = getFornecedores().filter(function(f) {
+  _skuFornItems = _ordNome(getFornecedores()).filter(function(f) {
     return _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n)
         || _cpNorm(f.codigo||'').includes(n);
   }).slice(0,15);
@@ -20685,12 +20693,12 @@ function _skuCliFiltrar() {
   if (_skuTipo === 'rede') {
     // Busca em Categorias de Cliente (redes)
     var cats = getCatClientes();
-    _skuCliItems = cats.filter(function(c) {
+    _skuCliItems = _ordNome(cats).filter(function(c) {
       return !c.pai && _cpNorm(c.nome||'').includes(n);
     }).slice(0,15).map(function(c){ return {id:c.id, nome:c.nome, tipo:'rede'}; });
   } else {
     // Busca em Clientes individuais
-    _skuCliItems = getClientesVisiveis().filter(function(c) {
+    _skuCliItems = _ordNome(getClientesVisiveis()).filter(function(c) {
       return _cpNorm(c.nome_fantasia||c.razao_social||'').includes(n)
           || _cpNorm(c.codigo||'').includes(n);
     }).slice(0,15).map(function(c){ return {id:c.id, codigo:c.codigo, nome:c.nome_fantasia||c.razao_social||'', tipo:'cliente'}; });
@@ -20727,7 +20735,7 @@ function _skuProdFiltrar() {
   var n = _cpNorm(q);
   var fId = (document.getElementById('sku-forn-id') || {}).value;
   if (!fId) { drop.innerHTML = '<div style="padding:8px 12px;font-size:12px;color:#b45309">Escolha o fornecedor primeiro.</div>'; drop.style.display = 'block'; return; }
-  _skuProdItems = getProdutos().filter(function(p) {
+  _skuProdItems = _ordNome(getProdutos()).filter(function(p) {
     if (String(p.fornecedor || '') !== String(fId)) return false;
     return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
   }).slice(0,15);
@@ -20769,7 +20777,7 @@ function _skuLoteProdFiltrar() {
   var n = _cpNorm(q);
   var fId = (document.getElementById('sku-forn-id') || {}).value;
   if (!fId) { drop.innerHTML = '<div style="padding:8px 12px;font-size:12px;color:#b45309">Escolha o fornecedor primeiro.</div>'; drop.style.display = 'block'; return; }
-  _skuLoteProdItems = getProdutos().filter(function(p) {
+  _skuLoteProdItems = _ordNome(getProdutos()).filter(function(p) {
     if (String(p.fornecedor || '') !== String(fId)) return false;
     return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
   }).slice(0,15);
@@ -21525,19 +21533,19 @@ function _pssPopularFiltros() {
   var vendSel = document.getElementById('pss-vendedor');
   if (vendSel && !vendSel.dataset.populado) {
     var vendedores = getVendedoresAtivos();
-    vendSel.innerHTML = '<option value="">Todos</option>' + vendedores.map(function(v){ return '<option value="'+v.id+'">'+_pedEsc(v.nome||'')+'</option>'; }).join('');
+    vendSel.innerHTML = '<option value="">Todos</option>' + _ordNome(vendedores).map(function(v){ return '<option value="'+v.id+'">'+_pedEsc(v.nome||'')+'</option>'; }).join('');
     vendSel.dataset.populado = '1';
   }
   var fornSel = document.getElementById('pss-fornecedor');
   if (fornSel && !fornSel.dataset.populado) {
     var forns = getFornecedores();
-    fornSel.innerHTML = '<option value="">Todos</option>' + forns.map(function(f){ return '<option value="'+f.id+'">'+_pedEsc(f.nome_fantasia||f.razao_social||'')+'</option>'; }).join('');
+    fornSel.innerHTML = '<option value="">Todos</option>' + _ordNome(forns).map(function(f){ return '<option value="'+f.id+'">'+_pedEsc(f.nome_fantasia||f.razao_social||'')+'</option>'; }).join('');
     fornSel.dataset.populado = '1';
   }
   var redeSel = document.getElementById('pss-rede');
   if (redeSel && !redeSel.dataset.populado) {
     var redes = getCatClientes().filter(function(c){ return !c.pai; });
-    redeSel.innerHTML = '<option value="">Todas</option>' + redes.map(function(c){ return '<option value="'+c.id+'">'+_pedEsc(c.nome||'')+'</option>'; }).join('');
+    redeSel.innerHTML = '<option value="">Todas</option>' + _ordNome(redes).map(function(c){ return '<option value="'+c.id+'">'+_pedEsc(c.nome||'')+'</option>'; }).join('');
     redeSel.dataset.populado = '1';
   }
   pssAtualizarLojas();
@@ -21548,7 +21556,7 @@ function pssAtualizarLojas() {
   if (!lojaSel) return;
   var valorAtual = lojaSel.value;
   var lojas = redeId ? getCatClientes().filter(function(c){ return String(c.pai) === String(redeId); }) : [];
-  lojaSel.innerHTML = '<option value="">Todas</option>' + lojas.map(function(c){ return '<option value="'+c.id+'">'+_pedEsc(c.nome||'')+'</option>'; }).join('');
+  lojaSel.innerHTML = '<option value="">Todas</option>' + _ordNome(lojas).map(function(c){ return '<option value="'+c.id+'">'+_pedEsc(c.nome||'')+'</option>'; }).join('');
   if (lojas.some(function(l){ return String(l.id) === String(valorAtual); })) lojaSel.value = valorAtual;
 }
 // ao abrir a aba Venda simples: ja vem com a semana atual (domingo a sabado)
@@ -24343,7 +24351,7 @@ function openPedidoForm(params) {
   const vendedores = getVendedoresAtivos();
   const vendSel = document.getElementById('ped-vendedor');
   vendSel.innerHTML = '<option value="">-- Selecione --</option>' +
-    vendedores.map(function(v){ return '<option value="' + v.id + '"' + (params.vendedorId == v.id ? ' selected' : '') + '>' + _pedEsc(v.nome || v.nome_fantasia || '') + '</option>'; }).join('');
+    _ordNome(vendedores).map(function(v){ return '<option value="' + v.id + '"' + (params.vendedorId == v.id ? ' selected' : '') + '>' + _pedEsc(v.nome || v.nome_fantasia || '') + '</option>'; }).join('');
   vendSel.value = params.vendedorId || '';
 
   document.getElementById('ped-item-prod-input').value = '';
@@ -24907,7 +24915,7 @@ function _pfatRender() {
   var transpSel = document.getElementById('pfat-transportadora');
   if (transpSel) {
     var transportadoras = getTransportadoras();
-    transpSel.innerHTML = '<option value="">-- Nenhuma --</option>' + transportadoras.map(function(t){ return '<option value="' + t.id + '">' + _pedEsc(t.nome_fantasia || t.razao_social || '') + '</option>'; }).join('');
+    transpSel.innerHTML = '<option value="">-- Nenhuma --</option>' + _ordNome(transportadoras).map(function(t){ return '<option value="' + t.id + '">' + _pedEsc(t.nome_fantasia || t.razao_social || '') + '</option>'; }).join('');
     transpSel.value = '';
   }
   var numDupEl = document.getElementById('pfat-num-duplicata'); if (numDupEl) numDupEl.value = '';
@@ -25259,13 +25267,13 @@ function _psnPopularFiltros() {
   var vendSel = document.getElementById('psn-vendedor');
   if (vendSel && !vendSel.dataset.populado) {
     var vendedores = getVendedoresAtivos();
-    vendSel.innerHTML = '<option value="">Todos</option>' + vendedores.map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
+    vendSel.innerHTML = '<option value="">Todos</option>' + _ordNome(vendedores).map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
     vendSel.dataset.populado = '1';
   }
   var catSel = document.getElementById('psn-categoria');
   if (catSel && !catSel.dataset.populado) {
     var categorias = getCatClientes().filter(function(c){ return !c.pai; });
-    catSel.innerHTML = '<option value="">Todas</option>' + categorias.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+    catSel.innerHTML = '<option value="">Todas</option>' + _ordNome(categorias).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
     catSel.dataset.populado = '1';
   }
   psnAtualizarSubcategorias();
@@ -25276,7 +25284,7 @@ function psnAtualizarSubcategorias() {
   if (!subSel) return;
   var valorAtual = subSel.value;
   var subs = catId ? getCatClientes().filter(function(c){ return String(c.pai) === String(catId); }) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function psnLimparFiltros() {
@@ -25420,13 +25428,13 @@ function _entctrlPopularFiltros() {
   var vendSel = document.getElementById('entctrl-vendedor');
   if (vendSel && !vendSel.dataset.populado) {
     var vendedores = getVendedoresAtivos();
-    vendSel.innerHTML = '<option value="">Todos</option>' + vendedores.map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
+    vendSel.innerHTML = '<option value="">Todos</option>' + _ordNome(vendedores).map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
     vendSel.dataset.populado = '1';
   }
   var catSel = document.getElementById('entctrl-categoria');
   if (catSel && !catSel.dataset.populado) {
     var categorias = getCatClientes().filter(function(c){ return !c.pai; });
-    catSel.innerHTML = '<option value="">Todas</option>' + categorias.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+    catSel.innerHTML = '<option value="">Todas</option>' + _ordNome(categorias).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
     catSel.dataset.populado = '1';
   }
   entctrlAtualizarSubcategorias();
@@ -25437,7 +25445,7 @@ function entctrlAtualizarSubcategorias() {
   if (!subSel) return;
   var valorAtual = subSel.value;
   var subs = catId ? getCatClientes().filter(function(c){ return String(c.pai) === String(catId); }) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function entctrlToggleMaisFiltros() {
@@ -25472,7 +25480,7 @@ function _entctrlFornFiltrar() {
       drop.style.display = 'none';
     } else {
       var n = _cpNorm(q);
-      _entctrlFornItems = getFornecedores().filter(function (f) {
+      _entctrlFornItems = _ordNome(getFornecedores()).filter(function (f) {
         return _cpNorm(f.nome_fantasia || f.razao_social || '').indexOf(n) !== -1 || _cpNorm(f.codigo || '').indexOf(n) !== -1;
       }).slice(0, 15);
       if (!_entctrlFornItems.length) {
@@ -25600,7 +25608,7 @@ function abrirModalImportEntrega() {
   var sel = document.getElementById('entimp-transp');
   if (sel) {
     var transportadoras = getTransportadoras();
-    sel.innerHTML = '<option value="">-- Não alterar a transportadora --</option>' + transportadoras.map(function(t){
+    sel.innerHTML = '<option value="">-- Não alterar a transportadora --</option>' + _ordNome(transportadoras).map(function(t){
       return '<option value="' + t.id + '">' + _pedEsc(_cpSemColchetes(t.nome_fantasia || t.razao_social || '')) + '</option>';
     }).join('');
   }
@@ -25872,13 +25880,13 @@ function _pnfPopularFiltros() {
   var vendSel = document.getElementById('pnf-vendedor');
   if (vendSel && !vendSel.dataset.populado) {
     var vendedores = getVendedoresAtivos();
-    vendSel.innerHTML = '<option value="">Todos</option>' + vendedores.map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
+    vendSel.innerHTML = '<option value="">Todos</option>' + _ordNome(vendedores).map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
     vendSel.dataset.populado = '1';
   }
   var catSel = document.getElementById('pnf-categoria');
   if (catSel && !catSel.dataset.populado) {
     var categorias = getCatClientes().filter(function(c){ return !c.pai; });
-    catSel.innerHTML = '<option value="">Todas</option>' + categorias.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+    catSel.innerHTML = '<option value="">Todas</option>' + _ordNome(categorias).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
     catSel.dataset.populado = '1';
   }
   pnfAtualizarSubcategorias();
@@ -25889,7 +25897,7 @@ function pnfAtualizarSubcategorias() {
   if (!subSel) return;
   var valorAtual = subSel.value;
   var subs = catId ? getCatClientes().filter(function(c){ return String(c.pai) === String(catId); }) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function pnfLimparFiltros() {
@@ -26022,13 +26030,13 @@ function _vcPopularFiltros() {
   var vendSel = document.getElementById('vc-vendedor');
   if (vendSel && !vendSel.dataset.populado) {
     var vendedores = getVendedoresAtivos();
-    vendSel.innerHTML = '<option value="">Todos</option>' + vendedores.map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
+    vendSel.innerHTML = '<option value="">Todos</option>' + _ordNome(vendedores).map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
     vendSel.dataset.populado = '1';
   }
   var catSel = document.getElementById('vc-categoria');
   if (catSel && !catSel.dataset.populado) {
     var categorias = getCatClientes().filter(function(c){ return !c.pai; });
-    catSel.innerHTML = '<option value="">Todas</option>' + categorias.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+    catSel.innerHTML = '<option value="">Todas</option>' + _ordNome(categorias).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
     catSel.dataset.populado = '1';
   }
   vcAtualizarSubcategorias();
@@ -26039,7 +26047,7 @@ function vcAtualizarSubcategorias() {
   if (!subSel) return;
   var valorAtual = subSel.value;
   var subs = catId ? getCatClientes().filter(function(c){ return String(c.pai) === String(catId); }) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function vcLimparFiltros() {
@@ -26422,13 +26430,13 @@ function _vcfPopularFiltros() {
   var vendSel = document.getElementById('vcf-vendedor');
   if (vendSel && !vendSel.dataset.populado) {
     var vendedores = getVendedoresAtivos();
-    vendSel.innerHTML = '<option value="">Todos</option>' + vendedores.map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
+    vendSel.innerHTML = '<option value="">Todos</option>' + _ordNome(vendedores).map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
     vendSel.dataset.populado = '1';
   }
   var catSel = document.getElementById('vcf-categoria');
   if (catSel && !catSel.dataset.populado) {
     var categorias = getCatClientes().filter(function(c){ return !c.pai; });
-    catSel.innerHTML = '<option value="">Todas</option>' + categorias.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+    catSel.innerHTML = '<option value="">Todas</option>' + _ordNome(categorias).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
     catSel.dataset.populado = '1';
   }
   vcfAtualizarSubcategorias();
@@ -26439,7 +26447,7 @@ function vcfAtualizarSubcategorias() {
   if (!subSel) return;
   var valorAtual = subSel.value;
   var subs = catId ? getCatClientes().filter(function(c){ return String(c.pai) === String(catId); }) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function vcfLimparFiltros() {
@@ -26618,7 +26626,7 @@ function _pedFornFiltrar() {
   document.getElementById('ped-forn-id').value = '';
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _pedFornItems = getFornecedores().filter(function(f){
+  _pedFornItems = _ordNome(getFornecedores()).filter(function(f){
     return _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n) || _cpNorm(f.codigo||'').includes(n);
   }).slice(0,15);
   if (!_pedFornItems.length) { drop.style.display='none'; return; }
@@ -26662,7 +26670,7 @@ function _pedCliFiltrar() {
   // so numeros (pode ter . / -): so mostra o cliente quando o codigo ou o CNPJ/CPF esta COMPLETO; nome continua a partir da 3a letra
   var _soNumCli = /^[\d.\-\/\s]+$/.test(q);
   var _semZerosCli = function (v) { return String(v || '').replace(/\D/g, '').replace(/^0+(?=.)/, ''); };
-  _pedCliItems = getClientesVisiveis().filter(function(c){
+  _pedCliItems = _ordNome(getClientesVisiveis()).filter(function(c){
     if ((c.ativo || 'Sim') === 'Não') return false; // cliente inativo não aparece na busca do pedido
     var docDigits = (c.cpf_cnpj||'').replace(/\D/g, '');
     // nome fantasia ou razão social: acha o texto em qualquer parte (inclusive números, ex.: "298" -> "... Lj 298")
@@ -26821,7 +26829,7 @@ function _pedProdFiltrar() {
       });
     });
   }
-  _pedProdItems = base.filter(function(p){
+  _pedProdItems = _ordNome(base).filter(function(p){
     if (_soNum) return _semZeros(p.codigo) === _qExato || (p.ean && _semZeros(p.ean) === _qExato) || !!_pedProdCodMap[p.id];
     return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n) || !!_pedProdCodMap[p.id];
   }).slice(0,15);
@@ -26927,7 +26935,7 @@ function _rqGravarNoBanco(docs, apagar) {
 
 function _bloqPopularFiltros() {
   var forns = getFornecedores();
-  var opts = forns.map(function (f) { return '<option value="' + f.id + '">' + _pedEsc(_cpSemColchetes(f.nome_fantasia || f.razao_social || '')) + '</option>'; }).join('');
+  var opts = _ordNome(forns).map(function (f) { return '<option value="' + f.id + '">' + _pedEsc(_cpSemColchetes(f.nome_fantasia || f.razao_social || '')) + '</option>'; }).join('');
   var sel = document.getElementById('bloq-fornecedor');
   if (sel && !sel.dataset.populado) { sel.innerHTML = '<option value="">Selecione...</option>' + opts; sel.dataset.populado = '1'; }
   var sf = document.getElementById('rq-f-forn');
@@ -27315,7 +27323,7 @@ function filtrarFornMeta() {
   document.getElementById('meta-fabrica-sel').value = '';
   if (!q) { drop.style.display = 'none'; _metaFornItems = []; return; }
   var n = _cpNorm(q);
-  _metaFornItems = getFornecedores().filter(function(f){
+  _metaFornItems = _ordNome(getFornecedores()).filter(function(f){
     return _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n) || _cpNorm(f.codigo||'').includes(n);
   }).slice(0, 15);
   if (!_metaFornItems.length) { drop.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:#94a3b8">Nenhum fornecedor encontrado.</div>'; drop.style.display = 'block'; return; }
@@ -30438,7 +30446,7 @@ function _devFornFiltrar() {
   document.getElementById('dev-forn-id').value = '';
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _devFornItems = getFornecedores().filter(function(f){
+  _devFornItems = _ordNome(getFornecedores()).filter(function(f){
     return _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n) || _cpNorm(f.codigo||'').includes(n);
   }).slice(0,15);
   if (!_devFornItems.length) { drop.style.display='none'; return; }
@@ -30475,7 +30483,7 @@ function _devCliFiltrar() {
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   var qDigits = q.replace(/\D/g, '');
-  _devCliItems = getClientesVisiveis().filter(function(c){
+  _devCliItems = _ordNome(getClientesVisiveis()).filter(function(c){
     var docDigits = (c.cpf_cnpj||'').replace(/\D/g, '');
     return _cpNorm(c.nome_fantasia||c.razao_social||'').includes(n)
         || _cpNorm(c.codigo||'').includes(n)
@@ -30544,7 +30552,7 @@ function _devProdFiltrar() {
   document.getElementById('dev-item-prod-id').value = '';
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _devProdItems = getProdutos().filter(function(p){
+  _devProdItems = _ordNome(getProdutos()).filter(function(p){
     return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
   }).slice(0,15);
   if (!_devProdItems.length) { drop.style.display='none'; return; }
@@ -30656,7 +30664,7 @@ function openDevolucaoForm(params) {
   const vendedores = getVendedoresAtivos();
   const vendSel = document.getElementById('dev-vendedor');
   vendSel.innerHTML = '<option value="">-- Selecione --</option>' +
-    vendedores.map(function(v){ return '<option value="' + v.id + '"' + (params.vendedorId == v.id ? ' selected' : '') + '>' + _pedEsc(v.nome || v.nome_fantasia || '') + '</option>'; }).join('');
+    _ordNome(vendedores).map(function(v){ return '<option value="' + v.id + '"' + (params.vendedorId == v.id ? ' selected' : '') + '>' + _pedEsc(v.nome || v.nome_fantasia || '') + '</option>'; }).join('');
   vendSel.value = params.vendedorId || '';
 
   document.getElementById('dev-item-prod-input').value = '';
@@ -31409,7 +31417,7 @@ function _revFornFiltrar() {
   document.getElementById('rev-forn-id').value = '';
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _revFornItems = getFornecedores().filter(function(f){
+  _revFornItems = _ordNome(getFornecedores()).filter(function(f){
     return _cpNorm(f.nome_fantasia||f.razao_social||'').includes(n) || _cpNorm(f.codigo||'').includes(n);
   }).slice(0,15);
   if (!_revFornItems.length) { drop.style.display='none'; return; }
@@ -31445,7 +31453,7 @@ function _revCliOrigFiltrar() {
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   var qDigits = q.replace(/\D/g, '');
-  _revCliOrigItems = getClientesVisiveis().filter(function(c){
+  _revCliOrigItems = _ordNome(getClientesVisiveis()).filter(function(c){
     var docDigits = (c.cpf_cnpj||'').replace(/\D/g, '');
     return _cpNorm(c.nome_fantasia||c.razao_social||'').includes(n)
         || _cpNorm(c.codigo||'').includes(n)
@@ -31483,7 +31491,7 @@ function _revProdFiltrar() {
   document.getElementById('rev-prod-id').value = '';
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
-  _revProdItems = getProdutos().filter(function(p){
+  _revProdItems = _ordNome(getProdutos()).filter(function(p){
     return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
   }).slice(0,15);
   if (!_revProdItems.length) { drop.style.display='none'; return; }
@@ -31861,7 +31869,7 @@ function abrirRevendaVender(id) {
   var vendedores = getVendedoresAtivos();
   var vendSel = document.getElementById('revv-vendedor');
   vendSel.innerHTML = '<option value="">-- Selecione --</option>' +
-    vendedores.map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || v.nome_fantasia || '') + '</option>'; }).join('');
+    _ordNome(vendedores).map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || v.nome_fantasia || '') + '</option>'; }).join('');
 
   var modal = document.getElementById('modal-revenda-vender');
   if (modal) modal.style.display = 'flex';
@@ -31881,7 +31889,7 @@ function _revCliDestFiltrar() {
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
   var qDigits = q.replace(/\D/g, '');
-  _revCliDestItems = getClientesVisiveis().filter(function(c){
+  _revCliDestItems = _ordNome(getClientesVisiveis()).filter(function(c){
     var docDigits = (c.cpf_cnpj||'').replace(/\D/g, '');
     return _cpNorm(c.nome_fantasia||c.razao_social||'').includes(n)
         || _cpNorm(c.codigo||'').includes(n)
@@ -32136,7 +32144,7 @@ function openUsuarioForm(params) {
   document.querySelectorAll('.usu-uf-check').forEach(function(el){ el.checked = ufsAtuais.indexOf(el.value) !== -1; });
   var grupos = getGruposAcesso();
   var sel = document.getElementById('usu-grupo');
-  sel.innerHTML = '<option value="">-- Selecione --</option>' + grupos.map(function(g){ return '<option value="'+g.id+'"' + (params.grupoId===g.id?' selected':'') + '>' + _usuEsc(g.nome) + '</option>'; }).join('');
+  sel.innerHTML = '<option value="">-- Selecione --</option>' + _ordNome(grupos).map(function(g){ return '<option value="'+g.id+'"' + (params.grupoId===g.id?' selected':'') + '>' + _usuEsc(g.nome) + '</option>'; }).join('');
   sel.value = params.grupoId || '';
   document.getElementById('usu-msg').textContent = '';
   var usuAutoriaEl = document.getElementById('usu-autoria-info');
@@ -32302,7 +32310,7 @@ function openPermissoesForm() {
   var sel = document.getElementById('perm-usuario-sel');
   var usuarios = getUsuariosSistema();
   sel.innerHTML = '<option value="">-- Selecione um usuário --</option>' +
-    usuarios.map(function(u){ return '<option value="'+u.id+'">' + _usuEsc(u.nome) + (u.grupoNome?' ('+_usuEsc(u.grupoNome)+')':'') + '</option>'; }).join('');
+    _ordNome(usuarios).map(function(u){ return '<option value="'+u.id+'">' + _usuEsc(u.nome) + (u.grupoNome?' ('+_usuEsc(u.grupoNome)+')':'') + '</option>'; }).join('');
   sel.value = '';
   document.getElementById('perm-matriz-wrap').style.display = 'none';
   document.getElementById('perm-vazio').style.display = 'block';
@@ -32531,7 +32539,7 @@ function openComandoForm(params) {
   var catSel = document.getElementById('nav-comando-filtro-categoria');
   if (catSel) {
     var categorias = getCatClientes().filter(function(c){ return !c.pai; });
-    catSel.innerHTML = '<option value="">Todas</option>' + categorias.map(function(c){ return '<option value="' + c.id + '">' + _navEsc(c.nome || '') + '</option>'; }).join('');
+    catSel.innerHTML = '<option value="">Todas</option>' + _ordNome(categorias).map(function(c){ return '<option value="' + c.id + '">' + _navEsc(c.nome || '') + '</option>'; }).join('');
   }
   var titulo = document.getElementById('nav-comando-titulo');
   var msg = document.getElementById('nav-comando-msg');
@@ -33068,19 +33076,19 @@ function _relPopularFiltros() {
   var vendSel = document.getElementById('rel-f-vendedor');
   if (vendSel && !vendSel.dataset.populado) {
     var vendedores = getVendedoresAtivos();
-    vendSel.innerHTML = '<option value="">Todos</option>' + vendedores.map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
+    vendSel.innerHTML = '<option value="">Todos</option>' + _ordNome(vendedores).map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
     vendSel.dataset.populado = '1';
   }
   var catSel = document.getElementById('rel-f-categoria');
   if (catSel && !catSel.dataset.populado) {
     var categorias = getCatClientes().filter(function(c){ return !c.pai; });
-    catSel.innerHTML = '<option value="">Todas</option>' + categorias.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+    catSel.innerHTML = '<option value="">Todas</option>' + _ordNome(categorias).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
     catSel.dataset.populado = '1';
   }
   var catSelB = document.getElementById('rel-f-b-categoria');
   if (catSelB && !catSelB.dataset.populado) {
     var categoriasB = getCatClientes().filter(function(c){ return !c.pai; });
-    catSelB.innerHTML = '<option value="">Todas</option>' + categoriasB.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+    catSelB.innerHTML = '<option value="">Todas</option>' + _ordNome(categoriasB).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
     catSelB.dataset.populado = '1';
   }
   _relAtualizarSubcategorias();
@@ -33091,7 +33099,7 @@ function _relAtualizarSubcategoriasB() {
   if (!catSel || !subSel) return;
   var catId = catSel.value, valorAtual = subSel.value;
   var subs = catId ? getCatClientes().filter(function(c){ return String(c.pai) === String(catId); }) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
   if (subs.some(function(x){ return String(x.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 function _relAtualizarSubcategorias() {
@@ -33100,7 +33108,7 @@ function _relAtualizarSubcategorias() {
   if (!subSel) return;
   var valorAtual = subSel.value;
   var subs = catId ? getCatClientes().filter(function(c){ return String(c.pai) === String(catId); }) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 
@@ -34964,9 +34972,9 @@ function _rcMontar() {
   var filtros = '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">'
     + '<div style="grid-column:1 / -1">' + _rcCampo('Buscar cliente', '<input id="rc-f-busca" placeholder="Nome, CNPJ ou código..." autocomplete="off" onkeydown="if(event.key===\'Enter\')gerarRelatorio()" oninput="_rcResumo()" style="' + st + '">') + '</div>'
     + _rcCampo('Fábrica', '<select id="rc-f-forn" onchange="_rcResumo()" style="' + st + '"><option value="">Todas</option>' + forns.map(function (n) { return '<option value="' + _pedEsc(n) + '">' + _pedEsc(n) + '</option>'; }).join('') + '</select>')
-    + _rcCampo('Rede', '<select id="rc-f-rede" onchange="_rcSubRedes();_rcResumo()" style="' + st + '"><option value="">Todas</option>' + redes.map(function (c) { return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('') + '</select>')
+    + _rcCampo('Rede', '<select id="rc-f-rede" onchange="_rcSubRedes();_rcResumo()" style="' + st + '"><option value="">Todas</option>' + _ordNome(redes).map(function (c) { return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('') + '</select>')
     + _rcCampo('Sub-rede', '<select id="rc-f-sub" onchange="_rcResumo()" style="' + st + '"><option value="">Todas</option></select>')
-    + _rcCampo('Vendedor', '<select id="rc-f-vend" onchange="_rcResumo()" style="' + st + '"><option value="">Todos</option>' + vends.map(function (v) { return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('') + '</select>')
+    + _rcCampo('Vendedor', '<select id="rc-f-vend" onchange="_rcResumo()" style="' + st + '"><option value="">Todos</option>' + _ordNome(vends).map(function (v) { return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('') + '</select>')
     + _rcCampo('UF', '<select id="rc-f-uf" onchange="_rcResumo()" style="' + st + '"><option value="">Todas</option><option>AL</option><option>BA</option><option>PB</option><option>PE</option><option>RN</option><option>SE</option></select>')
     + _rcCampo('Status', '<select id="rc-f-status" onchange="_rcResumo()" style="' + st + '"><option value="ativo">Ativos</option><option value="inativo">Inativos</option><option value="">Todos</option></select>')
     + _rcCampo('Período', '<select id="rc-f-per" onchange="_rcPerMudou();_rcResumo()" style="' + st + '"><option value="">Todo o histórico</option><option value="12">Últimos 12 meses</option><option value="6">Últimos 6 meses</option><option value="3">Últimos 3 meses</option><option value="datas">Escolher datas...</option></select>')
@@ -35002,7 +35010,7 @@ function _rcAbrir(id) { _rcAberto = (_rcAberto === id) ? null : id; _rcAplicarAb
 function _rcSubRedes() {
   var r = (document.getElementById('rc-f-rede') || {}).value, sel = document.getElementById('rc-f-sub'); if (!sel) return;
   var subs = r ? getCatClientes().filter(function (c) { return String(c.pai) === String(r); }) : [];
-  sel.innerHTML = '<option value="">Todas</option>' + subs.map(function (c) { return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+  sel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function (c) { return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
 }
 function _rcPerMudou() {
   var d = document.getElementById('rc-datas'), p = (document.getElementById('rc-f-per') || {}).value;
@@ -35302,8 +35310,8 @@ function _rpMontar() {
     + _rcCampo('Status', '<select id="rp-f-status" onchange="_rpResumo()" style="' + st + '"><option value="ativo">Ativos</option><option value="inativo">Inativos</option><option value="">Todos</option></select>')
     + _rcCampo('Período', '<select id="rp-f-per" onchange="_rpPerMudou();_rpResumo()" style="' + st + '"><option value="">Todo o histórico</option><option value="12">Últimos 12 meses</option><option value="6">Últimos 6 meses</option><option value="3">Últimos 3 meses</option><option value="datas">Escolher datas...</option></select>')
     + _rcCampo('UF (onde vendeu)', '<select id="rp-f-uf" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option><option>AL</option><option>BA</option><option>PB</option><option>PE</option><option>RN</option><option>SE</option></select>')
-    + _rcCampo('Rede (quem comprou)', '<select id="rp-f-rede" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option>' + redes.map(function (c) { return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('') + '</select>')
-    + _rcCampo('Vendedor', '<select id="rp-f-vend" onchange="_rpResumo()" style="' + st + '"><option value="">Todos</option>' + vends.map(function (v) { return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('') + '</select>')
+    + _rcCampo('Rede (quem comprou)', '<select id="rp-f-rede" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option>' + _ordNome(redes).map(function (c) { return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('') + '</select>')
+    + _rcCampo('Vendedor', '<select id="rp-f-vend" onchange="_rpResumo()" style="' + st + '"><option value="">Todos</option>' + _ordNome(vends).map(function (v) { return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('') + '</select>')
     + _rcCampo('Situação no mix', '<select id="rp-f-mix" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option><option value="linha">Em linha (vendeu nos últimos 30 dias)</option><option value="semgiro">Sem giro (30+ dias sem vender)</option><option value="nunca">Nunca faturou</option></select>')
     + '<div id="rp-datas" style="display:none;grid-column:1 / -1;gap:8px;align-items:center;flex-wrap:wrap"><span style="font-size:11px;font-weight:600;color:#64748b">De</span><input id="rp-f-de" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;width:100px"><span style="font-size:11px;font-weight:600;color:#64748b">até</span><input id="rp-f-ate" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" oninput="_entctrlMaskData(this)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;width:100px"></div>'
     + '</div>'
@@ -35833,13 +35841,13 @@ function _apresPopularFiltros() {
   var redeSel = document.getElementById('apres-rede');
   if (redeSel && !redeSel.dataset.populado) {
     var redes = getCatClientes().filter(function(c){ return !c.pai; });
-    redeSel.innerHTML = '<option value="">Selecione...</option>' + redes.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+    redeSel.innerHTML = '<option value="">Selecione...</option>' + _ordNome(redes).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
     redeSel.dataset.populado = '1';
   }
   var fornSel = document.getElementById('apres-fornecedor');
   if (fornSel && !fornSel.dataset.populado) {
     var fornecedores = getFornecedores();
-    fornSel.innerHTML = '<option value="">Selecione...</option>' + fornecedores.map(function(f){ return '<option value="' + f.id + '">' + _pedEsc(_cpSemColchetes(f.nome_fantasia || f.razao_social || '')) + '</option>'; }).join('');
+    fornSel.innerHTML = '<option value="">Selecione...</option>' + _ordNome(fornecedores).map(function(f){ return '<option value="' + f.id + '">' + _pedEsc(_cpSemColchetes(f.nome_fantasia || f.razao_social || '')) + '</option>'; }).join('');
     fornSel.dataset.populado = '1';
   }
   _apresAtualizarSubcategorias();
@@ -35855,7 +35863,7 @@ function _apresAtualizarSubcategorias() {
   if (!subSel) return;
   var valorAtual = subSel.value;
   var subs = redeId ? getCatClientes().filter(function(c){ return String(c.pai) === String(redeId); }) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + subs.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
   if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
 }
 
@@ -36505,7 +36513,7 @@ function _apPopular() {
   if (!document.getElementById('ap-tipos')) return;
   if (!Object.keys(_apS.slides).length) _apSlidesDoTipo(_apS.tipo);
   var dl = document.getElementById('ap-vend-list');
-  if (dl) { try { dl.innerHTML = getUsuariosSistema().map(function(u){ return '<option value="' + _apresEscHtml(u.nome || u.login || '') + '">'; }).join(''); } catch (e) {} }
+  if (dl) { try { dl.innerHTML = _ordNome(getUsuariosSistema()).map(function(u){ return '<option value="' + _apresEscHtml(u.nome || u.login || '') + '">'; }).join(''); } catch (e) {} }
   _apRenderTipos(); _apRenderForns(); _apRenderProdutos(); _apRenderSlidesLista(); _apRenderLista(); _apRender();
 }
 
@@ -37063,13 +37071,13 @@ function _sugPopularFiltros() {
   var fornSel = document.getElementById('sug-fornecedor');
   if (fornSel && !fornSel.dataset.populado) {
     var fornecedores = getFornecedores();
-    fornSel.innerHTML = '<option value="">Selecione...</option>' + fornecedores.map(function(f){ return '<option value="' + f.id + '">' + _pedEsc(_cpSemColchetes(f.nome_fantasia || f.razao_social || '')) + '</option>'; }).join('');
+    fornSel.innerHTML = '<option value="">Selecione...</option>' + _ordNome(fornecedores).map(function(f){ return '<option value="' + f.id + '">' + _pedEsc(_cpSemColchetes(f.nome_fantasia || f.razao_social || '')) + '</option>'; }).join('');
     fornSel.dataset.populado = '1';
   }
   var redeSel = document.getElementById('sug-rede');
   if (redeSel && !redeSel.dataset.populado) {
     var redes = getCatClientes().filter(function(c){ return !c.pai; });
-    redeSel.innerHTML = '<option value="">Selecione...</option>' + redes.map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
+    redeSel.innerHTML = '<option value="">Selecione...</option>' + _ordNome(redes).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
     redeSel.dataset.populado = '1';
   }
   _sugResetar();
@@ -37111,7 +37119,7 @@ function _sugAtualizarSubRede() {
     return;
   }
   if (subWrap) subWrap.style.display = '';
-  if (subSel) subSel.innerHTML += subs.map(function(s){ return '<option value="' + s.id + '">' + _pedEsc(s.nome || '') + '</option>'; }).join('');
+  if (subSel) subSel.innerHTML += _ordNome(subs).map(function(s){ return '<option value="' + s.id + '">' + _pedEsc(s.nome || '') + '</option>'; }).join('');
   _sugAtualizarLojas();
 }
 
@@ -37267,7 +37275,7 @@ function _sugClienteFiltrar() {
   if (q.length < 4) { drop.style.display = 'none'; return; }
   var n = _cpNorm(q);
   var qDigits = q.replace(/\D/g, '');
-  _sugCliItems = getClientesVisiveis().filter(function(c){
+  _sugCliItems = _ordNome(getClientesVisiveis()).filter(function(c){
     var docDigits = (c.cpf_cnpj || '').replace(/\D/g, '');
     return _cpNorm(c.nome_fantasia || c.razao_social || '').includes(n)
         || _cpNorm(c.codigo || '').includes(n)
@@ -37309,7 +37317,7 @@ function _sugProdutoFiltrar() {
   if (fornId) base = base.filter(function(p){ return p.fornecedor === fornId; });
   var jaAdicionados = _sugLinhas.map(function(l){ return l.produtoId; });
   base = base.filter(function(p){ return jaAdicionados.indexOf(p.id) === -1; });
-  _sugProdItems = base.filter(function(p){
+  _sugProdItems = _ordNome(base).filter(function(p){
     return _cpNorm(p.nome || '').includes(n) || _cpNorm(p.codigo || '').includes(n);
   }).slice(0, 15);
   if (!_sugProdItems.length) { drop.style.display = 'none'; return; }
@@ -38331,7 +38339,7 @@ if (!window._drClickForaRegistrado) {
 function _drRenderMsFornDrop() {
   var drop = document.getElementById('dr-forn-ms-drop');
   if (!drop) return;
-  _drOpcoesForn = getFornecedores();
+  _drOpcoesForn = getFornecedores().slice().sort(function (a, b) { return _cpSemColchetes(a.nome_fantasia || a.razao_social || '').localeCompare(_cpSemColchetes(b.nome_fantasia || b.razao_social || ''), 'pt-BR', { sensitivity: 'base' }); }); // ordem alfabetica
   drop.innerHTML = _drOpcoesForn.map(function (f, i) {
     var nome = _cpSemColchetes(f.nome_fantasia || f.razao_social || '');
     var marcado = _drFornecedoresSelecionados.indexOf(String(f.id)) !== -1;
@@ -38364,7 +38372,7 @@ function _drRenderMsRedeDrop() {
   var drop = document.getElementById('dr-rede-ms-drop');
   if (!drop) return;
   var todas = getCatClientes();
-  _drOpcoesRede = todas.filter(function (c) { return !c.pai; });
+  _drOpcoesRede = todas.filter(function (c) { return !c.pai; }).sort(function (a, b) { return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR', { sensitivity: 'base' }); }); // ordem alfabetica
   drop.innerHTML = _drOpcoesRede.map(function (r, i) {
     var marcado = _drSelecoes.some(function (s) { return s.tipo === 'rede' && String(s.id) === String(r.id); });
     return '<label style="display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:12.5px;color:#1e293b;cursor:pointer">'
@@ -38422,7 +38430,7 @@ function _drRenderMsSubredeDrop() {
   _drOpcoesSubrede = [];
   var html = '';
   redesSel.forEach(function (rSel) {
-    var subs = todas.filter(function (c) { return String(c.pai) === String(rSel.id); });
+    var subs = todas.filter(function (c) { return String(c.pai) === String(rSel.id); }).sort(function (a, b) { return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR', { sensitivity: 'base' }); }); // ordem alfabetica
     if (!subs.length) return;
     if (redesSel.length > 1) {
       html += '<div style="font-size:10.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;padding:6px 2px 2px">' + _pedEsc(rSel.nome) + '</div>';
@@ -39810,7 +39818,7 @@ function _fornComPopularTabs() {
   var sel = document.getElementById('forn-comext-tab'); if (!sel) return;
   var tabs = _fornEditId ? getTabPrecos().filter(function(t){ return (t.itens||[]).some(function(it){ return String(it.fornId) === String(_fornEditId); }); }) : [];
   sel.innerHTML = '<option value="">' + (tabs.length ? 'Selecione uma tabela deste fornecedor...' : 'Nenhuma tabela deste fornecedor') + '</option>'
-    + tabs.map(function(t){ return '<option value="' + t.id + '">' + _pedEsc(t.nome||'') + '</option>'; }).join('');
+    + _ordNome(tabs).map(function(t){ return '<option value="' + t.id + '">' + _pedEsc(t.nome||'') + '</option>'; }).join('');
 }
 function _fornComRender() {
   var lp = document.getElementById('forn-com-exprod-list'), lt = document.getElementById('forn-com-extab-list');
@@ -40048,7 +40056,7 @@ function _comPopularFiltros() {
   var sel = document.getElementById('com-fornecedor');
   if (sel) {
     var atual = sel.value;
-    sel.innerHTML = '<option value="">Todas</option>' + getFornecedores().filter(function(f){ return (f.ativo||'Sim')==='Sim'; }).map(function(f){ return '<option value="'+f.id+'">'+(f.nome_fantasia||'')+'</option>'; }).join('');
+    sel.innerHTML = '<option value="">Todas</option>' + _ordNome(getFornecedores()).filter(function(f){ return (f.ativo||'Sim')==='Sim'; }).map(function(f){ return '<option value="'+f.id+'">'+(f.nome_fantasia||'')+'</option>'; }).join('');
     sel.value = atual || '';
   }
   var deEl = document.getElementById('com-data-de');
@@ -40244,7 +40252,7 @@ function _comConfirmarFatura(pedidoId, faturaId, forma, fornecedorId, semModal) 
 function _cpiAbrirModal() {
   var sel = document.getElementById('cpi-forn-select');
   if (sel) {
-    sel.innerHTML = '<option value="">Selecione...</option>' + getFornecedores().filter(function (f) { return (f.ativo || 'Sim') === 'Sim'; }).map(function (f) { return '<option value="' + f.id + '">' + (f.nome_fantasia || '') + '</option>'; }).join('');
+    sel.innerHTML = '<option value="">Selecione...</option>' + _ordNome(getFornecedores()).filter(function (f) { return (f.ativo || 'Sim') === 'Sim'; }).map(function (f) { return '<option value="' + f.id + '">' + (f.nome_fantasia || '') + '</option>'; }).join('');
   }
   var erro = document.getElementById('cpi-forn-erro');
   if (erro) { erro.style.display = 'none'; erro.textContent = ''; }
@@ -40543,7 +40551,7 @@ function _pifCliFiltrar() {
   if (q.length < 3) { drop.style.display = 'none'; return; }
   var n = _cpNorm(q);
   var qDigits = q.replace(/\D/g, '');
-  _pifCliItems = getClientesVisiveis().filter(function (c) {
+  _pifCliItems = _ordNome(getClientesVisiveis()).filter(function (c) {
     var docDigits = (c.cpf_cnpj || '').replace(/\D/g, '');
     return _cpNorm(c.nome_fantasia || c.razao_social || '').includes(n)
       || _cpNorm(c.codigo || '').includes(n)
@@ -40574,7 +40582,7 @@ function _pifFornFiltrar() {
   document.getElementById('pif-forn-id').value = '';
   if (q.length < 3) { drop.style.display = 'none'; return; }
   var n = _cpNorm(q);
-  _pifFornItems = getFornecedores().filter(function (f) {
+  _pifFornItems = _ordNome(getFornecedores()).filter(function (f) {
     return _cpNorm(f.nome_fantasia || f.razao_social || '').includes(n) || _cpNorm(f.codigo || '').includes(n);
   }).slice(0, 15);
   if (!_pifFornItems.length) { drop.style.display = 'none'; return; }
@@ -40753,7 +40761,7 @@ function _pifRenderRevisaoTabela(produtosForn) {
   produtosForn = produtosForn || getProdutos().filter(function (p) { return p.fornecedor === _pifFornecedorEscolhido.id && (p.ativo || 'Sim') !== 'Não'; });
   var tbody = document.getElementById('pif-revisao-tbody');
   tbody.innerHTML = _pifItensRevisao.map(function (it, i) {
-    var opcoesProduto = '<option value="">— não encontrado, selecione —</option>' + produtosForn.map(function (p) {
+    var opcoesProduto = '<option value="">— não encontrado, selecione —</option>' + _ordNome(produtosForn).map(function (p) {
       return '<option value="' + p.id + '"' + (it.produtoId === p.id ? ' selected' : '') + '>' + _pedEsc(p.nome || '') + '</option>';
     }).join('');
     var statusHtml;
