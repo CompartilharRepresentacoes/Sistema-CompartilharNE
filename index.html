@@ -24122,6 +24122,7 @@ function duplicarPedido(id) {
   copia.id = '';
   copia.lancamento = '';
   copia.data = new Date().toISOString().slice(0,10);
+  copia.status = 'Pré-Venda'; // pedido clonado sempre começa como Pré-Venda
   copia.itens = (p.itens || []).map(function(it){ return Object.assign({}, it); });
   // cliente inativo não vem no pedido clonado: o campo Cliente fica vazio para escolher outro
   var cliOrig = getClientes().find(function(c){ return String(c.id) === String(p.clienteId); });
