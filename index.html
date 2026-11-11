@@ -5013,6 +5013,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         </div>
       </div>
       <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px">
+        <button onclick="skuImpAbrir()" title="Importar SKUs de uma planilha" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer"><i class="ti ti-upload" style="font-size:13px;vertical-align:-2px;margin-right:5px"></i>Importar planilha</button>
         <button onclick="showPage('page-sku-clientes-form',{})" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">➕ Novo SKU</button>
       </div>
       <div class="cad-filtros-bar">
@@ -7820,6 +7821,23 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 <div id="ped-status-popover" style="display:none;position:fixed;z-index:10050;background:#fff;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.2);min-width:170px;overflow:hidden;border:1px solid #e2e8f0"></div>
 
 <!-- ── Modal Anexos do Pedido (Nota Fiscal em PDF) ── -->
+<div id="modal-sku-import" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:980px;max-height:90vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
+    <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:#fff">Importar SKUs por planilha</div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,.6)">Primeiro mostra a conferência; só grava quando você clicar em Gravar</div>
+      </div>
+      <button onclick="skuImpFechar()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;flex-shrink:0">&times;</button>
+    </div>
+    <div id="sku-imp-corpo" style="padding:16px 18px;overflow-y:auto;flex:1"></div>
+    <input type="file" id="sku-imp-file" accept=".xlsx,.xls" style="display:none" onchange="skuImpEscolher(this)">
+    <div style="padding:10px 18px;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0">
+      <button onclick="skuImpFechar()" style="background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:7px;padding:7px 16px;font-size:12px;cursor:pointer">Fechar</button>
+      <button id="sku-imp-gravar" onclick="skuImpGravar()" style="display:none;background:#DE7926;color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer">Gravar</button>
+    </div>
+  </div>
+</div>
 <div id="modal-ped-anexos" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:12px;width:100%;max-width:440px;max-height:85vh;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column">
     <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0">
@@ -20939,6 +20957,237 @@ function salvarSkuCliente() {
   }
   setSkuClientes(dados);
   showPage('page-sku-clientes-list');
+}
+
+// ═══════════════════════════════════════════════════
+// IMPORTAR SKUs POR PLANILHA (tela SKU Clientes)
+// Lê a planilha, mostra a conferência e só grava quando o usuário clica em "Gravar".
+// SKU já cadastrado (mesma rede + fábrica + produto) é ATUALIZADO com o valor da planilha.
+// ═══════════════════════════════════════════════════
+var _skuImp = { linhas: [], filtro: 'todas', grupos: [], arquivo: '', gravando: false };
+var _SKU_IMP_FORMAS = ['CX', 'UND', 'PC', 'KG'];
+function _skuImpEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function skuImpAbrir() {
+  _skuImp = { linhas: [], filtro: 'todas', grupos: [], arquivo: '', gravando: false };
+  var m = document.getElementById('modal-sku-import'); if (!m) return;
+  var inp = document.getElementById('sku-imp-file'); if (inp) inp.value = '';
+  _skuImpRender();
+  m.style.display = 'flex';
+  try { _cfcCarregar(); } catch (e) {}
+}
+function skuImpFechar() {
+  if (_skuImp.gravando) return;
+  var m = document.getElementById('modal-sku-import'); if (m) m.style.display = 'none';
+}
+function skuImpEscolher(inp) {
+  var f = inp && inp.files && inp.files[0]; if (!f) return;
+  _skuImp.arquivo = f.name;
+  var rd = new FileReader();
+  rd.onload = function (e) {
+    try {
+      var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      var ws = wb.Sheets['SKUs'] || wb.Sheets[wb.SheetNames.filter(function (n) { return _cpNorm(n).indexOf('sku') === 0; })[0]] || wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
+      _skuImpAnalisar(rows);
+    } catch (err) {
+      _skuImp.linhas = []; _skuImp.erroArq = 'Não consegui ler o arquivo: ' + (err && err.message ? err.message : err);
+    }
+    _skuImpRender();
+  };
+  rd.onerror = function () { _skuImp.erroArq = 'Não consegui abrir o arquivo.'; _skuImpRender(); };
+  _skuImp.erroArq = '';
+  rd.readAsArrayBuffer(f);
+}
+function _skuImpAcharCol(cab, tipo) {
+  for (var i = 0; i < cab.length; i++) {
+    var h = _cpNorm(String(cab[i] || ''));
+    if (tipo === 'forn' && h.indexOf('fornecedor') === 0) return i;
+    if (tipo === 'rede' && h.indexOf('rede') === 0) return i;
+    if (tipo === 'cod' && h.indexOf('codigo do produto') === 0) return i;
+    if (tipo === 'sku' && h.indexOf('sku') === 0) return i;
+    if (tipo === 'forma' && h.indexOf('forma') === 0) return i;
+    if (tipo === 'codforn' && h.indexOf('cod') === 0 && h.indexOf('fornecedor') !== -1) return i;
+  }
+  return -1;
+}
+function _skuImpSemZeros(v) { var s = String(v || '').trim(); return /^\d+$/.test(s) ? s.replace(/^0+(?=.)/, '') : s.toLowerCase(); }
+function _skuImpInativo(p) {
+  var a = p && p.ativo; if (a === false) return true;
+  var s = _cpNorm(String(a == null ? '' : a)); return s === 'nao' || s === 'false' || s === 'inativo';
+}
+function _skuImpAnalisar(rows) {
+  var cab = rows[0] || [];
+  var col = { forn: _skuImpAcharCol(cab, 'forn'), rede: _skuImpAcharCol(cab, 'rede'), cod: _skuImpAcharCol(cab, 'cod'), sku: _skuImpAcharCol(cab, 'sku'), forma: _skuImpAcharCol(cab, 'forma'), codforn: _skuImpAcharCol(cab, 'codforn') };
+  if (col.forn < 0 || col.rede < 0 || col.cod < 0 || col.sku < 0 || col.forma < 0) {
+    _skuImp.linhas = []; _skuImp.erroArq = 'Não encontrei as colunas da planilha (Fornecedor, Rede, Código do produto, SKU do cliente, Forma de compra). Use o modelo "Planilha_importar_SKUs".'; return;
+  }
+  var forns = getFornecedores(), redes = getCatClientes().filter(function (c) { return !c.pai; }), prods = getProdutos(), skusAtuais = getSkuClientes();
+  var fornNome = function (f) { return _cpNorm(_cpSemColchetes(f.nome_fantasia || f.razao_social || '')); };
+  var linhas = [], visto = {}, skuPorGrupo = {};
+  for (var r = 1; r < rows.length; r++) {
+    var L = rows[r], g = function (i) { return i < 0 ? '' : String(L[i] == null ? '' : L[i]).trim(); };
+    var nForn = g(col.forn), nRede = g(col.rede), cod = g(col.cod), sku = g(col.sku), forma = g(col.forma).toUpperCase(), codForn = g(col.codforn);
+    if (!nForn && !nRede && !cod && !sku && !forma) continue;
+    if (forma === 'UN') forma = 'UND';
+    var it = { linha: r + 1, nForn: nForn, nRede: nRede, cod: cod, sku: sku, forma: forma, codForn: codForn, erros: [], avisos: [], status: '', prodNome: '' };
+    var f = null, rd = null, p = null;
+    if (!nForn) it.erros.push('Fornecedor em branco');
+    else {
+      var nf = _cpNorm(nForn), fx = forns.filter(function (x) { return fornNome(x) === nf; });
+      if (fx.length !== 1) fx = forns.filter(function (x) { return fornNome(x).indexOf(nf) !== -1; });
+      if (fx.length === 1) f = fx[0]; else it.erros.push(fx.length ? 'Fornecedor "' + nForn + '" bate com mais de um cadastro' : 'Fornecedor "' + nForn + '" não encontrado');
+    }
+    if (!nRede) it.erros.push('Rede em branco');
+    else {
+      var nr = _cpNorm(nRede), rx = redes.filter(function (x) { return _cpNorm(x.nome || '') === nr; });
+      if (rx.length === 1) rd = rx[0]; else it.erros.push(rx.length ? 'Rede "' + nRede + '" bate com mais de uma' : 'Rede "' + nRede + '" não encontrada');
+    }
+    if (!cod) it.erros.push('Código do produto em branco');
+    else if (f) {
+      var doForn = prods.filter(function (x) { return String(x.fornecedor || '') === String(f.id); });
+      var px = doForn.filter(function (x) { return String(x.codigo || '').trim() === cod; });
+      if (px.length !== 1) px = doForn.filter(function (x) { return _skuImpSemZeros(x.codigo) === _skuImpSemZeros(cod); });
+      if (px.length === 1) { p = px[0]; it.prodNome = _cpSemColchetes(p.nome || ''); }
+      else if (px.length > 1) it.erros.push('Código ' + cod + ' bate com mais de um produto');
+      else {
+        var outro = prods.filter(function (x) { return _skuImpSemZeros(x.codigo) === _skuImpSemZeros(cod); })[0];
+        it.erros.push(outro ? 'Produto ' + cod + ' é de outro fornecedor' : 'Produto ' + cod + ' não encontrado');
+      }
+    }
+    if (!sku) it.erros.push('SKU do cliente em branco');
+    if (_SKU_IMP_FORMAS.indexOf(forma) === -1) it.erros.push('Forma de compra inválida (use CX, UND, PC ou KG)');
+    if (f && rd && p) {
+      it.f = f; it.rd = rd; it.p = p;
+      if (_skuImpInativo(p)) it.avisos.push('Produto inativo');
+    }
+    linhas.push(it);
+  }
+  // situação (novo / atualiza / igual) e avisos de SKU igual em outro produto
+  var grupos = {};
+  linhas.forEach(function (it) {
+    if (!it.f || !it.rd || !it.p || it.erros.length) { if (it.erros.length) it.status = 'erro'; return; }
+    var chv = it.f.id + '|' + it.rd.id + '|' + it.p.id;
+    if (visto[chv]) { it.erros.push('Produto repetido na planilha (linha ' + visto[chv] + ')'); it.status = 'erro'; return; }
+    visto[chv] = it.linha;
+    var ex =skusAtuais.filter(function (x) { return x.tipo === 'rede' && String(x.fornId) === String(it.f.id) && String(x.cliId) === String(it.rd.id) && String(x.prodId) === String(it.p.id); })[0];
+    if (ex) { it.existente = ex; it.status = (String(ex.sku || '') === it.sku && String(ex.forma || '') === it.forma) ? 'igual' : 'atualiza'; }
+    else it.status = 'novo';
+    var k = it.f.id + '|' + it.rd.id + '|' + it.sku;
+    (skuPorGrupo[k] = skuPorGrupo[k] || []).push(it);
+    var gk = it.f.id + '|' + it.rd.id;
+    (grupos[gk] = grupos[gk] || { f: it.f, rd: it.rd, codigos: [] }).codigos.push(it.codForn);
+  });
+  linhas.forEach(function (it) {
+    if (!it.status || it.status === 'erro') return;
+    var k = it.f.id + '|' + it.rd.id + '|' + it.sku;
+    var naPlan = (skuPorGrupo[k] || []).length > 1;
+    var noBanco = skusAtuais.some(function (x) { return x.tipo === 'rede' && String(x.fornId) === String(it.f.id) && String(x.cliId) === String(it.rd.id) && String(x.sku) === it.sku && String(x.prodId) !== String(it.p.id); });
+    if (naPlan || noBanco) it.avisos.push('SKU igual ao de outro produto');
+  });
+  // código do fornecedor na rede (um por rede + fábrica)
+  var listaG = [];
+  Object.keys(grupos).forEach(function (k) {
+    var gr = grupos[k], distintos = [];
+    gr.codigos.forEach(function (c) { if (c && distintos.indexOf(c) === -1) distintos.push(c); });
+    if (!distintos.length) return;
+    var atual = ''; try { atual = _cfcCodigo(gr.f.id, 'rede', gr.rd.id); } catch (e) {}
+    listaG.push({ f: gr.f, rd: gr.rd, codigo: distintos[0], atual: atual, conflito: distintos.length > 1 });
+  });
+  _skuImp.linhas = linhas; _skuImp.grupos = listaG; _skuImp.erroArq = '';
+}
+function skuImpFiltro(f) { _skuImp.filtro = f; _skuImpRender(); }
+function _skuImpRender() {
+  var box = document.getElementById('sku-imp-corpo'); if (!box) return;
+  var L = _skuImp.linhas, n = function (fn) { return L.filter(fn).length; };
+  var btnGrav = document.getElementById('sku-imp-gravar');
+  if (_skuImp.erroArq) {
+    box.innerHTML = '<div style="padding:12px;border-radius:8px;background:#fef2f2;color:#b91c1c;font-size:12px;margin-bottom:12px">' + _skuImpEsc(_skuImp.erroArq) + '</div>' + _skuImpEscolherHtml();
+    if (btnGrav) btnGrav.style.display = 'none'; return;
+  }
+  if (!L.length) { box.innerHTML = _skuImpEscolherHtml(); if (btnGrav) btnGrav.style.display = 'none'; return; }
+  var novos = n(function (x) { return x.status === 'novo'; }), atual = n(function (x) { return x.status === 'atualiza'; }), igual = n(function (x) { return x.status === 'igual'; }), erro = n(function (x) { return x.status === 'erro'; }), avis = n(function (x) { return x.avisos.length > 0 && x.status !== 'erro'; });
+  var card = function (rot, v, bg, cor) { return '<div style="background:' + bg + ';border-radius:8px;padding:8px 12px;flex:1;min-width:100px"><div style="font-size:10.5px;color:' + cor + '">' + rot + '</div><div style="font-size:20px;font-weight:700;color:' + cor + '">' + v + '</div></div>'; };
+  var h = '<div style="font-size:11px;color:#64748b;margin-bottom:8px">Arquivo: <b>' + _skuImpEsc(_skuImp.arquivo) + '</b> &nbsp;·&nbsp; <a href="#" onclick="document.getElementById(\'sku-imp-file\').click();return false" style="color:#2563eb">escolher outro</a></div>';
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">' + card('Linhas lidas', L.length, '#f1f5f9', '#334155') + card('Novos', novos, '#ecfdf5', '#047857') + card('Vão atualizar', atual, '#eff6ff', '#1d4ed8') + card('Sem mudança', igual, '#f8fafc', '#64748b') + card('Com erro', erro, '#fef2f2', '#b91c1c') + card('Avisos', avis, '#fffbeb', '#b45309') + '</div>';
+  var gAt = _skuImp.grupos.filter(function (g) { return g.codigo !== g.atual; });
+  if (gAt.length) h += '<div style="font-size:11px;color:#475569;background:#f8fafc;border-radius:8px;padding:8px 12px;margin-bottom:10px"><b>Código do fornecedor na rede</b> que será gravado/atualizado: ' + gAt.map(function (g) { return _skuImpEsc(_cpSemColchetes(g.f.nome_fantasia || g.f.razao_social || '')) + ' em ' + _skuImpEsc(g.rd.nome) + ': ' + _skuImpEsc(g.codigo) + (g.atual ? ' (era ' + _skuImpEsc(g.atual) + ')' : '') + (g.conflito ? ' <span style="color:#b45309">(a planilha tem códigos diferentes; usado o da primeira linha)</span>' : ''); }).join('; ') + '</div>';
+  var chip = function (k, rot) { var on = _skuImp.filtro === k; return '<button onclick="skuImpFiltro(\'' + k + '\')" style="border:1px solid ' + (on ? '#272A4A' : '#cbd5e1') + ';background:' + (on ? '#272A4A' : '#fff') + ';color:' + (on ? '#fff' : '#475569') + ';border-radius:14px;padding:3px 11px;font-size:11px;cursor:pointer">' + rot + '</button>'; };
+  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">' + chip('todas', 'Todas') + chip('erro', 'Com erro') + chip('aviso', 'Avisos') + chip('novo', 'Novos') + chip('atualiza', 'Vão atualizar') + chip('igual', 'Sem mudança') + '</div>';
+  var vis = L.filter(function (x) { var f = _skuImp.filtro; return f === 'todas' || (f === 'aviso' ? (x.avisos.length > 0 && x.status !== 'erro') : x.status === f); });
+  var LIM = 400;
+  h += '<div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden"><div style="display:grid;grid-template-columns:44px 1.1fr .9fr 2fr 1fr 50px 1.7fr;gap:6px;padding:7px 10px;background:#f8fafc;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase"><span>Linha</span><span>Fábrica</span><span>Rede</span><span>Produto</span><span>SKU</span><span>Forma</span><span>Situação</span></div>';
+  h += vis.slice(0, LIM).map(function (x) {
+    var st = { novo: ['Novo', '#047857'], atualiza: ['Vai atualizar' + (x.existente ? ' (era ' + _skuImpEsc(x.existente.sku) + ' ' + _skuImpEsc(x.existente.forma || '') + ')' : ''), '#1d4ed8'], igual: ['Sem mudança', '#64748b'], erro: ['Erro', '#b91c1c'] }[x.status] || ['', '#64748b'];
+    var det = x.erros.length ? '<div style="color:#b91c1c;font-size:10.5px">' + x.erros.map(_skuImpEsc).join('; ') + '</div>' : '';
+    if (x.avisos.length) det += '<div style="color:#b45309;font-size:10.5px">' + x.avisos.map(_skuImpEsc).join('; ') + '</div>';
+    return '<div style="display:grid;grid-template-columns:44px 1.1fr .9fr 2fr 1fr 50px 1.7fr;gap:6px;padding:6px 10px;border-top:1px solid #f1f5f9;font-size:11.5px;align-items:start"><span style="color:#94a3b8">' + x.linha + '</span><span>' + _skuImpEsc(x.nForn) + '</span><span>' + _skuImpEsc(x.nRede) + '</span><span>' + _skuImpEsc(x.cod) + (x.prodNome ? ' · ' + _skuImpEsc(x.prodNome) : '') + '</span><span style="font-family:monospace">' + _skuImpEsc(x.sku) + '</span><span>' + _skuImpEsc(x.forma) + '</span><div><div style="color:' + st[1] + ';font-weight:600">' + st[0] + '</div>' + det + '</div></div>';
+  }).join('');
+  if (!vis.length) h += '<div style="padding:16px;text-align:center;color:#94a3b8;font-size:12px">Nenhuma linha neste filtro.</div>';
+  h += '</div>';
+  if (vis.length > LIM) h += '<div style="font-size:11px;color:#94a3b8;margin-top:6px">Mostrando as primeiras ' + LIM + ' de ' + vis.length + ' linhas deste filtro (todas são gravadas).</div>';
+  box.innerHTML = h;
+  var pronto = novos + atual;
+  if (btnGrav) {
+    btnGrav.style.display = '';
+    btnGrav.disabled = !pronto && !_skuImp.grupos.some(function (g) { return g.codigo !== g.atual; });
+    btnGrav.textContent = pronto ? ('Gravar ' + pronto + ' SKU' + (pronto > 1 ? 's' : '') + (erro ? ' (' + erro + ' com erro ficam de fora)' : '')) : 'Nada novo para gravar';
+    btnGrav.style.opacity = btnGrav.disabled ? '.5' : '1';
+  }
+}
+function _skuImpEscolherHtml() {
+  return '<label for="sku-imp-file" style="display:block;border:2px dashed #cbd5e1;border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;color:#64748b;font-size:12.5px"><i class="ti ti-upload" style="font-size:22px;display:block;margin-bottom:6px"></i>Clique para escolher a planilha (.xlsx)<div style="font-size:11px;color:#94a3b8;margin-top:4px">Use a planilha modelo, aba "SKUs". Nada é gravado antes da conferência.</div></label>';
+}
+function skuImpGravar() {
+  if (_skuImp.gravando) return;
+  var L = _skuImp.linhas.filter(function (x) { return x.status === 'novo' || x.status === 'atualiza'; });
+  var gAt = _skuImp.grupos.filter(function (g) { return g.codigo !== g.atual; });
+  if (!L.length && !gAt.length) return;
+  var erro = _skuImp.linhas.filter(function (x) { return x.status === 'erro'; }).length;
+  if (!confirm('Gravar ' + L.filter(function (x) { return x.status === 'novo'; }).length + ' SKU(s) novo(s) e atualizar ' + L.filter(function (x) { return x.status === 'atualiza'; }).length + '?' + (erro ? '\n\n' + erro + ' linha(s) com erro NÃO serão gravadas.' : ''))) return;
+  _skuImp.gravando = true;
+  var btn = document.getElementById('sku-imp-gravar'); if (btn) { btn.disabled = true; btn.textContent = 'Gravando...'; }
+  var dados = getSkuClientes().slice(), agora = new Date().toISOString(), antes = [], criados = 0, atualizados = 0;
+  L.forEach(function (it, i) {
+    var fNome = _cpSemColchetes(it.f.nome_fantasia || it.f.razao_social || '');
+    if (it.status === 'atualiza' && it.existente) {
+      var idx = dados.findIndex(function (x) { return x.id === it.existente.id; });
+      if (idx < 0) return;
+      var old = dados[idx]; antes.push(JSON.parse(JSON.stringify(old)));
+      var novo = Object.assign({}, old, { sku: it.sku, forma: it.forma, prodNome: it.prodNome || old.prodNome, fornNome: fNome, cliNome: it.rd.nome });
+      Object.assign(novo, _appMontarAutoria(old, _appDiffGenerico(old, novo)));
+      dados[idx] = novo; atualizados++;
+    } else {
+      var reg = { id: 'sku_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 6), tipo: 'rede', fornId: it.f.id, fornNome: fNome, cliId: it.rd.id, cliNome: it.rd.nome, prodId: it.p.id, prodNome: it.prodNome, sku: it.sku, forma: it.forma, dtCadastro: agora };
+      Object.assign(reg, _appMontarAutoria(null, []));
+      dados.push(reg); criados++;
+    }
+  });
+  var fim = function (ok, msgExtra) {
+    _skuImp.gravando = false;
+    var box = document.getElementById('sku-imp-corpo');
+    if (!ok) { if (btn) { btn.disabled = false; } _skuImpRender(); return; }
+    if (antes.length) {
+      try {
+        var blob = new Blob([JSON.stringify(antes, null, 2)], { type: 'application/json' }), a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'skus_antes_da_importacao_' + agora.slice(0, 10) + '.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      } catch (e) {}
+    }
+    _skuImp.linhas = []; _skuImp.grupos = [];
+    if (box) box.innerHTML = '<div style="padding:14px;border-radius:8px;background:#ecfdf5;color:#047857;font-size:13px;line-height:1.6"><b>Importação concluída.</b><br>' + criados + ' SKU(s) novo(s) gravado(s).<br>' + atualizados + ' SKU(s) atualizado(s).' + (antes.length ? '<br><span style="font-size:11.5px;color:#065f46">Baixei um arquivo com os valores de antes dos SKUs atualizados (para o caso de precisar voltar).</span>' : '') + (msgExtra || '') + '</div>';
+    var g = document.getElementById('sku-imp-gravar'); if (g) g.style.display = 'none';
+    try { renderSkuList(); } catch (e) {}
+  };
+  var gravaCods = function () {
+    var seq = Promise.resolve(true);
+    gAt.forEach(function (g) { seq = seq.then(function (okAnt) { return _cfcSalvar(g.f.id, _cpSemColchetes(g.f.nome_fantasia || g.f.razao_social || ''), 'rede', g.rd.id, g.rd.nome, g.codigo).then(function (ok) { return okAnt && ok; }); }); });
+    return seq;
+  };
+  var r;
+  try { r = (typeof firebaseConfigurado !== 'undefined' && firebaseConfigurado) ? _fsSet('sku_clientes', dados) : (setSkuClientes(dados), true); } catch (e) { r = false; }
+  Promise.resolve(r).then(function (ok) {
+    if (ok === false) { _skuImp.gravando = false; _skuImpRender(); return; }
+    return gravaCods().then(function (okC) { fim(true, okC ? '' : '<br><span style="color:#b45309">Atenção: os SKUs foram gravados, mas o código do fornecedor na rede não. Confira na tela do SKU.</span>'); });
+  });
 }
 
 function excluirSkuCliente(id) {
