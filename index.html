@@ -20254,38 +20254,57 @@ function renderSkuList() {
       if (busca || filtForma) return;
       if (!gruposMap[c.fornId + '|' + c.cliId]) grupos.push({ fornId: c.fornId, fornNome: c.fornNome, cliId: c.cliId, cliNome: c.cliNome, count: 0 });
     });
-    grupos.sort(function(a,b){ return (a.cliNome||'').localeCompare(b.cliNome||''); });
+    grupos.sort(function(a,b){ return (a.cliNome||'').localeCompare(b.cliNome||'') || _cpSemColchetes(a.fornNome||'').localeCompare(_cpSemColchetes(b.fornNome||'')); });
+    // Rede -> Fornecedor -> Produtos: junta os fornecedores dentro de cada rede
+    var redesMap = {}, redesLista = [];
+    grupos.forEach(function (g) {
+      if (!redesMap[g.cliId]) { redesMap[g.cliId] = { cliId: g.cliId, cliNome: g.cliNome, forns: [], count: 0 }; redesLista.push(redesMap[g.cliId]); }
+      redesMap[g.cliId].forns.push(g); redesMap[g.cliId].count += g.count;
+    });
 
-    var totalG = grupos.length;
+    var totalG = redesLista.length;
     var _PERg = 20;
     var pagesG = Math.max(1, Math.ceil(totalG / _PERg));
     if (_skuPage >= pagesG) _skuPage = pagesG - 1;
-    var pagG = grupos.slice(_skuPage * _PERg, (_skuPage + 1) * _PERg);
+    var pagG = redesLista.slice(_skuPage * _PERg, (_skuPage + 1) * _PERg);
 
     var kpiG = document.getElementById('sku-kpi-total');
     if (kpiG) kpiG.textContent = fil.length;
 
-    if (header) header.innerHTML = '<span style="width:24px;flex-shrink:0"></span><span style="flex:1">Fornecedor</span><span style="flex:1">Rede</span><span style="width:110px;flex-shrink:0;text-align:center">Cód. fornecedor</span><span style="width:90px;flex-shrink:0;text-align:center">SKUs</span><span style="width:80px;flex-shrink:0;text-align:center">Opções</span>';
+    if (header) header.innerHTML = '<span style="width:24px;flex-shrink:0"></span><span style="flex:1">Rede</span><span style="width:110px;flex-shrink:0;text-align:center">Fornecedores</span><span style="width:90px;flex-shrink:0;text-align:center">SKUs</span><span style="width:80px;flex-shrink:0;text-align:center"></span>';
 
     if (pagG.length === 0) {
       tbody.innerHTML = '<div style="padding:32px;text-align:center;color:#94a3b8;font-size:13px">Nenhuma rede com SKU cadastrado</div>';
     } else {
       var rowsG = '';
       for (var ig = 0; ig < pagG.length; ig++) {
-        var g = pagG[ig];
+        var rd = pagG[ig];
         var bgG = ig % 2 === 0 ? '#fff' : '#fafbff';
-        var gKey = g.fornId + '|' + g.cliId, gAberto = !!_skuAbertos[gKey];
-        rowsG += '<div class="mc-row" onclick="skuToggleRede(\'' + gKey + '\')" style="display:flex;padding:10px 14px;background:'+(gAberto ? '#eff6ff' : bgG)+';border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px;gap:4px;cursor:pointer">'
-          + '<span class="mc-meta" style="width:24px;flex-shrink:0;color:#64748b;font-size:15px"><i class="ti ' + (gAberto ? 'ti-chevron-down' : 'ti-chevron-right') + '"></i></span>'
-          + '<span class="mc-secondary" style="flex:1;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(g.fornNome||''))+'</span>'
-          + '<span class="mc-primary" style="flex:1;color:#334155;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(g.cliNome||'')+'</span>'
-          + '<span class="mc-meta" style="width:110px;flex-shrink:0;text-align:center;font-family:monospace;font-weight:700;color:#334155">'+_skuEsc(_cfcCodigo(g.fornId,'rede',g.cliId) || '—')+'</span>'
-          + '<span class="mc-meta" style="width:90px;flex-shrink:0;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:5px;font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1">'+g.count+' SKU'+(g.count!==1?'s':'')+'</span></span>'
-          + '<span class="mc-actions" style="width:80px;flex-shrink:0;display:flex;gap:6px;justify-content:center">'
-          + '<button onclick="event.stopPropagation();skuNovoNaRede(\''+g.fornId+'\',\''+g.cliId+'\')" style="width:26px;height:26px;border-radius:6px;border:1px solid #DE7926;background:#fff;cursor:pointer;color:#DE7926;font-size:13px" title="Cadastrar SKU nesta rede"><i class="ti ti-plus"></i></button>'
-          + '<button onclick="event.stopPropagation();skuExcluirRede(\''+g.fornId+'\',\''+g.cliId+'\')" style="width:26px;height:26px;border-radius:6px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;color:#dc2626;font-size:13px" title="Excluir"><i class="ti ti-trash"></i></button>'
-          + '</span></div>';
-        if (gAberto) rowsG += _skuDetalheHtml(g, fil.filter(function (r) { return r.fornId + '|' + r.cliId === gKey; }));
+        var rKey = 'R|' + rd.cliId, rAberto = !!_skuAbertos[rKey];
+        rowsG += '<div class="mc-row" onclick="skuToggleRede(\'' + rKey + '\')" style="display:flex;padding:10px 14px;background:'+(rAberto ? '#eff6ff' : bgG)+';border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px;gap:4px;cursor:pointer">'
+          + '<span class="mc-meta" style="width:24px;flex-shrink:0;color:#64748b;font-size:15px"><i class="ti ' + (rAberto ? 'ti-chevron-down' : 'ti-chevron-right') + '"></i></span>'
+          + '<span class="mc-primary" style="flex:1;color:#334155;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(rd.cliNome||'')+'</span>'
+          + '<span class="mc-meta" style="width:110px;flex-shrink:0;text-align:center;color:#64748b">'+rd.forns.length+'</span>'
+          + '<span class="mc-meta" style="width:90px;flex-shrink:0;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:5px;font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1">'+rd.count+' SKU'+(rd.count!==1?'s':'')+'</span></span>'
+          + '<span style="width:80px;flex-shrink:0"></span></div>';
+        if (rAberto) {
+          rowsG += '<div style="padding:8px 14px 12px 38px;background:#f8fafc;border-bottom:1px solid #e2e8f0"><div style="border:1px solid #e2e8f0;border-left:3px solid #DE7926;background:#fff;overflow:hidden">'
+            + '<div style="display:flex;align-items:center;gap:4px;padding:7px 12px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em"><span style="width:24px;flex-shrink:0"></span><span style="flex:1">Fornecedor</span><span style="width:110px;flex-shrink:0;text-align:center">Cód. fornecedor</span><span style="width:90px;flex-shrink:0;text-align:center">SKUs</span><span style="width:80px;flex-shrink:0;text-align:center">Opções</span></div>';
+          rd.forns.forEach(function (g) {
+            var gKey = g.fornId + '|' + g.cliId, gAberto = !!_skuAbertos[gKey];
+            rowsG += '<div class="mc-row" onclick="skuToggleRede(\'' + gKey + '\')" style="display:flex;padding:9px 12px;background:'+(gAberto ? '#eff6ff' : '#fff')+';border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px;gap:4px;cursor:pointer">'
+              + '<span class="mc-meta" style="width:24px;flex-shrink:0;color:#64748b;font-size:14px"><i class="ti ' + (gAberto ? 'ti-chevron-down' : 'ti-chevron-right') + '"></i></span>'
+              + '<span class="mc-primary" style="flex:1;color:#334155;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_skuEsc(_cpSemColchetes(g.fornNome||''))+'</span>'
+              + '<span class="mc-meta" style="width:110px;flex-shrink:0;text-align:center;font-family:monospace;font-weight:700;color:#334155">'+_skuEsc(_cfcCodigo(g.fornId,'rede',g.cliId) || '—')+'</span>'
+              + '<span class="mc-meta" style="width:90px;flex-shrink:0;text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:5px;font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1">'+g.count+' SKU'+(g.count!==1?'s':'')+'</span></span>'
+              + '<span class="mc-actions" style="width:80px;flex-shrink:0;display:flex;gap:6px;justify-content:center">'
+              + '<button onclick="event.stopPropagation();skuNovoNaRede(\''+g.fornId+'\',\''+g.cliId+'\')" style="width:26px;height:26px;border-radius:6px;border:1px solid #DE7926;background:#fff;cursor:pointer;color:#DE7926;font-size:13px" title="Cadastrar SKU nesta rede"><i class="ti ti-plus"></i></button>'
+              + '<button onclick="event.stopPropagation();skuExcluirRede(\''+g.fornId+'\',\''+g.cliId+'\')" style="width:26px;height:26px;border-radius:6px;border:1px solid #fecaca;background:#fef2f2;cursor:pointer;color:#dc2626;font-size:13px" title="Excluir"><i class="ti ti-trash"></i></button>'
+              + '</span></div>';
+            if (gAberto) rowsG += _skuDetalheHtml(g, fil.filter(function (r) { return r.fornId + '|' + r.cliId === gKey; }));
+          });
+          rowsG += '</div></div>';
+        }
       }
       tbody.innerHTML = rowsG;
     }
