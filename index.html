@@ -24053,6 +24053,9 @@ function pedProximoLancamento() {
 function openPedidoForm(params) {
   params = params || {};
   _pedItens = (params.itens || []).slice();
+  // limpa a sobra das buscas de Cliente/Produto do pedido anterior
+  _pedCliItems = []; _pedProdItems = []; _pedCliHi = -1; _pedProdHi = -1;
+  ['ped-cli-drop', 'ped-item-prod-drop'].forEach(function (id) { var d = document.getElementById(id); if (d) { d.style.display = 'none'; d.innerHTML = ''; } });
 
   document.getElementById('ped-edit-id').value = params.id || '';
   document.getElementById('ped-header-title').textContent = params.id ? 'Editar Pedido' : 'Novo Pedido';
@@ -26431,8 +26434,11 @@ function _pedCliKey(e) {
     return;
   }
   if (e.key!=='Enter' && e.key!=='Tab') return;
-  if (_pedCliHi >= 0 && _pedCliItems[_pedCliHi] && e.key === 'Enter') { _pedCliSel(_pedCliHi); }
-  else if (_pedCliItems.length===1) { _pedCliSel(0); }
+  // so escolhe algo se a lista estiver ABERTA na tela (nao usa sobra de busca anterior)
+  var _dvCli = document.getElementById('ped-cli-drop');
+  var _listaCliAberta = !!(_dvCli && _dvCli.style.display !== 'none' && _dvCli.querySelector('.ped-cli-opt'));
+  if (_listaCliAberta && _pedCliHi >= 0 && _pedCliItems[_pedCliHi] && e.key === 'Enter') { _pedCliSel(_pedCliHi); }
+  else if (_listaCliAberta && _pedCliItems.length===1) { _pedCliSel(0); }
   if (e.key==='Enter') {
     e.preventDefault();
     if (document.getElementById('ped-cli-id').value) _pedEnterAvanca(e, 'ped-num-cliente');
@@ -26590,8 +26596,10 @@ function _pedProdKey(e) {
     return;
   }
   if (e.key!=='Enter' && e.key!=='Tab') return;
-  if (_pedProdHi >= 0 && _pedProdItems[_pedProdHi] && _pedProdOpts().length && e.key === 'Enter') { _pedProdSel(_pedProdHi); }
-  else if (_pedProdItems.length===1) { _pedProdSel(0); }
+  // so escolhe algo se a lista estiver ABERTA na tela (nao usa sobra de busca anterior)
+  var _listaProdAberta = _pedProdOpts().length > 0;
+  if (_listaProdAberta && _pedProdHi >= 0 && _pedProdItems[_pedProdHi] && e.key === 'Enter') { _pedProdSel(_pedProdHi); }
+  else if (_listaProdAberta && _pedProdItems.length===1) { _pedProdSel(0); }
   if (e.key==='Enter') {
     e.preventDefault();
     if (document.getElementById('ped-item-prod-id').value) _pedEnterAvanca(e, 'ped-item-preco');
