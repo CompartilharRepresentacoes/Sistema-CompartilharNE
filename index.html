@@ -22904,6 +22904,12 @@ function _pedParsePedidoTextoSendas(paginasItens) {
     var cnpjs = _pedExtrairCnpjsPaginaSendas(linhas);
     var itensPagina = _pedExtrairItensPaginaSendas(linhas);
     if (!cnpjs.fornecedorCnpj && !cnpjs.clienteCnpj && !itensPagina.length) return; // pagina sem conteudo reconhecivel (ex.: capa)
+    // Pagina da MESMA loja logo apos a anterior (ex.: pagina final so com o cabecalho, ou continuacao dos itens): nao e outro pedido
+    var ant = blocos.length ? blocos[blocos.length - 1] : null;
+    if (ant && cnpjs.clienteCnpj && ant.localEntregaCnpj === cnpjs.clienteCnpj && ant.fornecedorCnpj === cnpjs.fornecedorCnpj) {
+      itensPagina.forEach(function (it) { ant.itens.push(it); });
+      return;
+    }
     blocos.push({ numero: numero, fornecedorCnpj: cnpjs.fornecedorCnpj, localEntregaCnpj: cnpjs.clienteCnpj, itens: itensPagina });
   });
   return blocos;
