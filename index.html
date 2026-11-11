@@ -38628,6 +38628,65 @@ function _drRedeMaeDoGrupo(g) {
   return null;
 }
 
+// ── Cliente/Rede SEM SKU cadastrado: "produtos cadastrados" = o que comprou nos 6 meses antes do
+// inicio do periodo ate hoje (os cards comprados/valor/kg continuam contando so o periodo informado).
+function _drSomarMeses(iso, n) {
+  var p = String(iso).split('-'); var y = +p[0], m = +p[1] - 1 + n, d = +p[2];
+  y += Math.floor(m / 12); m = ((m % 12) + 12) % 12;
+  var dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); if (d > dim) d = dim;
+  return y + '-' + ('0' + (m + 1)).slice(-2) + '-' + ('0' + d).slice(-2);
+}
+function _drHojeIso() {
+  var h = new Date();
+  return h.getFullYear() + '-' + ('0' + (h.getMonth() + 1)).slice(-2) + '-' + ('0' + h.getDate()).slice(-2);
+}
+function _drCadastroPorCompras(fornId, clienteIds, dataDe, produtosMap) {
+  var ini = dataDe ? _drSomarMeses(dataDe, -6) : '';
+  var fim = _drHojeIso();
+  var idsSet = {}; (clienteIds || []).forEach(function (id) { idsSet[String(id)] = true; });
+  var valorPorProd = {};
+  getPedidos().forEach(function (p) {
+    if (String(p.fornecedorId) !== String(fornId)) return;
+    if (!idsSet[String(p.clienteId)]) return;
+    if (p.status === 'Bonificado') return;
+    (p.faturas || []).forEach(function (fat) {
+      if (fat.status === 'Cancelado' || _nfRemessa(fat)) return;
+      if (ini && fat.data < ini) return;
+      if (fat.data > fim) return;
+      (fat.itens || []).forEach(function (it) {
+        valorPorProd[it.prodId] = (valorPorProd[it.prodId] || 0) + (Number(it.qtd) || 0) * (Number(it.precoFat) || 0);
+      });
+    });
+  });
+  var lista = [];
+  Object.keys(valorPorProd).forEach(function (pid) {
+    if (!(valorPorProd[pid] > 0)) return;
+    var prod = produtosMap[pid]; if (!prod) return;
+    lista.push({ prodId: prod.id, prod: prod, sku: '', forma: String(prod.unidade || '').trim().toUpperCase(), semSku: true });
+  });
+  lista.sort(function (a, b) { return String(a.prod.codigo || '').localeCompare(String(b.prod.codigo || ''), 'pt-BR', { numeric: true }); });
+  return lista;
+}
+// Pedidos de anos antigos nao ficam na memoria: quando precisa da janela de 6 meses, carrega o(s) ano(s) que faltam.
+function _drGarantirPedidos(dataDe) {
+  try {
+    if (!dataDe || typeof _fsCarregarPedidosAno !== 'function' || typeof firebaseConfigurado === 'undefined' || !firebaseConfigurado) return Promise.resolve(true);
+    var anoIni = parseInt(_drSomarMeses(dataDe, -6).slice(0, 4), 10), anoCorte = parseInt(_fsPedidosCorte, 10);
+    var ps = []; for (var a = anoIni; a < anoCorte; a++) ps.push(_fsCarregarPedidosAno(a));
+    return ps.length ? Promise.all(ps) : Promise.resolve(true);
+  } catch (err) { return Promise.resolve(true); }
+}
+function _drGruposComJanela(fornIds, selecoes, dataDe, dataAte, cb) {
+  var grupos = _drGerarGruposMultiForn(fornIds, selecoes, dataDe, dataAte);
+  if (!grupos.some(function (g) { return g.semSku; })) return cb(grupos);
+  var msg = document.getElementById('dr-msg');
+  if (msg) { msg.style.color = '#64748b'; msg.textContent = 'Carregando pedidos antigos...'; }
+  _drGarantirPedidos(dataDe).then(function () {
+    if (msg) msg.textContent = '';
+    cb(_drGerarGruposMultiForn(fornIds, selecoes, dataDe, dataAte));
+  });
+}
+
 function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
   _drPesoMapCache = null;
   var produtosMap = {}; getProdutos().forEach(function(p){ produtosMap[p.id] = p; });
@@ -38646,6 +38705,8 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       var idsCadastro = [String(sel.id)].concat(lojas.map(function(l){ return String(l.id); }));
       var cadastro = _drCadastroPara(skus, produtosMap, idsCadastro);
       var clienteIdsTodos = clientesDaRede.map(function(c){ return c.id; });
+      var semSkuRede = cadastro.length === 0;
+      if (semSkuRede) cadastro = _drCadastroPorCompras(fornId, clienteIdsTodos, dataDe, produtosMap);
       _drEnriquecerItens(cadastro, fornId, clienteIdsTodos);
 
       var produtosCalc = cadastro.map(function(item){
@@ -38682,7 +38743,7 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       var kgTotalRede = comVenda.reduce(function(acc, p){ return acc + p.kg; }, 0);
 
       grupos.push({
-        tipo: 'rede', nome: rede.nome || '', id: sel.id,
+        tipo: 'rede', nome: rede.nome || '', id: sel.id, semSku: semSkuRede,
         estados: Object.keys(estadosSet).sort().join(' / '),
         cadastrados: cadastro.length, comprados: comVenda.length, semVenda: semVenda.length,
         positivacao: cadastro.length ? (comVenda.length / cadastro.length * 100) : 0,
@@ -38702,6 +38763,8 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       if (redeMae) idsCadastroSub.push(String(redeMae.id));
       var cadastroSub = _drCadastroPara(skus, produtosMap, idsCadastroSub);
       var clienteIdsSub = clientesDaSub.map(function(c){ return c.id; });
+      var semSkuSub = cadastroSub.length === 0;
+      if (semSkuSub) cadastroSub = _drCadastroPorCompras(fornId, clienteIdsSub, dataDe, produtosMap);
       _drEnriquecerItens(cadastroSub, fornId, clienteIdsSub);
       var produtosCalcSub = cadastroSub.map(function(item){
         var r = _drValorQtdProduto(fornId, item.prodId, clienteIdsSub, dataDe, dataAte);
@@ -38730,7 +38793,7 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       var estadosSetSub = {};
       clientesDaSub.forEach(function(c){ var uf = c.ent_estado || c.estado; if (uf) estadosSetSub[uf] = true; });
       grupos.push({
-        tipo: 'subrede', nome: subrede.nome || '', id: sel.id,
+        tipo: 'subrede', nome: subrede.nome || '', id: sel.id, semSku: semSkuSub,
         estados: Object.keys(estadosSetSub).sort().join(' / '),
         cadastrados: cadastroSub.length, comprados: comVendaSub.length, semVenda: semVendaSub.length,
         positivacao: cadastroSub.length ? (comVendaSub.length / cadastroSub.length * 100) : 0,
@@ -38743,6 +38806,8 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       var cli = clientesMap[sel.id];
       if (!cli) return;
       var cadastroCli = _drCadastroPara(skus, produtosMap, [String(sel.id)]);
+      var semSkuCli = cadastroCli.length === 0;
+      if (semSkuCli) cadastroCli = _drCadastroPorCompras(fornId, [sel.id], dataDe, produtosMap);
       _drEnriquecerItens(cadastroCli, fornId, [String(sel.id)]);
       var produtosCalcCli = cadastroCli.map(function(item){
         var r = _drValorQtdProduto(fornId, item.prodId, [sel.id], dataDe, dataAte);
@@ -38753,7 +38818,7 @@ function getDrGrupos(fornId, selecoes, dataDe, dataAte) {
       var valorCli = comVendaCli.reduce(function(acc, p){ return acc + p.valor; }, 0);
       var kgCli = comVendaCli.reduce(function(acc, p){ return acc + p.kg; }, 0);
       grupos.push({
-        tipo: 'cliente', nome: _cpSemColchetes(cli.nome_fantasia || cli.razao_social || ''), id: sel.id,
+        tipo: 'cliente', nome: _cpSemColchetes(cli.nome_fantasia || cli.razao_social || ''), id: sel.id, semSku: semSkuCli,
         estados: cli.ent_estado || cli.estado || '',
         cadastrados: cadastroCli.length, comprados: comVendaCli.length, semVenda: semVendaCli.length,
         positivacao: cadastroCli.length ? (comVendaCli.length / cadastroCli.length * 100) : 0,
@@ -39297,6 +39362,7 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
     pageSetup: { orientation: 'portrait', fitToWidth: 1, fitToHeight: 0 }
   });
   ws.columns = [{ width: 11 }, { width: 16 }, { width: 44 }, { width: 14 }, { width: 12 }, { width: 10 }, { width: 18 }];
+  if (g.semSku) ws.getColumn(2).hidden = true; // sem SKU: a coluna Cod. Rede some
   ws.pageSetup.margins = { left: 0.4, right: 0.4, top: 0.5, bottom: 0.5, header: 0.3, footer: 0.3 };
 
   var linhaTitulo = ws.addRow(['DADOS REPRESENTADAS']);
@@ -39453,12 +39519,13 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
   var rotuloProprio = (g.tipo === 'cliente') ? 'CLIENTE' : (g.tipo === 'subrede' ? 'SUB-REDE' : 'REDE');
   var redeMae = _drRedeMaeDoGrupo(g);
   var mostrarLinhaRede = (g.tipo === 'subrede' && !!redeMae);
+  var semSkuDoc = !!g.semSku, NCOL = semSkuDoc ? 6 : 7;
   function linhaProduto(item) {
     var qtd = (item.prod.quant !== undefined && item.prod.quant !== null && item.prod.quant !== '') ? String(item.prod.quant) : '\u2014';
     var peso = (item.pesoCxCalc !== undefined && item.pesoCxCalc !== '') ? String(item.pesoCxCalc).replace('.', ',') : '\u2014';
     return '<tr style="background:#ffffff">'
       + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.prod.codigo || '') + '</td>'
-      + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.sku || '') + '</td>'
+      + (semSkuDoc ? '' : '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.sku || '') + '</td>')
       + '<td style="padding:5px 8px;text-align:left;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(item.prod.nome || '') + '</td>'
       + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(qtd) + '</td>'
       + '<td style="padding:5px 8px;text-align:center;border:1px solid #000;font-size:11px;color:#000">' + _pedEsc(peso) + '</td>'
@@ -39470,10 +39537,10 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
   var semVenda = g.cadastroSemVenda || [];
   var linhasComVenda = comVenda.map(function (item) { return linhaProduto(item); }).join('');
   var bannerComVenda = comVenda.length
-    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#e2efda;color:#375623;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS COM VENDA (' + comVenda.length + ' itens)</td></tr>')
+    ? ('<tr><td colspan="' + NCOL + '" style="padding:6px 8px;background:#e2efda;color:#375623;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS COM VENDA (' + comVenda.length + ' itens)</td></tr>')
     : '';
   var bannerSemVenda = semVenda.length
-    ? ('<tr><td colspan="7" style="padding:6px 8px;background:#fcd5b4;color:#7f3f00;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS SEM VENDA (' + semVenda.length + ' itens)</td></tr>')
+    ? ('<tr><td colspan="' + NCOL + '" style="padding:6px 8px;background:#fcd5b4;color:#7f3f00;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS SEM VENDA (' + semVenda.length + ' itens)</td></tr>')
     : '';
   var linhasSemVenda = semVenda.map(function (item) { return linhaProduto(item); }).join('');
   var semNenhumProduto = !comVenda.length && !semVenda.length;
@@ -39498,7 +39565,7 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
         : ('<table style="width:100%;border-collapse:collapse;font-size:11.5px;border:2.5px solid #000">'
             + '<thead><tr style="background:#c5d9f1">'
               + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">C\u00d3D. FAB</th>'
-              + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">C\u00d3D. REDE</th>'
+              + (semSkuDoc ? '' : '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">C\u00d3D. REDE</th>')
               + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px;text-align:left">PRODUTOS</th>'
               + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">QTDE P/CX</th>'
               + '<th style="padding:6px 8px;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:1px solid #000;border-right:1px solid #000;color:#1F4E79;font-size:10.5px">PESO CX</th>'
@@ -39642,14 +39709,15 @@ function _drVisualizar() {
   if (!_drSelecoes.length) { msg.style.color = '#dc2626'; msg.textContent = 'Selecione ao menos uma Rede ou Cliente.'; return; }
   var dataDe = _entctrlParseDataBR(document.getElementById('dr-data-de').value);
   var dataAte = _entctrlParseDataBR(document.getElementById('dr-data-ate').value);
-  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoesEfetivas(), dataDe, dataAte);
-  if (!grupos.length) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhum dado encontrado com esses filtros.'; return; }
-  _drUltimosGrupos = grupos;
-  _drVisualizarGrupoIdx = 0;
-  msg.style.color = '#64748b'; msg.textContent = '';
-  var modal = document.getElementById('modal-dr-visualizar');
-  if (modal) modal.style.display = 'flex';
-  _drRenderVisualizar();
+  _drGruposComJanela(_drFornecedoresSelecionados, _drSelecoesEfetivas(), dataDe, dataAte, function (grupos) {
+    if (!grupos.length) { msg.style.color = '#dc2626'; msg.textContent = 'Nenhum dado encontrado com esses filtros.'; return; }
+    _drUltimosGrupos = grupos;
+    _drVisualizarGrupoIdx = 0;
+    msg.style.color = '#64748b'; msg.textContent = '';
+    var modal = document.getElementById('modal-dr-visualizar');
+    if (modal) modal.style.display = 'flex';
+    _drRenderVisualizar();
+  });
 }
 
 function _drGerar() {
@@ -39659,7 +39727,7 @@ function _drGerar() {
   var dataDe = _entctrlParseDataBR(document.getElementById('dr-data-de').value);
   var dataAte = _entctrlParseDataBR(document.getElementById('dr-data-ate').value);
 
-  var grupos = _drGerarGruposMultiForn(_drFornecedoresSelecionados, _drSelecoesEfetivas(), dataDe, dataAte);
+  _drGruposComJanela(_drFornecedoresSelecionados, _drSelecoesEfetivas(), dataDe, dataAte, function (grupos) {
   _drUltimosGrupos = grupos;
   _drExpandido = {};
 
@@ -39687,6 +39755,7 @@ function _drGerar() {
   }).catch(function (err) {
     msg.style.color = '#dc2626';
     msg.textContent = 'Erro ao gerar o Excel: ' + (err && err.message ? err.message : err);
+  });
   });
 }
 
