@@ -29559,6 +29559,10 @@ function _emlPreCarregar(ids) {
 }
 function _emlIdsXml(dados) {
   var cnp = _devNormCnpj, a = cnp(dados.emitCNPJ), b = cnp(dados.destCNPJ);
+  // NF de origem ja esta nos pedidos carregados (ano atual)? entao nao precisa baixar o historico (e o que deixava lento)
+  var fornX = getFornecedores().find(function (f) { var c = cnp(f.cnpj); return c && (c === a || c === b); }) || null;
+  var nfX = (dados.refNFe && dados.refNFe.length === 44) ? _emlSemZeros(dados.refNFe.substring(25, 34)) : _emlSemZeros(dados.nfOrigemTxt || '');
+  if (fornX && nfX && _emlDonosNf(fornX, nfX).length) return [];
   return getClientes().filter(function (c) { var x = cnp(c.cpf_cnpj); return x && (x === a || x === b); }).map(function (c) { return c.id; });
 }
 // NF de origem com mais de 6 meses
@@ -29913,7 +29917,12 @@ function _emlAnalisar() {
   if (/^\s*(<\?xml|<nfeProc|<NFe)/i.test(texto)) { ta.value = ''; _emlLerXmls([new File([texto], 'NFD-colada.xml', { type: 'text/xml' })]); return; }
   var lista = _emlParse(texto), forn = _emlFornDoTexto(texto);
   var ids = [];
-  if (forn) lista.forEach(function (d) { _emlCandidatos(forn, d.codCli).forEach(function (c) { ids.push(c.id); }); });
+  if (forn) lista.forEach(function (d) {
+    var cont = {}; d.itens.forEach(function (it) { cont[it.nfVenda] = (cont[it.nfVenda] || 0) + 1; });
+    var nfP = Object.keys(cont).sort(function (a, b) { return cont[b] - cont[a]; })[0] || '';
+    if (nfP && _emlDonosNf(forn, nfP).length) return; // NF ja esta na memoria: nao baixa o historico
+    _emlCandidatos(forn, d.codCli).forEach(function (c) { ids.push(c.id); });
+  });
   _emlPreCarregar(ids).then(function () { _emlAnalisarMontar(lista, forn, ta); });
 }
 function _emlAnalisarMontar(lista, forn, ta) {
