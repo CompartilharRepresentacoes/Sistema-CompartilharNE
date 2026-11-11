@@ -24123,6 +24123,9 @@ function duplicarPedido(id) {
   copia.lancamento = '';
   copia.data = new Date().toISOString().slice(0,10);
   copia.itens = (p.itens || []).map(function(it){ return Object.assign({}, it); });
+  // cliente inativo não vem no pedido clonado: o campo Cliente fica vazio para escolher outro
+  var cliOrig = getClientes().find(function(c){ return String(c.id) === String(p.clienteId); });
+  if (cliOrig && (cliOrig.ativo || 'Sim') === 'Não') { copia.clienteId = ''; copia.clienteNome = ''; }
   showPage('page-pedido-form', copia);
 }
 
@@ -26388,6 +26391,7 @@ function _pedCliFiltrar() {
   var _soNumCli = /^[\d.\-\/\s]+$/.test(q);
   var _semZerosCli = function (v) { return String(v || '').replace(/\D/g, '').replace(/^0+(?=.)/, ''); };
   _pedCliItems = getClientesVisiveis().filter(function(c){
+    if ((c.ativo || 'Sim') === 'Não') return false; // cliente inativo não aparece na busca do pedido
     var docDigits = (c.cpf_cnpj||'').replace(/\D/g, '');
     // nome fantasia ou razão social: acha o texto em qualquer parte (inclusive números, ex.: "298" -> "... Lj 298")
     var noNome = _cpNorm(c.nome_fantasia||'').includes(n) || _cpNorm(c.razao_social||'').includes(n);
