@@ -20263,7 +20263,7 @@ function renderSkuList() {
       if (!gruposMap[c.fornId + '|' + c.cliId]) grupos.push({ fornId: c.fornId, fornNome: c.fornNome, cliId: c.cliId, cliNome: c.cliNome, count: 0 });
     });
     grupos.sort(function(a,b){ return (a.cliNome||'').localeCompare(b.cliNome||'') || _cpSemColchetes(a.fornNome||'').localeCompare(_cpSemColchetes(b.fornNome||'')); });
-    // Rede -> Fornecedor -> Produtos: junta os fornecedores dentro de cada rede
+    // Lista de SKU em cascata (Rede -> Fornecedor -> Produtos): junta os fornecedores dentro de cada rede
     var redesMap = {}, redesLista = [];
     grupos.forEach(function (g) {
       if (!redesMap[g.cliId]) { redesMap[g.cliId] = { cliId: g.cliId, cliNome: g.cliNome, forns: [], count: 0 }; redesLista.push(redesMap[g.cliId]); }
