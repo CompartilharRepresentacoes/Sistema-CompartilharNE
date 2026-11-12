@@ -5794,7 +5794,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                 </div>
                 <div id="ped-itens-tbody"><div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">Nenhum item adicionado.</div></div>
               </div>
-              <div style="display:flex;justify-content:flex-end;padding-top:10px">
+              <div style="display:flex;justify-content:flex-end;padding-top:10px;margin-top:12px;border-top:2px solid #111">
                 <div style="font-size:13px;color:#475569;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:baseline;gap:6px 22px"><span class="so-comissao">Comissão prevista: <span id="ped-comissao-total" style="font-size:13px;font-weight:400;color:#1c2f66;margin-left:4px">R$ 0,00</span></span><span>Peso total: <span id="ped-peso-total" style="font-size:13px;font-weight:400;color:#1e293b;margin-left:4px">0,00 kg</span></span><span>Total do pedido: <span id="ped-total-geral" style="font-size:16px;font-weight:800;color:#272A4A;margin-left:6px">R$ 0,00</span></span></div>
               </div>
             </div>
@@ -29412,6 +29412,17 @@ function salvarPedido() {
   msg.textContent = '✔ Pedido salvo com sucesso!';
   setTimeout(function(){ msg.textContent=''; showPage('page-pedido-list'); }, 900);
 }
+
+// Qtd. e Desc. (%) do item: seta pra cima/baixo e rodinha do mouse nao mudam o valor
+(function () {
+  var ids = ['ped-item-qtd', 'ped-item-desc', 'ped-edit-item-qtd', 'ped-edit-item-desc'];
+  document.addEventListener('keydown', function (ev) {
+    if ((ev.key === 'ArrowUp' || ev.key === 'ArrowDown') && ev.target && ids.indexOf(ev.target.id) !== -1) ev.preventDefault();
+  }, true);
+  document.addEventListener('wheel', function (ev) {
+    if (ev.target && ids.indexOf(ev.target.id) !== -1 && document.activeElement === ev.target) ev.target.blur();
+  }, { capture: true, passive: true });
+})();
 
 // Atalho Ctrl+Enter: salva o pedido na tela de Novo Pedido (igual ao botao Salvar)
 document.addEventListener('keydown', function (e) {
