@@ -5790,7 +5790,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
               <div id="ped-item-msg" style="font-size:11px;color:#dc2626;margin-top:-6px;margin-bottom:6px"></div>
               <div style="border:1px solid #eef2f7;border-radius:10px;overflow:hidden">
                 <div class="ped-itens-header" style="display:grid;grid-template-columns:1fr 100px 90px 75px 55px 55px 95px 66px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
-                  <span>Produto</span><span>Medidas da CX</span><span>Preço</span><span class="so-comissao">Comissão</span><span>Desc.</span><span>Qtd.</span><span>Total</span><span></span>
+                  <span>Produto</span><span style="text-align:center">Medidas da CX</span><span>Preço</span><span class="so-comissao">Comissão</span><span>Desc.</span><span>Qtd.</span><span>Total</span><span></span>
                 </div>
                 <div id="ped-itens-tbody"><div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">Nenhum item adicionado.</div></div>
               </div>
@@ -29278,7 +29278,7 @@ function renderPedItens() {
     var qtdUn = (it.modoUnid==='cx' && it.qtdCaixas) ? 'CX' : (it.medida || '');
     return '<div class="ped-item-row" style="display:grid;grid-template-columns:1fr 100px 90px 75px 55px 55px 95px 66px;padding:5px 12px;align-items:center;border-bottom:1px solid #f8fafc;font-size:12.5px;'+(bloqueioItem?'background:#fffbfb':'')+'">'
       + '<div style="font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+_pedEsc(nomeComCodigo)+'">'+_pedEsc(nomeComCodigo)+tagBloqueado+'</div>'
-      + '<div style="color:#7c8798">'+((it.cx!==undefined && it.cx!=='' && it.medida) ? (_pedEsc(String(it.cx))+' '+_pedEsc(it.medida)) : '—')+'</div>'
+      + '<div style="color:#7c8798;text-align:center">'+((it.cx!==undefined && it.cx!=='' && it.medida) ? (_pedEsc(String(it.cx))+' '+_pedEsc(it.medida)) : '—')+'</div>'
       + '<div style="color:#64748b">'+_pedFmtMoeda(it.precoUnit)+'</div>'
       + (function(){ var _r = _comResolver(_comFornDe(_pedItensFornId), it.prodId, it.comissao, _pedItensCliId, null); _pedComTotal += (Number(it.valorTotal)||0) * _r.pct / 100; return '<div class="so-comissao" style="color:#64748b">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'</div>'; })()
       + '<div style="color:#64748b">'+(it.desconto||0)+'%</div>'
