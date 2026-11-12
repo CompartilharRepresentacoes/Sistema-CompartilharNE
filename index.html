@@ -29249,7 +29249,7 @@ function _pedToggleDadosPedido() {
 function _pedUltProdAtualizar() {
   var el = document.getElementById('ped-ult-prod'); if (!el) return;
   var u = _pedItens && _pedItens.length ? _pedItens[_pedItens.length - 1] : null;
-  el.textContent = u ? ('Último lançado: ' + (u.prodCodigo ? u.prodCodigo + ' · ' : '') + (u.prodNome || '')) : '';
+  el.textContent = u ? ('Lançado: ' + (u.prodCodigo ? u.prodCodigo + ' · ' : '') + (u.prodNome || '')) : '';
 }
 function renderPedItens() {
   var tbody = document.getElementById('ped-itens-tbody');
