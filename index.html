@@ -21986,12 +21986,12 @@ function _pimpRender() {
     return '<tr style="border-bottom:1px solid #f1f5f9;' + zebra + '">'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569">' + (i + 1) + '</td>'
       + imgCell
-      + '<td style="padding:4px 6px;font-size:11.5px;color:#475569">' + _pedEsc(it.prodCodigo || '') + '</td>'
+      + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700">' + _pedEsc(it.prodCodigo || '') + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:600">' + _pedEsc(it.prodNome || '') + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:center">' + _pedEsc(it.medida || '') + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:right">' + pesoItem.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>'
-      + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:center">' + _pedEsc(it.quantidade) + '</td>'
-      + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:right">' + _pedFmtMoeda(_pimpPrecoComDesc(it)) + '</td>'
+      + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:center">' + _pedEsc(it.quantidade) + '</td>'
+      + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:right">' + _pedFmtMoeda(_pimpPrecoComDesc(it)) + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:right">' + _pedFmtMoeda(it.valorTotal) + '</td>'
       + '</tr>';
   }).join('');
