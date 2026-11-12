@@ -41052,7 +41052,7 @@ function _pwaParsear(texto) {
       if (fh) { fornHint = fh; if (atual && atual.impresso) { atual.fornHint = fh; atual.soForn = true; } }
       return;
     }
-    if (emForn && reCnpj.test(l)) { // CNPJ do fornecedor (nao e o do cliente); serve para achar a fabrica
+    if (emForn && reCnpj.test(l) && !/^\d{1,3}\s+\d{1,6}\s+\S/.test(l)) { // CNPJ do fornecedor (nao e o do cliente); serve para achar a fabrica
       var cf = reCnpj.exec(l).slice(1).join('');
       var ff = getFornecedores().filter(function (f) { return _pwaDig(f.cnpj) === cf; })[0];
       if (ff) { fornHint = ff.id; if (atual && atual.impresso) { atual.fornHint = ff.id; atual.soForn = true; } }
@@ -41077,7 +41077,7 @@ function _pwaParsear(texto) {
       if (!qt && tk.length >= 4) { var q4 = _pwaNum(tk[tk.length - 3]); if (q4 > 0) qt = q4; }
       if (!qt && tot && val) qt = Math.round(tot / val * 10) / 10;
       if (!qt) return;
-      var dsc = mT[3].replace(/\bQ[i1l]\b/g, 'Qj').replace(/\b(\d{2,3}[05])9\b/g, '$1g').replace(/D\.0\.P/g, 'D.O.P').replace(/^[^A-Za-zÀ-ú0-9]+/, '').trim();
+      var dsc = mT[3].replace(/\b\d{11,14}\b/g, ' ').replace(/\s+/g, ' ').replace(/\bQ[i1l]\b/g, 'Qj').replace(/\b(\d{2,3}[05])9\b/g, '$1g').replace(/D\.0\.P/g, 'D.O.P').replace(/^[^A-Za-zÀ-ú0-9]+/, '').trim();
       var prc = (tot && val && Math.abs(qt * val - tot) <= tot * 0.005) ? val : 0;
       if (colado && tot && qt) { var p2 = Math.round(tot / qt * 100) / 100; if (val && Math.abs(p2 - val) <= 0.03) prc = p2; } // corrige 1 digito errado do OCR
       atual.itens.push({ textoLido: l, cod: mT[2], desc: dsc, qtd: qt, unidade: _pwaUn(mT[4]), preco: prc });
