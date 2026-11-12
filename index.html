@@ -40959,16 +40959,27 @@ function _pwaArquivo(file) {
     var img = new Image();
     img.onload = function () {
       // amplia prints pequenos: melhora muito a leitura do OCR
-      var esc = img.width < 1400 ? Math.min(3, 1400 / img.width) : 1;
+      var esc = img.width <= 1000 ? Math.min(3, 1400 / img.width) : (img.width <= 2000 ? 2 : 1);
       var cv = document.createElement('canvas'); cv.width = Math.round(img.width * esc); cv.height = Math.round(img.height * esc);
       var cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
       _pifCarregarTesseract().then(function (T) { return T.recognize(cv.toDataURL('image/png'), 'por'); }).then(function (r) {
         var t = (r && r.data && r.data.text) || '';
-        var ta = document.getElementById('pwa-texto');
-        ta.value = (ta.value ? ta.value + '\n' : '') + t.trim();
-        st.textContent = 'Print lido. O texto está na caixa abaixo (pode corrigir) — confira na próxima tela.';
-        st.style.color = '#15803d';
-        _pwaLer();
+        var seguir = function (extra) {
+          var ta = document.getElementById('pwa-texto');
+          ta.value = (ta.value ? ta.value + '\n' : '') + t.trim() + (extra ? '\n' + extra.trim() : '');
+          st.textContent = 'Print lido. O texto está na caixa abaixo (pode corrigir) — confira na próxima tela.';
+          st.style.color = '#15803d';
+          _pwaLer();
+        };
+        if (_pwaNumPedCli(t) || !/pedido\s+fornecedor|data\s+emiss/i.test(t)) { seguir(''); return; }
+        // o "Nº Pedido Cliente" fica em letra pequena no canto superior direito: le esse canto ampliado
+        var cw = Math.round(img.width * 0.32), ch = Math.round(img.height * 0.16), z = Math.max(2, Math.min(5, 1600 / cw));
+        var c2 = document.createElement('canvas'); c2.width = Math.round(cw * z); c2.height = Math.round(ch * z);
+        var x2 = c2.getContext('2d'); x2.fillStyle = '#fff'; x2.fillRect(0, 0, c2.width, c2.height);
+        x2.drawImage(img, img.width - cw, 0, cw, ch, 0, 0, c2.width, c2.height);
+        return _pifCarregarTesseract().then(function (T2) { return T2.recognize(c2.toDataURL('image/png'), 'por'); }).then(function (r2) {
+          seguir((r2 && r2.data && r2.data.text) || '');
+        }, function () { seguir(''); });
       }).catch(function (err) {
         st.style.color = '#D82621'; st.textContent = 'Não consegui ler o print (' + (err && err.message ? err.message : 'erro') + '). Cole o texto copiado da conversa.';
       });
@@ -40995,6 +41006,24 @@ function _pwaUn(u) {
   return 'UN';
 }
 
+// "Nº Pedido Cliente" do cabecalho do print: o valor fica na mesma linha do titulo ou nas 2 linhas seguintes
+// (o OCR mistura as colunas do cabecalho). Pega o ultimo codigo que comeca com numero.
+function _pwaNumPedCli(texto) {
+  var ls = String(texto || '').split(/\r?\n/);
+  for (var i = 0; i < ls.length; i++) {
+    var m = /pedido\s+cliente/i.exec(ls[i]);
+    if (!m) continue;
+    var blocos = [ls[i].slice(m.index + m[0].length), ls[i + 1] || '', ls[i + 2] || ''];
+    for (var k = 0; k < blocos.length; k++) {
+      var b = blocos[k];
+      if (/pedido\s+fornecedor|data\s+emiss/i.test(b)) b = '';
+      var c = (b.match(/\d[A-Za-z0-9\-\/.]{3,}/g) || []).filter(function (x) { return !/^\d{2}\/\d{2}\/\d{2,4}$/.test(x) && !/^\d{1,2}\/\d{4}$/.test(x) && !/@/.test(x) && (x.match(/\d/g) || []).length >= 4 && !/^\d{4}-\d/.test(x); });
+      if (c.length) return c[c.length - 1].replace(/[.\-\/]+$/, '');
+    }
+  }
+  return '';
+}
+
 // Texto -> [{nome, cnpj, itens:[{textoLido, desc, qtd, unidade, preco}]}]
 function _pwaParsear(texto) {
   var reCnpj = /(\d{2})\.?(\d{3})\.?(\d{3})\/?(\d{4})-?(\d{2})/;
@@ -41002,45 +41031,56 @@ function _pwaParsear(texto) {
   var reB = /^(.*?)\s+(\d+(?:[.,]\d+)?)\s*(kgs?|un|unid\w*|cx|caixas?|pct|pc)\b\.?\s*(.*)$/i;
   var rePreco = /(?:R\$\s*)?(\d{1,3}(?:\.\d{3})+,\d{2}|\d+[.,]\d{1,2})\s*(?:\/\s*)?(?:kg|un|cx)?\s*$/i;
   var peds = [], atual = null, fornHint = '', emForn = false;
+  var numCli = _pwaNumPedCli(texto);
   String(texto || '').split(/\r?\n/).forEach(function (bruta) {
     var l = bruta.replace(/\s+/g, ' ').trim();
     if (!l || /encaminhada/i.test(l)) return;
     l = l.replace(/\s*\b\d{1,2}:\d{2}\s*$/, '').trim();
     if (!l || /^\d{1,2}:\d{2}$/.test(l)) return;
     // ── Pedido impresso pelo proprio sistema (cabecalho Cliente/Fornecedor + tabela de produtos) ──
-    var mCli = /^cliente\W*?:\s*(.*)$/i.exec(l);
+    var mCli = /^\W*cliente\W*?:\s*(.*)$/i.exec(l);
     if (mCli) {
       emForn = false;
-      atual = { nome: mCli[1].replace(/\s*contato.*$/i, '').trim(), cnpj: '', itens: [], fornHint: fornHint, impresso: true };
+      atual = { nome: mCli[1].replace(/\s*contato.*$/i, '').trim(), cnpj: '', itens: [], fornHint: fornHint, impresso: true, numCli: numCli };
       peds.push(atual);
       return;
     }
-    var mForn = /^fornecedor\W*?:\s*(.*)$/i.exec(l);
+    var mForn = /^\W*fornecedor\W*?:\s*(.*)$/i.exec(l);
     if (mForn) {
       emForn = true;
       var fh = _pwaFornPorNome(mForn[1].replace(/\s*fone.*$/i, '').trim());
       if (fh) { fornHint = fh; if (atual && atual.impresso) { atual.fornHint = fh; atual.soForn = true; } }
       return;
     }
-    if (emForn && reCnpj.test(l)) return; // CNPJ do fornecedor (nao e o do cliente)
+    if (emForn && reCnpj.test(l)) { // CNPJ do fornecedor (nao e o do cliente); serve para achar a fabrica
+      var cf = reCnpj.exec(l).slice(1).join('');
+      var ff = getFornecedores().filter(function (f) { return _pwaDig(f.cnpj) === cf; })[0];
+      if (ff) { fornHint = ff.id; if (atual && atual.impresso) { atual.fornHint = ff.id; atual.soForn = true; } }
+      return;
+    }
     if (atual && atual.impresso && !atual.cnpj && !atual.itens.length && reCnpj.test(l)) { atual.cnpj = reCnpj.exec(l).slice(1).join(''); return; }
     var mT = /^(\d{1,3})\s+(\d{1,6})\s+(.+)\s+(PC|KG|UN|UND|CX|PCT)\s+([\d.,\s—–-]+)$/i.exec(l);
     // OCR as vezes troca a unidade ou junta/some o numero do item: segunda tentativa, mais tolerante (4 numeros apos a unidade)
     if (!mT && atual && atual.impresso) {
-      var mL = /^(?:(\d{1,3})\s+)?(?:(\d{1,6})\s+)?(.+?)\s+([A-Za-z]{2,4})\s+((?:[\d.,]+\s+){3}[\d.,]+)$/.exec(l.replace(/[|¦_]/g, ' ').replace(/\s+/g, ' ').trim());
+      var mL = /^(?:(\d{1,3})\s+)?(?:(\d{1,6})\s+)?(.+?)\s+([A-Za-z]{2,4})\s+((?:[\d.,]+\s+){3}[\d.,]+)$/.exec(l.replace(/[|¦_]/g, ' ').replace(/\s+/g, ' ').replace(/^[A-Za-z]{1,3}\)\s*(?=\d)/, '').trim());
       if (mL && /^[UKPC]/i.test(mL[4])) { var u4 = mL[4].toUpperCase(); u4 = /^K/.test(u4) ? 'KG' : /^C/.test(u4) ? 'CX' : /^P/.test(u4) ? 'PC' : 'UND'; mT = [mL[0], mL[1] || '', mL[2] || '', mL[3], u4, mL[5]]; }
     }
     if (mT && atual && atual.impresso) {
       emForn = false;
       var tk = mT[5].replace(/[—–-]/g, ' ').trim().split(/\s+/).filter(Boolean);
+      var colado = tk.some(function (t) { return /,\d{2}(\d{3,}|[\d.]+,\d)/.test(t); });
+      if (colado) tk = mT[5].replace(/[—–-]/g, ' ').match(/\d+(?:\.\d{3})*,\d{2}|\d+/g) || tk;
       var tot = _pwaTokValor(tk[tk.length - 1]), val = tk.length > 1 ? _pwaTokValor(tk[tk.length - 2]) : 0;
       var qt = 0;
-      if (tot && val) { var qc = tot / val; if (qc > 0 && Math.abs(qc * 10 - Math.round(qc * 10)) < 0.06) qt = Math.round(qc * 10) / 10; }
+      if (colado && tk.length >= 4 && tot && val) { var qc4 = _pwaNum(tk[tk.length - 3]); if (qc4 > 0 && Math.abs(tot / qc4 - val) <= 0.03) qt = qc4; }
+      if (!qt && tot && val) { var qc = tot / val; if (qc > 0 && Math.abs(qc * 10 - Math.round(qc * 10)) < 0.06) qt = Math.round(qc * 10) / 10; }
       if (!qt && tk.length >= 4) { var q4 = _pwaNum(tk[tk.length - 3]); if (q4 > 0) qt = q4; }
       if (!qt && tot && val) qt = Math.round(tot / val * 10) / 10;
       if (!qt) return;
       var dsc = mT[3].replace(/\bQ[i1l]\b/g, 'Qj').replace(/\b(\d{2,3}[05])9\b/g, '$1g').replace(/D\.0\.P/g, 'D.O.P').replace(/^[^A-Za-zÀ-ú0-9]+/, '').trim();
-      atual.itens.push({ textoLido: l, cod: mT[2], desc: dsc, qtd: qt, unidade: _pwaUn(mT[4]), preco: (tot && val && Math.abs(qt * val - tot) <= tot * 0.005) ? val : 0 });
+      var prc = (tot && val && Math.abs(qt * val - tot) <= tot * 0.005) ? val : 0;
+      if (colado && tot && qt) { var p2 = Math.round(tot / qt * 100) / 100; if (val && Math.abs(p2 - val) <= 0.03) prc = p2; } // corrige 1 digito errado do OCR
+      atual.itens.push({ textoLido: l, cod: mT[2], desc: dsc, qtd: qt, unidade: _pwaUn(mT[4]), preco: prc });
       return;
     }
     var mA = reA.exec(l), mB = mA ? null : reB.exec(l);
@@ -41161,7 +41201,7 @@ function _pwaLer() {
     if (!ordem.length) { ordem.push(pd.fornHint || ''); grupos[ordem[0]] = []; }
     grupos[ordem[0]] = grupos[ordem[0]].concat(sem);
     ordem.forEach(function (f) {
-      _pwaCards.push({ nome: pd.nome, cnpj: pd.cnpj, cliente: ach ? ach.c : null, via: ach ? ach.via : '', fornId: f, itens: grupos[f] });
+      _pwaCards.push({ nome: pd.nome, cnpj: pd.cnpj, numCli: pd.numCli || '', cliente: ach ? ach.c : null, via: ach ? ach.via : '', fornId: f, itens: grupos[f] });
     });
   });
   _pwaCards.forEach(function (cd) { cd.itens.forEach(function (it) { _pwaRecalc(cd, it); }); });
@@ -41261,11 +41301,12 @@ function _pwaRender() {
     var cnpjFmt = cd.cnpj ? ' · ' + cd.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : '';
     var fornOpts = '<option value="">— selecione —</option>' + forns.map(function (f) { return '<option value="' + f.id + '"' + (cd.fornId === f.id ? ' selected' : '') + '>' + _pedEsc(f.nome_fantasia || f.razao_social || '') + '</option>'; }).join('');
     return '<div style="border:1px solid #e5e7eb;border-bottom:3px solid #2c4488;border-radius:10px;margin-bottom:12px">'
-      + '<div style="background:#f8fafc;padding:10px 12px;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;gap:10px;align-items:end;border-radius:10px 10px 0 0">'
+      + '<div style="background:#f8fafc;padding:10px 12px;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:end;border-radius:10px 10px 0 0">'
       + '<div style="position:relative"><div style="' + lbl + '">Cliente — lido: ' + _pedEsc((cd.nome || '—') + cnpjFmt) + '</div>'
       + '<input id="pwa-cli-' + ci + '" value="' + _pedEsc(cliTxt) + '" placeholder="Digite código, nome ou CNPJ do cliente..." oninput="_pwaCliBuscar(' + ci + ')" onfocus="this.select()" autocomplete="off" style="width:100%;margin-top:3px;padding:7px;border:1px solid ' + (cliOk ? '#e2e8f0' : '#fca5a5') + ';border-radius:6px;font-size:12px;box-sizing:border-box;background:#fff">'
       + '<div id="pwa-cd-' + ci + '" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e2e8f0;border-radius:8px;z-index:50;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.15)"></div></div>'
       + '<div><div style="' + lbl + '">Fábrica</div><select onchange="_pwaForn(' + ci + ',this.value)" style="width:100%;margin-top:3px;padding:7px;border:1px solid ' + (cd.fornId ? '#e2e8f0' : '#fca5a5') + ';border-radius:6px;font-size:12px;background:#fff">' + fornOpts + '</select></div>'
+      + '<div><div style="' + lbl + '">Nº pedido do cliente</div><input value="' + _pedEsc(cd.numCli || '') + '" oninput="_pwaNumCli(' + ci + ',this.value)" autocomplete="off" style="width:100%;margin-top:3px;padding:7px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;box-sizing:border-box;background:#fff"></div>'
       + '<span style="font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap;' + (cliOk ? 'background:#dcfce7;color:#15803d' : 'background:#fef3c7;color:#b45309') + '">' + (cliOk ? '✓ achado por ' + cd.via : 'escolha o cliente') + '</span></div>'
       + linhas
       + '<div style="padding:8px 12px;border-top:1px solid #f1f5f9;text-align:right;font-size:12px;color:#64748b">Total do pedido: <b style="color:#272A4A;font-size:14px">' + _pwaBR(tot) + '</b></div></div>';
@@ -41275,6 +41316,7 @@ function _pwaRender() {
   var b = document.getElementById('pwa-btn-criar'); if (b) b.textContent = 'Criar ' + _pwaCards.length + ' pedido' + (_pwaCards.length === 1 ? '' : 's');
 }
 
+function _pwaNumCli(ci, v) { if (_pwaCards[ci]) _pwaCards[ci].numCli = String(v || '').trim(); }
 function _pwaCliBuscar(ci) {
   var q = (document.getElementById('pwa-cli-' + ci).value || '').trim();
   var drop = document.getElementById('pwa-cd-' + ci);
@@ -41395,7 +41437,7 @@ function _pwaConfirmar() {
       id: 'ped' + Date.now() + '_pwa' + prox, lancamento: prox,
       fornecedorId: fornecedor.id, fornecedorNome: fornecedor.nome_fantasia || fornecedor.razao_social || '',
       clienteId: cliente.id, clienteNome: (cliente.codigo ? cliente.codigo + ' ' : '') + (cliente.nome_fantasia || cliente.razao_social || ''),
-      numPedidoCliente: '', numPedidoFornecedor: '', vendedorId: vendedorId, vendedorNome: vendedorNome,
+      numPedidoCliente: cd.numCli || '', numPedidoFornecedor: '', vendedorId: vendedorId, vendedorNome: vendedorNome,
       data: new Date().toISOString().slice(0, 10), status: 'Pré-Venda', obs: 'Importado do WhatsApp.',
       itens: itens, valorTotal: itens.reduce(function (a, it) { return a + it.valorTotal; }, 0), dtCadastro: new Date().toISOString()
     };
