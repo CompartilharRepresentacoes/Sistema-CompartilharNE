@@ -41193,7 +41193,7 @@ function _pwaLer() {
           return false;
         });
       }
-      return { textoLido: it.textoLido, desc: it.desc, qtdLida: it.qtd, unidadeLida: it.unidade, preco: it.preco, produto: pr, produtoId: pr ? pr.id : '', sugerido: sug };
+      return { textoLido: it.textoLido, desc: it.desc, qtdLida: it.qtd, unidadeLida: it.unidade, preco: it.preco, precoImpresso: it.preco, precoPorCx: it.unidade === 'CX', produto: pr, produtoId: pr ? pr.id : '', sugerido: sug };
     });
     var grupos = {}, ordem = [];
     itens.forEach(function (it) { if (it.produto) { var f = it.produto.fornecedor; if (!grupos[f]) { grupos[f] = []; ordem.push(f); } grupos[f].push(it); } });
@@ -41260,6 +41260,10 @@ function _pwaRecalc(cd, it) {
   if (it.produto) {
     var r = _pifResolverQuantidade({ qtd: it.qtdLida, unidade: it.unidadeLida }, it.produto);
     it.quantidade = r.quantidade; it.modoUnid = r.modoUnid; it.qtdCaixas = r.qtdCaixas; it.avisos = r.avisos;
+    if (it.precoPorCx && !it.precoEditado && it.precoImpresso > 0) {
+      var cxN = parseFloat(String(it.produto.quant || '').replace(',', '.'));
+      it.preco = (r.modoUnid === 'cx' && cxN > 0) ? Math.round(it.precoImpresso / cxN * 10000) / 10000 : it.precoImpresso;
+    }
     var pt = null;
     try { if (cd.cliente && cd.fornId) pt = pedResolverPrecoCliente(cd.fornId, it.produto.id, cd.cliente.id); } catch (e) {}
     it.precoTab = pt != null ? Number(pt) : null;
@@ -41407,7 +41411,7 @@ function _pwaProd(ci, ii, pid) {
   _pwaRecalc(cd, it); _pwaRender();
 }
 function _pwaQtd(ci, ii, v) { var cd = _pwaCards[ci], it = cd.itens[ii], q = _pwaNum(v); if (q > 0) { it.qtdLida = q; _pwaRecalc(cd, it); } _pwaRender(); }
-function _pwaPreco(ci, ii, v) { _pwaCards[ci].itens[ii].preco = _pwaNum(v); _pwaRender(); }
+function _pwaPreco(ci, ii, v) { var it = _pwaCards[ci].itens[ii]; it.preco = _pwaNum(v); it.precoEditado = true; _pwaRender(); }
 
 function _pwaConfirmar() {
   var erros = [];
