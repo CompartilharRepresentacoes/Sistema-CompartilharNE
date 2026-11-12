@@ -22839,6 +22839,9 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
   if (bloqueio) return { erro: 'Restrição de Pedido ativa' + (bloqueio.motivo ? (': ' + bloqueio.motivo) : ' para este cliente') + '.', tipoErro: 'bloqueio' };
 
   var cxNum = parseFloat(String(produto.quant || '').replace(',', '.'));
+  // PDF que traz "KG N" (caixa/peca de N kg, ex.: Hiperideal): vale o N do PDF, que e o que o cliente pediu e o que o preco por kg da tabela confirma
+  var cxPdfKg = (itemPdf.unidade === 'CXA' && itemPdf.embUn === 'KG' && itemPdf.conteudo > 0) ? itemPdf.conteudo : 0;
+  if (cxPdfKg) cxNum = cxPdfKg;
   var cxValido = !isNaN(cxNum) && cxNum > 0;
 
   var modoUnid, quantidadeReal, qtdCaixas, precoUnit;
@@ -22873,8 +22876,9 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
 
   return {
     prodId: produto.id, prodCodigo: produto.codigo, prodNome: produto.nome,
-    medida: produto.unidade || '', cx: produto.quant || '', comissao: tabItem.comissao || '',
+    medida: produto.unidade || '', cx: cxPdfKg ? String(cxPdfKg) : (produto.quant || ''), comissao: tabItem.comissao || '',
     quantidade: quantidadeReal, precoUnit: precoUnit, desconto: 0,
+    _cxCadastro: cxPdfKg ? String(produto.quant || '') : '', _cxPdfKg: cxPdfKg,
     valorTotal: quantidadeReal * precoUnit, modoUnid: modoUnid, qtdCaixas: qtdCaixas,
     avisos: avisos, _excluidoImport: false,
     _cxNum: cxValido ? cxNum : 0, _valorTabela: valorTabela, _qtdOriginalPdf: qtdOriginalPdf,
@@ -22891,12 +22895,14 @@ function _pedProcessarBlocoImportadoPdf(bloco) {
   var resultado = {
     lojaRotulo: bloco.lojaRotulo || '', origem: bloco.origem || '',
     numero: bloco.numero, fornecedorCnpj: bloco.fornecedorCnpj, localEntregaCnpj: bloco.localEntregaCnpj,
-    fornecedor: fornecedor || null, cliente: cliente || null, itensOk: [], itensPendentes: []
+    fornecedor: fornecedor || null, cliente: cliente || null, itensOk: [], itensPendentes: [],
+    conferencia: bloco.conferencia || null
   };
   if (!fornecedor || !cliente) return resultado;
 
   bloco.itens.forEach(function (itemPdf) {
-    var tabItem = _pedResolverProdutoPorCodigoPedido(fornecedor.id, cliente.id, itemPdf.codigoCandidatos);
+    var tabItem = itemPdf.refFabrica ? _pedResolverProdutoPorCodigoFabrica(fornecedor.id, cliente.id, itemPdf.refFabrica) : null;   // PDF que traz "REF: codigo da fabrica" (Hiperideal)
+    if (!tabItem) tabItem = _pedResolverProdutoPorCodigoPedido(fornecedor.id, cliente.id, itemPdf.codigoCandidatos);
     // PDF que traz o codigo da propria fabrica (ex.: Cambui -> Allfood): se o Codigo Pedido nao esta preenchido na tabela,
     // acha o produto pelo CODIGO do produto (mesmo codigo da fabrica) dentro das tabelas do cliente
     if (!tabItem && itemPdf.codigoDaFabrica) tabItem = _pedResolverProdutoPorCodigoFabrica(fornecedor.id, cliente.id, itemPdf.codigo);
@@ -22907,7 +22913,16 @@ function _pedProcessarBlocoImportadoPdf(bloco) {
     }
     var montado = _pedMontarItemImportadoPdf(itemPdf, tabItem, fornecedor.id, cliente.id);
     if (montado.erro) resultado.itensPendentes.push({ origem: itemPdf, motivo: montado.erro, tipoErro: montado.tipoErro || 'geral' });
-    else resultado.itensOk.push(montado);
+    else {
+      // PDF diz "caixa com N" e o cadastro do produto tem outro numero por caixa: avisa na conferencia
+      if (montado._cxPdfKg) {
+        var cxCad = parseFloat(String(montado._cxCadastro || '').replace(',', '.'));
+        if (!isNaN(cxCad) && Math.abs(cxCad - montado._cxPdfKg) > 0.001) montado.avisos = (montado.avisos || []).concat(['O PDF traz caixa de ' + montado._cxPdfKg + ' kg e o cadastro do produto tem ' + montado._cxCadastro + ' — usei os ' + montado._cxPdfKg + ' kg do PDF (o preço por kg da tabela confere com isso).']);
+      } else if (itemPdf.conteudo && montado._cxNum && Math.abs(itemPdf.conteudo - montado._cxNum) > 0.001) {
+        montado.avisos = (montado.avisos || []).concat(['O PDF traz caixa com ' + itemPdf.conteudo + ', mas o cadastro do produto tem ' + montado._cxNum + ' por caixa — confira.']);
+      }
+      resultado.itensOk.push(montado);
+    }
   });
   return resultado;
 }
@@ -23361,10 +23376,15 @@ function _pedRenderRevisaoImportacao() {
 
     return '<div style="padding:12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px">'
       + '<div style="display:flex;align-items:flex-start;gap:10px">'
-      + '<input type="checkbox" id="ped-import-check-' + ri + '" ' + (podeMarcar ? 'checked' : 'disabled') + ' style="margin-top:3px">'
+      + '<input type="checkbox" id="ped-import-check-' + ri + '" ' + (podeMarcar ? ((r.conferencia && !r.conferencia.ok) ? '' : 'checked') : 'disabled') + ' style="margin-top:3px">'
       + '<div style="flex:1">'
       + '<div style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedEsc((r.cliente.codigo || '') + ' ' + (r.cliente.nome_fantasia || r.cliente.razao_social || '')) + '</div>'
       + '<div style="font-size:11px;color:#64748b;margin-top:2px">Pedido nº ' + _pedEsc(r.numero) + ' · ' + itensAtivos.length + ' item(ns) reconhecido(s)' + (removidosCount ? ' · ' + removidosCount + ' removido(s)' : '') + (outrosPendentes.length ? ' · ' + outrosPendentes.length + ' pendente(s)' : '') + (bloqueios.length ? ' · ' + bloqueios.length + ' bloqueado(s)' : '') + ' · Total: ' + _pedFmtMoeda(valorTotal) + '</div>'
+      + (r.conferencia ? ('<div style="margin-top:4px;font-size:11px;font-weight:700;color:' + (r.conferencia.ok ? '#15803d' : '#b91c1c') + '">'
+          + (r.conferencia.totalPdf == null ? 'Total do PDF não foi lido — confira com o PDF antes de importar.'
+            : (r.conferencia.ok ? 'Total confere com o PDF: ' + _pedFmtMoeda(r.conferencia.totalPdf)
+              : 'Total NÃO confere: itens lidos somam ' + _pedFmtMoeda(r.conferencia.somaItens) + ' e o PDF diz ' + _pedFmtMoeda(r.conferencia.totalPdf) + ' — confira com o PDF.'))
+          + '</div>' + (r.conferencia.problemas || []).map(function (p) { return '<div style="margin-top:3px;font-size:10.5px;color:#b91c1c">⚠ ' + _pedEsc(p) + '</div>'; }).join('')) : '')
       + bloqueiosHtml
       + avisosHtml
       + pendentesHtml
@@ -23439,6 +23459,206 @@ function _pedConfirmarImportacaoPdf() {
   alert(criados + ' pedido(s) importado(s) com sucesso.' + (pulados ? (' ' + pulados + ' ignorado(s) por já existir um pedido igual (mesmo Fornecedor, Cliente e Número).') : ''));
 }
 
+// ── Layout Hiperideal (TOTVS Varejo "PEDIDO DE COMPRAS", rodape RELPEDSUPRIM.QRP) ──
+// O texto desse PDF vem sem as letras (a fonte nao tem mapeamento), entao nao da pra ler como texto:
+// o sistema le a IMAGEM de cada pagina (OCR, o mesmo Tesseract usado nos prints de pedido).
+// So le as paginas que tem tabela de itens (a pagina de assinatura, quase em branco, e pulada) e sem o
+// rodape de cada pagina. Cada pedido = uma loja.
+//   Cod Forn | Seq | Produto | Emb ("CX 16" / "KG 6") | Qtde | Valor Unit. | Valor Item ...  + "REF: codigo da fabrica"
+// Qtde = numero de caixas; "KG 6" = caixa com 6 kg. O preco vem normalmente por caixa; se vier por unidade,
+// o Valor Item mostra (Qtde x Unit x conteudo) e o sistema converte.
+function _pedPdfSemTexto(texto, numPaginas) {
+  return String(texto || '').replace(/[^A-Za-zÀ-ÿ]/g, '').length < 150 * Math.max(1, numPaginas);
+}
+
+function _pedHipNum(s) { return parseFloat(String(s).replace(/\./g, '').replace(',', '.')); }
+
+// Le o texto OCR de UMA pagina do pedido. Devolve null se nao parece um pedido desse layout.
+function _pedHipParsePagina(texto) {
+  var linhas = String(texto || '').split(/\r?\n/).map(function (l) { return l.replace(/\s+/g, ' ').trim(); }).filter(Boolean);
+  var cab = linhas.slice(0, 14).join('\n');
+  var mNum = /PEDIDO\s+DE\s+COMPRAS\D{0,6}(\d{5,9})/i.exec(cab);
+  if (!/PEDIDO/i.test(linhas.slice(0, 3).join(' ')) || !/FORNECEDOR/i.test(cab) || !/Cod\s+Forn|TOTAIS|Valor\s+total\s+do\s+pedido/i.test(texto)) return null;   // pagina seguinte do mesmo pedido nao repete o titulo da tabela
+  var cnpjs = (cab.match(/\d{2}\.\d{3}\.\d{3}\/\d{4}\s*-\s*\d{2}/g) || []).map(function (c) { return c.replace(/\D/g, ''); });
+  var pg = { numero: mNum ? mNum[1] : '', cnpjForn: cnpjs[0] || '', cnpjLoja: cnpjs[1] || '', rotulo: '', itens: [], total: null, totais: null };
+  var mRot = /EMPREENDIMENTOS\s+LTDA\s+(HIPERIDEAL[^\n]*?)(?:\n|$)/i.exec(cab);
+  if (mRot) pg.rotulo = mRot[1].replace(/\s+/g, ' ').trim();
+
+  var reItem = /^(?:(\d{3,6})\s+)?(?:(\d{6,8})\s+)?(.*?)\s*\b(CX|KG|UN|UND|PC)\s+(\d{1,3})\s+(\d+,\d{2})\s+(\S+)\s+(\S+)\s+(\S+)/i;
+  var atual = null;
+  linhas.forEach(function (l) {
+    l = l.replace(/[—–|]/g, ' ').replace(/\s+/g, ' ').trim();
+    var mt = /^TOTAIS\s+[\d.,]+\s+([\d.]+,\d{2})/i.exec(l);
+    if (mt) { pg.totais = _pedHipNum(mt[1]); atual = null; return; }
+    var mv = /Valor\s+total\s+do\s+pedido\s+([\d.]+,\d{2})/i.exec(l);
+    if (mv) { pg.total = _pedHipNum(mv[1]); atual = null; return; }
+    var m = reItem.exec(l);
+    if (m) {
+      var okUnit = /^[\d.]+,\d{2,4}$/.test(m[7]), okVal = /^[\d.]+,\d{2}$/;
+      atual = {
+        descricao: (m[3] || '').trim(), qtd: _pedHipNum(m[6]), unitario: okUnit ? _pedHipNum(m[7]) : null,
+        vals: [m[8], m[9]].filter(function (v) { return okVal.test(v); }).map(_pedHipNum),
+        embUn: m[4].toUpperCase(), conteudo: parseInt(m[5], 10), tokens: [m[1], m[2]].filter(Boolean), resto: ''
+      };
+      pg.itens.push(atual);
+      return;
+    }
+    if (atual && !/^EANs?\b/i.test(l)) atual.resto += ' ' + l;
+  });
+  pg.itens.forEach(function (it) {
+    var mr = /REF\s*:?\s*(\d{3,7})/i.exec(it.resto);
+    it.ref = mr ? mr[1] : '';
+    it.descricao = (it.descricao + ' ' + it.resto.replace(/REF\s*:?\s*\d*/i, '')).replace(/\s+/g, ' ').trim();
+  });
+  return pg;
+}
+
+// Junta as paginas de uma mesma loja e monta o "bloco" que o importador ja sabe processar.
+function _pedHipMontarBlocos(paginas) {
+  var grupos = [];
+  paginas.forEach(function (pg) {
+    var g = grupos.length ? grupos[grupos.length - 1] : null;
+    if (!g || g.fechado || ((pg.numero || pg.cnpjLoja) !== (g.numero || g.cnpjLoja))) {
+      g = { numero: pg.numero, cnpjForn: pg.cnpjForn, cnpjLoja: pg.cnpjLoja, rotulo: pg.rotulo, itens: [], total: null, totais: null, fechado: false };
+      grupos.push(g);
+    }
+    if (!g.cnpjLoja && pg.cnpjLoja) g.cnpjLoja = pg.cnpjLoja;
+    if (!g.rotulo && pg.rotulo) g.rotulo = pg.rotulo;
+    g.itens = g.itens.concat(pg.itens);
+    if (pg.total != null) g.total = pg.total;
+    if (pg.totais != null) g.totais = pg.totais;
+    if (pg.total != null || pg.totais != null) g.fechado = true;
+  });
+  return grupos.filter(function (g) { return g.itens.length > 0; }).map(function (g) {
+    var itens = [], soma = 0, problemas = [];
+    g.itens.forEach(function (it) {
+      var cods = it.tokens.join('/') + (it.ref ? ' (REF ' + it.ref + ')' : '');
+      var nome = it.descricao;
+      var unitCx = null, valorOk = null, v;
+      if (it.unitario != null) {
+        var base = it.qtd * it.unitario, comConteudo = it.qtd * it.unitario * it.conteudo;
+        for (var vi = 0; vi < it.vals.length && valorOk == null; vi++) {
+          v = it.vals[vi];
+          if (Math.abs(base - v) <= 0.02) { valorOk = v; unitCx = it.unitario; }                                                  // preco por caixa
+          else if (Math.abs(comConteudo - v) <= 0.05) { valorOk = v; unitCx = Math.round(it.unitario * it.conteudo * 10000) / 10000; }   // preco por unidade
+        }
+      } else if (it.vals.length === 2 && Math.abs(it.vals[0] - it.vals[1]) <= 0.01 && it.qtd > 0) {   // preco unitario ilegivel: usa o valor do item (as duas copias iguais)
+        valorOk = it.vals[0]; unitCx = Math.round(valorOk / it.qtd * 10000) / 10000;
+      }
+      if (valorOk == null) { problemas.push('Item "' + nome + '" (' + cods + '): valores não conferem ou não foram lidos direito — lance este item à mão.'); return; }
+      soma += valorOk;
+      var unidade;
+      if (it.embUn === 'CX' || it.embUn === 'KG') unidade = 'CXA';
+      else if (it.conteudo === 1) unidade = 'UN';
+      else { problemas.push('Item "' + nome + '" (' + cods + '): embalagem "' + it.embUn + ' ' + it.conteudo + '" não prevista — lance este item à mão.'); return; }
+      var cod = it.tokens[it.tokens.length - 1] || it.ref;
+      var cands = [];
+      it.tokens.forEach(function (t) { _pedCandidatosCodigoPedido(t).forEach(function (c) { if (cands.indexOf(c) === -1) cands.push(c); }); });
+      itens.push({
+        descricao: nome, dataEnt: null, qtd: it.qtd, unitario: unitCx, codigo: cod || '', codigoNormalizado: _pedNormCodigoPedido(cod || ''),
+        codigoCandidatos: cands, unidade: unidade, refFabrica: it.ref, conteudo: it.conteudo, embUn: it.embUn, embalagem: it.embUn + ' ' + it.conteudo
+      });
+    });
+    var totalPdf = g.total != null ? g.total : g.totais;
+    if (!g.numero) problemas.push('Número do pedido não foi lido — confira com o PDF.');
+    var ok = totalPdf != null && Math.abs(soma - totalPdf) <= 0.02 && !problemas.length;
+    return {
+      numero: g.numero, fornecedorCnpj: g.cnpjForn, localEntregaCnpj: g.cnpjLoja, lojaRotulo: g.rotulo || '', itens: itens,
+      origem: 'Importado de PDF Hiperideal "Pedido de Compras" nº ' + g.numero + ' (' + itens.length + ' itens).',
+      conferencia: { ok: ok, somaItens: Math.round(soma * 100) / 100, totalPdf: totalPdf, problemas: problemas }
+    };
+  });
+}
+
+// Barra de progresso simples enquanto o PDF e lido
+function _pedHipProgresso(msg, pct) {
+  var el = document.getElementById('ped-hip-prog');
+  if (msg === null) { if (el) el.remove(); return; }
+  if (!el) {
+    el = document.createElement('div'); el.id = 'ped-hip-prog';
+    el.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100000;display:flex;align-items:center;justify-content:center';
+    el.innerHTML = '<div style="background:#fff;border-radius:12px;padding:18px 22px;width:min(420px,90vw);box-shadow:0 10px 40px rgba(0,0,0,.25)">'
+      + '<div id="ped-hip-prog-msg" style="font-size:13px;color:#1e293b;margin-bottom:10px"></div>'
+      + '<div style="height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden"><div id="ped-hip-prog-bar" style="height:8px;width:0;background:#DE7926;transition:width .3s"></div></div>'
+      + '<div style="font-size:11px;color:#64748b;margin-top:8px">Não feche esta tela. A leitura do PDF leva alguns minutos.</div></div>';
+    document.body.appendChild(el);
+  }
+  document.getElementById('ped-hip-prog-msg').textContent = msg;
+  document.getElementById('ped-hip-prog-bar').style.width = Math.max(0, Math.min(100, pct || 0)) + '%';
+}
+
+var _pedHipFila = Promise.resolve();   // le um PDF por vez (varios ao mesmo tempo travariam o navegador)
+
+// Le o PDF Hiperideal por imagem. Devolve { resultados } ou { erro } (ou null se nao for esse layout).
+function _pedLerPdfHiperideal(pdf) {
+  var trabalho = function () { return _pedLerPdfHiperidealAgora(pdf); };
+  var p = _pedHipFila.then(trabalho, trabalho);
+  _pedHipFila = p.then(function () {}, function () {});
+  return p;
+}
+async function _pedLerPdfHiperidealAgora(pdf) {
+  var worker = null;
+  try {
+    _pedHipProgresso('Preparando a leitura do PDF…', 2);
+    // 1) acha as paginas que tem tabela (a de assinatura e quase toda branca)
+    var paginas = [], tintas = [];
+    for (var n = 1; n <= pdf.numPages; n++) {
+      var pgS = await pdf.getPage(n);
+      var vS = pgS.getViewport({ scale: 0.6 });
+      var cS = document.createElement('canvas'); cS.width = Math.floor(vS.width); cS.height = Math.floor(vS.height);
+      var xS = cS.getContext('2d', { willReadFrequently: true }); xS.fillStyle = '#fff'; xS.fillRect(0, 0, cS.width, cS.height);
+      await pgS.render({ canvasContext: xS, viewport: vS }).promise;
+      var y0 = Math.floor(cS.height * 0.25), y1 = Math.floor(cS.height * 0.65);
+      var dados = xS.getImageData(0, y0, cS.width, y1 - y0).data, escuros = 0, tot = (y1 - y0) * cS.width;
+      for (var k = 0; k < dados.length; k += 4) { if (dados[k] < 140) escuros++; }
+      tintas.push(escuros / tot);
+    }
+    var maxTinta = Math.max.apply(null, tintas);
+    tintas.forEach(function (t, ix) { if (t > Math.max(0.01, maxTinta * 0.5)) paginas.push(ix + 1); });   // pagina com tabela tem bem mais tinta que a de assinatura
+    if (!paginas.length) return null;
+    // 2) OCR da pagina com tabela, sem o rodape
+    var Tess = await _pifCarregarTesseract();
+    worker = await Tess.createWorker('por');
+    var textos = [], ini = Date.now();
+    for (var i = 0; i < paginas.length; i++) {
+      var decorrido = (Date.now() - ini) / 1000;
+      var falta = i > 0 ? Math.round(decorrido / i * (paginas.length - i)) : 0;
+      _pedHipProgresso('Lendo o PDF do Hiperideal: página ' + (i + 1) + ' de ' + paginas.length + (falta ? ' · faltam cerca de ' + (falta >= 60 ? Math.ceil(falta / 60) + ' min' : falta + ' s') : ''), 5 + (i / paginas.length) * 93);
+      var pg = await pdf.getPage(paginas[i]);
+      var vp = pg.getViewport({ scale: 200 / 72 });
+      var cv = document.createElement('canvas'); cv.width = Math.floor(vp.width); cv.height = Math.floor(vp.height);
+      var cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+      await pg.render({ canvasContext: cx, viewport: vp }).promise;
+      var alt = Math.floor(cv.height * 0.88);   // corta so o rodape (OBSERVACAO PADRAO); a tabela cresce pra baixo conforme o numero de itens
+      var rec = document.createElement('canvas'); rec.width = cv.width; rec.height = alt;
+      rec.getContext('2d').drawImage(cv, 0, 0, cv.width, alt, 0, 0, cv.width, alt);
+      var r = await worker.recognize(rec);
+      var textoPg = r.data.text || '';
+      // o numero do pedido fica no titulo, em letra grande e as vezes sai errado: le o canto do titulo ampliado
+      if (!/PEDIDO\s+DE\s+COMPRAS\D{0,6}\d{5,9}/i.test(textoPg)) {
+        var cn = document.createElement('canvas'), sx = Math.floor(cv.width * 0.62), sw = cv.width - sx, sh = Math.floor(cv.height * 0.055);
+        cn.width = sw * 2; cn.height = sh * 2;
+        var cnx = cn.getContext('2d'); cnx.fillStyle = '#fff'; cnx.fillRect(0, 0, cn.width, cn.height);
+        cnx.drawImage(cv, sx, 0, sw, sh, 0, 0, cn.width, cn.height);
+        var rn = await worker.recognize(cn);
+        var mn = /(\d{6})\s*\/?\s*[A-Z]?/.exec(String(rn.data.text || '').replace(/\s+/g, ' '));
+        if (mn) textoPg = 'PEDIDO DE COMPRAS ' + mn[1] + '\n' + textoPg;
+      }
+      textos.push(textoPg);
+    }
+    window._pedHipUltimosTextos = textos;   // ajuda a diagnosticar leitura errada
+    var lidas = textos.map(_pedHipParsePagina).filter(Boolean);
+    if (!lidas.length) return null;
+    var blocos = _pedHipMontarBlocos(lidas);
+    return { resultados: blocos.map(_pedProcessarBlocoImportadoPdf) };
+  } catch (e) {
+    return { erro: 'Não foi possível ler este PDF (leitura por imagem falhou). Tente de novo ou fale com o suporte.' };
+  } finally {
+    try { if (worker) await worker.terminate(); } catch (e2) {}
+    _pedHipProgresso(null);
+  }
+}
+
 // Le UM PDF (ArrayBuffer) e devolve { resultados } ou { erro } -- sem abrir tela nem dar alert
 function _pedLerPdfBuffer(buffer, lib) {
   return lib.getDocument({ data: new Uint8Array(buffer) }).promise.then(function (pdf) {
@@ -23470,6 +23690,11 @@ function _pedLerPdfBuffer(buffer, lib) {
       } else if (layout === 'compra_merc') {
         resultados = _pedParsePedidoTextoCompraMerc(paginasTexto).map(_pedProcessarBlocoImportadoPdf);
       } else {
+        if (_pedPdfSemTexto(textoCompleto, pdf.numPages)) {
+          return _pedLerPdfHiperideal(pdf).then(function (r) {
+            return r || { erro: 'Este layout de PDF ainda não é reconhecido pelo sistema. Fale com o suporte pra configurarmos esse formato também.' };
+          });
+        }
         return { erro: 'Este layout de PDF ainda não é reconhecido pelo sistema. Fale com o suporte pra configurarmos esse formato também.' };
       }
       if (!resultados.length) return { erro: 'Não foi possível reconhecer nenhum pedido/loja neste PDF.' };
