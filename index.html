@@ -333,7 +333,7 @@
     /* Perfil Vendedor: nao ve comissao; nao digita preco nem Nº pedido do fornecedor */
     body.perfil-vendedor .so-comissao { display:none !important; }
     body.perfil-vendedor .ped-grid-itens { grid-template-columns:1fr 55px 55px 92px 80px 80px 70px 40px !important; }
-    body.perfil-vendedor .ped-itens-header, body.perfil-vendedor .ped-item-row { grid-template-columns:1fr 50px 45px 90px 55px 55px 95px 66px !important; }
+    body.perfil-vendedor .ped-itens-header, body.perfil-vendedor .ped-item-row { grid-template-columns:1fr 100px 90px 55px 55px 95px 66px !important; }
     body.perfil-vendedor .tp-grid-itens { grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 90px 80px !important; }
     body.perfil-vendedor .tpcli-grid { grid-template-columns:1fr 1.3fr 90px 1fr !important; }
     body.perfil-vendedor #ped-item-preco, body.perfil-vendedor #ped-edit-item-preco, body.perfil-vendedor #ped-num-fornecedor { background:#f8fafc; color:#64748b; cursor:not-allowed; }
@@ -5646,7 +5646,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 
     <!-- ═══════ PEDIDOS: Formulário ═══════ -->
     <div id="page-pedido-form" class="app-page">
-      <div style="max-width:1000px">
+      <div style="max-width:1300px">
         <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(39,42,74,.10)">
 
           <!-- Header gradiente -->
@@ -5706,7 +5706,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                   </select>
                 </div>
                 <div>
-                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Número Pedido Cliente</label>
+                  <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px">Número Pedido Cliente <span style="color:#dc2626">*</span></label>
                   <input class="form-input" id="ped-num-cliente" placeholder="Nº informado pelo cliente" oninput="pedFiltrarNumCliente(this); pedVerificarDuplicidade()" onkeydown="_pedEnterAvanca(event,'ped-num-fornecedor')" style="width:100%">
                   <div id="ped-num-cliente-msg" style="font-size:10.5px;color:#DE7926;font-weight:600;margin-top:4px;min-height:13px"></div>
                 </div>
@@ -5789,8 +5789,8 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
               </div>
               <div id="ped-item-msg" style="font-size:11px;color:#dc2626;margin-top:-6px;margin-bottom:6px"></div>
               <div style="border:1px solid #eef2f7;border-radius:10px;overflow:hidden">
-                <div class="ped-itens-header" style="display:grid;grid-template-columns:1fr 50px 45px 90px 75px 55px 55px 95px 66px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
-                  <span>Produto</span><span>Medida</span><span>CX</span><span>Preço</span><span class="so-comissao">Comissão</span><span>Desc.</span><span>Qtd.</span><span>Total</span><span></span>
+                <div class="ped-itens-header" style="display:grid;grid-template-columns:1fr 100px 90px 75px 55px 55px 95px 66px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">
+                  <span>Produto</span><span>Medidas da CX</span><span>Preço</span><span class="so-comissao">Comissão</span><span>Desc.</span><span>Qtd.</span><span>Total</span><span></span>
                 </div>
                 <div id="ped-itens-tbody"><div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">Nenhum item adicionado.</div></div>
               </div>
@@ -29276,14 +29276,13 @@ function renderPedItens() {
     var tagBloqueado = bloqueioItem ? '<span title="'+_pedEsc(bloqueioItem.motivo || 'Produto bloqueado para este cliente')+'" style="background:#fef2f2;color:#dc2626;font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-left:6px;white-space:nowrap">Bloqueado</span>' : '';
     var qtdNum = (it.modoUnid==='cx' && it.qtdCaixas) ? it.qtdCaixas : it.quantidade;
     var qtdUn = (it.modoUnid==='cx' && it.qtdCaixas) ? 'CX' : (it.medida || '');
-    return '<div class="ped-item-row" style="display:grid;grid-template-columns:1fr 50px 45px 90px 75px 55px 55px 95px 66px;padding:9px 12px;align-items:center;border-bottom:1px solid #f8fafc;font-size:12.5px;'+(bloqueioItem?'background:#fffbfb':'')+'">'
+    return '<div class="ped-item-row" style="display:grid;grid-template-columns:1fr 100px 90px 75px 55px 55px 95px 66px;padding:5px 12px;align-items:center;border-bottom:1px solid #f8fafc;font-size:12.5px;'+(bloqueioItem?'background:#fffbfb':'')+'">'
       + '<div style="font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+_pedEsc(nomeComCodigo)+'">'+_pedEsc(nomeComCodigo)+tagBloqueado+'</div>'
-      + '<div style="color:#64748b">'+(it.medida!==undefined && it.medida!==''?_pedEsc(it.medida):'—')+'</div>'
-      + '<div style="color:#64748b">'+(it.cx!==undefined && it.cx!==''?it.cx:'—')+'</div>'
+      + '<div style="color:#7c8798">'+((it.cx!==undefined && it.cx!=='' && it.medida) ? (_pedEsc(String(it.cx))+' '+_pedEsc(it.medida)) : '—')+'</div>'
       + '<div style="color:#64748b">'+_pedFmtMoeda(it.precoUnit)+'</div>'
-      + (function(){ var _r = _comResolver(_comFornDe(_pedItensFornId), it.prodId, it.comissao, _pedItensCliId, null); _pedComTotal += (Number(it.valorTotal)||0) * _r.pct / 100; return '<div class="so-comissao" style="color:#1e293b;font-size:11.5px;font-weight:700">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'<br>'+_comOrigemTag(_r.origem)+'</div>'; })()
+      + (function(){ var _r = _comResolver(_comFornDe(_pedItensFornId), it.prodId, it.comissao, _pedItensCliId, null); _pedComTotal += (Number(it.valorTotal)||0) * _r.pct / 100; return '<div class="so-comissao" style="color:#64748b">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'</div>'; })()
       + '<div style="color:#64748b">'+(it.desconto||0)+'%</div>'
-      + '<div style="color:#64748b" title="'+((it.modoUnid==='cx' && it.qtdCaixas)?(_pedEsc(String(it.qtdCaixas))+' CX × '+_pedEsc(String(it.cx||''))+' = '+it.quantidade+' '+_pedEsc(it.medida||'')):'')+'">'+((it.modoUnid==='cx' && it.qtdCaixas)?(it.qtdCaixas+' CX'):it.quantidade)+'</div>'
+      + '<div style="color:#1e293b;font-weight:700" title="'+((it.modoUnid==='cx' && it.qtdCaixas)?(_pedEsc(String(it.qtdCaixas))+' CX × '+_pedEsc(String(it.cx||''))+' = '+it.quantidade+' '+_pedEsc(it.medida||'')):'')+'">'+((it.modoUnid==='cx' && it.qtdCaixas)?(it.qtdCaixas+' CX'):it.quantidade)+'</div>'
       + '<div style="font-weight:700;color:#1e293b">'+_pedFmtMoeda(it.valorTotal)+'</div>'
       + '<div style="text-align:right;white-space:nowrap">'+acoesCell+'</div>'
       + '<div class="ped-item-mobile">'
@@ -29347,6 +29346,7 @@ function salvarPedido() {
   if (!cliId)   { msg.textContent = 'Selecione o Cliente na lista de sugestões.'; return; }
   if (!dataRaw) { msg.textContent = 'Informe a Data do Pedido.'; return; }
   if (!data)    { msg.textContent = 'Data do Pedido inválida. Use o formato dd/mm/aaaa.'; return; }
+  if (!document.getElementById('ped-num-cliente').value.trim()) { msg.textContent = 'Informe o Número Pedido Cliente.'; document.getElementById('ped-num-cliente').focus(); return; }
   if (!_pedItens.length) { msg.textContent = 'Adicione ao menos um item ao pedido.'; return; }
   // Última linha de defesa contra produto bloqueado: cobre também itens trazidos por "Duplicar Pedido"
   // ou qualquer outro caminho que monte _pedItens sem passar por pedAddItem().
