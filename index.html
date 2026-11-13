@@ -23979,8 +23979,9 @@ function _pinfProcessar() {
   var produtos = getProdutos().filter(function (p) { return String(p.fornecedor || '') === String(fornecedorId); });
   var pedidosCandidatos = getPedidos().filter(function (p) {
     if (String(p.fornecedorId || '') !== String(fornecedorId)) return false;
-    var dt = String(p.dtCadastro || '').slice(0, 10);
-    return !!dt && dt >= dataIni && dt <= dataFim;
+    var dt = String(p.dtCadastro || '').slice(0, 10), dp = String(p.data || '').slice(0, 10);
+    // vale a data do pedido (ex.: pedido prorrogado para outra data) OU a data em que foi cadastrado
+    return (!!dt && dt >= dataIni && dt <= dataFim) || (!!dp && dp >= dataIni && dp <= dataFim);
   }).map(function (p) {
     var cli = clientes.find(function (c) { return c.id === p.clienteId; });
     var clone = Object.assign({}, p);
@@ -24006,6 +24007,21 @@ function _pinfProcessar() {
       clone._soPorNumero = true;
       pedidosCandidatos.push(clone);
     });
+    // pedidos do cliente citados pelo numero na NF (xPed / observacao), mesmo fora do periodo digitado
+    var numsCli = [];
+    xmlLidos.forEach(function (it) { if (it.dados && it.dados.numPedido && _pinfNumLimpo(it.dados.numPedido).length >= 4) numsCli.push(it.dados.numPedido); });
+    if (numsCli.length) {
+      var jaTem2 = {}; pedidosCandidatos.forEach(function (p) { jaTem2[p.id] = 1; });
+      getPedidos().forEach(function (p) {
+        if (String(p.fornecedorId || '') !== String(fornecedorId) || jaTem2[p.id] || !p.numPedidoCliente) return;
+        if (!numsCli.some(function (n) { return _pinfNumCasa(p.numPedidoCliente, n); })) return;
+        var cli = clientes.find(function (c) { return c.id === p.clienteId; });
+        var clone = Object.assign({}, p);
+        clone._clienteCnpjDigits = cli ? _devNormCnpj(cli.cpf_cnpj) : '';
+        clone._soPorNumero = true;
+        pedidosCandidatos.push(clone);
+      });
+    }
     _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos);
     _pinfFecharFiltro();
     _pinfAbrirRevisao();
@@ -24132,6 +24148,15 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
     var porForn = pedidosCandidatos.filter(function (p) { return pfNum && _pinfNumLimpo(p.numPedidoFornecedor) === pfNum; });
     if (porForn.length === 1) return { pedido: porForn[0], ambiguo: false, motivo: 'numPedidoFornecedor' };
   }
+  // 1b) numero do pedido do CLIENTE na NF (xPed): procura entre TODOS os pedidos da fabrica (inclusive fora do periodo).
+  // Numero + CNPJ do cliente batendo = vincula. CNPJ nao bate (ex.: CD/matriz) mas so existe UM pedido com esse numero = vincula.
+  if (!_nfEhRemessaXml(nfDados.natOp, nfDados.cfop) && _pinfNumLimpo(nfDados.numPedido).length >= 4) {
+    var _dd = _devNormCnpj(nfDados.destCNPJ), _ee = _devNormCnpj(nfDados.emitCNPJ);
+    var numMatches = pedidosCandidatos.filter(function (p) { return _pinfNumCasa(p.numPedidoCliente, nfDados.numPedido); });
+    var cnpjMatches = numMatches.filter(function (p) { var c = p._clienteCnpjDigits; return !!c && (c === _dd || c === _ee); });
+    if (cnpjMatches.length === 1) return { pedido: cnpjMatches[0], ambiguo: false, motivo: 'cnpj+numeroPedido' };
+    if (!cnpjMatches.length && numMatches.length === 1) return { pedido: numMatches[0], ambiguo: false, motivo: 'numeroPedido' };
+  }
   // pedidos trazidos so pelo numero (fora do periodo) nao entram nas regras por CNPJ/itens/valor
   var pedidosCandidatosTodos = pedidosCandidatos;
   pedidosCandidatos = pedidosCandidatos.filter(function (p) { return !p._soPorNumero; });
@@ -24189,7 +24214,13 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
 
   var numPedNf = _pinfNormNumPedido(nfDados.numPedido);
 
-  if (porCnpj.length === 1) return { pedido: porCnpj[0], ambiguo: false, motivo: 'cnpj' };
+  if (porCnpj.length === 1) {
+    var _nUnico = _pinfNumLimpo(porCnpj[0].numPedidoCliente), _nNf = _pinfNumLimpo(nfDados.numPedido);
+    if (/^\d{5,}$/.test(_nUnico) && /^\d{5,}$/.test(_nNf) && !_pinfNumCasa(porCnpj[0].numPedidoCliente, nfDados.numPedido)) {
+      return { pedido: null, ambiguo: true, motivo: 'A NF cita o pedido ' + nfDados.numPedido + ', mas o único pedido deste cliente no período é o ' + porCnpj[0].numPedidoCliente + ' — não vinculei sozinho. Vincule manualmente.' };
+    }
+    return { pedido: porCnpj[0], ambiguo: false, motivo: 'cnpj' };
+  }
   if (porCnpj.length > 1) {
     if (numPedNf) {
       var porNumero = porCnpj.filter(function (p) { return _pinfNumCasa(p.numPedidoCliente, nfDados.numPedido); });
