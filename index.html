@@ -33881,7 +33881,7 @@ function _relPfTabela() {
 }
 // ── v49: Pedido x Faturado x Nao faturado (R$ e Kg), com filtros e detalhe por item ──
 // ── Produtos nao Faturados: so o que deixou de faturar dos pedidos (ranking, % e impacto por rede/sub rede) ──
-function _relPnfPeso(v, tot) { return tot > 0 ? _relNum(v / tot * 100, 1) + '%' : '—'; }
+function _relPnfPct(naoRs, pedRs) { return pedRs > 0 ? _relNum(naoRs / pedRs * 100, 1) + '%' : '—'; }
 function _relCalcProdutosNaoFaturados(f) {
   var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
   var prodMap = {}; getProdutos().forEach(function(p){ prodMap[p.id] = p; });
@@ -33932,10 +33932,9 @@ function _relCalcProdutosNaoFaturados(f) {
       if (ign) falta = 0;
       var rsNao = Math.max(0, rsPedI - fv - rsIgn);
       T.pedRs += rsPedI; T.pedKg += pedU * peso;
-      if (!(falta > 0.000001) && !(rsNao > 0.005)) return;   // faturou tudo: nao entra no relatorio
-      T.naoRs += rsNao; T.naoKg += falta * peso;
-      prodsN[(it.prodCodigo || '') + '|' + nome] = 1; pedsN[p.id] = 1;
-      lin.push({ p: p, cli: cli, rede: rede, sub: sub, cod: it.prodCodigo || '', nome: nome, un: un, sazonal: !!(prodMap[it.prodId] && prodMap[it.prodId].sazonal === 'Sim'),
+      var afet = (falta > 0.000001) || (rsNao > 0.005);   // false = faturou tudo: so conta no "pedido" (base da %)
+      if (afet) { T.naoRs += rsNao; T.naoKg += falta * peso; prodsN[(it.prodCodigo || '') + '|' + nome] = 1; pedsN[p.id] = 1; }
+      lin.push({ afet: afet, p: p, cli: cli, rede: rede, sub: sub, cod: it.prodCodigo || '', nome: nome, un: un, sazonal: !!(prodMap[it.prodId] && prodMap[it.prodId].sazonal === 'Sim'),
         qPed: pedU, qFat: fqU, qNao: falta, rsPed: rsPedI, rsNao: rsNao, kgPed: pedU * peso, kgNao: falta * peso, nfs: Object.keys(nfs).join(', ') });
     });
   });
@@ -33946,20 +33945,25 @@ function _relCalcProdutosNaoFaturados(f) {
   var G = {};
   lin.forEach(function(r){
     var k = chave(r), g = G[k] || (G[k] = { nome: k, rsPed: 0, rsNao: 0, kgPed: 0, kgNao: 0, ped: {}, ls: [], saz: false });
-    g.rsPed += r.rsPed; g.rsNao += r.rsNao; g.kgPed += r.kgPed; g.kgNao += r.kgNao; g.ped[r.p.id] = 1; g.ls.push(r); if (r.sazonal) g.saz = true;
+    g.rsPed += r.rsPed; g.kgPed += r.kgPed;
+    if (!r.afet) return;
+    g.rsNao += r.rsNao; g.kgNao += r.kgNao; g.ped[r.p.id] = 1; g.ls.push(r); if (r.sazonal) g.saz = true;
   });
   // impacto por rede e, em cascata, sub rede
   var GR = {};
   lin.forEach(function(r){
     var g = GR[r.rede] || (GR[r.rede] = { nome: r.rede, rsNao: 0, kgNao: 0, rsPed: 0, ped: {}, subs: {} });
-    g.rsNao += r.rsNao; g.kgNao += r.kgNao; g.rsPed += r.rsPed; g.ped[r.p.id] = 1;
+    g.rsPed += r.rsPed;
     var sb = g.subs[r.sub] || (g.subs[r.sub] = { nome: r.sub, rsNao: 0, kgNao: 0, rsPed: 0, ped: {} });
-    sb.rsNao += r.rsNao; sb.kgNao += r.kgNao; sb.rsPed += r.rsPed; sb.ped[r.p.id] = 1;
+    sb.rsPed += r.rsPed;
+    if (!r.afet) return;
+    g.rsNao += r.rsNao; g.kgNao += r.kgNao; g.ped[r.p.id] = 1;
+    sb.rsNao += r.rsNao; sb.kgNao += r.kgNao; sb.ped[r.p.id] = 1;
   });
   window._relPnf = window._relPnf || { m: 'rs', top: 20 };
   window._relPnf.ag = ag; window._relPnf.nomeAg = nomeAg; window._relPnf.T = T; window._relPnf.n = lin.length;
-  window._relPnf.grupos = Object.keys(G).map(function(k){ return G[k]; });
-  window._relPnf.redes = Object.keys(GR).map(function(k){ return GR[k]; });
+  window._relPnf.grupos = Object.keys(G).map(function(k){ return G[k]; }).filter(function(g){ return g.ls.length; });
+  window._relPnf.redes = Object.keys(GR).map(function(k){ var g = GR[k]; g.subs = Object.keys(g.subs).map(function(x){ return g.subs[x]; }).filter(function(sb){ return Object.keys(sb.ped).length; }).reduce(function(o, sb){ o[sb.nome] = sb; return o; }, {}); return g; }).filter(function(g){ return Object.keys(g.ped).length; });
   var pct = T.pedRs ? T.naoRs / T.pedRs : 0;
   var kpis = _relKpis([
     { label: 'Pedido (filtrado)', valor: _pedFmtMoeda(T.pedRs), sub: _relNum(T.pedKg) + ' kg', cor: '#272A4A' },
@@ -33967,7 +33971,7 @@ function _relCalcProdutosNaoFaturados(f) {
     { label: '% não faturado do pedido', valor: _relNum(pct * 100, 1) + '%', sub: 'faturado: ' + _relNum((1 - pct) * 100, 1) + '%', cor: '#dc2626' },
     { label: 'Itens afetados', valor: Object.keys(prodsN).length, sub: 'produtos · ' + Object.keys(pedsN).length + ' pedidos', cor: '#272A4A' }
   ]);
-  var nota = '<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Clique numa linha para ver os pedidos. Pedidos cancelados ficam fora. Sobra menor que 1 caixa não conta como não faturado. Faturar acima do pedido não cobre a falta de outro item. “Peso no total não faturado” = quanto aquela linha representa de tudo que deixou de faturar nos filtros escolhidos.</div>';
+  var nota = '<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Clique numa linha para ver os pedidos. Pedidos cancelados ficam fora. Sobra menor que 1 caixa não conta como não faturado. Faturar acima do pedido não cobre a falta de outro item. “% não faturado” = quanto do valor pedido daquela linha deixou de faturar (inclui os pedidos dela que faturaram completos).</div>';
   return kpis + '<div id="rel-pnf-rank"></div><div id="rel-pnf-rede"></div>' + nota;
 }
 function _relPnfSet(k, v) { window._relPnf[k] = v; _relPnfRender(); }
@@ -33990,18 +33994,18 @@ function _relPnfRender() {
   var dataBR = function (d) { return d ? String(d).split('-').reverse().join('/') : ''; };
   var colsMini = [ {label:'Pedido'}, {label:'Data'}, {label:'Cliente'} ].concat(ag === 'produto' ? [] : [ {label:'Produto'} ]).concat([ {label:'Pedido',right:true}, {label:'Faturou',right:true}, {label:'Faltou',right:true}, {label:'Falta R$',right:true}, {label:'NF'} ]);
   var qtd = function (r, q) { return _relNum(q, Math.abs(q - Math.round(q)) < 0.005 ? 0 : 2) + ' ' + String(r.un || '').toLowerCase(); };
-  var cols = [ { label: nomeAgRot(S.nomeAg), width: '2fr' }, { label: 'Pedido', width: '115px', right: true }, { label: 'Faturou', width: '115px', right: true }, { label: 'Não faturou Kg', width: '115px', right: true }, { label: 'Não faturou R$', width: '125px', right: true }, { label: 'Peso no total não faturado', width: '170px', right: true }, { label: 'Pedidos', width: '70px', right: true } ];
+  var cols = [ { label: nomeAgRot(S.nomeAg), width: '2fr' }, { label: 'Pedido', width: '115px', right: true }, { label: 'Faturou', width: '115px', right: true }, { label: 'Não faturou Kg', width: '115px', right: true }, { label: 'Não faturou R$', width: '125px', right: true }, { label: '% não faturado', width: '120px', right: true }, { label: 'Pedidos', width: '70px', right: true } ];
   function nomeAgRot(n) { return n; }
   var rows = mostrar.map(function (g, i) {
     return [ '<span style="display:inline-block;width:26px;color:#94a3b8">' + (i + 1) + '</span><b>' + _pedEsc(g.nome) + '</b>' + (ag === 'produto' && g.saz ? ' <span style="font-size:10px;background:#fff2cc;color:#7f6000;border-radius:4px;padding:1px 6px;font-weight:600">sazonal</span>' : ''),
-      _pedFmtMoeda(g.rsPed), '<span style="color:#15803d">' + _pedFmtMoeda(g.rsPed - g.rsNao) + '</span>', '<b style="color:#b91c1c">' + _relNum(g.kgNao) + '</b>', '<b style="color:#b91c1c">' + _pedFmtMoeda(g.rsNao) + '</b>', '<b>' + _relPnfPeso(g.rsNao, totNao) + '</b>', String(Object.keys(g.ped).length) ];
+      _pedFmtMoeda(g.rsPed), '<span style="color:#15803d">' + _pedFmtMoeda(g.rsPed - g.rsNao) + '</span>', '<b style="color:#b91c1c">' + _relNum(g.kgNao) + '</b>', '<b style="color:#b91c1c">' + _pedFmtMoeda(g.rsNao) + '</b>', '<b>' + _relPnfPct(g.rsNao, g.rsPed) + '</b>', String(Object.keys(g.ped).length) ];
   });
   var dets = mostrar.map(function (g) {
     return _relMini(colsMini, g.ls.slice().sort(function (a, b) { return b.rsNao - a.rsNao; }).map(function (r) {
       return [ _pedEsc(r.p.numPedidoCliente || r.p.id), dataBR(r.p.data), _pedEsc(_cpSemColchetes(r.cli.nome_fantasia || r.p.clienteNome || '')) ].concat(ag === 'produto' ? [] : [ _pedEsc(r.nome) ]).concat([ qtd(r, r.qPed), '<span style="color:#15803d">' + qtd(r, r.qFat) + '</span>', '<b style="color:#b91c1c">' + qtd(r, r.qNao) + '</b>', '<b style="color:#b91c1c">' + _pedFmtMoeda(r.rsNao) + '</b>', _pedEsc(r.nfs || '—') ]);
     }));
   });
-  var tab = rows.length ? _relTabela(cols, rows, { detalhes: dets, minWidth: 1000, totais: [ 'TOTAL (' + lista.length + ')', _pedFmtMoeda(lista.reduce(function (a, g) { return a + g.rsPed; }, 0)), _pedFmtMoeda(lista.reduce(function (a, g) { return a + g.rsPed - g.rsNao; }, 0)), _relNum(S.T.naoKg), _pedFmtMoeda(S.T.naoRs), '100%', '' ] })
+  var tab = rows.length ? _relTabela(cols, rows, { detalhes: dets, minWidth: 1000, totais: [ 'TOTAL (' + lista.length + ')', _pedFmtMoeda(lista.reduce(function (a, g) { return a + g.rsPed; }, 0)), _pedFmtMoeda(lista.reduce(function (a, g) { return a + g.rsPed - g.rsNao; }, 0)), _relNum(S.T.naoKg), _pedFmtMoeda(S.T.naoRs), _relPnfPct(S.T.naoRs, lista.reduce(function (a, g) { return a + g.rsPed; }, 0)), '' ] })
     : '<div style="padding:30px;text-align:center;font-size:12px;color:#15803d">Nada deixou de faturar com os filtros escolhidos.</div>';
   box.innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);margin-bottom:12px;overflow:hidden">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #e2e8f0"><span style="font-size:13px;font-weight:700;color:#1e293b">Ranking de não faturado por ' + S.nomeAg.toLowerCase() + '</span>'
@@ -34010,12 +34014,12 @@ function _relPnfRender() {
   if (!boxR) return;
   if (ag === 'rede' || !S.redes.length) { boxR.innerHTML = ''; return; }
   var redes = S.redes.slice().sort(function (a, b) { return b.rsNao - a.rsNao; });
-  var colsR = [ { label: 'Rede', width: '2fr' }, { label: 'Pedido', width: '115px', right: true }, { label: 'Não faturou Kg', width: '115px', right: true }, { label: 'Não faturou R$', width: '125px', right: true }, { label: 'Peso no total não faturado', width: '170px', right: true }, { label: 'Pedidos', width: '70px', right: true } ];
-  var rowsR = redes.map(function (g) { return [ '<b>' + _pedEsc(g.nome) + '</b>', _pedFmtMoeda(g.rsPed), _relNum(g.kgNao), '<b style="color:#b91c1c">' + _pedFmtMoeda(g.rsNao) + '</b>', '<b>' + _relPnfPeso(g.rsNao, totNao) + '</b>', String(Object.keys(g.ped).length) ]; });
+  var colsR = [ { label: 'Rede', width: '2fr' }, { label: 'Pedido', width: '115px', right: true }, { label: 'Não faturou Kg', width: '115px', right: true }, { label: 'Não faturou R$', width: '125px', right: true }, { label: '% não faturado', width: '120px', right: true }, { label: 'Pedidos', width: '70px', right: true } ];
+  var rowsR = redes.map(function (g) { return [ '<b>' + _pedEsc(g.nome) + '</b>', _pedFmtMoeda(g.rsPed), _relNum(g.kgNao), '<b style="color:#b91c1c">' + _pedFmtMoeda(g.rsNao) + '</b>', '<b>' + _relPnfPct(g.rsNao, g.rsPed) + '</b>', String(Object.keys(g.ped).length) ]; });
   var detsR = redes.map(function (g) {
     var subs = Object.keys(g.subs).map(function (k) { return g.subs[k]; }).sort(function (a, b) { return b.rsNao - a.rsNao; });
-    return _relMini([ {label:'Sub rede'}, {label:'Pedido',right:true}, {label:'Não faturou Kg',right:true}, {label:'Não faturou R$',right:true}, {label:'Peso no total não faturado',right:true}, {label:'Pedidos',right:true} ], subs.map(function (sb) {
-      return [ _pedEsc(sb.nome), _pedFmtMoeda(sb.rsPed), _relNum(sb.kgNao), '<b style="color:#b91c1c">' + _pedFmtMoeda(sb.rsNao) + '</b>', '<b>' + _relPnfPeso(sb.rsNao, totNao) + '</b>', String(Object.keys(sb.ped).length) ];
+    return _relMini([ {label:'Sub rede'}, {label:'Pedido',right:true}, {label:'Não faturou Kg',right:true}, {label:'Não faturou R$',right:true}, {label:'% não faturado',right:true}, {label:'Pedidos',right:true} ], subs.map(function (sb) {
+      return [ _pedEsc(sb.nome), _pedFmtMoeda(sb.rsPed), _relNum(sb.kgNao), '<b style="color:#b91c1c">' + _pedFmtMoeda(sb.rsNao) + '</b>', '<b>' + _relPnfPct(sb.rsNao, sb.rsPed) + '</b>', String(Object.keys(sb.ped).length) ];
     }));
   });
   boxR.innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);margin-bottom:12px;overflow:hidden"><div style="padding:10px 14px;border-bottom:1px solid #e2e8f0"><span style="font-size:13px;font-weight:700;color:#1e293b">Impacto por rede</span> <span style="font-size:11px;color:#94a3b8">clique na rede para ver as sub redes</span></div>'
