@@ -2133,6 +2133,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
   <div id="msVendedores" class="multiselect"></div>
   <div id="msUf" class="multiselect"></div>
   <div id="msClientes" class="multiselect"></div>
+  <select id="dvgSazonal" title="Produtos sazonais" style="border:1px solid #e2e8f0;border-radius:7px;padding:5px 8px;font-size:12px;font-weight:600;background:#f8fafc;color:#1e293b;outline:none;cursor:pointer"><option value="com">Sazonal: Com Sazonal</option><option value="sem">Sazonal: Sem Sazonal</option><option value="so">Sazonal: Só Sazonal</option></select>
   <div style="width:1px;height:18px;background:#e2e8f0;margin:0 2px"></div>
   <button id="btnReset" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Limpar filtros</button>
 </div>
@@ -17489,6 +17490,23 @@ function _dashConstruirDadosAoVivo() {
     produtosPesoMap[pr.id] = parseFloat(String(pr.peso).replace(',', '.')) || 0;
     produtosCxMap[pr.id] = parseFloat(String(pr.quant == null ? '' : pr.quant).replace(',', '.')) || 0;
   });
+  var SAZ_PROD = {}; window._dashSazProd = SAZ_PROD;
+  ((typeof getProdutos === 'function') ? getProdutos() : []).forEach(function (pr) { if (pr.sazonal === 'Sim') SAZ_PROD[pr.id] = 1; });
+  // parte dos itens que e de produto sazonal (qtd, peso, caixas e proporcao do valor) -- para o filtro Sazonal do painel
+  function _dashParteSazonal(itens, campoQtd, modoVal) {
+    var r = { vol: 0, peso: 0, cx: 0, nSaz: 0, nTot: 0, ratio: 0 }, vTot = 0, vSaz = 0, qTot = 0, qSaz = 0;
+    (itens || []).forEach(function (it) {
+      var q = Number(it[campoQtd]) || 0, v = modoVal === 'fat' ? q * (Number(it.precoFat || it.precoUnit) || 0) : (Number(it.valorTotal) || 0);
+      r.nTot++; vTot += v; qTot += q;
+      if (SAZ_PROD[it.prodId]) {
+        r.nSaz++; vSaz += v; qSaz += q; r.vol += q;
+        r.peso += (produtosPesoMap[it.prodId] || 0) * q;
+        var un = produtosCxMap[it.prodId] || 0; if (un > 0) r.cx += q / un;
+      }
+    });
+    r.ratio = vTot > 0 ? vSaz / vTot : (qTot > 0 ? qSaz / qTot : 0);
+    return r;
+  }
   function _dashCaixasItens(itens, campoQtd) {
     return (itens || []).reduce(function (s, it) {
       var un = produtosCxMap[it.prodId] || 0;
@@ -17515,14 +17533,16 @@ function _dashConstruirDadosAoVivo() {
         var peso = _dashPesoItens(fat.itens, 'qtd');
         var data = (fat.data || pedido.data || '').slice(0, 10);
         if (!data) return;
-        PED.push([data, cIdx, fIdx, vIdx, vol, Number(fat.valor) || 0, sIdx, peso, pedido.id, _dashCaixasItens(fat.itens, 'qtd')]);
+        var _szF = _dashParteSazonal(fat.itens, 'qtd', 'fat'), _vlF = Number(fat.valor) || 0;
+        PED.push([data, cIdx, fIdx, vIdx, vol, _vlF, sIdx, peso, pedido.id, _dashCaixasItens(fat.itens, 'qtd'), _vlF * _szF.ratio, _szF.vol, _szF.peso, _szF.cx, _szF.nSaz, _szF.nTot]);
       });
     } else {
       var volPed = (pedido.itens || []).reduce(function (s, it) { return s + (Number(it.quantidade) || 0); }, 0);
       var pesoPed = _dashPesoItens(pedido.itens, 'quantidade');
       var dataPed = (pedido.data || '').slice(0, 10);
       if (!dataPed) return;
-      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, Number(pedido.valorTotal) || 0, sIdx, pesoPed, pedido.id, _dashCaixasItens(pedido.itens, 'quantidade')]);
+      var _szP = _dashParteSazonal(pedido.itens, 'quantidade', 'ped'), _vlP = Number(pedido.valorTotal) || 0;
+      PED.push([dataPed, cIdx, fIdx, vIdx, volPed, _vlP, sIdx, pesoPed, pedido.id, _dashCaixasItens(pedido.itens, 'quantidade'), _vlP * _szP.ratio, _szP.vol, _szP.peso, _szP.cx, _szP.nSaz, _szP.nTot]);
     }
   });
 
@@ -17650,6 +17670,7 @@ function dashInit() {
       vendedores: new Set(),
       clientes: new Set(),
       uf: new Set(),
+      sazonal: window._dashSazonal || 'com',   // com | sem | so
       aba: (document.querySelector('.dash-root .d-tab-btn.active')?.dataset.tab) || 'home',
       diasRisco: 60,
       fabricaFoco: -1,
@@ -17733,6 +17754,20 @@ function dashInit() {
     }
 
     // =============== FILTRAR ===============
+    // filtro Sazonal: devolve a propria linha, uma copia so com a parte pedida (sem/so sazonais) ou null se nao sobra nada
+    function _szProdOk(prodId) { const _sp = window._dashSazProd || {}; return state.sazonal === 'com' ? true : (state.sazonal === 'sem' ? !_sp[prodId] : !!_sp[prodId]); }
+    function _szAjustaLinha(p) {
+      if (state.sazonal === 'com' || p.length < 16 || !p[15]) return p;
+      const nS = p[14], nT = p[15];
+      if (state.sazonal === 'sem') {
+        if (!nS) return p;
+        if (nS >= nT) return null;
+        const q = p.slice(); q[4] = p[4] - p[11]; q[5] = p[5] - p[10]; q[7] = (p[7] || 0) - p[12]; q[9] = (p[9] || 0) - p[13]; return q;
+      }
+      if (!nS) return null;
+      if (nS >= nT) return p;
+      const q = p.slice(); q[4] = p[11]; q[5] = p[10]; q[7] = p[12]; q[9] = p[13]; return q;
+    }
     function filtraPedidos(opts={}) {
       const ini = opts.dtIni || state.dtIni, fim = opts.dtFim || state.dtFim;
       const fabSet = state.fabricas, venSet = state.vendedores, cliSet = state.clientes, ufSet = state.uf;
@@ -17748,6 +17783,7 @@ function dashInit() {
         if (ufSet.size) { const _ui = ufIdxOf[CLI_UF[p[1]]]; if (_ui === undefined || !ufSet.has(_ui)) continue; }
         if (cliSet.size && !cliSet.has(p[1])) continue;
         if (!ignorarStatus && !ST_OK.has(p[6])) continue;
+        if (state.sazonal !== 'com') { const _q = _szAjustaLinha(p); if (_q) out.push(_q); continue; }
         out.push(p);
       }
       return out;
@@ -18367,12 +18403,12 @@ function dashInit() {
             const base = pm.get(o.id); if (!base || !_pdPassa(base[1], base[2], base[3])) continue;
             for (const f of (o.faturas || [])) {
               if (f.status === 'Cancelado' || !f.data || f.data < cmp.dtIni || f.data > cmp.dtFim) continue;
-              for (const it of (f.itens || [])) { if (!(Number(it.qtd) > 0)) continue; b.add(it.prodId != null ? 'i' + it.prodId : 'c' + it.prodCodigo); }
+              for (const it of (f.itens || [])) { if (!(Number(it.qtd) > 0) || !_szProdOk(it.prodId)) continue; b.add(it.prodId != null ? 'i' + it.prodId : 'c' + it.prodCodigo); }
             }
           }
         } catch (e) { /* pedidos resumidos indisponiveis */ }
         out.n = a.size; out.nAnt = b.size;
-        out.ativos = (getProdutos() || []).filter(p => (p.ativo || 'Sim') !== 'Não').filter(p => {
+        out.ativos = (getProdutos() || []).filter(p => (p.ativo || 'Sim') !== 'Não').filter(p => _szProdOk(p.id)).filter(p => {
           const ix = FAB_ID.indexOf(p.fornecedor);
           return !(state.fabricas.size && ix >= 0 && !state.fabricas.has(ix));
         }).length;
@@ -18381,7 +18417,7 @@ function dashInit() {
         const fabOk = id => { const p = prodsM.get(id); if (!p) return true; const ix = FAB_ID.indexOf(p.fornecedor); return !(state.fabricas.size && ix >= 0 && !state.fabricas.has(ix)); };
         const prim = _dvgPrimeiraVenda();
         const evAt = new Map(), evAnt = new Set();
-        prim.forEach((v, k) => { if (!fabOk(v.pid)) return; if (v.d <= state.dtFim) evAt.set(k, v.pid); if (v.d <= cmp.dtFim) evAnt.add(k); });
+        prim.forEach((v, k) => { if (!fabOk(v.pid) || !_szProdOk(v.pid)) return; if (v.d <= state.dtFim) evAt.set(k, v.pid); if (v.d <= cmp.dtFim) evAnt.add(k); });
         let emL = 0;
         evAt.forEach((pid, k) => { const p = prodsM.get(pid); if (a.has(k) || !p || (p.ativo || 'Sim') !== 'Não') emL++; });
         a.forEach(k => { if (!evAt.has(k)) emL++; });
@@ -19367,6 +19403,7 @@ function dashInit() {
           if (pedidoReal.data < state.dtIni || pedidoReal.data > state.dtFim) continue;
           if (!ST_OK.has(STATUS.indexOf(pedidoReal.status))) continue;
           (pedidoReal.itens || []).forEach(it => {
+            if (!_szProdOk(it.prodId)) return;
             const chave = it.prodId != null ? it.prodId : (it.prodNome || it.prodCodigo);
             let acc = agProd.get(chave);
             if (!acc) {
@@ -19550,7 +19587,7 @@ function dashInit() {
     }
     // uma linha por produto faturado em cada fatura (valor ajustado para fechar com o valor da NF)
     let _pdLinhasCache = { k: null, t: 0, v: null };
-    function _pdChaveFiltro() { return [...state.fabricas].sort().join(',') + '|' + [...state.vendedores].sort().join(',') + '|' + [...state.uf].sort().join(',') + '|' + [...state.clientes].sort((a, b) => a - b).join(','); }
+    function _pdChaveFiltro() { return state.sazonal + '|' + [...state.fabricas].sort().join(',') + '|' + [...state.vendedores].sort().join(',') + '|' + [...state.uf].sort().join(',') + '|' + [...state.clientes].sort((a, b) => a - b).join(','); }
     function _pdLinhas() {
       const peds = getPedidos();
       const k = _pedImpressao(peds) + '#' + _pdChaveFiltro() + '#' + PED.length;
@@ -19580,6 +19617,7 @@ function dashInit() {
           const fator = (soma > 0 && f.valor > 0) ? f.valor / soma : 1;
           for (const x of its) {
             if (!(x.q > 0)) continue;
+            if (!_szProdOk(x.it.prodId)) continue;
             const pr = x.it.prodId != null ? prods.get(x.it.prodId) : null;
             const pesoU = pr ? (parseFloat(String(pr.peso).replace(',', '.')) || 0) : 0;
             const qcx = pr ? (parseFloat(String(pr.quant == null ? '' : pr.quant).replace(',', '.')) || 0) : 0;
@@ -19715,6 +19753,7 @@ function dashInit() {
       const ultVenda = new Map(); hist.forEach(l => { if (l.data <= fim) { const u = ultVenda.get(l.k); if (!u || l.data > u) ultVenda.set(l.k, l.data); } });
       const ativos = (getProdutos() || []).filter(p => (p.ativo || 'Sim') !== 'Não').filter(p => {
         const ix = FAB_ID.indexOf(p.fornecedor);
+        if (!_szProdOk(p.id)) return false;
         if (_pdSt.fab >= 0 && ix !== _pdSt.fab) return false;
         if (state.fabricas.size && ix >= 0 && !state.fabricas.has(ix)) return false;
         return true;
@@ -19740,6 +19779,7 @@ function dashInit() {
           if (!(p.faturas || []).some(f => f.status !== 'Cancelado')) continue;
           const b = pmx.get(p.id); if (!b || !_pdPassa(b[1], b[2], b[3])) continue;
           for (const it of r.itens) {
+            if (!_szProdOk(it.prodId)) continue;
             const k = it.prodId != null ? 'i' + it.prodId : 'c' + it.prodCodigo;
             const pr = prodsM.get(it.prodId);
             if (_pdSt.fab >= 0) { const ix = pr && pr.fornecedor != null ? FAB_ID.indexOf(pr.fornecedor) : b[2]; if ((ix >= 0 ? ix : b[2]) !== _pdSt.fab) continue; }
@@ -20069,11 +20109,14 @@ function dashInit() {
       state.dtIni = periodoMax.slice(0,8) + '01'; state.dtFim = periodoMax;
       document.querySelectorAll('.dash-root .qbtn[data-r]').forEach(x => x.classList.toggle('active', x.dataset.r === 'mes'));
       state.fabricas.clear(); state.vendedores.clear(); state.clientes.clear(); state.uf.clear();
+      state.sazonal = 'com'; window._dashSazonal = 'com'; { const _sz = document.getElementById('dvgSazonal'); if (_sz) _sz.value = 'com'; }
       document.getElementById('dtIni').value = _entctrlDataParaBR(state.dtIni);
       document.getElementById('dtFim').value = _entctrlDataParaBR(state.dtFim);
       window._dashPeriodoUsuario = null;
       buildFiltros(); rerender();
     });
+    { const _szSel = document.getElementById('dvgSazonal');
+      if (_szSel) { _szSel.value = state.sazonal; _szSel.onchange = () => { state.sazonal = _szSel.value; window._dashSazonal = state.sazonal; rerender(); }; } }
     // onclick (nao addEventListener) de proposito: dashInit() roda de novo toda vez que a
     // pagina Inicio e reaberta, e addEventListener empilharia um listener novo a cada vez --
     // o 2o clique dispararia os 2 listeners e o toggle voltaria pro mesmo estado sozinho.
