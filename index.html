@@ -24754,7 +24754,7 @@ function _pedSalvarAnexoAoPedido(pedidoId, file, tipo, callbacks) {
 
   var reader = new FileReader();
   reader.onload = function(e) {
-    var anexo = { tipo: tipo, nome: file.name, tamanho: file.size, dados: e.target.result, dtUpload: new Date().toLocaleDateString('pt-BR') };
+    var anexo = { tipo: tipo, nome: file.name, tamanho: file.size, dados: e.target.result, dtUpload: (function () { var h = new Date(); return h.getFullYear() + '-' + ('0' + (h.getMonth() + 1)).slice(-2) + '-' + ('0' + h.getDate()).slice(-2); })() };   // ISO (ano-mes-dia): o banco le dd/mm/aaaa como mes/dia e recusa dia > 12
     function salvarPersistir() {
       var data = getPedidos();
       var idx = data.findIndex(function(x){ return x.id === pedidoId; });
