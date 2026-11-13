@@ -1275,6 +1275,7 @@
     .mod-table td { padding: 7px 12px; border-bottom: 1px solid #e2e8f0; color: #1e293b; vertical-align: middle; }
     .mod-table tr:nth-child(even) td { background: #f8fafc; }
     .mod-table tr:hover td { background: #eff6ff; }
+    .bn-row:hover { background: #eff6ff !important; }
     .mod-table .sub-row td { background: #f0f7ff; }
     .mod-table .sub-row td:first-child { padding-left: 28px; color: #2563eb; }
     .mod-action-btn { background: none; border: none; cursor: pointer; padding: 2px 4px; font-size: 13px; border-radius: 3px; }
@@ -33777,15 +33778,26 @@ function _relPassaPedCli(f, p, cli) {
   }
   return true;
 }
+// Cards dos relatorios: mesmo padrao do painel (icone, titulo em maiusculas, numero grande e linha azul embaixo)
+var _KPI_TOM = ['#1c2f66', '#3d5aa8', '#5b78c9', '#0e2f6e'];
+function _relKpiIcone(label) {
+  var t = String(label || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  var mapa = [ [/periodo/, 'ti-calendar'], [/%|percent|atendimento|positiv/, 'ti-percentage'], [/nao fatur/, 'ti-package-off'], [/devol/, 'ti-arrow-back-up'], [/pedido/, 'ti-receipt'], [/fatur|valor|receita|comiss|r\$|pago|receber/, 'ti-cash'], [/kg|quilo|peso|volume|caixa/, 'ti-package'], [/client|loja/, 'ti-users'], [/vendedor/, 'ti-user'], [/nota|nfs?\b|nf-/, 'ti-file-invoice'], [/produto|item|itens|sku|mix/, 'ti-list-details'], [/dia|prazo|atras|parad/, 'ti-clock'], [/compar|perfil|lado/, 'ti-arrows-left-right'] ];
+  for (var i = 0; i < mapa.length; i++) if (mapa[i][0].test(t)) return mapa[i][1];
+  return 'ti-chart-bar';
+}
+function _relKpiCard(it, i, op) {
+  op = op || {};
+  var tom = _KPI_TOM[i % _KPI_TOM.length];
+  var st = 'background:' + (op.on ? '#f8fbff' : '#fff') + ';border-radius:12px;padding:12px 14px;box-shadow:0 3px 12px rgba(15,23,42,.1);display:flex;flex-direction:column;text-align:left;font-family:inherit;border:none;border-bottom:3px solid ' + tom + ';width:100%;' + (op.on ? 'outline:2px solid #3d5aa8;outline-offset:-2px;' : '') + (op.click ? 'cursor:pointer;' : '');
+  var inner = '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><div style="width:26px;height:26px;border-radius:8px;background:#eef2fb;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;color:' + tom + '"><i class="ti ' + (it.icone || _relKpiIcone(it.label)) + '"></i></div>'
+    + '<div style="font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:.03em;text-transform:uppercase">' + it.label + '</div></div>'
+    + '<div style="font-size:19px;font-weight:800;color:' + (it.cor || '#1e293b') + ';margin-top:4px">' + it.valor + '</div>'
+    + (it.sub ? '<div style="font-size:12.5px;color:#94a3b8;margin-top:2px">' + it.sub + '</div>' : '');
+  return op.click ? '<button type="button" onclick="' + op.click + '" style="' + st + '">' + inner + '</button>' : '<div style="' + st + '">' + inner + '</div>';
+}
 function _relKpis(itens) {
-  return '<div style="display:grid;grid-template-columns:repeat(' + itens.length + ',1fr);gap:12px;margin-bottom:12px">' + itens.map(function(it){
-    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)">'
-      + '<div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.01em">' + it.label + '</div>'
-      + '<div style="font-size:20px;font-weight:800;color:' + (it.cor||'#1e293b') + ';line-height:1.2;letter-spacing:-.02em">' + it.valor + '</div>'
-      + (it.sub ? '<div style="font-size:11px;color:#64748b;margin-top:3px">' + it.sub + '</div>' : '')
-      + '<div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:' + (it.cor||'#272A4A') + '"></div>'
-      + '</div>';
-  }).join('') + '</div>';
+  return '<div style="display:grid;grid-template-columns:repeat(' + itens.length + ',1fr);gap:12px;margin-bottom:12px">' + itens.map(function(it, i){ return _relKpiCard(it, i); }).join('') + '</div>';
 }
 
 function _relBaseFaturas(f) {
@@ -36140,25 +36152,27 @@ function _relCalcComparativoMix(f) {
   var baseA = { fornecedor: f.fornecedor, categoria: f.categoria, subcategoria: f.subcategoria, uf: f.uf, cliente: f.cliente, vendedor: f.vendedor };
   var baseB = { fornecedor: f.fornecedor, categoria: B.categoria, subcategoria: B.subcategoria, uf: B.uf, cliente: B.cliente, vendedor: B.vendedor };
   var pm = {}; getProdutos().forEach(function(pr){ pm[pr.id] = pr; });
-  function juntar(filtros) {
+  function juntar(filtros, comPeriodo) {
     var M = {};
-    _relBaseFaturas(Object.assign({}, filtros, { dataDe: de, dataAte: ate })).forEach(function(l){
+    _relBaseFaturas(Object.assign({}, filtros, comPeriodo ? { dataDe: de, dataAte: ate } : {})).forEach(function(l){
       (l.fatura.itens || []).forEach(function(i){
         var pr = pm[i.prodId] || {}, nome = i.prodNome || pr.nome || 'Produto', k = i.prodId || nome;
-        var o = M[k] = M[k] || { nome: nome, cod: i.prodCodigo || pr.codigo || '', v: 0 };
+        var o = M[k] = M[k] || { nome: nome, cod: i.prodCodigo || pr.codigo || '', v: 0, ult: '' };
         o.v += (Number(i.qtd) || 0) * (Number(i.precoFat) || 0);
+        if (l.fatura.data && l.fatura.data > o.ult) o.ult = l.fatura.data;
       });
     });
     return M;
   }
-  var A = juntar(baseA), Bm = juntar(baseB);
+  var A = juntar(baseA, true), Bm = juntar(baseB, true);
+  var Aall = juntar(baseA, false), Ball = juntar(baseB, false);   // historico: ultima compra mesmo antes do periodo
   var nomeA = _relNomeLado(baseA), nomeB = _relNomeLado(baseB);
   var todos = {};
-  Object.keys(A).forEach(function(k){ todos[k] = { nome: A[k].nome, cod: A[k].cod, a: true, b: false, v: A[k].v }; });
-  Object.keys(Bm).forEach(function(k){ if (todos[k]) { todos[k].b = true; todos[k].v += Bm[k].v; } else todos[k] = { nome: Bm[k].nome, cod: Bm[k].cod, a: false, b: true, v: Bm[k].v }; });
-  var lista = Object.keys(todos).map(function(k){ return todos[k]; }).sort(function(x, y){ return y.v - x.v; });
+  Object.keys(A).forEach(function(k){ todos[k] = { k: k, nome: A[k].nome, cod: A[k].cod, a: true, b: false, v: A[k].v }; });
+  Object.keys(Bm).forEach(function(k){ if (todos[k]) { todos[k].b = true; todos[k].v += Bm[k].v; } else todos[k] = { k: k, nome: Bm[k].nome, cod: Bm[k].cod, a: false, b: true, v: Bm[k].v }; });
+  var lista = Object.keys(todos).map(function(k){ var p = todos[k]; p.ultA = (Aall[k] && Aall[k].ult) || ''; p.ultB = (Ball[k] && Ball[k].ult) || ''; return p; }).sort(function(x, y){ return y.v - x.v; });
   window._relBn = { lista: lista, nomeA: nomeA, nomeB: nomeB, de: de, ate: ate, filtro: 'todos' };
-  return '<div id="rel-bn-kpis"></div><div id="rel-bn-lista"></div><div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Período: ' + _relFmtDataBR(de) + ' a ' + _relFmtDataBR(ate) + ' (padrão: últimos 12 meses). X = comprou (faturado, NF não cancelada) no período. Faixa azul: só o Perfil 1 compra; faixa laranja: só o Perfil 2 compra. A lista vem dos produtos mais vendidos para os menos.</div>';
+  return '<div id="rel-bn-kpis"></div><div id="rel-bn-lista"></div><div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Período: ' + _relFmtDataBR(de) + ' a ' + _relFmtDataBR(ate) + ' (padrão: últimos 12 meses). X = comprou (faturado, NF não cancelada) no período. <b>Última compra</b> = data da última NF faturada desse produto para aquele perfil, mesmo antes do período (em laranja quando faz mais de 90 dias; “nunca” se nunca comprou). Faixa azul: só o Perfil 1 compra; faixa laranja: só o Perfil 2 compra. A lista vem dos produtos mais vendidos para os menos.</div>';
 }
 function _relBnFiltro(k) { if (window._relBn) { window._relBn.filtro = k; _relBnRender(); } }
 function _relBnRender() {
@@ -36166,25 +36180,39 @@ function _relBnRender() {
   if (!S || !bk || !bl) return;
   var so1 = S.lista.filter(function(p){ return p.a && !p.b; }), so2 = S.lista.filter(function(p){ return !p.a && p.b; }), amb = S.lista.filter(function(p){ return p.a && p.b; });
   var cartoes = [
-    ['todos', '#64748b', 'Produtos comparados', S.lista.length, 'entre os dois perfis', '#1e293b'],
-    ['so1', '#272A4A', 'Só o Perfil 1 compra', so1.length, 'o Perfil 2 não compra', '#272A4A'],
-    ['amb', '#16a34a', 'Os dois compram', amb.length, (S.lista.length ? Math.round(amb.length / S.lista.length * 100) : 0) + '% dos produtos', '#15803d'],
-    ['so2', '#DE7926', 'Só o Perfil 2 compra', so2.length, 'o Perfil 1 não compra', '#b45309']
+    ['todos', 'Produtos comparados', S.lista.length, 'entre os dois perfis', '#1e293b', 'ti-arrows-left-right'],
+    ['so1', 'Só o Perfil 1 compra', so1.length, 'o Perfil 2 não compra', '#272A4A', 'ti-circle-1'],
+    ['amb', 'Os dois compram', amb.length, (S.lista.length ? Math.round(amb.length / S.lista.length * 100) : 0) + '% dos produtos', '#15803d', 'ti-circle-check'],
+    ['so2', 'Só o Perfil 2 compra', so2.length, 'o Perfil 1 não compra', '#b45309', 'ti-circle-2']
   ];
-  bk.innerHTML = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">' + cartoes.map(function(c){
-    var on = S.filtro === c[0];
-    return '<button type="button" onclick="_relBnFiltro(&#39;' + c[0] + '&#39;)" style="text-align:left;font-family:inherit;cursor:pointer;background:' + (on ? '#f8fafc' : '#fff') + ';border:1px solid #e5e7eb;border-left:4px solid ' + c[1] + ';border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.05);' + (on ? 'outline:2px solid #272A4A;outline-offset:-2px;' : '') + '">'
-      + '<div style="font-size:11px;color:#64748b;font-weight:600">' + c[2] + '</div><div style="font-size:22px;font-weight:800;color:' + c[5] + ';line-height:1.2;letter-spacing:-.02em">' + c[3] + '</div><div style="font-size:11px;color:#94a3b8">' + c[4] + '</div></button>';
+  bk.innerHTML = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">' + cartoes.map(function(c, i){
+    return _relKpiCard({ label: c[1], valor: c[2], sub: c[3], cor: c[4], icone: c[5] }, i, { click: "_relBnFiltro(&#39;" + c[0] + "&#39;)", on: S.filtro === c[0] });
   }).join('') + '</div>';
   var l = S.lista.filter(function(p){ return S.filtro === 'todos' || (S.filtro === 'so1' && p.a && !p.b) || (S.filtro === 'so2' && !p.a && p.b) || (S.filtro === 'amb' && p.a && p.b); });
+  var hoje = _relHojeISO(), dias = function(d){ return Math.floor((new Date(hoje + 'T12:00:00') - new Date(d + 'T12:00:00')) / 86400000); };
+  var dt = function(d){ return d ? '<span style="color:' + (dias(d) > 90 ? '#c2410c;font-weight:600' : '#475569') + ';font-size:11.5px">' + _relFmtDataBR(d) + '</span>' : '<span style="color:#cbd5e1;font-size:11.5px">nunca</span>'; };
   var x1 = '<b style="color:#272A4A;font-size:14px">X</b>', x2 = '<b style="color:#DE7926;font-size:14px">X</b>', sem = '<span style="color:#cbd5e1">—</span>';
-  var cols = [ { label: 'Produto' }, { label: _pedEsc(S.nomeA), width: '200px', right: true }, { label: _pedEsc(S.nomeB), width: '200px', right: true } ];
-  var rows = l.map(function(p){
+  var G = 'display:grid;grid-template-columns:minmax(280px,1.5fr) repeat(4,minmax(90px,1fr));';
+  var cel = 'padding:9px 12px;display:flex;align-items:center;justify-content:center;text-align:center;';
+  var sep = 'border-left:1px solid #dbe4f5;', sepH = 'border-left:1px solid rgba(255,255,255,.18);';
+  var linhas = l.map(function(p, i){
     var cor = (p.a && !p.b) ? '#272A4A' : ((!p.a && p.b) ? '#DE7926' : 'transparent');
-    return [ '<span style="border-left:3px solid ' + cor + ';padding-left:8px">' + _pedEsc((p.cod ? p.cod + ' · ' : '') + p.nome) + '</span>', p.a ? x1 : sem, p.b ? x2 : sem ];
-  });
+    return '<div class="bn-row" data-relrow="1" style="' + G + 'font-size:12px;border-top:1px solid #e3eaf7;background:' + (i % 2 ? '#f5f8fe' : '#fff') + ';transition:background .12s">'
+      + '<div style="padding:9px 12px;display:flex;align-items:center;border-left:3px solid ' + cor + '">' + _pedEsc((p.cod ? p.cod + ' · ' : '') + p.nome) + '</div>'
+      + '<div style="' + cel + '">' + (p.a ? x1 : sem) + '</div><div style="' + cel + '">' + dt(p.ultA) + '</div>'
+      + '<div style="' + cel + sep + '">' + (p.b ? x2 : sem) + '</div><div style="' + cel + '">' + dt(p.ultB) + '</div></div>';
+  }).join('');
   var titulo = { todos: 'Todos os produtos', so1: 'Só o Perfil 1 compra', amb: 'Os dois compram', so2: 'Só o Perfil 2 compra' }[S.filtro];
-  bl.innerHTML = '<div style="font-size:13px;font-weight:700;color:#1e293b;margin:0 0 6px">' + titulo + ' (' + l.length + ') <span style="font-size:11px;font-weight:400;color:#94a3b8">clique num cartão acima para filtrar a lista</span></div>' + _relTabela(cols, rows, { minWidth: 600 });
+  var hd = 'background:linear-gradient(135deg,#272A4A 0%,#3d4180 60%,#2e4a7a 100%);color:#fff;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;';
+  var corpo = l.length
+    ? '<div style="overflow-x:auto"><div style="min-width:760px">'
+      + '<div style="' + G + hd + '"><div style="padding:9px 12px">Produto</div><div style="padding:9px 12px;text-align:center;grid-column:span 2;' + sepH + '">' + _pedEsc(S.nomeA) + '</div><div style="padding:9px 12px;text-align:center;grid-column:span 2;' + sepH + '">' + _pedEsc(S.nomeB) + '</div></div>'
+      + '<div style="' + G + 'background:#e4ecfa;color:#475569;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #d5dff2"><div></div><div style="padding:5px 12px;text-align:center">Comprou</div><div style="padding:5px 12px;text-align:center">Última compra</div><div style="padding:5px 12px;text-align:center;' + sep + '">Comprou</div><div style="padding:5px 12px;text-align:center">Última compra</div></div>'
+      + '<div data-relrow="1" style="display:none"><div>Produto</div><div>' + _pedEsc(S.nomeA) + ' · Comprou</div><div>' + _pedEsc(S.nomeA) + ' · Última compra</div><div>' + _pedEsc(S.nomeB) + ' · Comprou</div><div>' + _pedEsc(S.nomeB) + ' · Última compra</div></div>'
+      + linhas + '</div></div>'
+    : '<div style="padding:40px 20px;text-align:center;font-size:12px;color:#94a3b8">Nenhum resultado para os filtros selecionados.</div>';
+  bl.innerHTML = '<div style="font-size:13px;font-weight:700;color:#1e293b;margin:0 0 6px">' + titulo + ' (' + l.length + ') <span style="font-size:11px;font-weight:400;color:#64748b">clique num cartão acima para filtrar</span></div>'
+    + '<div style="border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(39,42,74,.10);border:1px solid #d5dff2;background:#f3f7fd">' + corpo + '</div>';
 }
 
 // 10 · Positivação por vendedor
