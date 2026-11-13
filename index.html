@@ -6251,7 +6251,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
             <input id="rel-f-numero" placeholder="Número..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:110px">
           </span>
           <span class="rel-campo" data-campo="agrupar" style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:11px;font-weight:600;color:#64748b">Agrupar por</span>
+            <span id="rel-lbl-agrupar" style="font-size:11px;font-weight:600;color:#64748b">Agrupar por</span>
             <select id="rel-f-agrupar" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="pedido">Pedido</option><option value="cliente">Cliente</option><option value="fornecedor">Fábrica</option><option value="vendedor">Vendedor</option><option value="produto">Produto</option></select>
           </span>
           <button onclick="limparFiltrosRelatorio()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
@@ -33275,6 +33275,7 @@ function restaurarBackupSistema() {
 // ═══════════════════════════════════════════════════
 var RELATORIOS = [
   { id:'pedido-faturado', nivel:'operacional', icon:'ti-receipt', titulo:'Pedido × Faturado × Não faturado', desc:'Quanto foi pedido, faturado e o que ficou pendente (R$ e Kg).', campos:['data','fornecedor','vendedor','categoria','subcategoria','uf','cliente','status','produto','sazonal','numero','agrupar'] },
+  { id:'produtos-nao-faturados', nivel:'operacional', icon:'ti-receipt', titulo:'Produtos não Faturados', desc:'Só o que deixou de faturar dos pedidos: ranking, % e impacto por rede.', campos:['data','fornecedor','vendedor','categoria','subcategoria','uf','cliente','produto','sazonal','numero','agrupar'] },
   { id:'pedidos-parados', nivel:'operacional', icon:'ti-clock', titulo:'Pedidos parados por status', desc:'Tempo parado em cada status do pedido.', campos:['data','fornecedor','vendedor','status','cliente','uf','categoria','subcategoria'] },
   { id:'entregas-atraso', nivel:'operacional', icon:'ti-truck', titulo:'Entregas em rota e atrasadas', desc:'Notas por transportadora com dias de atraso.', campos:['data','uf','cliente','fornecedor','vendedor'] },
   { id:'vencimentos', nivel:'operacional', icon:'ti-tag', titulo:'Negociações de preço vencendo', desc:'Vigências a vencer ou já vencidas.', campos:['data','fornecedor'] },
@@ -33447,6 +33448,12 @@ function abrirRelatorio(id) {
   document.querySelectorAll('.rel-campo').forEach(function(el){
     el.style.display = r.campos.indexOf(el.getAttribute('data-campo')) !== -1 ? 'flex' : 'none';
   });
+  var _agSel = document.getElementById('rel-f-agrupar'), _agLbl = document.getElementById('rel-lbl-agrupar');
+  if (_agSel) {
+    if (!_agSel.dataset.orig) _agSel.dataset.orig = _agSel.innerHTML;
+    _agSel.innerHTML = id === 'produtos-nao-faturados' ? '<option value="produto">Produto</option><option value="rede">Rede</option><option value="cliente">Cliente</option><option value="fornecedor">Fábrica</option><option value="vendedor">Vendedor</option>' : _agSel.dataset.orig;
+    if (_agLbl) _agLbl.textContent = id === 'produtos-nao-faturados' ? 'Ranking por' : 'Agrupar por';
+  }
   var statusSel = document.getElementById('rel-f-status');
   if (statusSel) {
     if (id === 'pedido-faturado') {
@@ -33773,6 +33780,7 @@ function gerarRelatorio() {
   }
   var html = '';
   if (_relAtual === 'pedido-faturado') html = _relCalcPedidoFaturado(f);
+  else if (_relAtual === 'produtos-nao-faturados') html = _relCalcProdutosNaoFaturados(f);
   else if (_relAtual === 'pedidos-parados') html = _relCalcPedidosParados(f);
   else if (_relAtual === 'entregas-atraso') html = _relCalcEntregasAtraso(f);
   else if (_relAtual === 'vencimentos') html = _relCalcVencimentos(f);
@@ -33816,6 +33824,7 @@ function gerarRelatorio() {
   }
   document.getElementById('rel-resultado').innerHTML = html;
   if (_relAtual === 'pedido-faturado') _relPfRender();
+  if (_relAtual === 'produtos-nao-faturados') _relPnfRender();
 }
 
 // ── Pedido x Faturado: ranking de produtos (R$/Kg, Top 10/20/50/Todos) e paginacao da tabela (10 por pagina) ──
@@ -33871,6 +33880,147 @@ function _relPfTabela() {
   box.innerHTML = html + pager;
 }
 // ── v49: Pedido x Faturado x Nao faturado (R$ e Kg), com filtros e detalhe por item ──
+// ── Produtos nao Faturados: so o que deixou de faturar dos pedidos (ranking, % e impacto por rede/sub rede) ──
+function _relPnfPeso(v, tot) { return tot > 0 ? _relNum(v / tot * 100, 1) + '%' : '—'; }
+function _relCalcProdutosNaoFaturados(f) {
+  var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
+  var prodMap = {}; getProdutos().forEach(function(p){ prodMap[p.id] = p; });
+  var catNome = {}; getCatClientes().forEach(function(c){ catNome[String(c.id)] = c.nome || ''; });
+  function pesoDe(prodId) { var pr = prodMap[prodId]; return pr ? (parseFloat(String(pr.peso || '0').replace(',', '.')) || 0) : 0; }
+  var fProd = _cpNorm(f.produto || ''), fNum = _cpNorm(f.numero || ''), sazNao = (f.sazonal === 'nao');
+  var ag = ['produto', 'rede', 'cliente', 'fornecedor', 'vendedor'].indexOf(f.agrupar) >= 0 ? f.agrupar : 'produto';
+  var lin = [], T = { pedRs: 0, pedKg: 0, naoRs: 0, naoKg: 0 }, prodsN = {}, pedsN = {};
+  getPedidos().forEach(function(p){
+    if (p.status === 'Cancelado') return;
+    var cli = clientesMap[p.clienteId] || {};
+    if (!_appClienteVisivelUF(cli)) return;
+    if (f.dataDe && p.data < f.dataDe) return;
+    if (f.dataAte && p.data > f.dataAte) return;
+    if (!_relPassaPedCli(f, p, cli)) return;
+    var fats = (p.faturas || []).filter(function(x){ return x.status !== 'Cancelado'; });
+    if (fNum) {
+      var alvoNum = _cpNorm(String(p.numPedidoCliente || '') + ' ' + String(p.id || '') + ' ' + fats.map(function(x){ return x.numDuplicata || ''; }).join(' '));
+      if (alvoNum.indexOf(fNum) === -1) return;
+    }
+    var rede = catNome[String(cli.categoria || '')] || '(sem rede)', sub = catNome[String(cli.subcategoria || '')] || '(sem sub rede)';
+    (p.itens || []).forEach(function(it){
+      var nome = it.prodNome || it.prodCodigo || 'Produto';
+      if (fProd && _cpNorm(nome + ' ' + (it.prodCodigo || '')).indexOf(fProd) === -1) return;
+      if (sazNao && prodMap[it.prodId] && prodMap[it.prodId].sazonal === 'Sim') return;
+      var ped = Number(it.quantidade) || 0, peso = pesoDe(it.prodId);
+      var preco = ped ? ((Number(it.valorTotal) || 0) / ped) : (Number(it.precoUnit) || 0);
+      var fq = 0, fv = 0, nfs = {};
+      fats.forEach(function(fat){
+        (fat.itens || []).forEach(function(fi){
+          var igual = (it.prodId && fi.prodId === it.prodId) || (!it.prodId && it.prodCodigo && fi.prodCodigo === it.prodCodigo);
+          if (!igual) return;
+          var q = Number(fi.qtd) || 0;
+          fq += q; fv += q * (Number(fi.precoFat || fi.precoUnit) || preco);
+          if (fat.numDuplicata) nfs[fat.numDuplicata] = true;
+        });
+      });
+      var rsPedI = Number(it.valorTotal) || ped * preco;
+      var prCad = prodMap[it.prodId] || {}, un = String(prCad.unidade || '').trim().toUpperCase();
+      var itMed = String(it.medida || '').trim().toUpperCase();
+      var qpc = parseFloat(String(prCad.quant == null ? '' : prCad.quant).replace(',', '.')) || (Number(it.cx) > 0 ? Number(it.cx) : 0);
+      var fator = (itMed === 'CX' && un !== 'CX' && qpc > 0) ? qpc : 1;
+      if (!un) un = itMed;
+      var pedU = ped * fator, fqU = fq * fator, falta = Math.max(0, pedU - fqU);
+      var cxTam = un === 'CX' ? 1 : qpc;
+      var ign = cxTam > 0 && falta > 0.000001 && falta < cxTam - 0.000001;   // sobra menor que 1 caixa nao conta
+      var rsIgn = ign ? Math.max(0, rsPedI - Math.min(fv, rsPedI)) : 0;
+      if (ign) falta = 0;
+      var rsNao = Math.max(0, rsPedI - fv - rsIgn);
+      T.pedRs += rsPedI; T.pedKg += pedU * peso;
+      if (!(falta > 0.000001) && !(rsNao > 0.005)) return;   // faturou tudo: nao entra no relatorio
+      T.naoRs += rsNao; T.naoKg += falta * peso;
+      prodsN[(it.prodCodigo || '') + '|' + nome] = 1; pedsN[p.id] = 1;
+      lin.push({ p: p, cli: cli, rede: rede, sub: sub, cod: it.prodCodigo || '', nome: nome, un: un, sazonal: !!(prodMap[it.prodId] && prodMap[it.prodId].sazonal === 'Sim'),
+        qPed: pedU, qFat: fqU, qNao: falta, rsPed: rsPedI, rsNao: rsNao, kgPed: pedU * peso, kgNao: falta * peso, nfs: Object.keys(nfs).join(', ') });
+    });
+  });
+  var nomeAg = { produto: 'Produto', rede: 'Rede', cliente: 'Cliente', fornecedor: 'Fábrica', vendedor: 'Vendedor' }[ag];
+  function chave(r) {
+    return ag === 'produto' ? ((r.cod ? r.cod + ' · ' : '') + r.nome) : ag === 'rede' ? r.rede : ag === 'cliente' ? _cpSemColchetes(r.cli.nome_fantasia || r.p.clienteNome || '—') : ag === 'fornecedor' ? _cpSemColchetes(r.p.fornecedorNome || '—') : (r.p.vendedorNome || '—');
+  }
+  var G = {};
+  lin.forEach(function(r){
+    var k = chave(r), g = G[k] || (G[k] = { nome: k, rsPed: 0, rsNao: 0, kgPed: 0, kgNao: 0, ped: {}, ls: [], saz: false });
+    g.rsPed += r.rsPed; g.rsNao += r.rsNao; g.kgPed += r.kgPed; g.kgNao += r.kgNao; g.ped[r.p.id] = 1; g.ls.push(r); if (r.sazonal) g.saz = true;
+  });
+  // impacto por rede e, em cascata, sub rede
+  var GR = {};
+  lin.forEach(function(r){
+    var g = GR[r.rede] || (GR[r.rede] = { nome: r.rede, rsNao: 0, kgNao: 0, rsPed: 0, ped: {}, subs: {} });
+    g.rsNao += r.rsNao; g.kgNao += r.kgNao; g.rsPed += r.rsPed; g.ped[r.p.id] = 1;
+    var sb = g.subs[r.sub] || (g.subs[r.sub] = { nome: r.sub, rsNao: 0, kgNao: 0, rsPed: 0, ped: {} });
+    sb.rsNao += r.rsNao; sb.kgNao += r.kgNao; sb.rsPed += r.rsPed; sb.ped[r.p.id] = 1;
+  });
+  window._relPnf = window._relPnf || { m: 'rs', top: 20 };
+  window._relPnf.ag = ag; window._relPnf.nomeAg = nomeAg; window._relPnf.T = T; window._relPnf.n = lin.length;
+  window._relPnf.grupos = Object.keys(G).map(function(k){ return G[k]; });
+  window._relPnf.redes = Object.keys(GR).map(function(k){ return GR[k]; });
+  var pct = T.pedRs ? T.naoRs / T.pedRs : 0;
+  var kpis = _relKpis([
+    { label: 'Pedido (filtrado)', valor: _pedFmtMoeda(T.pedRs), sub: _relNum(T.pedKg) + ' kg', cor: '#272A4A' },
+    { label: 'Não faturado', valor: _pedFmtMoeda(T.naoRs), sub: _relNum(T.naoKg) + ' kg', cor: T.naoRs > 0.005 ? '#dc2626' : '#15803d' },
+    { label: '% não faturado do pedido', valor: _relNum(pct * 100, 1) + '%', sub: 'faturado: ' + _relNum((1 - pct) * 100, 1) + '%', cor: '#dc2626' },
+    { label: 'Itens afetados', valor: Object.keys(prodsN).length, sub: 'produtos · ' + Object.keys(pedsN).length + ' pedidos', cor: '#272A4A' }
+  ]);
+  var nota = '<div style="font-size:10.5px;color:#94a3b8;margin-top:8px">Clique numa linha para ver os pedidos. Pedidos cancelados ficam fora. Sobra menor que 1 caixa não conta como não faturado. Faturar acima do pedido não cobre a falta de outro item. “Peso no total não faturado” = quanto aquela linha representa de tudo que deixou de faturar nos filtros escolhidos.</div>';
+  return kpis + '<div id="rel-pnf-rank"></div><div id="rel-pnf-rede"></div>' + nota;
+}
+function _relPnfSet(k, v) { window._relPnf[k] = v; _relPnfRender(); }
+function _relPnfRender() {
+  var S = window._relPnf, box = document.getElementById('rel-pnf-rank'), boxR = document.getElementById('rel-pnf-rede');
+  if (!S || !box) return;
+  var totNao = S.T.naoRs, ag = S.ag;
+  var seg = function (itens, atual, chave) {
+    return '<span style="display:inline-flex;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">' + itens.map(function (it) {
+      var on = String(it[0]) === String(atual);
+      return '<button type="button" onclick="_relPnfSet(&#39;' + chave + '&#39;,' + (typeof it[0] === 'number' ? it[0] : "&#39;" + it[0] + "&#39;") + ')" style="border:none;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;' + (on ? 'background:#272A4A;color:#fff' : 'background:#fff;color:#475569') + '">' + it[1] + '</button>';
+    }).join('') + '</span>';
+  };
+  var lista = S.grupos.slice().sort(function (a, b) {
+    if (S.m === 'kg') return b.kgNao - a.kgNao;
+    if (S.m === 'pct') return (b.rsPed ? b.rsNao / b.rsPed : 0) - (a.rsPed ? a.rsNao / a.rsPed : 0);
+    return b.rsNao - a.rsNao;
+  });
+  var mostrar = S.top ? lista.slice(0, S.top) : lista;
+  var dataBR = function (d) { return d ? String(d).split('-').reverse().join('/') : ''; };
+  var colsMini = [ {label:'Pedido'}, {label:'Data'}, {label:'Cliente'} ].concat(ag === 'produto' ? [] : [ {label:'Produto'} ]).concat([ {label:'Pedido',right:true}, {label:'Faturou',right:true}, {label:'Faltou',right:true}, {label:'Falta R$',right:true}, {label:'NF'} ]);
+  var qtd = function (r, q) { return _relNum(q, Math.abs(q - Math.round(q)) < 0.005 ? 0 : 2) + ' ' + String(r.un || '').toLowerCase(); };
+  var cols = [ { label: nomeAgRot(S.nomeAg), width: '2fr' }, { label: 'Pedido', width: '115px', right: true }, { label: 'Faturou', width: '115px', right: true }, { label: 'Não faturou Kg', width: '115px', right: true }, { label: 'Não faturou R$', width: '125px', right: true }, { label: 'Peso no total não faturado', width: '170px', right: true }, { label: 'Pedidos', width: '70px', right: true } ];
+  function nomeAgRot(n) { return n; }
+  var rows = mostrar.map(function (g, i) {
+    return [ '<span style="display:inline-block;width:26px;color:#94a3b8">' + (i + 1) + '</span><b>' + _pedEsc(g.nome) + '</b>' + (ag === 'produto' && g.saz ? ' <span style="font-size:10px;background:#fff2cc;color:#7f6000;border-radius:4px;padding:1px 6px;font-weight:600">sazonal</span>' : ''),
+      _pedFmtMoeda(g.rsPed), '<span style="color:#15803d">' + _pedFmtMoeda(g.rsPed - g.rsNao) + '</span>', '<b style="color:#b91c1c">' + _relNum(g.kgNao) + '</b>', '<b style="color:#b91c1c">' + _pedFmtMoeda(g.rsNao) + '</b>', '<b>' + _relPnfPeso(g.rsNao, totNao) + '</b>', String(Object.keys(g.ped).length) ];
+  });
+  var dets = mostrar.map(function (g) {
+    return _relMini(colsMini, g.ls.slice().sort(function (a, b) { return b.rsNao - a.rsNao; }).map(function (r) {
+      return [ _pedEsc(r.p.numPedidoCliente || r.p.id), dataBR(r.p.data), _pedEsc(_cpSemColchetes(r.cli.nome_fantasia || r.p.clienteNome || '')) ].concat(ag === 'produto' ? [] : [ _pedEsc(r.nome) ]).concat([ qtd(r, r.qPed), '<span style="color:#15803d">' + qtd(r, r.qFat) + '</span>', '<b style="color:#b91c1c">' + qtd(r, r.qNao) + '</b>', '<b style="color:#b91c1c">' + _pedFmtMoeda(r.rsNao) + '</b>', _pedEsc(r.nfs || '—') ]);
+    }));
+  });
+  var tab = rows.length ? _relTabela(cols, rows, { detalhes: dets, minWidth: 1000, totais: [ 'TOTAL (' + lista.length + ')', _pedFmtMoeda(lista.reduce(function (a, g) { return a + g.rsPed; }, 0)), _pedFmtMoeda(lista.reduce(function (a, g) { return a + g.rsPed - g.rsNao; }, 0)), _relNum(S.T.naoKg), _pedFmtMoeda(S.T.naoRs), '100%', '' ] })
+    : '<div style="padding:30px;text-align:center;font-size:12px;color:#15803d">Nada deixou de faturar com os filtros escolhidos.</div>';
+  box.innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);margin-bottom:12px;overflow:hidden">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #e2e8f0"><span style="font-size:13px;font-weight:700;color:#1e293b">Ranking de não faturado por ' + S.nomeAg.toLowerCase() + '</span>'
+    + '<span style="display:flex;gap:8px;flex-wrap:wrap">' + seg([['rs', 'R$'], ['kg', 'Kg'], ['pct', '% do pedido']], S.m, 'm') + seg([[10, 'Top 10'], [20, '20'], [50, '50'], [0, 'Todos']], S.top, 'top') + '</span></div>'
+    + tab + '<div style="padding:8px 14px;font-size:11px;color:#64748b;border-top:1px solid #f1f5f9">Mostrando ' + mostrar.length + ' de ' + lista.length + ' · ordenado por ' + (S.m === 'kg' ? 'Kg' : (S.m === 'pct' ? '% do pedido não faturado' : 'R$')) + ' não faturado</div></div>';
+  if (!boxR) return;
+  if (ag === 'rede' || !S.redes.length) { boxR.innerHTML = ''; return; }
+  var redes = S.redes.slice().sort(function (a, b) { return b.rsNao - a.rsNao; });
+  var colsR = [ { label: 'Rede', width: '2fr' }, { label: 'Pedido', width: '115px', right: true }, { label: 'Não faturou Kg', width: '115px', right: true }, { label: 'Não faturou R$', width: '125px', right: true }, { label: 'Peso no total não faturado', width: '170px', right: true }, { label: 'Pedidos', width: '70px', right: true } ];
+  var rowsR = redes.map(function (g) { return [ '<b>' + _pedEsc(g.nome) + '</b>', _pedFmtMoeda(g.rsPed), _relNum(g.kgNao), '<b style="color:#b91c1c">' + _pedFmtMoeda(g.rsNao) + '</b>', '<b>' + _relPnfPeso(g.rsNao, totNao) + '</b>', String(Object.keys(g.ped).length) ]; });
+  var detsR = redes.map(function (g) {
+    var subs = Object.keys(g.subs).map(function (k) { return g.subs[k]; }).sort(function (a, b) { return b.rsNao - a.rsNao; });
+    return _relMini([ {label:'Sub rede'}, {label:'Pedido',right:true}, {label:'Não faturou Kg',right:true}, {label:'Não faturou R$',right:true}, {label:'Peso no total não faturado',right:true}, {label:'Pedidos',right:true} ], subs.map(function (sb) {
+      return [ _pedEsc(sb.nome), _pedFmtMoeda(sb.rsPed), _relNum(sb.kgNao), '<b style="color:#b91c1c">' + _pedFmtMoeda(sb.rsNao) + '</b>', '<b>' + _relPnfPeso(sb.rsNao, totNao) + '</b>', String(Object.keys(sb.ped).length) ];
+    }));
+  });
+  boxR.innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);margin-bottom:12px;overflow:hidden"><div style="padding:10px 14px;border-bottom:1px solid #e2e8f0"><span style="font-size:13px;font-weight:700;color:#1e293b">Impacto por rede</span> <span style="font-size:11px;color:#94a3b8">clique na rede para ver as sub redes</span></div>'
+    + _relTabela(colsR, rowsR, { detalhes: detsR, minWidth: 900 }) + '</div>';
+}
 function _relCalcPedidoFaturado(f) {
   var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
   var prodMap = {}; getProdutos().forEach(function(p){ prodMap[p.id] = p; });
