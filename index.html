@@ -4265,7 +4265,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                 </div>
                 <!-- Campos Identificação -->
                 <div style="flex:1;display:flex;flex-direction:column;gap:10px">
-                  <div style="display:grid;grid-template-columns:100px 1fr 90px;gap:10px">
+                  <div style="display:grid;grid-template-columns:100px 1fr 90px 90px;gap:10px">
                     <div>
                       <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px"><span style="color:#D82621">*</span> Código</label>
                       <input class="form-input" id="prod-codigo" placeholder="Ex: 0001" style="width:100%">
@@ -4280,6 +4280,10 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                         <option value="Sim">Sim</option>
                         <option value="Não">Não</option>
                       </select>
+                    </div>
+                    <div>
+                      <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:5px" title="Produto vendido só em época especial (ex.: fim de ano)">Sazonal</label>
+                      <label style="display:flex;align-items:center;justify-content:center;height:36px;cursor:pointer" title="Marque se o produto é sazonal"><input type="checkbox" id="prod-sazonal" style="width:18px;height:18px;cursor:pointer"></label>
                     </div>
                   </div>
                 </div>
@@ -6236,6 +6240,10 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <span class="rel-campo" data-campo="produto" style="display:flex;align-items:center;gap:6px">
             <span style="font-size:11px;font-weight:600;color:#64748b">Produto</span>
             <input id="rel-f-produto" placeholder="Código ou nome..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:140px">
+          </span>
+          <span class="rel-campo" data-campo="sazonal" style="display:flex;align-items:center;gap:6px" title="Sim = com produtos sazonais; Não = sem produtos sazonais">
+            <span style="font-size:11px;font-weight:600;color:#64748b">Sazonal</span>
+            <select id="rel-f-sazonal" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="sim">Sim</option><option value="nao">Não</option></select>
           </span>
           <span class="rel-campo" data-campo="numero" style="display:flex;align-items:center;gap:6px">
             <span style="font-size:11px;font-weight:600;color:#64748b">Nº pedido / NF</span>
@@ -16187,6 +16195,7 @@ function openProdutoForm(params) {
   setV('prod-ean',       r.ean||'');
   setV('prod-descricao', r.descricao||'');
   setV('prod-ativo',     r.ativo||'Sim');
+  { const _sz = document.getElementById('prod-sazonal'); if (_sz) _sz.checked = (r.sazonal === 'Sim'); }
   // Categoria Principal (somente categorias sem pai)
   const catSel = document.getElementById('prod-categoria');
   if (catSel) {
@@ -16243,6 +16252,7 @@ function salvarProduto() {
       subcategoria: subcatEl ? subcatEl.value : '',
       fornecedor:   document.getElementById('prod-fornecedor').value,
       ativo:        document.getElementById('prod-ativo').value,
+      sazonal:      (document.getElementById('prod-sazonal') || {}).checked ? 'Sim' : 'Não',
       foto,
     };
     const data = getProdutos();
@@ -33221,7 +33231,7 @@ function restaurarBackupSistema() {
 // RELATÓRIOS (lista resumida + tela de filtros/geração)
 // ═══════════════════════════════════════════════════
 var RELATORIOS = [
-  { id:'pedido-faturado', nivel:'operacional', icon:'ti-receipt', titulo:'Pedido × Faturado × Não faturado', desc:'Quanto foi pedido, faturado e o que ficou pendente (R$ e Kg).', campos:['data','fornecedor','vendedor','categoria','subcategoria','uf','cliente','status','produto','numero','agrupar'] },
+  { id:'pedido-faturado', nivel:'operacional', icon:'ti-receipt', titulo:'Pedido × Faturado × Não faturado', desc:'Quanto foi pedido, faturado e o que ficou pendente (R$ e Kg).', campos:['data','fornecedor','vendedor','categoria','subcategoria','uf','cliente','status','produto','sazonal','numero','agrupar'] },
   { id:'pedidos-parados', nivel:'operacional', icon:'ti-clock', titulo:'Pedidos parados por status', desc:'Tempo parado em cada status do pedido.', campos:['data','fornecedor','vendedor','status','cliente','uf','categoria','subcategoria'] },
   { id:'entregas-atraso', nivel:'operacional', icon:'ti-truck', titulo:'Entregas em rota e atrasadas', desc:'Notas por transportadora com dias de atraso.', campos:['data','uf','cliente','fornecedor','vendedor'] },
   { id:'vencimentos', nivel:'operacional', icon:'ti-tag', titulo:'Negociações de preço vencendo', desc:'Vigências a vencer ou já vencidas.', campos:['data','fornecedor'] },
@@ -33256,7 +33266,7 @@ var RELATORIOS = [
   { id:'mix-cliente', nivel:'analitico', icon:'ti-layout-grid', titulo:'Mix por cliente', desc:'Produtos que cada cliente compra e os que ainda não comprou (oportunidade de mix).', campos:['data','fornecedor','vendedor','uf','categoria','subcategoria','cliente'] },
   { id:'comparativo-mix', nivel:'analitico', icon:'ti-arrows-left-right', titulo:'Comparativo de mix entre redes ou clientes', desc:'Compara dois lados (rede + UF ou cliente) e mostra quais produtos um compra e o outro não.', campos:['data','fornecedor','uf','categoria','subcategoria','cliente','ladob'] },
   { id:'positivacao-vendedor', nivel:'gerencial', icon:'ti-user-check', titulo:'Positivação por vendedor', desc:'Clientes da carteira que compraram no período, % de positivação e ticket por cliente.', campos:['data','vendedor','fornecedor','uf','categoria','subcategoria'] },
-  { id:'vendas-produto', nivel:'analitico', icon:'ti-package', titulo:'Vendas por produto e categoria', desc:'Faturado e quilos por produto, com resumo por categoria.', campos:['data','fornecedor','vendedor','uf','cliente','categoria','subcategoria','produto'] },
+  { id:'vendas-produto', nivel:'analitico', icon:'ti-package', titulo:'Vendas por produto e categoria', desc:'Faturado e quilos por produto, com resumo por categoria.', campos:['data','fornecedor','vendedor','uf','cliente','categoria','subcategoria','produto','sazonal'] },
   { id:'comparativo-anual', nivel:'gerencial', icon:'ti-chart-bar', titulo:'Comparativo mês a mês e ano contra ano', desc:'Faturado de cada mês contra o mesmo mês do ano anterior.', campos:['data','fornecedor','vendedor','uf'] },
   { id:'sazonalidade', nivel:'analitico', icon:'ti-sun', titulo:'Sazonalidade', desc:'Índice sazonal por mês e produtos de pico, pelo histórico disponível.', campos:['fornecedor','categoria','uf','cliente'] },
   { id:'reino-negociado', nivel:'gerencial', icon:'ti-target-arrow', titulo:'Planejamento Reino: negociado × realizado', desc:'Volume negociado com cada rede contra o realizado, saldo e projeção até o fim do ano.', campos:['data','fornecedor','categoria','subcategoria'] }
@@ -33444,6 +33454,7 @@ function limparFiltrosRelatorio() {
   });
   _relAtualizarSubcategoriasB();
   var _ag = document.getElementById('rel-f-agrupar'); if (_ag) _ag.value = 'pedido';
+  var _sz = document.getElementById('rel-f-sazonal'); if (_sz) _sz.value = 'sim';
   _relAtualizarSubcategorias();
   if (_relAtual === 'clientes-completo') { try { _rcMontar(); } catch (eRc) { console.error(eRc); } }
   if (_relAtual === 'produtos-completo') { try { _rpMontar(); } catch (eRp) { console.error(eRp); } }
@@ -33490,7 +33501,7 @@ function _relFiltros() {
     categoria: v('rel-f-categoria'), subcategoria: v('rel-f-subcategoria'),
     uf: v('rel-f-uf'), cliente: v('rel-f-cliente'),
     transportadora: v('rel-f-transportadora'), status: v('rel-f-status'),
-    produto: v('rel-f-produto'), numero: v('rel-f-numero'), agrupar: v('rel-f-agrupar') || 'pedido',
+    produto: v('rel-f-produto'), numero: v('rel-f-numero'), agrupar: v('rel-f-agrupar') || 'pedido', sazonal: v('rel-f-sazonal') || 'sim',
     b: { categoria: v('rel-f-b-categoria'), subcategoria: v('rel-f-b-subcategoria'), uf: v('rel-f-b-uf'), cliente: v('rel-f-b-cliente') }
   };
 }
@@ -33822,6 +33833,7 @@ function _relCalcPedidoFaturado(f) {
   var prodMap = {}; getProdutos().forEach(function(p){ prodMap[p.id] = p; });
   function pesoDe(prodId) { var pr = prodMap[prodId]; return pr ? (parseFloat(String(pr.peso || '0').replace(',', '.')) || 0) : 0; }
   var fProd = _cpNorm(f.produto || ''), fNum = _cpNorm(f.numero || '');
+  var sazNao = (f.sazonal === 'nao');   // "Sazonal: Nao" tira os produtos sazonais
   var recs = [];
   getPedidos().forEach(function(p){
     if (p.status === 'Cancelado') return;
@@ -33839,6 +33851,7 @@ function _relCalcPedidoFaturado(f) {
     (p.itens || []).forEach(function(it){
       var nome = it.prodNome || it.prodCodigo || 'Produto';
       if (fProd && _cpNorm(nome + ' ' + (it.prodCodigo || '')).indexOf(fProd) === -1) return;
+      if (sazNao && prodMap[it.prodId] && prodMap[it.prodId].sazonal === 'Sim') return;
       var ped = Number(it.quantidade) || 0, peso = pesoDe(it.prodId);
       var preco = ped ? ((Number(it.valorTotal) || 0) / ped) : (Number(it.precoUnit) || 0);
       var fq = 0, fv = 0, nfs = {};
@@ -33869,10 +33882,10 @@ function _relCalcPedidoFaturado(f) {
       if (ign) { falta = 0; }
       itens.push({ nome: nome, cod: it.prodCodigo || '', un: un, qPed: pedU, qFat: fqc, qNao: falta, ign: ign, rsIgn: rsIgn, qIgn: faltaIgn, cxTam: cxTam, kgPed: pedU * peso, rsPed: rsPedI, kgFat: fqc * peso, rsFat: rsFatI, kgNao: falta * peso, kgIgn: ign ? faltaIgn * peso : 0, rsNao: Math.max(0, rsPedI - fv - rsIgn), kgExc: Math.max(0, fqU - pedU) * peso, rsExc: Math.max(0, fv - rsPedI), nfs: Object.keys(nfs).join(', ') });
     });
-    if (fProd && !itens.length) return;
+    if ((fProd || sazNao) && !itens.length) return;
     var r = { p: p, cli: cli, itens: itens, pedKg: 0, fatKg: 0, naoKg: 0, excKg: 0, excRs: 0, ignKg: 0, ignRs: 0 };
     itens.forEach(function(i){ r.pedKg += i.kgPed; r.fatKg += i.kgFat; r.naoKg += i.kgNao; r.excKg += i.kgExc; r.ignKg += i.kgIgn; });
-    if (fProd) {
+    if (fProd || sazNao) {
       r.pedRs = 0; r.fatRs = 0; r.naoRs = 0;
       itens.forEach(function(i){ r.pedRs += i.rsPed; r.fatRs += i.rsFat; r.naoRs += i.rsNao; r.excRs += i.rsExc; r.ignRs += i.rsIgn; });
     } else {
@@ -35578,6 +35591,7 @@ function _rpMontar() {
     + _rcCampo('Fábrica', '<select id="rp-f-forn" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option>' + forns.map(function (n) { return '<option value="' + _pedEsc(n) + '">' + _pedEsc(n) + '</option>'; }).join('') + '</select>')
     + _rcCampo('Categoria', '<select id="rp-f-cat" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option>' + cats.map(function (c) { return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('') + '</select>')
     + _rcCampo('Status', '<select id="rp-f-status" onchange="_rpResumo()" style="' + st + '"><option value="ativo">Ativos</option><option value="inativo">Inativos</option><option value="">Todos</option></select>')
+    + _rcCampo('Sazonal', '<select id="rp-f-saz" onchange="_rpResumo()" style="' + st + '"><option value="sim">Sim</option><option value="nao">Não</option></select>')
     + _rcCampo('Período', '<select id="rp-f-per" onchange="_rpPerMudou();_rpResumo()" style="' + st + '"><option value="">Todo o histórico</option><option value="12">Últimos 12 meses</option><option value="6">Últimos 6 meses</option><option value="3">Últimos 3 meses</option><option value="datas">Escolher datas...</option></select>')
     + _rcCampo('UF (onde vendeu)', '<select id="rp-f-uf" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option><option>AL</option><option>BA</option><option>PB</option><option>PE</option><option>RN</option><option>SE</option></select>')
     + _rcCampo('Rede (quem comprou)', '<select id="rp-f-rede" onchange="_rpResumo()" style="' + st + '"><option value="">Todas</option>' + _ordNome(redes).map(function (c) { return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('') + '</select>')
@@ -35618,7 +35632,7 @@ function _rpPerMudou() {
 function _rpLerFiltros() {
   function v(id) { var el = document.getElementById(id); return el ? String(el.value || '').trim() : ''; }
   var fn = v('rp-f-forn');
-  return { busca: v('rp-f-busca'), fornNome: fn, fornId: fn ? (window._rpFornIds || {})[fn] : '', cat: v('rp-f-cat'), status: v('rp-f-status'), per: v('rp-f-per'), deTxt: v('rp-f-de'), ateTxt: v('rp-f-ate'), uf: v('rp-f-uf'), rede: v('rp-f-rede'), vend: v('rp-f-vend'), mix: v('rp-f-mix') };
+  return { busca: v('rp-f-busca'), fornNome: fn, fornId: fn ? (window._rpFornIds || {})[fn] : '', cat: v('rp-f-cat'), status: v('rp-f-status'), per: v('rp-f-per'), deTxt: v('rp-f-de'), ateTxt: v('rp-f-ate'), uf: v('rp-f-uf'), rede: v('rp-f-rede'), vend: v('rp-f-vend'), mix: v('rp-f-mix'), saz: v('rp-f-saz') || 'sim' };
 }
 function _rpResumo() {
   var el = document.getElementById('rp-res-filtros'); if (!el) return;
@@ -35628,6 +35642,7 @@ function _rpResumo() {
   if (F.fornNome) t.push('Fábrica: ' + F.fornNome);
   if (F.cat) t.push('Categoria: ' + tx('rp-f-cat'));
   t.push(tx('rp-f-status'));
+  if (F.saz === 'nao') t.push('Sem sazonais');
   if (F.per) t.push(tx('rp-f-per'));
   if (F.uf) t.push('UF: ' + F.uf);
   if (F.rede) t.push('Rede: ' + tx('rp-f-rede'));
@@ -35721,6 +35736,7 @@ function _rpCalcular(F, per) {
     var ativo = (p.ativo || 'Sim') !== 'Não';
     if (F.status === 'ativo' && !ativo) return;
     if (F.status === 'inativo' && ativo) return;
+    if (F.saz === 'nao' && p.sazonal === 'Sim') return;
     if (F.fornId && String(p.fornecedor) !== String(F.fornId)) return;
     if (F.cat && String(p.categoria) !== String(F.cat) && String(p.subcategoria) !== String(F.cat)) return;
     if (busca && _cpNorm((p.codigo || '') + ' ' + (p.nome || '') + ' ' + (p.ean || '')).indexOf(busca) === -1) return;
@@ -35956,6 +35972,7 @@ function _relCalcVendasProduto(f) {
     (l.fatura.itens || []).forEach(function(i){
       var pr = pm[i.prodId] || {}, nome = i.prodNome || pr.nome || 'Produto';
       if (fp && _cpNorm(nome + ' ' + (i.prodCodigo || '')).indexOf(fp) === -1) return;
+      if (f.sazonal === 'nao' && pr.sazonal === 'Sim') return;
       var v = (Number(i.qtd) || 0) * (Number(i.precoFat) || 0), kg = _relPesoProd(pr) * (Number(i.qtd) || 0);
       var o = P[nome] = P[nome] || { v: 0, kg: 0 }; o.v += v; o.kg += kg;
       var cat = cm[pr.categoria] || 'Sem categoria'; var c = C[cat] = C[cat] || { v: 0, kg: 0 }; c.v += v; c.kg += kg;
@@ -39707,7 +39724,20 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
     linhaBannerCom.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
     for (var cb = 2; cb <= 7; cb++) { linhaBannerCom.getCell(cb).fill = _drFill(DR_CORES.zebraGreen); linhaBannerCom.getCell(cb).border = DR_BORDA_FINA; }
   }
-  comVenda.forEach(function (item) { linhaProdutoTabela(item, DR_CORES.zebraGreen); });
+  function _ehSazX(item) { return !!(item && item.prod && item.prod.sazonal === 'Sim'); }
+  function _bannerSazX(n) {
+    var lb = ws.addRow(['PRODUTOS SAZONAIS  (' + n + (n === 1 ? ' item' : ' itens') + ')']);
+    lb.height = 17;
+    ws.mergeCells(lb.number, 1, lb.number, 7);
+    lb.getCell(1).font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FF7F6000' } };
+    lb.getCell(1).fill = _drFill('FFFFF2CC');
+    lb.getCell(1).border = DR_BORDA_FINA;
+    lb.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+    for (var cs = 2; cs <= 7; cs++) { lb.getCell(cs).fill = _drFill('FFFFF2CC'); lb.getCell(cs).border = DR_BORDA_FINA; }
+  }
+  var _comNorm = comVenda.filter(function (x) { return !_ehSazX(x); }), _comSaz = comVenda.filter(_ehSazX);
+  _comNorm.forEach(function (item) { linhaProdutoTabela(item, DR_CORES.zebraGreen); });
+  if (_comSaz.length) { _bannerSazX(_comSaz.length); _comSaz.forEach(function (item) { linhaProdutoTabela(item, DR_CORES.zebraGreen); }); }
 
   var semVenda = g.cadastroSemVenda || [];
   if (semVenda.length) {
@@ -39720,7 +39750,9 @@ function _drConstruirAbaGrupo(wb, g, fornNome, periodoTxt, nomeAba, imgCompartil
     linhaBanner.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
     for (var cc = 2; cc <= 7; cc++) { linhaBanner.getCell(cc).fill = _drFill(DR_CORES.semVendaBg); linhaBanner.getCell(cc).border = DR_BORDA_FINA; }
 
-    semVenda.forEach(function (item) { linhaProdutoTabela(item, DR_CORES.zebraPink); });
+    var _semNorm = semVenda.filter(function (x) { return !_ehSazX(x); }), _semSaz = semVenda.filter(_ehSazX);
+    _semNorm.forEach(function (item) { linhaProdutoTabela(item, DR_CORES.zebraPink); });
+    if (_semSaz.length) { _bannerSazX(_semSaz.length); _semSaz.forEach(function (item) { linhaProdutoTabela(item, DR_CORES.zebraPink); }); }
   }
 
   if (imgCompartilharId !== null && imgCompartilharId !== undefined) {
@@ -39813,14 +39845,20 @@ function _drMontarDocumentoGrupoHtml(g, fornNome, periodoTxt, logoRede, logoForn
   }
   var comVenda = g.cadastroComVenda || [];
   var semVenda = g.cadastroSemVenda || [];
-  var linhasComVenda = comVenda.map(function (item) { return linhaProduto(item); }).join('');
+  function ehSaz(item) { return !!(item && item.prod && item.prod.sazonal === 'Sim'); }
+  function bannerSaz(n) { return '<tr><td colspan="' + NCOL + '" style="padding:6px 8px;background:#fff2cc;color:#7f6000;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS SAZONAIS (' + n + (n === 1 ? ' item' : ' itens') + ')</td></tr>'; }
+  function linhasComSaz(lista) {
+    var sz = lista.filter(ehSaz), nm = lista.filter(function (x) { return !ehSaz(x); });
+    return nm.map(function (item) { return linhaProduto(item); }).join('') + (sz.length ? bannerSaz(sz.length) + sz.map(function (item) { return linhaProduto(item); }).join('') : '');
+  }
+  var linhasComVenda = linhasComSaz(comVenda);
   var bannerComVenda = comVenda.length
     ? ('<tr><td colspan="' + NCOL + '" style="padding:6px 8px;background:#e2efda;color:#375623;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS COM VENDA (' + comVenda.length + ' itens)</td></tr>')
     : '';
   var bannerSemVenda = semVenda.length
     ? ('<tr><td colspan="' + NCOL + '" style="padding:6px 8px;background:#fcd5b4;color:#7f3f00;font-weight:700;border-top:2.5px solid #000;border-bottom:2.5px solid #000;border-left:2.5px solid #000;border-right:2.5px solid #000;font-size:11px">PRODUTOS SEM VENDA (' + semVenda.length + ' itens)</td></tr>')
     : '';
-  var linhasSemVenda = semVenda.map(function (item) { return linhaProduto(item); }).join('');
+  var linhasSemVenda = linhasComSaz(semVenda);
   var semNenhumProduto = !comVenda.length && !semVenda.length;
 
   return ''
