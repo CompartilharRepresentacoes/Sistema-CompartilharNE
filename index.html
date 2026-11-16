@@ -21353,7 +21353,7 @@ function _pagRodape(base, ini, qtd, total, np, pag, rotulo, irFn) {
   var h = '<span style="font-size:10px;color:#64748b">Mostrando ' + (ini + 1) + ' a ' + (ini + qtd) + ' de ' + total + ' ' + rotulo + '</span>';
   if (np > 1) {
     var btn = function (txt, n, ativo, off) {
-      return '<button type="button" ' + (off ? 'disabled' : 'onclick="' + irFn + '(' + n + ')"') + ' style="' + est + (ativo ? ';background:#272A4A;color:#fff;border-color:#272A4A' : '') + (off ? ';opacity:.4;cursor:default;color:#94a3b8' : '') + '">' + txt + '</button>';
+      return '<button type="button" ' + (off ? 'disabled' : 'onclick="' + irFn + (/,$/.test(irFn) ? n + ')' : '(' + n + ')') + '"') + ' style="' + est + (ativo ? ';background:#272A4A;color:#fff;border-color:#272A4A' : '') + (off ? ';opacity:.4;cursor:default;color:#94a3b8' : '') + '">' + txt + '</button>';
     };
     var nums = {}; nums[1] = 1; nums[np] = 1;
     for (var k = pag - 2; k <= pag + 2; k++) { if (k >= 1 && k <= np) nums[k] = 1; }
