@@ -5501,6 +5501,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
             <div style="font-size:11.5px;color:#64748b;margin-top:2px" id="vc-kpi-peso-naofat">0 kg</div>
           </div>
         </div>
+        <div id="vc-itens-painel" style="display:none"></div>
         <div id="vc-lista" style="display:flex;flex-direction:column;gap:10px"></div>
         <div id="vc-vazio" style="display:none;background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(39,42,74,.07);padding:60px 20px;text-align:center">
           <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="estoque" style="font-size:26px;color:#cbd5e1;margin-bottom:14px;display:block"><path d="M3 9.5 12 4l9 5.5V20H3z"/><path d="M8 20v-6h8v6M8 17h8"/></svg>
@@ -26706,6 +26707,83 @@ function _pedFiltraProdPsn(linhas, id) {
     return (r.fatura.itens || []).some(function(it){ var pr = pm[it.prodId] || {}; return _pedProdBate(termo, it.prodCodigo || pr.codigo, it.prodNome || pr.nome); });
   });
 }
+// ── Painel "Totais por item dos pedidos filtrados" (Vendas Completas): soma por produto da lista que esta na tela. Retratil; comeca recolhido. ──
+var _vcItens = { aberto: false, dados: [], pedidos: 0, kg: 0, rs: 0, busca: '', ord: 'rs' };
+function _vcItensPainelMontar(lista) {
+  var pm = _pedPm(), mapa = {}, kg = 0, rs = 0;
+  lista.forEach(function (r) {
+    r.itens.forEach(function (it) {
+      var k = (it.prodCodigo || '') + '|' + (it.prodNome || '');
+      var g = mapa[k] || (mapa[k] = { cod: it.prodCodigo || '', nome: it.prodNome || '', ped: {}, pc: 0, temPc: false, kg: 0, rs: 0 });
+      g.ped[r.pedido.id] = true; g.kg += it.pesoTotal; g.rs += it.valorTotal;
+      var pr = pm[it.prodId];
+      if (pr && String(pr.unidade || '').trim().toUpperCase() === 'PC') { g.pc += it.qtdPedida; g.temPc = true; }
+      kg += it.pesoTotal; rs += it.valorTotal;
+    });
+  });
+  _vcItens.dados = Object.keys(mapa).map(function (k) { var g = mapa[k]; g.np = Object.keys(g.ped).length; return g; });
+  _vcItens.pedidos = lista.length; _vcItens.kg = kg; _vcItens.rs = rs;
+  _vcItensPainelDesenhar();
+}
+function _vcItensPainelToggle() { _vcItens.aberto = !_vcItens.aberto; _vcItensPainelDesenhar(); }
+function _vcItensPainelFiltro() {
+  var b = document.getElementById('vc-itens-busca'), o = document.getElementById('vc-itens-ord');
+  _vcItens.busca = b ? b.value : _vcItens.busca; _vcItens.ord = o ? o.value : _vcItens.ord;
+  _vcItensPainelCorpo();
+}
+function _vcItensPainelLista() {
+  var t = _cpNorm(_vcItens.busca || '');
+  var l = _vcItens.dados.filter(function (g) { return !t || _cpNorm(g.nome + ' ' + g.cod).indexOf(t) !== -1; });
+  var o = _vcItens.ord;
+  l.sort(function (a, b) { return o === 'kg' ? b.kg - a.kg : (o === 'pc' ? b.pc - a.pc : (o === 'nome' ? a.nome.localeCompare(b.nome) : b.rs - a.rs)); });
+  return l;
+}
+function _vcItensFmt(v, d) { return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+function _vcItensPainelCorpo() {
+  var el = document.getElementById('vc-itens-corpo'); if (!el) return;
+  var l = _vcItensPainelLista(), tPc = 0, tem = false, tKg = 0, tRs = 0;
+  var th = 'padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:#272A4A;text-align:right';
+  var linhas = l.map(function (g, i) {
+    tKg += g.kg; tRs += g.rs; if (g.temPc) { tPc += g.pc; tem = true; }
+    var pcTxt = g.temPc ? _vcItensFmt(g.pc, Math.abs(g.pc - Math.round(g.pc)) < 0.005 ? 0 : 2) : '<span style="color:#cbd5e1">–</span>';
+    return '<tr class="vc-itens-tr" style="background:' + (i % 2 ? '#f5f8fe' : '#fff') + '"><td style="padding:8px 12px;font-size:12.5px;text-align:left"><span style="color:#94a3b8;font-size:11px;margin-right:6px">' + _pedEsc(g.cod) + '</span><b style="color:#1e293b">' + _pedEsc(g.nome) + '</b></td>'
+      + '<td style="padding:8px 12px;font-size:12.5px;text-align:right">' + g.np + '</td>'
+      + '<td style="padding:8px 12px;font-size:12.5px;text-align:right">' + pcTxt + '</td>'
+      + '<td style="padding:8px 12px;font-size:12.5px;text-align:right">' + _vcItensFmt(g.kg, 2) + '</td>'
+      + '<td style="padding:8px 12px;font-size:12.5px;text-align:right;font-weight:700;color:#15803d">' + _pedFmtMoeda(g.rs) + '</td></tr>';
+  }).join('');
+  if (!l.length) linhas = '<tr><td colspan="5" style="padding:14px;text-align:center;color:#94a3b8;font-size:12px">Nenhum item encontrado.</td></tr>';
+  el.innerHTML = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + th + ';text-align:left">Item</th><th style="' + th + '">Pedidos</th><th style="' + th + '">Qtd PC</th><th style="' + th + '">Peso (kg)</th><th style="' + th + '">Valor (R$)</th></tr></thead><tbody>' + linhas + '</tbody>'
+    + '<tfoot><tr style="background:#f1f5f9;border-top:2px solid #272A4A;font-weight:800"><td style="padding:9px 12px;font-size:12.5px">TOTAL' + (_vcItens.busca ? ' (itens buscados)' : '') + '</td><td style="padding:9px 12px;font-size:12.5px;text-align:right">' + (_vcItens.busca ? '' : _vcItens.pedidos) + '</td><td style="padding:9px 12px;font-size:12.5px;text-align:right">' + (tem ? _vcItensFmt(tPc, Math.abs(tPc - Math.round(tPc)) < 0.005 ? 0 : 2) : '–') + '</td><td style="padding:9px 12px;font-size:12.5px;text-align:right">' + _vcItensFmt(tKg, 2) + '</td><td style="padding:9px 12px;font-size:12.5px;text-align:right;color:#15803d">' + _pedFmtMoeda(tRs) + '</td></tr></tfoot></table></div>'
+    + '<div style="font-size:10.5px;color:#94a3b8;padding:8px 16px">Soma dos pedidos que aparecem na lista, com os filtros de cima. Qtd PC: só produtos cadastrados em PC (os de kg ficam com traço).</div>';
+}
+function _vcItensPainelCsv() {
+  var l = _vcItensPainelLista();
+  var linhas = [['Codigo', 'Item', 'Pedidos', 'Qtd PC', 'Peso kg', 'Valor R$']].concat(l.map(function (g) {
+    return [g.cod, g.nome, g.np, g.temPc ? String(g.pc).replace('.', ',') : '', g.kg.toFixed(2).replace('.', ','), g.rs.toFixed(2).replace('.', ',')];
+  }));
+  var csv = '﻿' + linhas.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(';'); }).join('\r\n');
+  var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'totais_por_item_pedidos.csv';
+  document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function _vcItensPainelDesenhar() {
+  var box = document.getElementById('vc-itens-painel'); if (!box) return;
+  if (!_vcItens.dados.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  var ab = _vcItens.aberto;
+  var ctrl = 'border:1px solid #cbd5e1;border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;background:#fff';
+  box.innerHTML = '<div style="background:#fff;border-radius:12px;box-shadow:0 3px 12px rgba(15,23,42,.1);border-bottom:3px solid #1c2f66;overflow:hidden;margin-bottom:10px">'
+    + '<div onclick="_vcItensPainelToggle()" title="Clique para ' + (ab ? 'recolher' : 'abrir') + '" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;flex-wrap:wrap">'
+    + '<span style="display:inline-block;width:14px;color:#272A4A;font-size:12px">' + (ab ? '▼' : '▶') + '</span>'
+    + '<span style="font-size:13px;font-weight:800;color:#272A4A;text-transform:uppercase;letter-spacing:.03em">Totais por item dos pedidos filtrados</span>'
+    + '<span style="margin-left:auto;display:flex;gap:18px;font-size:12px;color:#64748b;flex-wrap:wrap"><span>Itens <b style="color:#1e293b;font-size:13px">' + _vcItens.dados.length + '</b></span><span>Pedidos <b style="color:#1e293b;font-size:13px">' + _vcItens.pedidos + '</b></span><span>Peso <b style="color:#1e293b;font-size:13px">' + _vcItensFmt(_vcItens.kg, 2) + ' kg</b></span><span>Valor <b style="color:#1e293b;font-size:13px">' + _pedFmtMoeda(_vcItens.rs) + '</b></span></span></div>'
+    + (ab ? '<div style="border-top:1px solid #e5e7eb"><div style="display:flex;gap:10px;align-items:center;padding:10px 16px;background:#f8fafc;border-bottom:1px solid #e5e7eb;font-size:12px;flex-wrap:wrap">'
+      + '<input id="vc-itens-busca" type="text" placeholder="Buscar item..." value="' + _pedEsc(_vcItens.busca || '') + '" oninput="_vcItensPainelFiltro()" style="' + ctrl + ';width:230px">'
+      + '<span style="color:#64748b">Ordenar por:</span><select id="vc-itens-ord" onchange="_vcItensPainelFiltro()" style="' + ctrl + '"><option value="rs"' + (_vcItens.ord === 'rs' ? ' selected' : '') + '>Valor R$</option><option value="kg"' + (_vcItens.ord === 'kg' ? ' selected' : '') + '>Peso kg</option><option value="pc"' + (_vcItens.ord === 'pc' ? ' selected' : '') + '>Qtd PC</option><option value="nome"' + (_vcItens.ord === 'nome' ? ' selected' : '') + '>Nome</option></select>'
+      + '<button type="button" onclick="_vcItensPainelCsv()" style="' + ctrl + ';margin-left:auto;cursor:pointer">Exportar CSV</button></div><div id="vc-itens-corpo"></div></div>' : '')
+    + '</div>';
+  if (ab) _vcItensPainelCorpo();
+}
 function renderVendasCompletas(manterPag) {
   var cont = document.getElementById('vc-lista');
   var vazio = document.getElementById('vc-vazio');
@@ -26763,6 +26841,7 @@ function renderVendasCompletas(manterPag) {
   var kVN = document.getElementById('vc-kpi-valor-naofat'); if (kVN) kVN.textContent = _pedFmtMoeda(totalValorNaoFaturado);
   var kPN = document.getElementById('vc-kpi-peso-naofat'); if (kPN) kPN.textContent = totalPesoNaoFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
+  _vcItensPainelMontar(lista);
   if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; _pagLimpar('vc'); return; }
   vazio.style.display = 'none';
 
