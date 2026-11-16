@@ -27269,7 +27269,7 @@ function _pedProdFiltrar() {
   }
   var base = getProdutos();
   if (fornId) base = base.filter(function(p){ return p.fornecedor === fornId; });
-  base = base.filter(function (p) { return _permitidos[String(p.id).trim()]; });
+  base = base.filter(function (p) { return _permitidos[String(p.id).trim()] && (p.ativo || 'Sim') !== 'Não'; });   // produto inativo nao aparece na digitacao
   // Tambem acha pelo Cód. Pedido / Cód. Cliente cadastrado nas tabelas de preço do cliente (ou de todas, se ainda não escolheu o cliente)
   _pedProdCodMap = {};
   var qSimples = q.replace(/[^a-z0-9]/gi, '').toLowerCase();
