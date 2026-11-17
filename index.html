@@ -5534,17 +5534,21 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <button class="ped-ok-btn" onclick="renderVendasCompletasFaturadas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vcf-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vcf-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
-        <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+        <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px">
           <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #1c2f66">
             <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Pedidos</div>
             <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="vcf-kpi-total">0</div>
           </div>
           <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor Faturado</div>
+            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor do Pedido</div>
+            <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="vcf-kpi-valor-ped">R$ 0,00</div>
+          </div>
+          <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #2c4488">
+            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Valor Faturado (NFs)</div>
             <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#16a34a" id="vcf-kpi-valor">R$ 0,00</div>
           </div>
           <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Peso Total</div>
+            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Peso do Pedido</div>
             <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="vcf-kpi-peso">0 kg</div>
           </div>
         </div>
@@ -27036,6 +27040,8 @@ function renderVendasCompletasFaturadas(manterPag) {
   var totalValorGeral = lista.reduce(function(acc, r){ return acc + (r._prodFiltro ? r.valorFatItens : (Number(r.pedido.valorFaturado) || 0)); }, 0);
   var totalPesoGeral  = lista.reduce(function(acc, r){ return acc + r.pesoPedido; }, 0);
   var kV = document.getElementById('vcf-kpi-valor'); if (kV) kV.textContent = _pedFmtMoeda(totalValorGeral);
+  var totalValorPedido = lista.reduce(function(acc, r){ return acc + r.valorPedido; }, 0);
+  var kVP = document.getElementById('vcf-kpi-valor-ped'); if (kVP) kVP.textContent = _pedFmtMoeda(totalValorPedido);
   var kP = document.getElementById('vcf-kpi-peso'); if (kP) kP.textContent = totalPesoGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
   if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; _vcfLimparBarras(); return; }
@@ -27091,9 +27097,11 @@ function renderVendasCompletasFaturadas(manterPag) {
       + '<tbody>' + itensHtml + '</tbody></table></div>'
       + '<div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;background:#eff6ff;border-top:1px solid #dbeafe;padding:9px 16px;flex-wrap:wrap">'
       + nfsHtml
-      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Peso Total</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
+      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Peso do Pedido</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="width:1px;height:26px;background:#bfdbfe"></div>'
-      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Total</div><div style="font-size:14px;font-weight:800;color:#15803d;margin-top:1px">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
+      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor do Pedido</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
+      + '<div style="width:1px;height:26px;background:#bfdbfe"></div>'
+      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Faturado (NF)</div><div style="font-size:14px;font-weight:800;color:#15803d;margin-top:1px">' + _pedFmtMoeda(r._prodFiltro ? r.valorFatItens : (Number(p.valorFaturado) || 0)) + '</div></div>'
       + '</div>'
       + '</div>';
   });
