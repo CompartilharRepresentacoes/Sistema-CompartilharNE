@@ -24267,6 +24267,21 @@ function _pinfNumCasa(a, b) {
   var resto = longo.slice(curto.length);
   return longo.indexOf(curto) === 0 && /^[a-z]{1,3}$/.test(resto) && /[0-9a-z]$/.test(curto) && /\d/.test(curto);
 }
+// Desempate quando ha MAIS DE UM pedido com o mesmo numero: descarta o pedido em que TODOS os itens da NF
+// ja foram faturados por completo em NFs anteriores (sem saldo) e fica com o unico que ainda tem saldo.
+// So devolve um pedido quando sobra exatamente um; senao devolve null e o fluxo segue como antes.
+function _pinfDesempatePorSaldo(lista, nfDados) {
+  if (!lista || lista.length < 2) return null;
+  var codigos = (nfDados.itens || []).map(function (i) { return i.codigo ? _cpNorm(i.codigo) : ''; }).filter(Boolean);
+  if (!codigos.length) return null;
+  var produtos = (typeof getProdutos === 'function') ? getProdutos() : [];
+  var comSaldo = lista.filter(function (p) {
+    var itens = _pinfItensSaldoPedido(p, produtos).itens.filter(function (it) { return codigos.indexOf(_cpNorm(it.prodCodigo || '')) !== -1; });
+    var esgotado = itens.length > 0 && itens.every(function (it) { return it._jaFaturado; });
+    return !esgotado;
+  });
+  return (comSaldo.length === 1 && comSaldo.length < lista.length) ? comSaldo[0] : null;
+}
 function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
   nfDados = nfDados || {};
   if (!pedidosCandidatos || !pedidosCandidatos.length) {
@@ -24285,6 +24300,8 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
     var numMatches = pedidosCandidatos.filter(function (p) { return _pinfNumCasa(p.numPedidoCliente, nfDados.numPedido); });
     var cnpjMatches = numMatches.filter(function (p) { var c = p._clienteCnpjDigits; return !!c && (c === _dd || c === _ee); });
     if (cnpjMatches.length === 1) return { pedido: cnpjMatches[0], ambiguo: false, motivo: 'cnpj+numeroPedido' };
+    var _dsCnpj = _pinfDesempatePorSaldo(cnpjMatches, nfDados);
+    if (_dsCnpj) return { pedido: _dsCnpj, ambiguo: false, motivo: 'cnpj+numeroPedido (pedido com saldo)' };
     if (!cnpjMatches.length && numMatches.length === 1) return { pedido: numMatches[0], ambiguo: false, motivo: 'numeroPedido' };
   }
   // pedidos trazidos so pelo numero (fora do periodo) nao entram nas regras por CNPJ/itens/valor
@@ -24355,6 +24372,8 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
     if (numPedNf) {
       var porNumero = porCnpj.filter(function (p) { return _pinfNumCasa(p.numPedidoCliente, nfDados.numPedido); });
       if (porNumero.length === 1) return { pedido: porNumero[0], ambiguo: false, motivo: 'cnpj+numeroPedido' };
+      var _dsNum = _pinfDesempatePorSaldo(porNumero, nfDados);
+      if (_dsNum) return { pedido: _dsNum, ambiguo: false, motivo: 'cnpj+numeroPedido (pedido com saldo)' };
     }
     var ordenadosCnpj = ordenarPorScoreEValor(porCnpj);
     var melhorCnpj = ordenadosCnpj[0], segundoCnpj = ordenadosCnpj[1];
@@ -24372,6 +24391,8 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
   if (numPedNf) {
     var porNumeroTodos = pedidosCandidatos.filter(function (p) { return _pinfNumCasa(p.numPedidoCliente, nfDados.numPedido); });
     if (porNumeroTodos.length === 1) return { pedido: porNumeroTodos[0], ambiguo: false, motivo: 'numeroPedido' };
+    var _dsTodos = _pinfDesempatePorSaldo(porNumeroTodos, nfDados);
+    if (_dsTodos) return { pedido: _dsTodos, ambiguo: false, motivo: 'numeroPedido (pedido com saldo)' };
     if (porNumeroTodos.length > 1) {
       return { pedido: null, ambiguo: true, motivo: 'Mais de um pedido com o mesmo número no período — não foi possível decidir automaticamente qual corresponde a esta NF.' };
     }
