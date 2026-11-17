@@ -1449,6 +1449,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 <!-- jsPDF + html2canvas (geracao de PDF do Pedido na impressao) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';document.head.appendChild(s);"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';document.head.appendChild(s);"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js';document.head.appendChild(s);"></script>
 <style id="pimp-print-style">
   @media print {
     @page { margin: 10mm; }
@@ -22636,9 +22637,135 @@ function _pimprelRender() {
 function pedImprimirRelacaoPopup() {
   window.print();
 }
+// ---- PDF com texto (sem foto da tela) ----
+function _pimprelTextoPdf(t) {
+  return String(t == null ? '' : t).replace(/[–—]/g, '-').replace(/ /g, ' ');
+}
+function _pimprelHtmlParaTexto(h) {
+  var d = document.createElement('div'); d.innerHTML = String(h == null ? '' : h);
+  return _pimprelTextoPdf((d.textContent || '').trim());
+}
+function _pimprelCarregarImg(src) {
+  return new Promise(function (resolve) {
+    if (!src) return resolve(null);
+    var img = new Image();
+    img.onload = function () {
+      try {
+        var esc = Math.min(1, 500 / (img.naturalWidth || 500));
+        var cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(img.naturalWidth * esc)); cv.height = Math.max(1, Math.round(img.naturalHeight * esc));
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        resolve({ data: cv.toDataURL('image/png'), w: cv.width, h: cv.height });
+      } catch (e) { resolve(null); }
+    };
+    img.onerror = function () { resolve(null); };
+    img.src = src;
+  });
+}
+function _pimprelCorRgb(hex, padrao) {
+  var m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(String(hex || ''));
+  return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : (padrao || [30, 41, 59]);
+}
 function pedGerarPdfRelacao() {
-  // PDF com texto: abre a impressao do navegador (escolher "Salvar como PDF"). Mantem margem em todas as paginas e nao corta pedido no meio.
-  window.print();
+  try {
+    var jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
+    if (!jsPDFCtor || !jsPDFCtor.API || !jsPDFCtor.API.autoTable) { window.print(); return; }   // biblioteca nao carregou: usa a impressao do navegador
+    var dados = _pimprelDadosPorAba(_pimprelAbaAtual);
+    var logoComp = (typeof _pimpLogoCompartilharPadrao === 'function') ? _pimpLogoCompartilharPadrao() : '';
+    var logoForn = '';
+    if (dados.fornecedorFiltro) {
+      var nf = _cpNorm(dados.fornecedorFiltro);
+      var fo = getFornecedores().find(function (x) { return _cpNorm(String(x.nome_fantasia || x.razao_social || '').replace(/^\d+\s+/, '')) === nf; });
+      if (fo && fo.foto) logoForn = fo.foto;
+    }
+    return Promise.all([_pimprelCarregarImg(logoForn), _pimprelCarregarImg(logoComp)]).then(function (imgs) {
+      var doc = new jsPDFCtor('p', 'mm', 'a4');
+      var W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+      var M = 12, TOPO = 14, RODAPE = 14, AZUL = [39, 42, 74], CINZA = [100, 116, 139];
+      // cabecalho: titulo e filtros a esquerda, fornecedor no centro, logos a direita
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(AZUL[0], AZUL[1], AZUL[2]);
+      doc.text(_pimprelTextoPdf(dados.titulo), M, TOPO + 5);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(CINZA[0], CINZA[1], CINZA[2]);
+      doc.text(_pimprelTextoPdf(dados.subtitulo), M, TOPO + 10.5);
+      if (dados.fornecedorFiltro) {
+        doc.setFontSize(7); doc.text('FORNECEDOR', W / 2, TOPO + 3, { align: 'center' });
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(AZUL[0], AZUL[1], AZUL[2]);
+        doc.text(_pimprelTextoPdf(dados.fornecedorFiltro), W / 2, TOPO + 9, { align: 'center' });
+      }
+      var xDir = W - M, altLogo = 12;
+      [imgs[1], imgs[0]].forEach(function (im) {      // Compartilhar fica na ponta direita, a da fabrica ao lado esquerdo dela
+        if (!im) return;
+        var w = Math.min(36, altLogo * im.w / im.h), h = w * im.h / im.w;
+        try { doc.addImage(im.data, 'PNG', xDir - w, TOPO + (altLogo - h) / 2, w, h); xDir -= w + 5; } catch (e) { }
+      });
+      var yLinha = TOPO + altLogo + 3;
+      doc.setDrawColor(AZUL[0], AZUL[1], AZUL[2]); doc.setLineWidth(.5); doc.line(M, yLinha, W - M, yLinha);
+      var y = yLinha + 5;
+      var cabecalhoTabela = function (colunas) { return [colunas.map(function (c) { return _pimprelTextoPdf(c.header).toUpperCase(); })]; };
+      var corpoTabela = function (colunas, itens) {
+        return itens.map(function (it) { return colunas.map(function (c) { var v = c.get(it); return c.raw ? _pimprelHtmlParaTexto(v) : _pimprelTextoPdf(v); }); });
+      };
+      var estiloColunas = function (colunas) {
+        var o = {};
+        colunas.forEach(function (c, i) { o[i] = { halign: c.align || 'left' }; if (c.destaque) { o[i].fontStyle = 'bold'; o[i].textColor = [30, 41, 59]; } });
+        return o;
+      };
+      var baseTabela = function (colunas, itens, startY, fs) {
+        return {
+          startY: startY, margin: { left: M, right: M, top: TOPO, bottom: RODAPE }, theme: 'grid', showHead: 'everyPage', rowPageBreak: 'avoid',
+          head: cabecalhoTabela(colunas), body: corpoTabela(colunas, itens),
+          styles: { fontSize: fs, cellPadding: 1.6, lineColor: [203, 213, 225], lineWidth: .2, textColor: [51, 65, 85], overflow: 'linebreak' },
+          headStyles: { fillColor: [248, 250, 252], textColor: [100, 116, 139], fontSize: fs - 1, fontStyle: 'bold' },
+          columnStyles: estiloColunas(colunas)
+        };
+      };
+      var LINHA = 6.8;   // altura estimada de uma linha de tabela (mm)
+      if (dados.itemizado) {
+        if (!dados.blocos.length) { doc.setFontSize(10); doc.text('Nenhum registro encontrado com esses filtros.', W / 2, y + 20, { align: 'center' }); }
+        dados.blocos.forEach(function (b) {
+          var util = H - TOPO - RODAPE;
+          var altTotal = 9 + 7 + b.itens.length * LINHA;
+          var altMin = 9 + 7 + Math.min(b.itens.length, 4) * LINHA;
+          var resta = H - RODAPE - y;
+          // pedido que cabe numa pagina so nao e dividido; pedido grande so comeca se couberem pelo menos algumas linhas
+          if ((altTotal <= util && altTotal > resta) || (altTotal > util && altMin > resta)) { doc.addPage(); y = TOPO; }
+          doc.setFillColor(248, 250, 252); doc.setDrawColor(AZUL[0], AZUL[1], AZUL[2]); doc.setLineWidth(.4); doc.rect(M, y, W - 2 * M, 9, 'FD');
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(148, 163, 184); doc.text(_pimprelTextoPdf(b.data), M + 2, y + 5.7);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(30, 41, 59);
+          var xc = M + 22; doc.text(_pimprelTextoPdf(b.cliente), xc, y + 5.7);
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(71, 85, 105);
+          doc.text(_pimprelTextoPdf(b.fornecedor) + '  |  ' + _pimprelTextoPdf(b.status), xc + doc.getTextWidth(_pimprelTextoPdf(b.cliente)) * 1.08 + 4, y + 5.7);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5);
+          var cor = _pimprelCorRgb(b.valorCor, [21, 128, 61]);
+          doc.setTextColor(cor[0], cor[1], cor[2]); doc.text(_pimprelTextoPdf(b.valorValue), W - M - 2, y + 5.7, { align: 'right' });
+          doc.setTextColor(30, 41, 59); doc.text(_pimprelTextoPdf(b.pesoValor), W - M - 2 - doc.getTextWidth(_pimprelTextoPdf(b.valorValue)) - 6, y + 5.7, { align: 'right' });
+          doc.autoTable(baseTabela(b.colunas, b.itens, y + 9, 8));
+          y = doc.lastAutoTable.finalY + 6;
+        });
+      } else {
+        doc.autoTable(baseTabela(dados.colunas, dados.linhas, y, 8.5));
+        y = doc.lastAutoTable.finalY + 6;
+      }
+      if (y > H - RODAPE - 12) { doc.addPage(); y = TOPO; }
+      doc.setDrawColor(AZUL[0], AZUL[1], AZUL[2]); doc.setLineWidth(.5); doc.line(M, y, W - M, y);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(AZUL[0], AZUL[1], AZUL[2]);
+      var kg = dados.totalKg.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
+      doc.text('Total em Kg: ' + kg, W - M, y + 6, { align: 'right' });
+      doc.text('Total em R$: ' + _pimprelTextoPdf(_pedFmtMoeda(dados.totalReais)), W - M - doc.getTextWidth('Total em Kg: ' + kg) - 10, y + 6, { align: 'right' });
+      var n = doc.getNumberOfPages();
+      for (var k = 1; k <= n; k++) {
+        doc.setPage(k); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+        doc.text('Pagina ' + k + ' de ' + n, W - M, H - 6, { align: 'right' });
+      }
+      doc.save('Relacao_Pedidos_' + _pimprelAbaAtual + '_' + Date.now() + '.pdf');
+    }).catch(function (err) {
+      alert('Erro ao gerar PDF: ' + (err && err.message || err) + '. Vou abrir a impressao do navegador no lugar.');
+      window.print();
+    });
+  } catch (err) {
+    alert('Erro ao gerar PDF: ' + (err && err.message || err) + '. Vou abrir a impressao do navegador no lugar.');
+    window.print();
+  }
 }
 
 function relatorioPedidos() {
