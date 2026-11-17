@@ -22637,41 +22637,8 @@ function pedImprimirRelacaoPopup() {
   window.print();
 }
 function pedGerarPdfRelacao() {
-  var el = document.getElementById('pimprel-conteudo');
-  if (!el || !window.html2canvas || !window.jspdf) { alert('Não foi possível gerar o PDF: biblioteca ainda carregando. Aguarde alguns segundos e tente novamente.'); return; }
-  return html2canvas(el, { scale: 2, useCORS: true }).then(function(canvas){
-    var jsPDFCtor = window.jspdf.jsPDF;
-    var pdf = new jsPDFCtor('p', 'mm', 'a4');
-    var pageWidth  = pdf.internal.pageSize.getWidth();
-    var pageHeight = pdf.internal.pageSize.getHeight();
-    // Pontos onde pode quebrar a pagina: inicio de cada pedido (bloco) e, se um pedido for maior que a pagina, inicio de cada linha.
-    var rEl = el.getBoundingClientRect();
-    var fator = canvas.height / (rEl.height || 1);
-    var topo = function (n) { return Math.round((n.getBoundingClientRect().top - rEl.top) * fator); };
-    var quebrasBloco = Array.prototype.slice.call(el.children).map(topo);
-    var quebrasLinha = Array.prototype.slice.call(el.querySelectorAll('tbody tr')).map(topo);
-    var paginaPx = Math.floor(pageHeight * canvas.width / pageWidth);
-    var inicio = 0, primeira = true;
-    while (inicio < canvas.height - 2) {
-      var limite = inicio + paginaPx, fim;
-      if (limite >= canvas.height) { fim = canvas.height; }
-      else {
-        var cand = quebrasBloco.filter(function (y) { return y > inicio + 20 && y <= limite; });
-        if (!cand.length) cand = quebrasLinha.filter(function (y) { return y > inicio + 20 && y <= limite; });
-        fim = cand.length ? Math.max.apply(null, cand) : limite;
-      }
-      var fatia = document.createElement('canvas');
-      fatia.width = canvas.width; fatia.height = fim - inicio;
-      fatia.getContext('2d').drawImage(canvas, 0, inicio, canvas.width, fim - inicio, 0, 0, canvas.width, fim - inicio);
-      if (!primeira) pdf.addPage();
-      pdf.addImage(fatia.toDataURL('image/png'), 'PNG', 0, 0, pageWidth, (fim - inicio) * pageWidth / canvas.width);
-      primeira = false;
-      inicio = fim;
-    }
-    pdf.save('Relacao_Pedidos_' + _pimprelAbaAtual + '_' + Date.now() + '.pdf');
-  }).catch(function(err){
-    alert('Erro ao gerar PDF: ' + (err && err.message || err));
-  });
+  // PDF com texto: abre a impressao do navegador (escolher "Salvar como PDF"). Mantem margem em todas as paginas e nao corta pedido no meio.
+  window.print();
 }
 
 function relatorioPedidos() {
