@@ -30390,6 +30390,7 @@ function renderDevolucaoList() {
 
 // ── v77: Importar e-mails de devolucao da fabrica (colar/arrastar) ──
 var _emlRes = [];
+var _emlSeqN = 0;
 function _emlNum(s) { return parseFloat(String(s || '0').replace(/\./g, '').replace(',', '.')) || 0; }
 function _emlSemZeros(s) { return String(s || '').trim().replace(/^0+(?=\d)/, ''); }
 function _emlIso(br) { var m = String(br || '').match(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})\b/); return m ? ((m[3].length === 2 ? '20' + m[3] : m[3]) + '-' + m[2] + '-' + m[1]) : ''; }
@@ -30813,8 +30814,11 @@ function _emlMesclar(novos) {
   novos.forEach(function (n) {
     var ex = _emlRes.find(function (r) { return _emlChave(r) === _emlChave(n); });
     if (ex) { rep++; if (n.xmlAnexo && !ex.xmlAnexo) ex.xmlAnexo = n.xmlAnexo; return; }
+    n._seq = ++_emlSeqN;
     _emlRes.push(n);
   });
+  // NFD mais recente (data de emissao) primeiro; na mesma data, a que entrou por ultimo primeiro
+  _emlRes.sort(function (a, b) { return String(b.d.dataEmissao || '').localeCompare(String(a.d.dataEmissao || '')) || ((b._seq || 0) - (a._seq || 0)); });
   return rep;
 }
 function _emlAnalisar() {
