@@ -5548,7 +5548,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
             <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#16a34a" id="vcf-kpi-valor">R$ 0,00</div>
           </div>
           <div class="ped-kpi-card" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.04);border-bottom:3px solid #3d5aa8">
-            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Peso do Pedido</div>
+            <div class="ped-kpi-lbl" style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Peso Faturado</div>
             <div class="ped-kpi-val" style="font-size:20px;font-weight:800;color:#272A4A" id="vcf-kpi-peso">0 kg</div>
           </div>
         </div>
@@ -27040,7 +27040,8 @@ function renderVendasCompletasFaturadas(manterPag) {
 
   var kT = document.getElementById('vcf-kpi-total'); if (kT) kT.textContent = lista.length;
   var totalValorGeral = lista.reduce(function(acc, r){ return acc + (r._prodFiltro ? r.valorFatItens : (Number(r.pedido.valorFaturado) || 0)); }, 0);
-  var totalPesoGeral  = lista.reduce(function(acc, r){ return acc + r.pesoPedido; }, 0);
+  lista.forEach(function(r){ r.pesoFat = r.itens.reduce(function(a, it){ var pu = it.qtdPedida > 0 ? (it.pesoTotal / it.qtdPedida) : 0; return a + pu * it.qtdFaturada; }, 0); });
+  var totalPesoGeral  = lista.reduce(function(acc, r){ return acc + r.pesoFat; }, 0);
   var kV = document.getElementById('vcf-kpi-valor'); if (kV) kV.textContent = _pedFmtMoeda(totalValorGeral);
   var totalValorPedido = lista.reduce(function(acc, r){ return acc + r.valorPedido; }, 0);
   var kVP = document.getElementById('vcf-kpi-valor-ped'); if (kVP) kVP.textContent = _pedFmtMoeda(totalValorPedido);
@@ -27100,6 +27101,8 @@ function renderVendasCompletasFaturadas(manterPag) {
       + '<div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;background:#eff6ff;border-top:1px solid #dbeafe;padding:9px 16px;flex-wrap:wrap">'
       + nfsHtml
       + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Peso do Pedido</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + r.pesoPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
+      + '<div style="width:1px;height:26px;background:#bfdbfe"></div>'
+      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Peso Faturado</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + r.pesoFat.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg</div></div>'
       + '<div style="width:1px;height:26px;background:#bfdbfe"></div>'
       + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor do Pedido</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
       + '<div style="width:1px;height:26px;background:#bfdbfe"></div>'
