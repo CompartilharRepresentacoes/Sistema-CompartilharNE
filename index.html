@@ -21714,8 +21714,10 @@ function renderVendaSimples() {
   _pssAtualizarSetas();
 
   var produtosMapPss = {}; getProdutos().forEach(function(pr){ produtosMapPss[pr.id] = pr; });
-  var pssValorTotal = rows.reduce(function(acc,p){ return acc + (Number(p.valorTotal)||0); }, 0);
+  // Valor Total do topo: nao conta Bonificado, Aguardando Retorno nem Cancelado
+  var pssValorTotal = rows.reduce(function(acc,p){ return (p.status === 'Bonificado' || p.status === 'Aguardando Retorno' || p.status === 'Cancelado') ? acc : acc + (Number(p.valorTotal)||0); }, 0);
   var pssPesoTotal = rows.reduce(function(acc,p){
+    if (p.status === 'Bonificado' || p.status === 'Aguardando Retorno' || p.status === 'Cancelado') return acc;   // mesma regra do Valor Total
     return acc + (p.itens||[]).reduce(function(acc2,it){
       var prod = produtosMapPss[it.prodId];
       var pesoUnit = prod ? (parseFloat(String(prod.peso).replace(',', '.')) || 0) : 0;
