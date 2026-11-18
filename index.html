@@ -23159,20 +23159,34 @@ function _pedParsePedidoTextoCompraMerc(paginasTexto) {
 // ── Layout Consinco "PEDIDO DE COMPRAS" com colunas "Cod Forn | Codigo Produtos a Receber | Embalagem | Quantidade | Valor Unitario" ──
 // Ex.: Novo Atacado -> Allfood. Diferente do layout "Sendas" (colunas em outras posicoes) e o PDF vem GIRADO
 // (pagina em pe com o conteudo deitado): as posicoes ja chegam convertidas para o que se ve na tela
-// (ver _pedPaginasItensVisuais). O pedido ocupa varias paginas, entao os itens de todas as paginas viram
-// UM pedido so. Le cada linha pelas colunas (esquerda -> direita), sem depender de posicao fixa em pixels:
+// (ver _pedPaginasItensVisuais). O pedido ocupa varias paginas: paginas com o mesmo numero de pedido e o mesmo cliente viram
+// UM pedido; outro numero ou outro cliente = outro pedido. Le cada linha pelas colunas (esquerda -> direita), sem depender de posicao fixa em pixels:
 //   [Cod Forn] [Codigo do produto] [Descricao] [Embalagem "CX 10" / "KG 1"] [Quantidade] [Valor Unitario] ...
 // Valor Unitario e o preco de 1 UNIDADE da embalagem (4,00 CX de 10 x 15,57 = 622,80); o sistema espera o
 // preco da CAIXA quando a unidade e CXA, entao multiplica pelo conteudo da embalagem.
 function _pedParsePedidoTextoConsincoCod(paginasItensVis) {
-  var numero = '', itens = [], cnpjForn = '', cnpjCli = '', erro = false;
+  // Cada pagina repete o cabecalho (numero do pedido + CNPJ do cliente). Paginas com o mesmo numero e o mesmo cliente formam
+  // UM pedido; numero ou cliente diferente = outro pedido (um mesmo PDF pode trazer varios pedidos, ex.: CD 600 e CD 998).
+  var grupos = [], porChave = {}, ultimo = null;
   (paginasItensVis || []).forEach(function (items) {
     var txt = items.map(function (it) { return it.str; }).join(' ');
-    if (!numero) { var mN = /PEDIDO DE COMPRAS\D*(\d+)/.exec(txt); if (mN) numero = mN[1]; }
+    var mN = /PEDIDO DE COMPRAS\D*(\d+)/.exec(txt);
     var linhas = _pedAgruparLinhasPdf(items);
     var c = _pedExtrairCnpjsPaginaSendas(linhas);
-    if (!cnpjForn && c.fornecedorCnpj) cnpjForn = c.fornecedorCnpj;
-    if (!cnpjCli && c.clienteCnpj) cnpjCli = c.clienteCnpj;
+    var numero = mN ? mN[1] : '', cnpjForn = c.fornecedorCnpj || '', cnpjCli = c.clienteCnpj || '';
+    var g;
+    if (numero || cnpjCli) {
+      var chave = numero + '|' + cnpjCli;
+      g = porChave[chave];
+      if (!g) { g = porChave[chave] = { numero: numero, cnpjForn: cnpjForn, cnpjCli: cnpjCli, itens: [] }; grupos.push(g); }
+    } else {
+      g = ultimo;   // pagina sem cabecalho: continua o pedido anterior
+    }
+    if (!g) return;
+    ultimo = g;
+    if (!g.numero && numero) g.numero = numero;
+    if (!g.cnpjForn && cnpjForn) g.cnpjForn = cnpjForn;
+    if (!g.cnpjCli && cnpjCli) g.cnpjCli = cnpjCli;
     Object.keys(linhas).map(Number).sort(function (a, b) { return b - a; }).forEach(function (y) {
       var tk = linhas[y];
       var emb = tk.find(function (t) { return /^(CX|CXA|KG|UN|UND|PC|PCT)\s+\d+$/i.test(t.str.trim()); });
@@ -23194,7 +23208,7 @@ function _pedParsePedidoTextoConsincoCod(paginasItensVis) {
       var unidade = (un === 'CX' || un === 'CXA') ? 'CXA' : (un === 'KG' ? 'KG' : 'UN');
       var unitCx = unidade === 'CXA' ? Math.round(unit * conteudo * 100) / 100 : unit;
       var cod = codProd || codForn;
-      itens.push({
+      g.itens.push({
         descricao: desc.join(' ').replace(/\s+/g, ' ').trim(), dataEnt: null, qtd: qtd, unitario: unitCx,
         codigo: cod, codigoNormalizado: _pedNormCodigoPedido(cod),
         codigoCandidatos: _pedCandidatosCodigoPedido(cod),
@@ -23202,11 +23216,12 @@ function _pedParsePedidoTextoConsincoCod(paginasItensVis) {
       });
     });
   });
-  if (!itens.length || !numero || !cnpjForn || !cnpjCli) return [];
-  return [{
-    numero: numero, fornecedorCnpj: cnpjForn, localEntregaCnpj: cnpjCli, itens: itens,
-    origem: 'Importado de PDF "Pedido de Compras" nº ' + numero + ' (' + itens.length + ' itens).'
-  }];
+  return grupos.filter(function (g) { return g.itens.length && g.numero && g.cnpjForn && g.cnpjCli; }).map(function (g) {
+    return {
+      numero: g.numero, fornecedorCnpj: g.cnpjForn, localEntregaCnpj: g.cnpjCli, itens: g.itens,
+      origem: 'Importado de PDF "Pedido de Compras" nº ' + g.numero + ' (' + g.itens.length + ' itens).'
+    };
+  });
 }
 // ── Layout "Pedidos de compra por Periodo" (ERP do cliente, ex.: Unicompra/Bellacompra -> Sao Vicente) ──
 // Cada PAGINA e uma loja (CNPJ da loja no cabecalho), todas com o mesmo numero de pedido. Colunas de cada item:
