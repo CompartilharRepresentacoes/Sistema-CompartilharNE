@@ -5877,33 +5877,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </button>
         </div>
         <div id="entctrl-filtros-extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
-          <div style="position:relative;width:130px">
-            <input id="entctrl-fornecedor" oninput="_entctrlFornFiltrar()" onkeydown="_entctrlFornKey(event)" onblur="setTimeout(function(){var d=document.getElementById('entctrl-forn-drop');if(d)d.style.display='none'},200)" autocomplete="off" placeholder="Nome ou código..." style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-            <div id="entctrl-forn-drop" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #e2e8f0;border-radius:8px;z-index:999;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(39,42,74,.15)"></div>
-          </div>
-          <input type="hidden" id="entctrl-fornecedor-id">
-          <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
-          <select id="entctrl-categoria" onchange="entctrlAtualizarSubcategorias();renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Sub Rede</span>
-          <select id="entctrl-subcategoria" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Vendedor</span>
-          <select id="entctrl-vendedor" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">UF</span>
-          <select id="entctrl-uf" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-            <option value="">Todas</option>
-            <option value="AL">AL</option><option value="BA">BA</option><option value="PB">PB</option>
-            <option value="PE">PE</option><option value="RN">RN</option><option value="SE">SE</option>
-          </select>
-          <span style="font-size:11px;font-weight:600;color:#64748b">Transportadora</span>
-          <input id="entctrl-transportadora" oninput="renderEntregaControle()" placeholder="Nome..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:120px">
-          <span style="font-size:11px;font-weight:600;color:#64748b">Status</span>
-          <select id="entctrl-status" onchange="renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-            <option value="">Todos</option>
-            <option value="rota">Em Rota</option>
-            <option value="atrasada">Atrasada</option>
-            <option value="entregue">Entregue</option>
-          </select>
+          <div id="entctrl-ms-wrap" style="display:contents"></div>
           <button onclick="entctrlLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
         </div>
       </div>
@@ -10391,8 +10365,9 @@ function showPage(pageId, params) {
     if (params && (params.clienteNome || params.categoriaId)) {
       var elCli = document.getElementById('entctrl-cliente');
       if (elCli) elCli.value = params.clienteNome || '';
-      var elCat = document.getElementById('entctrl-categoria');
-      if (elCat) elCat.value = params.categoriaId || '';
+      var _catNome = ''; getCatClientes().forEach(function (c) { if (String(c.id) === String(params.categoriaId)) _catNome = c.nome || ''; });
+      _entMs.rede = params.categoriaId ? [{ v: String(params.categoriaId), t: _catNome || String(params.categoriaId) }] : [];
+      _entMs.sub = [];
       entctrlAtualizarSubcategorias();
     }
     renderEntregaControle();
@@ -26022,29 +25997,101 @@ function _entctrlLinhas() {
   return linhas;
 }
 function _entctrlPopularFiltros() {
-  var vendSel = document.getElementById('entctrl-vendedor');
-  if (vendSel && !vendSel.dataset.populado) {
-    var vendedores = getVendedoresAtivos();
-    vendSel.innerHTML = '<option value="">Todos</option>' + _ordNome(vendedores).map(function(v){ return '<option value="' + v.id + '">' + _pedEsc(v.nome || '') + '</option>'; }).join('');
-    vendSel.dataset.populado = '1';
-  }
-  var catSel = document.getElementById('entctrl-categoria');
-  if (catSel && !catSel.dataset.populado) {
-    var categorias = getCatClientes().filter(function(c){ return !c.pai; });
-    catSel.innerHTML = '<option value="">Todas</option>' + _ordNome(categorias).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
-    catSel.dataset.populado = '1';
-  }
-  entctrlAtualizarSubcategorias();
+  _entMsRender();
 }
 function entctrlAtualizarSubcategorias() {
-  var catId = document.getElementById('entctrl-categoria') ? document.getElementById('entctrl-categoria').value : '';
-  var subSel = document.getElementById('entctrl-subcategoria');
-  if (!subSel) return;
-  var valorAtual = subSel.value;
-  var subs = catId ? getCatClientes().filter(function(c){ return String(c.pai) === String(catId); }) : [];
-  subSel.innerHTML = '<option value="">Todas</option>' + _ordNome(subs).map(function(c){ return '<option value="' + c.id + '">' + _pedEsc(c.nome || '') + '</option>'; }).join('');
-  if (subs.some(function(s){ return String(s.id) === String(valorAtual); })) subSel.value = valorAtual;
+  _entMsRender();
 }
+// ── Controle de Entrega: filtros de multipla escolha (marca uma ou mais opcoes; nada marcado = todos) ──
+var _entMs = { forn: [], rede: [], sub: [], vend: [], uf: [], transp: [], status: [] };   // cada item: { v: valor, t: texto }
+var _entMsRot = { forn: 'Fornecedor', rede: 'Rede', sub: 'Sub Rede', vend: 'Vendedor', uf: 'UF', transp: 'Transportadora', status: 'Status' };
+var _entMsTodos = { forn: 'Todos', rede: 'Todas', sub: 'Todas', vend: 'Todos', uf: 'Todas', transp: 'Todas', status: 'Todos' };
+var _entMsOps = [];
+var _entMsAberto = '';
+function _entMsVals(k) { return _entMs[k].map(function (o) { return o.v; }); }
+function _entMsOpcoes(k) {
+  var ops = [];
+  if (k === 'forn') {
+    ops = _ordNome(getFornecedores()).map(function (f) { return { v: String(f.id), t: (f.codigo ? f.codigo + ' ' : '') + (f.nome_fantasia || f.razao_social || '') }; });
+  } else if (k === 'rede') {
+    ops = _ordNome(getCatClientes().filter(function (c) { return !c.pai; })).map(function (c) { return { v: String(c.id), t: c.nome || '' }; });
+  } else if (k === 'sub') {
+    var redes = _entMsVals('rede');
+    ops = _ordNome(getCatClientes().filter(function (c) { return c.pai && redes.indexOf(String(c.pai)) !== -1; })).map(function (c) { return { v: String(c.id), t: c.nome || '' }; });
+  } else if (k === 'vend') {
+    ops = _ordNome(getVendedoresAtivos()).map(function (v) { return { v: String(v.id), t: v.nome || '' }; });
+  } else if (k === 'uf') {
+    var ufs = {};
+    _entctrlLinhas().forEach(function (r) { if (r.uf) ufs[r.uf] = true; });
+    ops = Object.keys(ufs).sort().map(function (u) { return { v: u, t: u }; });
+  } else if (k === 'transp') {
+    var nomes = {}, semT = false;
+    getTransportadoras().forEach(function (t) { var n = String(t.nome_fantasia || t.razao_social || '').trim(); if (n) nomes[n.toLowerCase()] = n; });
+    _entctrlLinhas().forEach(function (r) { var n = String(r.transportadoraNome || '').trim(); if (n) { if (!nomes[n.toLowerCase()]) nomes[n.toLowerCase()] = n; } else semT = true; });
+    ops = Object.keys(nomes).sort().map(function (n) { return { v: n, t: nomes[n] }; });
+    if (semT) ops.push({ v: '', t: '(sem transportadora)' });
+  } else if (k === 'status') {
+    ops = [{ v: 'rota', t: 'Em Rota' }, { v: 'atrasada', t: 'Atrasada' }, { v: 'entregue', t: 'Entregue' }];
+  }
+  return ops;
+}
+function _entMsRender() {
+  var wrap = document.getElementById('entctrl-ms-wrap');
+  if (!wrap) return;
+  var dAnt = document.getElementById('entctrl-ms-drop');
+  var topAnt = dAnt ? dAnt.scrollTop : 0;
+  wrap.innerHTML = Object.keys(_entMsRot).map(function (k) {
+    var sel = _entMs[k];
+    var resumo = !sel.length ? _entMsTodos[k] : (sel.length === 1 ? sel[0].t : sel.length + ' selecionados');
+    var h = '<span style="font-size:11px;font-weight:600;color:#64748b">' + _entMsRot[k] + '</span>'
+      + '<div style="position:relative">'
+      + '<div onclick="_entMsAbrir(\'' + k + '\')" style="display:flex;align-items:center;gap:6px;border:1px solid ' + (sel.length ? '#272A4A' : '#e2e8f0') + ';border-radius:7px;padding:6px 9px;font-size:12px;background:' + (sel.length ? '#eef2ff' : '#f8fafc') + ';color:#1e293b;min-width:120px;max-width:190px;cursor:pointer;box-sizing:border-box' + (sel.length ? ';font-weight:600' : '') + '">'
+      + '<span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _pedEsc(resumo) + '</span><i class="ti ti-chevron-down" style="font-size:12px;color:#94a3b8"></i></div>';
+    if (_entMsAberto === k) {
+      _entMsOps = _entMsOpcoes(k);
+      var marcados = _entMsVals(k);
+      h += '<div id="entctrl-ms-drop" style="position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px;width:240px;max-width:80vw;box-shadow:0 8px 24px rgba(39,42,74,.15);z-index:999;max-height:260px;overflow-y:auto">'
+        + '<div style="display:flex;justify-content:space-between;border-bottom:1px solid #f1f5f9;padding-bottom:6px;margin-bottom:4px;font-size:11px">'
+        + '<a onclick="_entMsTodosMarcar(\'' + k + '\',1)" style="color:#DE7926;font-weight:700;cursor:pointer">Marcar todos</a>'
+        + '<a onclick="_entMsTodosMarcar(\'' + k + '\',0)" style="color:#DE7926;font-weight:700;cursor:pointer">Limpar</a></div>'
+        + (_entMsOps.length ? _entMsOps.map(function (o, i) {
+            return '<label style="display:flex;align-items:center;gap:8px;padding:5px 4px;font-size:12px;cursor:pointer"><input type="checkbox" ' + (marcados.indexOf(o.v) !== -1 ? 'checked ' : '') + 'onchange="_entMsMarcar(\'' + k + '\',' + i + ',this.checked)"> ' + _pedEsc(o.t) + '</label>';
+          }).join('') : '<div style="padding:8px 4px;font-size:11.5px;color:#94a3b8">' + (k === 'sub' ? 'Marque uma Rede primeiro.' : 'Nenhuma opção.') + '</div>')
+        + '</div>';
+    }
+    return h + '</div>';
+  }).join('');
+  var dNovo = document.getElementById('entctrl-ms-drop');
+  if (dNovo) dNovo.scrollTop = topAnt;
+}
+function _entMsAbrir(k) { _entMsAberto = (_entMsAberto === k) ? '' : k; _entMsRender(); }
+function _entMsMarcar(k, i, on) {
+  var o = _entMsOps[i]; if (!o) return;
+  var p = _entMsVals(k).indexOf(o.v);
+  if (on && p === -1) _entMs[k].push({ v: o.v, t: o.t });
+  if (!on && p !== -1) _entMs[k].splice(p, 1);
+  _entMsAposMudar(k);
+}
+function _entMsTodosMarcar(k, marcar) {
+  _entMs[k] = marcar ? _entMsOpcoes(k).map(function (o) { return { v: o.v, t: o.t }; }) : [];
+  _entMsAposMudar(k);
+}
+function _entMsAposMudar(k) {
+  if (k === 'rede') {   // sub redes marcadas que nao pertencem mais as redes marcadas saem da selecao
+    var redes = _entMsVals('rede'), permitidas = {};
+    getCatClientes().forEach(function (c) { if (c.pai && redes.indexOf(String(c.pai)) !== -1) permitidas[String(c.id)] = true; });
+    _entMs.sub = _entMs.sub.filter(function (s) { return permitidas[s.v]; });
+  }
+  _entMsRender();
+  renderEntregaControle();
+}
+document.addEventListener('click', function (e) {
+  if (!_entMsAberto) return;
+  var w = document.getElementById('entctrl-ms-wrap');
+  var caminho = e.composedPath ? e.composedPath() : [];
+  if (w && caminho.indexOf(w) !== -1) return;
+  _entMsAberto = ''; _entMsRender();
+});
 function entctrlToggleMaisFiltros() {
   var box = document.getElementById('entctrl-filtros-extra');
   var txt = document.getElementById('entctrl-mais-filtros-txt');
@@ -26059,10 +26106,12 @@ var _entAba = '';
 function _entSetAba(a) { _entAba = a; renderEntregaControle(); }
 function entctrlLimparFiltros() {
   _entAba = '';
-  ['entctrl-busca','entctrl-data-de','entctrl-data-ate','entctrl-fornecedor','entctrl-fornecedor-id','entctrl-vendedor','entctrl-categoria','entctrl-subcategoria','entctrl-uf','entctrl-transportadora','entctrl-status'].forEach(function(id){
+  ['entctrl-busca','entctrl-data-de','entctrl-data-ate'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
-  entctrlAtualizarSubcategorias();
+  Object.keys(_entMs).forEach(function(k){ _entMs[k] = []; });
+  _entMsAberto = '';
+  _entMsRender();
   renderEntregaControle();
 }
 var _entctrlFornItems = [];
@@ -26471,14 +26520,7 @@ function renderEntregaControle() {
   var busca   = (document.getElementById('entctrl-busca') ? document.getElementById('entctrl-busca').value : '').trim().toLowerCase();
   var dataDe  = _entctrlParseDataBR(document.getElementById('entctrl-data-de') ? document.getElementById('entctrl-data-de').value : '');
   var dataAte = _entctrlParseDataBR(document.getElementById('entctrl-data-ate') ? document.getElementById('entctrl-data-ate').value : '');
-  var fornIdF = document.getElementById('entctrl-fornecedor-id') ? document.getElementById('entctrl-fornecedor-id').value : '';
-  var fornF   = (document.getElementById('entctrl-fornecedor') ? document.getElementById('entctrl-fornecedor').value : '').trim().toLowerCase();
-  var vendF   = document.getElementById('entctrl-vendedor') ? document.getElementById('entctrl-vendedor').value : '';
-  var catF    = document.getElementById('entctrl-categoria') ? document.getElementById('entctrl-categoria').value : '';
-  var subF    = document.getElementById('entctrl-subcategoria') ? document.getElementById('entctrl-subcategoria').value : '';
-  var ufF     = document.getElementById('entctrl-uf') ? document.getElementById('entctrl-uf').value : '';
-  var transpF = (document.getElementById('entctrl-transportadora') ? document.getElementById('entctrl-transportadora').value : '').trim().toLowerCase();
-  var statusF = document.getElementById('entctrl-status') ? document.getElementById('entctrl-status').value : '';
+  var fornS = _entMsVals('forn'), vendS = _entMsVals('vend'), redeS = _entMsVals('rede'), subS = _entMsVals('sub'), ufS = _entMsVals('uf'), transpS = _entMsVals('transp'), statusS = _entMsVals('status');
 
   var linhas = _entctrlLinhas().filter(function(r){
     var p = r.pedido, f = r.fatura, cli = r.cliente;
@@ -26490,13 +26532,12 @@ function renderEntregaControle() {
     }
     if (dataDe && (!f.data || f.data < dataDe)) return false;
     if (dataAte && (!f.data || f.data > dataAte)) return false;
-    if (fornIdF) { if (p.fornecedorId !== fornIdF) return false; }
-    else if (fornF && String(p.fornecedorId||'').toLowerCase() !== fornF) return false;
-    if (vendF && p.vendedorId !== vendF) return false;
-    if (catF && String(cli.categoria||'') !== String(catF)) return false;
-    if (subF && String(cli.subcategoria||'') !== String(subF)) return false;
-    if (ufF && r.uf !== ufF) return false;
-    if (transpF && (r.transportadoraNome||'').toLowerCase().indexOf(transpF) === -1) return false;
+    if (fornS.length && fornS.indexOf(String(p.fornecedorId||'')) === -1) return false;
+    if (vendS.length && vendS.indexOf(String(p.vendedorId||'')) === -1) return false;
+    if (redeS.length && redeS.indexOf(String(cli.categoria||'')) === -1) return false;
+    if (subS.length && subS.indexOf(String(cli.subcategoria||'')) === -1) return false;
+    if (ufS.length && ufS.indexOf(r.uf) === -1) return false;
+    if (transpS.length && transpS.indexOf(String(r.transportadoraNome||'').trim().toLowerCase()) === -1) return false;
     return true;
   });
   // v132: contagens das abas ignoram a aba escolhida (ficam estaveis); depois aplica aba + status
@@ -26504,9 +26545,7 @@ function renderEntregaControle() {
   linhas = _baseAbas.filter(function(r){
     if (_entAba === 'rota' && r.entregue) return false;
     if (_entAba === 'entregue' && !r.entregue) return false;
-    if (statusF === 'rota' && (r.entregue || r.atrasada)) return false;
-    if (statusF === 'atrasada' && !r.atrasada) return false;
-    if (statusF === 'entregue' && !r.entregue) return false;
+    if (statusS.length && !statusS.some(function(sx){ return (sx === 'rota' && !r.entregue && !r.atrasada) || (sx === 'atrasada' && r.atrasada) || (sx === 'entregue' && r.entregue); })) return false;
     return true;
   });
   linhas = linhas.slice().sort(function(a,b){ return (b.fatura.data||'').localeCompare(a.fatura.data||''); });
