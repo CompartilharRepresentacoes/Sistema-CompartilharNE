@@ -23392,8 +23392,10 @@ function _pedExtrairItensPaginaSendas(linhas) {
       if (!descTok || it.x < descTok.x) descTok = it;
     });
     var embSeqTok = linha.find(function (it) { return it.x >= 278 && it.x <= 322; });
-    var qtdTok = linha.find(function (it) { return it.x >= 320 && it.x <= 360; });
-    var unitTok = linha.find(function (it) { return it.x >= 360 && it.x <= 400; });
+    var qtdTok = linha.find(function (it) { return it.x >= 310 && it.x <= 360 && /^[\d.,]+$/.test(it.str.trim()); });
+    // preco unitario = proximo numero depois da quantidade (precos com 3 digitos antes da virgula, ex.: 124,2500, comecam
+    // um pouco antes da coluna fixa e a linha inteira era ignorada)
+    var unitTok = qtdTok ? linha.find(function (it) { return it.x > qtdTok.x + 1 && it.x <= 420 && /^[\d.,]+$/.test(it.str.trim()); }) : null;
     if (!descTok || !embSeqTok || !qtdTok || !unitTok) return; // linha fora do padrao esperado, ignora com seguranca
 
     var m = /^([A-Za-z]+)\s+(\d+)$/.exec(embSeqTok.str.trim());
