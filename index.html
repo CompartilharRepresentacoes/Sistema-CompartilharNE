@@ -14922,19 +14922,19 @@ function _tpRenderProdList() {
   list.innerHTML = _tpItens.map(function(it,i){
     var prodCad = produtosCadastro.find(function(p){ return p.id === it.prodId; });
     var unidade = (prodCad && prodCad.unidade) ? prodCad.unidade : '—';
-    return '<div class="tp-grid-itens" style="display:grid;grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 80px 90px 80px;padding:9px 12px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
+    return '<div class="tp-grid-itens" style="display:grid;grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 80px 90px 80px;padding:2px 12px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
       + '<span style="color:#64748b;font-size:11px">'+(it.fornNome||'—')+'</span>'
       + '<span style="font-weight:600;color:#1e293b">'+(it.codigo?it.codigo+' – ':'')+it.nome+'</span>'
       + '<span style="color:#64748b">'+(it.codPedido||'—')+'</span>'
       + '<span style="color:#64748b">'+(it.codCliente||'—')+'</span>'
       + '<span style="color:#64748b;font-size:11px">'+unidade+'</span>'
       + '<span style="color:#1e293b;font-weight:600">R$ '+it.valor+'</span>'
-      + (function(){ var _r = _comResolver(_comFornDe(it.fornId), it.prodId, it.comissao, '', (document.getElementById('tabpreco-edit-id')||{}).value || ''); return '<span class="so-comissao" style="color:#1e293b;font-size:11px;font-weight:700">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'<br>'+_comOrigemTag(_r.origem)+'</span>'; })()
+      + (function(){ var _r = _comResolver(_comFornDe(it.fornId), it.prodId, it.comissao, '', (document.getElementById('tabpreco-edit-id')||{}).value || ''); var _orig = { N:'Negociação', E:'Exceção produto', I:'Tabela', T:'Exceção tabela', P:'Padrão' }[_r.origem] || ''; return '<span class="so-comissao" title="'+_orig+'" style="color:#1e293b;font-size:11px;font-weight:700">'+(_r.pct>0 ? _comFmtPct(_r.pct)+'%' : '—')+'</span>'; })()
       + '<span style="color:#DE7926;font-size:11px">'+(it.periodo||'—')+'</span>'
       + '<span style="color:#64748b">'+(it.dtCadastro||'—')+'</span>'
       + '<div style="display:flex;gap:4px;justify-content:center">'
-      + '<button onclick="_tpEditProd('+i+')" style="width:24px;height:24px;border-radius:5px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#64748b;font-size:11px;display:flex;align-items:center;justify-content:center" title="Editar"><i class="ti ti-edit"></i></button>'
-      + '<button onclick="_tpRemProd('+i+')" style="width:24px;height:24px;border-radius:5px;border:1px solid #fee2e2;background:#fff5f5;cursor:pointer;color:#dc2626;font-size:11px;display:flex;align-items:center;justify-content:center" title="Remover"><i class="ti ti-trash"></i></button>'
+      + '<button onclick="_tpEditProd('+i+')" style="width:20px;height:20px;border-radius:5px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#64748b;font-size:11px;display:flex;align-items:center;justify-content:center" title="Editar"><i class="ti ti-edit"></i></button>'
+      + '<button onclick="_tpRemProd('+i+')" style="width:20px;height:20px;border-radius:5px;border:1px solid #fee2e2;background:#fff5f5;cursor:pointer;color:#dc2626;font-size:11px;display:flex;align-items:center;justify-content:center" title="Remover"><i class="ti ti-trash"></i></button>'
       + '</div></div>';
   }).join('');
 }
@@ -15016,12 +15016,12 @@ function _tpRenderCliList() {
     return;
   }
   list.innerHTML = _tpClientes.map(function(c,i){
-    return '<div style="display:grid;grid-template-columns:80px 1fr 120px 80px;padding:9px 12px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
+    return '<div style="display:grid;grid-template-columns:80px 1fr 120px 80px;padding:2px 12px;align-items:center;border-bottom:1px solid #f1f5f9;font-size:12px" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
       + '<span style="color:#64748b;font-size:11px">'+(c.codigo||'—')+'</span>'
       + '<span style="font-weight:600;color:#1e293b">'+c.nome+'</span>'
       + '<span style="color:#64748b">'+c.dtCadastro+'</span>'
       + '<div style="display:flex;justify-content:center">'
-      + '<button onclick="_tpRemCli('+i+')" style="width:24px;height:24px;border-radius:5px;border:1px solid #fee2e2;background:#fff5f5;cursor:pointer;color:#dc2626;font-size:11px;display:flex;align-items:center;justify-content:center" title="Remover"><i class="ti ti-trash"></i></button>'
+      + '<button onclick="_tpRemCli('+i+')" style="width:20px;height:20px;border-radius:5px;border:1px solid #fee2e2;background:#fff5f5;cursor:pointer;color:#dc2626;font-size:11px;display:flex;align-items:center;justify-content:center" title="Remover"><i class="ti ti-trash"></i></button>'
       + '</div></div>';
   }).join('');
 }
