@@ -9593,7 +9593,7 @@ function _pedAtualizarCadastros(cb) {
 function _cadAutoIniciar() {
   if (_cadAutoLigado) return;
   _cadAutoLigado = true; _cadAutoUlt = Date.now();
-  setInterval(function () { _cadAutoAtualizar(55000); }, 60000);
+  setInterval(function () { _cadAutoAtualizar(595000); }, 600000);   // a cada 10 minutos (era 1): economiza dados do Supabase
   document.addEventListener('visibilitychange', function () { if (!document.hidden) _cadAutoAtualizar(30000); });
 }
 
