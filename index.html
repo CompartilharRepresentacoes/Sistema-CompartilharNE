@@ -4121,6 +4121,20 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                   </select>
                 </div>
               </div>
+
+              <!-- Regra de importacao de pedidos -->
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-top:14px">
+                <div style="padding:9px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:6px">
+                  <span style="font-size:12px;font-weight:700;color:#1e293b">Importação de pedidos</span>
+                  <span style="font-size:10px;color:#94a3b8">regra deste cliente</span>
+                </div>
+                <div style="padding:12px 14px">
+                  <label style="display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-size:12.5px;color:#1e293b">
+                    <input type="checkbox" id="cli-regra-kg-menos-cx" style="margin-top:2px;width:15px;height:15px">
+                    <span><b>Em KG, tirar 1 caixa na importação</b><div style="font-size:11px;color:#64748b;margin-top:3px">Ao importar um pedido deste cliente, cada produto pedido em <b>KG</b> entra com <b>1 caixa a menos</b> (caixa = "Quantidade por Caixa" do produto). Se o produto ficar sem nenhuma caixa, ele sai do pedido.</div></span>
+                  </label>
+                </div>
+              </div>
             </div>
 
             <!-- ── Observação ── -->
@@ -13280,6 +13294,7 @@ function openClienteForm(params) {
   const entEst = document.getElementById('cli-ent-estado'); if (entEst) entEst.value = r.ent_estado||'';
   // Observação
   setV('cli-obs', r.obs||'');
+  var _rkgEl = document.getElementById('cli-regra-kg-menos-cx'); if (_rkgEl) _rkgEl.checked = !!r.regra_kg_menos_cx;
   // Toggle doc tipo
   toggleCliDocTipo(r.doc_tipo || 'cnpj');
   // Vendedor principal
@@ -13646,6 +13661,7 @@ function salvarCliente() {
     ent_estado:   document.getElementById('cli-ent-estado').value,
     ent_pais:     document.getElementById('cli-ent-pais').value.trim(),
     obs:          document.getElementById('cli-obs').value.trim(),
+    regra_kg_menos_cx: !!(document.getElementById('cli-regra-kg-menos-cx') && document.getElementById('cli-regra-kg-menos-cx').checked),
     vendedor_principal: document.getElementById('cli-vendedor-principal').value,
     prazos_fornecedor:     window._cliPrazos          || [],
     tabelas_fornecedor:    window._cliTabelas         || [],
@@ -13886,6 +13902,7 @@ function _cliImportarLinhas(header, linhas, commit) {
       categoria: rede ? rede.id : '',
       subcategoria: loja ? loja.id : '',
       vendedor_principal: vendPrinc ? vendPrinc.id : (existente ? (existente.vendedor_principal||'') : ''),
+      regra_kg_menos_cx: existente ? !!existente.regra_kg_menos_cx : false,
       ativo: (ativoRaw === 'não' || ativoRaw === 'nao') ? 'Não' : 'Sim',
       ent_cep: _cadVal(row, col.entCep).trim(),
       ent_endereco: _cadVal(row, col.entEndereco).trim(),
@@ -23042,13 +23059,28 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
   var valorTabela = _pedParseMoeda(tabItem.valor);
   var avisos = _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxValido ? cxNum : 0, valorTabela, qtdOriginalPdf);
 
+  // Regra do cliente (cadastro): item em KG entra com 1 caixa a menos (depois do ajuste de caixa fechada).
+  // Se nao sobrar nenhuma caixa, o item sai do pedido (fica marcado como removido, com opcao de restaurar).
+  var removidoRegraKg = false;
+  if (itemPdf._regraKgMenosCx && itemPdf.unidade === 'KG') {
+    if (modoUnid === 'un' && cxValido) {
+      var qtdAntesKg = quantidadeReal;
+      var qtdDepoisKg = Math.round((quantidadeReal - cxNum) * 1000) / 1000;
+      removidoRegraKg = qtdDepoisKg <= 0.0001;
+      if (!removidoRegraKg) quantidadeReal = qtdDepoisKg;
+      avisos.push('Regra do cliente: em KG sai 1 caixa a menos (' + qtdAntesKg + ' - ' + cxNum + ' = ' + (removidoRegraKg ? 0 : qtdDepoisKg) + ')' + (removidoRegraKg ? ' - não sobrou nenhuma caixa, o item saiu do pedido (use Restaurar se quiser manter).' : '.'));
+    } else {
+      avisos.push('Regra do cliente "em KG, tirar 1 caixa" não aplicada: este produto não tem Quantidade por Caixa cadastrada.');
+    }
+  }
+
   return {
     prodId: produto.id, prodCodigo: produto.codigo, prodNome: produto.nome,
     medida: produto.unidade || '', cx: cxPdfKg ? String(cxPdfKg) : (produto.quant || ''), comissao: tabItem.comissao || '',
     quantidade: quantidadeReal, precoUnit: precoUnit, desconto: 0,
     _cxCadastro: cxPdfKg ? String(produto.quant || '') : '', _cxPdfKg: cxPdfKg,
     valorTotal: quantidadeReal * precoUnit, modoUnid: modoUnid, qtdCaixas: qtdCaixas,
-    avisos: avisos, _excluidoImport: false,
+    avisos: avisos, _excluidoImport: removidoRegraKg,
     _cxNum: cxValido ? cxNum : 0, _valorTabela: valorTabela, _qtdOriginalPdf: qtdOriginalPdf,
     // preco do pedido (PDF) x preco da tabela: quando divergem, a conferencia pede para escolher qual esta correto
     _precoPdf: precoUnit, _precoDiverge: (valorTabela > 0 && Math.abs(precoUnit - valorTabela) > 0.01), _precoEscolha: '',
@@ -23079,6 +23111,7 @@ function _pedProcessarBlocoImportadoPdf(bloco) {
       resultado.itensPendentes.push({ origem: itemPdf, motivo: 'Código "' + itemPdf.codigo + '" não encontrado. ' + diag });
       return;
     }
+    itemPdf._regraKgMenosCx = !!cliente.regra_kg_menos_cx;
     var montado = _pedMontarItemImportadoPdf(itemPdf, tabItem, fornecedor.id, cliente.id);
     if (montado.erro) resultado.itensPendentes.push({ origem: itemPdf, motivo: montado.erro, tipoErro: montado.tipoErro || 'geral' });
     else {
