@@ -24812,7 +24812,7 @@ function _pinfRenderRevisao() {
     if (!_pinfResultados.length) {
       wrap.innerHTML = '<div style="text-align:center;padding:24px;color:#94a3b8;font-size:12px">Nenhum pedido do período/fábrica selecionado foi reconhecido nos arquivos.</div>';
     } else {
-      wrap.innerHTML = _pinfResultados.map(function (r, ri) {
+      wrap.innerHTML = _pinfBarraMarcar() + _pinfResultados.map(function (r, ri) {
         var nfNums = r.nfs.map(function (x) { return x.dados.nNF; }).filter(Boolean).join(', ');
         var nfBadgesHtml = r.nfs.map(function (x) { return _nfBadgeHtml(x.dados.nNF, _nfClassificarTipo(x.dados.natOp, x.dados.cfop)); }).join('');
         var avisosTipo = r.nfs.map(function (x) {
@@ -24825,6 +24825,8 @@ function _pinfRenderRevisao() {
         var valorNf = r.nfs.reduce(function (s, x) { return s + (Number(x.dados.valor) || 0); }, 0);
         var pdfsDisponiveis = r.nfs.filter(function (x) { return x.pdfFile; });
         var aprovadoOk = r.status === 'ok' || r.aprovadoManual;
+        var marcada = _pinfMarcada(r);
+        var caixinha = '<input type="checkbox" ' + (marcada ? 'checked ' : '') + (aprovadoOk ? '' : 'disabled ') + 'onchange="_pinfMarcar(' + ri + ', this.checked)" title="' + (aprovadoOk ? 'Importar esta loja' : 'Aprove a divergência para poder marcar') + '" style="width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:' + (aprovadoOk ? 'pointer' : 'not-allowed') + '">';
 
         var pdfsBtns = pdfsDisponiveis.map(function (x, i) {
           return '<button type="button" onclick="_pinfVerPdf(' + ri + ',' + i + ')" style="background:#f8fafc;border:1px solid #e2e8f0;color:#475569;border-radius:6px;padding:4px 10px;font-size:10.5px;cursor:pointer;margin-left:6px;white-space:nowrap"><i class="ti ti-file-type-pdf" style="color:#dc2626;margin-right:3px"></i>Ver PDF' + (pdfsDisponiveis.length > 1 ? (' (' + (i + 1) + ')') : '') + '</button>';
@@ -24856,7 +24858,8 @@ function _pinfRenderRevisao() {
             + '</div>';
         }
 
-        return '<div style="padding:12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px">'
+        return '<div style="padding:12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start' + (marcada ? '' : ';opacity:.55;background:#f8fafc') + '">'
+          + caixinha + '<div style="flex:1;min-width:0">'
           + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
           + '<div>'
           + '<div style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(r.pedido.clienteNome || '')) + '</div>'
@@ -24868,7 +24871,7 @@ function _pinfRenderRevisao() {
           + corpo
           + infoJaFat
           + avisoTipoHtml
-          + '</div>';
+          + '</div></div>';
       }).join('');
     }
   }
@@ -24906,9 +24909,11 @@ function _pinfRenderRevisao() {
 
   var resumo = document.getElementById('pinf-revisao-resumo');
   if (resumo) {
-    var prontos = _pinfResultados.filter(function (r) { return r.status === 'ok' || r.aprovadoManual; }).length;
-    resumo.textContent = prontos + ' de ' + _pinfResultados.length + ' pedido(s) prontos para concluir.';
+    var marcadas = _pinfResultados.filter(_pinfMarcada).length;
+    resumo.textContent = marcadas + ' de ' + _pinfResultados.length + ' pedido(s) marcados e prontos para concluir.';
   }
+  var btnConc = document.getElementById('pinf-btn-concluir');
+  if (btnConc && !btnConc.disabled) btnConc.textContent = 'Concluir e anexar (' + _pinfResultados.filter(_pinfMarcada).length + ')';
 }
 function _pinfVerPdf(ri, pdfIdx) {
   var r = _pinfResultados[ri]; if (!r) return;
@@ -24931,8 +24936,19 @@ function _pinfVerPdfJaImportada(ni) {
   window.open(url, '_blank');
   setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
 }
-function _pinfAprovarDivergencia(ri) { var r = _pinfResultados[ri]; if (!r) return; r.aprovadoManual = true; _pinfRenderRevisao(); }
-function _pinfDesfazerAprovacao(ri) { var r = _pinfResultados[ri]; if (!r) return; r.aprovadoManual = false; _pinfRenderRevisao(); }
+// Caixinha de cada loja: so as lojas prontas (sem divergencia ou aprovadas) E marcadas sao concluidas
+function _pinfPronta(r) { return r.status === 'ok' || !!r.aprovadoManual; }
+function _pinfMarcada(r) { return _pinfPronta(r) && !r.desmarcado; }
+function _pinfMarcar(ri, v) { var r = _pinfResultados[ri]; if (!r) return; r.desmarcado = !v; _pinfRenderRevisao(); }
+function _pinfMarcarTodas(v) { _pinfResultados.forEach(function (r) { if (_pinfPronta(r)) r.desmarcado = !v; }); _pinfRenderRevisao(); }
+function _pinfBarraMarcar() {
+  return '<div style="display:flex;align-items:center;gap:14px;font-size:11.5px;margin-bottom:10px;color:#475569">'
+    + '<a onclick="_pinfMarcarTodas(true)" style="color:#DE7926;font-weight:700;cursor:pointer">Marcar todas</a>'
+    + '<a onclick="_pinfMarcarTodas(false)" style="color:#DE7926;font-weight:700;cursor:pointer">Desmarcar todas</a>'
+    + '<span>' + _pinfResultados.filter(_pinfMarcada).length + ' marcada(s) para importar</span></div>';
+}
+function _pinfAprovarDivergencia(ri) { var r = _pinfResultados[ri]; if (!r) return; r.aprovadoManual = true; r.desmarcado = false; _pinfRenderRevisao(); }
+function _pinfDesfazerAprovacao(ri) { var r = _pinfResultados[ri]; if (!r) return; r.aprovadoManual = false; r.desmarcado = false; _pinfRenderRevisao(); }
 
 // -- Conclusao: anexa XML/PDF e cria a fatura (via _pfatCriarFaturaAutoXml) de cada pedido pronto
 // (sem divergencia OU aprovado manualmente). Pedidos com divergencia NAO aprovada ficam de fora
@@ -24942,8 +24958,9 @@ function _pinfDesfazerAprovacao(ri) { var r = _pinfResultados[ri]; if (!r) retur
 function _pinfConcluirEAnexar() {
   var btnConcluir = document.getElementById('pinf-btn-concluir');
   if (btnConcluir && btnConcluir.disabled) return; // ja esta processando -- ignora cliques repetidos
-  var prontos = _pinfResultados.filter(function (r) { return r.status === 'ok' || r.aprovadoManual; });
-  if (!prontos.length) { alert('Nenhum pedido pronto para concluir (sem divergência ou aprovado manualmente).'); return; }
+  var prontos = _pinfResultados.filter(_pinfMarcada);
+  if (!prontos.length) { alert('Nenhum pedido marcado para concluir. Marque ao menos um pedido pronto (sem divergência ou aprovado manualmente).'); return; }
+  var desmarcadas = _pinfResultados.filter(function (r) { return _pinfPronta(r) && r.desmarcado; }).length;
 
   if (btnConcluir) { btnConcluir.disabled = true; btnConcluir.style.cursor = 'not-allowed'; btnConcluir.style.opacity = '0.6'; }
   var fila = [];
@@ -24958,7 +24975,7 @@ function _pinfConcluirEAnexar() {
     if (btnConcluir) { btnConcluir.disabled = false; btnConcluir.style.cursor = 'pointer'; btnConcluir.style.opacity = '1'; }
     _pinfFecharRevisao();
     if (typeof renderPedidoList === 'function') renderPedidoList();
-    alert(totalPedidos + ' pedido(s) concluído(s), ' + resumo.ok + ' arquivo(s) anexado(s).' + (resumo.avisos.length ? (' Avisos: ' + resumo.avisos.join(' ')) : ''));
+    alert(totalPedidos + ' pedido(s) concluído(s), ' + resumo.ok + ' arquivo(s) anexado(s).' + (desmarcadas ? (' ' + desmarcadas + ' loja(s) desmarcada(s) não foram importadas.') : '') + (resumo.avisos.length ? (' Avisos: ' + resumo.avisos.join(' ')) : ''));
   });
 }
 // Anexa (e fatura, quando XML) em fila ESTRITAMENTE sequencial -- reusa _pedSalvarAnexoAoPedido e
