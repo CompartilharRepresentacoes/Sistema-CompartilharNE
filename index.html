@@ -9126,6 +9126,26 @@ function _sbCacheSet(k, v) {
   k = _sbUid + '|' + k;
   return _sbDB().then(function (db) { if (!db) return; try { db.transaction('m', 'readwrite').objectStore('m').put(v, k); } catch (e) {} });
 }
+// Apaga da copia local (IndexedDB) os meses de pedidos que acabaram de ser gravados no banco. Sem isso, um mes fechado
+// continuava vindo da copia antiga por ate 12 horas e a alteracao (ex.: data de entrega importada) parecia sumir no F5.
+function _sbCacheLimparMeses(meses) {
+  if (!_sbUid) return;
+  var prefixo = _sbUid + '|';
+  _sbDB().then(function (db) {
+    if (!db) return;
+    try {
+      var st = db.transaction('m', 'readwrite').objectStore('m');
+      var rq = st.openKeyCursor ? st.openKeyCursor() : st.openCursor();
+      rq.onsuccess = function () {
+        var cur = rq.result; if (!cur) return;
+        var chave = String(cur.key);
+        var m = /\|c4\|(\d{4}-\d{2})-\d{2}\|/.exec(chave);
+        if (m && chave.indexOf(prefixo) === 0 && meses[m[1]]) st.delete(cur.key);
+        cur.continue();
+      };
+    } catch (e) { }
+  });
+}
 async function _sbCarregarPedidos(ini, fim, cli) {
   var jan = _sbMeses(ini, fim), res = [], i = 0;
   var hoje = new Date(); var limite = new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() - 1, 1)).toISOString().slice(0, 10);
@@ -9133,7 +9153,7 @@ async function _sbCarregarPedidos(ini, fim, cli) {
     while (i < jan.length) {
       var j = jan[i++];
       var fechado = j[1] < limite; // mes antes do mes passado: nao muda mais
-      var k = 'c3|' + j[0] + '|' + (cli || '');   // c3: troca de versao limpa a copia antiga (itens das NFs foram corrigidos em 05/11/2026)
+      var k = 'c4|' + j[0] + '|' + (cli || '');   // c4: troca de versao limpa a copia antiga (c3: itens das NFs corrigidos em 05/11/2026; c4: copias de meses fechados nao eram atualizadas ao gravar pedidos antigos)
       var c = fechado ? await _sbCacheGet(k) : null;
       if (c && c.t && (Date.now() - c.t) < 12 * 3600 * 1000) { Array.prototype.push.apply(res, c.d); continue; }
       var r = await SB.rpc('docs_pedidos', { p_ini: j[0], p_fim: j[1], p_cli: cli || null });
@@ -9385,6 +9405,16 @@ function _sbGravarPedidos(arrayNovo) {
     });
     return seq;
   }).then(function () {
+    try {
+      var _mesesGravados = {};
+      alterados.forEach(function (o) {
+        if (o && o.data) _mesesGravados[String(o.data).slice(0, 7)] = true;
+        var _antes = o && mapAntigo[o.id];
+        if (_antes && _antes.data) _mesesGravados[String(_antes.data).slice(0, 7)] = true;   // pedido que mudou de mes
+      });
+      apagar.forEach(function (id) { var _ob = mapAntigo[id]; if (_ob && _ob.data) _mesesGravados[String(_ob.data).slice(0, 7)] = true; });
+      _sbCacheLimparMeses(_mesesGravados);
+    } catch (eCache) { }
     console.log('[Supabase] pedidos gravados:', alterados.length, 'alterado(s),', apagar.length, 'apagado(s)');
     _fsAoAtualizar('pedidos');
   }).catch(function (err) {
