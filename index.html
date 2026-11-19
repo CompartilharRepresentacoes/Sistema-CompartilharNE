@@ -24775,7 +24775,7 @@ function _pinfMontarResultados(xmlLidos, pdfFiles, pedidosCandidatos, produtos) 
     var saldoPed = _pinfItensSaldoPedido(grupo.pedido, produtos);
     // grupo so de remessas (lancadas com valor zero e sem itens): nao ha itens para conferir
     var divergencias = xmlsComItens.length ? _pimCalcularDivergenciasItem(saldoPed.itens, itensNfConvertidos, produtos) : [];
-    return { pedido: grupo.pedido, nfs: grupo.xmls, divergencias: divergencias, jaFaturados: saldoPed.jaFaturados, status: divergencias.length ? 'divergente' : 'ok', aprovadoManual: false };
+    return { pedido: grupo.pedido, nfs: grupo.xmls, divergencias: divergencias, itensNf: itensNfConvertidos, itensSaldo: saldoPed.itens, jaFaturados: saldoPed.jaFaturados, status: divergencias.length ? 'divergente' : 'ok', aprovadoManual: false };
   });
 
   _pinfResultados = resultados;
@@ -24854,17 +24854,17 @@ function _pinfRenderRevisao() {
           }).join('');
           corpo = '<div style="color:#991b1b;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:8px 10px;margin-top:8px;display:flex;flex-direction:column;gap:3px">'
             + linhas
-            + '<div style="margin-top:4px;font-size:10.5px;font-weight:600">' + (marcada ? 'Será importada com esta divergência. Se tiver dúvida, desmarque a caixinha.' : 'Não será importada.') + '</div>'
             + '</div>';
         }
 
+        if (r.verDetalhe) corpo = _pinfDetalheHtml(r);
         return '<div style="padding:12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start' + (marcada ? '' : ';opacity:.55;background:#f8fafc') + '">'
           + caixinha + '<div style="flex:1;min-width:0">'
           + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
           + '<div>'
           + '<div style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedEsc(_cpSemColchetes(r.pedido.clienteNome || '')) + '</div>'
           + '<div style="font-size:11px;color:#64748b;margin-top:2px">Pedido nº ' + _pedEsc(r.pedido.numPedidoCliente || String(r.pedido.lancamento || '')) + ' · Valor NF: ' + _pedFmtMoeda(valorNf) + '</div>'
-          + (nfBadgesHtml ? ('<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' + nfBadgesHtml + '</div>') : '')
+          + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center">' + nfBadgesHtml + '<button type="button" onclick="_pinfAlternarDetalhe(' + ri + ')" style="border:1.5px solid ' + (r.verDetalhe ? '#272A4A' : '#94a3b8') + ';background:' + (r.verDetalhe ? '#272A4A' : '#fff') + ';color:' + (r.verDetalhe ? '#fff' : '#272A4A') + ';border-radius:999px;padding:1px 10px;font-size:10px;font-weight:800;cursor:pointer">' + ((r.pedido.itens || []).length) + ' produtos</button></div>'
           + '</div>'
           + '<div>' + pdfsBtns + '</div>'
           + '</div>'
@@ -24935,6 +24935,39 @@ function _pinfVerPdfJaImportada(ni) {
   var url = URL.createObjectURL(n.pdfFile);
   window.open(url, '_blank');
   setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+}
+// Lista detalhada dos produtos de uma loja: verde = certo, vermelho = divergente (mesma regra das divergencias do painel)
+var _PINF_MOTIVO = { faltando: 'Não faturado', quantidade: 'Quantidade a mais', preco: 'Preço diferente' };
+function _pinfAlternarDetalhe(ri) { var r = _pinfResultados[ri]; if (!r) return; r.verDetalhe = !r.verDetalhe; _pinfRenderRevisao(); }
+function _pinfLinhasDetalhe(r) {
+  var itensPed = (r.pedido && r.pedido.itens) || [], nfs = r.itensNf || [], saldo = r.itensSaldo || [], divs = r.divergencias || [];
+  var fq = function (q) { return String(Math.round((Number(q) || 0) * 1000) / 1000); };
+  var achaNf = function (cod) { var c = _cpNorm(cod || ''); return c ? nfs.find(function (x) { return _cpNorm(x.codigo || '') === c; }) : null; };
+  var linhas = [];
+  itensPed.forEach(function (it, i) {
+    var cod = it.prodCodigo || '', sd = saldo[i], nf = achaNf(cod);
+    var motivos = divs.filter(function (d) { return d.tipo !== 'extra' && _cpNorm(d.produtoCodigo || '') === _cpNorm(cod); }).map(function (d) { return _PINF_MOTIVO[d.tipo] || d.tipo; });
+    var qPed = (sd && !sd._jaFaturado) ? sd.quantidade : it.quantidade;
+    linhas.push({ produto: (cod ? cod + ' - ' : '') + (it.prodNome || ''), pedido: 'Qtd ' + fq(qPed) + ' · ' + _pedFmtMoeda(it.precoUnit),
+      faturado: nf ? ('Qtd ' + fq(nf.qtd) + ' · ' + _pedFmtMoeda(nf.precoUnit)) : ((sd && sd._jaFaturado) ? 'NF anterior' : '—'),
+      situacao: motivos.length ? motivos.join(' · ') : 'Certo', ok: !motivos.length });
+  });
+  divs.filter(function (d) { return d.tipo === 'extra'; }).forEach(function (d) {
+    var nf = achaNf(d.produtoCodigo);
+    linhas.push({ produto: (d.produtoCodigo ? d.produtoCodigo + ' - ' : '') + (d.produtoNome || ''), pedido: '—',
+      faturado: nf ? ('Qtd ' + fq(nf.qtd) + ' · ' + _pedFmtMoeda(nf.precoUnit)) : ('Qtd ' + fq(d.valorFaturado)), situacao: 'Fora do pedido', ok: false });
+  });
+  return linhas;
+}
+function _pinfDetalheHtml(r) {
+  var g = 'display:grid;grid-template-columns:1.9fr 1fr 1fr 1.4fr;gap:8px;padding:5px 10px;align-items:center';
+  return '<div style="margin-top:8px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;font-size:11px">'
+    + '<div style="' + g + ';background:#f8fafc;color:#94a3b8;font-size:9.5px;font-weight:700;text-transform:uppercase;border-bottom:1px solid #e2e8f0"><span>Produto</span><span>Pedido</span><span>Faturado</span><span>Situação</span></div>'
+    + _pinfLinhasDetalhe(r).map(function (l) {
+        var cor = l.ok ? 'background:#f0fdf4;color:#15803d;border-bottom:1px solid #dcfce7' : 'background:#fef2f2;color:#991b1b;border-bottom:1px solid #fecaca;font-weight:600';
+        return '<div style="' + g + ';' + cor + '"><span>' + _pedEsc(l.produto) + '</span><span>' + _pedEsc(l.pedido) + '</span><span>' + _pedEsc(l.faturado) + '</span><span style="font-weight:700">' + _pedEsc(l.situacao) + '</span></div>';
+      }).join('')
+    + '</div>';
 }
 // Caixinha de cada loja: so as lojas prontas (sem divergencia ou aprovadas) E marcadas sao concluidas
 function _pinfPronta(r) { return true; }   // todas vem marcadas, inclusive com divergencia; desmarca quem tiver duvida
