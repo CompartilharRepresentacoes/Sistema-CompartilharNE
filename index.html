@@ -26837,7 +26837,7 @@ function renderEntregaControle() {
     else if (r.atrasada) statusHtml = '<span style="background:#fef2f2;color:#991b1b;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Atrasada</span>';
     else statusHtml = '<span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Em Rota</span>';
     var diasHtml = (r.diasDif == null) ? '<span style="color:#cbd5e1">—</span>' : '<span style="font-weight:700;color:' + (r.diasDif > 0 ? '#991b1b' : '#15803d') + '">' + r.diasDif + '</span>';
-    return '<div class="mc-row" style="display:grid;grid-template-columns:130px 1.7fr 72px 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px minmax(150px,1.2fr);padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9">'
+    return '<div class="mc-row ped-row-hover" style="display:grid;grid-template-columns:130px 1.7fr 72px 45px 0.85fr 0.85fr 80px 85px 85px 65px 118px 100px minmax(150px,1.2fr);padding:10px 14px;align-items:center;border-bottom:1px solid #f1f5f9;transition:background .12s">'
       + '<div class="mc-meta ent-pedido" style="order:1;font-size:12px;color:#475569;white-space:nowrap">' + _pedEsc(p.numPedidoCliente || '—') + '</div>'
       + '<div class="mc-primary ent-cliente" style="order:2;font-size:12.5px;font-weight:700;color:#1e293b;white-space:normal;word-break:break-word">' + _pedEsc(_cpSemColchetes(p.clienteNome)) + '</div>'
       + '<div class="ent-linha-forn" style="display:contents">'
@@ -26856,9 +26856,9 @@ function renderEntregaControle() {
       + '<div class="ent-datafat" style="order:8;font-size:12px;color:#64748b">' + dataFatFmt + '</div>'
       + '<div class="ent-prev" style="order:9;font-size:12px;color:#64748b">' + prevFmt + '</div>'
       + '<div class="ent-dias" style="order:10;text-align:center">' + diasHtml + '</div>'
-      + '<div class="ent-entrega-wrap" style="order:11"><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="' + _entctrlDataParaBR(f.dataEntrega) + '" oninput="_entctrlMaskData(this)" onchange="entctrlSalvarDataEntregaTexto(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:6px;padding:4px 6px;font-size:11px"></div>'
+      + '<div class="ent-entrega-wrap" style="order:11"><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="' + _entctrlDataParaBR(f.dataEntrega) + '" oninput="_entctrlMaskData(this)" onchange="entctrlSalvarDataEntregaTexto(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:100%;box-sizing:border-box;border:1.5px solid #94a3b8;border-radius:6px;padding:4px 6px;font-size:11px;background:#fff"></div>'
       + '</div>'
-      + '<div class="ent-obs" style="order:13"><input type="text" maxlength="200" placeholder="Observação..." value="' + _pedEsc(f.obsEntrega || '') + '" onchange="entctrlSalvarObs(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:6px;padding:4px 6px;font-size:11px"></div>'
+      + '<div class="ent-obs" style="order:13"><input type="text" maxlength="200" placeholder="Observação..." value="' + _pedEsc(f.obsEntrega || '') + '" onchange="entctrlSalvarObs(\'' + p.id + '\',\'' + f.id + '\',this)" style="width:100%;box-sizing:border-box;border:1.5px solid #94a3b8;border-radius:6px;padding:4px 6px;font-size:11px;background:#fff"></div>'
       + '</div>';
   });
 }
