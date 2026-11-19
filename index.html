@@ -24295,8 +24295,14 @@ function _pinfAbrirFiltro() {
   var iniEl = document.getElementById('pinf-data-ini');
   var fimEl = document.getElementById('pinf-data-fim');
   if (iniEl && fimEl) {
-    fimEl.value = _entctrlDataParaBR(new Date().toISOString().slice(0, 10));
-    iniEl.value = _entctrlDataParaBR(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10));
+    // periodo pre-selecionado = semana atual: do domingo ate a sexta (no sabado, ate hoje). Usa a data local, nao a UTC.
+    var _hj = new Date(), _hoje = new Date(_hj.getFullYear(), _hj.getMonth(), _hj.getDate());
+    var _dom = new Date(_hoje.getFullYear(), _hoje.getMonth(), _hoje.getDate() - _hoje.getDay());
+    var _sex = new Date(_dom.getFullYear(), _dom.getMonth(), _dom.getDate() + 5);
+    if (_hoje > _sex) _sex = _hoje;
+    var _isoLocal = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+    iniEl.value = _entctrlDataParaBR(_isoLocal(_dom));
+    fimEl.value = _entctrlDataParaBR(_isoLocal(_sex));
   }
   var modal = document.getElementById('modal-pinf-filtro');
   if (modal) modal.style.display = 'flex';
