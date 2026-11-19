@@ -24826,7 +24826,7 @@ function _pinfRenderRevisao() {
         var pdfsDisponiveis = r.nfs.filter(function (x) { return x.pdfFile; });
         var aprovadoOk = r.status === 'ok' || r.aprovadoManual;
         var marcada = _pinfMarcada(r);
-        var caixinha = '<input type="checkbox" ' + (marcada ? 'checked ' : '') + (aprovadoOk ? '' : 'disabled ') + 'onchange="_pinfMarcar(' + ri + ', this.checked)" title="' + (aprovadoOk ? 'Importar esta loja' : 'Aprove a divergência para poder marcar') + '" style="width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:' + (aprovadoOk ? 'pointer' : 'not-allowed') + '">';
+        var caixinha = '<input type="checkbox" ' + (marcada ? 'checked ' : '') + 'onchange="_pinfMarcar(' + ri + ', this.checked)" title="Importar esta loja (desmarque se tiver dúvida)" style="width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer">';
 
         var pdfsBtns = pdfsDisponiveis.map(function (x, i) {
           return '<button type="button" onclick="_pinfVerPdf(' + ri + ',' + i + ')" style="background:#f8fafc;border:1px solid #e2e8f0;color:#475569;border-radius:6px;padding:4px 10px;font-size:10.5px;cursor:pointer;margin-left:6px;white-space:nowrap"><i class="ti ti-file-type-pdf" style="color:#dc2626;margin-right:3px"></i>Ver PDF' + (pdfsDisponiveis.length > 1 ? (' (' + (i + 1) + ')') : '') + '</button>';
@@ -24838,7 +24838,7 @@ function _pinfRenderRevisao() {
           + r.jaFaturados.map(function (j) { return '<div>' + _pedEsc((j.codigo ? j.codigo + ' - ' : '') + (j.nome || '')) + (j.nfs.length ? ' · ' + _pedEsc(j.nfs.join(', ')) : '') + '</div>'; }).join('')
           + '</div>') : '';
         var corpo;
-        if (aprovadoOk) {
+        if (r.status === 'ok') {
           corpo = '<div style="display:flex;align-items:center;gap:6px;color:#15803d;font-size:11.5px;font-weight:600;background:#f0fdf4;border-radius:6px;padding:6px 10px;margin-top:8px">'
             + '<i class="ti ti-circle-check"></i><span>' + (r.status === 'ok' ? 'OK — sem divergência' : 'Aprovado com divergência') + '</span>'
             + (r.status !== 'ok' ? ('<button type="button" onclick="_pinfDesfazerAprovacao(' + ri + ')" style="margin-left:auto;background:none;border:none;color:#b45309;text-decoration:underline;cursor:pointer;font-size:10.5px;font-weight:600">Desfazer</button>') : '')
@@ -24854,7 +24854,7 @@ function _pinfRenderRevisao() {
           }).join('');
           corpo = '<div style="color:#991b1b;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:8px 10px;margin-top:8px;display:flex;flex-direction:column;gap:3px">'
             + linhas
-            + '<button type="button" onclick="_pinfAprovarDivergencia(' + ri + ')" style="align-self:flex-start;margin-top:4px;background:#272A4A;color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:10.5px;font-weight:600;cursor:pointer">OK, aprovar mesmo assim</button>'
+            + '<div style="margin-top:4px;font-size:10.5px;font-weight:600">' + (marcada ? 'Será importada com esta divergência. Se tiver dúvida, desmarque a caixinha.' : 'Não será importada.') + '</div>'
             + '</div>';
         }
 
@@ -24910,7 +24910,7 @@ function _pinfRenderRevisao() {
   var resumo = document.getElementById('pinf-revisao-resumo');
   if (resumo) {
     var marcadas = _pinfResultados.filter(_pinfMarcada).length;
-    resumo.textContent = marcadas + ' de ' + _pinfResultados.length + ' pedido(s) marcados e prontos para concluir.';
+    resumo.textContent = marcadas + ' de ' + _pinfResultados.length + ' pedido(s) marcados para importar.';
   }
   var btnConc = document.getElementById('pinf-btn-concluir');
   if (btnConc && !btnConc.disabled) btnConc.textContent = 'Concluir e anexar (' + _pinfResultados.filter(_pinfMarcada).length + ')';
@@ -24937,7 +24937,7 @@ function _pinfVerPdfJaImportada(ni) {
   setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
 }
 // Caixinha de cada loja: so as lojas prontas (sem divergencia ou aprovadas) E marcadas sao concluidas
-function _pinfPronta(r) { return r.status === 'ok' || !!r.aprovadoManual; }
+function _pinfPronta(r) { return true; }   // todas vem marcadas, inclusive com divergencia; desmarca quem tiver duvida
 function _pinfMarcada(r) { return _pinfPronta(r) && !r.desmarcado; }
 function _pinfMarcar(ri, v) { var r = _pinfResultados[ri]; if (!r) return; r.desmarcado = !v; _pinfRenderRevisao(); }
 function _pinfMarcarTodas(v) { _pinfResultados.forEach(function (r) { if (_pinfPronta(r)) r.desmarcado = !v; }); _pinfRenderRevisao(); }
@@ -24959,7 +24959,7 @@ function _pinfConcluirEAnexar() {
   var btnConcluir = document.getElementById('pinf-btn-concluir');
   if (btnConcluir && btnConcluir.disabled) return; // ja esta processando -- ignora cliques repetidos
   var prontos = _pinfResultados.filter(_pinfMarcada);
-  if (!prontos.length) { alert('Nenhum pedido marcado para concluir. Marque ao menos um pedido pronto (sem divergência ou aprovado manualmente).'); return; }
+  if (!prontos.length) { alert('Nenhum pedido marcado para importar. Marque ao menos um pedido.'); return; }
   var desmarcadas = _pinfResultados.filter(function (r) { return _pinfPronta(r) && r.desmarcado; }).length;
 
   if (btnConcluir) { btnConcluir.disabled = true; btnConcluir.style.cursor = 'not-allowed'; btnConcluir.style.opacity = '0.6'; }
