@@ -6599,6 +6599,12 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </div>
         </div>
 
+        <div id="sug-puxar-bloco" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:8px 12px;border:1px solid #f5d0a8;background:#fff7ed;border-radius:8px;font-size:12px;color:#334155">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600"><input type="checkbox" id="sug-puxar-prod" checked onchange="_sugPuxarMudou(this.checked)"> Puxar os produtos que a rede compra</label>
+          <span style="font-size:11.5px;color:#64748b">Só produtos ativos deste fornecedor, comprados pelas lojas marcadas nos últimos 12 meses. As quantidades ficam em branco.</span>
+          <a href="#" onclick="_sugPuxarDeNovo();return false" style="margin-left:auto;font-size:11.5px;font-weight:600;color:#2563eb;text-decoration:none">↻ Puxar de novo</a>
+        </div>
+
       </div>
 
       <div id="sug-painel-prod" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.05)">
@@ -38542,6 +38548,8 @@ function _sugResetar() {
   _sugEscopo = 'rede';
   _sugLojasSelecionadas = {};
   _sugLinhas = [];
+  _sugAssinatura = ''; _sugAutoForn = '';
+  var puxarChk = document.getElementById('sug-puxar-prod'); if (puxarChk) puxarChk.checked = true;
   var fornSel = document.getElementById('sug-fornecedor');
   if (fornSel) fornSel.value = '';
   var redeSel = document.getElementById('sug-rede');
@@ -39029,8 +39037,74 @@ function _sugAtualizarTotais() {
     + '</tr>';
 }
 
+// ── Puxar os produtos que a rede/cliente compra (quantidades em branco, so produtos ativos) ──
+var _sugAssinatura = '';
+var _sugAutoForn = '';
+function _sugProdutosDaRede(fornId, cols) {
+  var ids = {}; cols.forEach(function(c){ ids[String(c.id)] = true; });
+  var d = new Date(); d.setFullYear(d.getFullYear() - 1);
+  var corte = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  var porId = {}, porCod = {};
+  getProdutos().forEach(function(p){
+    if (p.fornecedor !== fornId || (p.ativo || 'Sim') === 'Não') return;
+    porId[String(p.id)] = p;
+    if (p.codigo) porCod[_cpNorm(String(p.codigo))] = p;
+  });
+  var achados = {};
+  getPedidos().forEach(function(ped){
+    if (!ped || ped.status === 'Cancelado' || String(ped.fornecedorId || '') !== String(fornId)) return;
+    if (ped.data && String(ped.data) < corte) return;
+    if (!ids[String(ped.clienteId)]) return;
+    (ped.itens || []).forEach(function(it){
+      var p = (it.prodId != null && porId[String(it.prodId)]) || (it.prodCodigo ? porCod[_cpNorm(String(it.prodCodigo))] : null);
+      if (p) achados[p.id] = p;
+    });
+  });
+  return _ordNome(Object.keys(achados).map(function(k){ return achados[k]; }));
+}
+// forcar=false: so puxa quando a selecao (fornecedor + lojas/cliente) mudou desde a ultima vez e a caixinha esta marcada
+function _sugPuxarProdutos(forcar) {
+  var chk = document.getElementById('sug-puxar-prod');
+  var fornEl = document.getElementById('sug-fornecedor');
+  var fornId = fornEl ? fornEl.value : '';
+  var cols = _sugColunasAtivas();
+  var sig = fornId + '|' + cols.map(function(c){ return String(c.id); }).sort().join(',');
+  if (!forcar && (!chk || !chk.checked || sig === _sugAssinatura)) return;
+  _sugAssinatura = sig;
+  var msg = document.getElementById('sug-msg');
+  if (!fornId || !cols.length) return;
+  if (_sugAutoForn && _sugAutoForn !== fornId) {
+    _sugLinhas = _sugLinhas.filter(function(l){
+      if (!l.auto) return true;
+      return Object.keys(l.qtds || {}).some(function(k){ return Number(l.qtds[k]) > 0; });
+    });
+  }
+  _sugAutoForn = fornId;
+  var achados = _sugProdutosDaRede(fornId, cols);
+  var novos = 0;
+  achados.forEach(function(p){
+    if (_sugLinhas.some(function(l){ return l.produtoId === p.id; })) return;
+    _sugLinhas.push({ produtoId: p.id, qtds: {}, auto: true });
+    novos++;
+  });
+  if (msg) {
+    var de = _sugEscopo === 'cliente' ? 'do cliente' : 'da rede';
+    if (!achados.length) { msg.style.color = '#b45309'; msg.textContent = 'Nenhum produto ativo deste fornecedor foi comprado por estas lojas nos últimos 12 meses.'; }
+    else { msg.style.color = '#15803d'; msg.textContent = novos + (novos === 1 ? ' produto puxado ' : ' produtos puxados ') + de + ' (somente ativos).' + (novos < achados.length ? ' Os outros ' + (achados.length - novos) + ' já estavam na lista.' : ''); }
+  }
+}
+function _sugPuxarMudou(on) { if (on) { _sugAssinatura = ''; _sugRenderTabela(); } }
+function _sugPuxarDeNovo() {
+  var fornEl = document.getElementById('sug-fornecedor');
+  var msg = document.getElementById('sug-msg');
+  if (!fornEl || !fornEl.value || !_sugColunasAtivas().length) { if (msg) { msg.style.color = '#dc2626'; msg.textContent = 'Escolha o fornecedor e a rede/lojas (ou o cliente) para puxar os produtos.'; } return; }
+  _sugPuxarProdutos(true);
+  _sugRenderTabela();
+}
+
 function _sugRenderTabela() {
   var cols = _sugColunasAtivas();
+  _sugPuxarProdutos(false);
   _sugColsRender = cols; _sugBloqMemo = {}; _sugProdsRender = null;
   var thead = document.querySelector('#sug-tabela thead');
   var tbody = document.querySelector('#sug-tabela tbody');
