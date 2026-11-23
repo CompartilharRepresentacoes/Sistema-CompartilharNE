@@ -38941,13 +38941,9 @@ function _sugQtdBase(p, valor) {
 function _sugPesoCelula(p, valor) {
   return _sugQtdBase(p, valor) * _sugPesoUnit(p);
 }
+// Produto em KG aceita qualquer peso (nao precisa fechar caixa); valor e peso usam o que foi digitado.
 function _sugValidarQtd(p, valor) {
-  var v = parseFloat(String(valor || '0').replace(',', '.')) || 0;
-  if (!v || !_sugEhKg(p)) return true;
-  var cx = _sugCxTamanho(p);
-  if (!cx) return true;
-  var razao = v / cx;
-  return Math.abs(razao - Math.round(razao)) < 1e-6;
+  return true;
 }
 function _sugPlaceholderCel(p) {
   if (_sugEhKg(p)) return 'Kg';
@@ -38959,7 +38955,7 @@ function _sugHintCelula(p, valor) {
   if (_sugEhKg(p)) {
     var cx = _sugCxTamanho(p);
     if (!cx) return '';
-    return _sugValidarQtd(p, v) ? (_sugFmtNum(v / cx) + ' cx') : ('não é múltiplo de ' + _sugFmtNum(cx) + ' kg');
+    return _sugFmtNum(v / cx) + ' cx';
   }
   var cxU = _sugCxTamanho(p);
   if (!cxU) return '';
@@ -39063,6 +39059,35 @@ function _sugAtualizarQtd(produtoId, colId, valor, inputEl) {
   }
   _sugAtualizarTotais();
 }
+
+// Setas andam pela grade (← → entre lojas, ↑ ↓ entre produtos) sem mudar o valor digitado; rodinha do mouse tambem nao muda.
+document.addEventListener('keydown', function(e) {
+  var t = e.target;
+  if (!t || !t.classList || !t.classList.contains('sug-q') || !t.closest('#sug-tabela')) return;
+  var k = e.key;
+  if (k !== 'ArrowLeft' && k !== 'ArrowRight' && k !== 'ArrowUp' && k !== 'ArrowDown') return;
+  e.preventDefault();
+  var td = t.closest('td'), tr = td.parentNode, alvo = null, i;
+  if (k === 'ArrowLeft' || k === 'ArrowRight') {
+    var passo = k === 'ArrowRight' ? 1 : -1;
+    for (i = td.cellIndex + passo; i >= 0 && i < tr.cells.length; i += passo) {
+      var a = tr.cells[i].querySelector('.sug-q'); if (a) { alvo = a; break; }
+    }
+  } else {
+    var pl = k === 'ArrowDown' ? 'nextElementSibling' : 'previousElementSibling';
+    var r = tr[pl];
+    while (r) {
+      var c = r.cells[td.cellIndex], b = c && c.querySelector('.sug-q');
+      if (b) { alvo = b; break; }
+      r = r[pl];
+    }
+  }
+  if (alvo) { alvo.focus(); try { alvo.select(); } catch (x) {} }
+});
+document.addEventListener('wheel', function(e) {
+  var t = e.target;
+  if (t && t.classList && t.classList.contains('sug-q') && document.activeElement === t) t.blur();
+}, { passive: true });
 
 function _sugAtualizarTotais() {
   var cols = _sugCols();
