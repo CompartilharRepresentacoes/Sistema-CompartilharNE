@@ -23091,10 +23091,11 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
   var cxValido = !isNaN(cxNum) && cxNum > 0;
 
   var modoUnid, quantidadeReal, qtdCaixas, precoUnit;
-  // PDF diz "UN" mas o preco e o da CAIXA fechada (ex.: Sendas/Sao Vicente: 1 x R$ 92,00, tabela R$ 11,50 x 8 por caixa):
+  // PDF diz UN/PC/CX/etc. (qualquer unidade que nao seja CXA, KG ou GR) mas o preco e o da CAIXA fechada
+  // (ex.: Sendas/Sao Vicente: 1 x R$ 92,00, tabela R$ 11,50 x 8 por caixa):
   // so quando o preco do PDF bate com o preco da tabela x pecas da caixa, o item e lido como caixa.
   var pdfEmCaixaPorPreco = false;
-  if (itemPdf.unidade === 'UN' && cxValido && cxNum > 1) {
+  if (itemPdf.unidade !== 'CXA' && itemPdf.unidade !== 'KG' && itemPdf.unidade !== 'GR' && cxValido && cxNum > 1) {
     var valTabCx = _pedParseMoeda(tabItem.valor);
     var unitPdfCx = Number(itemPdf.unitario) || 0;
     if (valTabCx > 0 && unitPdfCx > 0 && Math.abs(unitPdfCx - valTabCx * cxNum) <= Math.max(0.02, unitPdfCx * 0.005) && Math.abs(unitPdfCx - valTabCx) > 0.02) pdfEmCaixaPorPreco = true;
