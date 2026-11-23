@@ -5372,7 +5372,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         </div>
         <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
         </div>
-        <button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+        <button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button>
         <div class="ped-spacer" style="flex:1"></div>
       </div>
       <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5442,7 +5442,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <span style="font-size:11px;font-weight:600;color:#64748b">Loja</span>
           <select id="pss-loja" onchange="renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
         </div>
-          <button class="ped-limpar-btn" onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-limpar-btn" onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5495,7 +5495,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </select></div>
           <input type="hidden" id="vc-produto" value="">
           </div>
-          <button class="ped-ok-btn" onclick="renderVendasCompletas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vc-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vc-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
+          <button class="ped-ok-btn" onclick="renderVendasCompletas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vc-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vc-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5549,7 +5549,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </select></div>
           <input type="hidden" id="vcf-produto" value="">
           </div>
-          <button class="ped-ok-btn" onclick="renderVendasCompletasFaturadas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vcf-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vcf-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
+          <button class="ped-ok-btn" onclick="renderVendasCompletasFaturadas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vcf-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vcf-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5599,7 +5599,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </select></div>
           <input type="hidden" id="psn-produto" value="">
           </div>
-          <button class="ped-ok-btn" onclick="renderVendasSimplesNfs()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
+          <button class="ped-ok-btn" onclick="renderVendasSimplesNfs()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5645,7 +5645,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </select></div>
           <input type="hidden" id="pnf-produto" value="">
           </div>
-          <button class="ped-ok-btn" onclick="renderNaoFaturados()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('pnf-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('pnf-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
+          <button class="ped-ok-btn" onclick="renderNaoFaturados()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('pnf-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('pnf-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -8056,6 +8056,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
       <button onclick="pedFecharImpressaoRelacao()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">Fechar</button>
       <button onclick="pedImprimirRelacaoPopup()" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="impressora" style="font-size:11px"><path d="M7 9V3.5h10V9M7 17H5.5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H17"/><rect x="7" y="14" width="10" height="6.5" rx="1"/></svg> Imprimir</button>
       <button onclick="pedGerarPdfRelacao()" style="background:#D82621;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-type-pdf" style="font-size:11px"></i> Gerar PDF</button>
+      <button onclick="pedGerarExcelRelacao()" style="background:#1D6F42;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-file-spreadsheet" style="font-size:11px"></i> Gerar Excel</button>
     </div>
   </div>
 </div>
@@ -22829,6 +22830,160 @@ function pedGerarPdfRelacao() {
   } catch (err) {
     alert('Erro ao gerar PDF: ' + (err && err.message || err) + '. Vou abrir a impressao do navegador no lugar.');
     window.print();
+  }
+}
+
+// ---- Excel da Relacao de Pedidos (cabecalho com logo da Compartilhar, igual ao PDF) ----
+function _pimprelArgb(hex, padrao) {
+  var c = _pimprelCorRgb(hex, padrao || [30, 41, 59]);
+  return 'FF' + c.map(function (v) { return ('0' + v.toString(16)).slice(-2); }).join('').toUpperCase();
+}
+function _pimprelTxtCelula(c, it) {
+  var v = c.get(it);
+  if (c.raw) { var d = document.createElement('div'); d.innerHTML = String(v == null ? '' : v); return (d.textContent || '').trim(); }
+  return String(v == null ? '' : v);
+}
+function pedGerarExcelRelacao() {
+  try {
+    if (typeof ExcelJS === 'undefined') { alert('Biblioteca de Excel não carregada. Tente novamente em alguns segundos.'); return; }
+    var dados = _pimprelDadosPorAba(_pimprelAbaAtual);
+    var logoComp = (typeof _pimpLogoCompartilharPadrao === 'function') ? _pimpLogoCompartilharPadrao() : '';
+    var logoForn = '';
+    if (dados.fornecedorFiltro) {
+      var nf = _cpNorm(dados.fornecedorFiltro);
+      var fo = getFornecedores().find(function (x) { return _cpNorm(String(x.nome_fantasia || x.razao_social || '').replace(/^\d+\s+/, '')) === nf; });
+      if (fo && fo.foto) logoForn = fo.foto;
+    }
+    return Promise.all([_pimprelCarregarImg(logoForn), _pimprelCarregarImg(logoComp)]).then(function (imgs) {
+      var AZUL = 'FF272A4A', BRANCO = 'FFFFFFFF', CINZA = 'FF64748B', LINHA = 'FFCBD5E1', ZEBRA = 'FFF8FAFC';
+      var colunas = dados.itemizado ? ((dados.blocos[0] && dados.blocos[0].colunas) || []) : dados.colunas;
+      var ncols = Math.max(colunas.length, 4);
+      var wb = new ExcelJS.Workbook();
+      var nomeAba = String(dados.subtitulo || 'Relacao').split(' · ')[0].replace(/[\\\/\?\*\[\]:]/g, ' ').slice(0, 31) || 'Relacao';
+      var ws = wb.addWorksheet(nomeAba, { views: [{ showGridLines: false }] });
+      // larguras pelas colunas
+      var larg = [];
+      for (var i = 0; i < ncols; i++) larg.push(10);
+      var medir = function (cols, itens) {
+        cols.forEach(function (c, i) {
+          var m = String(c.header || '').length + 2;
+          itens.forEach(function (it) { var t = _pimprelTxtCelula(c, it); if (t.length + 2 > m) m = t.length + 2; });
+          larg[i] = Math.max(larg[i], Math.min(46, Math.max(9, m)));
+        });
+      };
+      if (dados.itemizado) dados.blocos.forEach(function (b) { medir(b.colunas, b.itens); }); else medir(colunas, dados.linhas);
+      ws.columns = larg.map(function (w) { return { width: w }; });
+      var borda = { top: { style: 'thin', color: { argb: LINHA } }, left: { style: 'thin', color: { argb: LINHA } }, bottom: { style: 'thin', color: { argb: LINHA } }, right: { style: 'thin', color: { argb: LINHA } } };
+      // cabecalho: titulo/filtros a esquerda, fornecedor ao centro, logos a direita
+      var metade = Math.max(2, Math.floor(ncols / 2) - 1);
+      var r1 = ws.addRow([]); r1.height = 26; var r2 = ws.addRow([]); r2.height = 22;
+      ws.mergeCells(1, 1, 1, metade); ws.mergeCells(2, 1, 2, metade);
+      var cT = ws.getCell(1, 1); cT.value = dados.titulo; cT.font = { name: 'Calibri', size: 16, bold: true, color: { argb: AZUL } }; cT.alignment = { vertical: 'bottom', horizontal: 'left' };
+      var cS = ws.getCell(2, 1); cS.value = dados.subtitulo; cS.font = { name: 'Calibri', size: 10, color: { argb: CINZA } }; cS.alignment = { vertical: 'top', horizontal: 'left' };
+      if (dados.fornecedorFiltro) {
+        var f0 = metade + 1, f1 = Math.max(f0, ncols - 2);
+        if (f1 > f0) { ws.mergeCells(1, f0, 1, f1); ws.mergeCells(2, f0, 2, f1); }
+        var cF1 = ws.getCell(1, f0); cF1.value = 'FORNECEDOR'; cF1.font = { name: 'Calibri', size: 8, color: { argb: 'FF94A3B8' } }; cF1.alignment = { vertical: 'bottom', horizontal: 'center' };
+        var cF2 = ws.getCell(2, f0); cF2.value = dados.fornecedorFiltro; cF2.font = { name: 'Calibri', size: 12, bold: true, color: { argb: AZUL } }; cF2.alignment = { vertical: 'top', horizontal: 'center' };
+      }
+      var r3 = ws.addRow([]); r3.height = 5;
+      for (var c3 = 1; c3 <= ncols; c3++) ws.getCell(3, c3).border = { bottom: { style: 'medium', color: { argb: AZUL } } };
+      // logos (Compartilhar na ponta direita; a da fabrica ao lado esquerdo dela)
+      var px = larg.map(function (w) { return Math.round(w * 7 + 5); });
+      var totalPx = px.reduce(function (a, b) { return a + b; }, 0);
+      var cursor = totalPx - 6, ALT = 40;
+      [imgs[1], imgs[0]].forEach(function (im) {
+        if (!im) return;
+        var wImg = Math.min(150, Math.round(ALT * im.w / im.h)), hImg = Math.round(wImg * im.h / im.w);
+        var x = Math.max(0, cursor - wImg); cursor = x - 14;
+        var col = 0, acc = 0;
+        while (col < ncols - 1 && acc + px[col] <= x) { acc += px[col]; col++; }
+        var off = Math.min(Math.max(0, x - acc), px[col] - 1);
+        var id = wb.addImage({ base64: im.data, extension: 'png' });
+        ws.addImage(id, { tl: { nativeCol: col, nativeColOff: Math.round(off * 9525), nativeRow: 0, nativeRowOff: Math.round(((26 + 22) * 4 / 3 - hImg) / 2 * 9525) }, ext: { width: wImg, height: hImg }, editAs: 'oneCell' });
+      });
+      var cabecalhoTabela = function (cols, cor, fonte, tam) {
+        var row = ws.addRow(cols.map(function (c) { return String(c.header || '').toUpperCase(); }));
+        row.height = 18;
+        cols.forEach(function (c, i) {
+          var cel = row.getCell(i + 1);
+          cel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: cor } };
+          cel.font = { name: 'Calibri', size: tam, bold: true, color: { argb: fonte } };
+          cel.alignment = { vertical: 'middle', horizontal: c.align || 'left' };
+          cel.border = borda;
+        });
+        return row;
+      };
+      var linhaItens = function (cols, it, k) {
+        var row = ws.addRow(cols.map(function (c) { return _pimprelTxtCelula(c, it); }));
+        row.height = 16;
+        cols.forEach(function (c, i) {
+          var cel = row.getCell(i + 1);
+          cel.font = { name: 'Calibri', size: 10, bold: !!c.destaque, color: { argb: c.destaque ? 'FF1E293B' : 'FF334155' } };
+          cel.alignment = { vertical: 'middle', horizontal: c.align || 'left' };
+          cel.border = borda;
+          if (k % 2 === 1) cel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ZEBRA } };
+        });
+      };
+      var linhaTitulosTabela = 0;
+      if (dados.itemizado) {
+        if (!dados.blocos.length) { ws.addRow(['Nenhum registro encontrado com esses filtros.']); }
+        dados.blocos.forEach(function (b) {
+          var partes = [b.numero, b.data, b.cliente, b.fornecedor, b.semStatus ? '' : b.status].filter(function (t) { return t; });
+          var rb = ws.addRow([]); rb.height = 20;
+          var nb = rb.number, ate = Math.max(1, ncols - 2);
+          if (ate > 1) ws.mergeCells(nb, 1, nb, ate);
+          var cEsq = ws.getCell(nb, 1); cEsq.value = partes.join('   |   ');
+          cEsq.font = { name: 'Calibri', size: 10.5, bold: true, color: { argb: 'FF1E293B' } }; cEsq.alignment = { vertical: 'middle', horizontal: 'left' };
+          var cPeso = ws.getCell(nb, ncols - 1); cPeso.value = (b.pesoLabel ? b.pesoLabel + ': ' : '') + _pimprelHtmlParaTexto(b.pesoValor);
+          cPeso.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF1E293B' } }; cPeso.alignment = { vertical: 'middle', horizontal: 'right' };
+          var cVal = ws.getCell(nb, ncols); cVal.value = (b.valorLabel ? b.valorLabel + ': ' : '') + _pimprelHtmlParaTexto(b.valorValue);
+          cVal.font = { name: 'Calibri', size: 10, bold: true, color: { argb: _pimprelArgb(b.valorCor, [21, 128, 61]) } }; cVal.alignment = { vertical: 'middle', horizontal: 'right' };
+          for (var cc = 1; cc <= ncols; cc++) {
+            var ce = ws.getCell(nb, cc);
+            ce.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEEF1FB' } };
+            ce.border = { top: { style: 'thin', color: { argb: AZUL } }, bottom: { style: 'thin', color: { argb: AZUL } } };
+          }
+          cabecalhoTabela(b.colunas, 'FFF1F5F9', 'FF64748B', 9);
+          b.itens.forEach(function (it, k) { linhaItens(b.colunas, it, k); });
+          ws.addRow([]).height = 8;
+        });
+      } else {
+        linhaTitulosTabela = cabecalhoTabela(colunas, AZUL, BRANCO, 10).number;
+        dados.linhas.forEach(function (it, k) { linhaItens(colunas, it, k); });
+      }
+      // totais
+      var kg = dados.totalKg.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
+      var rt = ws.addRow([]); rt.height = 22;
+      var nt = rt.number, ateT = Math.max(1, ncols - 2);
+      if (ateT > 1) ws.mergeCells(nt, 1, nt, ateT);
+      ws.getCell(nt, 1).value = 'TOTAL';
+      ws.getCell(nt, ncols - 1).value = kg;
+      ws.getCell(nt, ncols).value = _pedFmtMoeda(dados.totalReais);
+      for (var ct = 1; ct <= ncols; ct++) {
+        var ctl = ws.getCell(nt, ct);
+        ctl.font = { name: 'Calibri', size: 11, bold: true, color: { argb: AZUL } };
+        ctl.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEEF1FB' } };
+        ctl.border = { top: { style: 'medium', color: { argb: AZUL } } };
+        ctl.alignment = { vertical: 'middle', horizontal: ct === 1 ? 'left' : 'right' };
+      }
+      // impressao: A4 deitado, 1 pagina de largura, cabecalho repetido
+      ws.pageSetup = { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, margins: { left: 0.4, right: 0.4, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 } };
+      ws.pageSetup.printTitlesRow = linhaTitulosTabela ? ('1:' + linhaTitulosTabela) : '1:3';
+      if (linhaTitulosTabela) ws.views = [{ showGridLines: false, state: 'frozen', ySplit: linhaTitulosTabela }];
+      var base = String(dados.subtitulo || 'Relacao').split(' · ')[0].normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'Pedidos';
+      return wb.xlsx.writeBuffer().then(function (buffer) {
+        var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a'); a.href = url; a.download = 'Relacao_de_Pedidos_' + base + '.xlsx';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }).catch(function (err) {
+      alert('Erro ao gerar o Excel: ' + (err && err.message || err));
+    });
+  } catch (err) {
+    alert('Erro ao gerar o Excel: ' + (err && err.message || err));
   }
 }
 
