@@ -39065,15 +39065,31 @@ document.addEventListener('keydown', function(e) {
   var t = e.target;
   if (!t || !t.classList || !t.classList.contains('sug-q') || !t.closest('#sug-tabela')) return;
   var k = e.key;
-  if (k !== 'ArrowLeft' && k !== 'ArrowRight' && k !== 'ArrowUp' && k !== 'ArrowDown') return;
-  e.preventDefault();
+  if (k === 'Tab' && (e.ctrlKey || e.altKey || e.metaKey)) return;
+  if (k !== 'ArrowLeft' && k !== 'ArrowRight' && k !== 'ArrowUp' && k !== 'ArrowDown' && k !== 'Enter' && k !== 'Tab') return;
   var td = t.closest('td'), tr = td.parentNode, alvo = null, i;
-  if (k === 'ArrowLeft' || k === 'ArrowRight') {
+  if (k === 'Enter' || k === 'Tab') {
+    // Enter / Tab: vai para a celula ao lado (proxima loja); no fim da linha, vai para a 1a loja do produto de baixo.
+    // Shift volta. Se nao houver para onde ir, o Tab segue o comportamento normal do navegador.
+    var volta = e.shiftKey, passoET = volta ? -1 : 1;
+    var linhaET = tr;
+    while (linhaET && !alvo) {
+      var ini = linhaET === tr ? td.cellIndex + passoET : (volta ? linhaET.cells.length - 1 : 0);
+      for (i = ini; i >= 0 && i < linhaET.cells.length; i += passoET) {
+        var ae = linhaET.cells[i].querySelector('.sug-q'); if (ae) { alvo = ae; break; }
+      }
+      linhaET = alvo ? null : (volta ? linhaET.previousElementSibling : linhaET.nextElementSibling);
+    }
+    if (!alvo) { if (k === 'Enter') e.preventDefault(); return; }
+    e.preventDefault();
+  } else if (k === 'ArrowLeft' || k === 'ArrowRight') {
+    e.preventDefault();
     var passo = k === 'ArrowRight' ? 1 : -1;
     for (i = td.cellIndex + passo; i >= 0 && i < tr.cells.length; i += passo) {
       var a = tr.cells[i].querySelector('.sug-q'); if (a) { alvo = a; break; }
     }
   } else {
+    e.preventDefault();
     var pl = k === 'ArrowDown' ? 'nextElementSibling' : 'previousElementSibling';
     var r = tr[pl];
     while (r) {
