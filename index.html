@@ -1446,7 +1446,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
  #page-pedido-list .ped-filtros-bar .ped-limpar-btn,#page-pedido-list .ped-filtros-bar .ped-imprimir-btn{padding:7px 10px !important}
 }
 @media (max-width:767px){ #page-pedido-list .ped-fg{display:contents} }
-.ped-ok-btn{display:none !important}
+.ped-ok-btn:disabled{opacity:.6;cursor:not-allowed !important}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <!-- jsPDF + html2canvas (geracao de PDF do Pedido na impressao) -->
@@ -2117,6 +2117,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
     <div id="periodoInfo" style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px"></div>
   </div>
   <div style="display:flex;gap:8px">
+    <button class="ped-ok-btn" data-pre="painel" title="Buscar no banco os pedidos mais recentes e atualizar os números" onclick="_btnOkAtualizar('painel')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;margin-right:0">OK</button>
     <button id="btnToggleFiltros" onclick="document.getElementById('dvgFiltrosBar').classList.toggle('dvg-filtros-aberto')" style="display:none;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer"><i class="ti ti-filter"></i> Filtros</button>
   </div>
 </div>
@@ -5370,7 +5371,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <option value="Cancelado">Cancelado</option>
         </select>
         </div>
-        <button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
+        <button class="ped-ok-btn" data-pre="geral" title="Buscar no banco os pedidos do período (outros usuários podem ter lançado ou dado baixa)" onclick="_btnOkAtualizar('geral')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
         </div>
         <button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('geral')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button>
         <div class="ped-spacer" style="flex:1"></div>
@@ -5442,7 +5443,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <span style="font-size:11px;font-weight:600;color:#64748b">Loja</span>
           <select id="pss-loja" onchange="renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todas</option></select>
         </div>
-          <button class="ped-limpar-btn" onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button>
+          <button class="ped-ok-btn" data-pre="simples" title="Buscar no banco os pedidos do período (outros usuários podem ter lançado ou dado baixa)" onclick="_btnOkAtualizar('simples')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="pssLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5495,7 +5496,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </select></div>
           <input type="hidden" id="vc-produto" value="">
           </div>
-          <button class="ped-ok-btn" onclick="renderVendasCompletas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vc-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vc-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
+          <button class="ped-ok-btn" data-pre="vc" title="Buscar no banco os pedidos do período (outros usuários podem ter lançado ou dado baixa)" onclick="_btnOkAtualizar('vc')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vc-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vc-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5549,7 +5550,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </select></div>
           <input type="hidden" id="vcf-produto" value="">
           </div>
-          <button class="ped-ok-btn" onclick="renderVendasCompletasFaturadas()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vcf-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vcf-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
+          <button class="ped-ok-btn" data-pre="vcf" title="Buscar no banco os pedidos do período (outros usuários podem ter lançado ou dado baixa)" onclick="_btnOkAtualizar('vcf')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="vcfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('completas-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vcf-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('vcf-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5599,7 +5600,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </select></div>
           <input type="hidden" id="psn-produto" value="">
           </div>
-          <button class="ped-ok-btn" onclick="renderVendasSimplesNfs()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button>
+          <button class="ped-ok-btn" data-pre="psn" title="Buscar no banco os pedidos do período (outros usuários podem ter lançado ou dado baixa)" onclick="_btnOkAtualizar('psn')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="psnLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('simples-nf')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -5645,7 +5646,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </select></div>
           <input type="hidden" id="pnf-produto" value="">
           </div>
-          <button class="ped-ok-btn" onclick="renderNaoFaturados()" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('pnf-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('pnf-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
+          <button class="ped-ok-btn" data-pre="pnf" title="Buscar no banco os pedidos do período (outros usuários podem ter lançado ou dado baixa)" onclick="_btnOkAtualizar('pnf')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="pnfLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar</button><button class="ped-imprimir-btn" onclick="pedAbrirImpressaoRelacao('nao-fat')" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="documento" style="font-size:11px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg> Gerar Documento</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('pnf-lista',true)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Expandir todos</button><button type="button" class="ped-limpar-btn" onclick="_cardsExpandir('pnf-lista',false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Recolher todos</button>
           <div class="ped-spacer" style="flex:1"></div>
         </div>
         <div class="ped-kpi-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -21523,7 +21524,7 @@ setInterval(function () { ['vc','vcf','psn','pnf'].forEach(_pedSubVis); }, 400);
   var abas = { vc: 'renderVendasCompletas', vcf: 'renderVendasCompletasFaturadas', psn: 'renderVendasSimplesNfs', pnf: 'renderNaoFaturados' };
   function ligar() {
     Object.keys(abas).forEach(function (pre) {
-      var ok = document.querySelector('#page-pedido-list .ped-ok-btn[onclick^="' + abas[pre] + '"]') || document.querySelector('.ped-ok-btn[onclick^="' + abas[pre] + '"]');
+      var ok = document.querySelector('#page-pedido-list .ped-ok-btn[data-pre="' + pre + '"]') || document.querySelector('.ped-ok-btn[data-pre="' + pre + '"]');
       var cont = ok && ok.parentElement; if (!cont || cont.getAttribute('data-auto')) return;
       cont.setAttribute('data-auto', '1');
       var t = null;
@@ -21534,6 +21535,173 @@ setInterval(function () { ['vc','vcf','psn','pnf'].forEach(_pedSubVis); }, 400);
         if (el.getAttribute('placeholder') === 'dd/mm/aaaa') { var v = el.value; if (v === '' || /^\d{2}\/\d{2}\/\d{4}$/.test(v)) agendar(150); }
         else agendar(400);
       });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ligar); else ligar();
+})();
+// ===== Botao OK (laranja): busca de novo no banco o que outras pessoas podem ter lancado ou alterado =====
+// Em vez de F5 (que baixa cadastros, fotos e pedidos do ano), busca so os pedidos do periodo mostrado
+// (ou so Devolucoes / Ocorrencias) e redesenha a tela mantendo filtros e pagina.
+var _btnOkOcupado = {};
+var _BTN_OK_CFG = {
+  geral:   { de: 'ped-data-de',      ate: 'ped-data-ate',      recuar: 0, tipo: 'pedidos', render: function () { renderPedidoList(); } },
+  simples: { de: 'pss-data-de',      ate: 'pss-data-ate',      recuar: 0, tipo: 'pedidos', render: function () { renderVendaSimples(); } },
+  vc:      { de: 'vc-data-de',       ate: 'vc-data-ate',       recuar: 0, tipo: 'pedidos', render: function () { renderVendasCompletas(true); } },
+  vcf:     { de: 'vcf-data-de',      ate: 'vcf-data-ate',      recuar: 0, tipo: 'pedidos', render: function () { renderVendasCompletasFaturadas(true); } },
+  psn:     { de: 'psn-data-de',      ate: 'psn-data-ate',      recuar: 0, tipo: 'pedidos', render: function () { renderVendasSimplesNfs(true); } },
+  pnf:     { de: 'pnf-data-de',      ate: 'pnf-data-ate',      recuar: 0, tipo: 'pedidos', render: function () { renderNaoFaturados(true); } },
+  // Entrega e Painel contam pela data da fatura: o pedido pode ser de 1-2 meses antes, por isso recuam 2 meses
+  entrega: { de: 'entctrl-data-de',  ate: 'entctrl-data-ate',  recuar: 2, tipo: 'pedidos', render: function () { renderEntregaControle(); } },
+  painel:  { de: 'dtIni',            ate: 'dtFim',             recuar: 2, tipo: 'pedidos', render: function () { if (typeof dashInit === 'function') dashInit(); } },
+  devolucoes:  { tipo: 'cadastros', colecoes: ['devolucoes'],           rotulo: 'devoluções' },
+  ocorrencias: { tipo: 'cadastros', colecoes: ['ocorrencias_entrega'],  rotulo: 'ocorrências' }
+};
+function _btnOkAviso(txt) {
+  var old = document.getElementById('btn-ok-aviso'); if (old && old.parentNode) old.parentNode.removeChild(old);
+  if (!document.body) return;
+  var d = document.createElement('div');
+  d.id = 'btn-ok-aviso';
+  d.style.cssText = 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#272A4A;color:#fff;font-size:12px;font-weight:600;padding:9px 18px;border-radius:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:99999';
+  d.textContent = txt;
+  document.body.appendChild(d);
+  setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 4500);
+}
+function _btnOkIso(d) { return d.toISOString().slice(0, 10); }
+// Periodo a buscar: o das datas da tela; sem datas, mes passado ate o fim do mes que vem.
+function _btnOkIntervalo(de, ate, recuar) {
+  var h = new Date(), y = h.getFullYear(), m = h.getMonth();
+  var ini = de || (ate ? _fsPedidosCorte : _btnOkIso(new Date(Date.UTC(y, m - 1, 1))));
+  var fim = ate || _btnOkIso(new Date(Date.UTC(y, m + 2, 0)));
+  if (recuar) { var d0 = new Date(ini + 'T00:00:00Z'); ini = _btnOkIso(new Date(Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth() - recuar, 1))); }
+  if (ini > fim) fim = ini;
+  return [ini, fim];
+}
+// Busca de novo os pedidos dos meses do intervalo (ignorando a copia local) e troca no cache so o que mudou.
+// Devolve { novos, alterados, removidos }.
+async function _sbAtualizarPedidos(ini, fim) {
+  try { await _sbGravandoPedidos; } catch (e) { }   // espera terminar o que este usuario estava salvando
+  var meses = _sbMeses(ini, fim), i = 0, trazidos = [];
+  var hoje = new Date(); var limite = new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() - 1, 1)).toISOString().slice(0, 10);
+  async function worker() {
+    while (i < meses.length) {
+      var j = meses[i++];
+      var r = await SB.rpc('docs_pedidos', { p_ini: j[0], p_fim: j[1], p_cli: null });
+      if (r.error) throw new Error(r.error.message);
+      var d = r.data || [];
+      if (j[1] < limite) _sbCacheSet('c4|' + j[0] + '|', { t: Date.now(), d: d });   // mes fechado: deixa a copia local ja atualizada
+      Array.prototype.push.apply(trazidos, d);
+    }
+  }
+  var ws = []; for (var n = 0; n < Math.min(3, meses.length); n++) ws.push(worker());
+  await Promise.all(ws);
+  var rIni = meses[0][0], rFim = meses[meses.length - 1][1];
+  var atual = _fsCache['pedidos'] || [];
+  var mapaNovo = {}; trazidos.forEach(function (o) { if (o && o.id) mapaNovo[o.id] = o; });
+  var mapaAtual = {}; atual.forEach(function (o) { if (o && o.id) mapaAtual[o.id] = o; });
+  var res = [], usados = {}, alterados = 0, removidos = 0, novos = 0;
+  atual.forEach(function (o) {
+    if (!o || !o.id) { res.push(o); return; }
+    var nv = mapaNovo[o.id];
+    if (nv) {
+      usados[o.id] = true;
+      if (JSON.stringify(nv) !== JSON.stringify(o)) alterados++;
+      res.push(nv); return;
+    }
+    var dt = String(o.data || '');
+    if (trazidos.length && dt && dt >= rIni && dt <= rFim) { removidos++; return; }   // sumiu do banco (foi apagado por outro usuario)
+    res.push(o);
+  });
+  trazidos.forEach(function (o) { if (o && o.id && !usados[o.id]) { res.push(o); novos++; } });
+  trazidos.forEach(function (o) { var l = parseInt(o && o.lancamento, 10); if (l > _fsMaxLancGlobal) _fsMaxLancGlobal = l; });
+  _fsCache['pedidos'] = res;
+  _vcCache = { k: null, t: 0, v: null };   // forca recalcular as listas (a impressao digital dos pedidos pode nao notar todas as mudancas)
+  try { _ufFiltrosAtualizar(); } catch (e3) { }
+  return { novos: novos, alterados: alterados, removidos: removidos };
+}
+// Devolucoes / Ocorrencias: le os cadastros do banco e troca so essas colecoes.
+async function _btnOkCadastros(colecoes) {
+  if (_cadAutoGravando()) return { espera: true };
+  var r = await SB.rpc('docs_cadastros');
+  if (r.error) throw new Error(r.error.message);
+  if (_cadAutoGravando()) return { espera: true };
+  var tot = { novos: 0, alterados: 0, removidos: 0 };
+  colecoes.forEach(function (nome) {
+    var srv = r.data && r.data[nome]; if (!Array.isArray(srv)) return;
+    var atual = _fsCache[nome] || [], mapa = {};
+    atual.forEach(function (o) { if (o && o.id != null) mapa[o.id] = o; });
+    var vistos = {};
+    srv.forEach(function (o) {
+      if (!o || o.id == null) return;
+      vistos[o.id] = true;
+      if (!mapa[o.id]) tot.novos++; else if (JSON.stringify(mapa[o.id]) !== JSON.stringify(o)) tot.alterados++;
+    });
+    atual.forEach(function (o) { if (o && o.id != null && !vistos[o.id]) tot.removidos++; });
+    _fsCache[nome] = srv;
+    try { _fsAoAtualizar(nome); } catch (e) { }
+  });
+  return tot;
+}
+function _btnOkResumo(rotulo, t) {
+  var p = [];
+  if (t.novos) p.push(t.novos + (t.novos === 1 ? ' novo' : ' novos'));
+  if (t.alterados) p.push(t.alterados + (t.alterados === 1 ? ' alterado' : ' alterados'));
+  if (t.removidos) p.push(t.removidos + (t.removidos === 1 ? ' removido' : ' removidos'));
+  return p.length ? (rotulo + ' atualizados: ' + p.join(', ')) : (rotulo + ': nada novo no banco');
+}
+function _btnOkAtualizar(chave) {
+  var cfg = _BTN_OK_CFG[chave]; if (!cfg || _btnOkOcupado[chave]) return;
+  if (typeof SB === 'undefined' || !_fsTodasProntas()) { _btnOkAviso('O sistema ainda está carregando. Aguarde alguns segundos.'); return; }
+  var btns = Array.prototype.slice.call(document.querySelectorAll('.ped-ok-btn[data-pre="' + chave + '"]'));
+  _btnOkOcupado[chave] = true;
+  var textos = btns.map(function (b) { return b.textContent; });
+  btns.forEach(function (b) { b.disabled = true; b.textContent = 'Atualizando…'; });
+  var t0 = Date.now();
+  var trabalho;
+  if (cfg.tipo === 'cadastros') {
+    trabalho = _btnOkCadastros(cfg.colecoes).then(function (t) {
+      if (t.espera) { _btnOkAviso('Há uma gravação em andamento. Tente de novo em alguns segundos.'); return; }
+      _btnOkAviso(_btnOkResumo(cfg.rotulo.charAt(0).toUpperCase() + cfg.rotulo.slice(1), t));
+    });
+  } else {
+    var val = function (id) { var e = document.getElementById(id); return e ? _entctrlParseDataBR(e.value) : ''; };
+    var iv = _btnOkIntervalo(val(cfg.de), val(cfg.ate), cfg.recuar);
+    trabalho = _sbAtualizarPedidos(iv[0], iv[1]).then(function (t) {
+      try { cfg.render(); } catch (e) { console.warn('[OK] redesenhar falhou:', e); }
+      var de = iv[0].split('-').reverse().join('/'), ate = iv[1].split('-').reverse().join('/');
+      _btnOkAviso(_btnOkResumo('Pedidos', t) + ' (' + de + ' a ' + ate + ')');
+    });
+  }
+  trabalho.catch(function (e) {
+    console.error('[OK] atualizar falhou:', e);
+    _btnOkAviso('Não foi possível atualizar agora: ' + (e && e.message ? e.message : e));
+  }).then(function () {
+    // fica "Atualizando…" por uns 5 s (sem aceitar novo clique) para poupar o banco
+    setTimeout(function () {
+      btns.forEach(function (b, k) { b.disabled = false; b.textContent = textos[k] || 'OK'; });
+      _btnOkOcupado[chave] = false;
+    }, Math.max(0, 5000 - (Date.now() - t0)));
+  });
+}
+// Entrega, Devolucoes e Ocorrencias: o botao OK entra no cabecalho, ao lado do Voltar
+(function () {
+  var telas = { 'page-entrega-controle': 'entrega', 'page-devolucao-list': 'devolucoes', 'page-ocorrencias': 'ocorrencias' };
+  function ligar() {
+    Object.keys(telas).forEach(function (id) {
+      var pg = document.getElementById(id); if (!pg) return;
+      if (pg.querySelector('.ped-ok-btn')) return;
+      var voltar = pg.querySelector('button[onclick*="showPage(\'page-home\')"]');
+      if (!voltar || !voltar.parentNode) return;
+      var ok = document.createElement('button');
+      ok.className = 'ped-ok-btn';
+      ok.setAttribute('data-pre', telas[id]);
+      ok.title = 'Buscar no banco o que outros usuários lançaram ou alteraram';
+      ok.setAttribute('onclick', "_btnOkAtualizar('" + telas[id] + "')");
+      ok.style.cssText = 'background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;margin-right:0';
+      ok.textContent = 'OK';
+      var cx = document.createElement('div');
+      cx.style.cssText = 'display:flex;gap:8px;align-items:center';
+      voltar.parentNode.insertBefore(cx, voltar);
+      cx.appendChild(ok); cx.appendChild(voltar);
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ligar); else ligar();
