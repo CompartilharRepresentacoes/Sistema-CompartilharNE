@@ -24714,7 +24714,14 @@ function _pimItemPedidoEmUnidades(itPed, itNf, produtos) {
   var pn = Number(itNf.precoUnit) || 0;
   if (!(pn > 0)) return orig;
   var difNormal = Math.abs(p - pn), difCx = Math.abs(p / cx - pn);
-  if (difNormal > _PIM_TOL_PRECO && difCx <= Math.max(0.011, pn * 0.005)) {
+  var qn = Number(itNf.qtd) || 0;
+  // pedido em caixa se: o preco por caixa / peças da caixa bate com o da NF, OU a quantidade da NF
+  // e exatamente a do pedido x peças da caixa (mesmo com preco diferente: ai o preco e divergencia
+  // de verdade), OU o preco por peça fica perto (ate 20%) do da NF e o preco por caixa esta longe.
+  var porPreco = difCx <= Math.max(0.011, pn * 0.005);
+  var porQtd = q > 0 && Math.abs(qn - q * cx) <= 0.01;
+  var porPrecoAprox = difCx <= pn * 0.2 && p > pn * 1.5;
+  if (difNormal > _PIM_TOL_PRECO && (porPreco || porQtd || porPrecoAprox)) {
     return { quantidade: q * cx, precoUnit: p / cx, emCaixa: true };
   }
   return orig;
