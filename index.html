@@ -6555,7 +6555,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px">
           <div>
             <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Fornecedor</div>
-            <select id="sug-fornecedor" onchange="_sugRenderTabela()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:200px"><option value="">Selecione...</option></select>
+            <select id="sug-fornecedor" onchange="_sugFornecedorMudou()" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 8px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:200px"><option value="">Selecione...</option></select>
           </div>
           <div>
             <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Escopo</div>
@@ -6588,6 +6588,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
             <span id="sug-lojas-contador" style="font-size:12.5px;color:#1e293b;font-weight:600">Selecione uma rede</span>
             <svg id="sug-lojas-chevron" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .15s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
+          <div id="sug-lojas-aviso" style="display:none;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:11.5px;color:#64748b"></div>
           <div id="sug-lojas-painel" style="display:none;margin-top:8px;padding:10px;border:1px solid #f1f5f9;border-radius:7px">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
               <input id="sug-loja-busca" type="text" placeholder="Buscar loja pelo nome..." oninput="_sugAplicarFiltroLojas()" autocomplete="off" style="border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;font-size:12px;background:#f8fafc;color:#1e293b;min-width:240px;flex:1 1 240px;max-width:340px">
@@ -38553,9 +38554,10 @@ function _sugResetar() {
   if (todas) todas.checked = false;
   var lista = document.getElementById('sug-lojas-lista');
   if (lista) lista.innerHTML = 'Selecione uma rede para ver as lojas.';
-  _sugLojasLista = []; _sugUfFiltro = 'Todas';
+  _sugLojasLista = []; _sugUfFiltro = 'Todas'; _sugMostrarTodasLojas = false;
   var bu = document.getElementById('sug-loja-busca'); if (bu) bu.value = '';
   var cu = document.getElementById('sug-loja-ufs'); if (cu) cu.innerHTML = '';
+  _sugAtualizarAvisoLojas();
   _sugAtualizarContadorLojas();
   var cliInput = document.getElementById('sug-cliente-input');
   if (cliInput) cliInput.value = '';
@@ -38624,7 +38626,7 @@ function _sugAtualizarSubRede() {
 
 // Retorna as lojas (Clientes reais) da Rede/Sub Rede escolhidas hoje na tela,
 // ou [] se a seleção ainda estiver incompleta.
-function _sugLojasAtivasFiltro() {
+function _sugLojasDaRede() {
   var redeId = document.getElementById('sug-rede').value;
   var subWrap = document.getElementById('sug-subrede-wrap');
   var temSubRede = !!(subWrap && subWrap.style.display !== 'none');
@@ -38634,6 +38636,41 @@ function _sugLojasAtivasFiltro() {
     return String(c.categoria) === String(redeId) && (!temSubRede || String(c.subcategoria) === String(subId));
   });
 }
+// Com fornecedor escolhido, so entram as lojas que ja fizeram pedido (nao cancelado) para ele nos ultimos 12 meses,
+// dentro dos pedidos que o sistema tem carregados. A caixinha "Mostrar todas as lojas da rede" desliga esse filtro.
+var _sugMostrarTodasLojas = false;
+function _sugClientesQueCompraram(fornId) {
+  var d = new Date(); d.setFullYear(d.getFullYear() - 1);
+  var corte = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  var ids = {};
+  getPedidos().forEach(function(p){
+    if (!p || p.status === 'Cancelado' || String(p.fornecedorId || '') !== String(fornId)) return;
+    if (p.data && String(p.data) < corte) return;
+    if (p.clienteId != null) ids[String(p.clienteId)] = true;
+  });
+  return ids;
+}
+function _sugLojasAtivasFiltro() {
+  var lojas = _sugLojasDaRede();
+  var fornEl = document.getElementById('sug-fornecedor');
+  var fornId = fornEl ? fornEl.value : '';
+  if (!fornId || _sugMostrarTodasLojas || !lojas.length) return lojas;
+  var ids = _sugClientesQueCompraram(fornId);
+  return lojas.filter(function(c){ return ids[String(c.id)]; });
+}
+function _sugAtualizarAvisoLojas() {
+  var el = document.getElementById('sug-lojas-aviso'); if (!el) return;
+  var fornEl = document.getElementById('sug-fornecedor');
+  var fornId = fornEl ? fornEl.value : '';
+  var base = _sugLojasDaRede();
+  if (!fornId || !base.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  var ativas = _sugLojasAtivasFiltro().length;
+  el.style.display = 'flex';
+  el.innerHTML = '<span>' + (_sugMostrarTodasLojas ? 'Mostrando todas as ' + base.length + ' lojas da rede.' : 'Mostrando só as lojas que já compraram deste fornecedor nos últimos 12 meses (' + ativas + ' de ' + base.length + ').') + '</span>'
+    + '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:600;color:#475569"><input type="checkbox" ' + (_sugMostrarTodasLojas ? 'checked' : '') + ' onchange="_sugToggleMostrarTodasLojas(this.checked)"> Mostrar todas as lojas da rede</label>';
+}
+function _sugToggleMostrarTodasLojas(v) { _sugMostrarTodasLojas = !!v; _sugAtualizarLojas(); }
+function _sugFornecedorMudou() { _sugAtualizarLojas(); }
 
 function _sugToggleLojasPanel() {
   var painel = document.getElementById('sug-lojas-painel');
@@ -38657,6 +38694,7 @@ function _sugAtualizarContadorLojas() {
 }
 
 function _sugAtualizarLojas() {
+  _sugAtualizarAvisoLojas();
   var redeId = document.getElementById('sug-rede').value;
   var subWrap = document.getElementById('sug-subrede-wrap');
   var temSubRede = !!(subWrap && subWrap.style.display !== 'none');
@@ -38675,7 +38713,7 @@ function _sugAtualizarLojas() {
   }
   var lojas = _sugLojasAtivasFiltro();
   if (!lojas.length) {
-    lista.innerHTML = 'Nenhuma loja cadastrada para esta ' + (temSubRede ? 'sub rede' : 'rede') + '.';
+    lista.innerHTML = _sugLojasDaRede().length ? 'Nenhuma loja desta ' + (temSubRede ? 'sub rede' : 'rede') + ' fez pedido para este fornecedor nos últimos 12 meses. Marque "Mostrar todas as lojas da rede".' : 'Nenhuma loja cadastrada para esta ' + (temSubRede ? 'sub rede' : 'rede') + '.';
     if (todas) todas.checked = false;
     _sugAtualizarContadorLojas();
     _sugRenderTabela();
