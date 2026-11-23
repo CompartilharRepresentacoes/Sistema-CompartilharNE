@@ -23960,6 +23960,23 @@ function _pedImportRestaurarItem(ri, ii) {
   _pedRenderRevisaoImportacao();
 }
 
+// Botao "N produtos" de cada loja: abre a lista de todos os itens lidos (igual a Conferencia de NFs),
+// com os certos em verde; os com aviso continuam editaveis no quadro amarelo abaixo.
+function _pedImportAlternarDetalhe(ri) { var r = _pedImportResultados[ri]; if (!r) return; r.verDetalhe = !r.verDetalhe; _pedRenderRevisaoImportacao(); }
+function _pedImportDetalheHtml(r) {
+  var g = 'display:grid;grid-template-columns:2fr .7fr .9fr .9fr 1.1fr;gap:8px;padding:5px 10px;align-items:center';
+  var fq = function (q) { return String(Math.round((Number(q) || 0) * 1000) / 1000).replace('.', ','); };
+  return '<div style="margin-top:8px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;font-size:11px">'
+    + '<div style="' + g + ';background:#f8fafc;color:#94a3b8;font-size:9.5px;font-weight:700;text-transform:uppercase;border-bottom:1px solid #e2e8f0"><span>Produto</span><span>Qtd</span><span>Preço</span><span>Total</span><span>Situação</span></div>'
+    + r.itensOk.map(function (it) {
+        var situacao = it._excluidoImport ? 'Removido' : (((it.avisos && it.avisos.length) || it._precoDiverge) ? 'Com aviso (veja abaixo)' : 'Certo');
+        var cor = situacao === 'Certo' ? 'background:#f0fdf4;color:#15803d;border-bottom:1px solid #dcfce7'
+          : (it._excluidoImport ? 'background:#f8fafc;color:#94a3b8;border-bottom:1px solid #e2e8f0;text-decoration:line-through' : 'background:#fffbeb;color:#92400e;border-bottom:1px solid #fde68a;font-weight:600');
+        return '<div style="' + g + ';' + cor + '"><span>' + _pedEsc((it.prodCodigo ? it.prodCodigo + ' - ' : '') + (it.prodNome || '')) + '</span><span>' + fq(it.quantidade) + '</span><span>' + _pedFmtMoeda(it.precoUnit) + '</span><span>' + _pedFmtMoeda(it.valorTotal) + '</span><span style="font-weight:700">' + situacao + '</span></div>';
+      }).join('')
+    + '</div>';
+}
+
 function _pedRenderRevisaoImportacao() {
   var wrap = document.getElementById('ped-import-lista');
   if (!wrap) return;
@@ -24048,6 +24065,8 @@ function _pedRenderRevisaoImportacao() {
       + '<div style="flex:1">'
       + '<div style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedEsc((r.cliente.codigo || '') + ' ' + (r.cliente.nome_fantasia || r.cliente.razao_social || '')) + '</div>'
       + '<div style="font-size:11px;color:#64748b;margin-top:2px">Pedido nº ' + _pedEsc(r.numero) + ' · ' + itensAtivos.length + ' item(ns) reconhecido(s)' + (removidosCount ? ' · ' + removidosCount + ' removido(s)' : '') + (outrosPendentes.length ? ' · ' + outrosPendentes.length + ' pendente(s)' : '') + (bloqueios.length ? ' · ' + bloqueios.length + ' bloqueado(s)' : '') + ' · Total: ' + _pedFmtMoeda(valorTotal) + '</div>'
+      + (r.itensOk.length ? '<div style="margin-top:6px"><button type="button" onclick="_pedImportAlternarDetalhe(' + ri + ')" style="border:1.5px solid ' + (r.verDetalhe ? '#272A4A' : '#94a3b8') + ';background:' + (r.verDetalhe ? '#272A4A' : '#fff') + ';color:' + (r.verDetalhe ? '#fff' : '#272A4A') + ';border-radius:999px;padding:1px 10px;font-size:10px;font-weight:800;cursor:pointer">' + r.itensOk.length + ' produtos</button></div>' : '')
+      + (r.verDetalhe ? _pedImportDetalheHtml(r) : '')
       + (r.conferencia ? ('<div style="margin-top:4px;font-size:11px;font-weight:700;color:' + (r.conferencia.ok ? '#15803d' : '#b91c1c') + '">'
           + (r.conferencia.totalPdf == null ? 'Total do PDF não foi lido — confira com o PDF antes de importar.'
             : (r.conferencia.ok ? 'Total confere com o PDF: ' + _pedFmtMoeda(r.conferencia.totalPdf)
