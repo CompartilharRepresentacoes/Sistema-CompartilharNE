@@ -24697,6 +24697,28 @@ function _pinfItensSaldoPedido(pedido, produtos) {
 }
 var _PIM_TOL_QTD = 0.01;
 var _PIM_TOL_PRECO = 0.01;
+// Pedido lancado em CAIXA (ex.: 40 CX a R$ 124,25 a caixa) x NF em UNIDADE (800 PC a R$ 6,21):
+// a NF ja vem convertida para unidades; aqui o item do pedido tambem e levado para unidades
+// (qtd x unidades da caixa, preco / unidades da caixa) SO quando o preco da NF bate com o preco
+// do pedido dividido pela caixa. Assim nao acusa quantidade/preco que na verdade estao certos.
+function _pimItemPedidoEmUnidades(itPed, itNf, produtos) {
+  var q = Number(itPed.quantidade) || 0, p = Number(itPed.precoUnit) || 0;
+  var orig = { quantidade: q, precoUnit: p, emCaixa: false };
+  if (!itNf || !(p > 0)) return orig;
+  var cx = parseFloat(String(itPed.cx || '').replace(',', '.'));
+  if (!(cx > 1)) {
+    var prod = (produtos || []).find(function (x) { return _cpNorm(x.codigo || '') === _cpNorm(itPed.prodCodigo || ''); });
+    cx = prod ? parseFloat(String(prod.quant || '').replace(',', '.')) : 0;
+  }
+  if (!(cx > 1)) return orig;
+  var pn = Number(itNf.precoUnit) || 0;
+  if (!(pn > 0)) return orig;
+  var difNormal = Math.abs(p - pn), difCx = Math.abs(p / cx - pn);
+  if (difNormal > _PIM_TOL_PRECO && difCx <= Math.max(0.011, pn * 0.005)) {
+    return { quantidade: q * cx, precoUnit: p / cx, emCaixa: true };
+  }
+  return orig;
+}
 function _pimCalcularDivergenciasItem(itensPedido, itensNfConvertidos, produtos) {
   produtos = produtos || [];
   var divergencias = [];
@@ -24711,11 +24733,12 @@ function _pimCalcularDivergenciasItem(itensPedido, itensNfConvertidos, produtos)
     }
     var itNf = nfRestantes[idx];
     nfRestantes.splice(idx, 1);
-    if ((Number(itNf.qtd) || 0) - (Number(itPed.quantidade) || 0) > _PIM_TOL_QTD) {
-      divergencias.push({ tipo: 'quantidade', produtoCodigo: itPed.prodCodigo || '', produtoNome: itPed.prodNome || '', valorPedido: itPed.quantidade, valorFaturado: itNf.qtd, jaFaturadoAntes: !!itPed._jaFaturado });
+    var pedUn = _pimItemPedidoEmUnidades(itPed, itNf, produtos);
+    if ((Number(itNf.qtd) || 0) - pedUn.quantidade > _PIM_TOL_QTD) {
+      divergencias.push({ tipo: 'quantidade', produtoCodigo: itPed.prodCodigo || '', produtoNome: itPed.prodNome || '', valorPedido: pedUn.quantidade, valorFaturado: itNf.qtd, jaFaturadoAntes: !!itPed._jaFaturado });
     }
-    if (Math.abs((Number(itPed.precoUnit) || 0) - (Number(itNf.precoUnit) || 0)) > _PIM_TOL_PRECO) {
-      divergencias.push({ tipo: 'preco', produtoCodigo: itPed.prodCodigo || '', produtoNome: itPed.prodNome || '', valorPedido: itPed.precoUnit, valorFaturado: itNf.precoUnit });
+    if (Math.abs(pedUn.precoUnit - (Number(itNf.precoUnit) || 0)) > _PIM_TOL_PRECO) {
+      divergencias.push({ tipo: 'preco', produtoCodigo: itPed.prodCodigo || '', produtoNome: itPed.prodNome || '', valorPedido: pedUn.precoUnit, valorFaturado: itNf.precoUnit });
     }
   });
 
@@ -25017,7 +25040,8 @@ function _pinfLinhasDetalhe(r) {
     var cod = it.prodCodigo || '', sd = saldo[i], nf = achaNf(cod);
     var motivos = divs.filter(function (d) { return d.tipo !== 'extra' && _cpNorm(d.produtoCodigo || '') === _cpNorm(cod); }).map(function (d) { return _PINF_MOTIVO[d.tipo] || d.tipo; });
     var qPed = (sd && !sd._jaFaturado) ? sd.quantidade : it.quantidade;
-    linhas.push({ produto: (cod ? cod + ' - ' : '') + (it.prodNome || ''), pedido: 'Qtd ' + fq(qPed) + ' · ' + _pedFmtMoeda(it.precoUnit),
+    var pedUn = _pimItemPedidoEmUnidades(Object.assign({}, it, { quantidade: qPed }), nf, _pinfProdutosCtx || []);
+    linhas.push({ produto: (cod ? cod + ' - ' : '') + (it.prodNome || ''), pedido: 'Qtd ' + fq(pedUn.quantidade) + ' · ' + _pedFmtMoeda(pedUn.precoUnit),
       faturado: nf ? ('Qtd ' + fq(nf.qtd) + ' · ' + _pedFmtMoeda(nf.precoUnit)) : ((sd && sd._jaFaturado) ? 'NF anterior' : '—'),
       situacao: motivos.length ? motivos.join(' · ') : 'Certo', ok: !motivos.length });
   });
