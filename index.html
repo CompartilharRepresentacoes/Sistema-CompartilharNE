@@ -32143,7 +32143,10 @@ function _devProdFiltrar() {
   document.getElementById('dev-item-prod-id').value = '';
   if (q.length < 3) { drop.style.display='none'; return; }
   var n = _cpNorm(q);
+  // So aparecem produtos do fornecedor escolhido na devolucao (se ainda nao escolheu, mostra todos)
+  var _fornDev = (document.getElementById('dev-forn-id') || {}).value || '';
   _devProdItems = _ordNome(getProdutos()).filter(function(p){
+    if (_fornDev && String(p.fornecedor || '') !== String(_fornDev)) return false;
     return _cpNorm(p.nome||'').includes(n) || _cpNorm(p.codigo||'').includes(n);
   }).slice(0,15);
   if (!_devProdItems.length) { drop.style.display='none'; return; }
