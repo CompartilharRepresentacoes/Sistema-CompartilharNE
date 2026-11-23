@@ -22316,12 +22316,12 @@ function _pimprelBlocoPedidoHtml(bloco) {
   }).join('');
   return ''
     + '<div style="border:2px solid #272A4A;border-radius:10px;overflow:hidden;margin-bottom:16px;page-break-inside:avoid">'
-    + '<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #eef2f7;flex-wrap:wrap">'
+    + '<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #eef2f7;flex-wrap:nowrap;white-space:nowrap">'
       + (bloco.numero ? '<div style="font-size:11.5px;font-weight:700;color:#1e293b">' + _pedEsc(bloco.numero) + '</div>' : '')
       + '<div style="font-size:10.5px;color:#94a3b8">' + _pedEsc(bloco.data) + '</div>'
-      + '<div style="font-size:11.5px;font-weight:700;color:#1e293b">' + _pedEsc(bloco.cliente) + '</div>'
-      + '<div style="font-size:11px;color:#475569">' + _pedEsc(bloco.fornecedor) + '</div>'
-      + _pimprelBadgeStatus(bloco.status)
+      + '<div style="font-size:11.5px;font-weight:700;color:#1e293b;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + _pedEsc(bloco.cliente) + '">' + _pedEsc(bloco.cliente) + '</div>'
+      + '<div style="font-size:11px;color:#475569;flex-shrink:0">' + _pedEsc(bloco.fornecedor) + '</div>'
+      + (bloco.semStatus ? '' : '<span style="flex-shrink:0">' + _pimprelBadgeStatus(bloco.status) + '</span>')
       + '<div style="flex:1"></div>'
       + '<div style="text-align:right"><div style="font-size:8px;color:#94a3b8;text-transform:uppercase">' + _pedEsc(bloco.pesoLabel) + '</div><div style="font-size:11px;font-weight:700;color:#1e293b">' + bloco.pesoValor + '</div></div>'
       + '<div style="text-align:right"><div style="font-size:8px;color:#94a3b8;text-transform:uppercase">' + _pedEsc(bloco.valorLabel) + '</div><div style="font-size:11px;font-weight:700;color:' + (bloco.valorCor || '#15803d') + '">' + bloco.valorValue + '</div></div>'
@@ -22459,7 +22459,7 @@ function _pimprelColItensNaoFat() {
     { header:'Valor', align:'right', get:function(it){ return _pedFmtMoeda(it.precoUnit); } },
     { header:'Qtd Pedida', align:'center', get:function(it){ return _pedFmtQtd(it.qtdPedida); } },
     { header:'Qtd Faturada', align:'center', get:function(it){ return _pedFmtQtd(it.qtdFaturada); } },
-    { header:'Falta Faturar', align:'center', get:function(it){ return _pedFmtQtd(it.restante); } },
+    { header:'Falta Faturar', align:'center', destaque:true, get:function(it){ return _pedFmtQtd(it.restante); } },
     { header:'Valor Não Faturado', align:'right', destaque:true, get:function(it){ return _pedFmtMoeda(it.valorNaoFaturado); } },
   ];
 }
@@ -22632,7 +22632,7 @@ function _pimprelDadosNaoFat() {
       data: r.pedido.data ? r.pedido.data.split('-').reverse().join('/') : '—',
       cliente: _cpSemColchetes(r.pedido.clienteNome),
       fornecedor: String(r.pedido.fornecedorNome||'').replace(/^\d+\s+/, ''),
-      status: r.pedido.status,
+      status: r.pedido.status, semStatus: true,
       pesoLabel: 'Peso Pendente', pesoValor: r.pesoPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg',
       valorLabel: 'Valor Não Faturado', valorValue: _pedFmtMoeda(r.valorPendente), valorCor: '#dc2626',
       colunas: colunasItens, itens: r.pendentes
@@ -22775,9 +22775,23 @@ function pedGerarPdfRelacao() {
           }
           doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(148, 163, 184); doc.text(_pimprelTextoPdf(b.data), xd, y + 5.7);
           doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(30, 41, 59);
-          var xc = xd + 20; doc.text(_pimprelTextoPdf(b.cliente), xc, y + 5.7);
+          var xc = xd + 20;
+          var txtForn = _pimprelTextoPdf(b.fornecedor) + (b.semStatus ? '' : '  |  ' + _pimprelTextoPdf(b.status));
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+          var wForn = doc.getTextWidth(txtForn);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5);
+          var wValor = doc.getTextWidth(_pimprelTextoPdf(b.valorValue)), wPeso = doc.getTextWidth(_pimprelTextoPdf(b.pesoValor));
+          var limiteDir = W - M - 2 - wValor - 6 - wPeso - 6;
+          var nomeCli = _pimprelTextoPdf(b.cliente);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+          var maxCli = limiteDir - xc - wForn - 8;
+          if (doc.getTextWidth(nomeCli) * 1.08 > maxCli) {
+            while (nomeCli.length > 3 && (doc.getTextWidth(nomeCli + '...') * 1.08) > maxCli) nomeCli = nomeCli.slice(0, -1);
+            nomeCli = nomeCli.replace(/\s+$/, '') + '...';
+          }
+          doc.setTextColor(30, 41, 59); doc.text(nomeCli, xc, y + 5.7);
           doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(71, 85, 105);
-          doc.text(_pimprelTextoPdf(b.fornecedor) + '  |  ' + _pimprelTextoPdf(b.status), xc + doc.getTextWidth(_pimprelTextoPdf(b.cliente)) * 1.08 + 4, y + 5.7);
+          doc.text(txtForn, xc + doc.getTextWidth(nomeCli) * 1.08 + 4, y + 5.7);
           doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5);
           var cor = _pimprelCorRgb(b.valorCor, [21, 128, 61]);
           doc.setTextColor(cor[0], cor[1], cor[2]); doc.text(_pimprelTextoPdf(b.valorValue), W - M - 2, y + 5.7, { align: 'right' });
