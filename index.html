@@ -2117,7 +2117,6 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
     <div id="periodoInfo" style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px"></div>
   </div>
   <div style="display:flex;gap:8px">
-    <button class="ped-ok-btn" data-pre="painel" title="Buscar no banco os pedidos mais recentes e atualizar os números" onclick="_btnOkAtualizar('painel')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;margin-right:0">OK</button>
     <button id="btnToggleFiltros" onclick="document.getElementById('dvgFiltrosBar').classList.toggle('dvg-filtros-aberto')" style="display:none;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer"><i class="ti ti-filter"></i> Filtros</button>
   </div>
 </div>
@@ -2141,7 +2140,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
   <div id="msClientes" class="multiselect"></div>
   <select id="dvgSazonal" title="Produtos sazonais" style="border:1px solid #e2e8f0;border-radius:7px;padding:5px 8px;font-size:12px;font-weight:600;background:#f8fafc;color:#1e293b;outline:none;cursor:pointer"><option value="com">Sazonal: Com Sazonal</option><option value="sem">Sazonal: Sem Sazonal</option><option value="so">Sazonal: Só Sazonal</option></select>
   <div style="width:1px;height:18px;background:#e2e8f0;margin:0 2px"></div>
-  <button id="btnReset" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Limpar filtros</button>
+  <button class="ped-ok-btn" data-pre="painel" title="Buscar no banco os pedidos mais recentes e atualizar os números" onclick="_btnOkAtualizar('painel')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;padding:5px 16px">OK</button><button id="btnReset" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:7px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Limpar filtros</button>
 </div>
 <div class="d-tab-bar" id="dTabBar">
   <div class="d-tab-btn active" data-tab="home">VISÃO GERAL</div>
@@ -5889,7 +5888,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <span style="color:#94a3b8;font-size:13px">→</span>
           <input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" id="entctrl-data-ate" oninput="_entctrlMaskData(this);renderEntregaControle()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:90px">
           </div>
-          <button onclick="abrirModalImportEntrega()" style="margin-left:auto;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">&#11014; Importar</button>
+          <button class="ped-ok-btn" data-pre="entrega" title="Buscar no banco os pedidos do período (outros usuários podem ter lançado ou dado baixa)" onclick="_btnOkAtualizar('entrega')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;padding:6px 16px">OK</button><button onclick="abrirModalImportEntrega()" style="margin-left:auto;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">&#11014; Importar</button>
           <div style="position:relative">
             <button id="entctrl-arq-btn" onclick="entctrlToggleMenuArquivo(event)" style="background:#272A4A;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap"><i class="ti ti-download" style="font-size:12px"></i> Gerar arquivo <i class="ti ti-chevron-down" style="font-size:11px"></i></button>
             <div id="entctrl-arq-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(39,42,74,.18);overflow:hidden;z-index:999;min-width:190px">
@@ -5963,7 +5962,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <div><label>Motivo</label><select id="dev-f-motivo" onchange="_devAoTrocarMotivo()"><option value="">Todos</option></select></div>
           <div><label>UF</label><select id="dev-f-uf" onchange="renderDevolucaoList()"><option value="">Todas</option></select></div>
           <div><label>Vendedor</label><select id="dev-f-vend" onchange="renderDevolucaoList()"><option value="">Todos</option></select></div>
-          <div style="display:flex;gap:8px"><button onclick="_devLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button><button class="dev-hdr-mobile-hide" onclick="emlMenu(this)" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap">Importar</button><button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">➕ Cadastrar</button></div>
+          <div style="display:flex;gap:8px"><button class="ped-ok-btn" data-pre="devolucoes" title="Buscar no banco as devoluções lançadas por outros usuários" onclick="_btnOkAtualizar('devolucoes')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;padding:7px 16px">OK</button><button onclick="_devLimparFiltros()" style="background:#fff;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;color:#272A4A">Limpar</button><button class="dev-hdr-mobile-hide" onclick="emlMenu(this)" style="background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:7px 12px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap">Importar</button><button class="dev-hdr-mobile-hide" onclick="showPage('page-devolucao-form',{})" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">➕ Cadastrar</button></div>
         </div>
       </div>
       <div id="dev-graficos"></div>
@@ -6772,7 +6771,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <button id="oc-mais-filtros-btn" onclick="_ocToggleMaisFiltros()" style="background:#f8fafc;color:#272A4A;border:1px solid #e2e8f0;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
             <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="filtro" style="font-size:13px"><path d="M3.5 5h17l-6.5 7.5V19l-4 2v-8.5z"/></svg> <span id="oc-mais-filtros-txt">Mais filtros</span> <i id="oc-mais-filtros-chevron" class="ti ti-chevron-down" style="font-size:12px"></i>
           </button>
-          <button type="button" onclick="_ocLimparFiltros()" style="background:#eef2f9;color:#1c2f66;border:none;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">Limpar</button>
+          <button class="ped-ok-btn" data-pre="ocorrencias" title="Buscar no banco as ocorrências lançadas por outros usuários" onclick="_btnOkAtualizar('ocorrencias')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;padding:6px 16px">OK</button><button type="button" onclick="_ocLimparFiltros()" style="background:#eef2f9;color:#1c2f66;border:none;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">Limpar</button>
           <button id="oc-btn-email" type="button" onclick="_ocTogglePainel('email')" style="margin-left:auto;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">&#9993; Anexar</button>
           <button id="oc-btn-manual" type="button" onclick="_ocTogglePainel('manual')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">➕ Lançar</button>
         </div>
@@ -21682,30 +21681,6 @@ function _btnOkAtualizar(chave) {
     }, Math.max(0, 5000 - (Date.now() - t0)));
   });
 }
-// Entrega, Devolucoes e Ocorrencias: o botao OK entra no cabecalho, ao lado do Voltar
-(function () {
-  var telas = { 'page-entrega-controle': 'entrega', 'page-devolucao-list': 'devolucoes', 'page-ocorrencias': 'ocorrencias' };
-  function ligar() {
-    Object.keys(telas).forEach(function (id) {
-      var pg = document.getElementById(id); if (!pg) return;
-      if (pg.querySelector('.ped-ok-btn')) return;
-      var voltar = pg.querySelector('button[onclick*="showPage(\'page-home\')"]');
-      if (!voltar || !voltar.parentNode) return;
-      var ok = document.createElement('button');
-      ok.className = 'ped-ok-btn';
-      ok.setAttribute('data-pre', telas[id]);
-      ok.title = 'Buscar no banco o que outros usuários lançaram ou alteraram';
-      ok.setAttribute('onclick', "_btnOkAtualizar('" + telas[id] + "')");
-      ok.style.cssText = 'background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;margin-right:0';
-      ok.textContent = 'OK';
-      var cx = document.createElement('div');
-      cx.style.cssText = 'display:flex;gap:8px;align-items:center';
-      voltar.parentNode.insertBefore(cx, voltar);
-      cx.appendChild(ok); cx.appendChild(voltar);
-    });
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ligar); else ligar();
-})();
 var _pedStatusFiltro = '';
 var _pedOrdCampo = 'lancamento'; // ao abrir: ordem de digitacao (ultimo pedido digitado no topo, pelo numero de Lancamento); clicar em Data ordena por data
 var _pedOrdDir = 'desc';
