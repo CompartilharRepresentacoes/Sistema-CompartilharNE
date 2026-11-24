@@ -5369,6 +5369,8 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <option value="Bonificado">Bonificado</option>
           <option value="Cancelado">Cancelado</option>
         </select>
+        <span style="font-size:11px;font-weight:600;color:#64748b;margin-left:6px">Fornecedor</span>
+        <select id="ped-fornecedor" onchange="renderPedidoList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;max-width:170px"><option value="">Todos</option></select>
         </div>
         <button class="ped-ok-btn" data-pre="geral" title="Buscar no banco os pedidos do período (outros usuários podem ter lançado ou dado baixa)" onclick="_btnOkAtualizar('geral')" style="background:#DE7926;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px">OK</button><button class="ped-limpar-btn" onclick="pedLimparFiltros()" style="background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Limpar filtros</button>
         </div>
@@ -21688,11 +21690,21 @@ function pedSetStatusFiltro(status) {
   _pedStatusFiltro = status;
   renderPedidoList();
 }
+// Preenche o filtro Fornecedor da Visao Geral (uma vez; ordem alfabetica)
+function _pedPopularFornGeral() {
+  var sel = document.getElementById('ped-fornecedor');
+  if (!sel || sel.dataset.populado) return;
+  var fs = (typeof getFornecedores === 'function' ? getFornecedores() : []).slice().sort(function (a, b) { return String(a.nome_fantasia || a.razao_social || '').localeCompare(String(b.nome_fantasia || b.razao_social || ''), 'pt-BR'); });
+  if (!fs.length) return;
+  sel.innerHTML = '<option value="">Todos</option>' + fs.map(function (f) { return '<option value="' + _pedEsc(f.id) + '">' + _pedEsc(f.nome_fantasia || f.razao_social || f.codigo || '') + '</option>'; }).join('');
+  sel.dataset.populado = '1';
+}
 function pedLimparFiltros() {
   var b = document.getElementById('ped-busca'); if (b) b.value = '';
   var de = document.getElementById('ped-data-de'); if (de) de.value = '';
   var ate = document.getElementById('ped-data-ate'); if (ate) ate.value = '';
   var sel = document.getElementById('ped-status-sel'); if (sel) sel.value = '';
+  var fg = document.getElementById('ped-fornecedor'); if (fg) fg.value = '';
   _pedStatusFiltro = '';
   renderPedidoList();
 }
@@ -21982,9 +21994,12 @@ function renderPedidoList() {
   // v516: periodo anterior ao corte -> carrega o historico (re-renderiza ao terminar)
   // v527: carrega so os anos do filtro (ate o corte), nao o historico inteiro
   if (dataDe && dataDe < _fsPedidosCorte && !_fsPeriodoCarregado(dataDe, dataAte || _fsPedidosCorte)) { _fsCarregarPedidosPeriodo(dataDe, dataAte || _fsPedidosCorte); }
+  _pedPopularFornGeral();
+  const fornGeral = document.getElementById('ped-fornecedor')?.value || '';
   let rows = pedidos.filter(function(p){
     if (!_appRegistroVisivelUF(p)) return false;
     if (_pedStatusFiltro && p.status !== _pedStatusFiltro) return false;
+    if (fornGeral && String(p.fornecedorId || '') !== fornGeral) return false;
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
     if (!busca) return true;
@@ -22498,9 +22513,11 @@ function _pimprelDadosGeral() {
   var busca   = (document.getElementById('ped-busca') ? document.getElementById('ped-busca').value : '').toLowerCase();
   var dataDe  = document.getElementById('ped-data-de') ? _entctrlParseDataBR(document.getElementById('ped-data-de').value) : '';
   var dataAte = document.getElementById('ped-data-ate') ? _entctrlParseDataBR(document.getElementById('ped-data-ate').value) : '';
+  var fornGeral = document.getElementById('ped-fornecedor') ? document.getElementById('ped-fornecedor').value : '';
   var rows = pedidos.filter(function(p){
     if (!_appRegistroVisivelUF(p)) return false;
     if (_pedStatusFiltro && p.status !== _pedStatusFiltro) return false;
+    if (fornGeral && String(p.fornecedorId || '') !== fornGeral) return false;
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
     if (!busca) return true;
