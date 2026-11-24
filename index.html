@@ -5464,7 +5464,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           <div id="pss-tbody" style="min-height:60px"></div>
           <div style="padding:8px 14px;background:#f8fafc;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px">
             <span style="font-size:10px;color:#94a3b8" id="pss-paginacao">0 registros</span>
-            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <div style="display:none;align-items:center;gap:6px;flex-shrink:0">
               <span style="font-size:10px;color:#94a3b8">Mostrar</span>
               <select id="pss-qtd" onchange="renderVendaSimples()" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;font-size:11px;color:#1e293b;font-weight:600;cursor:pointer">
                 <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="todos">Todas</option>
@@ -21546,7 +21546,7 @@ setInterval(function () { ['vc','vcf','psn','pnf'].forEach(_pedSubVis); }, 400);
 var _btnOkOcupado = {};
 var _BTN_OK_CFG = {
   geral:   { de: 'ped-data-de',      ate: 'ped-data-ate',      recuar: 0, tipo: 'pedidos', render: function () { renderPedidoList(); } },
-  simples: { de: 'pss-data-de',      ate: 'pss-data-ate',      recuar: 0, tipo: 'pedidos', render: function () { renderVendaSimples(); } },
+  simples: { de: 'pss-data-de',      ate: 'pss-data-ate',      recuar: 0, tipo: 'pedidos', render: function () { renderVendaSimples(true); } },
   vc:      { de: 'vc-data-de',       ate: 'vc-data-ate',       recuar: 0, tipo: 'pedidos', render: function () { renderVendasCompletas(true); } },
   vcf:     { de: 'vcf-data-de',      ate: 'vcf-data-ate',      recuar: 0, tipo: 'pedidos', render: function () { renderVendasCompletasFaturadas(true); } },
   psn:     { de: 'psn-data-de',      ate: 'psn-data-ate',      recuar: 0, tipo: 'pedidos', render: function () { renderVendasSimplesNfs(true); } },
@@ -21838,6 +21838,7 @@ function _pssSemanaAtual() {
     var f = function (d) { return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); };
     de.value = f(ini); ate.value = f(fim);
   }
+  _pssMostrar = false;   // ao abrir a aba a lista fica vazia ate clicar em OK
   renderVendaSimples();
 }
 // Venda simples: ao abrir fica na ordem de digitacao (numero de lancamento, do mais antigo ao mais novo; o ultimo digitado fica embaixo).
@@ -21846,7 +21847,7 @@ var _pssOrdCampo = 'lancamento', _pssOrdDir = 'asc';
 function pssOrdenarPor(campo) {
   if (_pssOrdCampo === campo) { _pssOrdDir = (_pssOrdDir === 'asc') ? 'desc' : 'asc'; }
   else { _pssOrdCampo = campo; _pssOrdDir = 'asc'; }
-  renderVendaSimples();
+  renderVendaSimples(_pssMostrar === true);
 }
 function _pssValorOrd(p, campo, clientesMap) {
   if (campo === 'numPedidoFornecedor') return String(p.numPedidoFornecedor || '');
@@ -21865,12 +21866,26 @@ function pssLimparFiltros() {
     var el = document.getElementById(id); if (el) el.value = '';
   });
   pssAtualizarLojas();
+  _pssMostrar = false;
   renderVendaSimples();
 }
-function renderVendaSimples() {
+// Venda Simples: a lista so aparece depois de escolher os filtros e clicar em OK (renderVendaSimples(true)).
+// Mudar um filtro nao mexe na lista; so o proximo OK atualiza.
+var _pssMostrar = false;
+function renderVendaSimples(forcar) {
   var tbody = document.getElementById('pss-tbody');
   var pag = document.getElementById('pss-paginacao');
   if (!tbody) return;
+  if (forcar === true) _pssMostrar = true;
+  else {
+    if (!_pssMostrar) {
+      tbody.innerHTML = '<div style="text-align:center;padding:48px 16px;color:#94a3b8;font-size:13px">Escolha os filtros e clique em OK para ver os pedidos.</div>';
+      var kv0 = document.getElementById('pss-kpi-valor'); if (kv0) kv0.textContent = _pedFmtMoeda(0);
+      var kp0 = document.getElementById('pss-kpi-peso'); if (kp0) kp0.textContent = '0,00 kg';
+      if (pag) pag.textContent = '';
+    }
+    return;
+  }
   var pedidos = getPedidos();
   var clientesMap = {}; getClientes().forEach(function(c){ clientesMap[c.id] = c; });
 
@@ -21924,9 +21939,7 @@ function renderVendaSimples() {
   var pssKV = document.getElementById('pss-kpi-valor'); if (pssKV) pssKV.textContent = _pedFmtMoeda(pssValorTotal);
   var pssKP = document.getElementById('pss-kpi-peso'); if (pssKP) pssKP.textContent = pssPesoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
 
-  var pssFiltrados = rows.length;
-  rows = _pgAplicar(rows, 'pss-qtd');
-  if (pag) pag.textContent = _pgTexto(rows.length, pssFiltrados, pedidos.length, 'pedido', 'pedidos');
+  if (pag) pag.textContent = 'Mostrando ' + rows.length + (rows.length === 1 ? ' pedido' : ' pedidos');
 
   if (!rows.length) {
     tbody.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Nenhum pedido encontrado com esses filtros.</div>';
