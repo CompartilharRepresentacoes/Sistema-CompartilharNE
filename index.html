@@ -23751,6 +23751,61 @@ function _pedParsePedidoTextoRpOne(paginasTexto) {
   }];
 }
 
+// ── Layout "TOTVS Varejo / RELPEDSUPRIM" ("PEDIDO DE COMPRAS", rodape "TOTVS Varejo Supermercados"; ex.: Bemais -> Sao Vicente) ──
+// Mesmo cabecalho do layout Sendas (Fornecedor a esquerda, Loja a direita), mas a tabela tem outras colunas:
+//   Cod Forn (x~14) | Seq (x~90) | Produtos (x~126) | Emb "CX 8"/"KG 1" (x~225) | Estoq. | Qtde | Valor Unit. | Valor Item ...
+// "Cod Forn" e o codigo do produto da fabrica (= Codigo do cadastro de Produtos). Cada pedido (numero) e uma loja e pode ocupar
+// mais de uma pagina (paginas do mesmo numero e da mesma loja viram UM pedido). Valor Unit. e o preco da embalagem
+// (CX 8 -> preco da caixa; KG 1 -> preco por kg): qtd x Valor Unit. = Valor Item, o que e conferido linha a linha.
+function _pedParsePedidoTextoTotvs(paginasItens) {
+  var blocos = [], porChave = {};
+  var ehNum = function (s) { return /^-?\d[\d.]*,\d+$/.test(String(s || '').trim()); };
+  (paginasItens || []).forEach(function (items) {
+    var txt = items.map(function (it) { return it.str; }).join(' ');
+    var mN = /PEDIDO DE COMPRAS\D*(\d+)/.exec(txt);
+    var numero = mN ? mN[1] : '';
+    var linhas = _pedAgruparLinhasPdf(items);
+    var cn = _pedExtrairCnpjsPaginaSendas(linhas);
+    var itens = [], atual = null;
+    Object.keys(linhas).map(Number).sort(function (a, b) { return b - a; }).forEach(function (y) {
+      var tk = linhas[y];
+      var emb = tk.find(function (t) { return t.x >= 200 && t.x <= 260 && /^(CX|CXA|KG|UN|UND|PC|PCT|FD)\s+\d+$/i.test(t.str.trim()); });
+      var codTok = tk.find(function (t) { return t.x < 60 && /^\d+$/.test(t.str.trim()); });
+      if (emb && codTok) {
+        var nums = tk.filter(function (t) { return t.x > emb.x + 1 && ehNum(t.str); }).map(function (t) { return _pedParseMoeda(t.str); });
+        if (nums.length < 4) { atual = null; return; }   // estoque, quantidade, valor unitario, valor do item
+        var qtd = nums[1], unit = nums[2], totalPdf = nums[3];
+        var mE = /^([A-Za-z]+)\s+(\d+)$/.exec(emb.str.trim());
+        var un = mE[1].toUpperCase();
+        var descTok = tk.filter(function (t) { return t.x > codTok.x + 1 && t.x < emb.x - 1 && !/^\d+$/.test(t.str.trim()); });
+        var cod = codTok.str.trim();
+        atual = {
+          descricao: descTok.map(function (t) { return t.str.trim(); }).join(' '), dataEnt: null, qtd: qtd, unitario: unit,
+          codigo: cod, codigoNormalizado: _pedNormCodigoPedido(cod), codigoCandidatos: _pedCandidatosCodigoPedido(cod),
+          unidade: (un === 'CX' || un === 'CXA') ? 'CXA' : (un === 'KG' ? 'KG' : 'UN'),
+          embalagem: emb.str.trim(), totalPdf: totalPdf, codigoDaFabrica: true
+        };
+        itens.push(atual);
+        return;
+      }
+      // linhas seguintes do mesmo item: continuacao do nome (coluna Produtos) ate a linha "EANs:"
+      if (atual) {
+        if (tk.some(function (t) { return /^EANs/i.test(t.str.trim()) || /^TOTAIS/i.test(t.str.trim()); })) { atual = null; return; }
+        var cont = tk.filter(function (t) { return t.x >= 120 && t.x < 220; }).map(function (t) { return t.str.trim(); }).join(' ');
+        if (cont) atual.descricao = (atual.descricao + ' ' + cont).trim();
+      }
+    });
+    if (!numero || !cn.fornecedorCnpj || !cn.clienteCnpj) return;   // pagina sem cabecalho reconhecivel
+    var chave = numero + '|' + cn.clienteCnpj;
+    if (porChave[chave]) { porChave[chave].itens = porChave[chave].itens.concat(itens); return; }
+    porChave[chave] = { numero: numero, fornecedorCnpj: cn.fornecedorCnpj, localEntregaCnpj: cn.clienteCnpj, itens: itens, origem: '' };
+    blocos.push(porChave[chave]);
+  });
+  blocos = blocos.filter(function (b) { return b.itens.length; });
+  blocos.forEach(function (b) { b.origem = 'Importado de PDF "Pedido de Compras" nº ' + b.numero + ' (' + b.itens.length + ' itens).'; });
+  return blocos;
+}
+
 // Detecta qual layout de PDF de pedido este texto e, pra rotear pro parser certo.
 // Retorna 'atacadao', 'sendas' ou null (layout desconhecido/nao configurado ainda).
 function _pedDetectarLayoutPdf(textoCompleto) {
@@ -23759,6 +23814,8 @@ function _pedDetectarLayoutPdf(textoCompleto) {
   // "RP One - Enterprise" (ex.: Cambui -> Allfood): Cod Barras | Cod Forn | Descricao | Qtde Emb | Emb | Pr Unit | Pr Emb | Vl Total
   if (/RP\s+One\s*-\s*Enterprise/i.test(textoCompleto) && /Cod\s+Forn/i.test(textoCompleto)) return 'rp_one';
   // Consinco com colunas "Cod Forn | Codigo Produtos a Receber" (ex.: Novo Atacado -> Allfood): outro layout que o do Sendas
+  // "TOTVS Varejo Supermercados / RELPEDSUPRIM" (ex.: Bemais -> Sao Vicente)
+  if (/TOTVS\s+Varejo/i.test(textoCompleto) && /RELPEDSUPRIM/i.test(textoCompleto) && /PEDIDO\s+DE\s+COMPRAS/.test(textoCompleto)) return 'totvs';
   if (/Consinco/.test(textoCompleto) && /C[oó]digo\s+Produtos\s+a\s+Receber/i.test(textoCompleto)) return 'consinco_cod';
   if (/Consinco/.test(textoCompleto)) return 'sendas';
   if (/Numero:\s*\d+/.test(textoCompleto) && /Local\s+de\s+Entrega\s*:/.test(textoCompleto)) return 'atacadao';
@@ -24375,6 +24432,8 @@ function _pedLerPdfBuffer(buffer, lib) {
         resultados = _pedImportarPdfProcessar(textoCompleto);
       } else if (layout === 'sendas') {
         resultados = _pedImportarPdfProcessarSendas(paginasItens);
+      } else if (layout === 'totvs') {
+        resultados = _pedParsePedidoTextoTotvs(paginasItens).map(_pedProcessarBlocoImportadoPdf);
       } else if (layout === 'rp_one') {
         resultados = _pedParsePedidoTextoRpOne(paginasTexto).map(_pedProcessarBlocoImportadoPdf);
       } else if (layout === 'unicompra') {
