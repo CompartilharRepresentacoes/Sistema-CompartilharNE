@@ -23943,8 +23943,12 @@ function _pedExtrairItensPaginaSendas(linhas) {
     var m = /^([A-Za-z]+)\s+(\d+)$/.exec(embSeqTok.str.trim());
     var unidade = (m ? m[1] : embSeqTok.str.trim()).toUpperCase();
     var codigo = codTok.str.trim();
+    // Embalagem "CX 10" (caixa com mais de 1 peca): quantidade = caixas e Valor Unit. = preco da CAIXA (qtd x Valor Unit. = Valor Item).
+    // Vale como caixa (CXA) mesmo se o preco do PDF diverge da tabela. "CX 1" fica como esta (a regra do preco da caixa decide).
+    var conteudoCx = 0;
+    if (m && (unidade === 'CX' || unidade === 'CXA') && parseInt(m[2], 10) > 1) { unidade = 'CXA'; conteudoCx = parseInt(m[2], 10); }
 
-    itens.push({
+    var itemSendas = {
       descricao: descTok.str.trim(),
       dataEnt: null,
       qtd: _pedParseMoeda(qtdTok.str),
@@ -23953,7 +23957,9 @@ function _pedExtrairItensPaginaSendas(linhas) {
       codigoNormalizado: _pedNormCodigoPedido(codigo),
       codigoCandidatos: _pedCandidatosCodigoPedido(codigo),
       unidade: unidade
-    });
+    };
+    if (conteudoCx) itemSendas.conteudo = conteudoCx;   // o sistema avisa se o cadastro do produto tem outro numero por caixa
+    itens.push(itemSendas);
   });
   return itens;
 }
