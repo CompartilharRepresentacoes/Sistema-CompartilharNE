@@ -22280,7 +22280,7 @@ function _pimpRender() {
       + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:600">' + _pedEsc(it.prodNome || '') + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:center">' + _pedEsc(it.medida || '') + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:right">' + pesoItem.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>'
-      + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:center">' + _pedEsc(it.quantidade) + '</td>'
+      + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:center">' + _pedEsc(isNaN(Number(it.quantidade)) ? it.quantidade : Math.round(Number(it.quantidade) * 1000) / 1000) + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:right">' + _pedFmtMoeda(_pimpPrecoComDesc(it)) + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:right">' + _pedFmtMoeda(it.valorTotal) + '</td>'
       + '</tr>';
@@ -30849,7 +30849,7 @@ function pedAddItem() {
   if (modoUnid === 'cx') {
     if (isNaN(cxNum) || cxNum <= 0) { msg.textContent = 'Este produto não tem Quant. Caixa cadastrada — não é possível lançar por CX.'; return; }
     qtdCaixas = qtd;
-    quantidadeReal = qtd * cxNum;
+    quantidadeReal = Math.round(qtd * cxNum * 1000) / 1000;   // evita 19.200000000000003 (3 caixas x 6,4)
   } else if (!isNaN(cxNum) && cxNum > 0) {
     var razaoUn = quantidadeReal / cxNum;
     if (Math.abs(razaoUn - Math.round(razaoUn)) > 1e-6) {
@@ -30928,7 +30928,7 @@ function pedSalvarEdicaoItemModal() {
   if (modoUnid === 'cx') {
     if (isNaN(cxNum) || cxNum <= 0) { msg.textContent = 'Este produto não tem Quant. Caixa cadastrada — não é possível lançar por CX.'; return; }
     qtdCaixas = qtdInput;
-    quantidadeReal = qtdInput * cxNum;
+    quantidadeReal = Math.round(qtdInput * cxNum * 1000) / 1000;   // evita 19.200000000000003 (3 caixas x 6,4)
   } else if (!isNaN(cxNum) && cxNum > 0) {
     var razaoUnEdit = quantidadeReal / cxNum;
     if (Math.abs(razaoUnEdit - Math.round(razaoUnEdit)) > 1e-6) {
