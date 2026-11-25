@@ -23806,6 +23806,58 @@ function _pedParsePedidoTextoTotvs(paginasItens) {
   return blocos;
 }
 
+// ── Layout "Mateus Supermercados" ("PEDIDO DE COMPRAS", "PEDIDO DE NUMERO ...", "FILIAL PEDIDO" / "FORNECEDOR"; ex.: Mateus BA -> Sao Vicente) ──
+// O PDF vem GIRADO (usa as posicoes como se ve na tela, ver _pedPaginasItensVisuais). Cada PAGINA e uma loja (CNPJ da FILIAL PEDIDO
+// a esquerda, CNPJ do FORNECEDOR a direita), todas com o mesmo numero de pedido. Colunas de cada item:
+//   CODIGO (do cliente = "Codigo Pedido" da Tabela de Preco) | Descricao | REF FORN - COD. BARRAS | Mult. For | Quantidade | Prec Unit | Valor Total
+// Quantidade e Prec Unit sao da propria unidade do produto (KG -> kg e preco por kg; "110G" -> pecas e preco por peca): qtd x preco = Valor Total,
+// conferido linha a linha na hora da leitura. O produto e achado so pelo CODIGO (Codigo Pedido da Tabela de Preco do cliente).
+function _pedParsePedidoTextoMateus(paginasItensVis) {
+  var blocos = [], porChave = {};
+  var ehNum = function (s) { return /^\d[\d.]*,\d+$/.test(String(s || '').trim()); };
+  (paginasItensVis || []).forEach(function (items) {
+    var txt = items.map(function (it) { return it.str; }).join(' ').replace(/\s+/g, ' ');
+    var mN = /PEDIDO DE N\S{0,3}MERO\s*(\d+)/i.exec(txt);
+    var numero = mN ? mN[1] : '';
+    var cnpjs = [];
+    items.forEach(function (it) {
+      var m = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.exec(String(it.str || '').trim());
+      if (m) cnpjs.push({ x: it.transform[4], y: it.transform[5], c: _pedNormCnpjDigits(m[0]) });
+    });
+    cnpjs.sort(function (a, b) { return b.y - a.y; });   // de cima para baixo: o 1o de cada lado e do cabecalho
+    var cLoja = cnpjs.filter(function (k) { return k.x < 400; })[0], cForn = cnpjs.filter(function (k) { return k.x >= 400; })[0];
+    var cnpjLoja = cLoja ? cLoja.c : '', cnpjForn = cForn ? cForn.c : '';
+    if (!numero || !cnpjLoja || !cnpjForn) return;   // pagina sem cabecalho reconhecivel
+    var linhas = _pedAgruparLinhasPdf(items), itens = [];
+    Object.keys(linhas).map(Number).sort(function (a, b) { return b - a; }).forEach(function (y) {
+      var tk = linhas[y];
+      var codTok = tk[0];
+      if (!codTok || codTok.x > 60 || !/^\d{3,9}$/.test(codTok.str.trim())) return;
+      var refTok = tk.find(function (t) { return t.x > codTok.x && /^\d+\s*-\s*\d+$/.test(t.str.trim()); });
+      if (!refTok) return;
+      var nums = tk.filter(function (t) { return t.x > refTok.x && ehNum(t.str); }).map(function (t) { return _pedParseMoeda(t.str); });
+      if (nums.length < 3) return;   // quantidade, preco unitario, valor total
+      var qtd = nums[0], unit = nums[1], totalPdf = nums[2];
+      var desc = tk.filter(function (t) { return t.x > codTok.x && t.x < refTok.x - 1; }).map(function (t) { return t.str.trim(); }).join(' ').replace(/\s+/g, ' ').trim();
+      var cod = codTok.str.trim();
+      var item = {
+        descricao: desc, dataEnt: null, qtd: qtd, unitario: unit,
+        codigo: cod, codigoNormalizado: _pedNormCodigoPedido(cod), codigoCandidatos: _pedCandidatosCodigoPedido(cod),
+        unidade: /\bKG$/i.test(desc) ? 'KG' : 'UN',
+        refForn: refTok.str.trim(), totalPdf: totalPdf
+      };
+      itens.push(item);
+    });
+    if (!itens.length) return;
+    var chave = numero + '|' + cnpjLoja;
+    if (porChave[chave]) { porChave[chave].itens = porChave[chave].itens.concat(itens); return; }
+    porChave[chave] = { numero: numero, fornecedorCnpj: cnpjForn, localEntregaCnpj: cnpjLoja, itens: itens, origem: '' };
+    blocos.push(porChave[chave]);
+  });
+  blocos.forEach(function (b) { b.origem = 'Importado de PDF "Pedido de Compras" nº ' + b.numero + ' (' + b.itens.length + ' itens).'; });
+  return blocos;
+}
+
 // Detecta qual layout de PDF de pedido este texto e, pra rotear pro parser certo.
 // Retorna 'atacadao', 'sendas' ou null (layout desconhecido/nao configurado ainda).
 function _pedDetectarLayoutPdf(textoCompleto) {
@@ -23814,6 +23866,8 @@ function _pedDetectarLayoutPdf(textoCompleto) {
   // "RP One - Enterprise" (ex.: Cambui -> Allfood): Cod Barras | Cod Forn | Descricao | Qtde Emb | Emb | Pr Unit | Pr Emb | Vl Total
   if (/RP\s+One\s*-\s*Enterprise/i.test(textoCompleto) && /Cod\s+Forn/i.test(textoCompleto)) return 'rp_one';
   // Consinco com colunas "Cod Forn | Codigo Produtos a Receber" (ex.: Novo Atacado -> Allfood): outro layout que o do Sendas
+  // "Mateus Supermercados" (ex.: Mateus BA -> Sao Vicente): "PEDIDO DE NUMERO", "FILIAL PEDIDO", "REF FORN - COD. BARRAS"
+  if (/FILIAL\s+PEDIDO/.test(textoCompleto) && /REF\s+FORN/.test(textoCompleto) && /PEDIDO\s+DE\s+N\S{0,3}MERO/i.test(textoCompleto)) return 'mateus';
   // "TOTVS Varejo Supermercados / RELPEDSUPRIM" (ex.: Bemais -> Sao Vicente)
   if (/TOTVS\s+Varejo/i.test(textoCompleto) && /RELPEDSUPRIM/i.test(textoCompleto) && /PEDIDO\s+DE\s+COMPRAS/.test(textoCompleto)) return 'totvs';
   if (/Consinco/.test(textoCompleto) && /C[oó]digo\s+Produtos\s+a\s+Receber/i.test(textoCompleto)) return 'consinco_cod';
@@ -24432,6 +24486,8 @@ function _pedLerPdfBuffer(buffer, lib) {
         resultados = _pedImportarPdfProcessar(textoCompleto);
       } else if (layout === 'sendas') {
         resultados = _pedImportarPdfProcessarSendas(paginasItens);
+      } else if (layout === 'mateus') {
+        resultados = _pedParsePedidoTextoMateus(paginasItensVis).map(_pedProcessarBlocoImportadoPdf);
       } else if (layout === 'totvs') {
         resultados = _pedParsePedidoTextoTotvs(paginasItens).map(_pedProcessarBlocoImportadoPdf);
       } else if (layout === 'rp_one') {
