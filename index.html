@@ -332,6 +332,11 @@
     .mv-av { display:inline-block; margin-top:3px; font-size:10.5px; font-weight:700; color:#3b2a00; background:#fcd34d; border-radius:999px; padding:1px 9px; } .mv-av.clk { cursor:pointer; } .mv-av.clk:hover { background:#fde68a; }
     /* Perfil Vendedor: nao ve comissao; nao digita preco nem Nº pedido do fornecedor */
     body.perfil-vendedor .so-comissao { display:none !important; }
+    /* respeita as caixinhas da tela Permissoes (Incluir/Alterar/Excluir) em Devolucoes e Alterar em Controle de Entrega */
+    body.sem-dev-incluir .dev-btn-novo { display:none !important; }
+    body.sem-dev-alterar .dev-btn-edit { display:none !important; }
+    body.sem-dev-excluir .dev-btn-del { display:none !important; }
+    body.sem-ent-alterar .ent-entrega-wrap input, body.sem-ent-alterar .ent-obs input, body.sem-ent-alterar .ent-transp input, body.sem-ent-alterar .ent-transp select { pointer-events:none !important; background:#f1f5f9 !important; color:#64748b !important; }
     /* enquanto as permissoes do usuario nao chegam do banco (e nao ha copia da ultima visita), o menu fica invisivel para nao "piscar" itens que depois somem */
     body.perm-carregando .sb-item { visibility:hidden; }
     /* Perfil Vendedor: ele so ve os proprios clientes e pedidos, entao os filtros "Vendedor" nao servem (some em todas as telas) */
@@ -5963,7 +5968,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         @media(max-width:767px){#page-devolucao-list{overflow-x:hidden}#dev-graficos>div,#dev-graficos div{max-width:100%;box-sizing:border-box}}
       </style>
         <div class="dev-mobile-actions" style="display:none;margin-bottom:10px">
-          <button onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#DE7926;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">➕ Cadastrar</button>
+          <button class="dev-btn-novo" onclick="showPage('page-devolucao-form',{})" style="width:100%;background:#DE7926;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">➕ Cadastrar</button>
           <button onclick="emlMenu(this)" style="width:100%;margin-top:8px;background:#fff;color:#272A4A;border:1px solid #cbd5e1;border-radius:8px;padding:9px 0;font-size:11px;font-weight:700;cursor:pointer">Importar</button>
         </div>
       <div id="dev-status-chips"></div>
@@ -7465,7 +7470,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
 
     <!-- ═══════ GERENCIAR: Permissões por Usuário ═══════ -->
     <div id="page-permissoes-form" class="app-page">
-      <div style="max-width:760px">
+      <div style="max-width:1100px">
         <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(39,42,74,.10)">
           <div style="background:linear-gradient(90deg,#D82621,#DE7926) bottom/100% 3px no-repeat,linear-gradient(135deg,#272A4A,#3d4180);padding:14px 20px;display:flex;align-items:center;gap:12px">
             <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -7503,6 +7508,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                 </div>
                 <div id="perm-matriz-tbody"></div>
               </div>
+              <div id="perm-extras" style="margin-top:16px"></div>
               <div style="display:flex;gap:10px;padding-top:14px">
                 <button onclick="salvarPermissoesUsuario()" style="background:#272A4A;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px">
                   <i class="ti ti-device-floppy"></i> Salvar
@@ -10000,13 +10006,36 @@ function _appPaginaPermitida(pageId) {
 function _appEhVendedor() {
   return !!(_appUsuarioAtual && !_appEhAdmin && !_appGrupoTotal() && /vendedor/i.test(_appUsuarioAtual.grupoNome || ''));
 }
+// Caixinhas da tela Permissoes (Ver/Incluir/Alterar/Excluir) do usuario logado: {chave:{ver,incluir,alterar,excluir}}. null = ainda nao carregou.
+// Administrador, Diretor e Assistente podem tudo. A barreira real continua sendo o banco; isto faz a TELA respeitar as caixinhas.
+var _appPermAcao = null;
+var _appPermExtra = {};   // permissoes detalhadas do usuario logado {chave:true/false}; sem linha = padrao do grupo
+function _appPode(chave, acao) {
+  if (_appEhAdmin || _appGrupoTotal()) return true;
+  if (_appPermAcao === null) return !_appEhVendedor();
+  var p = _appPermAcao[chave];
+  return !!(p && p[acao]);
+}
+function _appPodeExtra(chave) {
+  if (_appEhAdmin || _appGrupoTotal()) return true;
+  if (Object.prototype.hasOwnProperty.call(_appPermExtra, chave)) return !!_appPermExtra[chave];
+  return !_appEhVendedor();   // padrao: Vendedor nao tem, os demais tem
+}
 var _relTodosOriginal = null;
 function _appAplicarPerfilVendedor() {
   var v = _appEhVendedor();
   try { document.body.classList.toggle('perfil-vendedor', v); } catch (e1) {}
-  ['ped-item-preco', 'ped-edit-item-preco', 'ped-num-fornecedor'].forEach(function (id) {
-    var el = document.getElementById(id); if (el) el.readOnly = v;
+  try {
+    document.body.classList.toggle('sem-dev-incluir', !_appPode('devolucoes', 'incluir'));
+    document.body.classList.toggle('sem-dev-alterar', !_appPode('devolucoes', 'alterar'));
+    document.body.classList.toggle('sem-dev-excluir', !_appPode('devolucoes', 'excluir'));
+    document.body.classList.toggle('sem-ent-alterar', !_appPode('controle_entrega', 'alterar'));
+  } catch (e1b) {}
+  var _semPreco = !_appPodeExtra('ped_alterar_preco');
+  ['ped-item-preco', 'ped-edit-item-preco'].forEach(function (id) {
+    var el = document.getElementById(id); if (el) el.readOnly = _semPreco;
   });
+  var _elNumForn = document.getElementById('ped-num-fornecedor'); if (_elNumForn) _elNumForn.readOnly = v;
   try {
     if (typeof RELATORIOS !== 'undefined') {
       if (!_relTodosOriginal) _relTodosOriginal = RELATORIOS.slice();
@@ -10063,7 +10092,7 @@ function _appPermCacheLer() {
   try { var t = localStorage.getItem(_appPermCacheChave()); var o = t ? JSON.parse(t) : null; return (o && o.ver) ? o : null; } catch (e) { return null; }
 }
 function _appPermCacheGravar() {
-  try { localStorage.setItem(_appPermCacheChave(), JSON.stringify({ admin: _appEhAdmin, ver: _appPermVer || {}, oculto: _appMenuOculto || {} })); } catch (e) {}
+  try { localStorage.setItem(_appPermCacheChave(), JSON.stringify({ admin: _appEhAdmin, ver: _appPermVer || {}, oculto: _appMenuOculto || {}, acao: _appPermAcao, extra: _appPermExtra || {} })); } catch (e) {}
 }
 function _appPermFimCarga() { try { document.body.classList.remove('perm-carregando'); } catch (e) {} }
 function _appCarregarPermissoes() {
@@ -10071,14 +10100,25 @@ function _appCarregarPermissoes() {
     if (typeof SB === 'undefined') { _appPermFimCarga(); return; }
     Promise.all([
       SB.rpc('app_admin'),
-      SB.from('usuario_permissoes').select('pagina_chave,pode_ver'),
-      SB.from('usuario_menu_oculto').select('usuario_id_legado,pagina_chave').then(function (x) { return x; }, function () { return { error: true }; })
+      SB.from('usuario_permissoes').select('pagina_chave,pode_ver,pode_incluir,pode_alterar,pode_excluir'),
+      SB.from('usuario_menu_oculto').select('usuario_id_legado,pagina_chave').then(function (x) { return x; }, function () { return { error: true }; }),
+      SB.from('usuario_permissoes_extra').select('usuario_id_legado,chave,permitido').then(function (x) { return x; }, function () { return { error: true }; })
     ]).then(function (r) {
       if (r[0].error || r[1].error) { console.warn('Permissões não carregadas:', r[0].error || r[1].error); _appPermFimCarga(); return; }
       _appEhAdmin = r[0].data === true;
       var o = {};
-      (r[1].data || []).forEach(function (x) { if (x.pode_ver) o[x.pagina_chave] = true; });
+      var acoes = {};
+      (r[1].data || []).forEach(function (x) {
+        if (x.pode_ver) o[x.pagina_chave] = true;
+        acoes[x.pagina_chave] = { ver: !!x.pode_ver, incluir: !!x.pode_incluir, alterar: !!x.pode_alterar, excluir: !!x.pode_excluir };
+      });
       _appPermVer = o;
+      _appPermAcao = acoes;
+      _appPermExtra = {};
+      if (r[3] && !r[3].error) {
+        var meuIdX = _appMeuIdLegado();
+        (r[3].data || []).forEach(function (x) { if (meuIdX && String(x.usuario_id_legado) === String(meuIdX)) _appPermExtra[x.chave] = !!x.permitido; });
+      }
       _appMenuOculto = {};
       if (r[2] && !r[2].error) {
         var meuId = _appMeuIdLegado();
@@ -10146,7 +10186,7 @@ function entrarNoApp(user) {
   dashInit();
   _appPermVer = null; _appEhAdmin = false; _appMenuOculto = {};
   var _pc = _appPermCacheLer();
-  if (_pc) { _appPermVer = _pc.ver || {}; _appEhAdmin = !!_pc.admin; _appMenuOculto = _pc.oculto || {}; }
+  if (_pc) { _appPermVer = _pc.ver || {}; _appEhAdmin = !!_pc.admin; _appMenuOculto = _pc.oculto || {}; _appPermAcao = _pc.acao || null; _appPermExtra = _pc.extra || {}; }
   else { try { document.body.classList.add('perm-carregando'); setTimeout(_appPermFimCarga, 8000); } catch (e0) {} }
   _appAplicarMenuPermissoes();
   _appCarregarPermissoes();
@@ -26316,7 +26356,7 @@ function _pfatRender() {
           + '<td style="padding:6px 8px"><input type="number" min="0" max="' + restante + '" step="any" class="pfat-item-qtd" placeholder="' + (restante > 0 ? restante : 0) + '" value="" ' + (restante <= 0 ? 'disabled' : '') + ' style="width:64px;border:1px solid #e2e8f0;border-radius:5px;padding:4px 6px;font-size:11px"></td>'
           + '<td style="padding:6px 8px;font-size:11px;text-align:right;color:#64748b">' + (precoTab != null ? _pedFmtMoeda(precoTab) : '—') + '</td>'
           + '<td style="padding:6px 8px;font-size:11px;text-align:right;color:#64748b">' + _pedFmtMoeda(it.precoUnit) + '</td>'
-          + '<td style="padding:6px 8px"><input type="text" inputmode="decimal" class="pfat-item-preco" oninput="_pedMaskPreco(this)" placeholder="' + _pedNumParaMascara(it.precoUnit) + '" value="" ' + (restante <= 0 ? 'disabled' : '') + ' style="width:78px;border:1px solid #e2e8f0;border-radius:5px;padding:4px 6px;font-size:11px"></td>'
+          + '<td style="padding:6px 8px"><input type="text" inputmode="decimal" class="pfat-item-preco" oninput="_pedMaskPreco(this)" placeholder="' + _pedNumParaMascara(it.precoUnit) + '" value="' + (_appPodeExtra('ped_alterar_preco') ? '' : _pedNumParaMascara(it.precoUnit)) + '" ' + (restante <= 0 ? 'disabled' : '') + (_appPodeExtra('ped_alterar_preco') ? '' : ' readonly') + ' style="width:78px;border:1px solid #e2e8f0;border-radius:5px;padding:4px 6px;font-size:11px"></td>'
           + '</tr>';
       }).join('');
     }
@@ -26392,6 +26432,7 @@ function pedSalvarFatura() {
       var precoDigitado = precoInput ? _pedParseMoeda(precoInput.value) : 0;
       var prodId = tr.getAttribute('data-prodid');
       var itOrig = (pedido.itens || []).find(function(x){ return x.prodId === prodId; }) || {};
+      if (!_appPodeExtra('ped_alterar_preco')) precoDigitado = Number(itOrig.precoUnit) || 0;   // sem a permissao: Pr. Fat. = preco do pedido
       if (precoDigitado <= 0 && !erroPrecoFaltando) erroPrecoFaltando = 'Informe o Pr. Fat. de "' + (itOrig.prodNome || 'item') + '".';
       itensFatura.push({
         prodId: prodId,
@@ -26968,6 +27009,7 @@ function _entctrlFornSel(i) {
 }
 // Observacao da entrega (texto livre por NF; salva ao sair do campo)
 function entctrlSalvarObs(pedidoId, faturaId, el) {
+  if (!_appPode('controle_entrega', 'alterar')) { renderEntregaControle(); return; }
   var data = getPedidos();
   var pedido = data.find(function(x){ return x.id === pedidoId; });
   if (!pedido) return;
@@ -26979,6 +27021,7 @@ function entctrlSalvarObs(pedidoId, faturaId, el) {
   setPedidos(data);
 }
 function entctrlSalvarDataEntrega(pedidoId, faturaId, valor) {
+  if (!_appPode('controle_entrega', 'alterar')) { renderEntregaControle(); return; }
   var data = getPedidos();
   var pedido = data.find(function(x){ return x.id === pedidoId; });
   if (!pedido) return;
@@ -26990,6 +27033,7 @@ function entctrlSalvarDataEntrega(pedidoId, faturaId, valor) {
 }
 // Transportadora digitada na mao (so para NF sem transportadora; fica editavel por f.transpManual)
 function entctrlSalvarTransportadora(pedidoId, faturaId, el) {
+  if (!_appPode('controle_entrega', 'alterar')) { renderEntregaControle(); return; }
   var data = getPedidos();
   var pedido = data.find(function(x){ return x.id === pedidoId; });
   if (!pedido) return;
@@ -30972,7 +31016,7 @@ function pedSalvarEdicaoItemModal() {
   var msg = document.getElementById('ped-edit-item-msg');
   if (!it) { pedFecharEdicaoItem(); return; }
   msg.textContent = '';
-  var preco = _pedParseMoeda(document.getElementById('ped-edit-item-preco').value);
+  var preco = _appPodeExtra('ped_alterar_preco') ? _pedParseMoeda(document.getElementById('ped-edit-item-preco').value) : (Number(it.precoUnit) || 0);   // sem a permissao: o preco gravado nunca muda
   var qtdInput = _n2(parseFloat(document.getElementById('ped-edit-item-qtd').value) || 0);
   var desc  = parseFloat(document.getElementById('ped-edit-item-desc').value) || 0;
   if (preco <= 0) { msg.textContent = 'Informe um preço válido, maior que zero.'; return; }
@@ -31551,9 +31595,9 @@ function renderDevolucaoList() {
       + '<div class="mc-meta" style="font-size:12.5px;color:#475569">' + kgDe(d).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + '</div>'
       + '<div class="mc-meta" style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedFmtMoeda(d.totalProdutos) + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
-      + '<button onclick="editDevolucao(\'' + d.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
+      + '<button class="dev-btn-edit" onclick="editDevolucao(\'' + d.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:14px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
       + (temXml ? '<button onclick="devAbrirXml(\''+d.id+'\')" title="' + _pedEsc('Ver XML anexado' + (d.nfEmitida ? ' — NF ' + d.nfEmitida : '')) + '" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#15803d" onmouseover="this.style.background=\'#f0fdf4\'" onmouseout="this.style.background=\'none\'"><i class="ti ti-file-code" style="font-size:14px"></i></button>' : '')
-      + '<button onclick="deleteDevolucao(\'' + d.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
+      + '<button class="dev-btn-del" onclick="deleteDevolucao(\'' + d.id + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#dc2626" onmouseover="this.style.background=\'#fff0f0\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="lixeira" style="font-size:14px"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>'
       + '</div></div>';
   }).join('');
 }
@@ -32219,12 +32263,14 @@ function _emlSolto(ev) {
 
 
 function deleteDevolucao(id) {
+  if (!_appPode('devolucoes', 'excluir')) { alert('Seu usuário não tem permissão para excluir devoluções.'); return; }
   if (!confirm('Excluir esta devolução?')) return;
   setDevolucoes(getDevolucoes().filter(function(d){ return d.id !== id; }));
   renderDevolucaoList();
 }
 
 function editDevolucao(id) {
+  if (!_appPode('devolucoes', 'alterar')) { alert('Seu usuário não tem permissão para alterar devoluções.'); return; }
   const d = getDevolucoes().find(function(x){ return x.id === id; });
   if (d) showPage('page-devolucao-form', d);
 }
@@ -32436,6 +32482,7 @@ function renderDevItens() {
 
 function openDevolucaoForm(params) {
   params = params || {};
+  if (!_appPode('devolucoes', params.id ? 'alterar' : 'incluir')) { showPage('page-devolucao-list'); return; }
   _devItens = (params.itens || []).slice();
 
   document.getElementById('dev-edit-id').value = params.id || '';
@@ -32903,6 +32950,7 @@ function _devCopiarFallback(inputEl, onOk, onErro) {
 function salvarDevolucao() {
   var msg = document.getElementById('dev-msg');
   msg.textContent = ''; msg.style.color = '#dc2626';
+  if (!_appPode('devolucoes', document.getElementById('dev-edit-id').value ? 'alterar' : 'incluir')) { msg.textContent = 'Seu usuário não tem permissão para salvar devoluções.'; return; }
 
   var fornId   = document.getElementById('dev-forn-id').value;
   var fornNome = document.getElementById('dev-forn-input').value.trim();
@@ -34129,6 +34177,12 @@ function permSelecionarUsuario() {
   _permOculto = JSON.parse(JSON.stringify(_permOcultoTodos[id] || {}));
   _permOcultoOrig = JSON.stringify(Object.keys(_permOculto).sort());
   _permRenderMatriz(perms);
+  _permRenderExtras(_permExtraVals(usuario));
+  _permExtraOrig = JSON.stringify(_permExtraVals(usuario));
+  if (!_permExtraCarregando) { _permExtraCarregando = true; _permCarregarExtras(function () {
+    _permExtraCarregando = false;
+    if (document.getElementById('perm-usuario-sel').value === id) { _permRenderExtras(_permExtraVals(usuario)); _permExtraOrig = JSON.stringify(_permExtraVals(usuario)); }
+  }); }
   if (!_permOcultoCarregando) { _permOcultoCarregando = true; _permCarregarOcultos(function () {
     _permOcultoCarregando = false;
     var idAtual = document.getElementById('perm-usuario-sel').value;
@@ -34157,8 +34211,71 @@ function permCopiarDeOutro() {
   }
   _permOculto = JSON.parse(JSON.stringify(_permOcultoTodos[origemId] || {}));
   _permRenderMatriz(perms);
+  _permRenderExtras(_permExtraVals(origem));
   msg.style.color = '#b45309';
   msg.textContent = 'Permissões de ' + (origem.nome || '') + ' copiadas. Confira e clique em Salvar para valer.';
+}
+// O que cada caixinha faz em cada tela (texto de ajuda na tela Permissoes)
+var _PERM_DESC = {
+  devolucoes: 'Ver: consulta e filtra · Incluir: lança devolução (botão Cadastrar e importar XML) · Alterar: edita (lápis) · Excluir: apaga (lixeira)',
+  controle_entrega: 'Ver: consulta e filtra · Alterar: digita a data de entrega, a observação e a transportadora · (Incluir/Excluir não são usados)',
+  pedidos: 'Ver: consulta pedidos · Incluir: lança pedido novo · Alterar: edita e fatura pedido · Excluir: apaga pedido. O preço do item é a permissão detalhada logo abaixo da tabela.',
+  clientes: 'Ver: consulta (e alimenta painel e pedidos) · Incluir: cadastra cliente · Alterar: edita · Excluir: apaga',
+  tabela_preco: 'Ver: consulta tabelas de preço · Incluir: cria · Alterar: edita preços · Excluir: apaga',
+  relatorios: 'Ver: abre os relatórios (o vendedor não vê comissão)'
+};
+function _permDescHtml(key) {
+  var d = _PERM_DESC[key];
+  return d ? '<div style="font-size:10.5px;color:#94a3b8;font-weight:400;margin-top:2px;line-height:1.35">' + d + '</div>' : '';
+}
+// ── Permissoes detalhadas por usuario (tabela usuario_permissoes_extra). Sem linha = padrao do grupo (Vendedor nao, os demais sim) ──
+var _PERM_EXTRAS = [
+  { chave: 'ped_alterar_preco', secao: 'Pedidos', nome: 'Alterar o preço do item', desc: 'Digitar ou mudar o preço ao lançar, ao editar o item e ao faturar (Pr. Fat.). Desmarcado: o preço fica travado (vale o da tabela / o já gravado). O desconto % continua liberado.' }
+];
+var _permExtraOrig = '', _permExtraTodos = {}, _permExtraOk = true, _permExtraCarregando = false;
+function _permExtraVals(usuario) {
+  var padrao = !/vendedor/i.test((usuario && usuario.grupoNome) || '');
+  var mine = (usuario && _permExtraTodos[usuario.id]) || {};
+  var v = {};
+  _PERM_EXTRAS.forEach(function (x) { v[x.chave] = Object.prototype.hasOwnProperty.call(mine, x.chave) ? !!mine[x.chave] : padrao; });
+  return v;
+}
+function _permRenderExtras(vals) {
+  var box = document.getElementById('perm-extras'); if (!box) return;
+  var html = '<div style="padding:8px 12px;background:#f8fafc;border:1px solid #eef2f7;border-radius:10px 10px 0 0;font-size:10px;font-weight:700;color:#272A4A;text-transform:uppercase;letter-spacing:.05em">Permissões detalhadas</div>'
+    + '<div style="border:1px solid #eef2f7;border-top:0;border-radius:0 0 10px 10px">';
+  _PERM_EXTRAS.forEach(function (x) {
+    html += '<label style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-bottom:1px solid #f1f5f9;cursor:pointer">'
+      + '<input type="checkbox" id="permx_' + x.chave + '" ' + (vals[x.chave] ? 'checked' : '') + ' style="margin-top:2px">'
+      + '<span style="font-size:12px;color:#334155"><b>' + x.secao + ' — ' + x.nome + '</b><div style="font-size:10.5px;color:#94a3b8;margin-top:2px;line-height:1.35">' + x.desc + '</div></span></label>';
+  });
+  box.innerHTML = html + '</div>';
+}
+function _permCarregarExtras(cb) {
+  if (typeof SB === 'undefined') { if (cb) cb(); return; }
+  SB.from('usuario_permissoes_extra').select('usuario_id_legado,chave,permitido').then(function (r) {
+    if (r.error) { _permExtraOk = false; console.warn('[permissoes detalhadas] indisponivel:', r.error.message); }
+    else {
+      _permExtraOk = true; _permExtraTodos = {};
+      (r.data || []).forEach(function (x) { (_permExtraTodos[x.usuario_id_legado] = _permExtraTodos[x.usuario_id_legado] || {})[x.chave] = !!x.permitido; });
+    }
+    if (cb) cb();
+  }, function () { _permExtraOk = false; if (cb) cb(); });
+}
+function _permGravarExtras(id, msgEl) {
+  var vals = {};
+  _PERM_EXTRAS.forEach(function (x) { var el = document.getElementById('permx_' + x.chave); vals[x.chave] = !!(el && el.checked); });
+  if (JSON.stringify(vals) === _permExtraOrig) return;
+  if (!_permExtraOk) { msgEl.style.color = '#b45309'; msgEl.textContent = 'Permissões salvas, mas as permissões detalhadas não foram gravadas (tabela do banco ainda não existe).'; return; }
+  SB.from('usuario_permissoes_extra').delete().eq('usuario_id_legado', id).then(function (r) {
+    if (r.error) throw new Error(r.error.message);
+    return SB.from('usuario_permissoes_extra').insert(_PERM_EXTRAS.map(function (x) { return { usuario_id_legado: id, chave: x.chave, permitido: vals[x.chave] }; }));
+  }).then(function (r) {
+    if (r && r.error) throw new Error(r.error.message);
+    _permExtraOrig = JSON.stringify(vals); _permExtraTodos[id] = JSON.parse(JSON.stringify(vals));
+  }).catch(function (e) {
+    msgEl.style.color = '#dc2626'; msgEl.textContent = 'Permissões salvas, mas não foi possível gravar as permissões detalhadas: ' + (e && e.message ? e.message : e);
+  });
 }
 function _permRenderMatriz(permissoesAtuais) {
   permissoesAtuais = permissoesAtuais || {};
@@ -34170,7 +34287,7 @@ function _permRenderMatriz(permissoesAtuais) {
     PAGINAS_SISTEMA.filter(function(p){ return p.secao === secao; }).forEach(function(p){
       var perm = permissoesAtuais[p.key] || {};
       html += '<div style="display:grid;grid-template-columns:1fr 64px 64px 64px 64px 64px;padding:7px 12px;border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px">'
-        + '<span style="color:#334155">' + p.nome + '</span>'
+        + '<span style="color:#334155">' + p.nome + _permDescHtml(p.key) + '</span>'
         + '<span style="text-align:center"><input type="checkbox" id="permu_' + p.key + '_ver" ' + (perm.ver?'checked':'') + '></span>'
         + '<span style="text-align:center"><input type="checkbox" id="permu_' + p.key + '_incluir" ' + (perm.incluir?'checked':'') + '></span>'
         + '<span style="text-align:center"><input type="checkbox" id="permu_' + p.key + '_alterar" ' + (perm.alterar?'checked':'') + '></span>'
@@ -34275,6 +34392,7 @@ function salvarPermissoesUsuario() {
     msg.style.color = '#15803d';
     msg.textContent = '\u2714 Permissões salvas com sucesso!';
     _permGravarOcultos(id, msg);
+    _permGravarExtras(id, msg);
     setTimeout(function(){ if (msg.textContent.indexOf('com sucesso') !== -1) msg.textContent = ''; }, 1800);
   } catch (err) {
     msg.style.color = '#dc2626';
