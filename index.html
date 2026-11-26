@@ -332,6 +332,16 @@
     .mv-av { display:inline-block; margin-top:3px; font-size:10.5px; font-weight:700; color:#3b2a00; background:#fcd34d; border-radius:999px; padding:1px 9px; } .mv-av.clk { cursor:pointer; } .mv-av.clk:hover { background:#fde68a; }
     /* Perfil Vendedor: nao ve comissao; nao digita preco nem Nº pedido do fornecedor */
     body.perfil-vendedor .so-comissao { display:none !important; }
+    /* Perfil Vendedor: ele so ve os proprios clientes e pedidos, entao os filtros "Vendedor" nao servem (some em todas as telas) */
+    body.perfil-vendedor #msVendedores,
+    body.perfil-vendedor #pss-vendedor, body.perfil-vendedor span:has(+ #pss-vendedor),
+    body.perfil-vendedor .ped-fg:has(> #vc-vendedor), body.perfil-vendedor .ped-fg:has(> #vcf-vendedor),
+    body.perfil-vendedor .ped-fg:has(> #psn-vendedor), body.perfil-vendedor .ped-fg:has(> #pnf-vendedor),
+    body.perfil-vendedor div:has(> #dev-f-vend),
+    body.perfil-vendedor .rel-campo[data-campo="vendedor"],
+    body.perfil-vendedor #rel-f-p1-vendedor, body.perfil-vendedor span:has(+ #rel-f-p1-vendedor),
+    body.perfil-vendedor #rel-f-p2-vendedor, body.perfil-vendedor span:has(+ #rel-f-p2-vendedor),
+    body.perfil-vendedor label:has(> #rc-f-vend), body.perfil-vendedor label:has(> #rp-f-vend) { display:none !important; }
     body.perfil-vendedor .ped-grid-itens { grid-template-columns:1fr 55px 55px 92px 80px 80px 70px 40px !important; }
     body.perfil-vendedor .ped-itens-header, body.perfil-vendedor .ped-item-row { grid-template-columns:1fr 100px 90px 55px 55px 95px 66px !important; }
     body.perfil-vendedor .tp-grid-itens { grid-template-columns:110px 1fr 100px 100px 70px 90px 80px 90px 80px !important; }
@@ -26813,7 +26823,7 @@ function _entMsRender() {
   if (!wrap) return;
   var dAnt = document.getElementById('entctrl-ms-drop');
   var topAnt = dAnt ? dAnt.scrollTop : 0;
-  wrap.innerHTML = Object.keys(_entMsRot).map(function (k) {
+  wrap.innerHTML = Object.keys(_entMsRot).filter(function (k) { return !(k === 'vend' && typeof _appEhVendedor === 'function' && _appEhVendedor()); }).map(function (k) {
     var sel = _entMs[k];
     var resumo = !sel.length ? _entMsTodos[k] : (sel.length === 1 ? sel[0].t : sel.length + ' selecionados');
     var h = '<span style="font-size:11px;font-weight:600;color:#64748b">' + _entMsRot[k] + '</span>'
