@@ -638,10 +638,11 @@
 
       #page-pedido-form .ped-item-row {
         display: block !important;
-        padding: 10px 12px !important;
-        border: 1px solid #eef2f7 !important;
-        border-radius: 10px !important;
-        margin-bottom: 8px !important;
+        padding: 8px 4px !important;
+        border: none !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        border-radius: 0 !important;
+        margin-bottom: 0 !important;
       }
       #page-pedido-form .ped-item-row > *:not(.ped-item-mobile) { display: none !important; }
       #page-pedido-form .ped-item-mobile { display: block !important; }
@@ -675,7 +676,8 @@
     #page-pedido-form .ped-dados-resumo .pdr-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-right: 2px; }
     #page-pedido-form .ped-dados-resumo svg { margin-left: auto; flex-shrink: 0; color: #94a3b8; }
     #page-pedido-form .ped-item-mobile { display: none; }
-    #page-pedido-form .ped-item-mobile .pim-nome { font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 6px; }
+    #page-pedido-form .ped-item-mobile .pim-nome { font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 2px; }
+    #page-pedido-form .ped-item-mobile .pim-linha { min-width: 0; }
     #page-pedido-form .ped-item-mobile .pim-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #334155; margin-top: 4px; }
     #page-pedido-form .ped-item-mobile .pim-row b { color: #94a3b8; font-size: 9px; text-transform: uppercase; font-weight: 700; margin-right: 3px; }
     #page-pedido-form .ped-item-mobile .pim-total em { font-style: normal; color: #15803d; font-weight: 800; font-size: 13px; }
@@ -31194,8 +31196,7 @@ function renderPedItens() {
       + '<div style="text-align:right;white-space:nowrap">'+acoesCell+'</div>'
       + '<div class="ped-item-mobile">'
         + '<div class="pim-nome">'+_pedEsc(nomeComCodigo)+tagBloqueado+'</div>'
-        + '<div class="pim-row"><span><b>QTD.</b><em class="pim-qtd-num">'+_pedEsc(String(qtdNum))+'</em><span class="pim-qtd-un">'+_pedEsc(qtdUn)+'</span></span><span><b>PREÇO</b>'+_pedFmtMoeda(it.precoUnit)+'</span></div>'
-        + '<div class="pim-row"><span><b>DESC.</b>'+(it.desconto||0)+'%</span><span class="pim-total"><b>TOTAL</b><em>'+_pedFmtMoeda(it.valorTotal)+'</em></span><span class="pim-acoes">'+acoesCell+'</span></div>'
+        + '<div class="pim-row"><span class="pim-linha"><em class="pim-qtd-num">'+_pedEsc(String(qtdNum))+'</em> <span class="pim-qtd-un">'+_pedEsc(qtdUn)+'</span> · '+_pedFmtMoeda(it.precoUnit)+((Number(it.desconto)||0)>0 ? ' · desc. '+it.desconto+'%' : '')+' · <span class="pim-total"><em>'+_pedFmtMoeda(it.valorTotal)+'</em></span></span><span class="pim-acoes">'+acoesCell+'</span></div>'
       + '</div>'
       + '</div>';
   }).join('');
