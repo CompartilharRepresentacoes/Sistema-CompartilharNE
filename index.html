@@ -332,6 +332,8 @@
     .mv-av { display:inline-block; margin-top:3px; font-size:10.5px; font-weight:700; color:#3b2a00; background:#fcd34d; border-radius:999px; padding:1px 9px; } .mv-av.clk { cursor:pointer; } .mv-av.clk:hover { background:#fde68a; }
     /* Perfil Vendedor: nao ve comissao; nao digita preco nem Nº pedido do fornecedor */
     body.perfil-vendedor .so-comissao { display:none !important; }
+    /* enquanto as permissoes do usuario nao chegam do banco (e nao ha copia da ultima visita), o menu fica invisivel para nao "piscar" itens que depois somem */
+    body.perm-carregando .sb-item { visibility:hidden; }
     /* Perfil Vendedor: ele so ve os proprios clientes e pedidos, entao os filtros "Vendedor" nao servem (some em todas as telas) */
     body.perfil-vendedor #msVendedores,
     body.perfil-vendedor #pss-vendedor, body.perfil-vendedor span:has(+ #pss-vendedor),
@@ -10055,15 +10057,24 @@ function _appMenuEscondido(pageId) {
   }
   return false;
 }
+// Copia (so para desenhar o menu sem piscar no F5) das permissoes da ultima visita deste usuario. A barreira real e o banco.
+function _appPermCacheChave() { return 'permCache|' + String((_appUsuarioAtual && _appUsuarioAtual.email) || '').trim().toLowerCase(); }
+function _appPermCacheLer() {
+  try { var t = localStorage.getItem(_appPermCacheChave()); var o = t ? JSON.parse(t) : null; return (o && o.ver) ? o : null; } catch (e) { return null; }
+}
+function _appPermCacheGravar() {
+  try { localStorage.setItem(_appPermCacheChave(), JSON.stringify({ admin: _appEhAdmin, ver: _appPermVer || {}, oculto: _appMenuOculto || {} })); } catch (e) {}
+}
+function _appPermFimCarga() { try { document.body.classList.remove('perm-carregando'); } catch (e) {} }
 function _appCarregarPermissoes() {
   try {
-    if (typeof SB === 'undefined') return;
+    if (typeof SB === 'undefined') { _appPermFimCarga(); return; }
     Promise.all([
       SB.rpc('app_admin'),
       SB.from('usuario_permissoes').select('pagina_chave,pode_ver'),
       SB.from('usuario_menu_oculto').select('usuario_id_legado,pagina_chave').then(function (x) { return x; }, function () { return { error: true }; })
     ]).then(function (r) {
-      if (r[0].error || r[1].error) { console.warn('Permissões não carregadas:', r[0].error || r[1].error); return; }
+      if (r[0].error || r[1].error) { console.warn('Permissões não carregadas:', r[0].error || r[1].error); _appPermFimCarga(); return; }
       _appEhAdmin = r[0].data === true;
       var o = {};
       (r[1].data || []).forEach(function (x) { if (x.pode_ver) o[x.pagina_chave] = true; });
@@ -10073,11 +10084,13 @@ function _appCarregarPermissoes() {
         var meuId = _appMeuIdLegado();
         (r[2].data || []).forEach(function (x) { if (meuId && String(x.usuario_id_legado) === String(meuId)) _appMenuOculto[x.pagina_chave] = true; });
       }
+      _appPermCacheGravar();
       _appAplicarMenuPermissoes();
+      _appPermFimCarga();
       var atual = document.querySelector('.app-page[style*="block"]');
       if (atual && !_appPaginaPermitida(atual.id)) showPage('page-home');
-    }).catch(function (e) { console.warn('Permissões não carregadas:', e); });
-  } catch (e) { console.warn('Permissões não carregadas:', e); }
+    }).catch(function (e) { console.warn('Permissões não carregadas:', e); _appPermFimCarga(); });
+  } catch (e) { console.warn('Permissões não carregadas:', e); _appPermFimCarga(); }
 }
 
 // v165: tela de carregamento e navegação (voltar do navegador / F5)
@@ -10131,7 +10144,11 @@ function entrarNoApp(user) {
   // preso naquele retrato vazio ate clicar manualmente em "Inicio". Rodar de novo aqui garante
   // que assim que o login termina (dados do Firestore ja carregados) o dashboard ja nasce certo.
   dashInit();
-  _appPermVer = null; _appEhAdmin = false; _appAplicarMenuPermissoes();
+  _appPermVer = null; _appEhAdmin = false; _appMenuOculto = {};
+  var _pc = _appPermCacheLer();
+  if (_pc) { _appPermVer = _pc.ver || {}; _appEhAdmin = !!_pc.admin; _appMenuOculto = _pc.oculto || {}; }
+  else { try { document.body.classList.add('perm-carregando'); setTimeout(_appPermFimCarga, 8000); } catch (e0) {} }
+  _appAplicarMenuPermissoes();
   _appCarregarPermissoes();
   if (!_navRestaurado) {
     _navRestaurado = true;
