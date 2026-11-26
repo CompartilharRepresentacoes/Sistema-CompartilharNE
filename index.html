@@ -17469,6 +17469,17 @@ function _cpNorm(s) {
     .trim();
 }
 // Remove colchetes de códigos exibidos como "[0010] Nome" -> "0010 Nome" (mantém os números, inclusive zeros à esquerda)
+var _devFornMapaRef = null, _devFornMapa = null;
+function _devFornNome(d) {
+  var ref = (typeof _fsCache !== 'undefined' && _fsCache) ? _fsCache['fornecedores'] : null;
+  if (!_devFornMapa || ref !== _devFornMapaRef) {
+    _devFornMapa = {};
+    (ref || getFornecedores() || []).forEach(function (x) { if (x && x.id != null) _devFornMapa[String(x.id)] = x.nome_fantasia || x.razao_social || ''; });
+    _devFornMapaRef = ref;
+  }
+  var n = d && d.fornecedorId != null ? _devFornMapa[String(d.fornecedorId)] : '';
+  return n || _cpSemColchetes((d && d.fornecedorNome) || '');
+}
 function _cpSemColchetes(s) {
   return String(s||'').replace(/^\[([^\]]*)\]\s*/, '$1 ');
 }
@@ -31551,7 +31562,7 @@ function _devPopularFiltroMotivo() {
   _devUfMap = null;
   pop('dev-f-motivo', DEV_MOTIVOS, 'Todos');
   var forn = {}, vend = {}, ufs = {};
-  devs.forEach(function (d) { if (d.fornecedorNome) forn[_cpSemColchetes(d.fornecedorNome)] = 1; if (d.vendedorNome) vend[d.vendedorNome] = 1; var u = _devUfDe(d); if (u) ufs[u] = 1; });
+  devs.forEach(function (d) { if (d.fornecedorNome || d.fornecedorId != null) forn[_devFornNome(d)] = 1; if (d.vendedorNome) vend[d.vendedorNome] = 1; var u = _devUfDe(d); if (u) ufs[u] = 1; });
   pop('dev-f-forn', Object.keys(forn).sort(), 'Todas');
   pop('dev-f-vend', Object.keys(vend).sort(), 'Todos');
   pop('dev-f-uf', Object.keys(ufs).sort(), 'Todas');
@@ -31583,7 +31594,7 @@ function renderDevolucaoList() {
   function base(d) {
     if (!_appRegistroVisivelUF(d)) return false;
     if (_devMotivosFiltro.length && _devMotivosFiltro.indexOf(d.motivo) === -1) return false;
-    if (fForn && _cpSemColchetes(d.fornecedorNome || '') !== fForn) return false;
+    if (fForn && _devFornNome(d) !== fForn) return false;
     if (fVend && (d.vendedorNome || '') !== fVend) return false;
     if (fUf && _devUfDe(d) !== fUf) return false;
     if (busca) {
@@ -31607,7 +31618,7 @@ function renderDevolucaoList() {
   var pesoMap = {}; try { getProdutos().forEach(function (p) { pesoMap[p.id] = parseFloat(String(p.peso == null ? '' : p.peso).replace(',', '.')) || 0; }); } catch (e) {}
   function kgDe(d) { return (d.itens || []).reduce(function (s, it) { return s + (pesoMap[it.prodId] || 0) * (Number(it.quantidade) || 0); }, 0); }
   function valDe(d) { return Number(d.totalProdutos) || 0; }
-  function resumo(lista) { var r = { n: 0, v: 0, kg: 0, abertas: 0, motivo: {}, forn: {}, cli: {}, kmotivo: {}, kforn: {}, kcli: {} }; lista.forEach(function (d) { if (!valida(d)) return; r.n++; r.v += valDe(d); r.kg += kgDe(d); if (_devStatusDe(d) === 'Aberto') r.abertas++; var kd = kgDe(d); var m = d.motivo || '—'; r.motivo[m] = (r.motivo[m] || 0) + valDe(d); r.kmotivo[m] = (r.kmotivo[m] || 0) + kd; var f = _cpSemColchetes(d.fornecedorNome || '—'); r.forn[f] = (r.forn[f] || 0) + valDe(d); r.kforn[f] = (r.kforn[f] || 0) + kd; var c = _cpSemColchetes(d.clienteNome || '—'); r.cli[c] = (r.cli[c] || 0) + valDe(d); r.kcli[c] = (r.kcli[c] || 0) + kd; }); return r; }
+  function resumo(lista) { var r = { n: 0, v: 0, kg: 0, abertas: 0, motivo: {}, forn: {}, cli: {}, kmotivo: {}, kforn: {}, kcli: {} }; lista.forEach(function (d) { if (!valida(d)) return; r.n++; r.v += valDe(d); r.kg += kgDe(d); if (_devStatusDe(d) === 'Aberto') r.abertas++; var kd = kgDe(d); var m = d.motivo || '—'; r.motivo[m] = (r.motivo[m] || 0) + valDe(d); r.kmotivo[m] = (r.kmotivo[m] || 0) + kd; var f = _devFornNome(d) || '—'; r.forn[f] = (r.forn[f] || 0) + valDe(d); r.kforn[f] = (r.kforn[f] || 0) + kd; var c = _cpSemColchetes(d.clienteNome || '—'); r.cli[c] = (r.cli[c] || 0) + valDe(d); r.kcli[c] = (r.kcli[c] || 0) + kd; }); return r; }
   var atual = resumo(deBasePer);
   var ant = per ? resumo(deBase.filter(function (d) { return noPeriodo(d, per.aIni, per.aFim); })) : null;
   var fat = per ? _devFaturadoPeriodo(per.ini, per.fim, '', null) : _devFaturadoPeriodo('0000-00-00', '9999-99-99', '', null);
@@ -31656,7 +31667,7 @@ function renderDevolucaoList() {
   tbody.innerHTML = rows.map(function(d){
     const dataFmt = d.data ? d.data.split('-').reverse().join('/') : '—';
     const cliNomeSo = _cpSemColchetes(d.clienteNome||'');
-    const fornNomeSo = _cpSemColchetes(d.fornecedorNome||'');
+    const fornNomeSo = _devFornNome(d);
     const temXml = !!(d.xmlAnexo && d.xmlAnexo.dados);
     const subD = [_devUfDe(d), d.nfOrigem ? 'NF origem ' + d.nfOrigem : ''].filter(Boolean).join(' · ');
     return '<div class="mc-row" style="display:grid;grid-template-columns:75px 95px 1.1fr 1fr 0.8fr 90px 92px 62px 100px 118px;padding:12px 14px;align-items:center;border-bottom:1px solid #f1f5f9;transition:background .12s"'
