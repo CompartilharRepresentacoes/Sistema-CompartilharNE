@@ -23954,6 +23954,72 @@ function _pedParsePedidoTextoMateus(paginasItensVis) {
   return blocos;
 }
 
+// ── Layout "Atakarejo" (TOTVS Varejo "PEDIDO DE COMPRAS", rodape RELPEDSUPRIMATAK.QRP; Atakarejo -> Allfood) ──
+// Parecido com o TOTVS do Bemais, mas: o "Cod Forn" fica na coluna do meio (x~93) e e o codigo que o Atakarejo usa para o
+// produto (= "Codigo Pedido" da Tabela de Preco do cliente, nao o codigo da fabrica); nao existe a coluna Estoque
+// (depois da Emb vem: Qtde | Valor Unit. | Valor Item ...); e o CNPJ da loja vem partido em dois pedacos
+// ("73.849.952/0001" e "- 58") no quadro "DADOS PARA FATURAMENTO" (direita). Cada pedido (numero) e uma loja e ocupa 2 paginas
+// (itens + rodape). Valor Unit. e o preco da embalagem (CX 10 -> caixa; KG 1 -> kg): qtd x Valor Unit. = Valor Item (conferido na leitura).
+function _pedParsePedidoTextoTotvsAtak(paginasItens) {
+  var blocos = [], porChave = {};
+  var ehNum = function (s) { return /^-?\d[\d.]*,\d+$/.test(String(s || '').trim()); };
+  var soDigitos = function (s) { return String(s || '').replace(/\D/g, ''); };
+  (paginasItens || []).forEach(function (items) {
+    var txt = items.map(function (it) { return it.str; }).join(' ');
+    var mN = /PEDIDO DE COMPRAS\D*(\d+)/.exec(txt);
+    var numero = mN ? mN[1] : '';
+    var linhas = _pedAgruparLinhasPdf(items);
+    // CNPJ: linha com o rotulo "CNPJ" (fornecedor a esquerda, loja a direita); junta os pedacos depois do rotulo
+    var cnpjForn = '', cnpjLoja = '';
+    Object.keys(linhas).forEach(function (y) {
+      var tk = linhas[y];
+      tk.filter(function (t) { return /^CNPJ$/i.test(t.str.trim()); }).forEach(function (rot) {
+        var resto = tk.filter(function (t) { return t.x > rot.x + 1 && (rot.x < 400 ? t.x < 400 : true); }).sort(function (a, b) { return a.x - b.x; });
+        var d = soDigitos(resto.map(function (t) { return t.str; }).join('')).slice(0, 14);
+        if (d.length !== 14) return;
+        if (rot.x < 400) { if (!cnpjForn) cnpjForn = d; } else { if (!cnpjLoja) cnpjLoja = d; }
+      });
+    });
+    var itens = [], atual = null;
+    Object.keys(linhas).map(Number).sort(function (a, b) { return b - a; }).forEach(function (y) {
+      var tk = linhas[y];
+      var emb = tk.find(function (t) { return t.x >= 200 && t.x <= 260 && /^(CX|CXA|KG|UN|UND|PC|PCT|FD)\s+\d+$/i.test(t.str.trim()); });
+      var codTok = tk.find(function (t) { return t.x > 60 && t.x < 112 && /^\d{5,9}$/.test(t.str.trim()); });
+      if (emb && codTok) {
+        var nums = tk.filter(function (t) { return t.x > emb.x + 1 && ehNum(t.str); }).map(function (t) { return _pedParseMoeda(t.str); });
+        if (nums.length < 3) { atual = null; return; }   // quantidade, valor unitario, valor do item
+        var qtd = nums[0], unit = nums[1], totalPdf = nums[2];
+        var mE = /^([A-Za-z]+)\s+(\d+)$/.exec(emb.str.trim());
+        var un = mE[1].toUpperCase();
+        var descTok = tk.filter(function (t) { return t.x > codTok.x + 1 && t.x < emb.x - 1 && !/^\d+$/.test(t.str.trim()); });
+        var cod = codTok.str.trim();
+        atual = {
+          descricao: descTok.map(function (t) { return t.str.trim(); }).join(' '), dataEnt: null, qtd: qtd, unitario: unit,
+          codigo: cod, codigoNormalizado: _pedNormCodigoPedido(cod), codigoCandidatos: _pedCandidatosCodigoPedido(cod),
+          unidade: (un === 'CX' || un === 'CXA') ? 'CXA' : (un === 'KG' ? 'KG' : 'UN'),
+          embalagem: emb.str.trim(), totalPdf: totalPdf
+        };
+        itens.push(atual);
+        return;
+      }
+      // linhas seguintes do mesmo item: continuacao do nome (coluna Produtos)
+      if (atual) {
+        if (tk.some(function (t) { return /^TOTAIS/i.test(t.str.trim()); })) { atual = null; return; }
+        var cont = tk.filter(function (t) { return t.x >= 120 && t.x < 215; }).map(function (t) { return t.str.trim(); }).join(' ');
+        if (cont) atual.descricao = (atual.descricao + ' ' + cont).trim();
+      }
+    });
+    if (!numero || !cnpjForn || !cnpjLoja) return;   // pagina sem cabecalho reconhecivel
+    var chave = numero + '|' + cnpjLoja;
+    if (porChave[chave]) { porChave[chave].itens = porChave[chave].itens.concat(itens); return; }
+    porChave[chave] = { numero: numero, fornecedorCnpj: cnpjForn, localEntregaCnpj: cnpjLoja, itens: itens, origem: '' };
+    blocos.push(porChave[chave]);
+  });
+  blocos = blocos.filter(function (b) { return b.itens.length; });
+  blocos.forEach(function (b) { b.origem = 'Importado de PDF "Pedido de Compras" nº ' + b.numero + ' (' + b.itens.length + ' itens).'; });
+  return blocos;
+}
+
 // Detecta qual layout de PDF de pedido este texto e, pra rotear pro parser certo.
 // Retorna 'atacadao', 'sendas' ou null (layout desconhecido/nao configurado ainda).
 function _pedDetectarLayoutPdf(textoCompleto) {
@@ -23964,6 +24030,8 @@ function _pedDetectarLayoutPdf(textoCompleto) {
   // Consinco com colunas "Cod Forn | Codigo Produtos a Receber" (ex.: Novo Atacado -> Allfood): outro layout que o do Sendas
   // "Mateus Supermercados" (ex.: Mateus BA -> Sao Vicente): "PEDIDO DE NUMERO", "FILIAL PEDIDO", "REF FORN - COD. BARRAS"
   if (/FILIAL\s+PEDIDO/.test(textoCompleto) && /REF\s+FORN/.test(textoCompleto) && /PEDIDO\s+DE\s+N\S{0,3}MERO/i.test(textoCompleto)) return 'mateus';
+  // "TOTVS Varejo / RELPEDSUPRIMATAK" (Atakarejo -> Allfood): colunas diferentes do Bemais, por isso vem antes do 'totvs'
+  if (/TOTVS\s+Varejo/i.test(textoCompleto) && /RELPEDSUPRIMATAK/i.test(textoCompleto) && /PEDIDO\s+DE\s+COMPRAS/.test(textoCompleto)) return 'totvs_atak';
   // "TOTVS Varejo Supermercados / RELPEDSUPRIM" (ex.: Bemais -> Sao Vicente)
   if (/TOTVS\s+Varejo/i.test(textoCompleto) && /RELPEDSUPRIM/i.test(textoCompleto) && /PEDIDO\s+DE\s+COMPRAS/.test(textoCompleto)) return 'totvs';
   if (/Consinco/.test(textoCompleto) && /C[oó]digo\s+Produtos\s+a\s+Receber/i.test(textoCompleto)) return 'consinco_cod';
@@ -24590,6 +24658,8 @@ function _pedLerPdfBuffer(buffer, lib) {
         resultados = _pedImportarPdfProcessarSendas(paginasItens);
       } else if (layout === 'mateus') {
         resultados = _pedParsePedidoTextoMateus(paginasItensVis).map(_pedProcessarBlocoImportadoPdf);
+      } else if (layout === 'totvs_atak') {
+        resultados = _pedParsePedidoTextoTotvsAtak(paginasItens).map(_pedProcessarBlocoImportadoPdf);
       } else if (layout === 'totvs') {
         resultados = _pedParsePedidoTextoTotvs(paginasItens).map(_pedProcessarBlocoImportadoPdf);
       } else if (layout === 'rp_one') {
