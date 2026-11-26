@@ -21412,6 +21412,8 @@ var PED_STATUS = ['Pré-Venda','Aguardando Retorno','Enviado','Faturado','Fatura
 function getPedidos() { return firebaseConfigurado ? _fsGet('pedidos') : JSON.parse(localStorage.getItem('pedidos') || '[]'); }
 function setPedidos(data) { if (firebaseConfigurado) { _fsSet('pedidos', data); } else { localStorage.setItem('pedidos', JSON.stringify(data)); } }
 
+// Peso (kg/quantidade) e preco: sempre 2 casas (tira lixo como 152.73000000000002 e 1.4879999)
+function _n2(v) { var n = Number(v); return isFinite(n) ? Math.round((n + (n < 0 ? -1e-9 : 1e-9)) * 100) / 100 : 0; }
 function _pedFmtMoeda(v) { return 'R$ ' + (Number(v)||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function _pedFmtQtd(v) { return (Number(v)||0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
 function _pedEsc(s) { return String(s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
@@ -22334,7 +22336,7 @@ function _pimpRender() {
       + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:600">' + _pedEsc(it.prodNome || '') + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:center">' + _pedEsc(it.medida || '') + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#475569;text-align:right">' + pesoItem.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>'
-      + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:center">' + _pedEsc(isNaN(Number(it.quantidade)) ? it.quantidade : Math.round(Number(it.quantidade) * 1000) / 1000) + '</td>'
+      + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:center">' + _pedEsc(isNaN(Number(it.quantidade)) ? it.quantidade : _n2(it.quantidade)) + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:right">' + _pedFmtMoeda(_pimpPrecoComDesc(it)) + '</td>'
       + '<td style="padding:4px 6px;font-size:11.5px;color:#1e293b;font-weight:700;text-align:right">' + _pedFmtMoeda(it.valorTotal) + '</td>'
       + '</tr>';
@@ -23450,7 +23452,7 @@ function _pedCalcularAvisosImportado(precoUnit, quantidadeReal, modoUnid, cxNum,
     var restoCx = quantidadeReal % cxNum;
     var ehMultiploCx = restoCx < 0.0001 || (cxNum - restoCx) < 0.0001;
     if (!ehMultiploCx) {
-      var qtdAbaixo = Math.round(Math.floor(quantidadeReal / cxNum) * cxNum * 1000) / 1000;
+      var qtdAbaixo = _n2(Math.floor(quantidadeReal / cxNum) * cxNum);
       avisos.push('Quantidade (' + quantidadeReal + ') não fecha caixa cheia deste produto (caixa = ' + cxNum + ') — o valor mais próximo para baixo seria ' + qtdAbaixo + '.');
     } else if (qtdOriginalPdf != null && Math.abs(qtdOriginalPdf - quantidadeReal) > 0.0001) {
       avisos.push('Cliente pediu ' + qtdOriginalPdf + ', mas a caixa deste produto é fechada com ' + cxNum + ' — quantidade ajustada para ' + quantidadeReal + ' (caixa fechada). Se quiser completar mais uma caixa, digite ' + (Math.round((quantidadeReal + cxNum) * 1000) / 1000) + '.');
@@ -23486,7 +23488,7 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
     if (!cxValido) return { erro: 'PDF traz "' + itemPdf.codigo + '" em CXA, mas o produto "' + (produto.nome || '') + '" não tem Quantidade por Caixa cadastrada — não é possível converter com segurança.' };
     modoUnid = 'cx';
     qtdCaixas = itemPdf.qtd;
-    quantidadeReal = Math.round(itemPdf.qtd * cxNum * 1000) / 1000;
+    quantidadeReal = _n2(itemPdf.qtd * cxNum);
     precoUnit = itemPdf.unitario / cxNum;
   } else {
     modoUnid = 'un';
@@ -23504,7 +23506,7 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
     var restoCxImport = quantidadeReal % cxNum;
     if (restoCxImport > 0.0001 && (cxNum - restoCxImport) > 0.0001) {
       qtdOriginalPdf = quantidadeReal;
-      quantidadeReal = Math.round(Math.floor(quantidadeReal / cxNum) * cxNum * 1000) / 1000;
+      quantidadeReal = _n2(Math.floor(quantidadeReal / cxNum) * cxNum);
     }
   }
 
@@ -23517,7 +23519,7 @@ function _pedMontarItemImportadoPdf(itemPdf, tabItem, fornId, clienteId) {
   if (itemPdf._regraKgMenosCx && itemPdf.unidade === 'KG') {
     if (modoUnid === 'un' && cxValido) {
       var qtdAntesKg = quantidadeReal;
-      var qtdDepoisKg = Math.round((quantidadeReal - cxNum) * 1000) / 1000;
+      var qtdDepoisKg = _n2(quantidadeReal - cxNum);
       removidoRegraKg = qtdDepoisKg <= 0.0001;
       if (!removidoRegraKg) quantidadeReal = qtdDepoisKg;
       avisos.push('Regra do cliente: em KG sai 1 caixa a menos (' + qtdAntesKg + ' - ' + cxNum + ' = ' + (removidoRegraKg ? 0 : qtdDepoisKg) + ')' + (removidoRegraKg ? ' - não sobrou nenhuma caixa, o item saiu do pedido (use Restaurar se quiser manter).' : '.'));
@@ -24141,7 +24143,7 @@ function _pedImportRestaurarItem(ri, ii) {
 function _pedImportAlternarDetalhe(ri) { var r = _pedImportResultados[ri]; if (!r) return; r.verDetalhe = !r.verDetalhe; _pedRenderRevisaoImportacao(); }
 function _pedImportDetalheHtml(r) {
   var g = 'display:grid;grid-template-columns:2fr .7fr .9fr .9fr 1.1fr;gap:8px;padding:5px 10px;align-items:center';
-  var fq = function (q) { return String(Math.round((Number(q) || 0) * 1000) / 1000).replace('.', ','); };
+  var fq = function (q) { return String(_n2(q)).replace('.', ','); };
   return '<div style="margin-top:8px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;font-size:11px">'
     + '<div style="' + g + ';background:#f8fafc;color:#94a3b8;font-size:9.5px;font-weight:700;text-transform:uppercase;border-bottom:1px solid #e2e8f0"><span>Produto</span><span>Qtd</span><span>Preço</span><span>Total</span><span>Situação</span></div>'
     + r.itensOk.map(function (it) {
@@ -25602,7 +25604,7 @@ function _pinfDesfazerVinculo(ri, xi) {
 function _pinfAlternarDetalhe(ri) { var r = _pinfResultados[ri]; if (!r) return; r.verDetalhe = !r.verDetalhe; _pinfRenderRevisao(); }
 function _pinfLinhasDetalhe(r) {
   var itensPed = (r.pedido && r.pedido.itens) || [], nfs = r.itensNf || [], saldo = r.itensSaldo || [], divs = r.divergencias || [];
-  var fq = function (q) { return String(Math.round((Number(q) || 0) * 1000) / 1000); };
+  var fq = function (q) { return String(_n2(q)); };
   var achaNf = function (cod) { var c = _cpNorm(cod || ''); return c ? nfs.find(function (x) { return _cpNorm(x.codigo || '') === c; }) : null; };
   var linhas = [];
   itensPed.forEach(function (it, i) {
@@ -26217,7 +26219,7 @@ function _pfatQtdFaturadaItem(pedido, prodId, prodCodigo) {
       if ((prodId && it.prodId === prodId) || (!prodId && prodCodigo && it.prodCodigo === prodCodigo)) total += Number(it.qtd) || 0;
     });
   });
-  return total;
+  return _n2(total);
 }
 function _pfatAtualizarStatusPedido(pedido) {
   pedido.valorFaturado = _pfatValorFaturasAtivo(pedido);
@@ -26303,13 +26305,13 @@ function _pfatRender() {
     } else {
       tbody.innerHTML = itens.map(function(it){
         var qtdFat = _pfatQtdFaturadaItem(pedido, it.prodId, it.prodCodigo);
-        var restante = Math.max(0, (Number(it.quantidade) || 0) - qtdFat);
+        var restante = _n2(Math.max(0, (Number(it.quantidade) || 0) - qtdFat));
         var tabItem = pedResolverPrecoCliente(pedido.fornecedorId, it.prodId, pedido.clienteId);
         var precoTab = tabItem ? Number(tabItem.valor) : null;
         return '<tr data-prodid="' + _pedEsc(it.prodId) + '" data-prodcodigo="' + _pedEsc(it.prodCodigo) + '" style="border-bottom:1px solid #f8fafc">'
           + '<td style="padding:6px 8px;font-size:11px;color:#64748b">' + _pedEsc(it.prodCodigo || '—') + '</td>'
           + '<td style="padding:6px 8px;font-size:11px;color:#1e293b;font-weight:600">' + _pedEsc(it.prodNome || '') + '</td>'
-          + '<td style="padding:6px 8px;font-size:11px;text-align:center">' + (Number(it.quantidade) || 0) + '</td>'
+          + '<td style="padding:6px 8px;font-size:11px;text-align:center">' + _n2(it.quantidade) + '</td>'
           + '<td style="padding:6px 8px;font-size:11px;text-align:center;font-weight:700;color:' + (qtdFat > 0 ? '#15803d' : '#cbd5e1') + '">' + qtdFat + '</td>'
           + '<td style="padding:6px 8px"><input type="number" min="0" max="' + restante + '" step="any" class="pfat-item-qtd" placeholder="' + (restante > 0 ? restante : 0) + '" value="" ' + (restante <= 0 ? 'disabled' : '') + ' style="width:64px;border:1px solid #e2e8f0;border-radius:5px;padding:4px 6px;font-size:11px"></td>'
           + '<td style="padding:6px 8px;font-size:11px;text-align:right;color:#64748b">' + (precoTab != null ? _pedFmtMoeda(precoTab) : '—') + '</td>'
@@ -26385,7 +26387,7 @@ function pedSalvarFatura() {
   rows.forEach(function(tr){
     var qtdInput = tr.querySelector('.pfat-item-qtd');
     var precoInput = tr.querySelector('.pfat-item-preco');
-    var qtd = qtdInput ? (parseFloat(qtdInput.value) || 0) : 0;
+    var qtd = qtdInput ? _n2(parseFloat(qtdInput.value) || 0) : 0;
     if (qtd > 0) {
       var precoDigitado = precoInput ? _pedParseMoeda(precoInput.value) : 0;
       var prodId = tr.getAttribute('data-prodid');
@@ -26525,18 +26527,18 @@ function _pfatEhUnidadeCaixa(uCom) {
 }
 function _pfatConverterItemXmlParaUnidades(match, produto) {
   if (!_pfatEhUnidadeCaixa(match.unidadeXml)) {
-    return { qtd: match.qtd, precoFat: match.precoUnit };
+    return { qtd: _n2(match.qtd), precoFat: match.precoUnit };
   }
   var cxNum = parseFloat(String((produto && produto.quant) || '').replace(',', '.'));
   if (isNaN(cxNum) || cxNum <= 0) {
     // Produto sem "Quant. Caixa" cadastrada -- sem conversao segura, mantem como veio do XML
     // (mesma logica defensiva usada em _pedMontarItemImportadoPdf).
-    return { qtd: match.qtd, precoFat: match.precoUnit };
+    return { qtd: _n2(match.qtd), precoFat: match.precoUnit };
   }
   var qtdEmUnidades = match.qtd * cxNum;
   var valorItemXml = match.valorItem || (match.qtd * match.precoUnit);
   return {
-    qtd: qtdEmUnidades,
+    qtd: _n2(qtdEmUnidades),
     precoFat: qtdEmUnidades > 0 ? (valorItemXml / qtdEmUnidades) : match.precoUnit
   };
 }
@@ -30891,7 +30893,7 @@ function pedAddItem() {
   var cx        = document.getElementById('ped-item-cx').value;
   var comissao  = document.getElementById('ped-item-comissao').value;
   comissao = (comissao && comissao !== '—') ? comissao : '';
-  var qtd   = parseFloat(document.getElementById('ped-item-qtd').value) || 0;
+  var qtd   = _n2(parseFloat(document.getElementById('ped-item-qtd').value) || 0);
   var preco = _pedParseMoeda(document.getElementById('ped-item-preco').value);
   var desc  = parseFloat(document.getElementById('ped-item-desc').value) || 0;
   if (qtd <= 0) { msg.textContent = 'Informe uma quantidade maior que zero.'; return; }
@@ -30903,7 +30905,7 @@ function pedAddItem() {
   if (modoUnid === 'cx') {
     if (isNaN(cxNum) || cxNum <= 0) { msg.textContent = 'Este produto não tem Quant. Caixa cadastrada — não é possível lançar por CX.'; return; }
     qtdCaixas = qtd;
-    quantidadeReal = Math.round(qtd * cxNum * 1000) / 1000;   // evita 19.200000000000003 (3 caixas x 6,4)
+    quantidadeReal = _n2(qtd * cxNum);   // evita 19.200000000000003 (3 caixas x 6,4)
   } else if (!isNaN(cxNum) && cxNum > 0) {
     var razaoUn = quantidadeReal / cxNum;
     if (Math.abs(razaoUn - Math.round(razaoUn)) > 1e-6) {
@@ -30971,7 +30973,7 @@ function pedSalvarEdicaoItemModal() {
   if (!it) { pedFecharEdicaoItem(); return; }
   msg.textContent = '';
   var preco = _pedParseMoeda(document.getElementById('ped-edit-item-preco').value);
-  var qtdInput = parseFloat(document.getElementById('ped-edit-item-qtd').value) || 0;
+  var qtdInput = _n2(parseFloat(document.getElementById('ped-edit-item-qtd').value) || 0);
   var desc  = parseFloat(document.getElementById('ped-edit-item-desc').value) || 0;
   if (preco <= 0) { msg.textContent = 'Informe um preço válido, maior que zero.'; return; }
   if (qtdInput <= 0) { msg.textContent = 'Informe uma quantidade maior que zero.'; return; }
@@ -30982,7 +30984,7 @@ function pedSalvarEdicaoItemModal() {
   if (modoUnid === 'cx') {
     if (isNaN(cxNum) || cxNum <= 0) { msg.textContent = 'Este produto não tem Quant. Caixa cadastrada — não é possível lançar por CX.'; return; }
     qtdCaixas = qtdInput;
-    quantidadeReal = Math.round(qtdInput * cxNum * 1000) / 1000;   // evita 19.200000000000003 (3 caixas x 6,4)
+    quantidadeReal = _n2(qtdInput * cxNum);   // evita 19.200000000000003 (3 caixas x 6,4)
   } else if (!isNaN(cxNum) && cxNum > 0) {
     var razaoUnEdit = quantidadeReal / cxNum;
     if (Math.abs(razaoUnEdit - Math.round(razaoUnEdit)) > 1e-6) {
@@ -39961,7 +39963,7 @@ function _sugGerarExcel() {
       valorPorColExcel[ci] += valCel;
     });
     valores.push(totalQtd);
-    valores.push(Math.round(totalPeso * 1000) / 1000);
+    valores.push(_n2(totalPeso));
     valores.push(Math.round(totalValor * 100) / 100);
     pesoGeralExcel += totalPeso;
     valorGeralExcel += totalValor;
@@ -39976,7 +39978,7 @@ function _sugGerarExcel() {
     row.getCell(valores.length).numFmt = '"R$" #,##0.00';
   });
 
-  var totalRowVals = ['', 'Peso Total (kg)', '', ''].concat(pesoPorColExcel.map(function(v){ return Math.round(v * 1000) / 1000; })).concat(['', Math.round(pesoGeralExcel * 1000) / 1000, '']);
+  var totalRowVals = ['', 'Peso Total (kg)', '', ''].concat(pesoPorColExcel.map(function(v){ return _n2(v); })).concat(['', _n2(pesoGeralExcel), '']);
   var linhaTotal = ws.addRow(totalRowVals);
   linhaTotal.eachCell({ includeEmpty: true }, function(cell, colNum){
     cell.font = { name: 'Calibri', bold: true, size: 10, color: { argb: 'FF000000' } };
@@ -42544,7 +42546,7 @@ function _comRenderNF(d) {
   var itensHtml = (d.itens && d.itens.length)
     ? '<div style="display:grid;grid-template-columns:90px 1fr 70px 100px 100px;gap:8px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;padding:4px 0;border-bottom:1px solid #cbd5e1"><span>C\u00f3digo</span><span>Produto</span><span style="text-align:right">Qtd</span><span style="text-align:right">Pre\u00e7o</span><span style="text-align:right">Total</span></div>'
       + d.itens.map(function(it){
-          var q = Math.round((it.qtd||0)*1000)/1000, pr = it.precoFat||0;
+          var q = _n2(it.qtd||0), pr = it.precoFat||0;
           return '<div style="display:grid;grid-template-columns:90px 1fr 70px 100px 100px;gap:8px;font-size:11.5px;padding:5px 0;border-bottom:1px solid #eef2f7"><span>'+_pedEsc(it.prodCodigo||'\u2014')+'</span><span>'+_pedEsc(it.prodNome||'')+'</span><span style="text-align:right">'+q+'</span><span style="text-align:right">'+_finMoeda(pr)+'</span><span style="text-align:right">'+_finMoeda(Math.round(q*pr*100)/100)+'</span></div>';
         }).join('')
     : '<div style="font-size:11.5px;color:#94a3b8;padding:4px 0">Sem itens lan\u00e7ados nesta NF.</div>';
@@ -43051,7 +43053,7 @@ function _pifResolverQuantidade(item, produto) {
   if (item.unidade === 'CX' && cxValido) {
     modoUnid = 'cx';
     qtdCaixas = item.qtd;
-    quantidade = Math.round(item.qtd * cxNum * 1000) / 1000;
+    quantidade = _n2(item.qtd * cxNum);
   }
   var avisos = [];
   if (modoUnid === 'un' && cxValido && produto.unidade !== 'KG') {
