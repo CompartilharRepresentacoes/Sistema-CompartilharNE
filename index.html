@@ -22066,7 +22066,7 @@ function renderVendaSimples(forcar) {
 
   var statusCores = {
     'Pré-Venda':          { bg:'transparent', cor:'#ea580c' },
-    'Aguardando Retorno': { bg:'transparent', cor:'#ca8a04' },
+    'Aguardando Retorno': { bg:'transparent', cor:'#6b21a8' },
     'Enviado':            { bg:'transparent', cor:'#1d4ed8' },
     'Faturado':           { bg:'transparent', cor:'#15803d' },
     'Faturado Parcial':   { bg:'transparent', cor:'#db2777' },
@@ -22173,7 +22173,7 @@ function renderPedidoList() {
 
   const statusCores = {
     'Pré-Venda':          { bg:'transparent', cor:'#ea580c' },
-    'Aguardando Retorno': { bg:'transparent', cor:'#ca8a04' },
+    'Aguardando Retorno': { bg:'transparent', cor:'#6b21a8' },
     'Enviado':            { bg:'transparent', cor:'#1d4ed8' },
     'Faturado':           { bg:'transparent', cor:'#15803d' },
     'Faturado Parcial':   { bg:'transparent', cor:'#db2777' },
@@ -22529,7 +22529,7 @@ function pedGerarPdfImpressao(elExterno, pedidoIdExterno) {
 var _pimprelAbaAtual = 'geral';
 var _PIMPREL_STATUS_CORES = {
   'Pré-Venda':          { bg:'transparent', cor:'#ea580c' },
-  'Aguardando Retorno': { bg:'transparent', cor:'#ca8a04' },
+  'Aguardando Retorno': { bg:'transparent', cor:'#6b21a8' },
   'Enviado':            { bg:'transparent', cor:'#1d4ed8' },
   'Faturado':           { bg:'transparent', cor:'#15803d' },
   'Faturado Parcial':   { bg:'transparent', cor:'#db2777' },
@@ -26399,7 +26399,7 @@ function _pfatRender() {
   var ref = document.getElementById('pfat-ref');
   if (ref) ref.textContent = _cpSemColchetes(pedido.clienteNome || '') + ' · ' + fornNomeSo;
 
-  var statusCores = { 'Pré-Venda':{bg:'transparent',cor:'#ea580c'}, 'Aguardando Retorno':{bg:'transparent',cor:'#ca8a04'}, 'Enviado':{bg:'transparent',cor:'#1d4ed8'}, 'Faturado':{bg:'transparent',cor:'#15803d'}, 'Faturado Parcial':{bg:'transparent',cor:'#db2777'}, 'Bonificado':{bg:'transparent',cor:'#334155'}, 'Cancelado':{bg:'transparent',cor:'#dc2626'} };
+  var statusCores = { 'Pré-Venda':{bg:'transparent',cor:'#ea580c'}, 'Aguardando Retorno': { bg:'transparent', cor:'#6b21a8' }, 'Enviado':{bg:'transparent',cor:'#1d4ed8'}, 'Faturado':{bg:'transparent',cor:'#15803d'}, 'Faturado Parcial':{bg:'transparent',cor:'#db2777'}, 'Bonificado':{bg:'transparent',cor:'#334155'}, 'Cancelado':{bg:'transparent',cor:'#dc2626'} };
   var cor = statusCores[pedido.status] || { bg:'#f1f5f9', cor:'#64748b' };
 
   var infoGrid = document.getElementById('pfat-info-grid');
@@ -28283,7 +28283,7 @@ function renderVendasCompletas(manterPag) {
   if (!lista.length) { cont.innerHTML = ''; vazio.style.display = 'block'; _pagLimpar('vc'); return; }
   vazio.style.display = 'none';
 
-  var statusCores = { 'Pré-Venda':{bg:'transparent',cor:'#ea580c'}, 'Aguardando Retorno':{bg:'transparent',cor:'#ca8a04'}, 'Enviado':{bg:'transparent',cor:'#1d4ed8'}, 'Faturado':{bg:'transparent',cor:'#15803d'}, 'Faturado Parcial':{bg:'transparent',cor:'#db2777'}, 'Bonificado':{bg:'transparent',cor:'#334155'}, 'Cancelado':{bg:'transparent',cor:'#dc2626'} };
+  var statusCores = { 'Pré-Venda':{bg:'transparent',cor:'#ea580c'}, 'Aguardando Retorno': { bg:'transparent', cor:'#6b21a8' }, 'Enviado':{bg:'transparent',cor:'#1d4ed8'}, 'Faturado':{bg:'transparent',cor:'#15803d'}, 'Faturado Parcial':{bg:'transparent',cor:'#db2777'}, 'Bonificado':{bg:'transparent',cor:'#334155'}, 'Cancelado':{bg:'transparent',cor:'#dc2626'} };
 
   _sbPagina('vc', 'renderVendasCompletas', cont, lista, manterPag, true, 'pedidos', function(r){
     var p = r.pedido;
@@ -36050,7 +36050,7 @@ function _relCalcPedidoFaturado(f) {
 
 function _relCalcPedidosParados(f) {
   var hoje = new Date();
-  var statusCores = { 'Pré-Venda':{bg:'transparent',cor:'#ea580c'}, 'Aguardando Retorno':{bg:'transparent',cor:'#ca8a04'}, 'Enviado':{bg:'transparent',cor:'#1d4ed8'}, 'Faturado':{bg:'transparent',cor:'#15803d'}, 'Faturado Parcial':{bg:'transparent',cor:'#db2777'}, 'Bonificado':{bg:'transparent',cor:'#334155'}, 'Cancelado':{bg:'transparent',cor:'#dc2626'} };
+  var statusCores = { 'Pré-Venda':{bg:'transparent',cor:'#ea580c'}, 'Aguardando Retorno': { bg:'transparent', cor:'#6b21a8' }, 'Enviado':{bg:'transparent',cor:'#1d4ed8'}, 'Faturado':{bg:'transparent',cor:'#15803d'}, 'Faturado Parcial':{bg:'transparent',cor:'#db2777'}, 'Bonificado':{bg:'transparent',cor:'#334155'}, 'Cancelado':{bg:'transparent',cor:'#dc2626'} };
   var pedidos = getPedidos().filter(function(p){ return p.status !== 'Faturado' && p.status !== 'Cancelado'; });
   var _cmPP = {}; getClientes().forEach(function(c){ _cmPP[c.id] = c; });
   pedidos = pedidos.filter(function(p){
