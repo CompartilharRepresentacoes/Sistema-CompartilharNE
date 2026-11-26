@@ -13121,6 +13121,8 @@ function renderClienteList() {
   if (!tbody) return;
 
   const buscaNum = busca.replace(/\D/g, '');
+  // Codigo do cliente na fabrica (codigos_fornecedor): ignora traco, ponto, espaco e maiusculas (50-0217 = 500217)
+  const buscaCodFab = busca.replace(/[^a-z0-9]/g, '');
   let rows = data.filter(r => {
     const docNum = (r.cpf_cnpj||'').replace(/\D/g, '');
     const matchBusca = !busca
@@ -13129,7 +13131,8 @@ function renderClienteList() {
       || (r.cpf_cnpj||'').includes(busca)
       || (buscaNum && docNum.includes(buscaNum))
       || (r.cidade||'').toLowerCase().includes(busca)
-      || (r.codigo||'').toLowerCase().includes(busca);
+      || (r.codigo||'').toLowerCase().includes(busca)
+      || (buscaCodFab && (r.codigos_fornecedor||[]).some(x => String(x.codigo_cliente||'').toLowerCase().replace(/[^a-z0-9]/g, '').includes(buscaCodFab)));
     const matchAtivo = !_cliFiltroAtivo || (r.ativo||'Sim') === _cliFiltroAtivo;
     const matchRede = !fRede || String(r.categoria||'') === String(fRede);
     const matchSubRede = !fSubRede || String(r.subcategoria||'') === String(fSubRede);
