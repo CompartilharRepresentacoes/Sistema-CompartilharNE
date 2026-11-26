@@ -7479,6 +7479,12 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                 <button onclick="permMarcarTudo(true)" style="background:#f1f5f9;color:#272A4A;border:none;border-radius:6px;padding:5px 10px;font-size:10.5px;font-weight:600;cursor:pointer">Marcar todas</button>
                 <button onclick="permMarcarTudo(false)" style="background:#f1f5f9;color:#475569;border:none;border-radius:6px;padding:5px 10px;font-size:10.5px;font-weight:600;cursor:pointer">Desmarcar todas</button>
               </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+                <span style="font-size:11px;font-weight:600;color:#475569">Copiar permissões de</span>
+                <select class="form-input" id="perm-copiar-sel" style="width:240px"><option value="">-- Selecione um usuário --</option></select>
+                <button onclick="permCopiarDeOutro()" style="background:#f1f5f9;color:#272A4A;border:none;border-radius:6px;padding:5px 10px;font-size:10.5px;font-weight:600;cursor:pointer">Copiar</button>
+                <span style="font-size:10.5px;color:#94a3b8">Só preenche as caixinhas; confira e clique em Salvar.</span>
+              </div>
               <div style="border:1px solid #eef2f7;border-radius:10px;overflow:hidden;max-height:420px;overflow-y:auto">
                 <div style="display:grid;grid-template-columns:1fr 64px 64px 64px 64px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;position:sticky;top:0">
                   <span>Página</span><span style="text-align:center">Ver</span><span style="text-align:center">Incluir</span><span style="text-align:center">Alterar</span><span style="text-align:center">Excluir</span>
@@ -34070,8 +34076,30 @@ function permSelecionarUsuario() {
     perms = (grupo && grupo.permissoes) ? grupo.permissoes : {};
   }
   _permRenderMatriz(perms);
+  var selCopia = document.getElementById('perm-copiar-sel');
+  if (selCopia) {
+    selCopia.innerHTML = '<option value="">-- Selecione um usuário --</option>' +
+      _ordNome(getUsuariosSistema().filter(function(u){ return u.id !== id; })).map(function(u){ return '<option value="'+u.id+'">' + _usuEsc(u.nome) + (u.grupoNome?' ('+_usuEsc(u.grupoNome)+')':'') + '</option>'; }).join('');
+    selCopia.value = '';
+  }
   wrap.style.display = 'block';
   vazio.style.display = 'none';
+}
+// Copia as permissoes de outro usuario para as caixinhas da tela (nao grava: o usuario confere e clica em Salvar)
+function permCopiarDeOutro() {
+  var msg = document.getElementById('perm-msg');
+  var origemId = document.getElementById('perm-copiar-sel').value;
+  if (!origemId) { msg.style.color = '#dc2626'; msg.textContent = 'Escolha de qual usuário copiar.'; return; }
+  var origem = getUsuariosSistema().find(function(u){ return u.id === origemId; });
+  if (!origem) return;
+  var perms = (origem.permissoes && Object.keys(origem.permissoes).length) ? origem.permissoes : null;
+  if (!perms) {
+    var grupo = getGruposAcesso().find(function(g){ return g.id === origem.grupoId; });
+    perms = (grupo && grupo.permissoes) ? grupo.permissoes : {};
+  }
+  _permRenderMatriz(perms);
+  msg.style.color = '#b45309';
+  msg.textContent = 'Permissões de ' + (origem.nome || '') + ' copiadas. Confira e clique em Salvar para valer.';
 }
 function _permRenderMatriz(permissoesAtuais) {
   permissoesAtuais = permissoesAtuais || {};
