@@ -7486,8 +7486,8 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
                 <span style="font-size:10.5px;color:#94a3b8">Só preenche as caixinhas; confira e clique em Salvar.</span>
               </div>
               <div style="border:1px solid #eef2f7;border-radius:10px;overflow:hidden;max-height:420px;overflow-y:auto">
-                <div style="display:grid;grid-template-columns:1fr 64px 64px 64px 64px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;position:sticky;top:0">
-                  <span>Página</span><span style="text-align:center">Ver</span><span style="text-align:center">Incluir</span><span style="text-align:center">Alterar</span><span style="text-align:center">Excluir</span>
+                <div style="display:grid;grid-template-columns:1fr 64px 64px 64px 64px 64px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:9.5px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;position:sticky;top:0">
+                  <span>Página</span><span style="text-align:center">Ver</span><span style="text-align:center">Incluir</span><span style="text-align:center">Alterar</span><span style="text-align:center">Excluir</span><span style="text-align:center" title="Olho: esconde este item do menu para o usuário (a permissão Ver continua valendo)">Menu</span>
                 </div>
                 <div id="perm-matriz-tbody"></div>
               </div>
@@ -10013,7 +10013,7 @@ function _appAplicarMenuPermissoes() {
   itens.forEach(function (it) { it.style.display = ''; });
   if (_appPermVer === null || _appEhAdmin || _appGrupoTotal()) return;
   document.querySelectorAll('.sb-flyout a').forEach(function (a) {
-    var p = pid(a); if (p && !_appPaginaPermitida(p)) a.style.display = 'none';
+    var p = pid(a); if (p && (!_appPaginaPermitida(p) || _appMenuEscondido(p))) a.style.display = 'none';
   });
   document.querySelectorAll('.sb-flyout .fly-col').forEach(function (col) {
     var vis = [].some.call(col.querySelectorAll('a'), function (a) { return a.style.display !== 'none'; });
@@ -10025,23 +10025,44 @@ function _appAplicarMenuPermissoes() {
     if (fly) {
       var vis = [].some.call(fly.querySelectorAll('a'), function (a) { return a.style.display !== 'none'; });
       if (!vis) it.style.display = 'none';
-    } else if (p && !_appPaginaPermitida(p)) {
+    } else if (p && (!_appPaginaPermitida(p) || _appMenuEscondido(p))) {
       it.style.display = 'none';
     }
   });
+}
+// Itens do menu que o administrador escondeu (olho na tela Permissoes) para o usuario logado. So esconde o menu.
+var _appMenuOculto = {};
+function _appMeuIdLegado() {
+  try {
+    var em = String((_appUsuarioAtual && _appUsuarioAtual.email) || '').trim().toLowerCase();
+    var u = getUsuariosSistema().find(function (x) { return em && String(x.email || '').trim().toLowerCase() === em; });
+    return u ? u.id : '';
+  } catch (e) { return ''; }
+}
+function _appMenuEscondido(pageId) {
+  for (var i = 0; i < _PAGINA_CHAVE.length; i++) {
+    if (_PAGINA_CHAVE[i][0].test(pageId)) return !!_appMenuOculto[_PAGINA_CHAVE[i][1]];
+  }
+  return false;
 }
 function _appCarregarPermissoes() {
   try {
     if (typeof SB === 'undefined') return;
     Promise.all([
       SB.rpc('app_admin'),
-      SB.from('usuario_permissoes').select('pagina_chave,pode_ver')
+      SB.from('usuario_permissoes').select('pagina_chave,pode_ver'),
+      SB.from('usuario_menu_oculto').select('usuario_id_legado,pagina_chave').then(function (x) { return x; }, function () { return { error: true }; })
     ]).then(function (r) {
       if (r[0].error || r[1].error) { console.warn('Permissões não carregadas:', r[0].error || r[1].error); return; }
       _appEhAdmin = r[0].data === true;
       var o = {};
       (r[1].data || []).forEach(function (x) { if (x.pode_ver) o[x.pagina_chave] = true; });
       _appPermVer = o;
+      _appMenuOculto = {};
+      if (r[2] && !r[2].error) {
+        var meuId = _appMeuIdLegado();
+        (r[2].data || []).forEach(function (x) { if (meuId && String(x.usuario_id_legado) === String(meuId)) _appMenuOculto[x.pagina_chave] = true; });
+      }
       _appAplicarMenuPermissoes();
       var atual = document.querySelector('.app-page[style*="block"]');
       if (atual && !_appPaginaPermitida(atual.id)) showPage('page-home');
@@ -34061,6 +34082,7 @@ function openPermissoesForm() {
   document.getElementById('perm-vazio').style.display = 'block';
   document.getElementById('perm-msg').textContent = '';
 }
+var _permOcultoCarregando = false;
 function permSelecionarUsuario() {
   var id = document.getElementById('perm-usuario-sel').value;
   var wrap = document.getElementById('perm-matriz-wrap');
@@ -34075,7 +34097,14 @@ function permSelecionarUsuario() {
     var grupo = getGruposAcesso().find(function(g){ return g.id === usuario.grupoId; });
     perms = (grupo && grupo.permissoes) ? grupo.permissoes : {};
   }
+  _permOculto = JSON.parse(JSON.stringify(_permOcultoTodos[id] || {}));
+  _permOcultoOrig = JSON.stringify(Object.keys(_permOculto).sort());
   _permRenderMatriz(perms);
+  if (!_permOcultoCarregando) { _permOcultoCarregando = true; _permCarregarOcultos(function () {
+    _permOcultoCarregando = false;
+    var idAtual = document.getElementById('perm-usuario-sel').value;
+    if (idAtual === id) { _permOculto = JSON.parse(JSON.stringify(_permOcultoTodos[id] || {})); _permOcultoOrig = JSON.stringify(Object.keys(_permOculto).sort()); _permPintarOlhos(); }
+  }); }
   var selCopia = document.getElementById('perm-copiar-sel');
   if (selCopia) {
     selCopia.innerHTML = '<option value="">-- Selecione um usuário --</option>' +
@@ -34097,6 +34126,7 @@ function permCopiarDeOutro() {
     var grupo = getGruposAcesso().find(function(g){ return g.id === origem.grupoId; });
     perms = (grupo && grupo.permissoes) ? grupo.permissoes : {};
   }
+  _permOculto = JSON.parse(JSON.stringify(_permOcultoTodos[origemId] || {}));
   _permRenderMatriz(perms);
   msg.style.color = '#b45309';
   msg.textContent = 'Permissões de ' + (origem.nome || '') + ' copiadas. Confira e clique em Salvar para valer.';
@@ -34107,19 +34137,75 @@ function _permRenderMatriz(permissoesAtuais) {
   PAGINAS_SISTEMA.forEach(function(p){ if (secoes.indexOf(p.secao) === -1) secoes.push(p.secao); });
   var html = '';
   secoes.forEach(function(secao){
-    html += '<div style="padding:7px 12px;background:#f8fafc;font-size:10px;font-weight:700;color:#272A4A;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #e2e8f0">' + secao + '</div>';
+    html += '<div style="padding:7px 12px;background:#f8fafc;font-size:10px;font-weight:700;color:#272A4A;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #e2e8f0;display:grid;grid-template-columns:1fr 64px;align-items:center"><span>' + secao + '</span><span style="text-align:center"><button type="button" class="perm-olho" data-secao="' + secao + '" onclick="permAlternarOcultoSecao(this.getAttribute(\'data-secao\'))" title="Esconder / mostrar o menu ' + secao + ' inteiro para este usuário" style="background:none;border:none;cursor:pointer;font-size:15px;padding:0;color:#272A4A"><i class="ti ti-eye"></i></button></span></div>';
     PAGINAS_SISTEMA.filter(function(p){ return p.secao === secao; }).forEach(function(p){
       var perm = permissoesAtuais[p.key] || {};
-      html += '<div style="display:grid;grid-template-columns:1fr 64px 64px 64px 64px;padding:7px 12px;border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px">'
+      html += '<div style="display:grid;grid-template-columns:1fr 64px 64px 64px 64px 64px;padding:7px 12px;border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px">'
         + '<span style="color:#334155">' + p.nome + '</span>'
         + '<span style="text-align:center"><input type="checkbox" id="permu_' + p.key + '_ver" ' + (perm.ver?'checked':'') + '></span>'
         + '<span style="text-align:center"><input type="checkbox" id="permu_' + p.key + '_incluir" ' + (perm.incluir?'checked':'') + '></span>'
         + '<span style="text-align:center"><input type="checkbox" id="permu_' + p.key + '_alterar" ' + (perm.alterar?'checked':'') + '></span>'
         + '<span style="text-align:center"><input type="checkbox" id="permu_' + p.key + '_excluir" ' + (perm.excluir?'checked':'') + '></span>'
+        + '<span style="text-align:center"><button type="button" class="perm-olho" data-key="' + p.key + '" onclick="permAlternarOculto(this.getAttribute(\'data-key\'))" title="Esconder / mostrar no menu" style="background:none;border:none;cursor:pointer;font-size:15px;padding:0;color:#272A4A"><i class="ti ti-eye"></i></button></span>'
         + '</div>';
     });
   });
   document.getElementById('perm-matriz-tbody').innerHTML = html;
+  _permPintarOlhos();
+}
+// ── Olho: itens do menu escondidos por usuario (tabela usuario_menu_oculto; so esconde o menu, nao tira a permissao) ──
+var _permOculto = {};        // itens escondidos do usuario que esta aberto na tela {chave:true}
+var _permOcultoOrig = '';    // como estava gravado (para saber se mudou)
+var _permOcultoTodos = {};   // {idUsuario: {chave:true}} lido do banco
+var _permOcultoOk = true;    // false se a tabela ainda nao existe no banco
+function _permCarregarOcultos(cb) {
+  if (typeof SB === 'undefined') { if (cb) cb(); return; }
+  SB.from('usuario_menu_oculto').select('usuario_id_legado,pagina_chave').then(function (r) {
+    if (r.error) { _permOcultoOk = false; console.warn('[menu oculto] indisponivel:', r.error.message); }
+    else {
+      _permOcultoOk = true; _permOcultoTodos = {};
+      (r.data || []).forEach(function (x) { (_permOcultoTodos[x.usuario_id_legado] = _permOcultoTodos[x.usuario_id_legado] || {})[x.pagina_chave] = true; });
+    }
+    if (cb) cb();
+  }, function () { _permOcultoOk = false; if (cb) cb(); });
+}
+function _permPintarOlhos() {
+  document.querySelectorAll('#perm-matriz-tbody .perm-olho').forEach(function (b) {
+    var chaves, k = b.getAttribute('data-key'), s = b.getAttribute('data-secao');
+    var oculto;
+    if (k) oculto = !!_permOculto[k];
+    else { chaves = PAGINAS_SISTEMA.filter(function (p) { return p.secao === s; }); oculto = chaves.length > 0 && chaves.every(function (p) { return _permOculto[p.key]; }); }
+    var i = b.querySelector('i');
+    if (i) i.className = 'ti ' + (oculto ? 'ti-eye-off' : 'ti-eye');
+    b.style.color = oculto ? '#dc2626' : '#272A4A';
+    if (k) b.title = oculto ? 'Escondido do menu — clique para mostrar' : 'Visível no menu — clique para esconder';
+  });
+}
+function permAlternarOculto(chave) {
+  if (_permOculto[chave]) delete _permOculto[chave]; else _permOculto[chave] = true;
+  _permPintarOlhos();
+}
+function permAlternarOcultoSecao(secao) {
+  var paginas = PAGINAS_SISTEMA.filter(function (p) { return p.secao === secao; });
+  var todas = paginas.length > 0 && paginas.every(function (p) { return _permOculto[p.key]; });
+  paginas.forEach(function (p) { if (todas) delete _permOculto[p.key]; else _permOculto[p.key] = true; });
+  _permPintarOlhos();
+}
+function _permGravarOcultos(id, msgEl, okTxt) {
+  var novo = JSON.stringify(Object.keys(_permOculto).sort());
+  if (novo === _permOcultoOrig) return;
+  if (!_permOcultoOk) { msgEl.style.color = '#b45309'; msgEl.textContent = 'Permissões salvas, mas os itens escondidos não foram gravados (tabela do banco ainda não existe).'; return; }
+  var chaves = Object.keys(_permOculto);
+  SB.from('usuario_menu_oculto').delete().eq('usuario_id_legado', id).then(function (r) {
+    if (r.error) throw new Error(r.error.message);
+    if (!chaves.length) return { error: null };
+    return SB.from('usuario_menu_oculto').insert(chaves.map(function (c) { return { usuario_id_legado: id, pagina_chave: c }; }));
+  }).then(function (r) {
+    if (r && r.error) throw new Error(r.error.message);
+    _permOcultoOrig = novo; _permOcultoTodos[id] = JSON.parse(JSON.stringify(_permOculto));
+  }).catch(function (e) {
+    msgEl.style.color = '#dc2626'; msgEl.textContent = 'Permissões salvas, mas não foi possível gravar os itens escondidos: ' + (e && e.message ? e.message : e);
+  });
 }
 function permMarcarTudo(valor) {
   PAGINAS_SISTEMA.forEach(function(p){
@@ -34159,7 +34245,8 @@ function salvarPermissoesUsuario() {
     setUsuariosSistema(dados);
     msg.style.color = '#15803d';
     msg.textContent = '\u2714 Permissões salvas com sucesso!';
-    setTimeout(function(){ msg.textContent = ''; }, 1800);
+    _permGravarOcultos(id, msg);
+    setTimeout(function(){ if (msg.textContent.indexOf('com sucesso') !== -1) msg.textContent = ''; }, 1800);
   } catch (err) {
     msg.style.color = '#dc2626';
     if (err && err.name === 'QuotaExceededError') msg.textContent = 'Armazenamento cheio. Libere espaço e tente novamente.';
