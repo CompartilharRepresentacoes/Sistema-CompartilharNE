@@ -25431,7 +25431,8 @@ var _PIM_TOL_PRECO = 0.01;
 // (qtd x unidades da caixa, preco / unidades da caixa) SO quando o preco da NF bate com o preco
 // do pedido dividido pela caixa. Assim nao acusa quantidade/preco que na verdade estao certos.
 function _pimItemPedidoEmUnidades(itPed, itNf, produtos) {
-  var q = Number(itPed.quantidade) || 0, p = Number(itPed.precoUnit) || 0;
+  // preco do pedido JA COM o desconto do item (a NF vem com o desconto aplicado; sem desconto = preco cheio)
+  var q = Number(itPed.quantidade) || 0, p = _pimpPrecoComDesc(itPed);
   var orig = { quantidade: q, precoUnit: p, emCaixa: false };
   if (!itNf || !(p > 0)) return orig;
   var cx = parseFloat(String(itPed.cx || '').replace(',', '.'));
