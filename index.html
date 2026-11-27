@@ -16873,7 +16873,7 @@ function _clihistRender() {
         + '<span style="font-weight:600;color:#1e293b">' + _pedEsc(p.fornecedorNome || '—') + '</span>'
         + '<span style="color:#64748b">' + _pedEsc(p.status || '—') + '</span>'
         + '<span>' + _pedFmtMoeda(p.valorTotal) + '</span>'
-        + '<span>' + _pedFmtMoeda(p.valorFaturado) + '</span>'
+        + (_pfatValorNfBonificado(p) ? ('<span style="color:#64748b" title="Valor da NF de bonificação — não entra no faturamento">' + _pedFmtMoeda(_pfatValorNfBonificado(p)) + '</span>') : ('<span>' + _pedFmtMoeda(p.valorFaturado) + '</span>'))
         + '</div>';
     }).join('');
   }
@@ -22226,7 +22226,7 @@ function renderPedidoList() {
       + '<div class="mc-meta ped-r-forn" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px" title="' + _pedEsc(fornNomeSo) + '">' + _pedEsc(fornNomeSo) + '</div>'
       + '<div class="mc-meta ped-r-vend" style="font-size:12.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px">' + _pedEsc(p.vendedorNome || '—') + '</div>'
       + '<div class="mc-meta ped-r-valor" style="font-size:12.5px;font-weight:700;color:#1e293b">' + _pedFmtMoeda(p.valorTotal) + '</div>'
-      + '<div class="mc-meta ped-r-valfat" style="font-size:12.5px;' + (p.valorFaturado ? 'font-weight:700;color:#15803d' : 'color:#cbd5e1') + '">' + (p.valorFaturado ? _pedFmtMoeda(p.valorFaturado) : '—') + '</div>'
+      + '<div class="mc-meta ped-r-valfat" style="font-size:12.5px;' + (p.valorFaturado ? 'font-weight:700;color:#15803d' : (_pfatValorNfBonificado(p) ? 'font-weight:500;color:#64748b' : 'color:#cbd5e1')) + '"' + (!p.valorFaturado && _pfatValorNfBonificado(p) ? ' title="Valor da NF de bonificação — não entra no faturamento"' : '') + '>' + (p.valorFaturado ? _pedFmtMoeda(p.valorFaturado) : (_pfatValorNfBonificado(p) ? _pedFmtMoeda(_pfatValorNfBonificado(p)) : '—')) + '</div>'
       + '<div class="mc-badge">' + statusHtml + '</div>'
       + '<div class="mc-actions" style="display:flex;gap:3px;justify-content:flex-end">'
       + '<button onclick="editPedido(\'' + p.id + '\')" title="Editar" style="background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:#475569" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-icon="editar" style="font-size:18px"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></svg></button>'
@@ -26412,6 +26412,11 @@ function pedRemoverAnexo(i) {
 // ── Faturamento do Pedido (faturas/duplicatas, por item) ──
 var _pfatPedidoId = '';
 function _pfatPedidoAtual() { return getPedidos().find(function(x){ return x.id === _pfatPedidoId; }); }
+// Valor das NFs de um pedido Bonificado: SO para mostrar na tela como informacao (nao entra em faturamento, comissao nem totais)
+function _pfatValorNfBonificado(pedido) {
+  if (!pedido || pedido.status !== 'Bonificado') return 0;
+  return _n2((pedido.faturas || []).filter(function (f) { return f.status !== 'Cancelado'; }).reduce(function (s, f) { return s + (Number(f.valor) || 0); }, 0));
+}
 function _pfatValorFaturasAtivo(pedido) {
   if (pedido && pedido.status === 'Bonificado') return 0;   // Bonificado: NF ligada ao pedido nao conta como faturado
   return (pedido.faturas || []).filter(function(f){ return f.status !== 'Cancelado'; }).reduce(function(s,f){ return s + (Number(f.valor)||0); }, 0);
@@ -26486,7 +26491,7 @@ function _pfatRender() {
       campo('Pedido Fornecedor', _pedEsc(pedido.numPedidoFornecedor || '—')) +
       campo('Pedido Cliente', _pedEsc(pedido.numPedidoCliente || '—')) +
       campo('Valor', _pedFmtMoeda(pedido.valorTotal)) +
-      campo('Valor Faturado', '<span style="color:#15803d">' + _pedFmtMoeda(_pfatValorFaturasAtivo(pedido)) + '</span>') +
+      campo('Valor Faturado', _pfatValorNfBonificado(pedido) ? ('<span style="color:#64748b" title="Valor da NF de bonificação — não entra no faturamento">' + _pedFmtMoeda(_pfatValorNfBonificado(pedido)) + '</span> <span style="font-size:9.5px;font-weight:400;color:#94a3b8">(NF de bonificação, não conta no faturamento)</span>') : ('<span style="color:#15803d">' + _pedFmtMoeda(_pfatValorFaturasAtivo(pedido)) + '</span>')) +
       campo('Status', '<span style="display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:' + cor.bg + ';color:' + cor.cor + '">' + _pedEsc(pedido.status) + '</span>') +
       campo('Transportadora', _pedEsc(_pfatTransportadoraResumo(pedido)));
   }
@@ -28590,7 +28595,7 @@ function renderVendasCompletasFaturadas(manterPag) {
       + '<div style="width:1px;height:26px;background:#bfdbfe"></div>'
       + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor do Pedido</div><div style="font-size:14px;font-weight:800;color:#1e293b;margin-top:1px">' + _pedFmtMoeda(r.valorPedido) + '</div></div>'
       + '<div style="width:1px;height:26px;background:#bfdbfe"></div>'
-      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Faturado (NF)</div><div style="font-size:14px;font-weight:800;color:#15803d;margin-top:1px">' + _pedFmtMoeda(r._prodFiltro ? r.valorFatItens : (Number(p.valorFaturado) || 0)) + '</div></div>'
+      + '<div style="text-align:right"><div style="font-size:9px;color:#1d4ed8;text-transform:uppercase;font-weight:700;letter-spacing:.04em">Valor Faturado (NF)</div><div style="font-size:14px;font-weight:800;color:' + (!r._prodFiltro && !(Number(p.valorFaturado) || 0) && _pfatValorNfBonificado(p) ? '#64748b' : '#15803d') + ';margin-top:1px"' + (!r._prodFiltro && !(Number(p.valorFaturado) || 0) && _pfatValorNfBonificado(p) ? ' title="Valor da NF de bonificação — não entra no faturamento"' : '') + '>' + _pedFmtMoeda(r._prodFiltro ? r.valorFatItens : ((Number(p.valorFaturado) || 0) || _pfatValorNfBonificado(p))) + '</div></div>'
       + '</div>'
       + '</div>';
   });
