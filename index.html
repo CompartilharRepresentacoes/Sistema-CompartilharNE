@@ -25110,6 +25110,25 @@ function _pinfProcessar() {
     return clone;
   });
 
+  // semana anterior ao periodo: so entra na conta da NF que NAO achou pedido no periodo (e so pelo CNPJ da loja)
+  (function () {
+    var d0 = new Date(dataIni + 'T00:00:00'); d0.setDate(d0.getDate() - 7);
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    var iniAnt = d0.getFullYear() + '-' + pad(d0.getMonth() + 1) + '-' + pad(d0.getDate());
+    var jaTemAnt = {}; pedidosCandidatos.forEach(function (p) { jaTemAnt[p.id] = 1; });
+    getPedidos().forEach(function (p) {
+      if (String(p.fornecedorId || '') !== String(fornecedorId) || jaTemAnt[p.id]) return;
+      var dt = String(p.dtCadastro || '').slice(0, 10), dp = String(p.data || '').slice(0, 10);
+      var naSemana = (!!dt && dt >= iniAnt && dt < dataIni) || (!!dp && dp >= iniAnt && dp < dataIni);
+      if (!naSemana) return;
+      var cli = clientes.find(function (c) { return c.id === p.clienteId; });
+      var clone = Object.assign({}, p);
+      clone._clienteCnpjDigits = cli ? _devNormCnpj(cli.cpf_cnpj) : '';
+      clone._semanaAnterior = true;
+      pedidosCandidatos.push(clone);
+    });
+  })();
+
   var xmlFiles = _pinfArquivosSelecionados.filter(function (f) { return /\.xml$/i.test(f.name); });
   var pdfFiles = _pinfArquivosSelecionados.filter(function (f) { return /\.pdf$/i.test(f.name); });
 
@@ -25274,6 +25293,24 @@ function _pinfDesempatePorSaldo(lista, nfDados) {
   });
   return (comSaldo.length === 1 && comSaldo.length < lista.length) ? comSaldo[0] : null;
 }
+// CNPJ do destinatario (ou emitente) da NF igual ao CNPJ do cliente do pedido
+function _pinfCnpjDaNf(p, nfDados) {
+  var c = p._clienteCnpjDigits, dd = _devNormCnpj(nfDados.destCNPJ), ee = _devNormCnpj(nfDados.emitCNPJ);
+  return !!c && (c === dd || c === ee);
+}
+// A NF tem pelo menos 1 produto que esta no pedido (pelo codigo ou, se nao achar, pelo EAN do cadastro)
+function _pinfTemProdutoEmComum(p, nfDados) {
+  var itensNf = nfDados.itens || [];
+  if (!itensNf.length) return true; // NF sem itens lidos: nao da para conferir, nao bloqueia
+  var produtos = (typeof getProdutos === 'function') ? getProdutos() : [];
+  return itensNf.some(function (it) {
+    var prod = _pinfProdutoDoItemNf(it, produtos);
+    return (p.itens || []).some(function (pi) {
+      if (it.codigo && pi.prodCodigo && _cpNorm(pi.prodCodigo) === _cpNorm(it.codigo)) return true;
+      return !!(prod && pi.prodId && String(pi.prodId) === String(prod.id));
+    });
+  });
+}
 function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
   nfDados = nfDados || {};
   if (!pedidosCandidatos || !pedidosCandidatos.length) {
@@ -25282,11 +25319,11 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
   // 1) numero do pedido do FORNECEDOR ("N Ped. Venda" / "N Ped. BRINDE" na observacao): exato, vale mesmo fora do periodo
   if (nfDados.numPedForn) {
     var pfNum = _pinfNumLimpo(nfDados.numPedForn);
-    var porForn = pedidosCandidatos.filter(function (p) { return pfNum && _pinfNumLimpo(p.numPedidoFornecedor) === pfNum; });
+    var porForn = pedidosCandidatos.filter(function (p) { return pfNum && _pinfNumLimpo(p.numPedidoFornecedor) === pfNum && (_nfEhRemessaXml(nfDados.natOp, nfDados.cfop) || _pinfCnpjDaNf(p, nfDados)); });
     if (porForn.length === 1) return { pedido: porForn[0], ambiguo: false, motivo: 'numPedidoFornecedor' };
   }
   // 1b) numero do pedido do CLIENTE na NF (xPed): procura entre TODOS os pedidos da fabrica (inclusive fora do periodo).
-  // Numero + CNPJ do cliente batendo = vincula. CNPJ nao bate (ex.: CD/matriz) mas so existe UM pedido com esse numero = vincula.
+  // Numero + CNPJ do cliente batendo = vincula. CNPJ nao bate = NAO vincula (a NF fica para vinculo manual).
   if (!_nfEhRemessaXml(nfDados.natOp, nfDados.cfop) && _pinfNumLimpo(nfDados.numPedido).length >= 4) {
     var _dd = _devNormCnpj(nfDados.destCNPJ), _ee = _devNormCnpj(nfDados.emitCNPJ);
     var numMatches = pedidosCandidatos.filter(function (p) { return _pinfNumCasa(p.numPedidoCliente, nfDados.numPedido); });
@@ -25294,11 +25331,10 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
     if (cnpjMatches.length === 1) return { pedido: cnpjMatches[0], ambiguo: false, motivo: 'cnpj+numeroPedido' };
     var _dsCnpj = _pinfDesempatePorSaldo(cnpjMatches, nfDados);
     if (_dsCnpj) return { pedido: _dsCnpj, ambiguo: false, motivo: 'cnpj+numeroPedido (pedido com saldo)' };
-    if (!cnpjMatches.length && numMatches.length === 1) return { pedido: numMatches[0], ambiguo: false, motivo: 'numeroPedido' };
   }
   // pedidos trazidos so pelo numero (fora do periodo) nao entram nas regras por CNPJ/itens/valor
   var pedidosCandidatosTodos = pedidosCandidatos;
-  pedidosCandidatos = pedidosCandidatos.filter(function (p) { return !p._soPorNumero; });
+  pedidosCandidatos = pedidosCandidatos.filter(function (p) { return !p._soPorNumero && !p._semanaAnterior; });
   if (!pedidosCandidatos.length) {
     return { pedido: null, ambiguo: false, motivo: 'Nenhum pedido do fornecedor/período encontrado para esta NF.' };
   }
@@ -25358,7 +25394,10 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
     if (/^\d{5,}$/.test(_nUnico) && /^\d{5,}$/.test(_nNf) && !_pinfNumCasa(porCnpj[0].numPedidoCliente, nfDados.numPedido)) {
       return { pedido: null, ambiguo: true, motivo: 'A NF cita o pedido ' + nfDados.numPedido + ', mas o único pedido deste cliente no período é o ' + porCnpj[0].numPedidoCliente + ' — não vinculei sozinho. Vincule manualmente.' };
     }
-    return { pedido: porCnpj[0], ambiguo: false, motivo: 'cnpj' };
+    if (_pinfNumCasa(porCnpj[0].numPedidoCliente, nfDados.numPedido) || _pinfTemProdutoEmComum(porCnpj[0], nfDados)) {
+      return { pedido: porCnpj[0], ambiguo: false, motivo: 'cnpj' };
+    }
+    // sem nenhum produto em comum: nao e deste pedido; tenta a semana anterior abaixo
   }
   if (porCnpj.length > 1) {
     if (numPedNf) {
@@ -25372,25 +25411,25 @@ function _pimEscolherPedidoCandidato(nfDados, pedidosCandidatos) {
     if (segundoCnpj && segundoCnpj.score === melhorCnpj.score && Math.abs(segundoCnpj.diff - melhorCnpj.diff) < 0.01) {
       return { pedido: null, ambiguo: true, motivo: 'Mais de um pedido deste cliente no período — não foi possível decidir automaticamente qual corresponde a esta NF.' };
     }
-    return { pedido: melhorCnpj.p, ambiguo: false, motivo: 'cnpj+itens' };
+    if (melhorCnpj.score > 0 || _pinfTemProdutoEmComum(melhorCnpj.p, nfDados)) return { pedido: melhorCnpj.p, ambiguo: false, motivo: 'cnpj+itens' };
+    // nenhum pedido do periodo tem produto em comum com a NF; tenta a semana anterior abaixo
   }
 
-  // porCnpj vazio: o CNPJ da NF não bateu com NENHUM pedido candidato do período (cliente
-  // sem CNPJ cadastrado, ou CNPJ divergente). NUNCA cai mais para casar por itens/valor
-  // entre pedidos de OUTROS clientes -- era assim que uma NF acabava vinculada ao pedido
-  // de um cliente diferente. 2ª prioridade (única): número do pedido do cliente, se a NF
-  // trouxer essa informação, buscando entre TODOS os candidatos do período.
+  // Ultima tentativa: nenhum pedido do periodo serviu. Procura, na SEMANA ANTERIOR, pedidos da MESMA loja (CNPJ)
+  // que tenham produto em comum com a NF. Sem CNPJ batendo, nunca vincula (fica para vinculo manual).
+  var daSemana = pedidosCandidatosTodos.filter(function (p) { return p._semanaAnterior && _pinfCnpjDaNf(p, nfDados) && _pinfTemProdutoEmComum(p, nfDados); });
   if (numPedNf) {
-    var porNumeroTodos = pedidosCandidatos.filter(function (p) { return _pinfNumCasa(p.numPedidoCliente, nfDados.numPedido); });
-    if (porNumeroTodos.length === 1) return { pedido: porNumeroTodos[0], ambiguo: false, motivo: 'numeroPedido' };
-    var _dsTodos = _pinfDesempatePorSaldo(porNumeroTodos, nfDados);
-    if (_dsTodos) return { pedido: _dsTodos, ambiguo: false, motivo: 'numeroPedido (pedido com saldo)' };
-    if (porNumeroTodos.length > 1) {
-      return { pedido: null, ambiguo: true, motivo: 'Mais de um pedido com o mesmo número no período — não foi possível decidir automaticamente qual corresponde a esta NF.' };
-    }
+    var daSemanaNum = daSemana.filter(function (p) { return _pinfNumCasa(p.numPedidoCliente, nfDados.numPedido); });
+    if (daSemanaNum.length) daSemana = daSemanaNum;
+  }
+  if (daSemana.length === 1) return { pedido: daSemana[0], ambiguo: false, motivo: 'cnpj (semana anterior)' };
+  if (daSemana.length > 1) {
+    var _dsSem = _pinfDesempatePorSaldo(daSemana, nfDados);
+    if (_dsSem) return { pedido: _dsSem, ambiguo: false, motivo: 'cnpj (semana anterior, pedido com saldo)' };
+    return { pedido: null, ambiguo: true, motivo: 'Mais de um pedido desta loja na semana anterior — não foi possível decidir automaticamente qual corresponde a esta NF.' };
   }
 
-  return { pedido: null, ambiguo: true, motivo: 'Não foi possível identificar o pedido correspondente automaticamente (CNPJ do cliente não bateu com nenhum pedido do período, e não há número de pedido correspondente) — vincule manualmente.' };
+  return { pedido: null, ambiguo: true, motivo: 'Não achei pedido desta loja (pelo CNPJ da NF) no período nem na semana anterior com produtos em comum com a NF — vincule manualmente.' };
 }
 
 // Compara os itens do Pedido com os itens da(s) NF(s) ja convertidos p/ unidades reais e ja
