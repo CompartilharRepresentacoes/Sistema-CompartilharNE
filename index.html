@@ -5378,16 +5378,7 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
         <div class="ped-divider" style="width:1px;height:22px;background:#e2e8f0"></div>
         <div class="ped-status-row">
         <span style="font-size:11px;font-weight:600;color:#64748b">Status</span>
-        <select id="ped-status-sel" onchange="pedSetStatusFiltro(this.value)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none">
-          <option value="">Todos</option>
-          <option value="Pré-Venda">Pré-Venda</option>
-          <option value="Aguardando Retorno">Aguardando Retorno</option>
-          <option value="Enviado">Enviado</option>
-          <option value="Faturado">Faturado</option>
-          <option value="Faturado Parcial">Faturado Parcial</option>
-          <option value="Bonificado">Bonificado</option>
-          <option value="Cancelado">Cancelado</option>
-        </select>
+        <div class="ped-msst" id="ped-msst-geral"><button type="button" class="ped-msst-btn" onclick="_pedStToggle('geral', event)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-width:110px;justify-content:space-between"><span class="ped-msst-txt">Todos</span><span style="font-size:10px">&#9662;</span></button><div class="ped-msst-pop" style="display:none"></div></div>
         <span style="font-size:11px;font-weight:600;color:#64748b;margin-left:6px">Fornecedor</span>
         <select id="ped-fornecedor" onchange="renderPedidoList()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;max-width:170px"><option value="">Todos</option></select>
         </div>
@@ -5456,6 +5447,8 @@ tr.vcf-hl td{background:#fef9c3}tr.vcf-hl td:first-child{box-shadow:inset 3px 0 
           </select>
           <span style="font-size:11px;font-weight:600;color:#64748b">Fornecedor</span>
           <select id="pss-fornecedor" onchange="renderVendaSimples()" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none"><option value="">Todos</option></select>
+          <span style="font-size:11px;font-weight:600;color:#64748b">Status</span>
+          <div class="ped-msst" id="ped-msst-pss"><button type="button" class="ped-msst-btn" onclick="_pedStToggle('pss', event)" style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-width:110px;justify-content:space-between"><span class="ped-msst-txt">Todos</span><span style="font-size:10px">&#9662;</span></button><div class="ped-msst-pop" style="display:none"></div></div>
           <span style="font-size:11px;font-weight:600;color:#64748b">Produto</span>
           <input id="pss-produto" oninput="renderVendaSimples()" placeholder="Nome ou código..." style="border:1px solid #e2e8f0;border-radius:7px;padding:6px 8px;font-size:12px;background:#f8fafc;color:#1e293b;outline:none;width:150px">
           <span style="font-size:11px;font-weight:600;color:#64748b">Rede</span>
@@ -21801,13 +21794,51 @@ function _btnOkAtualizar(chave) {
     }, Math.max(0, 5000 - (Date.now() - t0)));
   });
 }
-var _pedStatusFiltro = '';
+var _pedStatusFiltro = '';   // (antigo, escolha unica; agora vale _pedStSel)
 var _pedOrdCampo = 'lancamento'; // ao abrir: ordem de digitacao (ultimo pedido digitado no topo, pelo numero de Lancamento); clicar em Data ordena por data
 var _pedOrdDir = 'desc';
-function pedSetStatusFiltro(status) {
-  _pedStatusFiltro = status;
-  renderPedidoList();
+// ── Filtro Status com varias escolhas (Visao Geral = 'geral' e Venda Simples = 'pss') ──
+// Nenhuma caixinha marcada = todos os status.
+var _PED_STATUS_LISTA = ['Pré-Venda', 'Aguardando Retorno', 'Enviado', 'Faturado', 'Faturado Parcial', 'Bonificado', 'Cancelado'];
+var _pedStSel = { geral: [], pss: [] };
+function _pedStatusOk(ctx, status) { var s = _pedStSel[ctx]; return !s || !s.length || s.indexOf(status) !== -1; }
+function _pedStRender(ctx) {
+  var box = document.getElementById('ped-msst-' + ctx); if (!box) return;
+  var sel = _pedStSel[ctx];
+  box.querySelector('.ped-msst-txt').textContent = !sel.length ? 'Todos' : (sel.length === 1 ? sel[0] : sel.length + ' selecionados');
+  box.querySelector('.ped-msst-pop').innerHTML = _PED_STATUS_LISTA.map(function (s, i) {
+    return '<label class="ped-msst-row"><input type="checkbox" data-ctx="' + ctx + '" data-i="' + i + '"' + (sel.indexOf(s) !== -1 ? ' checked' : '') + ' onchange="_pedStMarcar(this)"> ' + _pedEsc(s) + '</label>';
+  }).join('') + '<div class="ped-msst-rod"><button type="button" onclick="_pedStLimpar(\'' + ctx + '\')">Limpar (todos)</button></div>';
 }
+function _pedStAplicar(ctx) { if (ctx === 'geral') renderPedidoList(); else renderVendaSimples(); }
+function _pedStMarcar(inp) {
+  var ctx = inp.dataset.ctx, s = _PED_STATUS_LISTA[parseInt(inp.dataset.i, 10)], arr = _pedStSel[ctx], k = arr.indexOf(s);
+  if (inp.checked && k === -1) arr.push(s); else if (!inp.checked && k !== -1) arr.splice(k, 1);
+  _pedStRender(ctx);
+  var pop = document.querySelector('#ped-msst-' + ctx + ' .ped-msst-pop'); if (pop) pop.style.display = 'block';
+  _pedStAplicar(ctx);
+}
+function _pedStLimpar(ctx) { _pedStSel[ctx] = []; _pedStRender(ctx); var pop = document.querySelector('#ped-msst-' + ctx + ' .ped-msst-pop'); if (pop) pop.style.display = 'block'; _pedStAplicar(ctx); }
+function _pedStToggle(ctx, ev) {
+  if (ev) ev.stopPropagation();
+  var pop = document.querySelector('#ped-msst-' + ctx + ' .ped-msst-pop'); if (!pop) return;
+  var abrir = pop.style.display === 'none';
+  document.querySelectorAll('.ped-msst-pop').forEach(function (p) { p.style.display = 'none'; });
+  if (abrir) { _pedStRender(ctx); pop.style.display = 'block'; }
+}
+document.addEventListener('click', function (e) { if (!e.target.closest || e.target.closest('.ped-msst')) return; document.querySelectorAll('.ped-msst-pop').forEach(function (p) { p.style.display = 'none'; }); });
+(function () {
+  var st = document.createElement('style');
+  st.textContent = '.ped-msst{position:relative;display:inline-block}'
+    + '.ped-msst-pop{position:absolute;top:calc(100% + 4px);left:0;z-index:60;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:190px;padding:6px}'
+    + '.ped-msst-row{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:12px;color:#1e293b;cursor:pointer;border-radius:6px;white-space:nowrap}'
+    + '.ped-msst-row:hover{background:#f1f5f9}'
+    + '.ped-msst-rod{border-top:1px solid #f1f5f9;margin-top:4px;padding-top:6px;text-align:right}'
+    + '.ped-msst-rod button{background:#f1f5f9;color:#475569;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer}'
+    + '#page-pedido-list .ped-filtros-extra.ped-mf-aberta .ped-msst{width:100%}'
+    + '#page-pedido-list .ped-filtros-extra.ped-mf-aberta .ped-msst-btn{width:100%}';
+  document.head.appendChild(st);
+})();
 // Preenche o filtro Fornecedor da Visao Geral (uma vez; ordem alfabetica)
 function _pedPopularFornGeral() {
   var sel = document.getElementById('ped-fornecedor');
@@ -21821,9 +21852,8 @@ function pedLimparFiltros() {
   var b = document.getElementById('ped-busca'); if (b) b.value = '';
   var de = document.getElementById('ped-data-de'); if (de) de.value = '';
   var ate = document.getElementById('ped-data-ate'); if (ate) ate.value = '';
-  var sel = document.getElementById('ped-status-sel'); if (sel) sel.value = '';
   var fg = document.getElementById('ped-fornecedor'); if (fg) fg.value = '';
-  _pedStatusFiltro = '';
+  _pedStSel.geral = []; _pedStRender('geral');
   renderPedidoList();
 }
 function _pedValorOrdenacao(p, campo) {
@@ -21984,6 +22014,7 @@ function pssLimparFiltros() {
     var el = document.getElementById(id); if (el) el.value = '';
   });
   pssAtualizarLojas();
+  _pedStSel.pss = []; _pedStRender('pss');
   _pssMostrar = false;
   renderVendaSimples();
 }
@@ -22023,6 +22054,7 @@ function renderVendaSimples(forcar) {
     if (dataAte && (!p.data || p.data > dataAte)) return false;
     if (vendedorF && p.vendedorId !== vendedorF) return false;
     if (fornF && p.fornecedorId !== fornF) return false;
+    if (!_pedStatusOk('pss', p.status)) return false;
     var cli = clientesMap[p.clienteId];
     if (ufF && (!cli || cli.estado !== ufF)) return false;
     if (redeF && (!cli || String(cli.categoria||'') !== String(redeF))) return false;
@@ -22129,7 +22161,7 @@ function renderPedidoList() {
   const fornGeral = document.getElementById('ped-fornecedor')?.value || '';
   let rows = pedidos.filter(function(p){
     if (!_appRegistroVisivelUF(p)) return false;
-    if (_pedStatusFiltro && p.status !== _pedStatusFiltro) return false;
+    if (!_pedStatusOk('geral', p.status)) return false;
     if (fornGeral && String(p.fornecedorId || '') !== fornGeral) return false;
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
@@ -22647,7 +22679,7 @@ function _pimprelDadosGeral() {
   var fornGeral = document.getElementById('ped-fornecedor') ? document.getElementById('ped-fornecedor').value : '';
   var rows = pedidos.filter(function(p){
     if (!_appRegistroVisivelUF(p)) return false;
-    if (_pedStatusFiltro && p.status !== _pedStatusFiltro) return false;
+    if (!_pedStatusOk('geral', p.status)) return false;
     if (fornGeral && String(p.fornecedorId || '') !== fornGeral) return false;
     if (dataDe && (!p.data || p.data < dataDe)) return false;
     if (dataAte && (!p.data || p.data > dataAte)) return false;
@@ -22698,6 +22730,7 @@ function _pimprelDadosSimples() {
     if (dataAte && (!p.data || p.data > dataAte)) return false;
     if (vendedorF && p.vendedorId !== vendedorF) return false;
     if (fornF && p.fornecedorId !== fornF) return false;
+    if (!_pedStatusOk('pss', p.status)) return false;
     var cli = clientesMap[p.clienteId];
     if (ufF && (!cli || cli.estado !== ufF)) return false;
     if (redeF && (!cli || String(cli.categoria||'') !== String(redeF))) return false;
